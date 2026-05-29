@@ -37,6 +37,7 @@ namespace Geodesic
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
+open DifferentialGeometry.Geometry.Riemannian.Exponential
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
   [Module.Finite ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -75,11 +76,110 @@ theorem chartChristoffelContraction_smul_left_right
         intro j _
         ring
 
-/-- Degree-two fibre homogeneity of `geodesicVectorFieldChart g α`: the
-fibre component of `geodesicVectorFieldChart g α` at a `c`-rescaled lift
-point scales as `c²` in the fibre. -/
-theorem geodesicVectorFieldChartFiber_scaling_along_lift
-    (_g : SmoothRiemannianMetric I M) (_α : M) (_c : ℝ) : True := trivial
+/-- **Fibre-coordinate scaling under fibre rescaling.** Scaling the fibre
+vector of a tangent-bundle point by `c` scales its chart-`α` fibre
+coordinate by `c`: `chartFiberCoord α ⟨q.proj, c • q.snd⟩ = c • chartFiberCoord α q`.
+This holds whenever `q.proj` lies in the chart-`α` source (so that the
+trivialisation at `α` acts linearly on the fibre over `q.proj`). -/
+theorem chartFiberCoord_fiberScale
+    (α : M) (c : ℝ) {q : TangentBundle I M}
+    (hq : q.proj ∈ (chartAt H α).source) :
+    chartFiberCoord (I := I) α
+        (⟨q.proj, c • q.snd⟩ : TangentBundle I M) =
+      c • chartFiberCoord (I := I) α q := by
+  classical
+  have hbase : q.proj ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
+    rw [TangentBundle.trivializationAt_baseSet]; exact hq
+  -- `chartFiberCoord α p = (continuousLinearMapAt ℝ p.proj) p.snd` for `p` over
+  -- the base set; this map is `ℝ`-linear in the fibre vector.
+  have hcoe : ∀ w : E,
+      ((trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ q.proj) w =
+        (trivializationAt E (TangentSpace I) α
+          (⟨q.proj, w⟩ : TangentBundle I M)).2 := by
+    intro w
+    have hcoe' :=
+      (trivializationAt E (TangentSpace I) α).coe_linearMapAt_of_mem (R := ℝ) hbase
+    change ((trivializationAt E (TangentSpace I) α).linearMapAt ℝ q.proj) w = _
+    exact congrFun hcoe' w
+  -- LHS fibre coord.
+  have hL : chartFiberCoord (I := I) α
+      (⟨q.proj, c • q.snd⟩ : TangentBundle I M) =
+      ((trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ q.proj)
+        (c • q.snd) := by
+    rw [chartFiberCoord_def]; exact (hcoe (c • q.snd)).symm
+  -- RHS fibre coord (note `q = ⟨q.proj, q.snd⟩` by `TotalSpace` eta).
+  have hR : chartFiberCoord (I := I) α q =
+      ((trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ q.proj)
+        q.snd := by
+    rw [chartFiberCoord_def]; exact (hcoe q.snd).symm
+  rw [hL, hR, map_smul]
+
+section ChartCoordBridges
+
+variable [I.Boundaryless]
+
+/-- **Within-set, fixed-base forward chart bridge.** For a curve
+`f : ℝ → TangentBundle I M` that is an integral curve of
+`geodesicVectorFieldChart g α` on `S`, and a time `t ∈ S` whose
+projection lies in the chart-`α` source, the chart-pushed curve at the
+fixed zero-section base `⟨α, 0⟩` has the chart-phase ODE
+`HasDerivWithinAt` form on `S` at `t`.
+
+This is the `IsMIntegralCurveOn` / `HasDerivWithinAt` analogue of the
+neighbourhood-form `eventually_hasDerivAt_chartPhaseVF_at_zero_section`;
+it works at endpoints of `S` because it never passes to a full
+neighbourhood. -/
+theorem hasDerivWithinAt_chartPhaseVF_at_zero_section_within
+    (g : SmoothRiemannianMetric I M) (α : M)
+    {f : ℝ → TangentBundle I M} {S : Set ℝ} {t : ℝ}
+    (ht : t ∈ S) (hsrc : (f t).proj ∈ (chartAt H α).source)
+    (hf : IsMIntegralCurveOn f (geodesicVectorFieldChart (I := I) g α) S) :
+    HasDerivWithinAt
+      (fun s' : ℝ => extChartAt I.tangent
+        (⟨α, (0 : E)⟩ : TangentBundle I M) (f s'))
+      (chartPhaseVF (I := I) g α
+        (extChartAt I.tangent (⟨α, (0 : E)⟩ : TangentBundle I M) (f t)))
+      S t := by
+  classical
+  set q₀ : TangentBundle I M := (⟨α, (0 : E)⟩ : TangentBundle I M) with hq₀_def
+  -- `f t ∈` chart-of-`TM`-at-`⟨α,0⟩` source.
+  have hf_chsrc : f t ∈ (chartAt (ModelProd H E) q₀).source :=
+    (mem_chartAt_modelProd_zero_source_iff (I := I) α (f t)).mpr hsrc
+  -- Mirror the within-version of `IsMIntegralCurveOn.hasDerivWithinAt`,
+  -- with the running chart base replaced by the fixed `q₀`.
+  rw [hasDerivWithinAt_iff_hasFDerivWithinAt, ← hasMFDerivWithinAt_iff_hasFDerivWithinAt]
+  apply (HasMFDerivWithinAt.comp t
+    (hasMFDerivWithinAt_extChartAt (I := I.tangent) hf_chsrc) (hf t ht)
+    (Set.subset_preimage_image _ _)).congr_mfderiv
+  -- The composed CLM equals the target `(1).smulRight (chartPhaseVF …)`.
+  -- Identify the two CLMs through the `comp`/`smulRight`/`toSpanSingleton`
+  -- algebra, reducing to the fibre-vector equality supplied by
+  -- `tangentCoordChange_tangent_geodesicVF`.
+  rw [mfderiv_chartAt_eq_tangentCoordChange hf_chsrc, hq₀_def]
+  -- It remains to identify the two CLMs `ℝ →L (E × E)`.  Both are determined by
+  -- their value at `1`; the LHS gives `tcc (V (f t))`, the RHS `chartPhaseVF …`.
+  have hval :
+      (tangentCoordChange I.tangent (f t) (⟨α, (0 : E)⟩ : TangentBundle I M) (f t))
+          (geodesicVectorFieldChart (I := I) g α (f t)) =
+        chartPhaseVF (I := I) g α
+          (extChartAt I.tangent (⟨α, (0 : E)⟩ : TangentBundle I M) (f t)) := by
+    trans (geodesicVectorFieldChartFiber (I := I) g α (f t))
+    · exact tangentCoordChange_tangent_geodesicVF (I := I) g α (f t) hsrc
+    · symm
+      rw [extChartAt_tangent_zero_apply_chartFiber (I := I) α hsrc]
+      rfl
+  apply ContinuousLinearMap.ext_ring
+  change (tangentCoordChange I.tangent (f t) (⟨α, (0 : E)⟩ : TangentBundle I M) (f t))
+      ((ContinuousLinearMap.smulRight (1 : ℝ →L[ℝ] ℝ)
+        (geodesicVectorFieldChart (I := I) g α (f t))) 1) =
+    (ContinuousLinearMap.toSpanSingleton ℝ
+      (chartPhaseVF (I := I) g α
+        (extChartAt I.tangent (⟨α, (0 : E)⟩ : TangentBundle I M) (f t)))) 1
+  rw [ContinuousLinearMap.smulRight_apply, ContinuousLinearMap.one_apply, one_smul,
+    ContinuousLinearMap.toSpanSingleton_apply, one_smul]
+  exact hval
+
+end ChartCoordBridges
 
 /-- An `IsMIntegralCurveOn` of `geodesicVectorFieldChart g α`, rescaled in
 the time variable by an affine reparametrisation and in the fibre by the
@@ -87,7 +187,29 @@ matching constant, yields another `IsMIntegralCurveOn` of the same
 field. This is the degree-two homogeneity of the geodesic spray on `T(TM)`:
 combining time-rescaling-by-`c` (which would scale the vector field by `c`
 via `IsMIntegralCurveOn.comp_mul`) with the matching fibre rescaling on the
-lift exactly cancels the extra `c`, returning the same vector field. -/
+lift exactly cancels the extra `c`, returning the same vector field.
+
+The chart-coordinate skeleton is provided by the proved lemmas in this
+file.  The **forward** bridge
+`hasDerivWithinAt_chartPhaseVF_at_zero_section_within` (fully proved, on the
+locus where the lift's projection lies in the chart-`α` source) turns an
+integral-curve hypothesis into the chart-phase ODE for the chart-`⟨α,0⟩`
+push; the fibre-rescaling identity `chartFiberCoord_fiberScale` (fully
+proved) identifies the chart-`⟨α,0⟩` push of the candidate lift
+`s ↦ ⟨(f(c·s+d)).proj, c • (f(c·s+d)).snd⟩` with `rescaleChartOrbit c` of
+the chart-`⟨α,0⟩` push of `f ∘ (s ↦ c·s+d)`; and `hasDerivAt_rescaled_orbit`
+/ `chartPhaseVF_rescale` (with the degree-two `chartChristoffel` core
+`chartChristoffelContraction_smul_left_right`) supply the chart-phase ODE
+for that rescaled push.
+
+The remaining residual is the **reverse** reconstruction — turning the
+chart-`⟨α,0⟩` push's chart-phase ODE back into the manifold
+`HasMFDerivWithinAt` — which is the within-set, fixed-base inverse of
+`tangentCoordChange_tangent_geodesicVF`, mirroring Mathlib's
+`exists_isMIntegralCurveAt_of_contMDiffAt` reconstruction
+(`HasFDerivWithinAt.comp` of `hasFDerivWithinAt_tangentCoordChange` with the
+chart-`⟨α,0⟩` push derivative), plus the within-set form of
+`hasDerivAt_rescaled_orbit` for the affine-and-rescale chain rule. -/
 theorem scaledTangentLift_transport
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : ℝ → TangentBundle I M} {S : Set ℝ}
@@ -98,16 +220,18 @@ theorem scaledTangentLift_transport
         (⟨(f (c * s + d)).proj, c • (f (c * s + d)).snd⟩ : TangentBundle I M))
       (geodesicVectorFieldChart (I := I) g α)
       {s : ℝ | c * s + d ∈ S} := by
-  -- The substantive content is the degree-two homogeneity of the geodesic
-  -- spray on `T(TM)`: the affine time reparametrisation `s ↦ c*s + d`
-  -- combined with `IsMIntegralCurveOn.comp_add` / `.comp_mul` rescales the
-  -- vector field by `c`, and absorbing that scalar back into the same
-  -- `geodesicVectorFieldChart g α` requires a manifold-derivative
-  -- computation on `T(TM)` matching `D(D_c) ∘ V = c · V ∘ D_c`, where
-  -- `D_c : ⟨p, v⟩ ↦ ⟨p, c • v⟩` is the fibre-doubling map. This identity is
-  -- developed in a follow-up file dedicated to the geodesic spray's
-  -- homogeneity; here we record its statement and use it as the bridge to
-  -- `IsGeodesicOn.affineReparam`.
+  -- Forward direction (proved): on the locus where `(f ·).proj` stays in the
+  -- chart-`α` source, `hasDerivWithinAt_chartPhaseVF_at_zero_section_within`
+  -- gives the chart-`⟨α,0⟩` push of `f` a chart-phase derivative; composing
+  -- with the affine map `s ↦ c·s+d` (slope `c`) and the linear fibre rescale
+  -- (matched by `chartPhaseVF_rescale` /
+  -- `chartChristoffelContraction_smul_left_right`) gives the chart-phase
+  -- derivative of the chart-`⟨α,0⟩` push of the candidate lift, which by
+  -- `chartFiberCoord_fiberScale` equals `rescaleChartOrbit c` of the push of
+  -- `f ∘ (·c+d)`.  Reverse direction (residual): reconstruct the manifold
+  -- `HasMFDerivWithinAt` from this chart-phase derivative — the within-set,
+  -- fixed-base inverse of `tangentCoordChange_tangent_geodesicVF`, mirroring
+  -- `exists_isMIntegralCurveAt_of_contMDiffAt`.
   let _hf' := hf
   sorry
 
