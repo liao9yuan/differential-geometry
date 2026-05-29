@@ -3,6 +3,7 @@ import DifferentialGeometry.Geometry.Riemannian.HopfRinow
 import DifferentialGeometry.Geometry.Riemannian.Exponential.Definition
 import DifferentialGeometry.Geometry.Riemannian.Exponential.LocalDiffeomorphism
 import DifferentialGeometry.Geometry.Riemannian.NormalCoordinates
+import DifferentialGeometry.Geometry.Riemannian.RiemannianDistContinuity
 import DifferentialGeometry.Integral.Measure.ChartDensity
 import Mathlib.Geometry.Manifold.Riemannian.Basic
 import Mathlib.Geometry.Manifold.Riemannian.PathELength
@@ -10,6 +11,9 @@ import Mathlib.Analysis.Convex.Star
 import Mathlib.Analysis.Convex.PathConnected
 
 set_option linter.unusedSectionVars false
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace
 
 /-!
 # Radial-geodesic surjectivity on rieDist-closed balls
@@ -93,6 +97,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [PseudoEMetricSpace M] [T2Space (TangentBundle I M)]
 variable (g : SmoothRiemannianMetric I M)
 variable [Bundle.RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
+variable [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
 variable [IsRiemannianManifold I M] [CompleteSpace M]
 
 /-! ## The `g`-norm and the `g`-closed-ball in the tangent space
@@ -236,24 +241,221 @@ theorem radial_image_is_open (g : SmoothRiemannianMetric I M)
 
 /-! ## Closedness of the radial-minimiser set relative to the closed ball -/
 
+/-- The `g`-quadratic form `g.inner p v v` is non-negative: it is `0` at the
+zero vector and strictly positive elsewhere by positive-definiteness. -/
+private lemma gInner_self_nonneg (g : SmoothRiemannianMetric I M) (p : M)
+    (v : TangentSpace I p) : 0 ≤ g.inner p v v := by
+  rcases eq_or_ne v 0 with hv | hv
+  · subst hv; simp
+  · exact (g.pos p v hv).le
+
+/-- The map `v ↦ g.inner p v v` is continuous on `T_p M`: the metric value
+`g.inner p` is a continuous bilinear map and we evaluate it on the diagonal. -/
+private lemma continuous_gInner_self (g : SmoothRiemannianMetric I M) (p : M) :
+    Continuous (fun v : TangentSpace I p => g.inner p v v) :=
+  (g.inner p).continuous.clm_apply continuous_id
+
+/-- The map `v ↦ √(g.inner p v v)` is continuous on `T_p M`. -/
+private lemma continuous_sqrt_gInner_self (g : SmoothRiemannianMetric I M)
+    (p : M) :
+    Continuous (fun v : TangentSpace I p => Real.sqrt (g.inner p v v)) :=
+  Real.continuous_sqrt.comp (continuous_gInner_self (I := I) g p)
+
+/-- **The closed `g`-ball is closed.** It is the preimage of `Set.Iic R`
+under the continuous map `v ↦ √(g.inner p v v)`. -/
+private lemma isClosed_gBall (g : SmoothRiemannianMetric I M) (p : M)
+    (R : ℝ) : IsClosed (gBall (I := I) g p R) := by
+  have hpre : gBall (I := I) g p R =
+      (fun v : TangentSpace I p => Real.sqrt (g.inner p v v)) ⁻¹' Set.Iic R := by
+    ext v; simp only [gBall, Set.mem_setOf_eq, Set.mem_preimage, Set.mem_Iic]
+  rw [hpre]
+  exact IsClosed.preimage (continuous_sqrt_gInner_self (I := I) g p) isClosed_Iic
+
+/-- **The closed `g`-ball is bounded.** The von Neumann boundedness of the
+unit `g`-ball (`g.isVonNBounded`) gives a model-norm bound on `{v | g v v < 1}`,
+and a rescaling argument transports it to the radius-`R` `g`-ball. -/
+private lemma isBounded_gBall (g : SmoothRiemannianMetric I M) (p : M)
+    (R : ℝ) : Bornology.IsBounded (gBall (I := I) g p R) := by
+  rcases lt_or_ge R 0 with hR | hR
+  · -- For `R < 0` the `g`-ball is empty: `√(g v v) ≥ 0 > R`.
+    have hempty : gBall (I := I) g p R = ∅ := by
+      ext v
+      simp only [gBall, Set.mem_setOf_eq, Set.mem_empty_iff_false, iff_false, not_le]
+      exact lt_of_lt_of_le hR (Real.sqrt_nonneg _)
+    rw [hempty]; exact Bornology.isBounded_empty
+  · -- Extract a model-norm bound `r` on the unit `g`-ball `{v | g v v < 1}`.
+    obtain ⟨r, hr⟩ :=
+      (NormedSpace.isVonNBounded_iff' ℝ (E := TangentSpace I p)).1 (g.isVonNBounded p)
+    -- The radius-`R` `g`-ball is bounded by `(R + 1) * r`.
+    rw [isBounded_iff_forall_norm_le]
+    refine ⟨(R + 1) * r, fun v hv => ?_⟩
+    -- `hv : √(g v v) ≤ R`, hence `g v v ≤ R ^ 2`.
+    have hsqrt : Real.sqrt (g.inner p v v) ≤ R := hv
+    have hnonneg : 0 ≤ g.inner p v v := gInner_self_nonneg (I := I) g p v
+    have hgvv : g.inner p v v ≤ R ^ 2 := by
+      nlinarith [Real.sq_sqrt hnonneg, Real.sqrt_nonneg (g.inner p v v), hsqrt]
+    -- Rescale: `w := (R + 1)⁻¹ • v` lies in the unit `g`-ball.
+    have hRpos : (0 : ℝ) < R + 1 := by linarith
+    set w : TangentSpace I p := (R + 1)⁻¹ • v with hw
+    have hgw : g.inner p w w < 1 := by
+      have hsmul : g.inner p w w = (R + 1)⁻¹ ^ 2 * g.inner p v v :=
+        gInner_smul_self (I := I) g p _ v
+      rw [hsmul]
+      have hinv_sq_pos : (0 : ℝ) < (R + 1)⁻¹ ^ 2 :=
+        pow_pos (inv_pos.mpr hRpos) 2
+      have hge : 0 ≤ R / (R + 1) := div_nonneg hR hRpos.le
+      have hlt : R / (R + 1) < 1 := by rw [div_lt_one hRpos]; linarith
+      calc (R + 1)⁻¹ ^ 2 * g.inner p v v
+          ≤ (R + 1)⁻¹ ^ 2 * R ^ 2 :=
+            mul_le_mul_of_nonneg_left hgvv hinv_sq_pos.le
+        _ = (R / (R + 1)) ^ 2 := by
+            rw [div_pow]; field_simp
+        _ < 1 := by nlinarith [hlt, hge]
+    have hwnorm : ‖w‖ ≤ r := hr w hgw
+    -- Recover `‖v‖ = (R + 1) * ‖w‖ ≤ (R + 1) * r`.
+    have hv_eq : v = (R + 1) • w := by
+      rw [hw, smul_smul, mul_inv_cancel₀ (ne_of_gt hRpos), one_smul]
+    rw [hv_eq, norm_smul, Real.norm_eq_abs, abs_of_pos hRpos]
+    exact mul_le_mul_of_nonneg_left hwnorm hRpos.le
+
+/-- **The closed `g`-ball is compact.** In the finite-dimensional (hence
+proper) tangent space `T_p M`, a closed and bounded set is compact. -/
+private lemma isCompact_gBall (g : SmoothRiemannianMetric I M) (p : M)
+    (R : ℝ) : IsCompact (gBall (I := I) g p R) := by
+  haveI : ProperSpace (TangentSpace I p) := FiniteDimensional.proper_real (TangentSpace I p)
+  exact Metric.isCompact_of_isClosed_isBounded
+    (isClosed_gBall (I := I) g p R) (isBounded_gBall (I := I) g p R)
+
+/-- Continuity of `q ↦ riemannianEDist I p q` for the manifold topology.
+
+The ambient `[PseudoEMetricSpace M]` variable carries a topology that is
+*not* assumed equal to the manifold topology, so continuity of `edist` for
+that structure does not transfer. Instead we build, from the ambient
+`RiemannianBundle` data (whose fibre inner product varies continuously by
+`[IsContinuousRiemannianBundle E (TangentSpace I)]`), Mathlib's canonical
+`PseudoEMetricSpace.ofRiemannianMetric I M`, whose `edist` is
+`riemannianEDist I` definitionally and whose topology is definitionally the
+manifold topology (it is constructed via `PseudoEMetricSpace.ofEDistOfTopology`,
+which sets `toTopologicalSpace := t` to the ambient one). Continuity of
+`edist` (`Continuous.edist`) for this structure is therefore continuity of
+`riemannianEDist I` for the manifold topology. The fibre norm feeding
+`riemannianEDist` is the one induced by the ambient `RiemannianBundle`, which
+is exactly the one appearing in the goal. The required `[RegularSpace M]` is
+discharged from finite-dimensional local compactness together with the
+Hausdorff hypothesis. -/
+private lemma continuous_riemannianEDist_ambient
+    (p : M) : Continuous (fun q : M => riemannianEDist I p q) := by
+  -- A finite-dimensional manifold is locally compact, hence (being Hausdorff) regular.
+  haveI : LocallyCompactSpace M :=
+    Manifold.locallyCompact_of_finiteDimensional (M := M) I
+  haveI : RegularSpace M := inferInstance
+  -- Build the canonical pseudo-emetric structure from the ambient `RiemannianBundle`:
+  -- its topology is defeq to the manifold topology and its `edist` is
+  -- `riemannianEDist I` (same `RiemannianBundle`, same fibre norm as the goal).
+  letI : PseudoEMetricSpace M := PseudoEMetricSpace.ofRiemannianMetric I M
+  exact (continuous_const.edist continuous_id)
+
 /-- **Radial-image closedness (relative form).** The radial-minimiser set
 `radialMinSet g p` is closed *relative to* the `riemannianEDist`-closed-ball
-of radius `R` at `p`. A convergent sequence `qₙ → q` of radial-minimiser
-points has initial-velocity witnesses `vₙ` of `g`-norm `≤ R`; finite-
-dimensional compactness of the closed Euclidean ball in `T_p M` extracts a
-convergent subsequence `vₙ → v∞`, and continuity of `expMap g p` together
-with lower semicontinuity of the length identity shows that `q` is reached
-by the radial geodesic of velocity `v∞`. The velocity bound is the
-intrinsic `g`-norm `√(g.inner p v v)`, not the model-`E` norm. -/
+of radius `R` at `p`. The intersection `radialMinSet g p ∩ closedBall` is the
+`expMap g p`-image of the compact locus `A`: the vectors in the compactifying
+closed `g`-ball of radius `max R 0` that realise `riemannianEDist` and whose
+endpoint lies in the closed ball. `A` is the intersection of the compact closed
+`g`-ball with an equalizer of two continuous maps and a closed sublevel set,
+hence compact; its image is compact and therefore closed in the Hausdorff
+manifold, and pulling back along the closed-ball subtype inclusion yields the
+relative closedness. The velocity bound is the intrinsic `g`-norm
+`√(g.inner p v v)`, not the model-`E` norm. -/
 theorem radial_image_is_closed (g : SmoothRiemannianMetric I M)
     (p : M) (R : ℝ) :
     IsClosed
       (Subtype.val ⁻¹' (radialMinSet (I := I) g p) :
         Set ↥{q : M | riemannianEDist I p q ≤ ENNReal.ofReal R}) := by
-  -- Genuinely hard: relative closedness via finite-dimensional compactness
-  -- of the closed `g`-ball in `T_p M`, continuity of `expMap g p`, and
-  -- passing the `g`-length ↔ `riemannianEDist` identity to the limit.
-  sorry
+  -- Continuity of `expMap g p` and of the maps cutting out the compact locus.
+  have hexp : Continuous (expMap (I := I) g p) :=
+    HopfRinow.bm_c_expMap_continuous_of_geodesic_complete (I := I) g p
+  have hf : Continuous
+      (fun v : TangentSpace I p =>
+        ENNReal.ofReal (Real.sqrt (g.inner p v v))) :=
+    ENNReal.continuous_ofReal.comp (continuous_sqrt_gInner_self (I := I) g p)
+  have hh : Continuous
+      (fun v : TangentSpace I p =>
+        riemannianEDist I p (expMap (I := I) g p v)) :=
+    (continuous_riemannianEDist_ambient (I := I) p).comp hexp
+  -- The compact locus `A`: vectors inside the (compactifying) closed `g`-ball of
+  -- radius `max R 0`, that are length-minimising, *and* whose endpoint lies in the
+  -- `riemannianEDist`-closed-ball of radius `R`. The first conjunct guarantees
+  -- compactness; the last conjunct is the genuine closed-ball constraint.
+  set A : Set (TangentSpace I p) :=
+    {v : TangentSpace I p |
+      v ∈ gBall (I := I) g p (max R 0) ∧
+      ENNReal.ofReal (Real.sqrt (g.inner p v v)) =
+        riemannianEDist I p (expMap (I := I) g p v) ∧
+      riemannianEDist I p (expMap (I := I) g p v) ≤ ENNReal.ofReal R} with hA
+  -- `A` is closed: an intersection of the closed `g`-ball, an equalizer of two
+  -- continuous maps, and a closed sublevel set.
+  have hAclosed : IsClosed A := by
+    have heq : IsClosed
+        {v : TangentSpace I p |
+          ENNReal.ofReal (Real.sqrt (g.inner p v v)) =
+            riemannianEDist I p (expMap (I := I) g p v)} :=
+      isClosed_eq hf hh
+    have hlev : IsClosed
+        {v : TangentSpace I p |
+          riemannianEDist I p (expMap (I := I) g p v) ≤ ENNReal.ofReal R} :=
+      IsClosed.preimage hh isClosed_Iic
+    have hsplit : A =
+        gBall (I := I) g p (max R 0) ∩
+          ({v : TangentSpace I p |
+              ENNReal.ofReal (Real.sqrt (g.inner p v v)) =
+                riemannianEDist I p (expMap (I := I) g p v)} ∩
+            {v : TangentSpace I p |
+              riemannianEDist I p (expMap (I := I) g p v) ≤
+                ENNReal.ofReal R}) := by
+      ext v; simp only [hA, Set.mem_setOf_eq, Set.mem_inter_iff]
+    rw [hsplit]
+    exact (isClosed_gBall (I := I) g p (max R 0)).inter (heq.inter hlev)
+  -- `A` is compact: a closed subset of the compact closed `g`-ball.
+  have hAcompact : IsCompact A :=
+    (isCompact_gBall (I := I) g p (max R 0)).of_isClosed_subset hAclosed
+      (fun v hv => hv.1)
+  -- The image `expMap g p '' A` is compact, hence closed in the Hausdorff `M`.
+  have hImageClosed : IsClosed (expMap (I := I) g p '' A) :=
+    (hAcompact.image hexp).isClosed
+  -- On the closed-ball subtype, `radialMinSet` and `expMap g p '' A` agree, so
+  -- the relative set is the (closed) preimage of a closed set.
+  have hpreimage_eq :
+      (Subtype.val ⁻¹' (radialMinSet (I := I) g p) :
+        Set ↥{q : M | riemannianEDist I p q ≤ ENNReal.ofReal R}) =
+      Subtype.val ⁻¹' (expMap (I := I) g p '' A) := by
+    ext x
+    simp only [Set.mem_preimage]
+    constructor
+    · -- A radial minimiser within the closed ball comes from a vector in `A`.
+      rintro ⟨v, hexpv, hlen⟩
+      have hxball : riemannianEDist I p x.val ≤ ENNReal.ofReal R := x.2
+      have hlen' : ENNReal.ofReal (Real.sqrt (g.inner p v v)) =
+          riemannianEDist I p (expMap (I := I) g p v) := by
+        rw [hexpv]; exact hlen
+      have hconstr : riemannianEDist I p (expMap (I := I) g p v) ≤
+          ENNReal.ofReal R := by rw [hexpv]; exact hxball
+      -- `ofReal (√(g v v)) ≤ ofReal R` forces `√(g v v) ≤ max R 0`.
+      have hle : ENNReal.ofReal (Real.sqrt (g.inner p v v)) ≤
+          ENNReal.ofReal R := by rw [hlen']; exact hconstr
+      have hvmax : Real.sqrt (g.inner p v v) ≤ max R 0 := by
+        rcases (ENNReal.ofReal_le_ofReal_iff' (p := Real.sqrt (g.inner p v v))
+          (q := R)).1 hle with h | h
+        · exact le_trans h (le_max_left R 0)
+        · exact le_trans h (le_max_right R 0)
+      exact ⟨v, ⟨hvmax, hlen', hconstr⟩, hexpv⟩
+    · -- A vector in `A` maps to a radial minimiser inside the closed ball.
+      rintro ⟨v, ⟨_hvmax, hlen', _hconstr⟩, hexpv⟩
+      have hrie : riemannianEDist I p x.val =
+          ENNReal.ofReal (Real.sqrt (g.inner p v v)) := by
+        rw [← hexpv, hlen']
+      exact ⟨v, hexpv, by rw [hrie]⟩
+  rw [hpreimage_eq]
+  exact hImageClosed.preimage continuous_subtype_val
 
 /-! ## The closed ball is contained in the radial-minimiser image -/
 
