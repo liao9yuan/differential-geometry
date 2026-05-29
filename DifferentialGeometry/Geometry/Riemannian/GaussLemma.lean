@@ -285,6 +285,34 @@ theorem normalBall_radial_unique_minimizer
       hγ_smooth.contMDiffOn hγ_inBall
   exact lt_of_le_of_lt hlb hγ_len
 
+/-- **Equality case of the radial unique-minimiser bound.** Inside the
+normal ball at `p`, a `C¹` curve `γ` on `[a, b]` from `p` to
+`expMap g p v` that stays in the normal-chart source and whose
+`pathELength` equals the minimum `√(g_p(v, v))` (the lower bound of
+`normalBall_radial_unique_minimizer`) is a monotone radial
+reparametrisation: there is a monotone reparametrisation function
+`φ : ℝ → ℝ` with `φ a = 0`, `φ b = 1` such that `γ` coincides with the
+radial geodesic `t ↦ expMap g p (φ t • v)` on `[a, b]`. This is the
+equality-characterisation sibling of `normalBall_radial_unique_minimizer`
+(which gives only the inequality), consumed by the local radial
+identification of a minimiser and by the radial-image openness step. -/
+theorem normalBall_radial_minimizer_equality
+    (g : SmoothRiemannianMetric I M) (p : M) {v : E}
+    (hv : (show TangentSpace I p from v) ∈ expDomain (I := I) g p)
+    (hball : v ∈ (NormalCoordinates.normalChartAt (I := I) g p).target)
+    {γ : ℝ → M} {a b : ℝ} (hab : a ≤ b)
+    (hγ : CMDiff[Set.Icc a b] 1 γ)
+    (hγa : γ a = p)
+    (hγb : γ b = expMap (I := I) g p (show TangentSpace I p from v))
+    (hγ_inBall : ∀ t ∈ Set.Icc a b,
+      γ t ∈ (NormalCoordinates.normalChartAt (I := I) g p).source)
+    (hlen : pathELength I γ a b =
+      ENNReal.ofReal (Real.sqrt (g.inner p v v))) :
+    ∃ φ : ℝ → ℝ, MonotoneOn φ (Set.Icc a b) ∧ φ a = 0 ∧ φ b = 1 ∧
+      ∀ t ∈ Set.Icc a b,
+        γ t = expMap (I := I) g p (show TangentSpace I p from (φ t • v)) := by
+  sorry
+
 end RadialUniqueMinimizer
 
 section LocalRadialIdentification

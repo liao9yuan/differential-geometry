@@ -1564,6 +1564,36 @@ theorem ricciTensor_contMDiff (g : SmoothRiemannianMetric I M) :
 
 end RicciSmoothness
 
+/-! ## Pair (block) symmetry of the Riemann curvature operator
+
+The block symmetry `⟨R(X, Y) Z, W⟩ = ⟨R(Z, W) X, Y⟩` of the Levi-Civita Riemann
+curvature operator. It is the algebraic consequence of the first Bianchi identity
+together with the first-pair antisymmetry (`riemannOp_swap`) and the last-pair
+metric-skewness (`riemannOp_metric_skew`), and controls the sign of the curvature
+term in the second variation of arc length. -/
+
+section PairSymmetry
+
+variable [CompleteSpace E]
+
+/-- **Pair (block) symmetry of `riemannOp`.** For the Levi-Civita connection of a smooth
+Riemannian metric `g`, at each point `x ∈ M` and for any fibre vectors
+`v, w, Z, W ∈ T_x M`,
+$$
+  g_x\bigl(R(v, w) Z, W\bigr) = g_x\bigl(R(Z, W) v, w\bigr).
+$$
+The slot order matches the curvature term produced by the second-variation derivation
+(`curvature_identity_on_variation_fixed_chart`), where the curvature operator acts as
+`R(v, w) u` via `riemannOp (LeviCivita g) x v w u`. -/
+theorem riemannOp_inner_pair_symm
+    (g : SmoothRiemannianMetric I M) (x : M)
+    (v w Z W : TangentSpace I x) :
+    g.inner x (riemannOp (LeviCivita (I := I) g) x v w Z) W =
+      g.inner x (riemannOp (LeviCivita (I := I) g) x Z W v) w := by
+  sorry
+
+end PairSymmetry
+
 end Connection
 end Integral
 end DifferentialGeometry

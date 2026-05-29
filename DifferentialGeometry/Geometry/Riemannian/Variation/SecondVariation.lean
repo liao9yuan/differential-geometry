@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Riemannian.Variation.ParallelTransport
 import DifferentialGeometry.Geometry.Riemannian.Variation.FixedChartIdentities
 import DifferentialGeometry.Geometry.Riemannian.AlongCurve
+import DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
 import DifferentialGeometry.Geometry.Riemannian.MFDerivAlongCurve
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.Equation
 import DifferentialGeometry.Integral.Connection.Curvature
@@ -571,6 +572,109 @@ theorem minimiser_implies_second_variation_nonneg
       g.inner (γ t) (V t) (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ)) = 0)
     (_hV0 : V 0 = 0) (_hVL : V L = 0) :
     0 ≤ indexForm (I := I) g γ 0 L V V := sorry
+
+/-! ## Moving-foot metric compatibility for the speed-squared -/
+
+/-- **Metric compatibility for the moving-foot speed-squared.** For a smooth
+two-parameter variation `f`, the `s`-derivative at `s = 0` of the slice
+speed-squared `speedSq g f s t` is `2 ⟨∇_s ∂_t f, ∂_t f⟩_g`, where the
+transverse covariant derivative `∇_s ∂_t f` is `covDerivAlong` of the
+longitudinal-velocity section `s ↦ ∂_t f(s, t)` along the transverse curve
+`s ↦ f s t`, evaluated at `s = 0`, and `∂_t f|_{s = 0}` is the longitudinal
+velocity of the central curve. This is the Leibniz / metric-compatibility step
+underlying the first variation of arc length. -/
+theorem S1_moving_foot_metric_compatibility
+    (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M) (t : ℝ)
+    (_hf : IsSmoothVariation (I := I) f) :
+    HasDerivAt (fun s : ℝ => speedSq (I := I) g f s t)
+      (2 * g.inner (f 0 t)
+        (DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong.covDerivAlong
+          (I := I) g (fun s : ℝ => f s t)
+          (fun s : ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f s u) t (1 : ℝ)) 0)
+        (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f 0 u) t (1 : ℝ))) 0 := sorry
+
+/-! ## Differentiation under the interval integral of the speed -/
+
+/-- **Differentiation under the interval integral for the arc-length speed.**
+For a smooth two-parameter variation `f` whose central curve is unit-speed on
+`[0, L]`, the `s`-derivative at `s = 0` of the slice arc-length integrand
+`∫₀^L √(speedSq g f s t) dt` equals the interval integral of the pointwise
+`s`-derivative of `√(speedSq)`. By the chain rule and
+`S1_moving_foot_metric_compatibility`, the pointwise derivative is
+`(2 ⟨∇_s ∂_t f, ∂_t f⟩_g) / (2 √(speedSq g f 0 t))`. The unit-speed hypothesis
+at `s = 0` guarantees positivity of the speed on `[0, L]`, so the square-root is
+differentiable there; the full domination / measurability hypotheses are
+supplied to the Mathlib differentiation-under-the-integral engine inside the
+proof. -/
+theorem S2_diff_under_interval_integral
+    (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M) (L : ℝ)
+    (_hf : IsSmoothVariation (I := I) f) (_hL : 0 < L)
+    (_hUnit : ∀ t ∈ Set.Icc (0 : ℝ) L, speedSq (I := I) g f 0 t = 1) :
+    HasDerivAt
+      (fun s : ℝ => ∫ t in (0 : ℝ)..L, Real.sqrt (speedSq (I := I) g f s t))
+      (∫ t in (0 : ℝ)..L,
+        (2 * g.inner (f 0 t)
+          (DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong.covDerivAlong
+            (I := I) g (fun s : ℝ => f s t)
+            (fun s : ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f s u) t (1 : ℝ)) 0)
+          (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f 0 u) t (1 : ℝ)))
+          / (2 * Real.sqrt (speedSq (I := I) g f 0 t)))
+      0 := sorry
+
+/-! ## Construction of a smooth variation with prescribed variation field -/
+
+/-- **Exponential-map construction of a smooth endpoint-fixed variation.**
+Given a smooth curve `γ` and a smooth `E`-valued variation field `V` vanishing
+at the endpoints `0` and `L`, there is a smooth two-parameter variation `f`
+whose central curve is `γ`, whose `s`-velocity at `s = 0` realises `V`
+(`∂_s f|_{s = 0} = V`), and which keeps both endpoints fixed
+(`f s 0 = γ 0` and `f s L = γ L` for every `s`). The construction follows the
+geodesic exponential map of the field, `f s t := exp_{γ t}(s · V t)`. -/
+theorem S5_exp_variation_construction
+    (g : SmoothRiemannianMetric I M) (γ : ℝ → M) (V : ℝ → E) (L : ℝ)
+    (_hγ : ContMDiff (𝓘(ℝ, ℝ)) I ∞ γ) (_hV : ContDiff ℝ ∞ V)
+    (_hV0 : V 0 = 0) (_hVL : V L = 0) :
+    ∃ f : ℝ → ℝ → M,
+      IsSmoothVariation (I := I) f ∧
+      (∀ t : ℝ, f 0 t = γ t) ∧
+      (∀ t : ℝ,
+        (mfderiv (𝓘(ℝ, ℝ)) I (fun s : ℝ => f s t) 0 (1 : ℝ) : E) = V t) ∧
+      (∀ s : ℝ, f s 0 = γ 0) ∧ (∀ s : ℝ, f s L = γ L) := sorry
+
+/-! ## Interval-integrability of the index-form integrand -/
+
+/-- **Interval-integrability of the index-form integrand on the
+sine-modulated parallel frame.** For a `C¹` unit-speed geodesic `γ` on `[0, L]`
+(`L > 0`) and a differentiable, parallel, orthonormal frame `e` of the
+perpendicular subspace along `γ`, each sine-modulated section
+`t ↦ sin(π t / L) · e i` makes the index-form integrand interval-integrable on
+`[0, L]`. The integrand is continuous on the compact interval: it is built from
+the smooth chart Christoffels, the `C¹` curve `γ`, the smooth sine factor, and
+the differentiable frame `e`. -/
+theorem indexFormIntegrand_intervalIntegrable
+    (g : SmoothRiemannianMetric I M) (γ : ℝ → M) (L : ℝ) (_hL : 0 < L)
+    (_hγ_C1 : ContMDiffOn (𝓘(ℝ, ℝ)) I 1 γ (Set.Icc 0 L))
+    (_hγ_geoOn : IsGeodesicOn (I := I) g γ (Set.Icc 0 L))
+    (_hγ_unit : ∀ t ∈ Set.Icc (0 : ℝ) L,
+      g.inner (γ t)
+          (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ))
+          (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ)) = 1)
+    (e : Fin (Module.finrank ℝ E - 1) → SectionAlongCurve I M γ)
+    (_heDiff : ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L, DifferentiableAt ℝ (e i).toFun t)
+    (_hParallel : ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L,
+      chartCovDerivAlong (I := I) g (γ t) γ (e i).toFun t = 0)
+    (_hON : ∀ t ∈ Set.Icc (0 : ℝ) L, ∀ i j,
+      g.inner (γ t) ((e i).toFun t) ((e j).toFun t) = if i = j then 1 else 0)
+    (_hPerp : ∀ t ∈ Set.Icc (0 : ℝ) L, ∀ i,
+      g.inner (γ t) ((e i).toFun t) (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ)) = 0) :
+    ∀ i : Fin (Module.finrank ℝ E - 1),
+      IntervalIntegrable
+        (fun t : ℝ => indexFormIntegrand (I := I) g γ
+          ((SectionAlongCurve.smulFun
+            (fun s => Real.sin (Real.pi * s / L)) (e i)).toFun)
+          ((SectionAlongCurve.smulFun
+            (fun s => Real.sin (Real.pi * s / L)) (e i)).toFun) t)
+        MeasureTheory.volume 0 L := sorry
 
 end Variation
 end Riemannian

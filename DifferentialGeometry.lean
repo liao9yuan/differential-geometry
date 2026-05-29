@@ -475,6 +475,7 @@ import DifferentialGeometry.Geometry.Riemannian.Exponential.UnifiedPackaging
 import DifferentialGeometry.Geometry.Riemannian.Exponential.UniformUniqueness
 import DifferentialGeometry.Geometry.Riemannian.Exponential.UniformExistence
 import DifferentialGeometry.Geometry.Riemannian.Exponential.ChainedFlowContinuity
+import DifferentialGeometry.Geometry.Riemannian.Exponential.OffZeroRegularity
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.MaximalRescaling
 import DifferentialGeometry.Geometry.Riemannian.NormalCoordinates
 import DifferentialGeometry.Geometry.Riemannian.InjectivityRadius
@@ -482,11 +483,13 @@ import DifferentialGeometry.Geometry.Riemannian.SectionalCurvature
 import DifferentialGeometry.Geometry.Riemannian.AlongCurve
 import DifferentialGeometry.Geometry.Riemannian.MFDerivAlongCurve
 import DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
+import DifferentialGeometry.Geometry.Riemannian.TangentNormDiamond
 import DifferentialGeometry.Geometry.Riemannian.GaussLemma
 import DifferentialGeometry.Geometry.Riemannian.HopfRinow
 import DifferentialGeometry.Geometry.Riemannian.RadialSurjectivity
 import DifferentialGeometry.Geometry.Riemannian.Variation.ParallelTransport
 import DifferentialGeometry.Geometry.Riemannian.Variation.ParallelLocalODE
+import DifferentialGeometry.Geometry.Riemannian.Variation.PerpFrame
 import DifferentialGeometry.Geometry.Riemannian.Variation.SecondVariation
 import DifferentialGeometry.Geometry.Riemannian.Variation.FixedChartIdentities
 import DifferentialGeometry.Geometry.Riemannian.Topology.SemilocallySimplyConnected
