@@ -41,7 +41,8 @@ The `ℓ¹` summability `∑ᵢ |cᵢ| · (1 + λᵢ)^N < ∞` is supplied uncon
 by `spectralCoeff_weightedPow_summable`, which converts the `ℓ²` spectral decay of
 the gate element into `ℓ¹` against any polynomial weight by an AM–GM split against
 the **eigenvalue-tail summability** `EigenvalueTailSummable g r s`
-(`∑ᵢ (1 + λᵢ)^{-p} < ∞` for every `p ≥ 0`). This single analytic fact — the
+(`∑ᵢ (1 + λᵢ)^{-p} < ∞` for *some* `p > 0` — the satisfiable Schatten form,
+by Weyl asymptotics any `p > n/2`). This single analytic fact — the
 Weyl-type spectral counting input — is genuinely not available in the surrounding
 infrastructure (the project deliberately avoids trace-class / heat-trace
 summability), so it is threaded here as an explicit hypothesis. The headline of

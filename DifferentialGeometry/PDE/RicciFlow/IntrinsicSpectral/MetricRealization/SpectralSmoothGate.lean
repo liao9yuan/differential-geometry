@@ -272,15 +272,23 @@ heat-trace summability) and prove the resulting `IteratedGardingExtensionBound`
 unconditionally from it. -/
 
 /-- **Eigenvalue-tail summability (predicate).** `EigenvalueTailSummable g r s`
-holds when, for *every* exponent `p ≥ 0`, the family
+holds when there *exists* an exponent `p > 0` for which the family
 `i ↦ (1 + λᵢ)^{-p}` over the tensor eigen-index set is summable. This is the
-Weyl-type spectral input: the connection-Laplacian eigenvalues `λᵢ` grow fast
-enough (with multiplicity) that every negative power of `1 + λᵢ` is summable. It
-is the single analytic fact converting the spectral `ℓ²` decay of a gate
-element's coordinates into the `ℓ¹` decay needed to sum the per-eigenvector
-chart-Sobolev bounds. -/
+Weyl-type (Schatten) spectral input: the connection-Laplacian eigenvalues `λᵢ`
+grow fast enough (with multiplicity — by Weyl asymptotics `λᵢ ~ i^{2/n}`) that
+*some* negative power of `1 + λᵢ` is summable, namely every `p > n/2`. It is the
+single analytic fact converting the spectral `ℓ²` decay of a gate element's
+coordinates into the `ℓ¹` decay needed to sum the per-eigenvector chart-Sobolev
+bounds.
+
+The previous, stronger "for all `p ≥ 0`" form was unsatisfiable: at `p = 0` it
+demands summability of the constant family `1` over the infinite eigen-index
+set, and for `dim M ≥ 2` even at `p = 1` the series `∑ (1 + λᵢ)⁻¹` diverges. The
+existential `p > 0` form is the satisfiable Schatten statement, and it is all the
+`ℓ¹`-control argument needs: a single fixed `p` suffices for *every* polynomial
+weight, by feeding the AM–GM split with the spectral data at exponent `2N + p`. -/
 def EigenvalueTailSummable (g : SmoothRiemannianMetric I M) (r s : ℕ) : Prop :=
-  ∀ p : ℝ, 0 ≤ p →
+  ∃ p : ℝ, 0 < p ∧
     Summable (fun i : TensorSpectral.TensorEigenIdx (I := I) (M := M) g r s =>
       (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (-p))
 
@@ -302,10 +310,14 @@ per-eigenvector chart-Sobolev bounds: it converts the spectral `ℓ²` decay
 polynomial weight, by AM–GM domination against the spectral data at exponent
 `σ = 2N + p` and the eigenvalue tail at exponent `p`.
 
-The proof dominates each term by `½ · (weight^{2N+p} · cᵢ²) + ½ · weight^{-p}`,
-both of whose families are summable: the first by
-`spectralWeighted_summable_of_mem` at exponent `2N + p`, the second by
-`EigenvalueTailSummable` at exponent `p`. -/
+The proof extracts the single witness exponent `p > 0` from
+`EigenvalueTailSummable` and dominates each term by
+`½ · (weight^{2N+p} · cᵢ²) + ½ · weight^{-p}`, both of whose families are
+summable: the first by `spectralWeighted_summable_of_mem` at exponent `2N + p`
+(which is `≥ 0`), the second by the extracted tail summability at exponent `p`.
+The AM–GM split `|c|·wₙ ≤ ½·(w₂ₙ₊ₚ·c²) + ½·w₋ₚ` is valid for *any* `p > 0` (set
+`a = w_{(2N+p)/2}·|c|`, `b = w_{-p/2}`; then `ab = wₙ·|c|`, `a² = w₂ₙ₊ₚ·c²`,
+`b² = w₋ₚ`). -/
 theorem spectralCoeff_weightedPow_summable
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (u : TensorL2 r s g)
     (h_mem : MemAllTensorHs (I := I) (M := M) g r s u)
@@ -314,30 +326,31 @@ theorem spectralCoeff_weightedPow_summable
     Summable (fun i : TensorSpectral.TensorEigenIdx (I := I) (M := M) g r s =>
       |spectralCoeff (I := I) (M := M) g r s u i| *
         tensorSobolevWeight (I := I) (M := M) i (N : ℝ)) := by
-  -- Choose `p = 1` for the tail and `σ = 2N + 1` for the spectral side.
-  -- Then `σ - 2N = 1 = p`, and the AM–GM split is term-wise dominated.
-  have hp_nonneg : (0 : ℝ) ≤ 1 := zero_le_one
-  -- Spectral side at exponent `σ = 2N + 1 ≥ 0`.
-  have hσ_nonneg : (0 : ℝ) ≤ 2 * (N : ℝ) + 1 := by positivity
+  -- Extract the single witness tail exponent `p > 0` and run the AM–GM split with
+  -- the spectral side at exponent `σ = 2N + p ≥ 0`. Then `σ - 2N = p`, and the
+  -- AM–GM split is term-wise dominated for this fixed `p`.
+  obtain ⟨p, hp_pos, h_tail_p⟩ := h_tail
+  have hp_nonneg : (0 : ℝ) ≤ p := hp_pos.le
+  -- Spectral side at exponent `σ = 2N + p ≥ 0`.
+  have hσ_nonneg : (0 : ℝ) ≤ 2 * (N : ℝ) + p := by positivity
   have h_spec :
       Summable (fun i : TensorSpectral.TensorEigenIdx (I := I) (M := M) g r s =>
-        tensorSobolevWeight (I := I) (M := M) i (2 * (N : ℝ) + 1) *
+        tensorSobolevWeight (I := I) (M := M) i (2 * (N : ℝ) + p) *
           (spectralCoeff (I := I) (M := M) g r s u i) ^ 2) :=
     spectralWeighted_summable_of_mem (I := I) (M := M) g r s u h_mem hσ_nonneg
-  -- Eigenvalue-tail side at exponent `p = 1`.
-  have h_tail1 :
+  -- Eigenvalue-tail side at exponent `p`.
+  have h_tailp :
       Summable (fun i : TensorSpectral.TensorEigenIdx (I := I) (M := M) g r s =>
-        tensorSobolevWeight (I := I) (M := M) i (-(1 : ℝ))) := by
-    have := h_tail 1 hp_nonneg
-    -- rewrite `(1+λ)^(-1)` as the Sobolev weight at `-1`.
-    simpa only [eigenvalueTail_eq_weight] using this
+        tensorSobolevWeight (I := I) (M := M) i (-p)) := by
+    -- rewrite `(1+λ)^(-p)` as the Sobolev weight at `-p`.
+    simpa only [eigenvalueTail_eq_weight] using h_tail_p
   -- The dominating summable family.
   have h_dom :
       Summable (fun i : TensorSpectral.TensorEigenIdx (I := I) (M := M) g r s =>
-        (1 / 2) * (tensorSobolevWeight (I := I) (M := M) i (2 * (N : ℝ) + 1) *
+        (1 / 2) * (tensorSobolevWeight (I := I) (M := M) i (2 * (N : ℝ) + p) *
             (spectralCoeff (I := I) (M := M) g r s u i) ^ 2) +
-          (1 / 2) * tensorSobolevWeight (I := I) (M := M) i (-(1 : ℝ))) :=
-    (h_spec.mul_left _).add (h_tail1.mul_left _)
+          (1 / 2) * tensorSobolevWeight (I := I) (M := M) i (-p)) :=
+    (h_spec.mul_left _).add (h_tailp.mul_left _)
   refine Summable.of_nonneg_of_le ?_ ?_ h_dom
   · intro i
     have hw : 0 ≤ tensorSobolevWeight (I := I) (M := M) i (N : ℝ) :=
@@ -348,54 +361,54 @@ theorem spectralCoeff_weightedPow_summable
     set c := spectralCoeff (I := I) (M := M) g r s u i with hc_def
     set wN := tensorSobolevWeight (I := I) (M := M) i (N : ℝ) with hwN_def
     have hwN_nonneg : 0 ≤ wN := tensorSobolevWeight_nonneg (I := I) (M := M) i (N : ℝ)
-    -- Factor the weights: weight^{2N+1} = weight^N · weight^N · weight^1,
-    -- and weight^{-1} = (weight^1)⁻¹.
-    have hw1_pos : 0 < tensorSobolevWeight (I := I) (M := M) i (1 : ℝ) :=
-      tensorSobolevWeight_pos (I := I) (M := M) i (1 : ℝ)
+    -- Factor the weights: weight^{2N+p} = weight^N · weight^N · weight^p,
+    -- and weight^{-p} = (weight^p)⁻¹.
+    have hwp_pos : 0 < tensorSobolevWeight (I := I) (M := M) i p :=
+      tensorSobolevWeight_pos (I := I) (M := M) i p
     have h_split :
-        tensorSobolevWeight (I := I) (M := M) i (2 * (N : ℝ) + 1) =
-          wN * wN * tensorSobolevWeight (I := I) (M := M) i (1 : ℝ) := by
+        tensorSobolevWeight (I := I) (M := M) i (2 * (N : ℝ) + p) =
+          wN * wN * tensorSobolevWeight (I := I) (M := M) i p := by
       rw [hwN_def]
-      rw [show (2 * (N : ℝ) + 1) = ((N : ℝ) + (N : ℝ)) + (1 : ℝ) by ring,
-        tensorHs.tensorSobolevWeight_add (I := I) (M := M) i ((N : ℝ) + (N : ℝ)) (1 : ℝ),
+      rw [show (2 * (N : ℝ) + p) = ((N : ℝ) + (N : ℝ)) + p by ring,
+        tensorHs.tensorSobolevWeight_add (I := I) (M := M) i ((N : ℝ) + (N : ℝ)) p,
         tensorHs.tensorSobolevWeight_add (I := I) (M := M) i (N : ℝ) (N : ℝ)]
     have h_neg :
-        tensorSobolevWeight (I := I) (M := M) i (-(1 : ℝ)) =
-          (tensorSobolevWeight (I := I) (M := M) i (1 : ℝ))⁻¹ :=
-      tensorHs.tensorSobolevWeight_neg (I := I) (M := M) i (1 : ℝ)
-    -- Abbreviate `w1 := weight^1`.
-    set w1 := tensorSobolevWeight (I := I) (M := M) i (1 : ℝ) with hw1_def
-    -- Goal: |c| * wN ≤ ½(wN·wN·w1·c²) + ½·w1⁻¹.
+        tensorSobolevWeight (I := I) (M := M) i (-p) =
+          (tensorSobolevWeight (I := I) (M := M) i p)⁻¹ :=
+      tensorHs.tensorSobolevWeight_neg (I := I) (M := M) i p
+    -- Abbreviate `wp := weight^p`.
+    set wp := tensorSobolevWeight (I := I) (M := M) i p with hwp_def
+    -- Goal: |c| * wN ≤ ½(wN·wN·wp·c²) + ½·wp⁻¹.
     rw [h_split, h_neg]
-    -- AM–GM: |c|·wN = (√w1·|c|·wN)·(1/√w1) ≤ ½(w1·c²·wN²) + ½·w1⁻¹.
-    -- Equivalently `2·(|c|·wN) ≤ w1·wN²·c² + w1⁻¹`, i.e.
-    -- `0 ≤ (√w1·wN·|c| − 1/√w1)²` expanded.
-    have hw1_ne : w1 ≠ 0 := ne_of_gt hw1_pos
-    have key : 2 * (|c| * wN) ≤ wN * wN * w1 * c ^ 2 + w1⁻¹ := by
-      set a := Real.sqrt w1 with ha_def
-      have hsqrt_sq : a ^ 2 = w1 := Real.sq_sqrt (le_of_lt hw1_pos)
-      have hsqrt_pos : 0 < a := Real.sqrt_pos.mpr hw1_pos
+    -- AM–GM: |c|·wN = (√wp·|c|·wN)·(1/√wp) ≤ ½(wp·c²·wN²) + ½·wp⁻¹.
+    -- Equivalently `2·(|c|·wN) ≤ wp·wN²·c² + wp⁻¹`, i.e.
+    -- `0 ≤ (√wp·wN·|c| − 1/√wp)²` expanded.
+    have hwp_ne : wp ≠ 0 := ne_of_gt hwp_pos
+    have key : 2 * (|c| * wN) ≤ wN * wN * wp * c ^ 2 + wp⁻¹ := by
+      set a := Real.sqrt wp with ha_def
+      have hsqrt_sq : a ^ 2 = wp := Real.sq_sqrt (le_of_lt hwp_pos)
+      have hsqrt_pos : 0 < a := Real.sqrt_pos.mpr hwp_pos
       have hsqrt_ne : a ≠ 0 := ne_of_gt hsqrt_pos
       have hc_sq : c ^ 2 = |c| ^ 2 := (sq_abs c).symm
       -- The two AM–GM factors `x = a·wN·|c|`, `y = a⁻¹`.
       have h_amgm : 2 * (a * wN * |c|) * a⁻¹ ≤ (a * wN * |c|) ^ 2 + a⁻¹ ^ 2 :=
         two_mul_le_add_sq (a * wN * |c|) a⁻¹
-      -- `a⁻¹ · a = 1`, and `a⁻¹² = w1⁻¹`.
+      -- `a⁻¹ · a = 1`, and `a⁻¹² = wp⁻¹`.
       have hinv_mul : a⁻¹ * a = 1 := inv_mul_cancel₀ hsqrt_ne
-      have hinv_sq : a⁻¹ ^ 2 = w1⁻¹ := by rw [inv_pow, hsqrt_sq]
+      have hinv_sq : a⁻¹ ^ 2 = wp⁻¹ := by rw [inv_pow, hsqrt_sq]
       -- The cross term `2·(a·wN·|c|)·a⁻¹ = 2·(|c|·wN)`.
       have hcross : 2 * (a * wN * |c|) * a⁻¹ = 2 * (|c| * wN) := by
         have : a * wN * |c| * a⁻¹ = (a⁻¹ * a) * (wN * |c|) := by ring
         rw [show 2 * (a * wN * |c|) * a⁻¹ = 2 * (a * wN * |c| * a⁻¹) by ring,
           this, hinv_mul, one_mul]
         ring
-      -- The leading term `(a·wN·|c|)² = w1·wN²·c² = wN·wN·w1·c²`.
-      have hlead : (a * wN * |c|) ^ 2 = wN * wN * w1 * c ^ 2 := by
+      -- The leading term `(a·wN·|c|)² = wp·wN²·c² = wN·wN·wp·c²`.
+      have hlead : (a * wN * |c|) ^ 2 = wN * wN * wp * c ^ 2 := by
         rw [mul_pow, mul_pow, hsqrt_sq, ← hc_sq]; ring
       rw [hcross, hlead, hinv_sq] at h_amgm
       exact h_amgm
     -- Convert `2·X ≤ Y + Z` into `X ≤ ½Y + ½Z`.
-    nlinarith [key, hwN_nonneg, abs_nonneg c, hw1_pos.le]
+    nlinarith [key, hwN_nonneg, abs_nonneg c, hwp_pos.le]
 
 /-! ## The tensor super-critical reconstruction bridge and the full reduction
 
