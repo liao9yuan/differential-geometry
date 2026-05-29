@@ -64,7 +64,7 @@ set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
 
-open Bundle Manifold Set Filter
+open Bundle Manifold Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators
 
 namespace DifferentialGeometry
@@ -276,6 +276,186 @@ theorem partialDeriv2_chartGramOnE_realizeMetricAt_sub_eq
     Filter.eventuallyEq_iff_exists_mem.mpr
       ⟨interior ((extChartAt I α).target : Set E), hop.mem_nhds hy, h_eqOn⟩
   rw [hev.fderiv_eq]
+
+/-! ## The iterated covariant-gradient jet sum
+
+The right-hand side of the headline bound is the sum of the `g_bg`-fibre norms of the
+iterated covariant gradients `∇^j S` (`j = 0, 1, 2`) of the fixed tensor difference `S`,
+evaluated at the chart preimage `(extChartAt I α).symm y`.  This matches the left-hand side
+of the unconditional `C²` Sobolev embedding `iteratedCovGrad_toSobolev_embedding_C2_unconditional`. -/
+
+/-- The iterated covariant-gradient jet sum of a fixed `(0,2)`-tensor `S` at a manifold
+point `x`: `∑_{j ≤ 2} ‖(∇^j S)(x)‖_{g_bg}` (the `g_bg`-fibre norms of the `(0, 2 + j)`-tensors
+`∇^j S`).  This is exactly the left-hand side of the unconditional `C²` Sobolev embedding. -/
+def iteratedCovGradJetSum (g_bg : SmoothRiemannianMetric I M)
+    (S : SmoothCcTensor g_bg 0 2) (x : M) : ℝ :=
+  ∑ j ∈ Finset.range 3,
+    (letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace 0 (2 + j) I b) :=
+      Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g_bg 0 (2 + j)
+    ‖(iteratedCovGrad (I := I) (M := M) g_bg 0 2 j S).toSection x‖)
+
+/-- `iteratedCovGradJetSum` is non-negative. -/
+lemma iteratedCovGradJetSum_nonneg (g_bg : SmoothRiemannianMetric I M)
+    (S : SmoothCcTensor g_bg 0 2) (x : M) :
+    0 ≤ iteratedCovGradJetSum (I := I) g_bg S x :=
+  Finset.sum_nonneg (fun _ _ => norm_nonneg _)
+
+/-! ## The headline chart `2`-jet bound modulo the pointwise covariant-gradient input
+
+The chart `2`-jet seminorm of the difference of the two realized metrics, on a compact
+piece `K ⊆ interior (extChartAt I α).target`, is bounded by a constant times the iterated
+covariant-gradient jet sum of the fixed tensor difference `S`, evaluated at the chart
+preimage.
+
+The algebraic reduction (this file) identifies each `chartMetricJet2DiffSup` summand with a
+chart `∂^j` of the chart-frame component of `S`.  The pointwise covariant-gradient jet bound
+`hcovgrad_jet_bound` — the iterated inversion `∂^j(component of S) ≤ C · ∑_{i ≤ 2} ‖∇^i S‖`
+of the chart covariant-derivative formula `∇T = ∂T + Γ·T`, with the Christoffel carriers
+uniformly bounded on `K` — supplies the per-summand bound.  The headline is the finite sum
+of the per-summand bounds across the index ranges of the three jet aggregates. -/
+
+set_option linter.unusedSectionVars false in
+/-- **The chart `2`-jet seminorm of the realized-metric difference is bounded by the
+iterated covariant-gradient jet sum of the fixed tensor difference, modulo the pointwise
+covariant-gradient input.**
+
+For two realizable order-`σ` elements `u₁, u₂` (smooth representatives `T₁, T₂`, fixed
+difference `S = T₁ − T₂`), a chart base point `α`, a compact piece `K ⊆ interior
+(extChartAt I α).target`, and a pointwise covariant-gradient jet bound `hcovgrad_jet_bound`
+controlling each chart `∂^j` (`j = 0, 1, 2`) of every chart-frame component of `S` by a
+single constant `C₀` times `iteratedCovGradJetSum g_bg S ((extChartAt I α).symm y)` uniformly
+on `K`, the chart `2`-jet seminorm of the realized-metric difference satisfies
+
+  `chartMetricJet2DiffSup (realizeMetricAt u₁) (realizeMetricAt u₂) α y
+     ≤ C · iteratedCovGradJetSum g_bg S ((extChartAt I α).symm y)`
+
+for all `y ∈ K`, with `C` uniform on `K`.  `C` is the per-summand constant times the total
+number of chart-jet index terms (`n² + n³ + n⁴`).
+
+The hypothesis `hcovgrad_jet_bound` is a genuine analytic input: a pointwise inequality
+bounding chart partials of the components of the *fixed* tensor `S` by the covariant-gradient
+fibre norms of `S`.  It is structurally distinct from the conclusion (the chart `2`-jet
+seminorm of the *realized-metric difference*), so it is not a packaging of the conclusion. -/
+theorem chartMetricJet2DiffSup_realizeMetricAt_le_iteratedCovGradJetSum
+    (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
+    {u₁ u₂ : tensorHs (I := I) (M := M) g_bg 0 2 σ}
+    (hu₁ : realizableAt (I := I) g_bg u₁) (hu₂ : realizableAt (I := I) g_bg u₂)
+    (α : M) {K : Set E} (hKsub : K ⊆ interior ((extChartAt I α).target : Set E))
+    {C₀ : ℝ} (hC₀ : 0 ≤ C₀)
+    (hcovgrad_jet_bound : ∀ y ∈ K, ∀ l b : Fin (Module.finrank ℝ E),
+      |reprDiffChartCompOnE (I := I) g_bg hu₁ hu₂ α l b y| ≤
+          C₀ * iteratedCovGradJetSum (I := I) g_bg
+            (realizableRepr (I := I) g_bg hu₁ - realizableRepr (I := I) g_bg hu₂)
+            ((extChartAt I α).symm y) ∧
+        (∀ a : Fin (Module.finrank ℝ E),
+          |partialDeriv (E := E) a
+              (reprDiffChartCompOnE (I := I) g_bg hu₁ hu₂ α l b) y| ≤
+            C₀ * iteratedCovGradJetSum (I := I) g_bg
+              (realizableRepr (I := I) g_bg hu₁ - realizableRepr (I := I) g_bg hu₂)
+              ((extChartAt I α).symm y)) ∧
+        (∀ c a : Fin (Module.finrank ℝ E),
+          |partialDeriv (E := E) c
+              (partialDeriv (E := E) a
+                (reprDiffChartCompOnE (I := I) g_bg hu₁ hu₂ α l b)) y| ≤
+            C₀ * iteratedCovGradJetSum (I := I) g_bg
+              (realizableRepr (I := I) g_bg hu₁ - realizableRepr (I := I) g_bg hu₂)
+              ((extChartAt I α).symm y))) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ y ∈ K,
+      chartMetricJet2DiffSup (I := I) (M := M)
+          (realizeMetricAt (I := I) g_bg u₁) (realizeMetricAt (I := I) g_bg u₂) α y ≤
+        C * iteratedCovGradJetSum (I := I) g_bg
+          (realizableRepr (I := I) g_bg hu₁ - realizableRepr (I := I) g_bg hu₂)
+          ((extChartAt I α).symm y) := by
+  classical
+  set n : ℕ := Module.finrank ℝ E
+  set S : SmoothCcTensor g_bg 0 2 :=
+    realizableRepr (I := I) g_bg hu₁ - realizableRepr (I := I) g_bg hu₂ with hS_def
+  -- The total number of chart-jet index terms across the three aggregates.
+  set Ncard : ℝ := (Fintype.card ((Fin n) × (Fin n)) : ℝ)
+    + (Fintype.card ((Fin n) × (Fin n) × (Fin n)) : ℝ)
+    + (Fintype.card ((Fin n) × (Fin n) × (Fin n) × (Fin n)) : ℝ) with hNcard_def
+  have hNcard_nn : 0 ≤ Ncard := by
+    rw [hNcard_def]; positivity
+  refine ⟨C₀ * Ncard, mul_nonneg hC₀ hNcard_nn, ?_⟩
+  intro y hy
+  set R : ℝ := iteratedCovGradJetSum (I := I) g_bg S ((extChartAt I α).symm y) with hR_def
+  have hR_nn : 0 ≤ R := iteratedCovGradJetSum_nonneg (I := I) g_bg S _
+  -- Bound each of the three jet aggregates by `(card) · C₀ · R`.
+  -- 0-jet aggregate: `chartGramDiffSup g₁ g₂ α (symm y) = ∑_{pq} |entry|`.
+  have h0 : chartGramDiffSup (I := I) (M := M)
+        (realizeMetricAt (I := I) g_bg u₁) (realizeMetricAt (I := I) g_bg u₂) α
+        ((extChartAt I α).symm y) ≤
+      (Fintype.card ((Fin n) × (Fin n)) : ℝ) * (C₀ * R) := by
+    rw [chartGramDiffSup, matrixEntryL1]
+    calc ∑ pq : (Fin n) × (Fin n),
+            |(chartGramMatrix (I := I) (realizeMetricAt (I := I) g_bg u₁) α
+                  ((extChartAt I α).symm y) -
+                chartGramMatrix (I := I) (realizeMetricAt (I := I) g_bg u₂) α
+                  ((extChartAt I α).symm y)) pq.1 pq.2|
+        = ∑ pq : (Fin n) × (Fin n),
+            |reprDiffChartCompOnE (I := I) g_bg hu₁ hu₂ α pq.1 pq.2 y| := by
+          refine Finset.sum_congr rfl (fun pq _ => ?_)
+          rw [Matrix.sub_apply]
+          rw [chartGramMatrix_realizeMetricAt_sub_eq_reprDiffComp (I := I) g_bg hu₁ hu₂
+            α pq.1 pq.2 y]
+      _ ≤ ∑ _pq : (Fin n) × (Fin n), C₀ * R :=
+          Finset.sum_le_sum (fun pq _ => (hcovgrad_jet_bound y hy pq.1 pq.2).1)
+      _ = (Fintype.card ((Fin n) × (Fin n)) : ℝ) * (C₀ * R) := by
+          rw [Finset.sum_const, nsmul_eq_mul, Finset.card_univ]
+  -- 1-jet aggregate.
+  have h1 : chartGramPartialDiffSup (I := I) (M := M)
+        (realizeMetricAt (I := I) g_bg u₁) (realizeMetricAt (I := I) g_bg u₂) α y ≤
+      (Fintype.card ((Fin n) × (Fin n) × (Fin n)) : ℝ) * (C₀ * R) := by
+    rw [chartGramPartialDiffSup]
+    calc ∑ p : (Fin n) × (Fin n) × (Fin n),
+            gramPartialDiffEntry (I := I) (M := M)
+              (realizeMetricAt (I := I) g_bg u₁) (realizeMetricAt (I := I) g_bg u₂) α y p
+        = ∑ p : (Fin n) × (Fin n) × (Fin n),
+            |partialDeriv (E := E) p.2.1
+              (reprDiffChartCompOnE (I := I) g_bg hu₁ hu₂ α p.1 p.2.2) y| := by
+          refine Finset.sum_congr rfl (fun p _ => ?_)
+          rw [gramPartialDiffEntry,
+            partialDeriv_chartGramOnE_realizeMetricAt_sub_eq (I := I) g_bg hu₁ hu₂
+              α p.2.1 p.1 p.2.2 (hKsub hy)]
+      _ ≤ ∑ _p : (Fin n) × (Fin n) × (Fin n), C₀ * R :=
+          Finset.sum_le_sum (fun p _ => (hcovgrad_jet_bound y hy p.1 p.2.2).2.1 p.2.1)
+      _ = (Fintype.card ((Fin n) × (Fin n) × (Fin n)) : ℝ) * (C₀ * R) := by
+          rw [Finset.sum_const, nsmul_eq_mul, Finset.card_univ]
+  -- 2-jet aggregate.
+  have h2 : chartGramPartial2DiffSup (I := I) (M := M)
+        (realizeMetricAt (I := I) g_bg u₁) (realizeMetricAt (I := I) g_bg u₂) α y ≤
+      (Fintype.card ((Fin n) × (Fin n) × (Fin n) × (Fin n)) : ℝ) * (C₀ * R) := by
+    rw [chartGramPartial2DiffSup]
+    calc ∑ p : (Fin n) × (Fin n) × (Fin n) × (Fin n),
+            gramPartial2DiffEntry (I := I) (M := M)
+              (realizeMetricAt (I := I) g_bg u₁) (realizeMetricAt (I := I) g_bg u₂) α y p
+        = ∑ p : (Fin n) × (Fin n) × (Fin n) × (Fin n),
+            |partialDeriv (E := E) p.1
+              (partialDeriv (E := E) p.2.1
+                (reprDiffChartCompOnE (I := I) g_bg hu₁ hu₂ α p.2.2.1 p.2.2.2)) y| := by
+          refine Finset.sum_congr rfl (fun p _ => ?_)
+          rw [gramPartial2DiffEntry,
+            partialDeriv2_chartGramOnE_realizeMetricAt_sub_eq (I := I) g_bg hu₁ hu₂
+              α p.1 p.2.1 p.2.2.1 p.2.2.2 (hKsub hy)]
+      _ ≤ ∑ _p : (Fin n) × (Fin n) × (Fin n) × (Fin n), C₀ * R :=
+          Finset.sum_le_sum (fun p _ =>
+            (hcovgrad_jet_bound y hy p.2.2.1 p.2.2.2).2.2 p.1 p.2.1)
+      _ = (Fintype.card ((Fin n) × (Fin n) × (Fin n) × (Fin n)) : ℝ) * (C₀ * R) := by
+          rw [Finset.sum_const, nsmul_eq_mul, Finset.card_univ]
+  -- Assemble the three aggregates.
+  rw [chartMetricJet2DiffSup, chartMetricJet1DiffSup]
+  calc chartGramDiffSup (I := I) (M := M)
+          (realizeMetricAt (I := I) g_bg u₁) (realizeMetricAt (I := I) g_bg u₂) α
+          ((extChartAt I α).symm y)
+        + chartGramPartialDiffSup (I := I) (M := M)
+          (realizeMetricAt (I := I) g_bg u₁) (realizeMetricAt (I := I) g_bg u₂) α y
+        + chartGramPartial2DiffSup (I := I) (M := M)
+          (realizeMetricAt (I := I) g_bg u₁) (realizeMetricAt (I := I) g_bg u₂) α y
+      ≤ (Fintype.card ((Fin n) × (Fin n)) : ℝ) * (C₀ * R)
+          + (Fintype.card ((Fin n) × (Fin n) × (Fin n)) : ℝ) * (C₀ * R)
+          + (Fintype.card ((Fin n) × (Fin n) × (Fin n) × (Fin n)) : ℝ) * (C₀ * R) := by
+        gcongr
+    _ = C₀ * Ncard * R := by rw [hNcard_def]; ring
 
 end MetricRealization
 end IntrinsicSpectral
