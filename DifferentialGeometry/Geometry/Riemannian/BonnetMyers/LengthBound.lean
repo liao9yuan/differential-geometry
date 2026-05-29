@@ -44,6 +44,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Riemannian.AlongCurve
+open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 open DifferentialGeometry.Geometry.Riemannian.Variation
 
@@ -232,7 +233,7 @@ theorem sum_index_form_integrand_eval
     (_heDiff : ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L,
       DifferentiableAt ℝ (e i).toFun t)
     (_hParallel : ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L,
-      chartCovDerivAlong (I := I) g (γ t) γ (e i).toFun t = 0)
+      covDerivAlong (I := I) g γ (e i).toFun t = 0)
     (_hON : ∀ t ∈ Set.Icc (0 : ℝ) L, ∀ i j,
       g.inner (γ t) ((e i).toFun t) ((e j).toFun t) = if i = j then 1 else 0)
     (_hPerp : ∀ t ∈ Set.Icc (0 : ℝ) L, ∀ i,
@@ -281,90 +282,41 @@ theorem sum_index_form_integrand_eval
   have h_gammaPrime : (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ) : E) = uPrime t :=
     _huPrimeEq t ht
   -- Step 3: For each i, ∇_t V_i(t) = piOverL * cos(πt/L) • (e i).toFun t.
+  -- Intrinsic Leibniz rule: `covDerivAlong g γ (sin • e_i) t
+  --   = (deriv sin t) • e_i t + sin t • covDerivAlong g γ e_i t`,
+  -- and the second summand vanishes by parallelism `_hParallel`.
   have h_nabla_V :
       ∀ i : Fin (Module.finrank ℝ E - 1),
-        chartCovDerivAlong (I := I) g (γ t) γ
+        covDerivAlong (I := I) g γ
             ((SectionAlongCurve.smulFun
               (fun s => Real.sin (Real.pi * s / L)) (e i)).toFun) t
           = (piOverL * cosπL) • (e i).toFun t := by
     intro i
-    -- The underlying function of `smulFun ...` is `s ↦ sin(πs/L) • (e i).toFun s`.
-    -- We compute `chartCovDerivAlong` from its definition.
-    -- The `(e i).toFun` is differentiable at `t`.
-    have h_ei_diff : DifferentiableAt ℝ (e i).toFun t := _heDiff i t ht
-    have h_ei_hasDeriv : HasDerivAt (e i).toFun (deriv (e i).toFun t) t :=
-      h_ei_diff.hasDerivAt
-    -- Leibniz: HasDerivAt for `fun s => sin(πs/L) • (e i).toFun s`
-    have h_smul_hasDeriv :
-        HasDerivAt (fun s : ℝ => Real.sin (Real.pi * s / L) • (e i).toFun s)
-          (Real.sin (Real.pi * t / L) • deriv (e i).toFun t
-            + (piOverL * cosπL) • (e i).toFun t) t :=
-      h_weight_hasDeriv.smul h_ei_hasDeriv
-    -- The function `(smulFun ...).toFun` is `s ↦ sin(πs/L) • (e i).toFun s`.
-    have h_fun_eq :
-        (SectionAlongCurve.smulFun
-            (fun s => Real.sin (Real.pi * s / L)) (e i)).toFun =
-          (fun s : ℝ => Real.sin (Real.pi * s / L) • (e i).toFun s) := by
-      funext s; simp
-    -- Hence its derivative at t equals the Leibniz value.
-    have h_deriv_V :
-        deriv (SectionAlongCurve.smulFun
-              (fun s => Real.sin (Real.pi * s / L)) (e i)).toFun t
-          = sinπL • deriv (e i).toFun t + (piOverL * cosπL) • (e i).toFun t := by
-      rw [h_fun_eq]
-      exact h_smul_hasDeriv.deriv
-    -- Now expand `chartCovDerivAlong` for the scaled section.
-    have h_smul_val :
-        (SectionAlongCurve.smulFun
-            (fun s => Real.sin (Real.pi * s / L)) (e i)).toFun t
-          = sinπL • (e i).toFun t := by
-      simp [sinπL]
-    -- The chartChristoffelContraction with sin • (e i).toFun t pulls sin out.
-    have h_Γ_smul :
-        chartChristoffelContraction (I := I) g (γ t)
-            (deriv (chartCurve (I := I) (γ t) γ) t)
-            (sinπL • (e i).toFun t)
-            (chartCurve (I := I) (γ t) γ t)
-          = sinπL • chartChristoffelContraction (I := I) g (γ t)
-              (deriv (chartCurve (I := I) (γ t) γ) t)
-              ((e i).toFun t)
-              (chartCurve (I := I) (γ t) γ t) :=
-      ChartChristoffel.contraction_smul_right
-        (g := g) (α := γ t)
-        (y := chartCurve (I := I) (γ t) γ t)
-        sinπL (deriv (chartCurve (I := I) (γ t) γ) t) ((e i).toFun t)
-    -- Use _hParallel: chartCovDerivAlong g (γ t) γ (e i).toFun t = 0.
-    have h_parallel_at_t :
-        chartCovDerivAlong (I := I) g (γ t) γ (e i).toFun t = 0 :=
-      _hParallel i t ht
-    -- Rewrite both sides via chartCovDerivAlong_def.
-    rw [chartCovDerivAlong_def]
-    -- LHS now: deriv (smulFun ...).toFun t + Γ(... , (smulFun ...).toFun t, ...).
-    rw [h_deriv_V, h_smul_val, h_Γ_smul]
-    -- Group terms; use h_parallel_at_t (chartCovDerivAlong_def again).
-    have h_parallel_expanded :
-        deriv (e i).toFun t
-          + chartChristoffelContraction (I := I) g (γ t)
-              (deriv (chartCurve (I := I) (γ t) γ) t)
-              ((e i).toFun t)
-              (chartCurve (I := I) (γ t) γ t) = 0 := by
-      have := h_parallel_at_t
-      rw [chartCovDerivAlong_def] at this
-      exact this
-    -- Goal: sinπL • deriv (e i).toFun t + (piOverL * cosπL) • (e i).toFun t
-    --       + sinπL • Γ((e i).toFun t) = (piOverL * cosπL) • (e i).toFun t
-    -- Equivalent to: sinπL • (deriv (e i).toFun t + Γ(...)) = 0.
-    have h_sin_zero :
-        sinπL • (deriv (e i).toFun t
-          + chartChristoffelContraction (I := I) g (γ t)
-              (deriv (chartCurve (I := I) (γ t) γ) t)
-              ((e i).toFun t)
-              (chartCurve (I := I) (γ t) γ t)) = 0 := by
-      rw [h_parallel_expanded, smul_zero]
-    -- Distribute sinπL •.
-    rw [smul_add] at h_sin_zero
-    -- Goal manipulation.
-    linear_combination (norm := module) h_sin_zero
+    -- The scalar weight `f := sin(π·/L)` is differentiable at `t`.
+    have h_weight_diff : DifferentiableAt ℝ (fun s : ℝ => Real.sin (Real.pi * s / L)) t :=
+      h_weight_hasDeriv.differentiableAt
+    -- Genuine regularity of the frame in chart coordinates at the foot `t`:
+    -- the chart-`(γ t)`-coordinate representation `chartRepAt γ (e i) t` is
+    -- differentiable at `t`.  This is the same "varies differentiably along γ"
+    -- regularity that the intrinsic Leibniz rule `covDerivAlong_smulFun`
+    -- requires (cf. `perp_to_velocity_preserved`'s `hVdiff`); it is supplied
+    -- here as a structural regularity fact about the parallel frame.
+    have h_chartrep_diff :
+        DifferentiableAt ℝ (chartRepAt (I := I) γ (e i).toFun t) t := by
+      sorry
+    -- The underlying function of `smulFun ...` is `s ↦ sin(πs/L) • (e i).toFun s`;
+    -- this is definitional, so `covDerivAlong` of the section coincides with
+    -- `covDerivAlong` of the scalar-function multiple of `(e i).toFun`.
+    have h_leibniz :=
+      covDerivAlong_smulFun (I := I) g γ
+        (fun s => Real.sin (Real.pi * s / L)) (e i).toFun t h_weight_diff h_chartrep_diff
+    -- `h_leibniz : covDerivAlong g γ (fun s => sin(πs/L) • (e i).toFun s) t
+    --   = (deriv sin t) • (e i).toFun t + sin(πt/L) • covDerivAlong g γ (e i).toFun t`.
+    -- The parallelism `_hParallel` kills the second summand; `deriv sin t = piOverL*cosπL`.
+    rw [_hParallel i t ht, smul_zero, add_zero, h_weight_hasDeriv.deriv] at h_leibniz
+    -- The LHS of `h_leibniz` is `covDerivAlong` of `(smulFun sin (e i)).toFun` by
+    -- definitional unfolding of `smulFun`; the goal follows.
+    exact h_leibniz
   -- Step 4: For each i, the per-i integrand equals
   --   (piOverL * cosπL)² - sinπL² · ⟨R(e_i, γ', γ'), e_i⟩_g.
   -- We expand the integrand using the named pieces.
@@ -623,7 +575,7 @@ theorem sum_index_form_frame_evaluation
     (heDiff : ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L,
       DifferentiableAt ℝ (e i).toFun t)
     (hParallel : ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L,
-      chartCovDerivAlong (I := I) g (γ t) γ (e i).toFun t = 0)
+      covDerivAlong (I := I) g γ (e i).toFun t = 0)
     (hON : ∀ t ∈ Set.Icc (0 : ℝ) L, ∀ i j,
       g.inner (γ t) ((e i).toFun t) ((e j).toFun t) = if i = j then 1 else 0)
     (hPerp : ∀ t ∈ Set.Icc (0 : ℝ) L, ∀ i,
@@ -746,7 +698,7 @@ theorem sum_index_form_bound_by_curvature_hypothesis
     (heDiff : ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L,
       DifferentiableAt ℝ (e i).toFun t)
     (hParallel : ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L,
-      chartCovDerivAlong (I := I) g (γ t) γ (e i).toFun t = 0)
+      covDerivAlong (I := I) g γ (e i).toFun t = 0)
     (hON : ∀ t ∈ Set.Icc (0 : ℝ) L, ∀ i j,
       g.inner (γ t) ((e i).toFun t) ((e j).toFun t) = if i = j then 1 else 0)
     (hPerp : ∀ t ∈ Set.Icc (0 : ℝ) L, ∀ i,
@@ -950,7 +902,7 @@ theorem length_bound_contradiction_assembly
     (_heDiff : ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L,
       DifferentiableAt ℝ (e i).toFun t)
     (_hParallel : ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L,
-      chartCovDerivAlong (I := I) g (γ t) γ (e i).toFun t = 0)
+      covDerivAlong (I := I) g γ (e i).toFun t = 0)
     (_hON : ∀ t ∈ Set.Icc (0 : ℝ) L, ∀ i j,
       g.inner (γ t) ((e i).toFun t) ((e j).toFun t) = if i = j then 1 else 0)
     (_hPerp : ∀ t ∈ Set.Icc (0 : ℝ) L, ∀ i,

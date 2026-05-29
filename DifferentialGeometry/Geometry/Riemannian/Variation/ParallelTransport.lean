@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Riemannian.AlongCurve
+import DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.Equation
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.ChartTransition
 import DifferentialGeometry.Geometry.Riemannian.Variation.ParallelLocalODE
@@ -803,7 +804,8 @@ perpendicularity clauses use the *genuine Riemannian inner product*
 `g.inner (γ t)` of the raw tangent-bundle fibre vectors (the same
 `g.inner (γ t)` consumed by `sum_index_form_integrand_eval` /
 `length_bound_contradiction_assembly`), while parallelism is the
-moving-foot `chartCovDerivAlong = 0` consumed by those same engines.
+*intrinsic* covariant derivative `covDerivAlong g γ (e i) t = 0` consumed by
+those same engines.
 
 The perpendicularity clause is against the *velocity* `uPrime`, not an
 unconstrained function: `huPrimeEq` pins `uPrime` to the manifold
@@ -831,17 +833,18 @@ theorem parallel_on_frame_perp_to_geodesic
     ∃ e : Fin (Module.finrank ℝ E - 1) → SectionAlongCurve I M γ,
       (∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L, DifferentiableAt ℝ (e i).toFun t) ∧
       (∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L,
-        chartCovDerivAlong (I := I) g (γ t) γ (e i).toFun t = 0) ∧
+        DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong.covDerivAlong
+          (I := I) g γ (e i).toFun t = 0) ∧
       (∀ t ∈ Set.Icc (0 : ℝ) L, ∀ i j,
         g.inner (γ t) ((e i).toFun t) ((e j).toFun t) =
           if i = j then 1 else 0) ∧
       (∀ t ∈ Set.Icc (0 : ℝ) L, ∀ i,
         g.inner (γ t) ((e i).toFun t) (uPrime t) = 0) :=
   -- Missing construction: an orthonormal basis of `(γ'(0))^⊥ ⊆ T_{γ 0} M`,
-  -- parallel-transported along `γ`, with the moving-foot `chartCovDerivAlong`
+  -- parallel-transported along `γ`, with the intrinsic `covDerivAlong`
   -- parallelism and `g.inner`-orthonormality/perpendicularity assembled from
   -- the metric-compatibility constancy engine and the chart-Gram-to-`g.inner`
-  -- bridge. (Phase-3 Gram–Schmidt-then-parallel-transport.)
+  -- bridge. (Gram–Schmidt-then-parallel-transport.)
   sorry
 
 end Variation

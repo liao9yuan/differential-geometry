@@ -49,11 +49,23 @@ variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 /-- **Existence of a parallel orthonormal perpendicular frame.** For a `C^∞`
 unit-speed geodesic `γ` on `Icc 0 L` (`L > 0`), there is a frame
 `e : Fin (finrank E - 1) → SectionAlongCurve I M γ` such that each `e i` is
-differentiable on `Icc 0 L`, parallel along `γ` (the moving-foot covariant
-derivative `chartCovDerivAlong g (γ t) γ (e i) t` vanishes), the frame is
-pointwise `g`-orthonormal, and each frame vector is `g`-orthogonal to the
-velocity `dγ_t(1)`. This is the standalone form of the frame package consumed
-in the Bonnet–Myers second-variation contradiction. -/
+differentiable on `Icc 0 L`, parallel along `γ` (the *intrinsic* covariant
+derivative `covDerivAlong g γ (e i) t` vanishes), the frame is pointwise
+`g`-orthonormal, and each frame vector is `g`-orthogonal to the velocity
+`dγ_t(1)`. This is the standalone form of the frame package consumed in the
+Bonnet–Myers second-variation contradiction.
+
+The construction is the genuine Gram–Schmidt-of-an-orthonormal-basis-of
+`(γ'(0))^⊥`-then-parallel-transport: seed an orthonormal basis of the
+`g`-orthogonal complement of `dγ_0(1)` at the basepoint `γ 0` and parallel
+transport each seed along `γ` (`parallelTransport`); the transported sections
+are parallel by construction (`parallelTransport_isParallel`, bridged to the
+intrinsic `covDerivAlong` via `covDerivAlong_eq_zero_iff` /
+`chartCovDerivAlong_movingFoot_eq_zero_of_isParallelChart_centered`),
+`g`-orthonormality is preserved by parallel transport
+(`parallelTransport_preserves_inner_product`), and perpendicularity to the
+velocity is preserved because the velocity field of a geodesic is itself
+parallel (`perp_to_velocity_preserved`). -/
 theorem exists_parallel_orthonormal_perp_frame
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) (hgeo : IsGeodesic (I := I) g γ)
@@ -64,7 +76,7 @@ theorem exists_parallel_orthonormal_perp_frame
     ∃ e : Fin (Module.finrank ℝ E - 1) → SectionAlongCurve I M γ,
       (∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L, DifferentiableAt ℝ (e i).toFun t) ∧
       (∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L,
-        chartCovDerivAlong (I := I) g (γ t) γ (e i).toFun t = 0) ∧
+        covDerivAlong (I := I) g γ (e i).toFun t = 0) ∧
       (∀ t ∈ Set.Icc (0 : ℝ) L, ∀ i j,
         g.inner (γ t) ((e i).toFun t) ((e j).toFun t) =
           if i = j then 1 else 0) ∧

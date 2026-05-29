@@ -480,9 +480,10 @@ theorem first_variation_formula
       (- ∫ t in (0 : ℝ)..L,
         g.inner (f 0 t)
           (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f u t) 0 (1 : ℝ))
-          ((chartCovDerivAlong (I := I) (M := M) g (f 0 t) (fun v : ℝ => f 0 v)
+          (DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong.covDerivAlong
+            (I := I) g (fun v : ℝ => f 0 v)
             (fun v : ℝ =>
-              mfderiv (𝓘(ℝ, ℝ)) I (fun w : ℝ => f 0 w) v (1 : ℝ)) t : E))) 0 := sorry
+              mfderiv (𝓘(ℝ, ℝ)) I (fun w : ℝ => f 0 w) v (1 : ℝ)) t)) 0 := sorry
 
 /-! ## First variation vanishes along a geodesic -/
 
@@ -502,17 +503,24 @@ theorem first_variation_vanishes_for_geodesic
 
 /-! ## Index form -/
 
-/-- The pointwise **integrand** of the second-variation index form:
-`⟨∇_t V, ∇_t W⟩_g - ⟨R(V, γ') γ', W⟩_g`. Extracting this as a named
-definition lets downstream lemmas avoid unfolding the inner
+/-- The pointwise **integrand** of the second-variation index form,
+on intrinsic bundle-valued sections `V, W : ∀ t, TangentSpace I (γ t)`:
+`⟨∇_t V, ∇_t W⟩_g - ⟨R(V, γ') γ', W⟩_g`, where `∇_t` is the *intrinsic*
+covariant derivative `covDerivAlong g γ · t` (valued in `T_{γ t} M`),
+not the chart-`(γ t)`-coordinate moving-foot operator. Extracting this
+as a named definition lets downstream lemmas avoid unfolding the inner
 `let`-binders, which was a source of `whnf` heartbeat blow-up. -/
 def indexFormIntegrand [Module.Finite ℝ E] [IsManifold I ∞ M]
     (g : SmoothRiemannianMetric I M)
-    (γ : ℝ → M) (V W : ℝ → E) (t : ℝ) : ℝ :=
-  let nablaV : E := chartCovDerivAlong (I := I) g (γ t) γ V t
-  let nablaW : E := chartCovDerivAlong (I := I) g (γ t) γ W t
-  let gammaPrime : E := mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ)
-  let riem : E :=
+    (γ : ℝ → M) (V W : ∀ t, TangentSpace I (γ t)) (t : ℝ) : ℝ :=
+  let nablaV : TangentSpace I (γ t) :=
+    DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong.covDerivAlong
+      (I := I) g γ V t
+  let nablaW : TangentSpace I (γ t) :=
+    DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong.covDerivAlong
+      (I := I) g γ W t
+  let gammaPrime : TangentSpace I (γ t) := mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ)
+  let riem : TangentSpace I (γ t) :=
     (DifferentialGeometry.Integral.Connection.riemannOp
         (DifferentialGeometry.Integral.Connection.LeviCivita
           (I := I) g) (γ t))
@@ -520,18 +528,19 @@ def indexFormIntegrand [Module.Finite ℝ E] [IsManifold I ∞ M]
   g.inner (γ t) nablaV nablaW - g.inner (γ t) riem (W t)
 
 /-- The second-variation **index form** of a smooth curve `γ : ℝ → M`
-on the interval `[a, b]`, evaluated on two sections `V, W : ℝ → E`
-along `γ`:
-`I_γ(V, W) := ∫_a^b (⟨∇_t V, ∇_t W⟩_g - ⟨R(V, γ') γ', W⟩_g) dt`. -/
+on the interval `[a, b]`, evaluated on two intrinsic bundle-valued
+sections `V, W : ∀ t, TangentSpace I (γ t)` along `γ`:
+`I_γ(V, W) := ∫_a^b (⟨∇_t V, ∇_t W⟩_g - ⟨R(V, γ') γ', W⟩_g) dt`,
+with the intrinsic covariant derivative `∇_t`. -/
 def indexForm (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
-    (a b : ℝ) (V W : ℝ → E) : ℝ :=
+    (a b : ℝ) (V W : ∀ t, TangentSpace I (γ t)) : ℝ :=
   ∫ t in a..b, indexFormIntegrand (I := I) g γ V W t
 
 /-- Unfolded form of `indexForm` as an integral of the named
 integrand. -/
 lemma indexForm_eq_intervalIntegral
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
-    (a b : ℝ) (V W : ℝ → E) :
+    (a b : ℝ) (V W : ∀ t, TangentSpace I (γ t)) :
     indexForm (I := I) g γ a b V W =
       ∫ t in a..b, indexFormIntegrand (I := I) g γ V W t := rfl
 
@@ -1126,7 +1135,8 @@ theorem indexFormIntegrand_intervalIntegrable
     (e : Fin (Module.finrank ℝ E - 1) → SectionAlongCurve I M γ)
     (_heDiff : ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L, DifferentiableAt ℝ (e i).toFun t)
     (_hParallel : ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L,
-      chartCovDerivAlong (I := I) g (γ t) γ (e i).toFun t = 0)
+      DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong.covDerivAlong
+        (I := I) g γ (e i).toFun t = 0)
     (_hON : ∀ t ∈ Set.Icc (0 : ℝ) L, ∀ i j,
       g.inner (γ t) ((e i).toFun t) ((e j).toFun t) = if i = j then 1 else 0)
     (_hPerp : ∀ t ∈ Set.Icc (0 : ℝ) L, ∀ i,

@@ -50,6 +50,7 @@ open DifferentialGeometry.Geometry.Riemannian.Exponential
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 open DifferentialGeometry.Geometry.Riemannian.Variation
 open DifferentialGeometry.Geometry.Riemannian.AlongCurve
+open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
 
 /-! ## Compactness sub-leaves -/
 
@@ -344,7 +345,7 @@ theorem pairwise_edist_bound_from_geodesic
             (∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L,
               DifferentiableAt ℝ (e i).toFun t) ∧
             (∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L,
-              chartCovDerivAlong (I := I) g (γ t) γ (e i).toFun t = 0) ∧
+              covDerivAlong (I := I) g γ (e i).toFun t = 0) ∧
             (∀ t ∈ Set.Icc (0 : ℝ) L, ∀ i j,
               g.inner (γ t) ((e i).toFun t) ((e j).toFun t) =
                 if i = j then 1 else 0) ∧
