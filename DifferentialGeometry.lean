@@ -718,6 +718,7 @@ import DifferentialGeometry.Integral.Connection.TensorMetricCompatible
 import DifferentialGeometry.Integral.Connection.TensorRSMetricCompatible
 import DifferentialGeometry.Integral.Connection.TensorLoweringParallel
 import DifferentialGeometry.Integral.Connection.CovariantIntegrationByParts
+import DifferentialGeometry.Integral.Connection.TensorConnLapLoweredIBP
 import DifferentialGeometry.Integral.Connection.Curvature
 import DifferentialGeometry.Integral.Connection.CurvatureBundling
 import DifferentialGeometry.Integral.Connection.Ricci
@@ -1212,6 +1213,7 @@ import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.ManifoldFlowFami
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.ChartLocalFlowProducer
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.ManifoldIntegralFlow
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.ChartBridgeProducer
+import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.BareFlowFromJointC1
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.VariationalFlow
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.PushforwardSmooth
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.LiftMetric
