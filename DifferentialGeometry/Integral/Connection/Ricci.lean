@@ -1576,6 +1576,114 @@ section PairSymmetry
 
 variable [CompleteSpace E]
 
+/-- The four-tensor `T(a, b, c, d) := g_x(R(a, b) c, d)` packaging the Levi-Civita Riemann
+curvature operator paired against the metric. Used to phrase the algebraic symmetries
+that produce pair symmetry. -/
+private def riemann4 (g : SmoothRiemannianMetric I M) (x : M)
+    (a b c d : TangentSpace I x) : ℝ :=
+  g.inner x (riemannOp (LeviCivita (I := I) g) x a b c) d
+
+/-- **First-pair antisymmetry of `riemann4`.** `T(a, b, c, d) = -T(b, a, c, d)`, from
+`riemannOp_swap` and linearity of `g.inner x` in its first slot. -/
+private lemma riemann4_swap12 (g : SmoothRiemannianMetric I M) (x : M)
+    (a b c d : TangentSpace I x) :
+    riemann4 (I := I) g x a b c d = -riemann4 (I := I) g x b a c d := by
+  unfold riemann4
+  rw [riemannOp_swap (LeviCivita (I := I) g) x a b c]
+  rw [ContinuousLinearMap.map_neg (g.inner x), ContinuousLinearMap.neg_apply]
+
+/-- **Last-pair antisymmetry of `riemann4`.** `T(a, b, c, d) = -T(a, b, d, c)`, from
+`riemannOp_metric_skew` and symmetry of `g.inner x`. -/
+private lemma riemann4_swap34 (g : SmoothRiemannianMetric I M) (x : M)
+    (a b c d : TangentSpace I x) :
+    riemann4 (I := I) g x a b c d = -riemann4 (I := I) g x a b d c := by
+  unfold riemann4
+  have hskew := riemannOp_metric_skew (I := I) g x a b c d
+  -- hskew : g⟨R(a,b)c, d⟩ + g⟨c, R(a,b)d⟩ = 0.
+  have hsymm : g.inner x c (riemannOp (LeviCivita (I := I) g) x a b d) =
+      g.inner x (riemannOp (LeviCivita (I := I) g) x a b d) c :=
+    g.symm x c (riemannOp (LeviCivita (I := I) g) x a b d)
+  rw [hsymm] at hskew
+  linarith
+
+/-- **First Bianchi identity for `riemann4`.** The cyclic sum in the first three slots
+vanishes: `T(a, b, c, e) + T(b, c, a, e) + T(c, a, b, e) = 0`. Obtained by pairing the
+fibre-level cyclic first Bianchi identity (assembled from
+`riemannOp_first_bianchi_rearranged` and `riemannOp_swap`) against the metric. -/
+private lemma riemann4_bianchi (g : SmoothRiemannianMetric I M) (x : M)
+    (a b c e : TangentSpace I x) :
+    riemann4 (I := I) g x a b c e + riemann4 (I := I) g x b c a e +
+      riemann4 (I := I) g x c a b e = 0 := by
+  -- Cyclic first Bianchi on the operator: R(a,b)c + R(b,c)a + R(c,a)b = 0.
+  -- From `riemannOp_first_bianchi_rearranged g x b c a : R(a,b)c - R(a,c)b = -R(b,c)a`
+  -- and `riemannOp_swap` to rewrite R(a,c)b = -R(c,a)b.
+  have hrear := riemannOp_first_bianchi_rearranged (I := I) g x b c a
+  -- hrear : R(a,b)c - R(a,c)b = -R(b,c)a.
+  have hswap := riemannOp_swap (LeviCivita (I := I) g) x a c b
+  -- hswap : R(a,c)b = -R(c,a)b.
+  rw [hswap] at hrear
+  -- hrear : R(a,b)c - (-R(c,a)b) = -R(b,c)a, i.e. R(a,b)c + R(c,a)b = -R(b,c)a.
+  have hcyc : riemannOp (LeviCivita (I := I) g) x a b c +
+      riemannOp (LeviCivita (I := I) g) x b c a +
+      riemannOp (LeviCivita (I := I) g) x c a b = 0 := by
+    have h := hrear
+    -- h : R(a,b)c - -R(c,a)b = -R(b,c)a.
+    rw [sub_neg_eq_add] at h
+    -- h : R(a,b)c + R(c,a)b = -R(b,c)a.
+    -- Rearranged to the cyclic sum = 0.
+    rw [show riemannOp (LeviCivita (I := I) g) x a b c +
+        riemannOp (LeviCivita (I := I) g) x b c a +
+        riemannOp (LeviCivita (I := I) g) x c a b =
+        (riemannOp (LeviCivita (I := I) g) x a b c +
+          riemannOp (LeviCivita (I := I) g) x c a b) +
+        riemannOp (LeviCivita (I := I) g) x b c a from by abel]
+    rw [h]
+    abel
+  -- Pair against the metric in the fourth slot.
+  have hpair : riemann4 (I := I) g x a b c e + riemann4 (I := I) g x b c a e +
+      riemann4 (I := I) g x c a b e =
+      g.inner x (riemannOp (LeviCivita (I := I) g) x a b c +
+        riemannOp (LeviCivita (I := I) g) x b c a +
+        riemannOp (LeviCivita (I := I) g) x c a b) e := by
+    unfold riemann4
+    rw [ContinuousLinearMap.map_add (g.inner x), ContinuousLinearMap.map_add (g.inner x)]
+    simp only [ContinuousLinearMap.add_apply]
+  rw [hpair, hcyc]
+  simp
+
+/-- **Block symmetry of `riemann4`.** `T(a, b, c, d) = T(c, d, a, b)`. This is the
+classical algebraic consequence of the first Bianchi identity together with the two
+antisymmetries (`riemann4_swap12`, `riemann4_swap34`): summing the cyclic first Bianchi
+identity (`riemann4_bianchi`) over the four cyclic shifts of `(a, c, b, d)` and reducing
+each term with the antisymmetries cancels everything except `-2 T(a,b,c,d) + 2 T(c,d,a,b)`. -/
+private lemma riemann4_pair_symm (g : SmoothRiemannianMetric I M) (x : M)
+    (a b c d : TangentSpace I x) :
+    riemann4 (I := I) g x a b c d = riemann4 (I := I) g x c d a b := by
+  -- The four cyclic first Bianchi identities on the cyclic shifts of `(a, c, b, d)`.
+  have b1 := riemann4_bianchi (I := I) g x a c b d
+  -- T(a,c,b,d) + T(c,b,a,d) + T(b,a,c,d) = 0.
+  have b2 := riemann4_bianchi (I := I) g x c b d a
+  -- T(c,b,d,a) + T(b,d,c,a) + T(d,c,b,a) = 0.
+  have b3 := riemann4_bianchi (I := I) g x b d a c
+  -- T(b,d,a,c) + T(d,a,b,c) + T(a,b,d,c) = 0.
+  have b4 := riemann4_bianchi (I := I) g x d a c b
+  -- T(d,a,c,b) + T(a,c,d,b) + T(c,d,a,b) = 0.
+  -- First-pair antisymmetries (A1) to canonicalize the first two slots.
+  have a1_cbad := riemann4_swap12 (I := I) g x c b a d   -- T(c,b,a,d) = -T(b,c,a,d).
+  have a1_bacd := riemann4_swap12 (I := I) g x b a c d   -- T(b,a,c,d) = -T(a,b,c,d).
+  have a1_cbda := riemann4_swap12 (I := I) g x c b d a   -- T(c,b,d,a) = -T(b,c,d,a).
+  have a1_dcba := riemann4_swap12 (I := I) g x d c b a   -- T(d,c,b,a) = -T(c,d,b,a).
+  have a1_dabc := riemann4_swap12 (I := I) g x d a b c   -- T(d,a,b,c) = -T(a,d,b,c).
+  have a1_dacb := riemann4_swap12 (I := I) g x d a c b   -- T(d,a,c,b) = -T(a,d,c,b).
+  -- Last-pair antisymmetries (A2) to canonicalize the last two slots.
+  have a2_bcda := riemann4_swap34 (I := I) g x b c d a   -- T(b,c,d,a) = -T(b,c,a,d).
+  have a2_bdca := riemann4_swap34 (I := I) g x b d c a   -- T(b,d,c,a) = -T(b,d,a,c).
+  have a2_cdba := riemann4_swap34 (I := I) g x c d b a   -- T(c,d,b,a) = -T(c,d,a,b).
+  have a2_abdc := riemann4_swap34 (I := I) g x a b d c   -- T(a,b,d,c) = -T(a,b,c,d).
+  have a2_adcb := riemann4_swap34 (I := I) g x a d c b   -- T(a,d,c,b) = -T(a,d,b,c).
+  have a2_acdb := riemann4_swap34 (I := I) g x a c d b   -- T(a,c,d,b) = -T(a,c,b,d).
+  linarith
+
 /-- **Pair (block) symmetry of `riemannOp`.** For the Levi-Civita connection of a smooth
 Riemannian metric `g`, at each point `x ∈ M` and for any fibre vectors
 `v, w, Z, W ∈ T_x M`,
@@ -1590,7 +1698,9 @@ theorem riemannOp_inner_pair_symm
     (v w Z W : TangentSpace I x) :
     g.inner x (riemannOp (LeviCivita (I := I) g) x v w Z) W =
       g.inner x (riemannOp (LeviCivita (I := I) g) x Z W v) w := by
-  sorry
+  -- Reduce to the four-tensor `T` and apply block symmetry: T(v, w, Z, W) = T(Z, W, v, w).
+  change riemann4 (I := I) g x v w Z W = riemann4 (I := I) g x Z W v w
+  exact riemann4_pair_symm (I := I) g x v w Z W
 
 end PairSymmetry
 
