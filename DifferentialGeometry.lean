@@ -705,6 +705,8 @@ import DifferentialGeometry.Integral.Connection.LeviCivitaChartLocal
 
 import DifferentialGeometry.Integral.Connection.LeviCivitaChartTorsion
 
+import DifferentialGeometry.Integral.Connection.ChristoffelCorrectionBasepoint
+
 import DifferentialGeometry.Integral.Connection.LeviCivitaChartMetric
 
 import DifferentialGeometry.Integral.Connection.LeviCivitaChartSmooth
@@ -1150,6 +1152,7 @@ import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.SmoothInSpace.Va
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.SmoothInSpace.VariationalLiftLocalFlow
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.SmoothInSpace.VariationalLiftManifoldFlow
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.SmoothInSpace.VariationalLiftManifoldFlowClose
+import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.SmoothInSpace.VariationalLiftManifoldFlowOrbitReduction
 import DifferentialGeometry.PDE.RicciFlow.Pullback.PushforwardVF
 import DifferentialGeometry.PDE.RicciFlow.Pullback.Metric
 import DifferentialGeometry.PDE.RicciFlow.Pullback.CartanFormula
@@ -1171,7 +1174,6 @@ import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients.
 import DifferentialGeometry.PDE.RicciFlow.StrictParabolicAtSelf
 import DifferentialGeometry.PDE.RicciFlow.HebeyBlock.UniformChartBounds
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.Eigenbasis
-import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.HeatSemigroup
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.HeatSemigroupIntrinsic
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.BoundedC0SemigroupIntrinsic
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.QuasilinearExistenceIntrinsic
@@ -1226,7 +1228,6 @@ import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckRHSChartCover
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckPrincipalPartMatch
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckNonlinearitySpectral
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckRemainderStrongExists
-import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.QuasilinearStrong
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.SpectralSmoothing
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.HeatSemigroupTimeDeriv
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DuhamelSmoothing
@@ -1244,7 +1245,6 @@ import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.ChartBridgeProdu
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.BareFlowFromJointC1
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.VariationalFlow
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.PushforwardSmooth
-import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.LiftMetric
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization.PosDefPerturbation
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization.TensorHsRealize
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization.HeatOutputRealize
