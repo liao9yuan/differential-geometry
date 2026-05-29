@@ -577,6 +577,134 @@ lemma bilinear_metricTrace_invariance
   -- Conclude (the RHS matches `B = K e_m e_n`).
   rw [hmatrix]
 
+/-- At its own centre `b`, the chart-`b` Gram matrix is the canonical model-basis
+Gram matrix `gramMatrixAt g b`, because `chartBasisVecFiber b m b = e_m`. -/
+lemma chartGramMatrix_self_eq_gramMatrixAt
+    (g : SmoothRiemannianMetric I M) (b : M) :
+    chartGramMatrix (I := I) g b b = gramMatrixAt (I := I) (M := M) g b := by
+  ext m n
+  rw [chartGramMatrix_apply, gramMatrixAt_apply,
+    chartBasisVecFiber_self (I := I) b m, chartBasisVecFiber_self (I := I) b n]
+
+/-- The divergence bilinear form `K(u, w) = g(∇_u Z, w)` at `b`, bundled as a
+genuine bilinear map `E →ₗ[ℝ] E →ₗ[ℝ] ℝ`. The first slot factors through the
+Levi-Civita derivative continuous-linear map `(LeviCivita g) Z b`, the inner
+product supplying bilinearity. -/
+def divergenceBilinearForm
+    (g : SmoothRiemannianMetric I M)
+    (Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (b : M) :
+    E →ₗ[ℝ] E →ₗ[ℝ] ℝ :=
+  LinearMap.mk₂ ℝ
+    (fun u w => g.inner b ((LeviCivita (I := I) g).toFun Z.toFun b u) w)
+    (fun u₁ u₂ w => by
+      dsimp only
+      rw [map_add, map_add]
+      rfl)
+    (fun c u w => by
+      dsimp only
+      rw [map_smul, map_smul]
+      rfl)
+    (fun u w₁ w₂ => by dsimp only; rw [map_add])
+    (fun c u w => by dsimp only; rw [map_smul])
+
+@[simp] lemma divergenceBilinearForm_apply
+    (g : SmoothRiemannianMetric I M)
+    (Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (b : M) (u w : E) :
+    divergenceBilinearForm (I := I) (M := M) g Z b u w =
+      g.inner b ((LeviCivita (I := I) g).toFun Z.toFun b u) w := rfl
+
+/-- **Divergence equals the smooth-orthonormal-frame metric covariant trace.** For
+a smooth tangent vector field `Z` and any base point `b`, with
+`Bᵢ = smoothOrthoFrame g b i b`,
+
+```
+divergence_g g Z b = ∑_i g(∇_{B_i} Z, B_i).
+```
+
+This combines the chart-basis metric-trace form `divergence_g_eq_chartBasis_metricTrace`
+with the bilinear metric-trace invariance, transported to the same smooth
+orthonormal frame against which the rough Laplacian and the Dirichlet integrand
+are expressed. -/
+lemma divergence_g_eq_smoothOrthoFrame_metricTrace
+    (g : SmoothRiemannianMetric I M)
+    (Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (b : M) :
+    divergence_g (I := I) g Z b =
+      ∑ i : Fin (Module.finrank ℝ E),
+        g.inner b
+          ((LeviCivita (I := I) g).toFun Z.toFun b
+            (smoothOrthoFrame (I := I) g b i b))
+          (smoothOrthoFrame (I := I) g b i b) := by
+  classical
+  -- Build the orthonormal `Module.Basis` from `smoothOrthoFrame g b · b`.
+  have hB_orth : ∀ i j, g.inner b
+      (smoothOrthoFrame (I := I) g b i b) (smoothOrthoFrame (I := I) g b j b) =
+      if i = j then (1 : ℝ) else 0 :=
+    fun i j => smoothOrthoFrame_orthonormal_at_center (I := I) g b i j
+  have hB_li : LinearIndependent ℝ
+      (fun i : Fin (Module.finrank ℝ E) => smoothOrthoFrame (I := I) g b i b) := by
+    rw [linearIndependent_iff']
+    intro fs c hsum k hk_mem
+    have h_zero : g.inner b (smoothOrthoFrame (I := I) g b k b)
+        (∑ j ∈ fs, c j • smoothOrthoFrame (I := I) g b j b) = 0 := by
+      rw [hsum]; simp
+    rw [map_sum] at h_zero
+    have h_pull : ∀ j ∈ fs,
+        g.inner b (smoothOrthoFrame (I := I) g b k b)
+          (c j • smoothOrthoFrame (I := I) g b j b) =
+        c j * g.inner b (smoothOrthoFrame (I := I) g b k b)
+          (smoothOrthoFrame (I := I) g b j b) := by
+      intro j _
+      rw [(g.inner b (smoothOrthoFrame (I := I) g b k b)).map_smul
+        (c j) (smoothOrthoFrame (I := I) g b j b), smul_eq_mul]
+    rw [Finset.sum_congr rfl h_pull] at h_zero
+    have h_pull2 : ∀ j ∈ fs,
+        c j * g.inner b (smoothOrthoFrame (I := I) g b k b)
+          (smoothOrthoFrame (I := I) g b j b) =
+        c j * (if k = j then (1 : ℝ) else 0) := by
+      intro j _
+      rw [hB_orth k j]
+    rw [Finset.sum_congr rfl h_pull2] at h_zero
+    rw [Finset.sum_eq_single_of_mem k hk_mem] at h_zero
+    · rw [if_pos rfl, mul_one] at h_zero
+      exact h_zero
+    · intro j _ hjk
+      rw [if_neg (fun h => hjk h.symm), mul_zero]
+  have hcard : Fintype.card (Fin (Module.finrank ℝ E)) = Module.finrank ℝ E := by
+    rw [Fintype.card_fin]
+  set frame : Module.Basis (Fin (Module.finrank ℝ E)) ℝ E :=
+    basisOfLinearIndependentOfCardEqFinrank hB_li hcard with hframe_def
+  have hframe_eq : ∀ i, frame i = smoothOrthoFrame (I := I) g b i b := by
+    intro i
+    rw [hframe_def]
+    change (basisOfLinearIndependentOfCardEqFinrank hB_li hcard :
+        Fin (Module.finrank ℝ E) → E) i = smoothOrthoFrame (I := I) g b i b
+    rw [coe_basisOfLinearIndependentOfCardEqFinrank]
+  have hframe_orth : ∀ i j,
+      g.inner b (frame i) (frame j) = if i = j then (1 : ℝ) else 0 := by
+    intro i j; rw [hframe_eq i, hframe_eq j]; exact hB_orth i j
+  -- Start from the chart-basis metric-trace form.
+  rw [divergence_g_eq_chartBasis_metricTrace (I := I) g Z b]
+  -- Rewrite the chart-basis data at the centre to the canonical model basis.
+  have hrw : ∀ m n : Fin (Module.finrank ℝ E),
+      chartInvGramMatrix (I := I) g b b m n *
+          g.inner b
+            ((LeviCivita (I := I) g).toFun Z.toFun b
+              (chartBasisVecFiber (I := I) b m b))
+            (chartBasisVecFiber (I := I) b n b) =
+        (gramMatrixAt (I := I) (M := M) g b)⁻¹ m n *
+          divergenceBilinearForm (I := I) (M := M) g Z b
+            ((chartModelBasis E) m) ((chartModelBasis E) n) := by
+    intro m n
+    rw [divergenceBilinearForm_apply]
+    rw [chartBasisVecFiber_self (I := I) b m, chartBasisVecFiber_self (I := I) b n]
+    rw [chartInvGramMatrix, chartGramMatrix_self_eq_gramMatrixAt (I := I) g b]
+  rw [Finset.sum_congr rfl (fun m _ => Finset.sum_congr rfl (fun n _ => hrw m n))]
+  -- Apply the bilinear metric-trace invariance, reversed.
+  rw [← bilinear_metricTrace_invariance (I := I) (M := M) g b frame hframe_orth
+    (divergenceBilinearForm (I := I) (M := M) g Z b)]
+  refine Finset.sum_congr rfl (fun i _ => ?_)
+  rw [hframe_eq i, divergenceBilinearForm_apply]
+
 end Connection
 end Integral
 end DifferentialGeometry
