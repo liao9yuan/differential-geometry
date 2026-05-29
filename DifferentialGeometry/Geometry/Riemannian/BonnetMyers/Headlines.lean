@@ -367,13 +367,107 @@ theorem pairwise_edist_bound_from_geodesic
               MeasureTheory.volume 0 L := by
         sorry
       -- (v) interval-integrability of `t ↦ Ric(γ t)(uPrime t)(uPrime t)`.
-      -- Follows from continuity of `uPrime` and `γ` together with
-      -- smoothness of the Ricci tensor. Recorded as a structural gap.
+      -- The Ricci tensor is a smooth `(0,2)`-tensor bundle section
+      -- (`ricciTensor_contMDiff`); pulled back along the `C¹` curve `γ` it
+      -- is a continuous CLM-bundle section. Applying it (via the Mathlib
+      -- `ContinuousOn.clm_bundle_apply₂` bridge) to the within-velocity
+      -- vector section — whose total-space continuity on the compact
+      -- interval is the `tangentMapWithin` continuity of `γ` — yields a
+      -- continuous scalar on `Icc 0 L`, hence interval-integrable. We
+      -- prove integrability for the `mfderivWithin` form and transfer to
+      -- the `mfderiv` form by a.e.-equality on the co-null interior
+      -- `Ioo 0 L` (where `mfderivWithin = mfderiv`).
       have hRicIntegrable :
           IntervalIntegrable
             (fun t : ℝ => ricciTensor (I := I) g (γ t) (uPrime t) (uPrime t))
             MeasureTheory.volume 0 L := by
-        sorry
+        have hL_nn' : (0 : ℝ) ≤ L := le_of_lt hL_pos
+        -- (A) Total-space continuity of the within-velocity section on `Icc 0 L`.
+        -- `Icc 0 L` has the unique-mdiff property as a subset of the model `ℝ`.
+        have hUnique : UniqueMDiffOn 𝓘(ℝ, ℝ) (Set.Icc (0 : ℝ) L) := by
+          intro u hu
+          rw [uniqueMDiffWithinAt_iff_uniqueDiffWithinAt]
+          exact (uniqueDiffOn_Icc hL_pos) u hu
+        have hTan := hγ_C1.continuousOn_tangentMapWithin (le_refl 1) hUnique
+        have hLift : Continuous (fun u : ℝ =>
+            (⟨u, (1 : ℝ)⟩ : TangentBundle 𝓘(ℝ, ℝ) ℝ)) := by
+          have h_homeo :
+              Continuous ((tangentBundleModelSpaceHomeomorph 𝓘(ℝ, ℝ)).symm :
+                ModelProd ℝ ℝ → TangentBundle 𝓘(ℝ, ℝ) ℝ) :=
+            (tangentBundleModelSpaceHomeomorph 𝓘(ℝ, ℝ)).symm.continuous
+          exact h_homeo.comp (continuous_id.prodMk continuous_const)
+        have hMaps : Set.MapsTo
+            (fun u : ℝ => (⟨u, (1 : ℝ)⟩ : TangentBundle 𝓘(ℝ, ℝ) ℝ))
+            (Set.Icc (0 : ℝ) L) (Bundle.TotalSpace.proj ⁻¹' (Set.Icc (0 : ℝ) L)) := by
+          intro u hu
+          simpa using hu
+        have hVW : ContinuousOn
+            (fun t : ℝ =>
+              (TotalSpace.mk' E (E := (TangentSpace I : M → Type _))
+                (γ t)
+                (mfderivWithin 𝓘(ℝ, ℝ) I γ (Set.Icc (0 : ℝ) L) t (1 : ℝ)) :
+                  TangentBundle I M))
+            (Set.Icc (0 : ℝ) L) := by
+          have hComp : ContinuousOn
+              (fun t : ℝ => tangentMapWithin 𝓘(ℝ, ℝ) I γ (Set.Icc (0 : ℝ) L)
+                (⟨t, (1 : ℝ)⟩ : TangentBundle 𝓘(ℝ, ℝ) ℝ))
+              (Set.Icc (0 : ℝ) L) :=
+            hTan.comp hLift.continuousOn hMaps
+          exact hComp.congr (fun t _ => rfl)
+        -- (B) Continuity of the Ricci `(0,2)`-tensor section pulled back along `γ`.
+        have hRicSec : ContinuousOn
+            (fun t : ℝ => (TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+              (E := fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
+              (γ t) (ricciTensor (I := I) g (γ t))))
+            (Set.Icc (0 : ℝ) L) := by
+          have hRicCont : Continuous
+              (fun b : M => (TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+                (E := fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
+                b (ricciTensor (I := I) g b))) :=
+            (ricciTensor_contMDiff (I := I) g).continuous
+          exact (hRicCont.comp_continuousOn hγ_C1.continuousOn)
+        -- (C) Apply the bundle bilinear-application bridge.
+        have hScalarTotal : ContinuousOn
+            (fun t : ℝ => (TotalSpace.mk' ℝ (E := fun _ : M => ℝ)
+              (γ t)
+              (ricciTensor (I := I) g (γ t)
+                (mfderivWithin 𝓘(ℝ, ℝ) I γ (Set.Icc (0 : ℝ) L) t (1 : ℝ))
+                (mfderivWithin 𝓘(ℝ, ℝ) I γ (Set.Icc (0 : ℝ) L) t (1 : ℝ)))))
+            (Set.Icc (0 : ℝ) L) :=
+          ContinuousOn.clm_bundle_apply₂ (F₁ := E) (F₂ := E) (F₃ := ℝ)
+            (b := γ) hRicSec hVW hVW
+        -- (D) Extract the scalar continuity from the trivial-bundle total space.
+        have hScalarW : ContinuousOn
+            (fun t : ℝ => ricciTensor (I := I) g (γ t)
+              (mfderivWithin 𝓘(ℝ, ℝ) I γ (Set.Icc (0 : ℝ) L) t (1 : ℝ))
+              (mfderivWithin 𝓘(ℝ, ℝ) I γ (Set.Icc (0 : ℝ) L) t (1 : ℝ)))
+            (Set.Icc (0 : ℝ) L) := by
+          have hproj : Continuous
+              (fun p : TotalSpace ℝ (fun _ : M => ℝ) => p.2) :=
+            continuous_snd.comp
+              ((Bundle.Trivial.homeomorphProd M ℝ).continuous)
+          exact hproj.comp_continuousOn hScalarTotal
+        -- (E) Integrability of the within-velocity Ricci integrand on `Icc 0 L`.
+        have hIntW : IntervalIntegrable
+            (fun t : ℝ => ricciTensor (I := I) g (γ t)
+              (mfderivWithin 𝓘(ℝ, ℝ) I γ (Set.Icc (0 : ℝ) L) t (1 : ℝ))
+              (mfderivWithin 𝓘(ℝ, ℝ) I γ (Set.Icc (0 : ℝ) L) t (1 : ℝ)))
+            MeasureTheory.volume 0 L := by
+          apply ContinuousOn.intervalIntegrable
+          rwa [Set.uIcc_of_le hL_nn']
+        -- (F) Transfer to the `mfderiv = uPrime` form by a.e.-equality on `Ioo 0 L`.
+        refine hIntW.congr_ae ?_
+        have hIoo_ae : ∀ᵐ t ∂(MeasureTheory.volume.restrict (Set.uIoc (0 : ℝ) L)),
+            t ∈ Set.Ioo (0 : ℝ) L := by
+          rw [Set.uIoc_of_le hL_nn', ← MeasureTheory.restrict_Ioo_eq_restrict_Ioc]
+          exact MeasureTheory.ae_restrict_mem measurableSet_Ioo
+        filter_upwards [hIoo_ae] with t ht
+        have hmem : Set.Icc (0 : ℝ) L ∈ nhds t := Icc_mem_nhds ht.1 ht.2
+        change ricciTensor (I := I) g (γ t)
+            (mfderivWithin 𝓘(ℝ, ℝ) I γ (Set.Icc (0 : ℝ) L) t (1 : ℝ))
+            (mfderivWithin 𝓘(ℝ, ℝ) I γ (Set.Icc (0 : ℝ) L) t (1 : ℝ))
+          = ricciTensor (I := I) g (γ t) (uPrime t) (uPrime t)
+        rw [mfderivWithin_of_mem_nhds hmem]
       exact length_bound_contradiction_assembly (I := I) g γ hL_pos hγ_C1
         hγ_geoOn _hK _hdim hRic' uPrime huPrimeEq hγ_unit huCont
         e heDiff hParallel hON hPerp hIntegrandSum hRicIntegrable hγ_min
