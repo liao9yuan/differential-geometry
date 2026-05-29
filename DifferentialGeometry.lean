@@ -719,6 +719,7 @@ import DifferentialGeometry.Integral.Connection.TensorRSMetricCompatible
 import DifferentialGeometry.Integral.Connection.TensorLoweringParallel
 import DifferentialGeometry.Integral.Connection.CovariantIntegrationByParts
 import DifferentialGeometry.Integral.Connection.TensorConnLapLoweredIBP
+import DifferentialGeometry.Integral.Connection.TensorCovGradL2InnerDirichletBridge
 import DifferentialGeometry.Integral.Connection.Curvature
 import DifferentialGeometry.Integral.Connection.CurvatureBundling
 import DifferentialGeometry.Integral.Connection.Ricci
