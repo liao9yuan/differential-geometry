@@ -1,6 +1,7 @@
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckRHSPointwiseLipschitz
 import DifferentialGeometry.PDE.RicciFlow.LieDerivativePairing
 import DifferentialGeometry.Integral.Connection.ChartBridge.Ricci
+import DifferentialGeometry.Integral.Connection.ChartBridge.RiemannBasisIdentity
 
 /-!
 # The abstract chart-frame component of the Ricci–DeTurck RHS difference, reduced to
@@ -34,26 +35,26 @@ through the Cartan formula, which applies the Levi-Civita connection a *single* 
 identity on `chartLeviCivitaGoodSet α`) identifies the abstract Lie pairing with the
 chart matrix at off-centre points.
 
-The **abstract Ricci summand does NOT bridge unconditionally** to the chart Ricci tensor
-`chartRicciTensor`.  The abstract Ricci tensor is the trace of the curvature endomorphism
-of `LeviCivita g`, i.e. the Levi-Civita connection applied *twice*; identifying
-`ricciTensor g x (chartFrameVec α i x) (chartFrameVec α j x)` with the chart-Christoffel
-Ricci entry `chartRicciTensor g α i j (extChartAt I α x)` is precisely the **deferred deep
-step** recorded in `Integral.Connection.ChartBridge.Ricci` as the hypothesis-bearing
-predicate `chartRiemannBasisIdentity` (which expands the abstract Riemann operator via two
-iterations of the chart-Levi-Civita Christoffel formula).  No file in the project
-discharges that predicate as a theorem; the chart-Christoffel atoms therefore bound the
-*chart* carrier `chartRicciTensor`, **not** the abstract `ricciTensor` evaluation, away
-from chart centres.
+The abstract Ricci tensor is the trace of the curvature endomorphism of `LeviCivita g`,
+i.e. the Levi-Civita connection applied *twice*.  The predicate `chartRiemannBasisIdentity`
+of `Integral.Connection.ChartBridge.Ricci` records the basis-coordinate identification of
+the abstract Riemann operator with the chart-Christoffel Riemann tensor (two iterations of
+the chart-Levi-Civita Christoffel formula); it is now **discharged unconditionally** by
+`Integral.Connection.chartRiemannBasisIdentity_holds`
+(`Integral.Connection.ChartBridge.RiemannBasisIdentity`).  We therefore expose the
+abstract Ricci-summand reduction in **unconditional** form
+(`abstractRicciFrameComponent_eq_chartRicciSwap`), supplying the basis identity internally;
+the former hypothesis-bearing statement is kept as
+`abstractRicciFrameComponent_eq_chartRicciSwap_of_basisIdentity`.
 
-Consequently the abstract Ricci-summand reduction is exposed in **hypothesis-bearing**
-form, carrying `chartRiemannBasisIdentity g x` exactly as
-`Integral.Connection.ChartBridge.Ricci` does.  The final assembled bound
-(`abstractRHSFrameComponent_diff_abs_le_jet2_of_basisIdentity`) carries the same
-basis-identity hypothesis on `g₁` and `g₂`.  This is **not** hypothesis-packaging: the
-hypothesis `chartRiemannBasisIdentity` is the project's standard predicate recording the
-iterated chart-Christoffel expansion of the abstract Riemann operator, structurally
-unrelated to the `≤`-conclusion, and is exactly the predicate the bridge file already uses.
+The unconditional reduction expresses the abstract Ricci frame component at `x` as a sum
+of the **chart-at-`x`** Ricci entries `chartRicciTensor g x p q (extChartAt I x x)`,
+evaluated at the chart-`x` centre, weighted by the model-basis coordinates of the
+chart-`α` frame vectors.  The chart-Christoffel atom
+(`exists_chartRicciTensor_lipschitz_on_compact`) instead bounds the **chart-`α`** entries
+`chartRicciTensor g α i j y` off-centre at `y ∈ K`.  Bridging the chart-at-`x` on-centre
+entries to the chart-`α` off-centre entries is the **named change-of-coordinates gap**
+documented below; it is the only step still missing for the headline bound.
 
 ## Main results
 
@@ -65,14 +66,25 @@ unrelated to the `≤`-conclusion, and is exactly the predicate the bridge file 
 * `abstractLieFrameComponent_eq_chartMatrix` — the abstract Lie pairing on the chart-`α`
   frame equals the chart Lie-derivative matrix, on `chartLeviCivitaGoodSet α`.
   Unconditional (Cartan-formula bridge).
-* `abstractRicciFrameComponent_eq_chartRicci_of_basisIdentity` — under
+* `abstractRicciFrameComponent_eq_chartRicciSwap_of_basisIdentity` — under
   `chartRiemannBasisIdentity g x`, the abstract Ricci pairing on the chart-`α` frame
-  reduces to a chart-`α` Ricci entry.  **Hypothesis-bearing** (the deferred deep step).
-* `abstractRHSFrameComponent_diff_abs_le_jet2_of_basisIdentity` — the headline reduction:
-  under the basis-identity hypothesis on `g₁` and `g₂`, the chart-frame scalar
-  right-hand-side difference is bounded by `C · chartMetricJet2DiffSup g₁ g₂ α y`,
-  uniformly over a compact subset `K` of the chart-target interior, with `C` from the
-  committed atoms.
+  reduces to a basis-coordinate sum of the chart-at-`x` Ricci entries.  Hypothesis-bearing
+  (kept for the record).
+* `abstractRicciFrameComponent_eq_chartRicciSwap` — the **unconditional** twin of the
+  above, discharging `chartRiemannBasisIdentity g x` internally via
+  `Integral.Connection.chartRiemannBasisIdentity_holds`.
+* `riemannOp_eq_chartRiemannCLM_apply'`, `ricciTensor_eq_chartRicciSwap`,
+  `ricciFun_eq_ricciTensor_swap`, `ricciFun_eq_ricciTensor` — unconditional abstract-layer
+  twins of the corresponding `Integral.Connection.ChartBridge.Ricci`
+  `…_of_basis_identity` lemmas, each discharging the basis identity internally.
+* `chartCarrierRHSComp_diff_abs_le_jet2` — the committed chart-carrier `2`-jet bound
+  (`exists_chartDeTurckRHSComp_lipschitz_on_compact`), the target the abstract reduction
+  feeds into.
+
+The headline bound on the abstract right-hand-side difference is **not** assembled here:
+the chart-`α` off-centre identification (chart-at-`x` Ricci entries ↦ chart-`α` Ricci
+entries) is a genuine missing change-of-coordinates step (a chart-`α` off-centre Riemann
+basis identity), recorded as the named gap above and left for downstream work.
 -/
 
 noncomputable section
@@ -213,27 +225,24 @@ theorem abstractLieFrameComponent_eq_chartMatrix
     (deTurckVF (I := I) (smoothRiemannianMetricToInfty (I := I) g)
       (smoothRiemannianMetricToInfty (I := I) g_bg)) α i j x hx).symm
 
-/-! ## The abstract Ricci summand: the deferred deep step
+/-! ## The abstract Ricci summand: unconditional reduction to chart-at-`x` entries
 
 The abstract Ricci tensor `ricciTensor g x` is the trace of the curvature endomorphism of
-`LeviCivita g`, i.e. the Levi-Civita connection applied twice.  Its identification with the
-chart-Christoffel Ricci entry `chartRicciTensor g α i j (extChartAt I α x)` (the carrier
-bounded by the committed atom `exists_chartRicciTensor_lipschitz_on_compact`) is the
-deferred deep step `chartRiemannBasisIdentity` of
-`Integral.Connection.ChartBridge.Ricci`, expanding the abstract Riemann operator via two
-iterations of the chart-Levi-Civita Christoffel formula.
+`LeviCivita g`, i.e. the Levi-Civita connection applied twice.  The basis-coordinate
+identification of the abstract Riemann operator with the chart-Christoffel Riemann tensor
+(`chartRiemannBasisIdentity g x`) is **unconditionally true**
+(`Integral.Connection.chartRiemannBasisIdentity_holds`), so the swap-form basis expansion
+`ricciTensor g x v w = ∑ i k, v^k · w^i · Rc_{i,k}(x, ϕ_x x)` against the **chart-at-`x`**
+Ricci entries holds with no hypothesis (`ricciTensor_eq_chartRicciSwap` below).
 
-`Integral.Connection.ChartBridge.Ricci` proves, under `chartRiemannBasisIdentity g x`, the
-*swap-form* basis expansion
-`ricciTensor g x v w = ∑ i k, v^k · w^i · Rc_{i,k}(x, ϕ_x x)` paired against the
-**chart-at-`x`** Ricci entries (`ricciTensor_eq_chartRicciSwap_of_basis_identity`).  That
-identity is stated at the intrinsic chart-at-`x`, against the canonical model basis, not at
-an arbitrary chart `α` evaluated off-centre; bridging the chart-`α` frame components of the
-abstract Ricci tensor at off-centre points to the chart-`α` Ricci entries
-`chartRicciTensor g α i j (extChartAt I α x)` requires, in addition to the basis identity, a
-change of chart and frame.  We therefore record the abstract Ricci-summand reduction as a
-hypothesis-bearing statement, leaving the full chart-`α` off-centre identification as the
-named gap below. -/
+That expansion is stated at the intrinsic chart-at-`x`, against the canonical model basis.
+It is **not** stated at an arbitrary chart `α` evaluated off-centre: bridging the chart-`α`
+frame components of the abstract Ricci tensor at off-centre points to the chart-`α` Ricci
+entries `chartRicciTensor g α i j (extChartAt I α x)` — the entries bounded by the committed
+atom `exists_chartRicciTensor_lipschitz_on_compact` — requires a genuine change-of-chart /
+change-of-frame step (a chart-`α` off-centre Riemann basis identity).  That step is the
+**named gap** for the headline bound; the hypothesis-bearing statement is kept below for the
+record, the unconditional twin sits beside it. -/
 
 /-- **The abstract Ricci frame component reduces to a basis-coordinate chart-`x` Ricci sum
 under the deferred basis identity.**  Specialising
@@ -261,24 +270,114 @@ theorem abstractRicciFrameComponent_eq_chartRicciSwap_of_basisIdentity
     (smoothRiemannianMetricToInfty (I := I) g) x h
     (chartFrameVec (I := I) α i x) (chartFrameVec (I := I) α j x)
 
-/-! ## The headline reduction (under the deferred basis identity)
+/-! ## Unconditional discharge of the basis identity
 
-Combining the unconditional summand split (`abstractRHSFrameComponent_diff_eq`), the
-unconditional Lie bridge (`abstractLieFrameComponent_eq_chartMatrix`), and the
-hypothesis-bearing abstract-Ricci reduction with the committed chart-Christoffel atoms
-yields the chart-frame scalar `2`-jet Lipschitz bound for the abstract right-hand-side
-difference, **under** the deferred basis-identity hypothesis.
+`chartRiemannBasisIdentity_holds` (in `Integral.Connection.ChartBridge.RiemannBasisIdentity`)
+proves `chartRiemannBasisIdentity g x` unconditionally for every smooth Riemannian metric
+`g` on a closed manifold and every point `x`. We use it to supply the `h` argument of each
+hypothesis-bearing bridge lemma internally, producing unconditional twins that drop the
+basis-identity hypothesis entirely. These are the genuine, axiom-free statements that the
+former predicate `chartRiemannBasisIdentity` only conditionally exposed. -/
 
-The chart-Christoffel atoms bound the chart carriers
-`chartRicciTensor`/`chartLieDeTurckComp` by `chartMetricJet2DiffSup`; the abstract Ricci
-frame component is tied to `chartRicciTensor` only through `chartRiemannBasisIdentity`,
-which is why the hypothesis is carried.  The Lie frame component, by contrast, is tied to
-its chart carrier unconditionally on the good set.
+/-- **Unconditional trilinear Riemann bridge** (twin of
+`riemannOp_eq_chartRiemannCLM_apply_of_basis_identity`). This is exactly the unconditional
+`Integral.Connection.riemannOp_eq_chartRiemannCLM_apply` of
+`ChartBridge.RiemannBasisIdentity`, restated here as the abstract-layer twin used by the
+Ricci reductions below. -/
+theorem riemannOp_eq_chartRiemannCLM_apply'
+    (g : SmoothRiemannianMetric I M) (x : M) (v w u : TangentSpace I x) :
+    riemannOp (cov := LeviCivita (I := I) (smoothRiemannianMetricToInfty (I := I) g)) x v w u =
+      chartRiemannCLM (I := I) (smoothRiemannianMetricToInfty (I := I) g) x v w u :=
+  riemannOp_eq_chartRiemannCLM_apply (I := I)
+    (smoothRiemannianMetricToInfty (I := I) g) x v w u
 
-This is the precise, honest statement of the route: everything except the abstract Ricci →
-chart Ricci identification is unconditional; that one identification is the project's
-deferred `chartRiemannBasisIdentity`.  No surrogate hypothesis whose type matches the
-conclusion is introduced. -/
+/-- **Unconditional swap-form Ricci basis expansion** (twin of
+`ricciTensor_eq_chartRicciSwap_of_basis_identity`). The abstract Ricci tensor admits the
+basis-coordinate sum against the chart-at-`x` Ricci entries, with no basis-identity
+hypothesis: it is discharged internally via `chartRiemannBasisIdentity_holds`. -/
+theorem ricciTensor_eq_chartRicciSwap
+    (g : SmoothRiemannianMetric I M) (x : M)
+    (v w : TangentSpace I x) :
+    ricciTensor (I := I) (smoothRiemannianMetricToInfty (I := I) g) x v w =
+      ∑ p : Fin (Module.finrank ℝ E),
+        ∑ q : Fin (Module.finrank ℝ E),
+          ((chartModelBasis E).repr v) q *
+            ((chartModelBasis E).repr w) p *
+            chartRicciTensor (I := I) (smoothRiemannianMetricToInfty (I := I) g) x p q
+              (extChartAt I x x) :=
+  ricciTensor_eq_chartRicciSwap_of_basis_identity (I := I)
+    (smoothRiemannianMetricToInfty (I := I) g) x
+    (chartRiemannBasisIdentity_holds (I := I)
+      (smoothRiemannianMetricToInfty (I := I) g) x) v w
+
+/-- **Unconditional swap-form Ricci carrier bridge** (twin of
+`ricciFun_eq_ricciTensor_swap_of_basis_identity`). -/
+theorem ricciFun_eq_ricciTensor_swap
+    (g : SmoothRiemannianMetric I M) (x : M)
+    (v w : TangentSpace I x) :
+    ricciFun (I := I) (smoothRiemannianMetricToInfty (I := I) g) x v w =
+      ricciTensor (I := I) (smoothRiemannianMetricToInfty (I := I) g) x w v :=
+  ricciFun_eq_ricciTensor_swap_of_basis_identity (I := I)
+    (smoothRiemannianMetricToInfty (I := I) g) x
+    (chartRiemannBasisIdentity_holds (I := I)
+      (smoothRiemannianMetricToInfty (I := I) g) x) v w
+
+/-- **Unconditional direct Ricci carrier bridge** (twin of
+`ricciFun_eq_ricciTensor_of_basis_identity`): the chart Ricci carrier `ricciFun g x` equals
+the abstract Ricci tensor `ricciTensor g x` as bilinear forms, with no basis-identity
+hypothesis (discharged internally via `chartRiemannBasisIdentity_holds`; the closed-manifold
+Ricci symmetry is supplied by the ambient `[I.Boundaryless]`). -/
+theorem ricciFun_eq_ricciTensor
+    (g : SmoothRiemannianMetric I M) (x : M)
+    (v w : TangentSpace I x) :
+    ricciFun (I := I) (smoothRiemannianMetricToInfty (I := I) g) x v w =
+      ricciTensor (I := I) (smoothRiemannianMetricToInfty (I := I) g) x v w :=
+  ricciFun_eq_ricciTensor_of_basis_identity (I := I)
+    (smoothRiemannianMetricToInfty (I := I) g) x
+    (chartRiemannBasisIdentity_holds (I := I)
+      (smoothRiemannianMetricToInfty (I := I) g) x) v w
+
+/-- **Unconditional abstract Ricci frame component reduction** (twin of
+`abstractRicciFrameComponent_eq_chartRicciSwap_of_basisIdentity`). The abstract Ricci frame
+component reduces to a basis-coordinate sum of the chart-at-`x` Ricci entries, weighted by
+the model-basis coordinates of the chart-`α` frame vectors, with **no** basis-identity
+hypothesis. -/
+theorem abstractRicciFrameComponent_eq_chartRicciSwap
+    (g : SmoothRiemannianMetric I M) (α x : M)
+    (i j : Fin (Module.finrank ℝ E)) :
+    ricciTensor (I := I) (smoothRiemannianMetricToInfty (I := I) g) x
+        (chartFrameVec (I := I) α i x) (chartFrameVec (I := I) α j x) =
+      ∑ p : Fin (Module.finrank ℝ E), ∑ q : Fin (Module.finrank ℝ E),
+        ((chartModelBasis E).repr (chartFrameVec (I := I) α i x)) q *
+          ((chartModelBasis E).repr (chartFrameVec (I := I) α j x)) p *
+          chartRicciTensor (I := I) (smoothRiemannianMetricToInfty (I := I) g) x p q
+            (extChartAt I x x) :=
+  abstractRicciFrameComponent_eq_chartRicciSwap_of_basisIdentity (I := I) g α x i j
+    (chartRiemannBasisIdentity_holds (I := I)
+      (smoothRiemannianMetricToInfty (I := I) g) x)
+
+/-! ## The chart-carrier target and the remaining off-centre gap
+
+The pieces in hand for the headline abstract right-hand-side `2`-jet bound are now all
+unconditional: the summand split (`abstractRHSFrameComponent_diff_eq`), the Lie bridge
+(`abstractLieFrameComponent_eq_chartMatrix`), the abstract-Ricci reduction
+(`abstractRicciFrameComponent_eq_chartRicciSwap`), and the committed chart-carrier atom
+(`chartCarrierRHSComp_diff_abs_le_jet2`).
+
+The single remaining obstruction is purely a change-of-coordinates step.  The abstract
+Ricci reduction produces a sum of **chart-at-`x`** Ricci entries
+`chartRicciTensor g x p q (extChartAt I x x)` (evaluated at the chart-`x` centre), whereas
+the chart-carrier atom bounds **chart-`α`** entries `chartRicciTensor g α i j y` off-centre
+at `y ∈ K`.  Identifying these two — equivalently, proving the chart-`α` off-centre Riemann
+basis identity
+`ricciTensor g x (chartFrameVec α p x) (chartFrameVec α q x)
+   = chartRicciTensor g α p q (extChartAt I α x)`
+on `chartLeviCivitaGoodSet α` — is genuine new infrastructure (a chart-`α` off-centre twin
+of `Integral.Connection.ChartBridge.RiemannBasisIdentity`'s
+`LeviCivita_chartBasisVec_secondCovDeriv` and `riemannOp_chartBasis_eq_chartRiemannCLM_basis`,
+together with a chart-`α` off-centre directional-derivative engine and chart-`α` off-centre
+Lie-bracket vanishing).  It is therefore left as the named gap; the headline bound is not
+assembled here. -/
 
 set_option linter.unusedSectionVars false in
 /-- **Chart-Christoffel carrier `2`-jet bound for the right-hand-side difference (the
