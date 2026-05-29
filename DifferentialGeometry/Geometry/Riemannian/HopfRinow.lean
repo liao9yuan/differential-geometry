@@ -366,48 +366,88 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 `c := (g.inner p v v)^{1/2}` along the maximal geodesic at `(p, v)`,
 for any `s \le t` in the maximal interval the Riemannian extended
 distance between `\gamma(s)` and `\gamma(t)` is bounded by
-`c \cdot (t - s)`. -/
+`c \cdot (t - s)`.
+
+The two analytic facts this depends on are exposed as explicit
+hypotheses, both stated purely in terms of the bundle objects so they
+match whatever fibre norm is active at the call site (the
+`RiemannianBundle`-derived norm, with the project's `Tensor0SBundle`
+fibre instances locally suppressed):
+
+* `hγ_smooth` — the `C¹` (time-)smoothness of the maximal geodesic on
+  the compact parameter subinterval `Icc s t`.  This is the
+  ODE-regularity content of an integral curve of the (smooth)
+  geodesic spray; it is consumed by Mathlib's
+  `riemannianEDist_le_pathELength`.
+* `hSpeedBound` — the per-parameter bound of the bundle enorm of the
+  velocity by the constant `√(g.inner p v v)`.  This single inequality
+  packages both the bundle-norm ↔ `√(g.inner …)` compatibility and the
+  constant-speed property of a geodesic in the exact form the
+  `pathELength` estimate needs. -/
 theorem bm_c_gc_length_distance_bound
     (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p)
     {s t : ℝ}
-    (hs : s ∈ maximalGeodesicInterval (I := I) g p v)
-    (ht : t ∈ maximalGeodesicInterval (I := I) g p v)
-    (hst : s ≤ t) :
+    (_hs : s ∈ maximalGeodesicInterval (I := I) g p v)
+    (_ht : t ∈ maximalGeodesicInterval (I := I) g p v)
+    (hst : s ≤ t)
+    (hγ_smooth : ContMDiffOn 𝓘(ℝ, ℝ) I 1
+      (maximalGeodesic (I := I) g p v) (Set.Icc s t))
+    (hSpeedBound : ∀ τ : ℝ,
+      ‖mfderiv 𝓘(ℝ, ℝ) I (maximalGeodesic (I := I) g p v) τ (1 : ℝ)‖ₑ
+        ≤ ENNReal.ofReal (Real.sqrt ((g.inner p) v v))) :
     riemannianEDist I
         (maximalGeodesic (I := I) g p v s)
         (maximalGeodesic (I := I) g p v t) ≤
       ENNReal.ofReal (Real.sqrt ((g.inner p) v v) * (t - s)) := by
+  letI : MeasurableSpace M := borel M
+  haveI : BorelSpace M := ⟨rfl⟩
   -- Abbreviations for the maximal geodesic curve and its constant speed `c`.
   set γ : ℝ → M := maximalGeodesic (I := I) g p v with hγ_def
   set c : ℝ := Real.sqrt ((g.inner p) v v) with hc_def
   -- The constant `c` is nonnegative as a square root.
   have hc_nonneg : (0 : ℝ) ≤ c := Real.sqrt_nonneg _
-  -- Step 1. Smoothness witness for `γ` on `Icc s t`.
-  -- On the maximal interval, `γ = maximalGeodesic g p v` is locally a smooth
-  -- geodesic; in particular it is `C¹` on the compact subinterval `Icc s t`.
-  -- A self-contained derivation requires gluing chart-local witnesses across
-  -- `[s, t]` and reading off `ContMDiffOn` smoothness from the corresponding
-  -- `IsMIntegralCurveOn` data, which is a separate bridge from the
-  -- `MaximalInterval` module not currently exposed. Recorded as an
-  -- intermediate sorry isolating this gap.
-  have hγ_smooth : ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ (Set.Icc s t) := by
-    sorry
-  -- Step 2. PathELength bound by `c · (t - s)`.
-  -- Along a geodesic the norm of the velocity is the constant `c`; therefore
-  -- the integral defining `pathELength` is `c · (t - s)`. The constant-speed
-  -- identity used here is `bm_c_gc_constant_speed` (still a sorry); the
-  -- enorm identification between `‖γ'(τ)‖ₑ` and `ENNReal.ofReal (√⟨γ',γ'⟩_g)`
-  -- comes from the `IsRiemannianManifold` typeclass.  The composition is
-  -- isolated below.
+  -- Step 1. `pathELength` bound by `c · (t - s)`.
+  -- `pathELength I γ s t = ∫⁻ τ in Icc s t, ‖mfderiv γ τ 1‖ₑ`.  The
+  -- integrand is bounded ae by the constant `ofReal c` via `hSpeedBound`,
+  -- so the integral is bounded by `ofReal c · volume (Icc s t) =
+  -- ofReal c · ofReal (t - s) = ofReal (c · (t - s))`.
   have h_pathLen_le :
       pathELength I γ s t ≤ ENNReal.ofReal (c * (t - s)) := by
-    sorry
-  -- Step 3. `riemannianEDist ≤ pathELength` from the Mathlib lemma.
+    -- Rewrite `pathELength` as a set-lintegral of `‖mfderiv γ · 1‖ₑ`.
+    rw [Manifold.pathELength_eq_lintegral_mfderiv_Icc]
+    -- Dominate the integrand pointwise (hence everywhere on `Icc s t`)
+    -- by the constant `ofReal c`.
+    have h_le :
+        ∫⁻ τ in Set.Icc s t,
+            (fun τ => ‖mfderiv 𝓘(ℝ, ℝ) I γ τ (1 : ℝ)‖ₑ) τ
+          ≤ ∫⁻ _ in Set.Icc s t, ENNReal.ofReal c := by
+      refine MeasureTheory.setLIntegral_mono' measurableSet_Icc (fun τ _ => ?_)
+      simpa [hγ_def, hc_def] using hSpeedBound τ
+    -- Evaluate the constant set-lintegral: `ofReal c · volume (Icc s t)`.
+    have h_const :
+        (∫⁻ _ in Set.Icc s t, ENNReal.ofReal c)
+          = ENNReal.ofReal c * MeasureTheory.volume (Set.Icc s t) :=
+      MeasureTheory.setLIntegral_const (Set.Icc s t) (ENNReal.ofReal c)
+    -- `volume (Icc s t) = ofReal (t - s)`.
+    have h_vol : MeasureTheory.volume (Set.Icc s t) = ENNReal.ofReal (t - s) :=
+      Real.volume_Icc
+    -- `ofReal c · ofReal (t - s) = ofReal (c · (t - s))` (both factors ≥ 0).
+    have h_mul :
+        ENNReal.ofReal c * ENNReal.ofReal (t - s)
+          = ENNReal.ofReal (c * (t - s)) :=
+      (ENNReal.ofReal_mul hc_nonneg).symm
+    calc
+      ∫⁻ τ in Set.Icc s t, ‖mfderiv 𝓘(ℝ, ℝ) I γ τ (1 : ℝ)‖ₑ
+          ≤ ∫⁻ _ in Set.Icc s t, ENNReal.ofReal c := h_le
+      _ = ENNReal.ofReal c * MeasureTheory.volume (Set.Icc s t) := h_const
+      _ = ENNReal.ofReal c * ENNReal.ofReal (t - s) := by rw [h_vol]
+      _ = ENNReal.ofReal (c * (t - s)) := h_mul
+  -- Step 2. `riemannianEDist ≤ pathELength` from the Mathlib lemma.
   have h_dist_le :
       riemannianEDist I (γ s) (γ t) ≤ pathELength I γ s t :=
     riemannianEDist_le_pathELength (I := I) (γ := γ) (a := s) (b := t)
       hγ_smooth rfl rfl hst
-  -- Step 4. Chain the two bounds.
+  -- Step 3. Chain the two bounds.
   exact h_dist_le.trans h_pathLen_le
 
 variable [CompleteSpace M]
@@ -424,7 +464,11 @@ theorem bm_c_gc_escape_cauchy
     {T : ℝ} (_hT : IsLUB (maximalGeodesicInterval (I := I) g p v) T)
     {tₙ : ℕ → ℝ}
     (htₙ_mem : ∀ n, tₙ n ∈ maximalGeodesicInterval (I := I) g p v)
-    (htₙ_lim : Tendsto tₙ atTop (𝓝 T)) :
+    (htₙ_lim : Tendsto tₙ atTop (𝓝 T))
+    (hγ_smooth : ContMDiff 𝓘(ℝ, ℝ) I 1 (maximalGeodesic (I := I) g p v))
+    (hSpeedBound : ∀ τ : ℝ,
+      ‖mfderiv 𝓘(ℝ, ℝ) I (maximalGeodesic (I := I) g p v) τ (1 : ℝ)‖ₑ
+        ≤ ENNReal.ofReal (Real.sqrt ((g.inner p) v v))) :
     CauchySeq (fun n => maximalGeodesic (I := I) g p v (tₙ n)) := by
   -- Abbreviations: `γ` for the maximal geodesic curve, `c` for the constant
   -- speed `√⟨v,v⟩_g`.
@@ -466,12 +510,14 @@ theorem bm_c_gc_escape_cauchy
     rcases le_total (tₙ m) (tₙ n) with h | h
     · rw [ht_def, max_eq_right h]; exact htₙ_mem n
     · rw [ht_def, max_eq_left h]; exact htₙ_mem m
-  -- Apply the length-distance bound to `s, t`.
+  -- Apply the length-distance bound to `s, t`.  The `C¹` smoothness on
+  -- `Icc s t` is the restriction of the global `C¹` witness `hγ_smooth`;
+  -- the per-parameter speed bound is `hSpeedBound`.
   have h_bound :
       riemannianEDist I (γ s) (γ t) ≤ ENNReal.ofReal (c * (t - s)) := by
     have :=
       bm_c_gc_length_distance_bound (I := I) g p v (s := s) (t := t)
-        hs_mem ht_mem hst
+        hs_mem ht_mem hst (hγ_smooth.contMDiffOn) hSpeedBound
     -- Normalise to our local `γ` and `c`.
     simpa [hγ_def, hc_def] using this
   -- Convert `riemannianEDist` to `edist` using `IsRiemannianManifold`.
@@ -604,7 +650,11 @@ uniqueness theorems for geodesics provide a geodesic on `(-\varepsilon,
 contradicts the maximality of the original interval. Concretely, the
 maximal interval at `(p, v)` cannot be bounded above by a finite `T`. -/
 theorem bm_c_gc_extension_past_limit
-    (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p) :
+    (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p)
+    (hγ_smooth : ContMDiff 𝓘(ℝ, ℝ) I 1 (maximalGeodesic (I := I) g p v))
+    (hSpeedBound : ∀ τ : ℝ,
+      ‖mfderiv 𝓘(ℝ, ℝ) I (maximalGeodesic (I := I) g p v) τ (1 : ℝ)‖ₑ
+        ≤ ENNReal.ofReal (Real.sqrt ((g.inner p) v v))) :
     ¬ ∃ T : ℝ, IsLUB (maximalGeodesicInterval (I := I) g p v) T := by
   haveI : CompleteSpace E := FiniteDimensional.complete ℝ E
   -- Argue by contradiction.
@@ -653,6 +703,7 @@ theorem bm_c_gc_extension_past_limit
   have h_cauchy :
       CauchySeq (fun n => maximalGeodesic (I := I) g p v (tₙ n)) :=
     bm_c_gc_escape_cauchy (I := I) g p v (T := T) hT htₙ_mem htₙ_lim
+      hγ_smooth hSpeedBound
   -- A Cauchy sequence in a complete pseudo-EMetric space converges to
   -- some limit point `y : M` in the topology of `[PseudoEMetricSpace M]`.
   obtain ⟨y, _hy⟩ := cauchySeq_tendsto_of_complete h_cauchy
@@ -710,7 +761,11 @@ declared `_hT` and is unused, so the same chart-distance computation
 works equally for a GLB). The residual gap is the same gluing step
 across the metric limit point as in `bm_c_gc_extension_past_limit`. -/
 theorem bm_c_gc_symmetric_left_endpoint
-    (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p) :
+    (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p)
+    (hγ_smooth : ContMDiff 𝓘(ℝ, ℝ) I 1 (maximalGeodesic (I := I) g p v))
+    (hSpeedBound : ∀ τ : ℝ,
+      ‖mfderiv 𝓘(ℝ, ℝ) I (maximalGeodesic (I := I) g p v) τ (1 : ℝ)‖ₑ
+        ≤ ENNReal.ofReal (Real.sqrt ((g.inner p) v v))) :
     ¬ ∃ T : ℝ, IsGLB (maximalGeodesicInterval (I := I) g p v) T := by
   haveI : CompleteSpace E := FiniteDimensional.complete ℝ E
   -- Argue by contradiction.
@@ -798,7 +853,7 @@ theorem bm_c_gc_symmetric_left_endpoint
         riemannianEDist I (γ s) (γ t) ≤ ENNReal.ofReal (c * (t - s)) := by
       have :=
         bm_c_gc_length_distance_bound (I := I) g p v (s := s) (t := t)
-          hs_mem ht_mem hst
+          hs_mem ht_mem hst (hγ_smooth.contMDiffOn) hSpeedBound
       simpa [hγ_def, hc_def] using this
     have h_edist_bound :
         edist (γ s) (γ t) ≤ ENNReal.ofReal (c * (t - s)) := by
@@ -870,6 +925,8 @@ theorem bm_c_gc_symmetric_left_endpoint
   -- gap of `bm_c_gc_extension_past_limit`.
   sorry
 
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
 /-- **Assembly: the maximal geodesic interval is the whole real line.**
 Combine the no-right-escape `bm_c_gc_extension_past_limit` with the
 no-left-escape `bm_c_gc_symmetric_left_endpoint` and the openness of
@@ -898,17 +955,36 @@ theorem bm_c_gc_assemble
   -- Step 2: `S` is nonempty (`0 ∈ S`).
   have hS_ne : S.Nonempty :=
     ⟨0, zero_mem_maximalGeodesicInterval (I := I) g p v⟩
+  -- The two analytic facts consumed by the no-escape theorems:
+  --   * `C¹` (time-)smoothness of the maximal geodesic; and
+  --   * the per-parameter bundle-enorm bound on the velocity by the
+  --     constant speed `√(g.inner p v v)`.
+  -- Both are properties of the integral curve of the smooth geodesic
+  -- spray: smoothness is its ODE regularity, and the speed bound is the
+  -- bundle-norm ↔ `√(g.inner …)` compatibility combined with the
+  -- constant-speed identity `bm_c_gc_constant_speed`.  Establishing them
+  -- unconditionally for `maximalGeodesic` requires the deferred
+  -- `IsMIntegralCurve`-to-`ContMDiff` ODE-regularity bridge (the same gap
+  -- recorded in `Geodesic/Smoothness.lean`), so they are isolated here as
+  -- the single residual analytic input feeding the no-escape arguments.
+  have hγ_smooth :
+      ContMDiff 𝓘(ℝ, ℝ) I 1 (maximalGeodesic (I := I) g p v) := by
+    sorry
+  have hSpeedBound : ∀ τ : ℝ,
+      ‖mfderiv 𝓘(ℝ, ℝ) I (maximalGeodesic (I := I) g p v) τ (1 : ℝ)‖ₑ
+        ≤ ENNReal.ofReal (Real.sqrt ((g.inner p) v v)) := by
+    sorry
   -- Step 3: `S` is not bounded above.
   have hS_no_BddAbove : ¬ BddAbove S := by
     intro hBdd
     -- A nonempty bounded-above set in ℝ has an LUB (= sSup), contradicting
     -- `bm_c_gc_extension_past_limit`.
-    exact bm_c_gc_extension_past_limit (I := I) g p v
+    exact bm_c_gc_extension_past_limit (I := I) g p v hγ_smooth hSpeedBound
       ⟨sSup S, isLUB_csSup hS_ne hBdd⟩
   -- Step 4: `S` is not bounded below.
   have hS_no_BddBelow : ¬ BddBelow S := by
     intro hBdd
-    exact bm_c_gc_symmetric_left_endpoint (I := I) g p v
+    exact bm_c_gc_symmetric_left_endpoint (I := I) g p v hγ_smooth hSpeedBound
       ⟨sInf S, isGLB_csInf hS_ne hBdd⟩
   -- Step 5: a preconnected set unbounded both ways equals `univ`.
   exact hSpre.eq_univ_of_unbounded hS_no_BddBelow hS_no_BddAbove
