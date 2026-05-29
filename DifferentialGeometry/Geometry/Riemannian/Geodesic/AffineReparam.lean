@@ -21,8 +21,6 @@ reparametrisation of geodesics. The four declarations below state:
 * `scaledTangentLift_transport` — rescaling an integral curve of
   `geodesicVectorFieldChart g α` by an affine reparametrisation and a
   fibre rescaling yields another integral curve of the same field.
-* `IsGeodesicOn.affineReparam` — affine reparametrisation
-  `s ↦ γ (c * s + d)` preserves the `IsGeodesicOn` predicate.
 -/
 
 noncomputable section
@@ -234,38 +232,6 @@ theorem scaledTangentLift_transport
   -- `exists_isMIntegralCurveAt_of_contMDiffAt`.
   let _hf' := hf
   sorry
-
-/-- Affine reparametrisation of geodesics: if `γ : ℝ → M` is a geodesic on
-`Icc a b`, then for any constants `c d : ℝ` the curve `s ↦ γ (c * s + d)`
-is a geodesic on the preimage `{s | c * s + d ∈ Icc a b}`. -/
-theorem IsGeodesicOn.affineReparam
-    (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {a b : ℝ} (c d : ℝ)
-    (h : IsGeodesicOn (I := I) g γ (Set.Icc a b)) :
-    IsGeodesicOn (I := I) g (fun s => γ (c * s + d))
-      {s : ℝ | c * s + d ∈ Set.Icc a b} := by
-  -- Unpack the chart basepoint and velocity lift witnessing the original
-  -- geodesic predicate on `Icc a b`.
-  obtain ⟨α, f, hproj, hf⟩ := h
-  -- Candidate reparametrised lift. The natural lift for the affine
-  -- reparametrisation `s ↦ γ(c · s + d)` is the time-shifted, time-rescaled
-  -- lift with the fibre rescaled by `c`:
-  --   `s ↦ ⟨(f(c·s+d)).proj, c • (f(c·s+d)).snd⟩`.
-  -- The integral-curve identity for this lift against the SAME
-  -- `geodesicVectorFieldChart g α` is `scaledTangentLift_transport`.
-  refine ⟨α,
-    (fun s : ℝ =>
-      (⟨(f (c * s + d)).proj, c • (f (c * s + d)).snd⟩ : TangentBundle I M)),
-    ?_, ?_⟩
-  · -- Projection identity: the projection of the candidate lift is the
-    -- composition of the original projection with the affine
-    -- reparametrisation, which equals `γ(c·s+d)` by `hproj`.
-    intro s
-    -- `(⟨(f (c*s+d)).proj, c • _⟩ : TangentBundle I M).proj = (f (c*s+d)).proj`.
-    change (f (c * s + d)).proj = γ (c * s + d)
-    exact hproj (c * s + d)
-  · -- Integral-curve identity is the helper `scaledTangentLift_transport`
-    -- applied to the original lift's integral-curve hypothesis `hf`.
-    exact scaledTangentLift_transport (I := I) g α hf c d
 
 /-! ## Affine reparametrisation invariance of `pathELength`
 

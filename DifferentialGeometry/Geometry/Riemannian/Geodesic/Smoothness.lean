@@ -18,15 +18,9 @@ from the integral-curve property.
 
 ## Main results
 
-* `IsGeodesicAt.continuousAt`: a local geodesic at `t₀` is continuous
+* `IsGeodesicAt.continuousAt`: a local spray geodesic at `t₀` is continuous
   at `t₀`. The proof is a direct projection of the lift's continuity,
   inherited from Mathlib's `IsMIntegralCurveAt.continuousAt`.
-
-* `IsGeodesic.continuous`: a global geodesic is continuous, by the same
-  argument applied to a global integral curve via
-  `IsMIntegralCurve.continuous`.
-
-* `IsGeodesic.continuousAt`: continuity at any specified time.
 
 * `chartPushLift`, `chartPushVF`: the analytic shape of the lifted
   curve and the chart-pushed geodesic vector field in `E × E` (the
@@ -136,38 +130,6 @@ theorem IsGeodesicAt.continuousAt
   have heq : (fun t => (f t).proj) = γ := funext hproj
   rw [heq] at hcomp
   exact hcomp
-
-/-- **Continuity of a global geodesic.** A global geodesic is continuous
-everywhere on `ℝ`. -/
-theorem IsGeodesic.continuous
-    {g : SmoothRiemannianMetric I M} {γ : ℝ → M}
-    (hγ : IsGeodesic (I := I) g γ) :
-    Continuous γ := by
-  obtain ⟨α, f, hproj, hf⟩ := hγ
-  have hf_cont : Continuous f := hf.continuous
-  have hπ_cont : Continuous
-      (Bundle.TotalSpace.proj : TangentBundle I M → M) :=
-    continuous_tangentBundle_proj
-  have hcomp : Continuous (fun t => (f t).proj) := hπ_cont.comp hf_cont
-  have heq : (fun t => (f t).proj) = γ := funext hproj
-  rw [heq] at hcomp
-  exact hcomp
-
-/-- A global geodesic is continuous at any time `t`. -/
-theorem IsGeodesic.continuousAt
-    {g : SmoothRiemannianMetric I M} {γ : ℝ → M}
-    (hγ : IsGeodesic (I := I) g γ) (t : ℝ) :
-    ContinuousAt γ t :=
-  hγ.continuous.continuousAt
-
-/-- A global geodesic, viewed via the `IsGeodesicAt`-predicate at every
-time. Combined with `IsGeodesicAt.continuousAt`, this gives an alternate
-proof of continuity. -/
-lemma IsGeodesic.continuousAt_of_isGeodesicAt
-    {g : SmoothRiemannianMetric I M} {γ : ℝ → M}
-    (hγ : IsGeodesic (I := I) g γ) (t : ℝ) :
-    ContinuousAt γ t :=
-  (hγ.isGeodesicAt t).continuousAt
 
 end BaseContinuity
 
@@ -299,22 +261,6 @@ theorem IsGeodesicAt.exists_chartPushLift_hasDerivAt
   exact ⟨α, f, hproj, hf,
     chartPushLift_eventually_hasDerivAt (I := I) (g := g) (α := α)
       (t₀ := t₀) (f := f) hf⟩
-
-/-- **`IsGeodesic` chart-pushed derivative formula** (global version):
-the lift `f : ℝ → TangentBundle I M` satisfies the chart-local geodesic
-ODE in `E × E` phase space on a neighbourhood of every time `t`. -/
-theorem IsGeodesic.eventually_chartPushLift_hasDerivAt
-    {g : SmoothRiemannianMetric I M} {γ : ℝ → M}
-    (hγ : IsGeodesic (I := I) g γ) (t : ℝ) :
-    ∃ (α : M) (f : ℝ → TangentBundle I M),
-      (∀ s, (f s).proj = γ s) ∧
-      IsMIntegralCurveAt f (geodesicVectorFieldChart (I := I) g α) t ∧
-      ∀ᶠ s in 𝓝 t, HasDerivAt (chartPushLift (I := I) f t)
-        (chartPushVF (I := I) g α f t s) s := by
-  obtain ⟨α, f, hproj, hf⟩ := hγ
-  exact ⟨α, f, hproj, hf.isMIntegralCurveAt t,
-    chartPushLift_eventually_hasDerivAt (I := I) (g := g) (α := α)
-      (t₀ := t) (f := f) (hf.isMIntegralCurveAt t)⟩
 
 end IsGeodesicAtChartPush
 

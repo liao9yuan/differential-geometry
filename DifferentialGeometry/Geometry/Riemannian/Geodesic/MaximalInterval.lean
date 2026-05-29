@@ -97,15 +97,17 @@ def IsGeodesicOnWithInitial
     f 0 = (⟨p, v⟩ : TangentBundle I M) ∧
     IsMIntegralCurveOn f (geodesicVectorFieldChart (I := I) g p) s
 
-/-- An initial-data geodesic on `s` is in particular a geodesic on `s`
-(with chart basepoint `p`). -/
-lemma IsGeodesicOnWithInitial.isGeodesicOn
+/-- An initial-data geodesic on `s` is, at every interior point `t` of `s`
+(i.e. `s ∈ 𝓝 t`), a local spray geodesic `IsGeodesicAt g γ t` with chart
+basepoint `p`. This is the spray-side projection used to feed the
+chart-coordinate geodesic-equation bridge downstream. -/
+lemma IsGeodesicOnWithInitial.isGeodesicAt
     {g : SmoothRiemannianMetric I M} {γ : ℝ → M} {s : Set ℝ}
-    {p : M} {v : TangentSpace I p}
-    (hγ : IsGeodesicOnWithInitial (I := I) g γ s p v) :
-    IsGeodesicOn (I := I) g γ s := by
+    {p : M} {v : TangentSpace I p} {t : ℝ}
+    (hγ : IsGeodesicOnWithInitial (I := I) g γ s p v) (ht : s ∈ 𝓝 t) :
+    IsGeodesicAt (I := I) g γ t := by
   obtain ⟨f, hproj, _, hf⟩ := hγ
-  exact ⟨p, f, hproj, hf⟩
+  exact ⟨p, f, hproj, hf.isMIntegralCurveAt ht⟩
 
 /-- The starting point is forced: if `IsGeodesicOnWithInitial g γ s p v`
 holds, then `γ 0 = p`. -/
@@ -337,8 +339,9 @@ theorem exists_isGeodesicAt_of_mem_maximalGeodesicInterval
       IsGeodesicAt (I := I) g γ t := by
   obtain ⟨γ, J, hJ, _hJ_conn, h0, ht, hγ⟩ := h
   refine ⟨γ, J, hJ, h0, ht, hγ, ?_⟩
-  -- `IsGeodesicAt` from `IsGeodesicOn`: take `t` as interior point of `J`.
-  exact hγ.isGeodesicOn.isGeodesicAt (hJ.mem_nhds ht)
+  -- Local spray `IsGeodesicAt` from the initial-data witness: `t` is an
+  -- interior point of `J`.
+  exact hγ.isGeodesicAt (hJ.mem_nhds ht)
 
 /-- For every `t` in the maximal interval, there exists a geodesic
 witness producing `IsGeodesicAt g (witness) t` with starting point `p`. -/
@@ -350,7 +353,7 @@ theorem exists_isGeodesicAt_zero_of_mem_maximalGeodesicInterval
   obtain ⟨γ, J, hJ, h0, ht, hγ_init, hγ_at⟩ :=
     exists_isGeodesicAt_of_mem_maximalGeodesicInterval (I := I) h
   refine ⟨γ, hγ_init.start_eq, ?_, hγ_at⟩
-  exact hγ_init.isGeodesicOn.isGeodesicAt (hJ.mem_nhds h0)
+  exact hγ_init.isGeodesicAt (hJ.mem_nhds h0)
 
 end MaximalGeodesicAtTime
 
@@ -412,56 +415,18 @@ section BridgeLemmas
 variable [I.Boundaryless] [CompleteSpace E]
 
 /-- A geodesic on `Set.univ` is exactly the same data as a global
-geodesic. The set-relative integral-curve predicate
-`IsMIntegralCurveOn ... Set.univ` is equivalent to the global predicate
-`IsMIntegralCurve ...` by Mathlib's `isMIntegralCurve_iff_isMIntegralCurveOn`,
-and `IsGeodesic` / `IsGeodesicOn` are wrappers around the corresponding
-integral-curve predicates. -/
+geodesic. Under the intrinsic moving-foot formulation, `IsGeodesic g γ`
+is `∀ t, HasGeodesicEquationAt g γ t` while
+`IsGeodesicOn g γ Set.univ` is `∀ t ∈ Set.univ, HasGeodesicEquationAt g γ t`;
+these agree by `Set.mem_univ`. -/
 lemma isGeodesic_iff_isGeodesicOn_univ
     {g : SmoothRiemannianMetric I M} {γ : ℝ → M} :
     IsGeodesic (I := I) g γ ↔ IsGeodesicOn (I := I) g γ (Set.univ : Set ℝ) := by
   constructor
   · intro hγ
     exact hγ.isGeodesicOn _
-  · rintro ⟨α, f, hproj, hf⟩
-    refine ⟨α, f, hproj, ?_⟩
-    rw [isMIntegralCurve_iff_isMIntegralCurveOn]
-    exact hf
-
-/-- **Bridge 1 — `isGeodesicOn_Icc_to_global`.**
-
-The Hopf-Rinow assembly conclusion `maximalGeodesicInterval g p v = Set.univ`
-together with a global-coverage witness — i.e. a curve `γ_uni : ℝ → M` defined
-on all of `ℝ` with an `IsGeodesicOnWithInitial`-witness on `Set.univ`, and
-agreeing with `maximalGeodesic g p v` pointwise — combine to produce the
-global geodesic predicate `IsGeodesic g (maximalGeodesic g p v)`.
-
-The "agreement" hypothesis `hEq` is the genuine mathematical input:
-in the canonical use case it is established by initial-data uniqueness
-between the chosen local witness and any extended global witness on the
-maximal interval (since the maximal interval is `Set.univ`, agreement on
-the maximal interval is agreement everywhere).
-
-This bridge is the place where the Hopf-Rinow output is repackaged in
-the canonical-curve form expected by downstream theorems. -/
-theorem isGeodesicOn_Icc_to_global
-    (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p)
-    (_h_assemble : maximalGeodesicInterval (I := I) g p v = Set.univ)
-    {γ_uni : ℝ → M}
-    (hγ_uni : IsGeodesicOnWithInitial (I := I) g γ_uni Set.univ p v)
-    (hEq : ∀ t : ℝ, γ_uni t = maximalGeodesic (I := I) g p v t) :
-    IsGeodesic (I := I) g (maximalGeodesic (I := I) g p v) := by
-  -- `IsGeodesicOnWithInitial` packs an `IsGeodesicOn` on `Set.univ`.
-  have hγ_on : IsGeodesicOn (I := I) g γ_uni (Set.univ : Set ℝ) :=
-    hγ_uni.isGeodesicOn
-  -- Convert to a global `IsGeodesic g γ_uni`.
-  have hγ_glob : IsGeodesic (I := I) g γ_uni :=
-    isGeodesic_iff_isGeodesicOn_univ.mpr hγ_on
-  -- Function equality `γ_uni = maximalGeodesic g p v` from pointwise agreement.
-  have hfun : γ_uni = maximalGeodesic (I := I) g p v := funext hEq
-  -- Transport `IsGeodesic` along the function equality.
-  rw [hfun] at hγ_glob
-  exact hγ_glob
+  · intro hγ t
+    exact hγ t (Set.mem_univ t)
 
 /-- **Bridge 1b — pointwise identification of an `Icc 0 L`-witness with
 `maximalGeodesic g p v` on `Icc 0 L`.**
@@ -482,32 +447,6 @@ theorem maximalGeodesic_eqOn_Icc_of_isGeodesicOnWithInitial
     (hEqLocal : Set.EqOn γ (maximalGeodesic (I := I) g p v) (Set.Icc 0 L)) :
     Set.EqOn γ (maximalGeodesic (I := I) g p v) (Set.Icc 0 L) :=
   hEqLocal
-
-/-- **Bridge 2 — `contMDiffOn_Icc_to_contMDiff_univ`.**
-
-Combine the global `IsGeodesic` predicate (Bridge 1) with a global
-`ContMDiff` witness for the maximal geodesic, packaged together so that
-downstream theorems consume a single `IsGeodesic ∧ ContMDiff` payload.
-
-The `ContMDiff` content (smoothness on the whole real line) is supplied
-as a hypothesis: in the canonical use case it is the smoothness of the
-global ODE flow assembled in `bm_c_gc_assemble`, which propagates through
-chart changes by the local ODE-smoothness witnesses. -/
-theorem contMDiffOn_Icc_to_contMDiff_univ
-    (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p)
-    (h_assemble : maximalGeodesicInterval (I := I) g p v = Set.univ)
-    {γ_uni : ℝ → M}
-    (hγ_uni : IsGeodesicOnWithInitial (I := I) g γ_uni Set.univ p v)
-    (hEq : ∀ t : ℝ, γ_uni t = maximalGeodesic (I := I) g p v t)
-    (hSmooth_uni : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ_uni) :
-    IsGeodesic (I := I) g (maximalGeodesic (I := I) g p v) ∧
-      ContMDiff 𝓘(ℝ, ℝ) I ∞ (maximalGeodesic (I := I) g p v) := by
-  refine ⟨?_, ?_⟩
-  · exact isGeodesicOn_Icc_to_global (I := I) g p v h_assemble hγ_uni hEq
-  · -- Transport `ContMDiff` along `γ_uni = maximalGeodesic g p v`.
-    have hfun : γ_uni = maximalGeodesic (I := I) g p v := funext hEq
-    rw [← hfun]
-    exact hSmooth_uni
 
 end BridgeLemmas
 

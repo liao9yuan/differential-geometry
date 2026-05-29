@@ -171,43 +171,26 @@ private theorem bm_c_raw_mfderiv_eq_symmL_fderiv_at
     _ = ((trivializationAt E (TangentSpace I) α).symmL ℝ (γ s))
           ((fderiv ℝ ((extChartAt I α) ∘ γ) s : ℝ →L[ℝ] E) (1 : ℝ)) := by rw [hCC]
 
-/-- A geodesic is mdifferentiable at every parameter value, extracted from
-its integral-curve lift (which is mdifferentiable, the projection being
-smooth and `γ = proj ∘ lift`). -/
-private theorem bm_c_isGeodesic_mdifferentiableAt
-    {g : SmoothRiemannianMetric I M} {γ : ℝ → M}
-    (hγ : IsGeodesic (I := I) g γ) (s : ℝ) :
-    MDifferentiableAt 𝓘(ℝ, ℝ) I γ s := by
-  obtain ⟨α, f, hproj, hf⟩ := hγ
-  -- The lift `f` is mdifferentiable at `s` (it is an integral curve).
-  have hf_s : MDifferentiableAt 𝓘(ℝ, ℝ) I.tangent f s := (hf s).mdifferentiableAt
-  -- The projection is smooth, hence mdifferentiable at `f s`.
-  have hproj_mdiff :
-      MDifferentiableAt I.tangent I
-        (Bundle.TotalSpace.proj : TangentBundle I M → M) (f s) :=
-    ((Bundle.contMDiff_proj (TangentSpace I)
-      (n := (∞ : WithTop ℕ∞))).contMDiffAt).mdifferentiableAt (by simp)
-  -- Compose: `proj ∘ f` is mdifferentiable at `s`.
-  have hcomp : MDifferentiableAt 𝓘(ℝ, ℝ) I
-      ((Bundle.TotalSpace.proj : TangentBundle I M → M) ∘ f) s :=
-    hproj_mdiff.comp s hf_s
-  -- `proj ∘ f = γ` as functions, by `hproj`.
-  have hfun : ((Bundle.TotalSpace.proj : TangentBundle I M → M) ∘ f) = γ := by
-    funext u; exact hproj u
-  rwa [hfun] at hcomp
-
 /-- **Constant speed of a geodesic.** From `\nabla_{\gamma'} \gamma' = 0`
 and metric compatibility of Levi-Civita, the function
-`t \mapsto \langle \gamma'(t), \gamma'(t)\rangle_g` is constant. -/
+`t \mapsto \langle \gamma'(t), \gamma'(t)\rangle_g` is constant.
+
+The intrinsic geodesic predicate `IsGeodesic g γ` is the pointwise
+moving-foot equation; differentiating the speed integrand additionally
+requires `γ` to be `C^1`, exposed here as the minimal separable
+regularity hypothesis `hγ_C1` (in the canonical use case the geodesic is
+the smooth ODE flow, which is `C^1` a fortiori). -/
 theorem bm_c_gc_constant_speed
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M}
-    (hγ : IsGeodesic (I := I) g γ) :
+    (hγ : IsGeodesic (I := I) g γ) (hγ_C1 : ContMDiff 𝓘(ℝ, ℝ) I 1 γ) :
     ∀ s t : ℝ,
       (g.inner (γ s)) (mfderiv 𝓘(ℝ, ℝ) I γ s 1)
           (mfderiv 𝓘(ℝ, ℝ) I γ s 1) =
         (g.inner (γ t)) (mfderiv 𝓘(ℝ, ℝ) I γ t 1)
           (mfderiv 𝓘(ℝ, ℝ) I γ t 1) := by
   haveI : CompleteSpace E := FiniteDimensional.complete ℝ E
+  -- `γ` is mdifferentiable everywhere (from the `C^1` hypothesis).
+  have hγ_mdiff : MDifferentiable 𝓘(ℝ, ℝ) I γ := hγ_C1.mdifferentiable (by norm_num)
   -- The speed-squared function `F : ℝ → ℝ`.
   set F : ℝ → ℝ := fun t =>
       (g.inner (γ t)) (mfderiv 𝓘(ℝ, ℝ) I γ t 1)
@@ -227,16 +210,14 @@ theorem bm_c_gc_constant_speed
   -- to standard product-rule differentiation of the metric components
   -- `g_{ij}(γ(t)) · u'^i(t) · u'^j(t)` and the chart-coordinate Christoffel
   -- relation `∂_k g_{ij} = g_{lj} Γ^l_{ik} + g_{il} Γ^l_{jk}`. We isolate this
-  -- step as `hF_deriv` below; it consumes the cross-VF reduction bridge
-  -- `IsGeodesicAt.hasGeodesicEquationAt` (which is itself PARTIAL via
-  -- `bm_c_gc_vf_chart_coincidence`).
+  -- step as `hF_deriv` below; it consumes the intrinsic moving-foot geodesic
+  -- equation `HasGeodesicEquationAt`, which is exactly the new definition of
+  -- `IsGeodesic`.
   have hF_deriv : ∀ t : ℝ, HasDerivAt F 0 t := by
     intro t
-    -- Extract the local geodesic predicate at `t`.
-    have hγ_at : IsGeodesicAt (I := I) g γ t := hγ.isGeodesicAt t
-    -- Chart-coordinate second-derivative form of the geodesic equation at `t`.
-    have hγ_eq : HasGeodesicEquationAt (I := I) g γ t :=
-      IsGeodesicAt.hasGeodesicEquationAt (I := I) (g := g) (γ := γ) (t₀ := t) hγ_at
+    -- Chart-coordinate second-derivative form of the geodesic equation at `t`,
+    -- delivered directly by the intrinsic `IsGeodesic` predicate.
+    have hγ_eq : HasGeodesicEquationAt (I := I) g γ t := hγ t
     -- Work in the chart centred at `γ t`.  Abbreviations: `α := γ t`,
     -- `u := chartCurve α γ = φ_α ∘ γ`, and the chart-frame velocity
     -- `V s := deriv u s`.
@@ -306,15 +287,12 @@ theorem bm_c_gc_constant_speed
       -- Neighbourhood on which `γ s` is in the chart source and `u` is
       -- differentiable.
       have hsrc_nhds : {s : ℝ | γ s ∈ (chartAt H α).source} ∈ nhds t := by
-        have hcont : Continuous γ :=
-          MDifferentiable.continuous
-            (fun s => bm_c_isGeodesic_mdifferentiableAt (I := I) hγ s)
+        have hcont : Continuous γ := hγ_C1.continuous
         exact hcont.continuousAt.preimage_mem_nhds
           ((chartAt H α).open_source.mem_nhds hut_src)
       filter_upwards [hev', hsrc_nhds] with s hus hsrc
       -- Raw mfderiv at `s` factors through `symmL` of `fderiv u s`.
-      have hγ_s : MDifferentiableAt 𝓘(ℝ, ℝ) I γ s :=
-        bm_c_isGeodesic_mdifferentiableAt (I := I) hγ s
+      have hγ_s : MDifferentiableAt 𝓘(ℝ, ℝ) I γ s := hγ_mdiff s
       have hraw := bm_c_raw_mfderiv_eq_symmL_fderiv_at (I := I) (γ := γ)
         (α := α) (s := s) hγ_s hsrc
       -- `fderiv (φ_α ∘ γ) s 1 = deriv u s = V s` (definitional: `deriv f s`
@@ -1377,6 +1355,7 @@ theorem unit_speed_minimising_geodesic_from_points
           (g.inner (γ t)) (mfderiv 𝓘(ℝ, ℝ) I γ t 1)
               (mfderiv 𝓘(ℝ, ℝ) I γ t 1) = 1) ∧
         riemannianEDist I p q = ENNReal.ofReal L := by
+  haveI : CompleteSpace E := FiniteDimensional.complete ℝ E
   -- Step 1: obtain a length-minimising continuous curve `α` from `p` to `q`
   -- on `[0, 1]` realising the Riemannian infimum.
   obtain ⟨α, hα_cont, hα0, hα1, hα_len⟩ :=
@@ -1468,7 +1447,7 @@ theorem unit_speed_minimising_geodesic_from_points
       rw [show s * (s * (g.inner p) u u) = (s * s) * (g.inner p) u u by ring]
       rw [hs_sq, inv_mul_cancel₀ hc_ne]
     -- Local geodesic via Picard-Lindelöf.
-    obtain ⟨γ', f, hf0, hγ'_eq, hγ'_zero, hf_mIC, _hγ'_geod⟩ :=
+    obtain ⟨γ', f, hf0, hγ'_eq, hγ'_zero, hf_mIC, hγ'_geod⟩ :=
       exists_geodesic_at (I := I) g p v
     -- Provide the existential with L = 0 and curve γ := γ'.
     refine ⟨γ', 0, le_refl 0, hγ'_zero, ?_, ?_, ?_, ?_, ?_⟩
@@ -1502,19 +1481,14 @@ theorem unit_speed_minimising_geodesic_from_points
             _ = extChartAt 𝓘(ℝ, ℝ) (0 : ℝ) 0 := by rw [hx_sym0]
         exact hxx
       exact (contDiffWithinAt_singleton).mono hsub
-    · -- IsGeodesicOn g γ' (Set.Icc 0 0): from the local IsMIntegralCurveAt.
-      have hIcc_eq : (Set.Icc (0 : ℝ) 0) = ({0} : Set ℝ) :=
-        Set.Icc_self 0
-      rw [hIcc_eq]
-      refine ⟨p, f, ?_, ?_⟩
-      · intro t
-        have := congrFun hγ'_eq t
-        simp [projectCurve] at this
-        exact this.symm
-      · refine IsMIntegralCurveAt.isMIntegralCurveOn ?_
-        intro t ht
-        rcases ht with rfl
-        exact hf_mIC
+    · -- IsGeodesicOn g γ' (Set.Icc 0 0): the intrinsic moving-foot geodesic
+      -- equation at the single time `0`, delivered by the spray→intrinsic
+      -- bridge `IsGeodesicAt.hasGeodesicEquationAt` applied to the local
+      -- Picard-Lindelöf geodesic `hγ'_geod : IsGeodesicAt g γ' 0`.
+      intro t ht
+      rw [Set.Icc_self 0, Set.mem_singleton_iff] at ht
+      subst ht
+      exact hγ'_geod.hasGeodesicEquationAt
     · -- Unit speed at every t ∈ Set.Icc 0 0.
       intro t ht
       have hIcc_eq : (Set.Icc (0 : ℝ) 0) = ({0} : Set ℝ) :=
