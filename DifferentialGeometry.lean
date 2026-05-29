@@ -1221,6 +1221,7 @@ import DifferentialGeometry.PDE.RicciFlow.DeTurckShortTime
 import DifferentialGeometry.PDE.RicciFlow.DeTurckVFTimeFamily
 import DifferentialGeometry.PDE.RicciFlow.DeTurckSolutionC1
 import DifferentialGeometry.PDE.RicciFlow.HamiltonDeTurckPullback
+import DifferentialGeometry.PDE.RicciFlow.Pullback.EvaluationFormChainRule
 import DifferentialGeometry.PDE.RicciFlow.ShortTimeExistence
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.SobolevScale.Order2Equivalence
 
