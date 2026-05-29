@@ -1226,6 +1226,7 @@ import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.LiftMetric
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization.PosDefPerturbation
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization.TensorHsRealize
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization.HeatOutputRealize
+import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization.SpectralSmoothGate
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.PointwiseDeriv
 import DifferentialGeometry.PDE.RicciFlow.DeTurckShortTime
 import DifferentialGeometry.PDE.RicciFlow.DeTurckVFTimeFamily
