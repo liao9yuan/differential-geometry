@@ -571,6 +571,53 @@ theorem tensor0SCovariantDerivative_apply_zero
   rw [tensor0SCovariantDerivative_zero_eq]
   rfl
 
+/-! ### The covariant derivative of the constant unit `(0, 0)`-section is zero
+
+The constant `(0, 0)`-section with value the unit continuous multilinear map
+`ofModel (constOfIsEmpty 1)` has zero covariant derivative: its scalar function
+`scalarFn` is the constant `1`, whose exterior derivative vanishes. This is the
+parallel-transport input for the rank-`0` index-lowering intertwining. -/
+
+/-- The scalar function of the constant unit `(0, 0)`-section is the constant
+function `1`: `tensor0Iso x (ofModel (constOfIsEmpty 1)) = 1`. -/
+theorem scalarFn_unitZero :
+    scalarFn I M
+        (fun _ : M => Tensor0SSpace.ofModel
+          (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => E) (1 : ℝ))) =
+      fun _ : M => (1 : ℝ) := by
+  funext y
+  rw [scalarFn_apply]
+  -- `tensor0Iso y (ofModel f) = curryFin0 (cle_0 (cle_0.symm f)) = curryFin0 f = f 0`.
+  change (tensor0SSpace_continuousLinearEquiv (I := I) 0 y).trans
+      (continuousMultilinearCurryFin0 ℝ E ℝ).toContinuousLinearEquiv
+      ((tensor0SSpace_continuousLinearEquiv (I := I) 0 y).symm
+        (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => E) (1 : ℝ))) = (1 : ℝ)
+  rw [ContinuousLinearEquiv.trans_apply,
+    ContinuousLinearEquiv.apply_symm_apply]
+  -- `curryFin0` applied to `constOfIsEmpty 1` is its value on the empty tuple, `1`.
+  change (continuousMultilinearCurryFin0 ℝ E ℝ)
+      (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => E) (1 : ℝ)) = (1 : ℝ)
+  rw [continuousMultilinearCurryFin0_apply, ContinuousMultilinearMap.constOfIsEmpty_apply]
+
+/-- **The covariant derivative of the constant unit `(0, 0)`-section vanishes.**
+The `(0, 0)`-tensor section with constant value `ofModel (constOfIsEmpty 1)` is
+`∇`-parallel: its directional covariant derivative is `0` at every point and in
+every direction. -/
+theorem tensor0SCovariantDerivative_unitZero_eq_zero
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    [ContMDiffCovariantDerivative cov ∞]
+    (x : M) (v : TangentSpace I x) :
+    tensor0SCovariantDerivative I M 0 cov
+        (fun _ : M => Tensor0SSpace.ofModel
+          (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => E) (1 : ℝ)))
+        x v = 0 := by
+  rw [tensor0SCovariantDerivative_apply_zero, scalarFn_unitZero]
+  have hext : extDerivFun (I := I) (fun _ : M => (1 : ℝ)) x = 0 := by
+    unfold extDerivFun
+    simp [mfderiv_const]
+  rw [hext]
+  simp
+
 /-! ### Compile-time sanity check
 
 Given a `C^∞` covariant derivative on `TM`, the recursive construction produces a `C^∞`

@@ -71,6 +71,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open TensorMetricLowering
 open Tensor0SNabla
+open TensorRSNabla
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [InnerProductSpace ℝ E] [CompleteSpace E]
@@ -257,6 +258,176 @@ lemma toModel_eq_symm_liftedTensorSection
         (Tensor0SSpace.toModel (liftedTensorSection (I := I) (M := M) g r s S y)) := by
   rw [toModel_liftedTensorSection_eq_equiv,
     ContinuousLinearEquiv.symm_apply_apply]
+
+/-! ## The rank-`0` connection-intertwining identity
+
+The Levi-Civita-induced `(r, s)`-tensor connection is intertwined with the
+covariant-rank-`(0, r + s)` connection by index lowering. At rank `r = 0` the
+lowering map carries no metric content — it is the evaluation of an
+`(r, s) = (0, s)`-tensor at the metric-independent unit `(0, 0)`-tensor — so the
+intertwining is a *direct* consequence of the proved product rule
+`tensorRSCovariantDerivative_apply` together with the parallelism of the
+constant unit `(0, 0)`-section (`tensor0SCovariantDerivative_unitZero_eq_zero`).
+No use of `∇g = 0` is required at rank `0`. -/
+
+omit [InnerProductSpace ℝ E] [CompleteSpace E]
+  [NeZero (Module.finrank ℝ E)] in
+/-- **Smoothness of the constant unit `(0, 0)`-section.** The `(0, 0)`-tensor
+section with constant value `ofModel (constOfIsEmpty 1)` is a smooth section of
+the `(0, 0)`-tensor bundle: its scalar function is the constant `1`. -/
+lemma contMDiff_unitZeroSection :
+    ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 0 ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (Tensor0SModel 0 ℝ E)
+        (E := fun z : M => Tensor0SSpace 0 I z) y
+        (Tensor0SSpace.ofModel
+          (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => E) (1 : ℝ)))) := by
+  rw [← contMDiff_scalarFn_iff_section (I := I) (M := M)]
+  rw [scalarFn_unitZero (I := I) (M := M)]
+  exact contMDiff_const
+
+omit [InnerProductSpace ℝ E] [CompleteSpace E]
+  [NeZero (Module.finrank ℝ E)]
+  [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+/-- The model coercion of the `(r, s)`-tensor `T` applied to a `(0, r)`-tensor
+`D` is the model `(r, s)`-tensor applied to the model `(0, r)`-tensor: the
+fibrewise model coercions intertwine evaluation. -/
+lemma toModel_tensorRS_apply
+    (r s : ℕ) (x : M) (T : TensorRSSpace r s I x) (D : Tensor0SSpace r I x) :
+    Tensor0SSpace.toModel
+        ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from T) D) =
+      TensorRSSpace.toModel T (Tensor0SSpace.toModel D) := by
+  -- `TensorRSSpace.toModel = arrowCongr (cle_r) (cle_s)`, whose action is
+  -- `T ↦ cle_s ∘ T ∘ cle_r.symm`. Apply this to `cle_r D` and round-trip.
+  change Tensor0SSpace.toModel
+      ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from T) D) =
+    ((tensor0SSpace_continuousLinearEquiv (I := I) r x).arrowCongr
+        (tensor0SSpace_continuousLinearEquiv (I := I) s x) T)
+      (Tensor0SSpace.toModel D)
+  rw [ContinuousLinearEquiv.arrowCongr_apply]
+  -- `cle_r.symm (toModel D) = cle_r.symm (cle_r D) = D`.
+  have hD : (tensor0SSpace_continuousLinearEquiv (I := I) r x).symm
+      (Tensor0SSpace.toModel D) = D :=
+    (tensor0SSpace_continuousLinearEquiv (I := I) r x).symm_apply_apply D
+  rw [hD]
+  rfl
+
+/-- **Rank-`0` lowering is evaluation at the unit `(0, 0)`-tensor.** At rank
+`r = 0` (here `s = 2`) the metric-lowered `(0, 0 + 2)`-tensor section value
+`liftedTensorSection g 0 2 S y` is exactly `S y` evaluated at the constant unit
+`(0, 0)`-tensor `ofModel (constOfIsEmpty 1)`. -/
+lemma liftedTensorSection_zero_eq_apply_unit
+    (g : SmoothRiemannianMetric I M)
+    (S : Cₛ^∞⟮I; TensorRSModel 0 2 ℝ E, (fun x : M => TensorRSSpace 0 2 I x)⟯)
+    (y : M) :
+    (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace (0 + 2) I y from S y)
+        (Tensor0SSpace.ofModel
+          (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => E) (1 : ℝ))) =
+      liftedTensorSection (I := I) (M := M) g 0 2 S y := by
+  -- Both sides agree after `toModel`, which is injective; prove the model equation.
+  refine Tensor0SSpace.toModel_injective ?_
+  change Tensor0SSpace.toModel
+      ((show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace (0 + 2) I y from S y)
+        (Tensor0SSpace.ofModel
+          (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => E) (1 : ℝ)))) =
+    Tensor0SSpace.toModel (liftedTensorSection (I := I) (M := M) g 0 2 S y)
+  rw [toModel_liftedTensorSection]
+  -- LHS: `toModel (S y (unit)) = toModel (S y) (toModel unit) = toModel (S y) (constOfIsEmpty 1)`.
+  rw [toModel_tensorRS_apply (I := I) (M := M) 0 2 y (S y)
+    (Tensor0SSpace.ofModel
+      (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => E) (1 : ℝ)))]
+  rw [Tensor0SSpace.toModel_ofModel]
+  -- RHS: `lowerAllUpperIndices g 0 2 y (toModel (S y))`. Evaluate both at a tuple.
+  refine ContinuousMultilinearMap.ext (fun u => ?_)
+  rw [lowerAllUpperIndices_apply]
+  -- `separableFormAt g y 0 _ = constOfIsEmpty 1`, and `natAdd 0 j = j` reindexes the tuple.
+  rw [separableFormAt_zero]
+  -- The last-`2` reindex `fun j => u (Fin.natAdd 0 j)` is `u` (since `Fin.natAdd 0 j = j`).
+  congr 1
+  funext j
+  exact congrArg u (Fin.ext (by simp))
+
+/-- **The rank-`0` connection-intertwining identity (at `(0, 2)`).** The
+metric-lowered directional covariant derivative of a smooth `(0, 2)`-tensor
+section `S` is the index-lowering of the genuine `(0, 2)`-tensor covariant
+derivative of `S`:
+
+  `toModel (∇_v^lowered S) = lowerAllUpperIndices g 0 2 x (toModel (∇_v^{(0,2)} S))`,
+
+where `∇^lowered = loweredCovDerivAt g 0 2 S` is the covariant derivative of the
+metric-lowered `(0, 0 + 2)`-tensor section, and `∇^{(0,2)}` is the genuine
+Levi-Civita-induced `(0, 2)`-tensor connection `tensorRSCovariantDerivative`.
+
+The proof applies the proved product rule `tensorRSCovariantDerivative_apply`
+with the constant unit `(0, 0)`-section, whose covariant derivative vanishes
+(`tensor0SCovariantDerivative_unitZero_eq_zero`); at rank `0` the lowering map
+is exactly evaluation at that unit (`liftedTensorSection_zero_eq_apply_unit`),
+so no metric-compatibility (`∇g = 0`) input is needed. -/
+theorem loweredCovDerivAt_eq_lower_tensorCovDerivAt
+    (g : SmoothRiemannianMetric I M)
+    (S : Cₛ^∞⟮I; TensorRSModel 0 2 ℝ E, (fun x : M => TensorRSSpace 0 2 I x)⟯)
+    (x : M) (v : TangentSpace I x) :
+    Tensor0SSpace.toModel (loweredCovDerivAt (I := I) (M := M) g 0 2 S x v) =
+      lowerAllUpperIndices (I := I) (M := M) g 0 2 x
+        (TensorRSSpace.toModel
+          (tensorRSCovariantDerivative I M 0 2 (LeviCivita (I := I) g) S x v)) := by
+  classical
+  -- The constant unit `(0, 0)`-section.
+  let unitSec : Cₛ^∞⟮I; Tensor0SModel 0 ℝ E, (fun y : M => Tensor0SSpace 0 I y)⟯ :=
+    ⟨fun _ : M => Tensor0SSpace.ofModel
+        (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => E) (1 : ℝ)),
+      contMDiff_unitZeroSection (I := I) (M := M)⟩
+  -- The underlying function of `unitSec` is the constant unit `(0, 0)`-tensor.
+  have hcoe : (fun y : M => unitSec y) =
+      fun _ : M => Tensor0SSpace.ofModel
+        (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => E) (1 : ℝ)) := rfl
+  -- `toModel (unitSec x) = constOfIsEmpty 1`.
+  have hunit_model : Tensor0SSpace.toModel (unitSec x) =
+      ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => E) (1 : ℝ) := by
+    change Tensor0SSpace.toModel (Tensor0SSpace.ofModel
+      (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => E) (1 : ℝ))) = _
+    rw [Tensor0SSpace.toModel_ofModel]
+  -- Step A: the genuine `(0, 2)`-covariant derivative, lowered, equals its
+  -- evaluation at the unit `(0, 0)`-tensor — model-side.
+  have hlowerA :
+      lowerAllUpperIndices (I := I) (M := M) g 0 2 x
+          (TensorRSSpace.toModel
+            (tensorRSCovariantDerivative I M 0 2 (LeviCivita (I := I) g) S x v)) =
+        Tensor0SSpace.toModel
+          ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (0 + 2) I x from
+              tensorRSCovariantDerivative I M 0 2 (LeviCivita (I := I) g) S x v)
+            (unitSec x)) := by
+    rw [toModel_tensorRS_apply (I := I) (M := M) 0 2 x
+      (tensorRSCovariantDerivative I M 0 2 (LeviCivita (I := I) g) S x v) (unitSec x)]
+    -- `lowerAllUpperIndices g 0 2 x U` evaluated equals `U (constOfIsEmpty 1) (reindex)`.
+    rw [hunit_model]
+    refine ContinuousMultilinearMap.ext (fun u => ?_)
+    rw [lowerAllUpperIndices_apply, separableFormAt_zero]
+    congr 1
+    funext j
+    exact congrArg u (Fin.ext (by simp))
+  rw [hlowerA]
+  -- Step B: the product rule. `(∇^{(0,2)}_v S)(unitSec x)
+  --   = ∇^{(0,2)}_v (fun y => S y (unitSec y)) x v - S x (∇^{(0,0)}_v unitSec x v)`.
+  rw [tensorRSCovariantDerivative_apply (I := I) (M := M) 0 2
+    (LeviCivita (I := I) g) S unitSec x v]
+  -- `∇^{(0,0)}_v unitSec x v = 0`, so the second term vanishes.
+  rw [show (Tensor0SNabla.tensor0SCovariantDerivative I M 0 (LeviCivita (I := I) g)
+        (fun y : M => unitSec y) x v) = 0 from by
+    rw [hcoe]
+    exact tensor0SCovariantDerivative_unitZero_eq_zero (I := I) (M := M)
+      (LeviCivita (I := I) g) x v]
+  rw [map_zero, sub_zero]
+  -- `fun y => S y (unitSec y) = liftedTensorSection g 0 2 S` as a function,
+  -- so the `(0, 2)`-covariant derivative is `loweredCovDerivAt g 0 2 S x v`.
+  rw [loweredCovDerivAt_def]
+  -- The two section arguments coincide pointwise; the connection index `0 + 2 = 2`
+  -- agrees definitionally.
+  have hsec : (fun y : M =>
+        (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace (0 + 2) I y from S y) (unitSec y)) =
+      liftedTensorSection (I := I) (M := M) g 0 2 S := by
+    funext y
+    exact liftedTensorSection_zero_eq_apply_unit (I := I) (M := M) g S y
+  rw [hsec]
 
 end Connection
 end Integral
