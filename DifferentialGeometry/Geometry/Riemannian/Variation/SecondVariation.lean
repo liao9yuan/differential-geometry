@@ -86,6 +86,16 @@ private def speedSq
     (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f s u) t (1 : ℝ))
     (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f s u) t (1 : ℝ))
 
+/-- The arc length of the slice `t ↦ f s t` on `[0, L]` is the interval
+integral of the square root of the speed-squared `speedSq g f s t`. This is
+definitional: the `arcLength` integrand is `√(g.inner (f s t) (∂_t f) (∂_t f))`,
+and `speedSq g f s t` is exactly that inner product. -/
+private lemma arcLength_slice_eq_integral_sqrt_speedSq
+    (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M) (s L : ℝ) :
+    arcLength (I := I) g (fun t : ℝ => f s t) 0 L
+      = ∫ t in (0 : ℝ)..L, Real.sqrt (speedSq (I := I) g f s t) := by
+  rfl
+
 /-- The partial-`t` derivative of a smooth two-parameter variation, evaluated
 at `(s, t)` with the unit input vector `1 : ℝ`, coincides with the directional
 derivative of the uncurried map at `(s, t)` along `(0, 1) : ℝ × ℝ`. -/
