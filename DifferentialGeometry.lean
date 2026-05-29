@@ -723,6 +723,7 @@ import DifferentialGeometry.Integral.Connection.TensorCovGradL2InnerDirichletBri
 import DifferentialGeometry.Integral.Connection.TensorConnLapGreenIdentity
 import DifferentialGeometry.Integral.Connection.TensorConnLapSecondOrderIBP
 import DifferentialGeometry.Integral.Connection.TensorConnLapGreenAssembly
+import DifferentialGeometry.Integral.Connection.TensorConnLapGreenPerChart
 import DifferentialGeometry.Integral.Connection.Curvature
 import DifferentialGeometry.Integral.Connection.CurvatureBundling
 import DifferentialGeometry.Integral.Connection.Ricci
