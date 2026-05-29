@@ -966,6 +966,190 @@ theorem euclidPartial2_chartPushedRaw_abs_le_aux
   refine (abs_sub _ _).trans ?_
   exact add_le_add h_dc ((abs_add_le _ _).trans (add_le_add h_val_sum h_grad_sum))
 
+/-! ## Leaf-5: each iterated-covariant-gradient fibre norm is a jet-sum summand -/
+
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
+/-- For `j < 3`, the `g_bg`-Riemannian fibre norm of `(∇^j S)(x)` is bounded by the iterated
+covariant-gradient jet sum at `x` (it is the `j`-th nonnegative summand). -/
+theorem iteratedCovGrad_norm_le_jetSum
+    (g_bg : SmoothRiemannianMetric I M) (S : SmoothCcTensor g_bg 0 2) (x : M)
+    (j : ℕ) (hj : j < 3) :
+    letI : Bundle.RiemannianBundle (fun bb : M => TensorRSSpace 0 (2 + j) I bb) :=
+      Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g_bg 0 (2 + j)
+    ‖(iteratedCovGrad (I := I) (M := M) g_bg 0 2 j S).toSection x‖ ≤
+      iteratedCovGradJetSum (I := I) g_bg S x := by
+  rw [iteratedCovGradJetSum]
+  have hsummand_nn : ∀ i ∈ Finset.range 3,
+      0 ≤ (letI : Bundle.RiemannianBundle (fun bb : M => TensorRSSpace 0 (2 + i) I bb) :=
+            Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g_bg 0 (2 + i)
+          ‖(iteratedCovGrad (I := I) (M := M) g_bg 0 2 i S).toSection x‖) := by
+    intro i _
+    letI : Bundle.RiemannianBundle (fun bb : M => TensorRSSpace 0 (2 + i) I bb) :=
+      Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g_bg 0 (2 + i)
+    exact norm_nonneg _
+  exact Finset.single_le_sum hsummand_nn (Finset.mem_range.mpr hj)
+
+set_option maxHeartbeats 3200000 in
+/-- Uniform sup-bound for the second-order value coefficient over a compact `K_eucl`,
+uniform in all multi-index parameters. -/
+theorem secondCovDerivLO_valueCoeff_uniform_bound
+    (g_bg : SmoothRiemannianMetric I M) (α : M)
+    {K_eucl : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))}
+    (hK : IsCompact K_eucl) (hKsub : K_eucl ⊆ chartTargetEuclid (I := I) (M := M) α) :
+    ∃ Cval : ℝ, 0 ≤ Cval ∧ ∀ (a c : Fin (Module.finrank ℝ E))
+      (p1 : Fin 0 → Fin (Module.finrank ℝ E)) (Jdx p2 : Fin 2 → Fin (Module.finrank ℝ E))
+      (z : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))), z ∈ K_eucl →
+        |secondCovDerivLO_valueCoeff (I := I) (M := M) g_bg 0 2 α a c
+            (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) p1 Jdx p2 z| ≤ Cval := by
+  classical
+  have h_bound : ∀ (acIJ : (Fin (Module.finrank ℝ E)) × (Fin (Module.finrank ℝ E)) ×
+        ((Fin 0 → Fin (Module.finrank ℝ E)) × (Fin 2 → Fin (Module.finrank ℝ E)) ×
+          (Fin 2 → Fin (Module.finrank ℝ E)))),
+      ∃ Cv : ℝ, 0 ≤ Cv ∧ ∀ z ∈ K_eucl,
+        |secondCovDerivLO_valueCoeff (I := I) (M := M) g_bg 0 2 α acIJ.1 acIJ.2.1
+            (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) acIJ.2.2.1
+            acIJ.2.2.2.1 acIJ.2.2.2.2 z| ≤ Cv := by
+    rintro ⟨a, c, p1, Jdx, p2⟩
+    obtain ⟨Cv, hCv⟩ := hK.exists_bound_of_continuousOn
+      (((secondCovDerivLO_valueCoeff_contDiffOn (I := I) (M := M) g_bg 0 2 α a c
+        (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) p1 Jdx p2).continuousOn).mono hKsub)
+    refine ⟨max Cv 0, le_max_right _ _, fun z hz => ?_⟩
+    have := hCv z hz; rw [Real.norm_eq_abs] at this; exact this.trans (le_max_left _ _)
+  choose Cv hCv_nn hCv_bd using h_bound
+  refine ⟨Finset.univ.sup' Finset.univ_nonempty Cv,
+    le_trans (hCv_nn (Classical.arbitrary _)) (Finset.le_sup' Cv (Finset.mem_univ _)),
+    fun a c p1 Jdx p2 z hz => ?_⟩
+  -- For `p1 : Fin 0 → _`, `p1 = ![]`; the bound is indexed by `(a, c, p1, Jdx, p2)`.
+  have hp1 : p1 = (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) := Subsingleton.elim _ _
+  subst hp1
+  exact (hCv_bd (a, c, _, Jdx, p2) z hz).trans (Finset.le_sup' Cv (Finset.mem_univ _))
+
+set_option maxHeartbeats 3200000 in
+/-- Uniform sup-bound for the second-order gradient coefficient over a compact `K_eucl`,
+uniform in all multi-index parameters. -/
+theorem secondCovDerivLO_gradCoeff_uniform_bound
+    (g_bg : SmoothRiemannianMetric I M) (α : M)
+    {K_eucl : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))}
+    (hK : IsCompact K_eucl) (hKsub : K_eucl ⊆ chartTargetEuclid (I := I) (M := M) α) :
+    ∃ Cgrd : ℝ, 0 ≤ Cgrd ∧ ∀ (a : Fin (Module.finrank ℝ E))
+      (p1 : Fin 0 → Fin (Module.finrank ℝ E)) (Jdx p2 : Fin 2 → Fin (Module.finrank ℝ E))
+      (z : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))), z ∈ K_eucl →
+        |secondCovDerivLO_gradCoeff (I := I) (M := M) g_bg 0 2 α a
+            (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) p1 Jdx p2 z| ≤ Cgrd := by
+  classical
+  have h_bound : ∀ (aIJ : (Fin (Module.finrank ℝ E)) ×
+        ((Fin 0 → Fin (Module.finrank ℝ E)) × (Fin 2 → Fin (Module.finrank ℝ E)) ×
+          (Fin 2 → Fin (Module.finrank ℝ E)))),
+      ∃ Cg : ℝ, 0 ≤ Cg ∧ ∀ z ∈ K_eucl,
+        |secondCovDerivLO_gradCoeff (I := I) (M := M) g_bg 0 2 α aIJ.1
+            (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) aIJ.2.1
+            aIJ.2.2.1 aIJ.2.2.2 z| ≤ Cg := by
+    rintro ⟨a, p1, Jdx, p2⟩
+    obtain ⟨Cg, hCg⟩ := hK.exists_bound_of_continuousOn
+      (((secondCovDerivLO_gradCoeff_contDiffOn (I := I) (M := M) g_bg 0 2 α a
+        (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) p1 Jdx p2).continuousOn).mono hKsub)
+    refine ⟨max Cg 0, le_max_right _ _, fun z hz => ?_⟩
+    have := hCg z hz; rw [Real.norm_eq_abs] at this; exact this.trans (le_max_left _ _)
+  choose Cg hCg_nn hCg_bd using h_bound
+  refine ⟨Finset.univ.sup' Finset.univ_nonempty Cg,
+    le_trans (hCg_nn (Classical.arbitrary _)) (Finset.le_sup' Cg (Finset.mem_univ _)),
+    fun a p1 Jdx p2 z hz => ?_⟩
+  have hp1 : p1 = (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) := Subsingleton.elim _ _
+  subst hp1
+  exact (hCg_bd (a, _, Jdx, p2) z hz).trans (Finset.le_sup' Cg (Finset.mem_univ _))
+
+set_option maxHeartbeats 4000000 in
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
+/-- **Second-order chart-push bound by the jet sum.**  On a compact `K_eucl ⊆ chartTargetEuclid
+α`, there is a constant `C ≥ 0` such that the iterated `EuclideanSpace` partial of the
+chart-pushed raw `(0,2)`-component of `S` is bounded by `C` times the iterated covariant-gradient
+jet sum at the chart preimage. -/
+theorem euclidPartial2_chartPushedRaw_abs_le_jetSum
+    (g_bg : SmoothRiemannianMetric I M) (α : M)
+    {K_eucl : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))}
+    (hK : IsCompact K_eucl) (hKsub : K_eucl ⊆ chartTargetEuclid (I := I) (M := M) α) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ (S : SmoothCcTensor g_bg 0 2)
+      (c a : Fin (Module.finrank ℝ E)) (Jdx : Fin 2 → Fin (Module.finrank ℝ E))
+      (y' : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))), y' ∈ K_eucl →
+        |euclidPartial (E := E) c
+            (euclidPartial (E := E) a
+              (chartPushedRaw I α
+                (tensorChartComponentRaw (I := I) (M := M) g_bg 0 2 S α
+                  (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) Jdx))) y'| ≤
+          C * iteratedCovGradJetSum (I := I) g_bg S
+            ((extChartAt I α).symm ((toEuclidean (E := E)).symm y')) := by
+  classical
+  obtain ⟨hImg_cpt, hImg_sub⟩ :=
+    chartPreimage_image_isCompact_subset_chartSource (I := I) (M := M) α hK hKsub
+  obtain ⟨Craw4, hCraw4_nn, hCraw4_bd⟩ :=
+    tensorChartComponentRaw_abs_le_riemannianFibreNorm (I := I) g_bg 4 α hImg_cpt hImg_sub
+  obtain ⟨Craw3, hCraw3_nn, hCraw3_bd⟩ :=
+    tensorChartComponentRaw_abs_le_riemannianFibreNorm (I := I) g_bg 3 α hImg_cpt hImg_sub
+  obtain ⟨Craw2, hCraw2_nn, hCraw2_bd⟩ :=
+    tensorChartComponentRaw_abs_le_riemannianFibreNorm (I := I) g_bg 2 α hImg_cpt hImg_sub
+  obtain ⟨CLO3, hCLO3_nn, hCLO3_bd⟩ :=
+    covDerivLowerOrderTerm_abs_le_riemannianFibreNorm (I := I) g_bg 3 α hK hKsub
+  obtain ⟨CLO2, hCLO2_nn, hCLO2_bd⟩ :=
+    covDerivLowerOrderTerm_abs_le_riemannianFibreNorm (I := I) g_bg 2 α hK hKsub
+  obtain ⟨Cval, hCval_nn, hCval_bd⟩ :=
+    secondCovDerivLO_valueCoeff_uniform_bound (I := I) g_bg α hK hKsub
+  obtain ⟨Cgrd, hCgrd_nn, hCgrd_bd⟩ :=
+    secondCovDerivLO_gradCoeff_uniform_bound (I := I) g_bg α hK hKsub
+  set Npairs : ℝ := (Fintype.card ((Fin 0 → Fin (Module.finrank ℝ E)) ×
+      (Fin 2 → Fin (Module.finrank ℝ E))) : ℝ) with hNpairs_def
+  have hNpairs_nn : 0 ≤ Npairs := by rw [hNpairs_def]; positivity
+  refine ⟨Craw4 + CLO3 + Npairs * (Cval * Craw2) + 2 * (Npairs * (Cgrd * (Craw3 + CLO2))),
+    by positivity, ?_⟩
+  intro S c a Jdx y' hy'
+  letI inst4 : Bundle.RiemannianBundle (fun bb : M => TensorRSSpace 0 4 I bb) :=
+    Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g_bg 0 4
+  letI inst3 : Bundle.RiemannianBundle (fun bb : M => TensorRSSpace 0 3 I bb) :=
+    Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g_bg 0 3
+  letI inst2 : Bundle.RiemannianBundle (fun bb : M => TensorRSSpace 0 2 I bb) :=
+    Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g_bg 0 2
+  set b₀ : M := (extChartAt I α).symm ((toEuclidean (E := E)).symm y') with hb₀_def
+  set R : ℝ := iteratedCovGradJetSum (I := I) g_bg S b₀ with hR_def
+  set N0 : ℝ := ‖S.toSection b₀‖ with hN0_def
+  set N1 : ℝ := ‖(covGrad (I := I) (M := M) g_bg 0 2 S).toSection b₀‖ with hN1_def
+  set N2 : ℝ := ‖(covGrad (I := I) (M := M) g_bg 0 3
+    (covGrad (I := I) (M := M) g_bg 0 2 S)).toSection b₀‖ with hN2_def
+  have hN0_nn : 0 ≤ N0 := norm_nonneg _
+  have hN1_nn : 0 ≤ N1 := norm_nonneg _
+  have hN2_nn : 0 ≤ N2 := norm_nonneg _
+  have hN0_le : N0 ≤ R := by
+    rw [hN0_def, hR_def]
+    exact iteratedCovGrad_norm_le_jetSum (I := I) g_bg S b₀ 0 (by norm_num)
+  have hN1_le : N1 ≤ R := by
+    rw [hN1_def, hR_def]
+    exact iteratedCovGrad_norm_le_jetSum (I := I) g_bg S b₀ 1 (by norm_num)
+  have hN2_le : N2 ≤ R := by
+    rw [hN2_def, hR_def]
+    exact iteratedCovGrad_norm_le_jetSum (I := I) g_bg S b₀ 2 (by norm_num)
+  have hR_nn : 0 ≤ R := le_trans hN0_nn hN0_le
+  -- Apply the parametrized second-order bound.
+  have haux := euclidPartial2_chartPushedRaw_abs_le_aux (I := I) g_bg α hKsub
+    Craw4 hCraw4_bd Craw3 hCraw3_nn hCraw3_bd Craw2 hCraw2_bd CLO3 hCLO3_bd CLO2 hCLO2_nn hCLO2_bd
+    Cval hCval_nn hCval_bd Cgrd hCgrd_nn hCgrd_bd S c a Jdx hy'
+  rw [← hN0_def, ← hN1_def, ← hN2_def] at haux
+  refine haux.trans ?_
+  -- Collect into `C * R` using `Nj ≤ R`.
+  have hb3 : Npairs * (Cval * Craw2) * N0 ≤ Npairs * (Cval * Craw2) * R :=
+    mul_le_mul_of_nonneg_left hN0_le (by positivity)
+  have hb4 : Npairs * (Cgrd * (Craw3 + CLO2)) * (N1 + N0) ≤
+      Npairs * (Cgrd * (Craw3 + CLO2)) * (R + R) :=
+    mul_le_mul_of_nonneg_left (add_le_add hN1_le hN0_le) (by positivity)
+  have hb1 : Craw4 * N2 ≤ Craw4 * R := mul_le_mul_of_nonneg_left hN2_le hCraw4_nn
+  have hb2 : CLO3 * N1 ≤ CLO3 * R := mul_le_mul_of_nonneg_left hN1_le hCLO3_nn
+  calc (Craw4 * N2 + CLO3 * N1) + (Npairs * (Cval * Craw2) * N0
+          + Npairs * (Cgrd * (Craw3 + CLO2)) * (N1 + N0))
+      ≤ (Craw4 * R + CLO3 * R) + (Npairs * (Cval * Craw2) * R
+          + Npairs * (Cgrd * (Craw3 + CLO2)) * (R + R)) :=
+        add_le_add (add_le_add hb1 hb2) (add_le_add hb3 hb4)
+    _ = (Craw4 + CLO3 + Npairs * (Cval * Craw2) + 2 * (Npairs * (Cgrd * (Craw3 + CLO2)))) * R := by
+        ring
+
 /-! ## Leaf-5: the zeroth-order (conjunct 1) bound -/
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
