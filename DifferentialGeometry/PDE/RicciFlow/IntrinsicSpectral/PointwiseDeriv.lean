@@ -1,4 +1,3 @@
-import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.QuasilinearStrong
 import DifferentialGeometry.PDE.RicciFlow.SobolevEmbedding
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.MaxRegSpace
 import DifferentialGeometry.Analysis.Parabolic.TimeSobolev.TimeH1

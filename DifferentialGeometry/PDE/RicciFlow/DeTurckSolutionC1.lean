@@ -1,6 +1,5 @@
 import DifferentialGeometry.PDE.RicciFlow.DeTurckShortTime
 import DifferentialGeometry.PDE.RicciFlow.SobolevEmbedding
-import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.LiftMetric
 import DifferentialGeometry.PDE.RicciFlow.DeTurckRHS
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.MaxRegSpace
 import DifferentialGeometry.Analysis.Parabolic.TimeSobolev.TimeH1

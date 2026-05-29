@@ -66,9 +66,6 @@ The realization splits into two maps of very different difficulty:
   (HLCC); it does not extend to general `H^{a+2}` elements without exactly
   the embedding above.
 
-This `RealizesAsMetric` gate is stated below as a *Prop on the data*, never
-assumed in any constructed term.
-
 ## What is delivered here (all chart-locality-free)
 
 * `realizeToL2` — the `H^{a+2} →L[ℝ] TensorL2` realization CLM, with norm
@@ -78,8 +75,6 @@ assumed in any constructed term.
   derivative and lands in `H^a`", with norm `≤ 1`.  This is the abstract
   shape that the geometric remainder must factor through; see
   `firstOrderRemainder_lands_in_Ha`.
-* `RealizesAsMetric` — the precise analytic gate predicate (a Prop), and
-  documentation of its two analytic components in prose.
 * `deTurckNonlinearitySpectral_principalPart_cancels` — re-export of the
   symbol-level cancellation `deTurckRicciRHS_minus_roughLaplacian_…` from
   `DeTurckPrincipalPartMatch.lean`, the mathematical justification that the
@@ -125,8 +120,8 @@ witness `h_compact`, this sends `u ∈ H^{a+2}` to the `L²` `(0,2)`-tensor
 field with the same eigenbasis coordinates.  It is linear, continuous, and
 norm-non-increasing (operator norm `≤ 1`).  This is the only part of the
 spectral-coordinate ↔ tensor-field realization that exists unconditionally;
-the further promotion to a pointwise smooth metric is the gate
-`RealizesAsMetric` below. -/
+the further promotion to a pointwise smooth metric is the remaining analytic
+gate documented in the module header. -/
 def realizeToL2 (g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (h_compact : IsCompactOperator
       (tensorResolventL2 (I := I) (M := M) g_bg 0 2)) :
@@ -233,33 +228,6 @@ theorem firstOrderRemainder_lands_in_Ha
             (firstOrderRemainderInclusion_opNorm_le_one (I := I) (M := M) g_bg a)
             (norm_nonneg _)
       _ = ‖R‖ := one_mul _
-
-/-! ## The analytic gate: realizing an `L²` perturbation as a smooth metric
-
-The single missing ingredient to *write* `N(u)` (let alone bound it) is the
-promotion of the realized `L²` tensor `realizeToL2 u` to a genuine
-`SmoothRiemannianMetric`, so that `deTurckRicciRHS g_bg ·` type-checks.  We
-state this as a predicate on the data, and never assume it. -/
-
-/-- **The realization gate.**
-
-`RealizesAsMetric g_bg a` holds when there is a metric-valued realization map
-on the order-`(a+2)` perturbation space `H^{a+2}`.  Conceptually it sends a
-perturbation `u` to a genuine `SmoothRiemannianMetric` realizing `g_bg + h`,
-`h = realizeToL2 u`.
-
-This packages the two analytic facts documented in the module header:
-* a continuous-representative Sobolev embedding `H^{a+2} ↪ C²` (so the
-  realized class has a `C²` representative), available when
-  `2(a+2) > dim M + 4`; and
-* positive-definiteness of `g_bg + h` for `h` small in `C⁰`.
-
-No term in this file assumes it; it is the precise remaining content for
-assembling the operator `N` and feeding it to the engine. -/
-def RealizesAsMetric (g_bg : SmoothRiemannianMetric I M) (a : ℕ) : Prop :=
-  ∃ _realizeMetric :
-      tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 2) →
-        SmoothRiemannianMetric I M, True
 
 /-- **The remainder is principal-symbol-free (re-export).**
 

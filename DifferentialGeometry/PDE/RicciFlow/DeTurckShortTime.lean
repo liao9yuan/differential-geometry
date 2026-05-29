@@ -4,10 +4,7 @@ import DifferentialGeometry.PDE.RicciFlow.DeTurckRHS
 import DifferentialGeometry.PDE.RicciFlow.StrictParabolicAtSelf
 import DifferentialGeometry.PDE.RicciFlow.SmoothQuasilinear
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.Eigenbasis
-import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.HeatSemigroup
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MaxReg
-import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.QuasilinearStrong
-import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.LiftMetric
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.PointwiseDeriv
 
 namespace DifferentialGeometry.PDE.RicciFlow

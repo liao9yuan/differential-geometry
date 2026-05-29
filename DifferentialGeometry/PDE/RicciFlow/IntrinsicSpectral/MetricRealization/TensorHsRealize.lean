@@ -438,7 +438,7 @@ theorem exists_smooth_metric_of_tensorHs_small
     (Analysis.Parabolic.TensorSpectral.tensorHsSmoothRepr_unconditional
       (I := I) (M := M) u hu_fs) hδ'_lt hδ'
 
-/-! ## The substantive realization map and discharge of the realization gate
+/-! ## The substantive realization map
 
 We package the genuine realization into a *total* map
 `tensorHs g_bg 0 2 ((a : ℝ) + 2) → SmoothRiemannianMetric I M`: on a
@@ -446,10 +446,7 @@ finitely-supported element whose extracted symmetric form is `g_bg`-fibre small
 with constant `< 1` (the inputs for which `g_bg + h` is an honest smooth
 metric), it returns the genuinely realized perturbed metric `g_bg + h_sym`; on
 all other inputs it returns the background metric `g_bg`. This map *realizes*
-`g_bg + h` exactly on the validity domain (`realizeMetricMap_eq_of_small`), and
-it is the substantive object discharging the realization gate `RealizesAsMetric`
-of `DeTurckNonlinearitySpectral.lean` — not the literally-vacuous constant
-witness. -/
+`g_bg + h` exactly on the validity domain (`realizeMetricMap_eq_of_small`). -/
 
 open scoped Classical in
 /-- **The substantive realization map.**  Sends `u : H^{a+2}` to the genuine
@@ -493,19 +490,6 @@ theorem realizeMetricMap_eq_of_small (g_bg : SmoothRiemannianMetric I M) (a : �
   -- irrelevance), and the realized metric's inner product is `g_bg + h_sym`.
   rw [tensorSectionRealizeMetric_inner]
   rfl
-
-/-- **Substantive discharge of the realization gate `RealizesAsMetric`.**
-
-The realization gate of `DeTurckNonlinearitySpectral.lean` is discharged by the
-*genuine* realization map `realizeMetricMap`, which on its validity domain
-produces an honest `C^∞` Riemannian metric realizing `g_bg + h` (with the `C²`
-representative supplied by the Sobolev embedding and positive-definiteness by the
-perturbation radius), rather than by the literally-vacuous constant witness.  The
-substantive correctness is recorded in `realizeMetricMap_eq_of_small`. -/
-theorem realizesAsMetric (g_bg : SmoothRiemannianMetric I M) (a : ℕ) :
-    DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.RealizesAsMetric
-      (I := I) (M := M) g_bg a :=
-  ⟨realizeMetricMap (I := I) g_bg a, trivial⟩
 
 end MetricRealization
 end IntrinsicSpectral

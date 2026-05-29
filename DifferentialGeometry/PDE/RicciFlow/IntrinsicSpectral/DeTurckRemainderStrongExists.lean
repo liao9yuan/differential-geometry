@@ -62,12 +62,6 @@ shape the engine consumes.
   closes the engine pipeline on the genuine first-order shape with zero open
   subgoals.
 
-* `deTurckRemainder_realizesAsMetric_gate` — re-export of the realization gate
-  `RealizesAsMetric`, recording the precise remaining analytic content that turns
-  a metric perturbation `u ∈ H^{a+2}` into the metric input of
-  `deTurckRicciRHS g_bg ·`, the only missing ingredient for instantiating
-  `deTurckRemainder_strong_shortTime_exists` with the geometric `N`.
-
 ## Sign convention
 
 Geometer `Δ_∇ = −∇*∇`, spectrum `⊆ (−∞, 0]`; resolvent `(1 − Δ_∇)⁻¹`, weights
@@ -242,37 +236,6 @@ theorem firstOrderRemainderCLM_strong_shortTime_exists
     deTurckRemainder_strong_shortTime_exists (I := I) (M := M) g_bg
       (N := ⇑R) (L_R := ‖R‖₊) (R := (1 : ℝ)) one_pos u₀ hN
   exact ⟨T₀, hT₀_pos, fun {T} hT hTT₀ hT1 => hsol hT hTT₀ hT1⟩
-
-/-! ## The realization gate (re-export)
-
-Instantiating `deTurckRemainder_strong_shortTime_exists` with the *geometric*
-remainder `N(h) = deTurckRicciRHS g_bg (g_bg + h) − Δ_∇ h` requires turning the
-abstract perturbation `u ∈ H^{a+2}` into the `SmoothRiemannianMetric` input of
-`deTurckRicciRHS g_bg ·`.  That promotion is the realization gate
-`RealizesAsMetric` of `DeTurckNonlinearitySpectral.lean`: a continuous-
-representative Sobolev embedding `H^{a+2} ↪ C²` (valid when `2(a+2) > dim M + 4`)
-together with positive-definiteness of `g_bg + h` for `h` small in `C⁰`.  We
-re-export the gate predicate here so that the precise remaining analytic content
-sits beside the engine application it gates. -/
-
-/-- **The realization gate for the geometric DeTurck remainder (re-export).**
-
-`RealizesAsMetric g_bg a` is the predicate that there is a metric-valued
-realization map `H^{a+2} → SmoothRiemannianMetric I M` (sending a perturbation
-`u` to a genuine metric realizing `g_bg + h`, `h = realizeToL2 u`).  It is the
-sole missing ingredient to even *write* the geometric remainder
-`N(h) = deTurckRicciRHS g_bg (g_bg + h) − Δ_∇ h` as a map
-`tensorHs g_bg 0 2 (a + 1) → tensorHs g_bg 0 2 a`, and hence to instantiate
-`deTurckRemainder_strong_shortTime_exists` with the Ricci–DeTurck flow.  This is a
-predicate on the data only; no term here assumes it. -/
-theorem deTurckRemainder_realizesAsMetric_gate
-    (g_bg : SmoothRiemannianMetric I M) (a : ℕ) :
-    DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.RealizesAsMetric
-        (I := I) (M := M) g_bg a ↔
-      ∃ _realizeMetric :
-          tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 2) →
-            SmoothRiemannianMetric I M, True :=
-  Iff.rfl
 
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
