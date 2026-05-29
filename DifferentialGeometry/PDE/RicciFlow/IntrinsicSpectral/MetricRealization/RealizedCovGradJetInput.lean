@@ -51,6 +51,7 @@ namespace MetricRealization
 open DifferentialGeometry
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.Measure
+open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
@@ -210,6 +211,58 @@ theorem reprDiffChartCompOnE_eq_symm_tensorChartComponentRaw
   rw [reprDiffChartCompOnE, ccTensorBilinSymm_apply]
   rw [ccTensorBilin_chartBasisVecFiber_eq_tensorChartComponentRaw (I := I) g_bg S α hy l b,
     ccTensorBilin_chartBasisVecFiber_eq_tensorChartComponentRaw (I := I) g_bg S α hy b l]
+
+/-! ## Leaf-4: coordinate translation between E-side and Euclidean-side partials
+
+The covariant-gradient component formula `tensorChartComponentRaw_covGrad` is stated with the
+`EuclideanSpace`-side `euclidPartial` of the chart-pushed raw component.  The target conjuncts
+use the `E`-side `partialDeriv`.  The two are interchanged by the chain rule through the
+linear isometry `toEuclidean : E ≃ₗᵢ EuclideanSpace ℝ (Fin n)`. -/
+
+/-- **Chain-rule translation of `partialDeriv` to `euclidPartial`.**  For any scalar
+`f : E → ℝ` and any direction `a`, the `E`-side partial derivative `partialDeriv a f y` equals
+the `EuclideanSpace`-side partial `euclidPartial a (f ∘ toEuclidean.symm) (toEuclidean y)`. -/
+theorem partialDeriv_eq_euclidPartial_comp_toEuclidean
+    (a : Fin (Module.finrank ℝ E)) (f : E → ℝ) (y : E) :
+    partialDeriv (E := E) a f y =
+      euclidPartial (E := E) a (f ∘ (toEuclidean (E := E)).symm) (toEuclidean (E := E) y) := by
+  rw [euclidPartial_def, partialDeriv]
+  -- Chain rule through the linear isometry `toEuclidean.symm`.
+  rw [(toEuclidean (E := E)).symm.comp_right_fderiv
+    (f := f) (x := toEuclidean (E := E) y)]
+  rw [ContinuousLinearMap.comp_apply]
+  -- `toEuclidean.symm (single a 1) = chartModelBasis E a`.
+  rw [show (toEuclidean (E := E)).symm.toContinuousLinearMap
+      (EuclideanSpace.single a (1 : ℝ)) = (chartModelBasis E) a from by
+    rw [chartModelBasis_apply]; rfl]
+  -- `toEuclidean.symm (toEuclidean y) = y`.
+  rw [show (toEuclidean (E := E)).symm (toEuclidean (E := E) y) = y from by simp]
+
+/-- The `E`-side partial derivative function `partialDeriv a f`, pulled back through
+`toEuclidean.symm`, equals the `EuclideanSpace`-side partial `euclidPartial a (f ∘
+toEuclidean.symm)` (as functions on the Euclidean model space). -/
+theorem partialDeriv_comp_toEuclidean_symm_eq_euclidPartial
+    (a : Fin (Module.finrank ℝ E)) (f : E → ℝ) :
+    (partialDeriv (E := E) a f) ∘ (toEuclidean (E := E)).symm =
+      euclidPartial (E := E) a (f ∘ (toEuclidean (E := E)).symm) := by
+  funext z
+  rw [Function.comp_apply,
+    partialDeriv_eq_euclidPartial_comp_toEuclidean (E := E) a f
+      ((toEuclidean (E := E)).symm z)]
+  rw [show toEuclidean (E := E) ((toEuclidean (E := E)).symm z) = z from by simp]
+
+/-- **Second-order chain-rule translation.**  For any scalar `f : E → ℝ` and directions
+`c a`, the iterated `E`-side partial `partialDeriv c (partialDeriv a f) y` equals the iterated
+`EuclideanSpace`-side partial `euclidPartial c (euclidPartial a (f ∘ toEuclidean.symm))
+(toEuclidean y)`. -/
+theorem partialDeriv2_eq_euclidPartial2_comp_toEuclidean
+    (c a : Fin (Module.finrank ℝ E)) (f : E → ℝ) (y : E) :
+    partialDeriv (E := E) c (partialDeriv (E := E) a f) y =
+      euclidPartial (E := E) c
+        (euclidPartial (E := E) a (f ∘ (toEuclidean (E := E)).symm))
+        (toEuclidean (E := E) y) := by
+  rw [partialDeriv_eq_euclidPartial_comp_toEuclidean (E := E) c (partialDeriv (E := E) a f) y]
+  rw [partialDeriv_comp_toEuclidean_symm_eq_euclidPartial (E := E) a f]
 
 end MetricRealization
 end IntrinsicSpectral
