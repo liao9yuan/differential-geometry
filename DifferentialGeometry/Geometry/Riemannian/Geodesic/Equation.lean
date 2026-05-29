@@ -436,12 +436,23 @@ the global form `IsGeodesic g γ` is the conjunction over all `t : ℝ`.
 
 /-- Local geodesic at time `t₀`: there is a basepoint `α : M` and a lifted
 curve `f : ℝ → TangentBundle I M` with `(f t).proj = γ t` for all `t`,
-such that `f` is a local integral curve of the chart-fixed geodesic
-vector field `geodesicVectorFieldChart g α` at `t₀`. -/
+whose foot at `t₀` lies in the basepoint chart-source
+`(chartAt H α).source`, such that `f` is a local integral curve of the
+chart-fixed geodesic vector field `geodesicVectorFieldChart g α` at `t₀`.
+
+The foot-in-source clause `(f t₀).proj ∈ (chartAt H α).source` records that
+the lift's foot at `t₀` lies in the chart at the basepoint `α`. This is
+where the chart-fixed geodesic vector field is genuinely the geodesic
+spray (off the chart-source it degenerates to the zero section), so it is
+the natural well-posedness condition for the witness. Every constructor
+(Picard–Lindelöf at the initial point, the stationary geodesic, and the
+chart-rebased maximal-interval witnesses) supplies it; consumers use it to
+transfer the integral-curve property to the foot's own chart. -/
 def IsGeodesicAt (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (t₀ : ℝ) : Prop :=
   ∃ (α : M) (f : ℝ → TangentBundle I M),
     (∀ t, (f t).proj = γ t) ∧
+    (f t₀).proj ∈ (chartAt H α).source ∧
     IsMIntegralCurveAt f (geodesicVectorFieldChart (I := I) g α) t₀
 
 /-- A curve `γ : ℝ → M` is a geodesic of `g` if it satisfies the intrinsic
@@ -527,7 +538,8 @@ geodesic vector field, which vanishes at the zero section. -/
 theorem IsGeodesicAt.const (g : SmoothRiemannianMetric I M) (p : M) (t : ℝ) :
     IsGeodesicAt (I := I) g (fun _ : ℝ => p) t := by
   classical
-  refine ⟨p, fun _ : ℝ => (⟨p, (0 : E)⟩ : TangentBundle I M), fun _ => rfl, ?_⟩
+  refine ⟨p, fun _ : ℝ => (⟨p, (0 : E)⟩ : TangentBundle I M), fun _ => rfl,
+    mem_chart_source H p, ?_⟩
   -- A constant lift is an integral curve precisely because the vector
   -- field vanishes at the constant value.
   refine (isMIntegralCurve_const ?_).isMIntegralCurveAt t

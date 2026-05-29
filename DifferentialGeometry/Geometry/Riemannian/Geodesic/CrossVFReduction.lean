@@ -596,34 +596,14 @@ theorem bm_c_gc_cross_vf_projection_uniqueness
       IsMIntegralCurveAt f₁ (geodesicVectorFieldChart (I := I) g (γ t₀)) t₀ ∧
       γ =ᶠ[𝓝 t₀] (fun t => (f₁ t).proj) := by
   classical
-  -- Unpack the `IsGeodesicAt` witness: chart basepoint `α`, lift `f`.
-  obtain ⟨α, f, hproj, hf⟩ := hγ
+  -- Unpack the `IsGeodesicAt` witness: chart basepoint `α`, lift `f`, and
+  -- the foot-in-source clause `hα_src : (f t₀).proj ∈ (chartAt H α).source`.
+  obtain ⟨α, f, hproj, hα_src, hf⟩ := hγ
   -- `(f t₀).proj = γ t₀`.
   have hft₀ : (f t₀).proj = γ t₀ := hproj t₀
   -- `(f t₀).proj` lies in the chart-source at `γ t₀` (its own chart).
   have hγt₀_src : (f t₀).proj ∈ (chartAt H (γ t₀)).source := by
     rw [hft₀]; exact mem_chart_source H (γ t₀)
-  -- `(f t₀).proj` lies in the chart-source at `α`.
-  --
-  -- RESIDUAL. This is the foot-in-source condition for the witness basepoint.
-  -- It is required to convert the witness `f` (an integral curve of the
-  -- chart-`α` geodesic field) to an integral curve of the chart-`γ(t₀)`
-  -- geodesic field via the cross-basepoint coincidence below (whose hypothesis
-  -- `hα` is exactly this membership). It is NOT derivable from the bare
-  -- `IsGeodesicAt` predicate: off `(chartAt H α).source` the field
-  -- `geodesicVectorFieldChart g α` is the zero section (the inverse
-  -- trivialisation `(trivAt ⟨α,0⟩).symm` is `0` off its base set), so the
-  -- integral-curve clause at `t₀` degenerates to `mfderiv f t₀ = 0` with no
-  -- constraint placing the foot back in the source. Every constructor of
-  -- `IsGeodesicAt` in the codebase (Picard–Lindelöf in `Existence.lean`,
-  -- `IsGeodesicAt.const`, rescaling in `MaximalInterval.lean`) does produce a
-  -- witness whose foot lies in the basepoint chart-source; strengthening the
-  -- `IsGeodesicAt` definition to record this (e.g. an extra field
-  -- `(f t₀).proj ∈ (chartAt H α).source`, or equivalently aligning the
-  -- basepoint to the foot) would discharge this residual uniformly. Pending
-  -- that definitional adjustment, the membership is left as the precise gap.
-  have hα_src : (f t₀).proj ∈ (chartAt H α).source := by
-    sorry
   -- Build the chart-`γ(t₀)`-centred lift through the same initial tangent vector
   -- `(f t₀).snd`. Picard–Lindelöf gives the integral curve.
   obtain ⟨f₁, hf₁_init, hf₁⟩ :=

@@ -98,16 +98,28 @@ def IsGeodesicOnWithInitial
     IsMIntegralCurveOn f (geodesicVectorFieldChart (I := I) g p) s
 
 /-- An initial-data geodesic on `s` is, at every interior point `t` of `s`
-(i.e. `s ∈ 𝓝 t`), a local spray geodesic `IsGeodesicAt g γ t` with chart
-basepoint `p`. This is the spray-side projection used to feed the
-chart-coordinate geodesic-equation bridge downstream. -/
+(i.e. `s ∈ 𝓝 t`) whose foot `γ t` still lies in the base chart-source
+`(chartAt H p).source`, a local spray geodesic `IsGeodesicAt g γ t` with
+chart basepoint `p`. This is the spray-side projection used to feed the
+chart-coordinate geodesic-equation bridge downstream.
+
+The foot-in-source hypothesis `ht_src : γ t ∈ (chartAt H p).source` is the
+chart-validity condition for the chart-`p`-fixed integral-curve datum: it
+is exactly the well-posedness clause that the strengthened `IsGeodesicAt`
+predicate records. At an interior point where `γ` has left the base chart,
+the chart-`p` vector field has degenerated to the zero section, so no
+`IsGeodesicAt` witness with basepoint `p` is available there. -/
 lemma IsGeodesicOnWithInitial.isGeodesicAt
     {g : SmoothRiemannianMetric I M} {γ : ℝ → M} {s : Set ℝ}
     {p : M} {v : TangentSpace I p} {t : ℝ}
-    (hγ : IsGeodesicOnWithInitial (I := I) g γ s p v) (ht : s ∈ 𝓝 t) :
+    (hγ : IsGeodesicOnWithInitial (I := I) g γ s p v) (ht : s ∈ 𝓝 t)
+    (ht_src : γ t ∈ (chartAt H p).source) :
     IsGeodesicAt (I := I) g γ t := by
   obtain ⟨f, hproj, _, hf⟩ := hγ
-  exact ⟨p, f, hproj, hf.isMIntegralCurveAt ht⟩
+  -- The foot at `t` is `γ t` (projection identity), so it lies in the
+  -- base chart-source by the foot-in-source hypothesis.
+  refine ⟨p, f, hproj, ?_, hf.isMIntegralCurveAt ht⟩
+  rw [hproj t]; exact ht_src
 
 /-- The starting point is forced: if `IsGeodesicOnWithInitial g γ s p v`
 holds, then `γ 0 = p`. -/
@@ -328,32 +340,50 @@ section MaximalGeodesicAtTime
 variable [I.Boundaryless] [CompleteSpace E]
 
 /-- The witness `γ` chosen at `t ∈ maximalGeodesicInterval g p v` is a
-local geodesic at `t` with the prescribed initial data. The headline
-statement we produce records the existence of `(γ, J)` covering `t` such
-that `IsGeodesicAt g γ t`. -/
+local geodesic at `t` with the prescribed initial data, provided every
+witness curve covering `t` keeps its foot `γ t` in the base chart-source
+`(chartAt H p).source`. The headline statement we produce records the
+existence of `(γ, J)` covering `t` such that `IsGeodesicAt g γ t`.
+
+The foot-in-source hypothesis `ht_src` is the chart-validity clause for
+the chart-`p`-fixed witness; see `IsGeodesicOnWithInitial.isGeodesicAt`.
+It quantifies over witness curves because the witness producing `t`'s
+membership is existentially bound. -/
 theorem exists_isGeodesicAt_of_mem_maximalGeodesicInterval
     {g : SmoothRiemannianMetric I M} {p : M} {v : TangentSpace I p}
-    {t : ℝ} (h : t ∈ maximalGeodesicInterval (I := I) g p v) :
+    {t : ℝ} (h : t ∈ maximalGeodesicInterval (I := I) g p v)
+    (ht_src : ∀ (γ : ℝ → M) (J : Set ℝ),
+      IsGeodesicOnWithInitial (I := I) g γ J p v →
+        γ t ∈ (chartAt H p).source) :
     ∃ (γ : ℝ → M) (J : Set ℝ), IsOpen J ∧ (0 : ℝ) ∈ J ∧ t ∈ J ∧
       IsGeodesicOnWithInitial (I := I) g γ J p v ∧
       IsGeodesicAt (I := I) g γ t := by
   obtain ⟨γ, J, hJ, _hJ_conn, h0, ht, hγ⟩ := h
   refine ⟨γ, J, hJ, h0, ht, hγ, ?_⟩
   -- Local spray `IsGeodesicAt` from the initial-data witness: `t` is an
-  -- interior point of `J`.
-  exact hγ.isGeodesicAt (hJ.mem_nhds ht)
+  -- interior point of `J`, and the foot `γ t` lies in the base chart-source.
+  exact hγ.isGeodesicAt (hJ.mem_nhds ht) (ht_src γ J hγ)
 
 /-- For every `t` in the maximal interval, there exists a geodesic
-witness producing `IsGeodesicAt g (witness) t` with starting point `p`. -/
+witness producing `IsGeodesicAt g (witness) t` with starting point `p`,
+provided every witness curve keeps its foot `γ t` in the base chart-source
+`(chartAt H p).source` (the chart-validity clause; see
+`IsGeodesicOnWithInitial.isGeodesicAt`). The `t = 0` clause is automatic:
+every witness starts at `p ∈ (chartAt H p).source`. -/
 theorem exists_isGeodesicAt_zero_of_mem_maximalGeodesicInterval
     {g : SmoothRiemannianMetric I M} {p : M} {v : TangentSpace I p}
-    {t : ℝ} (h : t ∈ maximalGeodesicInterval (I := I) g p v) :
+    {t : ℝ} (h : t ∈ maximalGeodesicInterval (I := I) g p v)
+    (ht_src : ∀ (γ : ℝ → M) (J : Set ℝ),
+      IsGeodesicOnWithInitial (I := I) g γ J p v →
+        γ t ∈ (chartAt H p).source) :
     ∃ γ : ℝ → M, γ 0 = p ∧ IsGeodesicAt (I := I) g γ 0 ∧
       IsGeodesicAt (I := I) g γ t := by
   obtain ⟨γ, J, hJ, h0, ht, hγ_init, hγ_at⟩ :=
-    exists_isGeodesicAt_of_mem_maximalGeodesicInterval (I := I) h
+    exists_isGeodesicAt_of_mem_maximalGeodesicInterval (I := I) h ht_src
   refine ⟨γ, hγ_init.start_eq, ?_, hγ_at⟩
-  exact hγ_init.isGeodesicAt (hJ.mem_nhds h0)
+  -- `IsGeodesicAt g γ 0`: the foot at `0` is `γ 0 = p ∈ (chartAt H p).source`.
+  refine hγ_init.isGeodesicAt (hJ.mem_nhds h0) ?_
+  rw [hγ_init.start_eq]; exact mem_chart_source H p
 
 end MaximalGeodesicAtTime
 
@@ -374,12 +404,21 @@ junk-extended curve `maximalGeodesic g p v : ℝ → M` such that:
 
 * `I_max` is open and contains `0`;
 * `maximalGeodesic g p v 0 = p`;
-* every `t ∈ I_max` is covered by a local geodesic `γ` with initial data
+* every `t ∈ I_max` at which every witness keeps its foot in the base
+  chart-source is covered by a local geodesic `γ` with initial data
   `(p, v)` satisfying `IsGeodesicAt g γ t`;
 * outside `I_max`, the curve takes the junk value `p`.
--/
+
+The foot-in-source hypothesis `hsrc` is the chart-validity clause for the
+chart-`p`-fixed witnesses (see `IsGeodesicOnWithInitial.isGeodesicAt`); it
+is required because, where a witness has left the base chart, the chart-`p`
+geodesic vector field degenerates to the zero section. -/
 theorem exists_maximalGeodesic
-    (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p) :
+    (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p)
+    (hsrc : ∀ t ∈ maximalGeodesicInterval (I := I) g p v,
+      ∀ (γ : ℝ → M) (J : Set ℝ),
+        IsGeodesicOnWithInitial (I := I) g γ J p v →
+          γ t ∈ (chartAt H p).source) :
     let I_max := maximalGeodesicInterval (I := I) g p v
     let γ_max := maximalGeodesic (I := I) g p v
     IsOpen I_max ∧ (0 : ℝ) ∈ I_max ∧ γ_max 0 = p ∧
@@ -393,6 +432,7 @@ theorem exists_maximalGeodesic
     exact maximalGeodesic_of_not_mem (I := I) ht
   · intro t ht
     exact exists_isGeodesicAt_zero_of_mem_maximalGeodesicInterval (I := I) ht
+      (hsrc t ht)
 
 end MaximalGeodesicMain
 
