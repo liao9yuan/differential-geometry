@@ -286,6 +286,48 @@ lemma contMDiff_unitGradField (g : SmoothRiemannianMetric I M)
     (E₁ := fun z : M => Tensor0SSpace 0 I z) (E₂ := fun z : M => Tensor0SSpace 3 I z)
     (F₁ := Tensor0SModel 0 ℝ E) (F₂ := Tensor0SModel 3 ℝ E) hϕ hv
 
+/-- **Smoothness of the curried unit-evaluated gradient field.** The curried
+Hom-bundle section `y ↦ tensor0S_curry 2 y (U y)` of the unit-evaluated gradient
+field `U := unitGradField g T₀` is smooth as a section of the Hom-bundle
+`TM →L[ℝ] T^{(0,2)}`. This is `contMDiff_curriedSection_iff_section` applied to
+the smoothness of `U`. -/
+lemma contMDiff_curried_unitGradField (g : SmoothRiemannianMetric I M)
+    (T₀ : SmoothCcTensor g 0 2) :
+    ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] Tensor0SModel 2 ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (E →L[ℝ] Tensor0SModel 2 ℝ E)
+        (E := fun z : M => (TangentSpace I z →L[ℝ] Tensor0SSpace 2 I z)) y
+        (curriedSection I M (unitGradField (I := I) (M := M) g T₀) y)) :=
+  (contMDiff_curriedSection_iff_section (I := I) (M := M)
+    (unitGradField (I := I) (M := M) g T₀)).mp
+    (contMDiff_unitGradField (I := I) (M := M) g T₀)
+
+/-- **Slot-`0` naturality, one level (smoothness-discharged form).** Same as
+`curry_abstract_covDeriv_unitGrad_unfold`, but with the differentiability of the
+curried gradient field discharged from the proven smoothness of `U`; only the
+smoothness of the two vector fields `X, Y` is required. -/
+lemma curry_abstract_covDeriv_unitGrad_unfold'
+    (g : SmoothRiemannianMetric I M) (T₀ : SmoothCcTensor g 0 2)
+    {X Y : Π b : M, TangentSpace I b} {x : M}
+    (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% X))
+    (hY : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% Y)) :
+    (tensor0S_curry (I := I) (M := M) 2 x
+        ((Tensor0SNabla.tensor0SCovariantDerivative I M 3 (LeviCivita (I := I) g)).toFun
+          (unitGradField (I := I) (M := M) g T₀) x (X x))) (Y x) =
+      (Tensor0SNabla.tensor0SCovariantDerivative I M 2 (LeviCivita (I := I) g)).toFun
+          (fun y : M =>
+            (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace 2 I y from
+              tensorCovDerivAt (I := I) (M := M) g 0 2 T₀ y (Y y))
+              (unitZeroSec (I := I) (M := M) y)) x (X x) -
+        (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from
+          tensorCovDerivAt (I := I) (M := M) g 0 2 T₀ x
+            ((LeviCivita (I := I) g).toFun Y x (X x)))
+          (unitZeroSec (I := I) (M := M) x) := by
+  classical
+  refine curry_abstract_covDeriv_unitGrad_unfold (I := I) (M := M) g T₀ ?_ ?_ ?_
+  · exact (contMDiff_curried_unitGradField (I := I) (M := M) g T₀ x).mdifferentiableAt (by simp)
+  · exact (hX x).mdifferentiableAt (by simp)
+  · exact (hY x).mdifferentiableAt (by simp)
+
 end Connection
 end Integral
 end DifferentialGeometry
