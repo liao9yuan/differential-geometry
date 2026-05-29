@@ -454,40 +454,6 @@ theorem speed_positivity_on_regular_variation
       Real.sqrt_le_sqrt (le_of_lt h_st_in_S)
 
 
-/-! ## Commutation of mixed covariant derivatives -/
-
-/-- For a smooth two-parameter map `f : ℝ × ℝ → M`, the mixed
-covariant derivatives along the parameter directions commute:
-`∇_s ∂_t f = ∇_t ∂_s f`. -/
-theorem commute_ds_dt
-    (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M)
-    (α : M) (s t : ℝ) :
-    chartCovDerivAlong (I := I) g α (fun u : ℝ => f u t)
-      (fun u : ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun v : ℝ => f s v) t (1 : ℝ)) s
-    = chartCovDerivAlong (I := I) g α (fun v : ℝ => f s v)
-      (fun v : ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f u v) s (1 : ℝ)) t := sorry
-
-/-! ## Curvature identity on a variation -/
-
-/-- For a vector field `Y` along a smooth two-parameter map `f`, the
-commutator of `∇_s` and `∇_t` is given by the Riemann curvature
-operator: `(∇_s ∇_t - ∇_t ∇_s) Y = R(∂_s f, ∂_t f) Y`. -/
-theorem curvature_identity_on_variation
-    (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M) (Y : ℝ → ℝ → E)
-    (α : M) (s t : ℝ) :
-    chartCovDerivAlong (I := I) g α (fun u : ℝ => f u t) (fun u : ℝ =>
-        chartCovDerivAlong (I := I) g α (fun v : ℝ => f u v)
-          (fun v : ℝ => Y u v) t) s
-      - chartCovDerivAlong (I := I) g α (fun v : ℝ => f s v) (fun v : ℝ =>
-        chartCovDerivAlong (I := I) g α (fun u : ℝ => f u v)
-          (fun u : ℝ => Y u v) s) t
-    = (DifferentialGeometry.Integral.Connection.riemannOp
-        (DifferentialGeometry.Integral.Connection.LeviCivita
-          (I := I) g) (f s t))
-        (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f u t) s (1 : ℝ))
-        (mfderiv (𝓘(ℝ, ℝ)) I (fun v : ℝ => f s v) t (1 : ℝ))
-        (Y s t) := sorry
-
 /-! ## First variation of arc length -/
 
 /-- The first variation of arc length: for a smooth endpoint-fixed
@@ -497,7 +463,12 @@ of `⟨V, ∇_t γ'⟩_g`, where `V := ∂_s f|_{s = 0}` is the variation
 field. (The boundary contribution vanishes for endpoint-fixed
 variations and is omitted.) -/
 theorem first_variation_formula
-    (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M) (L : ℝ) :
+    (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M) (L : ℝ)
+    (_hfix0 : ∀ s : ℝ, f s 0 = f 0 0) (_hfixL : ∀ s : ℝ, f s L = f 0 L)
+    (_hUnit : ∀ t ∈ Set.Icc (0 : ℝ) L,
+      g.inner (f 0 t)
+          (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f 0 u) t (1 : ℝ))
+          (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f 0 u) t (1 : ℝ)) = 1) :
     HasDerivAt (fun s : ℝ => arcLength (I := I) g (fun t : ℝ => f s t) 0 L)
       (- ∫ t in (0 : ℝ)..L,
         g.inner (f 0 t)
@@ -513,7 +484,12 @@ variation `f` whose central curve is `γ`, the first variation of
 arc length at `s = 0` vanishes. -/
 theorem first_variation_vanishes_for_geodesic
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M) (f : ℝ → ℝ → M) (L : ℝ)
-    (_hγ : IsGeodesic (I := I) g γ) (_hf : ∀ t : ℝ, f 0 t = γ t) :
+    (_hγ : IsGeodesicOn (I := I) g γ (Set.Icc 0 L)) (_hf : ∀ t : ℝ, f 0 t = γ t)
+    (_hfix0 : ∀ s : ℝ, f s 0 = γ 0) (_hfixL : ∀ s : ℝ, f s L = γ L)
+    (_hUnit : ∀ t ∈ Set.Icc (0 : ℝ) L,
+      g.inner (γ t)
+          (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ))
+          (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ)) = 1) :
     HasDerivAt (fun s : ℝ => arcLength (I := I) g (fun t : ℝ => f s t) 0 L)
       0 0 := sorry
 
@@ -561,8 +537,15 @@ field `V := ∂_s f|_{s = 0}`:
 theorem second_variation_derivation
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M) (f : ℝ → ℝ → M) (L : ℝ)
     (V : ℝ → E)
-    (_hγ : IsGeodesic (I := I) g γ) (_hf : ∀ t : ℝ, f 0 t = γ t)
-    (_hV : ∀ t : ℝ, V t = mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f u t) 0 (1 : ℝ)) :
+    (_hγ : IsGeodesicOn (I := I) g γ (Set.Icc 0 L)) (_hf : ∀ t : ℝ, f 0 t = γ t)
+    (_hV : ∀ t : ℝ, V t = mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f u t) 0 (1 : ℝ))
+    (_hUnit : ∀ t ∈ Set.Icc (0 : ℝ) L,
+      g.inner (γ t)
+          (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ))
+          (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ)) = 1)
+    (_hfix0 : ∀ s : ℝ, f s 0 = γ 0) (_hfixL : ∀ s : ℝ, f s L = γ L)
+    (_hVperp : ∀ t : ℝ,
+      g.inner (γ t) (V t) (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ)) = 0) :
     HasDerivAt
       (fun s : ℝ => deriv
         (fun s' : ℝ => arcLength (I := I) g (fun t : ℝ => f s' t) 0 L) s)
@@ -576,9 +559,16 @@ consequently the index form is non-negative on every endpoint-fixed
 smooth variation field `V`. -/
 theorem minimiser_implies_second_variation_nonneg
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M) (L : ℝ) (V : ℝ → E)
-    (_hγ : IsGeodesic (I := I) g γ)
-    (_hmin : ∀ η : ℝ → M, η 0 = γ 0 → η L = γ L →
+    (_hγ : IsGeodesicOn (I := I) g γ (Set.Icc 0 L))
+    (_hmin : ∀ η : ℝ → M, ContMDiffOn 𝓘(ℝ, ℝ) I 1 η (Set.Icc 0 L) →
+      η 0 = γ 0 → η L = γ L →
       arcLength (I := I) g γ 0 L ≤ arcLength (I := I) g η 0 L)
+    (_hUnit : ∀ t ∈ Set.Icc (0 : ℝ) L,
+      g.inner (γ t)
+          (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ))
+          (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ)) = 1)
+    (_hVperp : ∀ t ∈ Set.Icc (0 : ℝ) L,
+      g.inner (γ t) (V t) (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ)) = 0)
     (_hV0 : V 0 = 0) (_hVL : V L = 0) :
     0 ≤ indexForm (I := I) g γ 0 L V V := sorry
 

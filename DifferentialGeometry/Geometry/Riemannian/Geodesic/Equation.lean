@@ -453,6 +453,40 @@ lemma IsGeodesic.isGeodesicAt {g : SmoothRiemannianMetric I M} {γ : ℝ → M}
   obtain ⟨α, f, hproj, hf⟩ := hγ
   exact ⟨α, f, hproj, hf.isMIntegralCurveAt t⟩
 
+/-- `γ : ℝ → M` is a geodesic of `g` on `s : Set ℝ` if there is a chart
+basepoint `α : M` and a velocity lift `f : ℝ → TangentBundle I M`
+projecting to `γ` whose restriction to `s` is an integral curve of the
+chart-fixed geodesic vector field `geodesicVectorFieldChart g α`. -/
+def IsGeodesicOn (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
+    (s : Set ℝ) : Prop :=
+  ∃ (α : M) (f : ℝ → TangentBundle I M),
+    (∀ t, (f t).proj = γ t) ∧
+    IsMIntegralCurveOn f (geodesicVectorFieldChart (I := I) g α) s
+
+/-- A geodesic on a set, viewed as a local geodesic at every interior
+point of the set (i.e. every `t` with `s ∈ 𝓝 t`). -/
+lemma IsGeodesicOn.isGeodesicAt {g : SmoothRiemannianMetric I M}
+    {γ : ℝ → M} {s : Set ℝ} {t : ℝ}
+    (hγ : IsGeodesicOn (I := I) g γ s) (ht : s ∈ 𝓝 t) :
+    IsGeodesicAt (I := I) g γ t := by
+  obtain ⟨α, f, hproj, hf⟩ := hγ
+  exact ⟨α, f, hproj, hf.isMIntegralCurveAt ht⟩
+
+/-- `IsGeodesicOn` is monotone in the set. -/
+lemma IsGeodesicOn.mono {g : SmoothRiemannianMetric I M}
+    {γ : ℝ → M} {s s' : Set ℝ}
+    (hγ : IsGeodesicOn (I := I) g γ s) (hs : s' ⊆ s) :
+    IsGeodesicOn (I := I) g γ s' := by
+  obtain ⟨α, f, hproj, hf⟩ := hγ
+  exact ⟨α, f, hproj, hf.mono hs⟩
+
+/-- A global geodesic, restricted to any set, is a geodesic on that set. -/
+lemma IsGeodesic.isGeodesicOn {g : SmoothRiemannianMetric I M}
+    {γ : ℝ → M} (hγ : IsGeodesic (I := I) g γ) (s : Set ℝ) :
+    IsGeodesicOn (I := I) g γ s := by
+  obtain ⟨α, f, hproj, hf⟩ := hγ
+  exact ⟨α, f, hproj, hf.isMIntegralCurveOn s⟩
+
 /-! ## Stationary geodesic: a constant curve is a geodesic -/
 
 /-- The constant curve `fun _ => p` is a geodesic. The lifted curve is the

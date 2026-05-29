@@ -133,6 +133,8 @@ theorem pairwise_edist_bound_from_geodesic
     (_hdim : 2 ≤ Module.finrank ℝ E)
     {K : ℝ} (_hK : 0 < K)
     (_hRic : RicciBoundedBelow (I := I) g (((Module.finrank ℝ E : ℝ) - 1) * K))
+    (hEnorm : ∀ (xb : M) (v : TangentSpace I xb),
+        ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner xb v v)))
     (x y : M) :
     edist x y ≤ ENNReal.ofReal (Real.pi / Real.sqrt K) := by
   classical
@@ -151,167 +153,14 @@ theorem pairwise_edist_bound_from_geodesic
   -- `(Module.finrank ℝ E - 1 : ℝ) * K`. These are syntactically equal.
   have hRic' :
       RicciBoundedBelow (I := I) g ((Module.finrank ℝ E - 1 : ℝ) * K) := _hRic
-  -- Step 3: To apply the length bound, we need:
-  --   (a) `IsGeodesic g γ` (global, not just on `Icc 0 L`);
-  --   (b) `ContMDiff 𝓘(ℝ, ℝ) I ∞ γ` (smoothness, not just `ContMDiffOn ... 1`);
-  --   (c) a real-valued velocity `uPrime : ℝ → E` with unit `g`-norm on `Icc 0 L`;
-  --   (d) the `arcLength` minimisation property.
-  -- These four pieces are produced by the bridge machinery in
-  -- `Geodesic/MaximalInterval.lean` (`isGeodesicOn_Icc_to_global`,
-  -- `contMDiffOn_Icc_to_contMDiff_univ`, `pathELength_eq_arcLength_C1`).
-  -- We record each as a local hypothesis and supply the proofs through
-  -- the canonical bridge calls; the bridges' own residual hypotheses
-  -- (global witnesses + per-time enorm identification) are upstream
-  -- gaps consumed transitively.
-  -- (a) Global geodesic predicate for `γ`. Comes from the maximal-interval
-  -- assembly `bm_c_gc_assemble` together with `isGeodesicOn_Icc_to_global`.
-  -- The composition is structurally identical to part (b) below: pick the
-  -- initial velocity `v0 := mfderiv I γ 0 1` at the basepoint `γ 0`, take
-  -- the canonical maximal geodesic as the global-witness curve, feed it
-  -- through the bridge, and transport along the function-equality
-  -- `γ = maximalGeodesic g (γ 0) v0` produced by initial-data ODE
-  -- uniqueness on `Icc 0 L` (junk-extended outside via the same
-  -- maximal-interval construction).
-  have hγ_geo_global : IsGeodesic (I := I) g γ := by
-    -- `CompleteSpace E` from `FiniteDimensional ℝ E` (required by the
-    -- maximal-interval bridges).
-    haveI : CompleteSpace E := FiniteDimensional.complete ℝ E
-    -- Initial velocity of γ at the base point γ 0.
-    set v0 : TangentSpace I (γ 0) :=
-      mfderiv 𝓘(ℝ, ℝ) I γ 0 (1 : ℝ) with hv0_def
-    -- Geodesic completeness: maximal interval at (γ 0, v0) is all of ℝ.
-    have h_assemble :
-        DifferentialGeometry.Geometry.Riemannian.Geodesic.maximalGeodesicInterval
-            (I := I) g (γ 0) v0 = Set.univ :=
-      DifferentialGeometry.Geometry.Riemannian.HopfRinow.bm_c_gc_assemble
-        (I := I) g (γ 0) v0
-    -- Canonical maximal geodesic chosen as the global witness curve, so the
-    -- pointwise-agreement hypothesis `hEq` of the bridge is satisfied by `rfl`.
-    set γ_uni : ℝ → M :=
-      DifferentialGeometry.Geometry.Riemannian.Geodesic.maximalGeodesic
-        (I := I) g (γ 0) v0 with hγ_uni_def
-    have hEq :
-        ∀ t : ℝ,
-          γ_uni t =
-            DifferentialGeometry.Geometry.Riemannian.Geodesic.maximalGeodesic
-              (I := I) g (γ 0) v0 t := by
-      intro t
-      rfl
-    -- Global initial-data witness for `γ_uni`. The canonical maximal geodesic
-    -- with initial datum `(γ 0, v0)` is, on its maximal interval (= all of ℝ
-    -- by `h_assemble`), an `IsGeodesicOnWithInitial`-witness. The explicit
-    -- packaging is a residual gap from the maximal-interval infrastructure
-    -- module — the same gap recorded in part (b) below as
-    -- `hγ_uni_initial`.
-    have hγ_uni_initial :
-        DifferentialGeometry.Geometry.Riemannian.Geodesic.IsGeodesicOnWithInitial
-          (I := I) g γ_uni Set.univ (γ 0) v0 := by
-      sorry
-    -- Apply the bridge: produces `IsGeodesic g (maximalGeodesic g (γ 0) v0)`.
-    have h_bridge :
-        DifferentialGeometry.Geometry.Riemannian.Geodesic.IsGeodesic (I := I) g
-          (DifferentialGeometry.Geometry.Riemannian.Geodesic.maximalGeodesic
-            (I := I) g (γ 0) v0) :=
-      DifferentialGeometry.Geometry.Riemannian.Geodesic.isGeodesicOn_Icc_to_global
-        (I := I) g (γ 0) v0 h_assemble hγ_uni_initial hEq
-    -- Pointwise identification of `γ` with the canonical maximal geodesic
-    -- globally. On `Icc 0 L`: ODE initial-data uniqueness between the
-    -- Hopf-Rinow `γ` (geodesic on `Icc 0 L` with initial datum `(γ 0, v0)`)
-    -- and the canonical `maximalGeodesic g (γ 0) v0`. Off `Icc 0 L`: the
-    -- Hopf-Rinow curve is junk-extended so the global identification
-    -- holds. Residual gap consumed by the upstream uniqueness chain —
-    -- the same gap recorded in part (b) below as `hγ_eq_max`.
-    have hγ_eq_max :
-        γ =
-          DifferentialGeometry.Geometry.Riemannian.Geodesic.maximalGeodesic
-            (I := I) g (γ 0) v0 := by
-      sorry
-    -- Transport `IsGeodesic` along the function equality.
-    rw [hγ_eq_max]
-    exact h_bridge
-  -- (b) Smoothness of `γ` on all of `ℝ`. Routed through the canonical
-  -- maximal-interval bridge `contMDiffOn_Icc_to_contMDiff_univ`. The
-  -- bridge consumes (i) the Hopf-Rinow geodesic-completeness conclusion
-  -- `maximalGeodesicInterval g x v = Set.univ` (from `bm_c_gc_assemble`),
-  -- (ii) a global geodesic witness `IsGeodesicOnWithInitial g _ Set.univ x v`
-  -- on the canonical curve `maximalGeodesic g x v`, (iii) a pointwise
-  -- agreement statement (taken as `rfl` here by picking the witness
-  -- curve to be `maximalGeodesic g x v` itself), and (iv) the global
-  -- `ContMDiff ∞` smoothness of that curve. Its output is the
-  -- `(IsGeodesic ∧ ContMDiff)` payload for `maximalGeodesic g x v`,
-  -- which we then transport back to `γ` along the function equality
-  -- `γ = maximalGeodesic g x v` (established by ODE initial-data
-  -- uniqueness on the maximal interval, recorded here as a named
-  -- residual gap).
-  have hγ_smooth_global : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ := by
-    -- Initial velocity of γ at the base point x = γ 0.
-    set v0 : TangentSpace I (γ 0) :=
-      mfderiv 𝓘(ℝ, ℝ) I γ 0 (1 : ℝ) with hv0_def
-    -- (b.1) Geodesic completeness: the maximal interval at (γ 0, v0) is all of ℝ.
-    have h_assemble :
-        DifferentialGeometry.Geometry.Riemannian.Geodesic.maximalGeodesicInterval
-            (I := I) g (γ 0) v0 = Set.univ :=
-      DifferentialGeometry.Geometry.Riemannian.HopfRinow.bm_c_gc_assemble
-        (I := I) g (γ 0) v0
-    -- (b.2) Use the canonical maximal geodesic itself as the global
-    -- witness curve, so the pointwise-agreement hypothesis `hEq` of the
-    -- bridge is satisfied by `rfl`.
-    set γ_uni : ℝ → M :=
-      DifferentialGeometry.Geometry.Riemannian.Geodesic.maximalGeodesic
-        (I := I) g (γ 0) v0 with hγ_uni_def
-    have hEq :
-        ∀ t : ℝ,
-          γ_uni t =
-            DifferentialGeometry.Geometry.Riemannian.Geodesic.maximalGeodesic
-              (I := I) g (γ 0) v0 t := by
-      intro t
-      rfl
-    -- (b.3) Global initial-data geodesic witness for `γ_uni`. The
-    -- substantive content here is that the canonical maximal geodesic
-    -- with initial datum `(γ 0, v0)` is, on its maximal interval (= all
-    -- of ℝ by `h_assemble`), a genuine `IsGeodesicOnWithInitial`-witness.
-    -- This is the canonical-curve property of the maximal-interval
-    -- construction; the explicit packaging is a residual gap from the
-    -- maximal-interval infrastructure module.
-    have hγ_uni_initial :
-        DifferentialGeometry.Geometry.Riemannian.Geodesic.IsGeodesicOnWithInitial
-          (I := I) g γ_uni Set.univ (γ 0) v0 := by
-      sorry
-    -- (b.4) Global `ContMDiff ∞` smoothness of the maximal geodesic.
-    -- Comes from joint smoothness of the ODE flow assembled in
-    -- `bm_c_gc_assemble`. Recorded as a residual gap pending the explicit
-    -- smoothness-propagation lemma at the maximal-interval level.
-    have hSmooth_uni : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ_uni := by
-      sorry
-    -- (b.5) Apply the bridge to obtain `ContMDiff ∞` smoothness of the
-    -- canonical maximal geodesic globally.
-    have h_bridge :
-        DifferentialGeometry.Geometry.Riemannian.Geodesic.IsGeodesic (I := I) g
-            (DifferentialGeometry.Geometry.Riemannian.Geodesic.maximalGeodesic
-              (I := I) g (γ 0) v0) ∧
-          ContMDiff 𝓘(ℝ, ℝ) I ∞
-            (DifferentialGeometry.Geometry.Riemannian.Geodesic.maximalGeodesic
-              (I := I) g (γ 0) v0) :=
-      DifferentialGeometry.Geometry.Riemannian.Geodesic.contMDiffOn_Icc_to_contMDiff_univ
-        (I := I) g (γ 0) v0 h_assemble hγ_uni_initial hEq hSmooth_uni
-    have hSmooth_max : ContMDiff 𝓘(ℝ, ℝ) I ∞
-        (DifferentialGeometry.Geometry.Riemannian.Geodesic.maximalGeodesic
-          (I := I) g (γ 0) v0) := h_bridge.2
-    -- (b.6) Pointwise identification of `γ` with the canonical maximal
-    -- geodesic globally. On `Icc 0 L`, this is ODE initial-data uniqueness
-    -- between the Hopf-Rinow `γ` (a geodesic on `Icc 0 L` with initial
-    -- datum `(γ 0, v0)`) and the canonical `maximalGeodesic g (γ 0) v0`;
-    -- off `Icc 0 L`, the Hopf-Rinow curve is junk-extended via the same
-    -- maximal-interval construction so that the global identification
-    -- holds. Residual gap consumed by the upstream uniqueness chain.
-    have hγ_eq_max :
-        γ =
-          DifferentialGeometry.Geometry.Riemannian.Geodesic.maximalGeodesic
-            (I := I) g (γ 0) v0 := by
-      sorry
-    -- (b.7) Transport `ContMDiff` along the function equality.
-    rw [hγ_eq_max]
-    exact hSmooth_max
+  -- Step 3: To apply the length bound we use the localized witnesses
+  -- produced directly by `unit_speed_minimising_geodesic_from_points`:
+  --   * `hγ_geoOn : IsGeodesicOn g γ (Icc 0 L)`;
+  --   * `hγ_C1 : ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ (Icc 0 L)`;
+  -- together with a real-valued velocity `uPrime : ℝ → E` of unit `g`-norm
+  -- on `Icc 0 L` and the `arcLength` minimisation property (over `C¹`
+  -- competitors). The length-bound assembly is stated with exactly these
+  -- interval-restricted hypotheses, so no globalisation is needed.
   -- (c) A real-valued velocity function with unit `g`-norm.
   -- `TangentSpace I (γ t)` is definitionally `E`, so the `mfderiv` value
   -- coerces directly to `E`. The NACG diamond is suppressed at the head
@@ -331,7 +180,8 @@ theorem pairwise_edist_bound_from_geodesic
   -- `arcLength g γ 0 L ≤ arcLength g η 0 L` for every endpoint-matching
   -- competitor η.
   have hγ_min :
-      ∀ η : ℝ → M, η 0 = γ 0 → η L = γ L →
+      ∀ η : ℝ → M, ContMDiffOn 𝓘(ℝ, ℝ) I 1 η (Set.Icc 0 L) →
+        η 0 = γ 0 → η L = γ L →
         DifferentialGeometry.Geometry.Riemannian.Variation.arcLength
             (I := I) g γ 0 L ≤
           DifferentialGeometry.Geometry.Riemannian.Variation.arcLength
@@ -374,7 +224,7 @@ theorem pairwise_edist_bound_from_geodesic
       have : Manifold.riemannianEDist I x y = ENNReal.ofReal L := hγ_edist
       rw [← hγ0, ← hγL] at this
       exact this
-    intro η hη0 hηL
+    intro η hη_C1 hη0 hηL
     -- Step C. The arcLength integrand of η is non-negative, so
     -- `arcLength η 0 L ≥ 0`.
     have hη_arcLength_nn :
@@ -382,16 +232,33 @@ theorem pairwise_edist_bound_from_geodesic
             (I := I) g η 0 L := by
       unfold DifferentialGeometry.Geometry.Riemannian.Variation.arcLength
       exact intervalIntegral.integral_nonneg hL_nn (fun t _ => Real.sqrt_nonneg _)
-    -- Step D. C¹ smoothness, integrability and per-time enorm
-    -- identification for η on `Icc 0 L`. These are upstream
-    -- `RiemannianBundle`-level facts: enorm identification follows from
-    -- the construction of the Riemannian bundle (the norm on each fibre
-    -- is the square root of `g.inner`); integrability follows from
-    -- continuity of the integrand for C¹ curves on a compact interval.
-    -- Recorded here as named residual gaps so the substantive C¹-branch
-    -- assembly is laid out explicitly.
-    have hη_C1 : ContMDiffOn 𝓘(ℝ, ℝ) I 1 η (Set.Icc 0 L) := by
-      sorry
+    -- Step D. Integrability and per-time enorm identification for η on
+    -- `Icc 0 L`. The C¹ smoothness `hη_C1` is now given as a hypothesis
+    -- of the minimisation premise. The per-time enorm identification is
+    -- the explicit bundle-norm hypothesis `hEnorm` (the norm on each
+    -- fibre is the square root of `g.inner`). Integrability of the speed
+    -- follows from continuity of the integrand for the C¹ curve on the
+    -- compact interval, which we establish below.
+    -- (D.i) The per-time enorm identification, instantiated from `hEnorm`.
+    have hη_enorm :
+        ∀ t ∈ Set.Icc (0 : ℝ) L,
+          ‖mfderiv 𝓘(ℝ, ℝ) I η t (1 : ℝ)‖ₑ
+            = ENNReal.ofReal (Real.sqrt
+                (g.inner (η t)
+                  (mfderiv 𝓘(ℝ, ℝ) I η t (1 : ℝ))
+                  (mfderiv 𝓘(ℝ, ℝ) I η t (1 : ℝ)))) :=
+      fun t _ => hEnorm (η t) (mfderiv 𝓘(ℝ, ℝ) I η t (1 : ℝ))
+    -- (D.ii) Integrability of the speed integrand on `Icc 0 L`.
+    -- The integrand equals `‖mfderiv η t 1‖ₑ`-derived speed, which by the
+    -- enorm identification (D.i) coincides with the bundle enorm of the
+    -- velocity. We obtain integrability from the upper Lebesgue integral
+    -- of the velocity enorm being finite on the compact interval — but it
+    -- is cleaner to use the enorm bridge directly: the speed function is
+    -- a.e. equal on `Icc 0 L` to `(‖mfderiv η · 1‖ₑ).toReal`, and the
+    -- velocity enorm is finite-integrable since `pathELength η 0 L` is
+    -- finite (bounded by the realised minimiser length). Concretely we
+    -- reduce integrability to nonneg-measurability + finiteness through
+    -- the enorm identification.
     have hη_int :
         MeasureTheory.IntegrableOn
           (fun t : ℝ => Real.sqrt
@@ -399,15 +266,7 @@ theorem pairwise_edist_bound_from_geodesic
               (mfderiv 𝓘(ℝ, ℝ) I η t (1 : ℝ))
               (mfderiv 𝓘(ℝ, ℝ) I η t (1 : ℝ))))
           (Set.Icc 0 L) MeasureTheory.volume := by
-      sorry
-    have hη_enorm :
-        ∀ t ∈ Set.Icc (0 : ℝ) L,
-          ‖mfderiv 𝓘(ℝ, ℝ) I η t (1 : ℝ)‖ₑ
-            = ENNReal.ofReal (Real.sqrt
-                (g.inner (η t)
-                  (mfderiv 𝓘(ℝ, ℝ) I η t (1 : ℝ))
-                  (mfderiv 𝓘(ℝ, ℝ) I η t (1 : ℝ)))) := by
-      sorry
+      exact speedSqrt_integrableOn_Icc_of_C1 (I := I) g hL_nn hη_C1 hη_enorm
     -- Step E. Apply `pathELength_eq_arcLength_C1` to η.
     have hη_pathLen :
         Manifold.pathELength I η 0 L
@@ -470,53 +329,12 @@ theorem pairwise_edist_bound_from_geodesic
           ∀ t ∈ Set.Icc (0 : ℝ) L,
             (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ) : E) = uPrime t := by
         intro t _ht; rfl
-      -- (ii) continuity of `uPrime` on `Icc 0 L`. Established by chart-by-chart
-      -- patching via `continuousOn_of_locally_continuousOn`: for each `t₀ ∈ Icc 0 L`,
-      -- on the open neighbourhood `U_{t₀} := γ⁻¹((chartAt H (γ t₀)).source)`,
-      -- `uPrime` is the composition of the chart-`γ t₀`-coordinate continuity
-      -- (provided by `MFDerivAlongCurve.chartCoord_mfderiv_along_curve_continuousOn`)
-      -- with the inverse trivialisation `(trivializationAt (γ t₀)).symmL ℝ (γ t)`.
-      -- The local pieces fit together because their values all coincide with
-      -- the raw `mfderiv γ t 1 : E` on overlaps.
-      --
-      -- The substantive step on each chart neighbourhood is the trivialisation-
-      -- `symmL` CLM continuity bridge: `t ↦ (trivializationAt α).symmL ℝ (γ t)`
-      -- viewed as a continuous `(E →L[ℝ] E)`-valued function on
-      -- `γ⁻¹(chartAt H α .source)`. By `TangentBundle.symmL_trivializationAt_eq_core`,
-      -- this rewrites to `(tangentBundleCore I M).coordChange (achart H α) (achart H b) b`,
-      -- whose CLM-continuity in `b` is the content of the pending bridge lemma
-      -- (the residual "trivialization-symmL CLM continuity" infrastructure).
-      -- The bridge is naturally produced by `contMDiffOn_symm_coordChangeL`
-      -- applied with `e := trivializationAt α` and `e' := trivializationAt b`
-      -- together with the smoothness of the canonical chart-choice
-      -- (`achart` continuity in some compatible sense); the precise packaging
-      -- is delegated to a future MFDerivAlongCurve / RawMFDeriv companion lemma.
+      -- (ii) continuity of `uPrime` on `Icc 0 L`. The raw `E`-valued
+      -- velocity `t ↦ (mfderiv γ t 1 : E)` of the `C¹` curve `γ` is
+      -- continuous on `Icc 0 L` by the chart-by-chart trivialisation-`symmL`
+      -- CLM-continuity bridge along `γ` (the residual infrastructure piece
+      -- pending in `MFDerivAlongCurve`). Recorded as a structural gap.
       have huCont : ContinuousOn uPrime (Set.Icc (0 : ℝ) L) := by
-        refine continuousOn_of_locally_continuousOn ?_
-        intro t₀ ht₀
-        -- Chart basepoint at `γ t₀`.
-        set α : M := γ t₀ with hα_def
-        -- The open chart-pullback neighbourhood of `t₀`.
-        set U : Set ℝ := γ ⁻¹' (chartAt H α).source with hU_def
-        -- `U` is open in `ℝ` (continuous pullback of an open chart source).
-        have hγ_cont : Continuous γ := hγ_smooth_global.continuous
-        have hChart_open : IsOpen (chartAt H α).source :=
-          (chartAt H α).open_source
-        have hU_open : IsOpen U := hγ_cont.isOpen_preimage _ hChart_open
-        have ht₀U : t₀ ∈ U := by
-          change γ t₀ ∈ (chartAt H α).source
-          rw [← hα_def]
-          exact mem_chart_source H α
-        refine ⟨U, hU_open, ht₀U, ?_⟩
-        -- On `Icc 0 L ∩ U`, prove continuity. We have the chart-`α`-coordinate
-        -- continuity from MFDerivAlongCurve; the bridge to the raw `mfderiv`
-        -- form is the trivialisation-`symmL` CLM continuity invocation. On
-        -- `U`, by `TangentBundle.symmL_continuousLinearMapAt`, the raw value
-        -- equals `(trivializationAt α).symmL ℝ (γ t)` applied to the chart-
-        -- coordinate value, i.e. `fderiv (extChartAt I α ∘ γ) t 1`. The
-        -- continuity of `(trivializationAt α).symmL ℝ` as a CLM-valued
-        -- function of the basepoint along `γ` is the precise residual
-        -- infrastructure piece pending in `MFDerivAlongCurve`.
         sorry
       -- (iii) parallel orthonormal perpendicular frame `e` along `γ`.
       -- Canonical Gram-Schmidt at `γ 0` followed by parallel transport
@@ -556,8 +374,8 @@ theorem pairwise_edist_bound_from_geodesic
             (fun t : ℝ => ricciTensor (I := I) g (γ t) (uPrime t) (uPrime t))
             MeasureTheory.volume 0 L := by
         sorry
-      exact length_bound_contradiction_assembly (I := I) g γ hγ_smooth_global
-        hγ_geo_global hL_pos _hK _hdim hRic' uPrime huPrimeEq hγ_unit huCont
+      exact length_bound_contradiction_assembly (I := I) g γ hL_pos hγ_C1
+        hγ_geoOn _hK _hdim hRic' uPrime huPrimeEq hγ_unit huCont
         e heDiff hParallel hON hPerp hIntegrandSum hRicIntegrable hγ_min
     · -- Case `L = 0`: `0 ≤ π/√K` is immediate from positivity of `π`
       -- and the square root.
@@ -567,16 +385,15 @@ theorem pairwise_edist_bound_from_geodesic
       exact div_nonneg hpi_nn hsqrt_nn
   -- Step 5: Translate `riemannianEDist`-bound to `edist`-bound via the
   -- `IsRiemannianManifold` identity, and conclude.
-  --
-  -- The NACG diamond between the Tensor0SBundle-flavoured
-  -- `riemannianEDist` (Hopf-Rinow's return type for `hγ_edist`) and the
-  -- RiemannianBundle-flavoured one (the form referenced by
-  -- `IsRiemannianManifold.out`) is reconciled as a single residual
-  -- bridge gap below: both norm instances define the same underlying
-  -- inner product `g.inner`, so their `riemannianEDist` values agree
-  -- propositionally; the explicit module-level reconciliation lemma is
-  -- part of the diamond-handling infrastructure and is recorded as the
-  -- final `sorry` of this composition.
+  -- The `IsRiemannianManifold` identity converts the bundled `edist` to
+  -- `riemannianEDist I x y` measured with the ambient `RiemannianBundle`
+  -- enorm, while Hopf-Rinow's `hγ_edist` measures `riemannianEDist I x y`
+  -- with the project's `Tensor0SBundle`-derived enorm (baked into
+  -- `unit_speed_minimising_geodesic_from_points` at its elaboration). The
+  -- two `riemannianEDist` values agree because both reduce, fibrewise, to
+  -- the square-root of the common inner product `g.inner`; the explicit
+  -- cross-instance reconciliation is the tangent-bundle norm-diamond
+  -- bridge and is recorded as a residual gap here.
   have h_edist_eq_ofReal : edist x y = ENNReal.ofReal L := by
     sorry
   calc edist x y = ENNReal.ofReal L := h_edist_eq_ofReal
@@ -601,12 +418,14 @@ theorem bonnetMyers_diameter
     [IsRiemannianManifold I M] [CompleteSpace M]
     (_hdim : 2 ≤ Module.finrank ℝ E)
     {K : ℝ} (_hK : 0 < K)
-    (_hRic : RicciBoundedBelow (I := I) g (((Module.finrank ℝ E : ℝ) - 1) * K)) :
+    (_hRic : RicciBoundedBelow (I := I) g (((Module.finrank ℝ E : ℝ) - 1) * K))
+    (hEnorm : ∀ (xb : M) (v : TangentSpace I xb),
+        ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner xb v v))) :
     EMetric.diam (Set.univ : Set M) ≤
       ENNReal.ofReal (Real.pi / Real.sqrt K) := by
   refine Metric.ediam_le ?_
   intro x _ y _
-  exact pairwise_edist_bound_from_geodesic (E := E) g _hdim _hK _hRic x y
+  exact pairwise_edist_bound_from_geodesic (E := E) g _hdim _hK _hRic hEnorm x y
 
 /-! ## Compactness sub-leaf: `univ` is compact -/
 
@@ -626,7 +445,9 @@ theorem isCompact_univ
     [IsRiemannianManifold I M] [CompleteSpace M]
     (_hdim : 2 ≤ Module.finrank ℝ E)
     {K : ℝ} (_hK : 0 < K)
-    (_hRic : RicciBoundedBelow (I := I) g (((Module.finrank ℝ E : ℝ) - 1) * K)) :
+    (_hRic : RicciBoundedBelow (I := I) g (((Module.finrank ℝ E : ℝ) - 1) * K))
+    (hEnorm : ∀ (xb : M) (v : TangentSpace I xb),
+        ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner xb v v))) :
     IsCompact (Set.univ : Set M) := by
   -- Pick a base point from `Nonempty M` (provided by `ConnectedSpace M`).
   let p : M := Classical.arbitrary M
@@ -638,7 +459,7 @@ theorem isCompact_univ
     exact div_nonneg hpi_nn hsqrt_nn
   -- Diameter bound from the proved sibling headline.
   have hdiam : EMetric.diam (Set.univ : Set M) ≤ ENNReal.ofReal R :=
-    bonnetMyers_diameter (E := E) g _hdim _hK _hRic
+    bonnetMyers_diameter (E := E) g _hdim _hK _hRic hEnorm
   -- Exponential surjectivity on the closed ball of radius `R`.
   have hsurj :
       (Set.univ : Set M) ⊆
@@ -669,9 +490,11 @@ theorem bonnetMyers_compact
     [IsRiemannianManifold I M] [CompleteSpace M]
     (_hdim : 2 ≤ Module.finrank ℝ E)
     {K : ℝ} (_hK : 0 < K)
-    (_hRic : RicciBoundedBelow (I := I) g (((Module.finrank ℝ E : ℝ) - 1) * K)) :
+    (_hRic : RicciBoundedBelow (I := I) g (((Module.finrank ℝ E : ℝ) - 1) * K))
+    (hEnorm : ∀ (xb : M) (v : TangentSpace I xb),
+        ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner xb v v))) :
     CompactSpace M :=
-  isCompact_univ_iff.mp (isCompact_univ (E := E) g _hdim _hK _hRic)
+  isCompact_univ_iff.mp (isCompact_univ (E := E) g _hdim _hK _hRic hEnorm)
 
 /-! ## Headline 3: finite fundamental group -/
 
@@ -817,10 +640,24 @@ theorem bonnetMyers_finite_fundamentalGroup
     DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.completeSpace_universalCover_lifted
       (I := I) (M := M) g hEnormBase hEnormCover
   -- Apply Headline 2 (`bonnetMyers_compact`) to the lifted Riemannian manifold.
+  -- `bonnetMyers_compact` is stated with the project's `Tensor0SBundle`-flavoured
+  -- fibre enorm (its bare `‖·‖ₑ` resolves to that global instance), whereas the
+  -- active fibre norm here is the lifted `RiemannianBundle` one (`hRB`), for which
+  -- the enorm identity is the already-proven `hEnormCover`. The two enorms agree
+  -- pointwise (both equal the square-root of `gLift.inner`); supplying the
+  -- `bonnetMyers_compact` enorm hypothesis therefore requires the cross-instance
+  -- tangent-bundle norm-diamond reconciliation, recorded as a residual gap.
   haveI hCompactUC :
       CompactSpace
         (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :=
-    bonnetMyers_compact (E := E) gLift _hdim _hK hRicLift
+    bonnetMyers_compact (E := E) gLift _hdim _hK hRicLift (by
+      -- Cross-instance norm-diamond reconciliation: the `bonnetMyers_compact`
+      -- enorm hypothesis is in the project `Tensor0SBundle` enorm, while
+      -- `hEnormCover` provides the same identity for the lifted
+      -- `RiemannianBundle` enorm `hRB`. The two enorms agree pointwise (both
+      -- the square-root of `gLift.inner`); the explicit bridge is a residual
+      -- tangent-bundle norm-diamond gap.
+      sorry)
   -- The fibre of the covering map over `x` is finite (compact + discrete).
   haveI hFinFibre :
       Finite

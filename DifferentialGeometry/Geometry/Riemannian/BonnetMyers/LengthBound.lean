@@ -612,9 +612,9 @@ interval-integrable). The proof routes via `indexForm_eq_intervalIntegral`,
 `intervalIntegral.integral_finset_sum`, and `intervalIntegral.integral_congr`
 against `sum_index_form_integrand_eval`. -/
 theorem sum_index_form_frame_evaluation
-    (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
-    (_hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ)
-    (_hgeo : IsGeodesic (I := I) g γ) {L : ℝ} (hL : 0 < L)
+    (g : SmoothRiemannianMetric I M) (γ : ℝ → M) {L : ℝ} (hL : 0 < L)
+    (_hγ : ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ (Set.Icc 0 L))
+    (_hgeo : IsGeodesicOn (I := I) g γ (Set.Icc 0 L))
     (uPrime : ℝ → E)
     (huPrimeEq : ∀ t ∈ Set.Icc (0 : ℝ) L,
       (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ) : E) = uPrime t)
@@ -735,9 +735,9 @@ The proof applies monotonicity of the interval integral to
 the unit speed `γ'`, and evaluates the trigonometric integrals via
 `integral_sin_sq` and `integral_cos_sq`. -/
 theorem sum_index_form_bound_by_curvature_hypothesis
-    (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
-    (_hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ)
-    (_hgeo : IsGeodesic (I := I) g γ) {L : ℝ} (hL : 0 < L) {K : ℝ}
+    (g : SmoothRiemannianMetric I M) (γ : ℝ → M) {L : ℝ} (hL : 0 < L)
+    (_hγ : ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ (Set.Icc 0 L))
+    (_hgeo : IsGeodesicOn (I := I) g γ (Set.Icc 0 L)) {K : ℝ}
     (hRic : RicciBoundedBelow (I := I) g ((Module.finrank ℝ E - 1 : ℝ) * K))
     (uPrime : ℝ → E)
     (huPrimeEq : ∀ t ∈ Set.Icc (0 : ℝ) L,
@@ -780,7 +780,7 @@ theorem sum_index_form_bound_by_curvature_hypothesis
               * Real.cos (Real.pi * t / L) ^ 2
             - Real.sin (Real.pi * t / L) ^ 2
                 * ricciTensor (I := I) g (γ t) (uPrime t) (uPrime t)) :=
-    sum_index_form_frame_evaluation (I := I) g γ _hγ _hgeo hL uPrime huPrimeEq
+    sum_index_form_frame_evaluation (I := I) g γ hL _hγ _hgeo uPrime huPrimeEq
       hUnit huCont e heDiff hParallel hON hPerp hIntegrandSum
   rw [hEval]
   have hL_nonneg : (0 : ℝ) ≤ L := le_of_lt hL
@@ -938,9 +938,9 @@ negative sum of index forms. On the other hand
 gives `0 ≤ indexForm g γ 0 L V_i V_i`, hence the sum is non-negative.
 This contradiction forces `L ≤ π / √K`. -/
 theorem length_bound_contradiction_assembly
-    (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
-    (_hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ)
-    (_hgeo : IsGeodesic (I := I) g γ) {L : ℝ} (_hL : 0 < L) {K : ℝ}
+    (g : SmoothRiemannianMetric I M) (γ : ℝ → M) {L : ℝ} (_hL : 0 < L)
+    (_hγ : ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ (Set.Icc 0 L))
+    (_hgeo : IsGeodesicOn (I := I) g γ (Set.Icc 0 L)) {K : ℝ}
     (_hK : 0 < K)
     (_hdim : 2 ≤ Module.finrank ℝ E)
     (_hRic : RicciBoundedBelow (I := I) g ((Module.finrank ℝ E - 1 : ℝ) * K))
@@ -969,7 +969,8 @@ theorem length_bound_contradiction_assembly
     (_hRicIntegrable : IntervalIntegrable
       (fun t : ℝ => ricciTensor (I := I) g (γ t) (uPrime t) (uPrime t))
       MeasureTheory.volume 0 L)
-    (_hmin : ∀ η : ℝ → M, η 0 = γ 0 → η L = γ L →
+    (_hmin : ∀ η : ℝ → M, ContMDiffOn 𝓘(ℝ, ℝ) I 1 η (Set.Icc 0 L) →
+      η 0 = γ 0 → η L = γ L →
       arcLength (I := I) g γ 0 L ≤ arcLength (I := I) g η 0 L) :
     L ≤ Real.pi / Real.sqrt K := by
   classical
@@ -1017,7 +1018,7 @@ theorem length_bound_contradiction_assembly
               (fun t => Real.sin (Real.pi * t / L)) (e i)).toFun))
         ≤ (Module.finrank ℝ E - 1 : ℝ) * (L / 2)
             * ((Real.pi / L) ^ 2 - K) :=
-    sum_index_form_bound_by_curvature_hypothesis (I := I) g γ _hγ _hgeo _hL
+    sum_index_form_bound_by_curvature_hypothesis (I := I) g γ _hL _hγ _hgeo
       _hRic uPrime _huPrimeEq _hUnit _huCont e _heDiff _hParallel _hON _hPerp
       _hIntegrandSum _hRicIntegrable
   -- Step 6: apply minimiser_implies_second_variation_nonneg pointwise and sum.
@@ -1031,11 +1032,33 @@ theorem length_bound_contradiction_assembly
         ((SectionAlongCurve.smulFun
           (fun t => Real.sin (Real.pi * t / L)) (e i)).toFun) := by
     intro i
+    -- Unit-speed of `γ'` in terms of the manifold velocity, via `_huPrimeEq`.
+    have hUnit_mfd : ∀ t ∈ Set.Icc (0 : ℝ) L,
+        g.inner (γ t)
+            (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ))
+            (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ)) = 1 := by
+      intro t ht
+      rw [_huPrimeEq t ht]
+      exact _hUnit t ht
+    -- Perpendicularity of the trial field `V_i = sin(π·/L) • e_i` to `γ'`.
+    -- The scalar `sin(π t / L)` factors out by bilinearity, leaving the frame
+    -- perpendicularity `_hPerp`.
+    have hVperp : ∀ t ∈ Set.Icc (0 : ℝ) L,
+        g.inner (γ t)
+            ((SectionAlongCurve.smulFun
+              (fun s => Real.sin (Real.pi * s / L)) (e i)).toFun t)
+            (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ)) = 0 := by
+      intro t ht
+      rw [_huPrimeEq t ht, SectionAlongCurve.smulFun_toFun]
+      rw [show (g.inner (γ t)) (Real.sin (Real.pi * t / L) • (e i).toFun t)
+            = Real.sin (Real.pi * t / L) • (g.inner (γ t)) ((e i).toFun t) from
+          map_smul (g.inner (γ t)) _ _]
+      rw [ContinuousLinearMap.smul_apply, smul_eq_mul, _hPerp t ht i, mul_zero]
     refine minimiser_implies_second_variation_nonneg
       (I := I) g γ L
       (fun t => (SectionAlongCurve.smulFun
         (fun t => Real.sin (Real.pi * t / L)) (e i)).toFun t)
-      _hgeo _hmin ?_ ?_
+      _hgeo _hmin hUnit_mfd hVperp ?_ ?_
     · -- V 0 = 0: sin(π·0/L) = sin 0 = 0, so the smul gives zero.
       simp [SectionAlongCurve.smulFun_toFun, Real.sin_zero]
     · -- V L = 0: sin(π·L/L) = sin π = 0, so the smul gives zero.

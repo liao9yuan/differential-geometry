@@ -77,47 +77,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 
-/-! ## Geodesic predicate on a set
-
-The set-restricted analogue of `IsGeodesic`: there exists a chart
-basepoint `α` and a velocity lift `f` that is an integral curve of the
-chart-fixed geodesic vector field on the set `s`. The value of `γ`
-outside `s` is irrelevant. -/
-
-/-- `γ : ℝ → M` is a geodesic of `g` on `s : Set ℝ` if there is a chart
-basepoint `α : M` and a velocity lift `f : ℝ → TangentBundle I M`
-projecting to `γ` whose restriction to `s` is an integral curve of the
-chart-fixed geodesic vector field `geodesicVectorFieldChart g α`. -/
-def IsGeodesicOn (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
-    (s : Set ℝ) : Prop :=
-  ∃ (α : M) (f : ℝ → TangentBundle I M),
-    (∀ t, (f t).proj = γ t) ∧
-    IsMIntegralCurveOn f (geodesicVectorFieldChart (I := I) g α) s
-
-/-- A geodesic on a set, viewed as a local geodesic at every interior
-point of the set (i.e. every `t` with `s ∈ 𝓝 t`). -/
-lemma IsGeodesicOn.isGeodesicAt {g : SmoothRiemannianMetric I M}
-    {γ : ℝ → M} {s : Set ℝ} {t : ℝ}
-    (hγ : IsGeodesicOn (I := I) g γ s) (ht : s ∈ 𝓝 t) :
-    IsGeodesicAt (I := I) g γ t := by
-  obtain ⟨α, f, hproj, hf⟩ := hγ
-  exact ⟨α, f, hproj, hf.isMIntegralCurveAt ht⟩
-
-/-- `IsGeodesicOn` is monotone in the set. -/
-lemma IsGeodesicOn.mono {g : SmoothRiemannianMetric I M}
-    {γ : ℝ → M} {s s' : Set ℝ}
-    (hγ : IsGeodesicOn (I := I) g γ s) (hs : s' ⊆ s) :
-    IsGeodesicOn (I := I) g γ s' := by
-  obtain ⟨α, f, hproj, hf⟩ := hγ
-  exact ⟨α, f, hproj, hf.mono hs⟩
-
-/-- A global geodesic, restricted to any set, is a geodesic on that set. -/
-lemma IsGeodesic.isGeodesicOn {g : SmoothRiemannianMetric I M}
-    {γ : ℝ → M} (hγ : IsGeodesic (I := I) g γ) (s : Set ℝ) :
-    IsGeodesicOn (I := I) g γ s := by
-  obtain ⟨α, f, hproj, hf⟩ := hγ
-  exact ⟨α, f, hproj, hf.isMIntegralCurveOn s⟩
-
 /-! ## Initial-data carriers
 
 A geodesic with prescribed initial data `(p : M, v : T_p M)` is one whose
@@ -577,7 +536,180 @@ open MeasureTheory intervalIntegral
 
 variable [I.Boundaryless]
 variable [Bundle.RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
-variable [T2Space M] [SigmaCompactSpace M]
+variable [T2Space M] [SigmaCompactSpace M] [FiniteDimensional ℝ E]
+
+/-- **Velocity-total-space continuity for a `C¹` curve on a closed interval.**
+For a curve `η : ℝ → M` that is `C¹` on `Icc a b`, the within-set velocity
+total-space section `t ↦ ⟨η t, mfderivWithin 𝓘(ℝ,ℝ) I η (Icc a b) t 1⟩` is
+continuous on `Icc a b`. This is the closed-interval `ContinuousOn` analogue
+of `MFDerivAlongCurve.continuous_tangentMap_unitLift`, routed through
+`ContMDiffOn.continuousOn_tangentMapWithin` (with `UniqueMDiffOn (Icc a b)`
+from `uniqueDiffOn_Icc`) precomposed with the continuous unit lift
+`t ↦ ⟨t, 1⟩`. -/
+private lemma continuousOn_velocityWithin_totalSpace_C1
+    {η : ℝ → M} {a b : ℝ} (hab : a < b)
+    (hη : ContMDiffOn 𝓘(ℝ, ℝ) I 1 η (Set.Icc a b)) :
+    ContinuousOn
+      (fun t : ℝ =>
+        (TotalSpace.mk' E (E := (TangentSpace I : M → Type _))
+          (η t)
+          (mfderivWithin 𝓘(ℝ, ℝ) I η (Set.Icc a b) t (1 : ℝ)) : TangentBundle I M))
+      (Set.Icc a b) := by
+  -- `Icc a b` has the unique-mdiff property as a subset of the model `ℝ`.
+  have hUnique : UniqueMDiffOn 𝓘(ℝ, ℝ) (Set.Icc a b) := by
+    intro x hx
+    rw [uniqueMDiffWithinAt_iff_uniqueDiffWithinAt]
+    exact (uniqueDiffOn_Icc hab) x hx
+  -- The bundled within-derivative is continuous on the bundle preimage of `Icc a b`.
+  have hTan := hη.continuousOn_tangentMapWithin (le_refl 1) hUnique
+  -- The unit lift `t ↦ ⟨t, 1⟩ : ℝ → TangentBundle 𝓘(ℝ, ℝ) ℝ` is continuous.
+  have hLift : Continuous (fun t : ℝ =>
+      (⟨t, (1 : ℝ)⟩ : TangentBundle 𝓘(ℝ, ℝ) ℝ)) := by
+    have h_homeo :
+        Continuous ((tangentBundleModelSpaceHomeomorph 𝓘(ℝ, ℝ)).symm :
+          ModelProd ℝ ℝ → TangentBundle 𝓘(ℝ, ℝ) ℝ) :=
+      (tangentBundleModelSpaceHomeomorph 𝓘(ℝ, ℝ)).symm.continuous
+    exact h_homeo.comp (continuous_id.prodMk continuous_const)
+  -- Precompose: the lift maps `Icc a b` into the bundle preimage.
+  have hMaps : Set.MapsTo (fun t : ℝ => (⟨t, (1 : ℝ)⟩ : TangentBundle 𝓘(ℝ, ℝ) ℝ))
+      (Set.Icc a b) (Bundle.TotalSpace.proj ⁻¹' (Set.Icc a b)) := by
+    intro t ht
+    simpa using ht
+  have hComp : ContinuousOn
+      (fun t : ℝ => tangentMapWithin 𝓘(ℝ, ℝ) I η (Set.Icc a b)
+        (⟨t, (1 : ℝ)⟩ : TangentBundle 𝓘(ℝ, ℝ) ℝ))
+      (Set.Icc a b) :=
+    hTan.comp hLift.continuousOn hMaps
+  -- The composite equals the target total-space section.
+  refine hComp.congr ?_
+  intro t _ht
+  rfl
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- **`ContinuousOn` of the `g`-speed-squared along a within-velocity section.**
+For a metric `g`, a curve `η`, and the within-set velocity section
+`vW t := mfderivWithin 𝓘(ℝ,ℝ) I η (Icc a b) t 1` presented through its
+total-space `ContinuousOn`, the quadratic form `t ↦ g.inner (η t) (vW t) (vW t)`
+is continuous on `Icc a b`. Mirrors `continuous_g_inner_along_param` from the
+second-variation development, in its `ContinuousOn` form, using the bundle
+inner product of `g`'s own continuous Riemannian metric. -/
+private lemma continuousOn_g_speedSq_velocityWithin
+    (g : SmoothRiemannianMetric I M) {η : ℝ → M} {a b : ℝ}
+    (hVW : ContinuousOn
+      (fun t : ℝ =>
+        (TotalSpace.mk' E (E := (TangentSpace I : M → Type _))
+          (η t)
+          (mfderivWithin 𝓘(ℝ, ℝ) I η (Set.Icc a b) t (1 : ℝ)) : TangentBundle I M))
+      (Set.Icc a b)) :
+    ContinuousOn
+      (fun t : ℝ =>
+        g.inner (η t)
+          (mfderivWithin 𝓘(ℝ, ℝ) I η (Set.Icc a b) t (1 : ℝ))
+          (mfderivWithin 𝓘(ℝ, ℝ) I η (Set.Icc a b) t (1 : ℝ)))
+      (Set.Icc a b) := by
+  letI cg : Bundle.ContinuousRiemannianMetric E (TangentSpace I : M → Type _) :=
+    g.toContinuousRiemannianMetric
+  letI rb : Bundle.RiemannianBundle (TangentSpace I : M → Type _) :=
+    ⟨cg.toRiemannianMetric⟩
+  have h := ContinuousOn.inner_bundle (F := E) (B := M)
+    (E := (TangentSpace I : M → Type _))
+    (b := η)
+    (v := fun t : ℝ => mfderivWithin 𝓘(ℝ, ℝ) I η (Set.Icc a b) t (1 : ℝ))
+    (w := fun t : ℝ => mfderivWithin 𝓘(ℝ, ℝ) I η (Set.Icc a b) t (1 : ℝ))
+    (s := Set.Icc a b) hVW hVW
+  refine h.congr ?_
+  intro t _ht
+  rfl
+
+/-- **Integrability of the `g`-speed integrand for a `C¹` curve.**
+For a curve `η : ℝ → M` that is `C¹` on `Icc a b` with `a ≤ b`, given the
+pointwise bundle-enorm identification on `Icc a b`, the speed integrand
+`t ↦ √(g.inner (η t) (mfderiv η t 1) (mfderiv η t 1))` is integrable on
+`Icc a b`.
+
+The proof reduces to the `ContinuousOn` of the within-velocity speed integrand
+on the compact interval (hence integrable by `ContinuousOn.integrableOn_Icc`),
+then transfers to the `mfderiv` form by a.e.-equality on the co-null interior
+`Ioo a b` (where `mfderivWithin = mfderiv`). The singleton case `a = b` is
+handled directly via `integrableOn_singleton_iff`. The `hEnorm` argument is kept
+for signature uniformity with `pathELength_eq_arcLength_C1` and is not needed in
+the proof. -/
+lemma speedSqrt_integrableOn_Icc_of_C1
+    (g : SmoothRiemannianMetric I M) {η : ℝ → M} {a b : ℝ} (hab : a ≤ b)
+    (hη : ContMDiffOn 𝓘(ℝ, ℝ) I 1 η (Set.Icc a b))
+    (_hEnorm : ∀ t ∈ Set.Icc a b,
+        ‖mfderiv 𝓘(ℝ, ℝ) I η t (1 : ℝ)‖ₑ
+          = ENNReal.ofReal (Real.sqrt
+              (g.inner (η t)
+                (mfderiv 𝓘(ℝ, ℝ) I η t (1 : ℝ))
+                (mfderiv 𝓘(ℝ, ℝ) I η t (1 : ℝ))))) :
+    MeasureTheory.IntegrableOn
+      (fun t : ℝ => Real.sqrt
+        (g.inner (η t)
+          (mfderiv 𝓘(ℝ, ℝ) I η t (1 : ℝ))
+          (mfderiv 𝓘(ℝ, ℝ) I η t (1 : ℝ))))
+      (Set.Icc a b) MeasureTheory.volume := by
+  classical
+  rcases eq_or_lt_of_le hab with hab_eq | hab_lt
+  · -- Degenerate interval `a = b`: `Icc a a = {a}` is a single point.
+    subst hab_eq
+    rw [Set.Icc_self, MeasureTheory.integrableOn_singleton_iff]
+    exact Or.inr (by simp)
+  · -- `a < b`. Continuity of the within-velocity speed integrand.
+    have hVW := continuousOn_velocityWithin_totalSpace_C1 (I := I) (M := M)
+      hab_lt hη
+    have hSpeedSq := continuousOn_g_speedSq_velocityWithin (I := I) (M := M) g hVW
+    have hSqrtW : ContinuousOn
+        (fun t : ℝ => Real.sqrt
+          (g.inner (η t)
+            (mfderivWithin 𝓘(ℝ, ℝ) I η (Set.Icc a b) t (1 : ℝ))
+            (mfderivWithin 𝓘(ℝ, ℝ) I η (Set.Icc a b) t (1 : ℝ))))
+        (Set.Icc a b) :=
+      Real.continuous_sqrt.comp_continuousOn hSpeedSq
+    -- Integrability of the within-velocity form on the compact interval.
+    have hIntW : MeasureTheory.IntegrableOn
+        (fun t : ℝ => Real.sqrt
+          (g.inner (η t)
+            (mfderivWithin 𝓘(ℝ, ℝ) I η (Set.Icc a b) t (1 : ℝ))
+            (mfderivWithin 𝓘(ℝ, ℝ) I η (Set.Icc a b) t (1 : ℝ))))
+        (Set.Icc a b) MeasureTheory.volume :=
+      hSqrtW.integrableOn_Icc
+    -- On the interior `Ioo a b`, `mfderivWithin = mfderiv`, so the two integrands
+    -- agree; `Ioo a b` is co-null in `Icc a b`.
+    have hAgree : ∀ t ∈ Set.Ioo a b,
+        Real.sqrt
+            (g.inner (η t)
+              (mfderivWithin 𝓘(ℝ, ℝ) I η (Set.Icc a b) t (1 : ℝ))
+              (mfderivWithin 𝓘(ℝ, ℝ) I η (Set.Icc a b) t (1 : ℝ)))
+          = Real.sqrt
+            (g.inner (η t)
+              (mfderiv 𝓘(ℝ, ℝ) I η t (1 : ℝ))
+              (mfderiv 𝓘(ℝ, ℝ) I η t (1 : ℝ))) := by
+      intro t ht
+      have hmem : Set.Icc a b ∈ nhds t :=
+        Icc_mem_nhds ht.1 ht.2
+      rw [mfderivWithin_of_mem_nhds hmem]
+    -- The two integrands are a.e. equal on `Icc a b` (they agree on `Ioo a b`,
+    -- whose complement in `Icc a b` is the null pair `{a, b}`).
+    have hae : (fun t : ℝ => Real.sqrt
+          (g.inner (η t)
+            (mfderivWithin 𝓘(ℝ, ℝ) I η (Set.Icc a b) t (1 : ℝ))
+            (mfderivWithin 𝓘(ℝ, ℝ) I η (Set.Icc a b) t (1 : ℝ))))
+        =ᵐ[MeasureTheory.volume.restrict (Set.Icc a b)]
+        (fun t : ℝ => Real.sqrt
+          (g.inner (η t)
+            (mfderiv 𝓘(ℝ, ℝ) I η t (1 : ℝ))
+            (mfderiv 𝓘(ℝ, ℝ) I η t (1 : ℝ)))) := by
+      have hIoo_ae : ∀ᵐ t ∂(MeasureTheory.volume.restrict (Set.Icc a b)),
+          t ∈ Set.Ioo a b := by
+        -- The restrictions to `Ioo a b` and `Icc a b` agree (they differ by the
+        -- null endpoints), so a.e. on `Icc a b` a point lies in `Ioo a b`.
+        rw [← MeasureTheory.restrict_Ioo_eq_restrict_Icc]
+        exact MeasureTheory.ae_restrict_mem measurableSet_Ioo
+      filter_upwards [hIoo_ae] with t ht
+      exact hAgree t ht
+    exact hIntW.congr hae
 
 /-- **Bridge 3 — `pathELength_eq_arcLength_C1`.**
 
