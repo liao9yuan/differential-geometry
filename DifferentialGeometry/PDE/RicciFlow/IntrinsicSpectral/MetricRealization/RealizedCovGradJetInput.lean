@@ -305,6 +305,66 @@ theorem reprDiffChartCompOnE_comp_toEuclidean_symm_eqOn
   rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α _ hy',
     chartPushedRaw_apply_of_mem (I := I) (M := M) α _ hy']
 
+/-! ## Leaf-4: the covariant-gradient inversion of the chart-pushed raw component
+
+The chart-component formula `tensorChartComponentRaw_covGrad` reads, in `EuclideanSpace`
+coordinates, the raw component of `covGrad S` as `euclidPartial (chart-push of raw comp of S)
++ Christoffel correction`.  Rearranged, the `EuclideanSpace`-side partial of the chart-pushed
+raw component of `S` is the raw component of `covGrad S` minus the correction. -/
+
+/-- **First-order covariant-gradient inversion (`s = 2`, `r = 0`).**  For `y' ∈
+chartTargetEuclid α`, the `EuclideanSpace`-side partial of the chart-pushed raw `(0,2)`-component
+of `S` at indices `![l, b]` in direction `a` equals the raw `(0,3)`-component of `covGrad g_bg
+0 2 S` at indices `![a, l, b]` (read at the chart preimage of `y'`), minus the lower-order
+Christoffel correction. -/
+theorem euclidPartial_chartPushedRaw_eq_covGrad_sub_lowerOrder
+    (g_bg : SmoothRiemannianMetric I M) (S : SmoothCcTensor g_bg 0 2) (α : M)
+    (a l b : Fin (Module.finrank ℝ E)) {y' : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))}
+    (hy' : y' ∈ chartTargetEuclid (I := I) (M := M) α) :
+    euclidPartial (E := E) a
+        (chartPushedRaw I α
+          (tensorChartComponentRaw (I := I) (M := M) g_bg 0 2 S α
+            (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![l, b])) y' =
+      tensorChartComponentRaw (I := I) (M := M) g_bg 0 (2 + 1)
+          (covGrad (I := I) (M := M) g_bg 0 2 S) α
+          (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![a, l, b]
+          ((extChartAt I α).symm ((toEuclidean (E := E)).symm y'))
+        - covDerivLowerOrderTerm (I := I) (M := M) g_bg 0 2 S α a
+            (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![l, b] y' := by
+  classical
+  -- `vecTail ![a, l, b] = ![l, b]` and `![a, l, b] 0 = a`.
+  have hJ0 : (![a, l, b] : Fin 3 → Fin (Module.finrank ℝ E)) 0 = a := rfl
+  have hJtail : Matrix.vecTail (![a, l, b] : Fin 3 → Fin (Module.finrank ℝ E)) = ![l, b] := by
+    funext j; fin_cases j <;> rfl
+  -- Apply the chart-component formula at `Jdx := ![a, l, b]`.
+  have hform := tensorChartComponentRaw_covGrad (I := I) (M := M) g_bg 0 2 S α
+    (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![a, l, b] hy'
+  rw [hJ0, hJtail] at hform
+  -- `hform : raw(covGrad S) = euclidPartial a (chartPush raw_{![l,b]}) + lowerOrder`.
+  -- Rearrange to isolate the euclidPartial term.
+  rw [hform]
+  ring
+
+/-! ## Leaf-4: differentiability bookkeeping in Euclidean coordinates -/
+
+/-- The chart-push of a raw chart component is differentiable at every point of the
+(open) Euclidean chart target. -/
+theorem chartPushedRaw_tensorChartComponentRaw_differentiableAt
+    (g_bg : SmoothRiemannianMetric I M) (s : ℕ)
+    (S : SmoothCcTensor g_bg 0 s) (α : M)
+    (Jdx : Fin s → Fin (Module.finrank ℝ E))
+    {y' : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))}
+    (hy' : y' ∈ chartTargetEuclid (I := I) (M := M) α) :
+    DifferentiableAt ℝ
+      (chartPushedRaw I α
+        (tensorChartComponentRaw (I := I) (M := M) g_bg 0 s S α
+          (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) Jdx)) y' := by
+  have hcd := chartPushedRaw_tensorChartComponentRaw_contDiffOn (I := I) (M := M) g_bg 0 s S α
+    (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) Jdx
+  have hopen : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
+    chartTargetEuclid_isOpen (I := I) (M := M) α
+  exact (hcd.contDiffAt (hopen.mem_nhds hy')).differentiableAt (by simp)
+
 end MetricRealization
 end IntrinsicSpectral
 end RicciFlow
