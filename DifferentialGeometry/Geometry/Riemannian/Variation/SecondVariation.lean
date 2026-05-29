@@ -219,24 +219,19 @@ the projection `(s, t) ↦ f s t` (immediate from joint smoothness) and
 smoothness of the chart-trivialisation-projected fiber value, which is a
 mfderiv-applied-to-a-smooth-vector formula handled by
 `ContMDiffAt.mfderiv_apply`. -/
-private lemma velocity_totalSpace_continuous
+private lemma velocity_totalSpace_contMDiff
     (f : ℝ → ℝ → M) (hf : IsSmoothVariation (I := I) f) :
-    Continuous (fun p : ℝ × ℝ =>
-      (TotalSpace.mk' E (E := (TangentSpace I : M → Type _))
-        (f p.1 p.2) (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f p.1 u) p.2 (1 : ℝ)) :
-          TangentBundle I M)) := by
+    ContMDiff (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, E)) ∞
+      (fun p : ℝ × ℝ =>
+        (TotalSpace.mk' E (E := (TangentSpace I : M → Type _))
+          (f p.1 p.2) (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f p.1 u) p.2 (1 : ℝ)) :
+            TangentBundle I M)) := by
   classical
   -- Joint smoothness of `f : ℝ × ℝ → M` as a curried map.
   have hf_uncurry : ContMDiff (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) I ∞
       (fun p : ℝ × ℝ => f p.1 p.2) := hf
-  -- It suffices to show smoothness; continuity follows. We use
-  -- `Bundle.contMDiffAt_totalSpace`: smooth into a total space decomposes
+  -- We use `Bundle.contMDiffAt_totalSpace`: smooth into a total space decomposes
   -- into smooth projection + smooth trivialisation-applied fiber value.
-  suffices h : ContMDiff (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, E)) ∞
-      (fun p : ℝ × ℝ =>
-        (TotalSpace.mk' E (E := (TangentSpace I : M → Type _))
-          (f p.1 p.2) (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f p.1 u) p.2 (1 : ℝ)) :
-            TangentBundle I M)) from h.continuous
   -- Reduce to pointwise smoothness.
   intro p₀
   rw [Bundle.contMDiffAt_totalSpace]
@@ -338,6 +333,17 @@ private lemma velocity_totalSpace_continuous
       (fun p : ℝ × ℝ => (trivializationAt E (TangentSpace I) (f p₀.1 p₀.2)
         ⟨f p.1 p.2, mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f p.1 u) p.2 (1 : ℝ)⟩).2) p₀
   exact h_smooth_mfd.congr_of_eventuallyEq h_eq
+
+/-- The total-space `TM`-valued partial-`t` velocity of a smooth two-parameter
+variation is continuous in the parameter `(s, t)`. Immediate corollary of the
+smoothness of this total-space velocity (`velocity_totalSpace_contMDiff`). -/
+private lemma velocity_totalSpace_continuous
+    (f : ℝ → ℝ → M) (hf : IsSmoothVariation (I := I) f) :
+    Continuous (fun p : ℝ × ℝ =>
+      (TotalSpace.mk' E (E := (TangentSpace I : M → Type _))
+        (f p.1 p.2) (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f p.1 u) p.2 (1 : ℝ)) :
+          TangentBundle I M)) :=
+  (velocity_totalSpace_contMDiff (I := I) (M := M) f hf).continuous
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
@@ -870,6 +876,32 @@ theorem S1_moving_foot_metric_compatibility
 
 /-! ## Differentiation under the interval integral of the speed -/
 
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- The speed-squared `speedSq g f s t` is jointly `C^∞` in the parameter
+`(s, t)`. The total-space partial-`t` velocity is smooth in `(s, t)`
+(`velocity_totalSpace_contMDiff`), and the Riemannian inner product of two
+smooth bundle sections is a smooth scalar function (`ContMDiff.inner_bundle`);
+the model spaces `ℝ × ℝ` and `ℝ` are trivial, so `ContMDiff` is `ContDiff`. -/
+private lemma speedSq_contDiff
+    (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M)
+    (hf : IsSmoothVariation (I := I) f) :
+    ContDiff ℝ ∞ (fun p : ℝ × ℝ => speedSq (I := I) g f p.1 p.2) := by
+  have hvel := velocity_totalSpace_contMDiff (I := I) (M := M) f hf
+  letI rb : Bundle.RiemannianBundle (TangentSpace I : M → Type _) :=
+    ⟨g.toRiemannianMetric⟩
+  have hinner := ContMDiff.inner_bundle (F := E) (B := M)
+    (E := (TangentSpace I : M → Type _))
+    (b := fun p : ℝ × ℝ => f p.1 p.2)
+    (v := fun p : ℝ × ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f p.1 u) p.2 (1 : ℝ))
+    (w := fun p : ℝ × ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f p.1 u) p.2 (1 : ℝ))
+    hvel hvel
+  have hcm : ContMDiff (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × ℝ => speedSq (I := I) g f p.1 p.2) := by
+    refine hinner.congr ?_; intro p; rfl
+  rw [← contMDiff_iff_contDiff, modelWithCornersSelf_prod, ← chartedSpaceSelf_prod]
+  exact hcm
+
 /-- **Differentiation under the interval integral for the arc-length speed.**
 For a smooth two-parameter variation `f` whose central curve is unit-speed on
 `[0, L]`, the `s`-derivative at `s = 0` of the slice arc-length integrand
@@ -894,7 +926,164 @@ theorem S2_diff_under_interval_integral
             (fun s : ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f s u) t (1 : ℝ)) 0)
           (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f 0 u) t (1 : ℝ)))
           / (2 * Real.sqrt (speedSq (I := I) g f 0 t)))
-      0 := sorry
+      0 := by
+  classical
+  -- Abbreviations: the speed-squared `Φ`, its uncurried form `G`, and the
+  -- pointwise `s`-derivative-at-`0` value `D` (the target numerator).
+  set Φ : ℝ → ℝ → ℝ := fun s t => speedSq (I := I) g f s t with hΦdef
+  set G : ℝ × ℝ → ℝ := fun p : ℝ × ℝ => Φ p.1 p.2 with hG
+  set D : ℝ → ℝ := fun t : ℝ =>
+    2 * g.inner (f 0 t)
+      (DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong.covDerivAlong
+        (I := I) g (fun s : ℝ => f s t)
+        (fun s : ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f s u) t (1 : ℝ)) 0)
+      (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f 0 u) t (1 : ℝ)) with hDdef
+  -- (1) `Φ = speedSq` is jointly `C^∞` in `(s, t)` (`speedSq_contDiff`).
+  have hΦ : ContDiff ℝ ∞ G := by
+    rw [hG, hΦdef]; exact speedSq_contDiff (I := I) (M := M) g f _hf
+  have hΦcont : Continuous G := hΦ.continuous
+  -- (2) The pointwise `s`-derivative of `Φ(·, t)` at `s = 0` is `D t`
+  -- (`S1_moving_foot_metric_compatibility`).
+  have hD : ∀ t : ℝ, HasDerivAt (fun s : ℝ => Φ s t) (D t) 0 := by
+    intro t
+    have := S1_moving_foot_metric_compatibility (I := I) g f t _hf
+    simpa only [hΦdef, hDdef] using this
+  -- The `s`-partial of the jointly-`C^∞` `G` is `fderiv G (0, t) (1, 0)`, and by
+  -- uniqueness of derivatives it agrees with `D`; this gives continuity of `D`.
+  have hΦdiff : ∀ p : ℝ × ℝ, DifferentiableAt ℝ G p :=
+    fun p => (hΦ.differentiable (by simp)).differentiableAt
+  have hslice_deriv : ∀ s t : ℝ,
+      HasDerivAt (fun u : ℝ => Φ u t) (fderiv ℝ G (s, t) (1, 0)) s := by
+    intro s t
+    have := Aux2.hasDerivAt_slice_fst (fun u v => Φ u v) s t (hΦdiff (s, t))
+    simpa only [hG] using this
+  have hD_eq : ∀ t : ℝ, D t = fderiv ℝ G (0, t) (1, 0) := by
+    intro t
+    exact (hD t).unique (hslice_deriv 0 t)
+  have hpartial_cont : Continuous (fun p : ℝ × ℝ => fderiv ℝ G p (1, 0)) := by
+    have hc : Continuous (fun p : ℝ × ℝ => fderiv ℝ G p) :=
+      hΦ.continuous_fderiv (by simp)
+    exact hc.clm_apply continuous_const
+  have hDcont : Continuous D := by
+    have : Continuous (fun t : ℝ => fderiv ℝ G (0, t) (1, 0)) :=
+      hpartial_cont.comp (continuous_const.prodMk continuous_id)
+    exact this.congr (fun t => (hD_eq t).symm)
+  -- (3) Positivity: the central curve is unit-speed on `[0, L]`, so near `s = 0`
+  -- the speed `√(Φ s t)` has a uniform positive lower bound `c0` on `[0, L]`.
+  have hpos : ∃ δ > (0 : ℝ), ∃ c0 > (0 : ℝ), ∀ s ∈ Set.Ioo (-δ) δ,
+      ∀ t ∈ Set.Icc (0 : ℝ) L, c0 ≤ Real.sqrt (Φ s t) := by
+    obtain ⟨δ, hδ, c, hc, hbnd⟩ :=
+      speed_positivity_on_regular_variation (I := I) (M := M) g f L _hf _hUnit
+    -- `hbnd` gives `c ≤ √(g.inner ...)`; that inner product is `Φ s t = speedSq` by
+    -- definition.
+    exact ⟨δ, hδ, c, hc, fun s hs t ht => hbnd s hs t ht⟩
+  -- (4) Differentiate under the interval integral via the Mathlib engine.
+  obtain ⟨δ, hδ, c0, hc0, hposΦ⟩ := hpos
+  set δ' : ℝ := δ / 2 with hδ'
+  have hδ'pos : 0 < δ' := by positivity
+  have hδ'lt : δ' < δ := by simp only [hδ']; linarith
+  set Kset : Set (ℝ × ℝ) := Set.Icc (-δ') δ' ×ˢ Set.Icc 0 L with hKset
+  have hKcompact : IsCompact Kset := (isCompact_Icc).prod isCompact_Icc
+  have hKne : Kset.Nonempty :=
+    ⟨(0, 0), ⟨⟨by linarith, le_of_lt hδ'pos⟩, ⟨le_refl 0, le_of_lt _hL⟩⟩⟩
+  obtain ⟨pm, hpmKset, hpmMax⟩ := hKcompact.exists_isMaxOn hKne
+    ((continuous_norm.comp hpartial_cont).continuousOn)
+  set K1 : ℝ := ‖fderiv ℝ G pm (1, 0)‖ with hK1
+  have hK1nonneg : 0 ≤ K1 := norm_nonneg _
+  -- Uniform positive lower bound `c0` for the speed on the compact box `Kset`.
+  have hsqrtlb : ∀ s ∈ Set.Icc (-δ') δ', ∀ t ∈ Set.Icc (0 : ℝ) L,
+      c0 ≤ Real.sqrt (Φ s t) := by
+    intro s hs t ht
+    refine hposΦ s ?_ t ht
+    rcases hs with ⟨h1, h2⟩
+    exact ⟨by linarith, by linarith⟩
+  -- The slice speed-squared is nonzero on the box (`√(Φ s t) ≥ c0 > 0`).
+  have hΦne : ∀ s ∈ Set.Icc (-δ') δ', ∀ t ∈ Set.Icc (0 : ℝ) L, Φ s t ≠ 0 := by
+    intro s hs t ht hcontra
+    have hsqrt0 : Real.sqrt (Φ s t) = 0 := by rw [hcontra, Real.sqrt_zero]
+    have := hsqrtlb s hs t ht
+    rw [hsqrt0] at this; linarith
+  -- The Lipschitz constant on the box: `K1 / (2 c0)`.
+  set C0 : ℝ := K1 / (2 * c0) with hC0
+  have hC0nonneg : 0 ≤ C0 := by positivity
+  -- Uniform Lipschitz bound of the slice `s ↦ √(Φ s t)` on `[-δ', δ']`.
+  have hlip : ∀ t ∈ Set.Icc (0 : ℝ) L,
+      LipschitzOnWith C0.toNNReal (fun s => Real.sqrt (Φ s t))
+        (Set.Icc (-δ') δ') := by
+    intro t ht
+    apply Convex.lipschitzOnWith_of_nnnorm_deriv_le (𝕜 := ℝ) _ _ (convex_Icc _ _)
+    · intro s hs
+      exact ((hslice_deriv s t).sqrt (hΦne s hs t ht)).differentiableAt
+    · intro s hs
+      have hderiv_eq : deriv (fun u : ℝ => Real.sqrt (Φ u t)) s
+          = fderiv ℝ G (s, t) (1, 0) / (2 * Real.sqrt (Φ s t)) :=
+        ((hslice_deriv s t).sqrt (hΦne s hs t ht)).deriv
+      have hnum_le : ‖fderiv ℝ G (s, t) (1, 0)‖ ≤ K1 :=
+        hpmMax (⟨hs, ht⟩ : (s, t) ∈ Kset)
+      have hden_ge : 2 * c0 ≤ 2 * Real.sqrt (Φ s t) := by
+        have := hsqrtlb s hs t ht; linarith
+      have hden_pos : (0 : ℝ) < 2 * Real.sqrt (Φ s t) := by
+        have := hsqrtlb s hs t ht; linarith
+      have hnorm_le : ‖deriv (fun u : ℝ => Real.sqrt (Φ u t)) s‖ ≤ C0 := by
+        rw [hderiv_eq, norm_div, Real.norm_eq_abs (2 * Real.sqrt (Φ s t)),
+          abs_of_nonneg (le_of_lt hden_pos), hC0,
+          div_le_div_iff₀ hden_pos (by linarith : (0 : ℝ) < 2 * c0)]
+        calc ‖fderiv ℝ G (s, t) (1, 0)‖ * (2 * c0)
+              ≤ K1 * (2 * c0) :=
+                mul_le_mul_of_nonneg_right hnum_le (by positivity)
+          _ ≤ K1 * (2 * Real.sqrt (Φ s t)) :=
+                mul_le_mul_of_nonneg_left hden_ge hK1nonneg
+      have h1 : ‖deriv (fun u : ℝ => Real.sqrt (Φ u t)) s‖₊
+          = Real.toNNReal ‖deriv (fun u : ℝ => Real.sqrt (Φ u t)) s‖ := by
+        rw [Real.toNNReal_of_nonneg (norm_nonneg _)]; rfl
+      rw [h1]; exact Real.toNNReal_le_toNNReal hnorm_le
+  -- The interval-integral differentiation engine.
+  set Ffun : ℝ → ℝ → ℝ := fun s t => Real.sqrt (Φ s t) with hFfun
+  set Ffun' : ℝ → ℝ := fun t => D t / (2 * Real.sqrt (Φ 0 t)) with hFfun'
+  have hFcont : ∀ s : ℝ, Continuous (Ffun s) := fun s =>
+    Real.continuous_sqrt.comp (hΦcont.comp (continuous_const.prodMk continuous_id))
+  have key := intervalIntegral.hasDerivAt_integral_of_dominated_loc_of_lip
+    (μ := volume) (a := (0 : ℝ)) (b := L) (F := Ffun) (F' := Ffun') (x₀ := (0 : ℝ))
+    (bound := fun _ => C0) (s := Set.Ioo (-δ') δ')
+    (Ioo_mem_nhds (by linarith) hδ'pos)
+    (Filter.Eventually.of_forall (fun x => (hFcont x).aestronglyMeasurable))
+    ((hFcont 0).intervalIntegrable 0 L)
+    (by
+      -- `Ffun'` is continuous on `Ioc 0 L` (nonzero denominator there).
+      have hden_cont : Continuous (fun t : ℝ => 2 * Real.sqrt (Φ 0 t)) :=
+        continuous_const.mul (Real.continuous_sqrt.comp
+          (hΦcont.comp (continuous_const.prodMk continuous_id)))
+      have hcoon : ContinuousOn Ffun' (Set.Ioc (0 : ℝ) L) := by
+        apply ContinuousOn.div hDcont.continuousOn hden_cont.continuousOn
+        intro t ht
+        have htIcc : t ∈ Set.Icc (0 : ℝ) L := ⟨le_of_lt ht.1, ht.2⟩
+        have h0 : (0 : ℝ) ∈ Set.Icc (-δ') δ' := ⟨by linarith, le_of_lt hδ'pos⟩
+        have hsqrt_pos : (0 : ℝ) < Real.sqrt (Φ 0 t) := by
+          have := hsqrtlb 0 h0 t htIcc; linarith
+        exact ne_of_gt (by linarith)
+      rw [Set.uIoc_of_le (le_of_lt _hL)]
+      exact hcoon.aestronglyMeasurable measurableSet_Ioc)
+    (by
+      -- Lipschitz bound a.e. on `Ι 0 L`.
+      apply Filter.Eventually.of_forall
+      intro t ht
+      rw [Set.uIoc_of_le (le_of_lt _hL)] at ht
+      have htIcc : t ∈ Set.Icc (0 : ℝ) L := ⟨le_of_lt ht.1, ht.2⟩
+      have hnn : Real.nnabs C0 = C0.toNNReal := by
+        ext; simp [Real.coe_nnabs, Real.coe_toNNReal _ hC0nonneg,
+          abs_of_nonneg hC0nonneg]
+      rw [hnn]
+      exact (hlip t htIcc).mono Set.Ioo_subset_Icc_self)
+    (_root_.intervalIntegrable_const)
+    (by
+      -- Pointwise derivative at `0` for a.e. `t ∈ Ι 0 L`.
+      apply Filter.Eventually.of_forall
+      intro t ht
+      rw [Set.uIoc_of_le (le_of_lt _hL)] at ht
+      have htIcc : t ∈ Set.Icc (0 : ℝ) L := ⟨le_of_lt ht.1, ht.2⟩
+      have h0 : (0 : ℝ) ∈ Set.Icc (-δ') δ' := ⟨by linarith, le_of_lt hδ'pos⟩
+      exact (hD t).sqrt (hΦne 0 h0 t htIcc))
+  exact key.2
 
 /-! ## Construction of a smooth variation with prescribed variation field -/
 
