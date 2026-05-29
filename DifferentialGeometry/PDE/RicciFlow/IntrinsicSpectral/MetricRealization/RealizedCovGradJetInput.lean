@@ -607,6 +607,19 @@ theorem extChartAt_symm_image_isCompact_subset_chartSource
       (extChartAt I α).map_target (hKtgt hy_mem)
     rwa [extChartAt_source] at hsrc
 
+/-! ## Leaf-4: `euclidPartial` congruence on an open set -/
+
+/-- If two functions agree on an open set `U`, their first `euclidPartial`s agree on `U`. -/
+theorem euclidPartial_congr_of_eqOn_isOpen
+    (a : Fin (Module.finrank ℝ E))
+    {f h : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ}
+    {U : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))}
+    (hU : IsOpen U) (heq : Set.EqOn f h U) :
+    Set.EqOn (euclidPartial (E := E) a f) (euclidPartial (E := E) a h) U := by
+  intro z hz
+  rw [euclidPartial_def, euclidPartial_def]
+  rw [(heq.eventuallyEq_of_mem (hU.mem_nhds hz)).fderiv_eq]
+
 end MetricRealization
 end IntrinsicSpectral
 end RicciFlow
