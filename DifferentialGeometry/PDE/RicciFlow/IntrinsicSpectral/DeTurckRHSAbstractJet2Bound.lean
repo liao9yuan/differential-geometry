@@ -2,6 +2,7 @@ import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckRHSPointwiseL
 import DifferentialGeometry.PDE.RicciFlow.LieDerivativePairing
 import DifferentialGeometry.Integral.Connection.ChartBridge.Ricci
 import DifferentialGeometry.Integral.Connection.ChartBridge.RiemannBasisIdentity
+import DifferentialGeometry.Integral.Connection.ChartBridge.RiemannBasisIdentityAlpha
 
 /-!
 # The abstract chart-frame component of the Ricci–DeTurck RHS difference, reduced to
@@ -355,6 +356,39 @@ theorem abstractRicciFrameComponent_eq_chartRicciSwap
   abstractRicciFrameComponent_eq_chartRicciSwap_of_basisIdentity (I := I) g α x i j
     (chartRiemannBasisIdentity_holds (I := I)
       (smoothRiemannianMetricToInfty (I := I) g) x)
+
+/-! ## The off-centre chart-`α` Ricci frame identity (change-of-coordinates step)
+
+The change-of-coordinates step bridging the abstract Ricci frame component at an
+off-centre point `x` to the chart-`α` off-centre Ricci entry
+`chartRicciTensor g α p q (ϕ_α x)` is now discharged unconditionally on
+`chartLeviCivitaGoodSet α` by
+`Integral.Connection.ricciTensor_chartBasisVec_alpha_eq`.  This is the genuine off-centre
+twin of the centred basis identity, established via a chart-`α` off-centre second covariant
+derivative, off-centre Lie-bracket vanishing, and a Levi-Civita trace against the chart-`α`
+frame.  We restate it here in the abstract-layer `chartFrameVec` / `smoothRiemannianMetricToInfty`
+typing. -/
+
+set_option linter.unusedSectionVars false in
+/-- **Off-centre chart-`α` Ricci frame identity (unconditional, on the chart-`α` good set).**
+For `x ∈ chartLeviCivitaGoodSet α`, the abstract Ricci tensor evaluated on the chart-`α`
+pushforward frame pair `(chartFrameVec α p x, chartFrameVec α q x)` equals the chart-`α`
+Christoffel Ricci entry evaluated off-centre at `ϕ_α x`:
+`ricciTensor g x (e^α_p x) (e^α_q x) = chartRicciTensor g α p q (ϕ_α x)`.
+
+This is the named change-of-coordinates gap, now closed:
+`Integral.Connection.ricciTensor_chartBasisVec_alpha_eq` supplies the off-centre identity. -/
+theorem abstractRicciFrameComponent_eq_chartRicciAlpha
+    (g : SmoothRiemannianMetric I M) (α : M)
+    (p q : Fin (Module.finrank ℝ E)) {x : M}
+    (hx : x ∈ chartLeviCivitaGoodSet (I := I) α) :
+    ricciTensor (I := I) (smoothRiemannianMetricToInfty (I := I) g) x
+        (chartFrameVec (I := I) α p x) (chartFrameVec (I := I) α q x) =
+      chartRicciTensor (I := I) (smoothRiemannianMetricToInfty (I := I) g) α p q
+        (extChartAt I α x) := by
+  rw [chartFrameVec_eq_chartBasisVecFiber, chartFrameVec_eq_chartBasisVecFiber]
+  exact ricciTensor_chartBasisVec_alpha_eq (I := I)
+    (smoothRiemannianMetricToInfty (I := I) g) α p q hx
 
 /-! ## The chart-carrier target and the remaining off-centre gap
 
