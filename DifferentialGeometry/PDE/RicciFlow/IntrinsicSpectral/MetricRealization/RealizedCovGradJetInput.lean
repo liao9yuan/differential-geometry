@@ -50,8 +50,11 @@ namespace MetricRealization
 
 open DifferentialGeometry
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
+open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
+open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -128,6 +131,85 @@ theorem tensorChartComponentRaw_abs_le_riemannianFibreNorm
     _ ≤ Cproj * (Cop * ‖T.toSection b‖) :=
         mul_le_mul_of_nonneg_left h_v_le hCproj_nn
     _ = Cproj * Cop * ‖T.toSection b‖ := by ring
+
+/-! ## Leaf-3: the dictionary `ccTensorBilin = raw chart-frame component` -/
+
+/-- The rank-`0` chart-frame basis element `chartFrameBasisModel α x 0 (![] : Fin 0 → _)`
+is the unit `(0, 0)`-tensor `constOfIsEmpty 1`.  Both are `0`-ary continuous multilinear
+maps, hence determined by their (unique, empty-tuple) value, which is the empty product
+`1` on either side. -/
+lemma chartFrameBasisModel_zero_eq_constOfIsEmpty (α x : M) :
+    chartFrameBasisModel (I := I) (M := M) α x 0
+        (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) =
+      ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ) := by
+  refine ContinuousMultilinearMap.ext ?_
+  intro v
+  rw [chartFrameBasisModel_apply]
+  simp
+
+/-- **The bilinear-form value of a `(0,2)`-tensor section equals its raw chart-frame
+component.**  For a smooth compactly-supported `(0,2)`-tensor `S`, a chart center `α`, a base
+point `x` in the chart source, and frame indices `l b`, the extracted bilinear form
+`ccTensorBilin g_bg S x` evaluated on the chart-`α`-frame vectors `(e_l, e_b)` equals the
+raw chart-frame scalar component `tensorChartComponentRaw g_bg 0 2 S α (![]) ![l, b] x`. -/
+theorem ccTensorBilin_chartBasisVecFiber_eq_tensorChartComponentRaw
+    (g_bg : SmoothRiemannianMetric I M) (S : SmoothCcTensor g_bg 0 2) (α : M) {x : M}
+    (hx : x ∈ (chartAt H α).source) (l b : Fin (Module.finrank ℝ E)) :
+    ccTensorBilin (I := I) g_bg S x
+        (chartBasisVecFiber (I := I) α l x) (chartBasisVecFiber (I := I) α b x) =
+      tensorChartComponentRaw (I := I) (M := M) g_bg 0 2 S α
+        (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E)))
+        ![l, b] x := by
+  classical
+  -- Unfold the right-hand side to the chart-frame closed form.
+  rw [tensorChartComponentRaw_eq_chartFrame (I := I) (M := M) g_bg 0 2 S α hx
+    (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![l, b]]
+  -- The `(0,0)`-tensor input is the unit `constOfIsEmpty 1`.
+  rw [chartFrameBasisModel_zero_eq_constOfIsEmpty (I := I) (M := M) α x]
+  -- The left-hand side: `ccTensorBilin = ccTensorModel ![·,·] = ccTensorMultilinear ![·,·]`.
+  rw [ccTensorBilin_apply, ccTensorModel, ccTensorMultilinear_apply]
+  -- `Tensor0SSpace.toModel` is the identity on the underlying carrier.
+  change (Tensor0SBundle.Tensor0SSpace.toModel
+      (S.toSection x (ContinuousMultilinearMap.constOfIsEmpty ℝ
+        (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ))))
+      ![chartBasisVecFiber (I := I) α l x, chartBasisVecFiber (I := I) α b x] =
+    (S.toSection x (ContinuousMultilinearMap.constOfIsEmpty ℝ
+        (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)))
+      (fun j : Fin 2 => chartBasisVecFiber (I := I) α (![l, b] j) x)
+  rw [Tensor0SBundle.Tensor0SSpace.toModel,
+    Tensor0SBundle.tensor0SSpace_continuousLinearEquiv_apply]
+  -- The two tuples agree pointwise.
+  congr 1
+  funext j
+  fin_cases j <;> rfl
+
+/-- **The chart-frame component function of the realized tensor difference is the
+symmetrized raw chart-frame component of `S`.**  At every chart point `y` whose chart
+preimage `(extChartAt I α).symm y` lies in the chart source, `reprDiffChartCompOnE` equals
+the symmetrization `½ (raw_{l,b} + raw_{b,l})` of the raw chart-frame components of the
+fixed tensor difference `S = realizableRepr hu₁ − realizableRepr hu₂`. -/
+theorem reprDiffChartCompOnE_eq_symm_tensorChartComponentRaw
+    (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
+    {u₁ u₂ : tensorHs (I := I) (M := M) g_bg 0 2 σ}
+    (hu₁ : realizableAt (I := I) g_bg u₁) (hu₂ : realizableAt (I := I) g_bg u₂)
+    (α : M) (l b : Fin (Module.finrank ℝ E)) {y : E}
+    (hy : (extChartAt I α).symm y ∈ (chartAt H α).source) :
+    reprDiffChartCompOnE (I := I) g_bg hu₁ hu₂ α l b y =
+      (1 / 2 : ℝ) *
+        (tensorChartComponentRaw (I := I) (M := M) g_bg 0 2
+            (realizableRepr (I := I) g_bg hu₁ - realizableRepr (I := I) g_bg hu₂) α
+            (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![l, b]
+            ((extChartAt I α).symm y) +
+          tensorChartComponentRaw (I := I) (M := M) g_bg 0 2
+            (realizableRepr (I := I) g_bg hu₁ - realizableRepr (I := I) g_bg hu₂) α
+            (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![b, l]
+            ((extChartAt I α).symm y)) := by
+  classical
+  set S : SmoothCcTensor g_bg 0 2 :=
+    realizableRepr (I := I) g_bg hu₁ - realizableRepr (I := I) g_bg hu₂ with hS_def
+  rw [reprDiffChartCompOnE, ccTensorBilinSymm_apply]
+  rw [ccTensorBilin_chartBasisVecFiber_eq_tensorChartComponentRaw (I := I) g_bg S α hy l b,
+    ccTensorBilin_chartBasisVecFiber_eq_tensorChartComponentRaw (I := I) g_bg S α hy b l]
 
 end MetricRealization
 end IntrinsicSpectral
