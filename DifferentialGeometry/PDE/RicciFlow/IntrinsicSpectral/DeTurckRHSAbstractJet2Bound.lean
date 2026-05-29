@@ -1,4 +1,5 @@
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckRHSPointwiseLipschitz
+import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients.LieMatrixChartBridge
 import DifferentialGeometry.PDE.RicciFlow.LieDerivativePairing
 import DifferentialGeometry.Integral.Connection.ChartBridge.Ricci
 import DifferentialGeometry.Integral.Connection.ChartBridge.RiemannBasisIdentity
@@ -429,6 +430,130 @@ theorem chartCarrierRHSComp_diff_abs_le_jet2
           chartDeTurckRHSComp (I := I) g_bg g₂ α i j y| ≤
         C * chartMetricJet2DiffSup (I := I) (M := M) g₁ g₂ α y :=
   exists_chartDeTurckRHSComp_lipschitz_on_compact (I := I) g_bg g₁ g₂ α hK hKsub
+
+/-! ## The abstract chart-frame RHS component equals the chart-Christoffel carrier
+
+With the abstract-Ricci off-centre identity (`abstractRicciFrameComponent_eq_chartRicciAlpha`)
+and the abstract-Lie chart bridge (`abstractLieFrameComponent_eq_chartMatrix`) followed by the
+Cartan-formula Lie matrix bridge (`chartLieDerivMetricMatrix_deTurckVF_eq_chartLieDeTurckComp`),
+the abstract chart-`α`-frame scalar right-hand-side component at an off-centre good-set point `x`
+equals the chart-Christoffel carrier `chartDeTurckRHSComp g_bg g α i j (ϕ_α x)`. -/
+
+set_option linter.unusedSectionVars false in
+/-- **The abstract chart-frame RHS component equals the chart-Christoffel carrier on the
+good set.**  For `x ∈ chartLeviCivitaGoodSet α`,
+```
+deTurckRicciRHS g_bg g x (e^α_i x) (e^α_j x) = chartDeTurckRHSComp g_bg g α i j (ϕ_α x),
+```
+where the chart carrier is `chartDeTurckRHSComp = -2 · chartRicciTensor + chartLieDeTurckComp`.
+The Ricci summand reduces by the off-centre chart-`α` Ricci frame identity; the Lie summand
+reduces by the unconditional Cartan-formula chart bridge composed with the textbook Lie matrix
+identity. -/
+theorem abstractRHSFrameComponent_eq_chartCarrier
+    (g_bg g : SmoothRiemannianMetric I M) (α : M)
+    (i j : Fin (Module.finrank ℝ E)) {x : M}
+    (hx : x ∈ chartLeviCivitaGoodSet (I := I) α) :
+    deTurckRicciRHS (I := I) g_bg g x
+        (chartFrameVec (I := I) α i x) (chartFrameVec (I := I) α j x) =
+      chartDeTurckRHSComp (I := I) g_bg g α i j (extChartAt I α x) := by
+  -- Split the abstract component into the abstract Ricci and abstract Lie summands.
+  rw [abstractRHSFrameComponent_eq_ricci_add_lie (I := I) g_bg g α x i j]
+  -- Reduce the abstract Ricci summand to the off-centre chart-`α` Ricci entry.
+  rw [abstractRicciFrameComponent_eq_chartRicciAlpha (I := I) g α i j hx]
+  -- Reduce the abstract Lie summand to the chart Lie-derivative matrix, then to the
+  -- textbook Christoffel Lie carrier.
+  rw [abstractLieFrameComponent_eq_chartMatrix (I := I) g_bg g α i j x hx]
+  rw [DeTurckCoefficients.chartLieDerivMetricMatrix_deTurckVF_eq_chartLieDeTurckComp
+    (I := I) (smoothRiemannianMetricToInfty (I := I) g)
+    (smoothRiemannianMetricToInfty (I := I) g_bg) α i j hx]
+  -- Assemble into the chart carrier `-2 · Rc + 𝓛`.  The metric-alias coercion
+  -- `smoothRiemannianMetricToInfty g = g` is a definitional identity.
+  rw [chartDeTurckRHSComp_def]
+  rfl
+
+set_option linter.unusedSectionVars false in
+/-- **The abstract chart-frame RHS difference equals the chart-carrier difference on the
+good set.**  Direct difference of `abstractRHSFrameComponent_eq_chartCarrier` for the two
+evolving metrics `g₁` and `g₂`. -/
+theorem abstractRHSFrameComponent_diff_eq_chartCarrier_diff
+    (g_bg g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
+    (i j : Fin (Module.finrank ℝ E)) {x : M}
+    (hx : x ∈ chartLeviCivitaGoodSet (I := I) α) :
+    (deTurckRicciRHS (I := I) g_bg g₁ x - deTurckRicciRHS (I := I) g_bg g₂ x)
+        (chartFrameVec (I := I) α i x) (chartFrameVec (I := I) α j x) =
+      chartDeTurckRHSComp (I := I) g_bg g₁ α i j (extChartAt I α x) -
+        chartDeTurckRHSComp (I := I) g_bg g₂ α i j (extChartAt I α x) := by
+  rw [ContinuousLinearMap.sub_apply, ContinuousLinearMap.sub_apply,
+    abstractRHSFrameComponent_eq_chartCarrier (I := I) g_bg g₁ α i j hx,
+    abstractRHSFrameComponent_eq_chartCarrier (I := I) g_bg g₂ α i j hx]
+
+/-! ## The headline abstract right-hand-side `2`-jet bound
+
+Combining the good-set carrier identity with the committed chart-carrier `2`-jet bound,
+the abstract chart-`α`-frame scalar right-hand-side difference, measured on the chart-`α`
+pushforward frame, is bounded by the chart `2`-jet seminorm of the metric difference,
+uniformly over a compact subset `K` of the chart-target interior.  The bound is stated at
+the chart point `y = ϕ_α x` for the unique good-set preimage `x = (ϕ_α)⁻¹ y`. -/
+
+set_option linter.unusedSectionVars false in
+/-- A point of the chart-target interior pulls back into the chart-`α` Levi-Civita good
+set, with the chart round-trip recovered. -/
+private lemma symm_mem_chartLeviCivitaGoodSet_of_interior
+    (α : M) {y : E} (hy : y ∈ interior ((extChartAt I α).target : Set E)) :
+    (extChartAt I α).symm y ∈ chartLeviCivitaGoodSet (I := I) α ∧
+      extChartAt I α ((extChartAt I α).symm y) = y := by
+  have hy_target : y ∈ (extChartAt I α).target := interior_subset hy
+  have hsrc : (extChartAt I α).symm y ∈ (extChartAt I α).source :=
+    (extChartAt I α).map_target hy_target
+  have hround : extChartAt I α ((extChartAt I α).symm y) = y :=
+    (extChartAt I α).right_inv hy_target
+  refine ⟨mem_chartLeviCivitaGoodSet_iff.mpr ⟨hsrc, ?_, ?_⟩, hround⟩
+  · -- The trivialization base set equals the chart source.
+    rw [TangentBundle.trivializationAt_baseSet]
+    rw [extChartAt_source] at hsrc; exact hsrc
+  · rw [hround]; exact hy
+
+set_option linter.unusedSectionVars false in
+/-- **Headline: the abstract Ricci–DeTurck right-hand-side difference, on the chart-`α`
+pushforward frame, is Lipschitz in the chart `2`-jet of the metric difference, uniformly
+over a compact subset of the chart-target interior.**
+
+For a fixed background metric `g_bg`, two smooth Riemannian metrics `g₁, g₂`, a chart base
+point `α`, and a compact subset `K` of the interior of the chart-`α` target, there is a
+single constant `C > 0` such that for every chart point `y ∈ K` (with good-set preimage
+`x = (ϕ_α)⁻¹ y`) and all frame indices `(i, j)`,
+```
+|(deTurckRicciRHS g_bg g₁ − deTurckRicciRHS g_bg g₂) x (e^α_i x) (e^α_j x)|
+  ≤ C · chartMetricJet2DiffSup g₁ g₂ α y .
+```
+
+This is the abstract (model-norm-free) chart-frame `2`-jet Lipschitz bound for the full
+Ricci–DeTurck right-hand-side difference, assembled from the unconditional summand split,
+the abstract-Ricci off-centre identity, the unconditional Cartan-formula Lie chart bridge,
+the textbook Lie matrix bridge, and the committed chart-carrier atom. -/
+theorem abstractRHSFrameComponent_diff_abs_le_jet2
+    (g_bg g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
+    {K : Set E} (hK : IsCompact K)
+    (hKsub : K ⊆ interior (extChartAt I α).target) :
+    ∃ C : ℝ, 0 < C ∧ ∀ y ∈ K, ∀ i j : Fin (Module.finrank ℝ E),
+      |(deTurckRicciRHS (I := I) g_bg g₁ ((extChartAt I α).symm y) -
+            deTurckRicciRHS (I := I) g_bg g₂ ((extChartAt I α).symm y))
+          (chartFrameVec (I := I) α i ((extChartAt I α).symm y))
+          (chartFrameVec (I := I) α j ((extChartAt I α).symm y))| ≤
+        C * chartMetricJet2DiffSup (I := I) (M := M) g₁ g₂ α y := by
+  -- The committed chart-carrier `2`-jet bound over `K`.
+  obtain ⟨C, hC_pos, hC⟩ :=
+    chartCarrierRHSComp_diff_abs_le_jet2 (I := I) g_bg g₁ g₂ α hK hKsub
+  refine ⟨C, hC_pos, ?_⟩
+  intro y hy i j
+  -- The good-set preimage of `y` and the chart round-trip.
+  obtain ⟨hx_good, hround⟩ :=
+    symm_mem_chartLeviCivitaGoodSet_of_interior (I := I) α (hKsub hy)
+  -- Rewrite the abstract frame difference as the chart-carrier difference at `ϕ_α (symm y) = y`.
+  rw [abstractRHSFrameComponent_diff_eq_chartCarrier_diff (I := I) g_bg g₁ g₂ α i j hx_good,
+    hround]
+  -- Apply the chart-carrier `2`-jet bound.
+  exact hC y hy i j
 
 end IntrinsicSpectral
 end RicciFlow
