@@ -165,7 +165,7 @@ theorem manifoldFlowFamily_exists
         (∀ x : M, Φ 0 x = x) ∧
         (∀ t : ℝ, 0 < t → t < T → ∀ x : M, Φ_fam t x = Φ t x) := by
   classical
-  obtain ⟨T, hT, Φ, hΦ_init, hdiffeo⟩ :=
+  obtain ⟨T, hT, Φ, hΦ_init, _hΦ_repr_simple, hdiffeo⟩ :=
     time_dependent_vf_flow_diffeomorph_on_closed_manifold X hper hperNeg
       hSmoothX_chart hSmoothNegX_chart hLocalFwd hLocalRev hBijPerChart
   -- Build the family: on `(0, T)`, the chosen Hartman diffeomorphism;
@@ -182,6 +182,118 @@ theorem manifoldFlowFamily_exists
     have hguard : 0 < t ∧ t < T := ⟨ht, htT⟩
     simp only [hguard, dif_pos, and_self]
     exact (hdiffeo t ht htT).choose_spec x
+
+/--
+**Time-indexed diffeomorphism family with the chart-coordinate realization of the
+flow exposed.**
+
+Strengthens `manifoldFlowFamily_exists` by carrying, in the conclusion, the
+chart-coordinate representation of the underlying global flow `Φ` (the
+`hΦ_repr_simple` datum that the Hartman assembly establishes internally but the
+plain existence statement discards):
+
+* `Φ_fam 0 = Diffeomorph.refl I M ∞`;
+* `Φ 0 x = x`;
+* `Φ_fam t x = Φ t x` for `t ∈ (0, T)`;
+* for every `x`, a representative chart `α` with
+  `Φ s x = (chartAt H α).symm (I.symm ((hper α).flow (I ((chartAt H α) x)) s))`
+  for all `s`;
+* the combined chart realization of the *family* itself on `(0, T)`:
+  `Φ_fam t x = (chartAt H α).symm (I.symm ((hper α).flow (I ((chartAt H α) x)) t))`,
+  obtained by composing the agreement `Φ_fam t x = Φ t x` with the chart
+  representation of `Φ`.
+
+The last conjunct is the per-flow chart-reading datum a downstream
+chart-coordinate variational connector consumes: it identifies the orbit
+`s ↦ Φ_fam s x` (on the horizon) with the chart pull-back of the Picard
+chart-coordinate flow, the form through which the `mfderiv`-in-chart dictionary
+(`mfderiv_flow_eq_chartFderiv_apply`, `flow_orbit_eventually_mem_chartAt_source`,
+`hagree_of_chartFderiv_witness`) reads the manifold pushforward.  All choices use
+`Classical.choice`, so the statement remains a pure existence theorem. -/
+theorem manifoldFlowFamily_exists_chartRepr
+    (X : ℝ → ∀ x : M, TangentSpace I x)
+    (hper : ∀ α : M, ChartLocalPicardData X α)
+    (hperNeg : ∀ α : M, ChartLocalPicardData (fun t x => -(X t x)) α)
+    (hSmoothX_chart : ∀ α : M, ContDiff ℝ ∞ (Function.uncurry fun t y =>
+      (X t ((chartAt H α).symm (I.symm y)) : E)))
+    (hSmoothNegX_chart : ∀ α : M, ContDiff ℝ ∞ (Function.uncurry fun t y =>
+      ((-X t ((chartAt H α).symm (I.symm y))) : E)))
+    (hLocalFwd : ∀ (Φ : ℝ → M → M) (T : ℝ), 0 < T →
+      (∀ x : M, ∃ α : M, x ∈ (hper α).U ∧
+        ∀ s : ℝ, Φ s x = (chartAt H α).symm
+          (I.symm ((hper α).flow (I ((chartAt H α) x)) s))) →
+      ∀ x : M, ∃ (ρ : ℝ) (_ : 0 < ρ) (flow : E → ℝ → E),
+        ContDiffOn ℝ ∞ (Function.uncurry flow)
+          (Metric.ball (I ((chartAt H x) x)) ρ ×ˢ Set.Ioo 0 T) ∧
+        (∀ s ∈ Set.Ioo (0 : ℝ) T, ∀ y ∈ (chartAt H x).source,
+          I ((chartAt H x) y) ∈ Metric.ball (I ((chartAt H x) x)) ρ →
+          Φ s y = (chartAt H x).symm (I.symm (flow (I ((chartAt H x) y)) s))) ∧
+        (∀ t ∈ Set.Ioo (0 : ℝ) T,
+          I.symm (flow (I ((chartAt H x) x)) t) ∈ (chartAt H x).target))
+    (hLocalRev : ∀ (Ψ : ℝ → M → M) (T : ℝ), 0 < T →
+      (∀ x : M, ∃ α : M, x ∈ (hperNeg α).U ∧
+        ∀ s : ℝ, Ψ s x = (chartAt H α).symm
+          (I.symm ((hperNeg α).flow (I ((chartAt H α) x)) s))) →
+      ∀ x : M, ∃ (ρ : ℝ) (_ : 0 < ρ) (flow : E → ℝ → E),
+        ContDiffOn ℝ ∞ (Function.uncurry flow)
+          (Metric.ball (I ((chartAt H x) x)) ρ ×ˢ Set.Ioo 0 T) ∧
+        (∀ s ∈ Set.Ioo (0 : ℝ) T, ∀ y ∈ (chartAt H x).source,
+          I ((chartAt H x) y) ∈ Metric.ball (I ((chartAt H x) x)) ρ →
+          Ψ s y = (chartAt H x).symm (I.symm (flow (I ((chartAt H x) y)) s))) ∧
+        (∀ t ∈ Set.Ioo (0 : ℝ) T,
+          I.symm (flow (I ((chartAt H x) x)) t) ∈ (chartAt H x).target))
+    (hBijPerChart : ∀ (Φ Ψ : ℝ → M → M),
+      (∀ x, Φ 0 x = x) → (∀ x, Ψ 0 x = x) →
+      (∀ x : M, ∃ α : M, ∀ s : ℝ,
+        Φ s x = (chartAt H α).symm
+          (I.symm ((hper α).flow (I ((chartAt H α) x)) s))) →
+      (∀ x : M, ∃ α : M, ∀ s : ℝ,
+        Ψ s x = (chartAt H α).symm
+          (I.symm ((hperNeg α).flow (I ((chartAt H α) x)) s))) →
+      ∀ α : M,
+        ∃ S_α : ℝ, 0 < S_α ∧
+          ∀ x ∈ (hper α).U ∩ (hperNeg α).U,
+            ∀ s ∈ Set.Ico (0 : ℝ) S_α,
+              Ψ s (Φ s x) = x ∧ Φ s (Ψ s x) = x) :
+    ∃ (T : ℝ) (_ : 0 < T) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M)) (Φ : ℝ → M → M),
+        Φ_fam 0 = Diffeomorph.refl I M ∞ ∧
+        (∀ x : M, Φ 0 x = x) ∧
+        (∀ t : ℝ, 0 < t → t < T → ∀ x : M, Φ_fam t x = Φ t x) ∧
+        (∀ x : M, ∃ α : M, ∀ s : ℝ,
+          Φ s x = (chartAt H α).symm
+            (I.symm ((hper α).flow (I ((chartAt H α) x)) s))) ∧
+        (∀ t : ℝ, 0 < t → t < T → ∀ x : M, ∃ α : M,
+          (Φ_fam t x : M) = (chartAt H α).symm
+            (I.symm ((hper α).flow (I ((chartAt H α) x)) t))) := by
+  classical
+  obtain ⟨T, hT, Φ, hΦ_init, hΦ_repr_simple, hdiffeo⟩ :=
+    time_dependent_vf_flow_diffeomorph_on_closed_manifold X hper hperNeg
+      hSmoothX_chart hSmoothNegX_chart hLocalFwd hLocalRev hBijPerChart
+  -- Build the family: on `(0, T)`, the chosen Hartman diffeomorphism;
+  -- elsewhere, the identity.
+  refine ⟨T, hT, fun t =>
+    if h : 0 < t ∧ t < T then (hdiffeo t h.1 h.2).choose else Diffeomorph.refl I M ∞,
+    Φ, ?_, hΦ_init, ?_, hΦ_repr_simple, ?_⟩
+  · -- `Φ_fam 0 = refl`: `0` fails the `0 < t` guard.
+    have h0 : ¬ (0 < (0 : ℝ) ∧ (0 : ℝ) < T) := by
+      rintro ⟨h, _⟩; exact (lt_irrefl 0) h
+    simp only [h0, dif_neg, not_false_iff]
+  · -- Agreement on `(0, T)`.
+    intro t ht htT x
+    have hguard : 0 < t ∧ t < T := ⟨ht, htT⟩
+    simp only [hguard, dif_pos, and_self]
+    exact (hdiffeo t ht htT).choose_spec x
+  · -- Chart realization of the family on `(0, T)`: combine the agreement
+    -- `Φ_fam t x = Φ t x` with the chart representation of `Φ`.
+    intro t ht htT x
+    obtain ⟨α, hαrepr⟩ := hΦ_repr_simple x
+    refine ⟨α, ?_⟩
+    have hguard : 0 < t ∧ t < T := ⟨ht, htT⟩
+    have hfam_eq : ((if h : 0 < t ∧ t < T then (hdiffeo t h.1 h.2).choose
+        else Diffeomorph.refl I M ∞ : M ≃ₘ⟮I, I⟯ M) : M → M) x = Φ t x := by
+      simp only [hguard, dif_pos, and_self]
+      exact (hdiffeo t ht htT).choose_spec x
+    rw [hfam_eq, hαrepr t]
 
 /-! ### Manifold flow ODE in chart-bridge transported-velocity form -/
 

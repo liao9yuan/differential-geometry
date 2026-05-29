@@ -185,6 +185,9 @@ theorem time_dependent_vf_flow_diffeomorph_on_closed_manifold
     ∃ T : ℝ, 0 < T ∧
       ∃ (Φ : ℝ → M → M),
         (∀ x, Φ 0 x = x) ∧
+        (∀ x : M, ∃ α : M, ∀ s : ℝ,
+          Φ s x = (chartAt H α).symm
+            (I.symm ((hper α).flow (I ((chartAt H α) x)) s))) ∧
         ∀ t, 0 < t → t < T →
           ∃ d : Diffeomorph I I M M ∞, ∀ x, d x = Φ t x := by
   -- ═══════════════════════════════════════════════════════════════════
@@ -270,8 +273,8 @@ theorem time_dependent_vf_flow_diffeomorph_on_closed_manifold
   -- Apply the diffeomorphism packaging theorem.
   have hDiffeo := time_dependent_vf_globalflow_diffeomorph
     (I := I) hT_pos hΦ_init hΨ_init hΦ_smooth_T hΨ_smooth_T hΨΦ hΦΨ
-  -- Package the conclusion.
-  refine ⟨T, hT_pos, Φ, hΦ_init, ?_⟩
+  -- Package the conclusion, exposing the chart-coordinate representation of `Φ`.
+  refine ⟨T, hT_pos, Φ, hΦ_init, hΦ_repr_simple, ?_⟩
   intro t ht htT
   obtain ⟨d, hd_fwd, _⟩ := hDiffeo t ht htT
   exact ⟨d, hd_fwd⟩
