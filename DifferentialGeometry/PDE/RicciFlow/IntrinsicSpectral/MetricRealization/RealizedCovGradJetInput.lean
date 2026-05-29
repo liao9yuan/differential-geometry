@@ -1,6 +1,7 @@
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization.RealizedJet2CovGradBound
 import DifferentialGeometry.Integral.Connection.TensorRSChartFiberToModelOpNormUnconditional
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.Estimates.ComponentL2BoundUniform
+import DifferentialGeometry.Analysis.Laplacian.TensorRegularity.CovDerivComponentSecondFormula
 
 /-!
 # The pointwise covariant-gradient jet input for the chart `2`-jet seminorm bound
@@ -619,6 +620,71 @@ theorem euclidPartial_congr_of_eqOn_isOpen
   intro z hz
   rw [euclidPartial_def, euclidPartial_def]
   rw [(heq.eventuallyEq_of_mem (hU.mem_nhds hz)).fderiv_eq]
+
+/-! ## Leaf-4: generalized first-order covariant-gradient inversion (any `s`, `r = 0`) -/
+
+/-- **First-order covariant-gradient inversion (general `s`, `r = 0`).**  For `y' ∈
+chartTargetEuclid α`, the `EuclideanSpace`-side partial of the chart-pushed raw `(0,s)`-component
+of `T` at indices `Jdx` in direction `m` equals the raw `(0,s+1)`-component of `covGrad g_bg 0
+s T` at indices `Fin.cons m Jdx`, minus the lower-order Christoffel correction. -/
+theorem euclidPartial_chartPushedRaw_general_eq_covGrad_sub_lowerOrder
+    (g_bg : SmoothRiemannianMetric I M) (s : ℕ)
+    (T : SmoothCcTensor g_bg 0 s) (α : M)
+    (m : Fin (Module.finrank ℝ E)) (Jdx : Fin s → Fin (Module.finrank ℝ E))
+    {y' : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))}
+    (hy' : y' ∈ chartTargetEuclid (I := I) (M := M) α) :
+    euclidPartial (E := E) m
+        (chartPushedRaw I α
+          (tensorChartComponentRaw (I := I) (M := M) g_bg 0 s T α
+            (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) Jdx)) y' =
+      tensorChartComponentRaw (I := I) (M := M) g_bg 0 (s + 1)
+          (covGrad (I := I) (M := M) g_bg 0 s T) α
+          (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) (Fin.cons m Jdx)
+          ((extChartAt I α).symm ((toEuclidean (E := E)).symm y'))
+        - covDerivLowerOrderTerm (I := I) (M := M) g_bg 0 s T α m
+            (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) Jdx y' := by
+  classical
+  have hJ0 : (Fin.cons m Jdx : Fin (s + 1) → Fin (Module.finrank ℝ E)) 0 = m := by
+    rw [Fin.cons_zero]
+  have hJtail : Matrix.vecTail (Fin.cons m Jdx : Fin (s + 1) → Fin (Module.finrank ℝ E)) = Jdx := by
+    funext j
+    rw [Matrix.vecTail, Function.comp_apply, Fin.cons_succ]
+  have hform := tensorChartComponentRaw_covGrad (I := I) (M := M) g_bg 0 s T α
+    (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) (Fin.cons m Jdx) hy'
+  rw [hJ0, hJtail] at hform
+  rw [hform]
+  ring
+
+/-- On the Euclidean chart target, the wrapped covariant-derivative chart-component
+`covDerivComponentEuclid g_bg 0 s T α m Idx Jdx` equals the raw `(0,s+1)`-component of `covGrad
+g_bg 0 s T` at `Fin.cons m Jdx`, evaluated at the chart preimage. -/
+theorem covDerivComponentEuclid_eqOn_rawComponent_covGrad
+    (g_bg : SmoothRiemannianMetric I M) (s : ℕ)
+    (T : SmoothCcTensor g_bg 0 s) (α : M)
+    (m : Fin (Module.finrank ℝ E)) (Jdx : Fin s → Fin (Module.finrank ℝ E)) :
+    Set.EqOn
+      (covDerivComponentEuclid (I := I) (M := M) g_bg 0 s α T m
+        (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) Jdx)
+      (fun y' => tensorChartComponentRaw (I := I) (M := M) g_bg 0 (s + 1)
+        (covGrad (I := I) (M := M) g_bg 0 s T) α
+        (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) (Fin.cons m Jdx)
+        ((extChartAt I α).symm ((toEuclidean (E := E)).symm y')))
+      (chartTargetEuclid (I := I) (M := M) α) := by
+  classical
+  intro y' hy'
+  simp only []
+  -- `covDerivComponentEuclid = euclidPartial m (chartPush raw) + LO` on the chart target.
+  rw [covDerivComponentEuclid_eqOn (I := I) (M := M) g_bg 0 s α T m
+    (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) Jdx hy']
+  -- The raw covariant-gradient component is the same sum.
+  have hJ0 : (Fin.cons m Jdx : Fin (s + 1) → Fin (Module.finrank ℝ E)) 0 = m := by
+    rw [Fin.cons_zero]
+  have hJtail : Matrix.vecTail (Fin.cons m Jdx : Fin (s + 1) → Fin (Module.finrank ℝ E)) = Jdx := by
+    funext j; rw [Matrix.vecTail, Function.comp_apply, Fin.cons_succ]
+  have hform := tensorChartComponentRaw_covGrad (I := I) (M := M) g_bg 0 s T α
+    (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) (Fin.cons m Jdx) hy'
+  rw [hJ0, hJtail] at hform
+  rw [hform]
 
 /-! ## Leaf-5: the zeroth-order (conjunct 1) bound -/
 
