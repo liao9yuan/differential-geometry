@@ -225,6 +225,7 @@ import DifferentialGeometry.Integral.L2.SmoothSections.Integrability
 import DifferentialGeometry.Tensor.Multilinear.BundleSmoothEval
 import DifferentialGeometry.Tensor.Multilinear.MetricLowering
 import DifferentialGeometry.Tensor.RSTensor.GradientBundleEquiv
+import DifferentialGeometry.Tensor.RSTensor.Tensor0SInnerSectionSmooth
 
 import DifferentialGeometry.Integral.Measure.BorelManifold.Defs
 import DifferentialGeometry.Integral.Measure.BorelManifold.Derived
@@ -1181,6 +1182,7 @@ import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.MFDerivPackage
 import DifferentialGeometry.PDE.RicciFlow.Pullback.RicciNaturality
 import DifferentialGeometry.PDE.RicciFlow.Pullback.CartanCancellation
 import DifferentialGeometry.PDE.RicciFlow.Pullback.EvaluationFormWitness
+import DifferentialGeometry.PDE.RicciFlow.Pullback.EvaluationFormProducer
 import DifferentialGeometry.PDE.RicciFlow.SobolevEmbeddingAssembly
 import DifferentialGeometry.PDE.RicciFlow.SobolevEmbeddingCm
 import DifferentialGeometry.PDE.RicciFlow.SobolevEmbeddingCmRankReduction
@@ -1204,6 +1206,7 @@ import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.Bijective.ChartC
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.Bijective.UniformBijective
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.HartmanAssembly
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.ManifoldFlowFamily
+import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.ChartLocalFlowProducer
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.ManifoldIntegralFlow
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.VariationalFlow
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.PushforwardSmooth
