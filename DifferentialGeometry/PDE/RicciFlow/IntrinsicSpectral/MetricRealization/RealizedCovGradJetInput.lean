@@ -56,6 +56,7 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
+open DifferentialGeometry.Analysis.Sobolev.Chart
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -263,6 +264,46 @@ theorem partialDeriv2_eq_euclidPartial2_comp_toEuclidean
         (toEuclidean (E := E) y) := by
   rw [partialDeriv_eq_euclidPartial_comp_toEuclidean (E := E) c (partialDeriv (E := E) a f) y]
   rw [partialDeriv_comp_toEuclidean_symm_eq_euclidPartial (E := E) a f]
+
+/-! ## Leaf-4: the chart-pushed realized component as a symmetrized raw chart push -/
+
+/-- On the Euclidean chart target, the `toEuclidean.symm`-pull of the realized-difference
+chart-frame component function `reprDiffChartCompOnE g_bg hu₁ hu₂ α l b` equals the
+symmetrized chart-push of the raw chart components of `S = realizableRepr hu₁ −
+realizableRepr hu₂`. -/
+theorem reprDiffChartCompOnE_comp_toEuclidean_symm_eqOn
+    (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
+    {u₁ u₂ : tensorHs (I := I) (M := M) g_bg 0 2 σ}
+    (hu₁ : realizableAt (I := I) g_bg u₁) (hu₂ : realizableAt (I := I) g_bg u₂)
+    (α : M) (l b : Fin (Module.finrank ℝ E)) :
+    Set.EqOn
+      (reprDiffChartCompOnE (I := I) g_bg hu₁ hu₂ α l b ∘ (toEuclidean (E := E)).symm)
+      (fun y' => (1 / 2 : ℝ) *
+        (chartPushedRaw I α
+            (tensorChartComponentRaw (I := I) (M := M) g_bg 0 2
+              (realizableRepr (I := I) g_bg hu₁ - realizableRepr (I := I) g_bg hu₂) α
+              (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![l, b]) y'
+          + chartPushedRaw I α
+            (tensorChartComponentRaw (I := I) (M := M) g_bg 0 2
+              (realizableRepr (I := I) g_bg hu₁ - realizableRepr (I := I) g_bg hu₂) α
+              (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![b, l]) y'))
+      (chartTargetEuclid (I := I) (M := M) α) := by
+  classical
+  intro y' hy'
+  set S : SmoothCcTensor g_bg 0 2 :=
+    realizableRepr (I := I) g_bg hu₁ - realizableRepr (I := I) g_bg hu₂ with hS_def
+  -- `b₀ := symm (toEuclidean.symm y')` lies in the chart source.
+  have hb_src : (extChartAt I α).symm ((toEuclidean (E := E)).symm y') ∈ (chartAt H α).source :=
+    symm_toEuclidean_symm_mem_chartAtSource (I := I) (M := M) α hy'
+  -- Beta-reduce the right-hand side lambda.
+  simp only []
+  -- LHS is the symmetrized raw component at the chart preimage (leaf-3).
+  rw [Function.comp_apply,
+    reprDiffChartCompOnE_eq_symm_tensorChartComponentRaw (I := I) g_bg hu₁ hu₂ α l b
+      (y := (toEuclidean (E := E)).symm y') hb_src]
+  -- RHS: `chartPushedRaw` of each raw component at `y'` is the raw component at the preimage.
+  rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α _ hy',
+    chartPushedRaw_apply_of_mem (I := I) (M := M) α _ hy']
 
 end MetricRealization
 end IntrinsicSpectral
