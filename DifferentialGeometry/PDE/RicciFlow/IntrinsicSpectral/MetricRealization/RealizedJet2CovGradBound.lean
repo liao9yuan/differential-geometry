@@ -81,6 +81,7 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
@@ -284,6 +285,8 @@ iterated covariant gradients `∇^j S` (`j = 0, 1, 2`) of the fixed tensor diffe
 evaluated at the chart preimage `(extChartAt I α).symm y`.  This matches the left-hand side
 of the unconditional `C²` Sobolev embedding `iteratedCovGrad_toSobolev_embedding_C2_unconditional`. -/
 
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
 /-- The iterated covariant-gradient jet sum of a fixed `(0,2)`-tensor `S` at a manifold
 point `x`: `∑_{j ≤ 2} ‖(∇^j S)(x)‖_{g_bg}` (the `g_bg`-fibre norms of the `(0, 2 + j)`-tensors
 `∇^j S`).  This is exactly the left-hand side of the unconditional `C²` Sobolev embedding. -/
@@ -294,11 +297,38 @@ def iteratedCovGradJetSum (g_bg : SmoothRiemannianMetric I M)
       Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g_bg 0 (2 + j)
     ‖(iteratedCovGrad (I := I) (M := M) g_bg 0 2 j S).toSection x‖)
 
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
 /-- `iteratedCovGradJetSum` is non-negative. -/
 lemma iteratedCovGradJetSum_nonneg (g_bg : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g_bg 0 2) (x : M) :
-    0 ≤ iteratedCovGradJetSum (I := I) g_bg S x :=
-  Finset.sum_nonneg (fun _ _ => norm_nonneg _)
+    0 ≤ iteratedCovGradJetSum (I := I) g_bg S x := by
+  rw [iteratedCovGradJetSum]
+  refine Finset.sum_nonneg (fun j _ => ?_)
+  letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace 0 (2 + j) I b) :=
+    Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g_bg 0 (2 + j)
+  exact norm_nonneg _
+
+/-- **The iterated covariant-gradient jet sum is bounded by the intrinsic `H^{2k}` Sobolev
+norm of the fixed tensor (unconditional `C²` Sobolev embedding).**
+
+For `2k > dim M + 4`, there is a constant `C > 0` such that, for every smooth
+compactly-supported `(0,2)`-tensor `S` and every base point `x`,
+
+  `iteratedCovGradJetSum g_bg S x ≤ C · ‖S.toHs (2k)‖`.
+
+This is exactly `iteratedCovGrad_toSobolev_embedding_C2_unconditional`: the left-hand side
+of that embedding is, term by term, the `iteratedCovGradJetSum` of `S` at `x`. -/
+theorem iteratedCovGradJetSum_le_toHs (g_bg : SmoothRiemannianMetric I M) (k : ℕ)
+    (h_super : 2 * k > Module.finrank ℝ E + 4) :
+    ∃ C : ℝ, 0 < C ∧ ∀ (S : SmoothCcTensor g_bg 0 2) (x : M),
+      iteratedCovGradJetSum (I := I) g_bg S x ≤
+        C * ‖SmoothCcTensor.toHs (g := g_bg) (r := 0) (s := 2) (2 * k) S‖ := by
+  obtain ⟨C, hC_pos, hC⟩ :=
+    iteratedCovGrad_toSobolev_embedding_C2_unconditional (I := I) (M := M) g_bg k h_super
+  refine ⟨C, hC_pos, fun S x => ?_⟩
+  rw [iteratedCovGradJetSum]
+  exact hC S x
 
 /-! ## The headline chart `2`-jet bound modulo the pointwise covariant-gradient input
 
@@ -456,6 +486,82 @@ theorem chartMetricJet2DiffSup_realizeMetricAt_le_iteratedCovGradJetSum
           + (Fintype.card ((Fin n) × (Fin n) × (Fin n) × (Fin n)) : ℝ) * (C₀ * R) := by
         gcongr
     _ = C₀ * Ncard * R := by rw [hNcard_def]; ring
+
+/-! ## The chart `2`-jet seminorm bounded by the intrinsic `H^{2k}` norm of the fixed
+tensor difference
+
+Chaining the headline jet bound with the unconditional `C²` Sobolev embedding eliminates
+the pointwise iterated-covariant-gradient sum in favour of the intrinsic `H^{2k}` Sobolev
+norm of the fixed tensor difference `S`.  This is the shape consumed downstream: it sits one
+spectral norm-equivalence step (`hnorm_bridge`, the gate's `IteratedGardingExtensionBound`)
+away from the `H^{a+1}` spectral norm of `u₁ − u₂`. -/
+
+set_option linter.unusedSectionVars false in
+/-- **The chart `2`-jet seminorm of the realized-metric difference is bounded by the
+intrinsic `H^{2k}` norm of the fixed tensor difference, modulo the pointwise covariant-
+gradient input.**
+
+Combines `chartMetricJet2DiffSup_realizeMetricAt_le_iteratedCovGradJetSum` (the algebraic
+chart-jet reduction plus the pointwise covariant-gradient input `hcovgrad_jet_bound`) with
+the unconditional `C²` Sobolev embedding `iteratedCovGradJetSum_le_toHs` (`2k > dim M + 4`).
+The result is, for all `y ∈ K`,
+
+  `chartMetricJet2DiffSup (realizeMetricAt u₁) (realizeMetricAt u₂) α y
+     ≤ C · ‖(T₁ − T₂).toHs (2k)‖`,
+
+with `C` uniform on `K`.  This is the `2`-jet seminorm of the metric difference dominated by
+the intrinsic Sobolev norm of the single fixed tensor difference, the form the spectral
+norm-equivalence bridge then converts into the `H^{a+1}` spectral norm of `u₁ − u₂`. -/
+theorem chartMetricJet2DiffSup_realizeMetricAt_le_toHs
+    (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
+    {u₁ u₂ : tensorHs (I := I) (M := M) g_bg 0 2 σ}
+    (hu₁ : realizableAt (I := I) g_bg u₁) (hu₂ : realizableAt (I := I) g_bg u₂)
+    (α : M) {K : Set E} (hKsub : K ⊆ interior ((extChartAt I α).target : Set E))
+    (k : ℕ) (h_super : 2 * k > Module.finrank ℝ E + 4)
+    {C₀ : ℝ} (hC₀ : 0 ≤ C₀)
+    (hcovgrad_jet_bound : ∀ y ∈ K, ∀ l b : Fin (Module.finrank ℝ E),
+      |reprDiffChartCompOnE (I := I) g_bg hu₁ hu₂ α l b y| ≤
+          C₀ * iteratedCovGradJetSum (I := I) g_bg
+            (realizableRepr (I := I) g_bg hu₁ - realizableRepr (I := I) g_bg hu₂)
+            ((extChartAt I α).symm y) ∧
+        (∀ a : Fin (Module.finrank ℝ E),
+          |partialDeriv (E := E) a
+              (reprDiffChartCompOnE (I := I) g_bg hu₁ hu₂ α l b) y| ≤
+            C₀ * iteratedCovGradJetSum (I := I) g_bg
+              (realizableRepr (I := I) g_bg hu₁ - realizableRepr (I := I) g_bg hu₂)
+              ((extChartAt I α).symm y)) ∧
+        (∀ c a : Fin (Module.finrank ℝ E),
+          |partialDeriv (E := E) c
+              (partialDeriv (E := E) a
+                (reprDiffChartCompOnE (I := I) g_bg hu₁ hu₂ α l b)) y| ≤
+            C₀ * iteratedCovGradJetSum (I := I) g_bg
+              (realizableRepr (I := I) g_bg hu₁ - realizableRepr (I := I) g_bg hu₂)
+              ((extChartAt I α).symm y))) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ y ∈ K,
+      chartMetricJet2DiffSup (I := I) (M := M)
+          (realizeMetricAt (I := I) g_bg u₁) (realizeMetricAt (I := I) g_bg u₂) α y ≤
+        C * ‖SmoothCcTensor.toHs (g := g_bg) (r := 0) (s := 2) (2 * k)
+          (realizableRepr (I := I) g_bg hu₁ - realizableRepr (I := I) g_bg hu₂)‖ := by
+  classical
+  set S : SmoothCcTensor g_bg 0 2 :=
+    realizableRepr (I := I) g_bg hu₁ - realizableRepr (I := I) g_bg hu₂ with hS_def
+  -- The algebraic chart-jet reduction against the pointwise iterated-covariant-gradient sum.
+  obtain ⟨C₁, hC₁_nn, hC₁⟩ :=
+    chartMetricJet2DiffSup_realizeMetricAt_le_iteratedCovGradJetSum (I := I) g_bg hu₁ hu₂
+      α hKsub hC₀ hcovgrad_jet_bound
+  -- The unconditional `C²` Sobolev embedding.
+  obtain ⟨C₂, hC₂_pos, hC₂⟩ :=
+    iteratedCovGradJetSum_le_toHs (I := I) g_bg k h_super
+  refine ⟨C₁ * C₂, mul_nonneg hC₁_nn hC₂_pos.le, ?_⟩
+  intro y hy
+  set N : ℝ := ‖SmoothCcTensor.toHs (g := g_bg) (r := 0) (s := 2) (2 * k) S‖ with hN_def
+  have hN_nn : 0 ≤ N := norm_nonneg _
+  calc chartMetricJet2DiffSup (I := I) (M := M)
+          (realizeMetricAt (I := I) g_bg u₁) (realizeMetricAt (I := I) g_bg u₂) α y
+      ≤ C₁ * iteratedCovGradJetSum (I := I) g_bg S ((extChartAt I α).symm y) := hC₁ y hy
+    _ ≤ C₁ * (C₂ * N) :=
+        mul_le_mul_of_nonneg_left (hC₂ S ((extChartAt I α).symm y)) hC₁_nn
+    _ = C₁ * C₂ * N := by ring
 
 end MetricRealization
 end IntrinsicSpectral
