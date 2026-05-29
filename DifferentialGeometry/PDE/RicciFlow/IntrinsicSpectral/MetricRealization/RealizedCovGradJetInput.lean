@@ -620,6 +620,66 @@ theorem euclidPartial_congr_of_eqOn_isOpen
   rw [euclidPartial_def, euclidPartial_def]
   rw [(heq.eventuallyEq_of_mem (hU.mem_nhds hz)).fderiv_eq]
 
+/-! ## Leaf-5: the zeroth-order (conjunct 1) bound -/
+
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
+/-- **Conjunct 1 of the covariant-gradient jet bound.**  On a compact `K ⊆ interior (extChartAt
+I α).target`, the realized-difference chart-frame component is bounded by a constant times the
+`j = 0` jet term `‖S.toSection (symm y)‖`. -/
+theorem reprDiffChartCompOnE_abs_le_riemannianFibreNorm
+    (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
+    {u₁ u₂ : tensorHs (I := I) (M := M) g_bg 0 2 σ}
+    (hu₁ : realizableAt (I := I) g_bg u₁) (hu₂ : realizableAt (I := I) g_bg u₂)
+    (α : M) {K : Set E} (hK : IsCompact K)
+    (hKsub : K ⊆ interior ((extChartAt I α).target : Set E)) :
+    letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace 0 2 I b) :=
+      Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g_bg 0 2
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ y ∈ K, ∀ l b : Fin (Module.finrank ℝ E),
+      |reprDiffChartCompOnE (I := I) g_bg hu₁ hu₂ α l b y| ≤
+        C * ‖(realizableRepr (I := I) g_bg hu₁ - realizableRepr (I := I) g_bg hu₂).toSection
+          ((extChartAt I α).symm y)‖ := by
+  classical
+  letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace 0 2 I b) :=
+    Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g_bg 0 2
+  set S : SmoothCcTensor g_bg 0 2 :=
+    realizableRepr (I := I) g_bg hu₁ - realizableRepr (I := I) g_bg hu₂ with hS_def
+  obtain ⟨hImg_cpt, hImg_sub⟩ :=
+    extChartAt_symm_image_isCompact_subset_chartSource (I := I) (M := M) α hK hKsub
+  obtain ⟨Craw, hCraw_nn, hCraw_bd⟩ :=
+    tensorChartComponentRaw_abs_le_riemannianFibreNorm (I := I) g_bg 2 α hImg_cpt hImg_sub
+  refine ⟨Craw, hCraw_nn, ?_⟩
+  intro y hy l b
+  set b₀ : M := (extChartAt I α).symm y with hb₀_def
+  have hb₀_src : b₀ ∈ (chartAt H α).source := hImg_sub ⟨y, hy, rfl⟩
+  have hb₀_img : b₀ ∈ (extChartAt I α).symm '' K := ⟨y, hy, rfl⟩
+  -- Leaf-3: the realized component is the symmetrized raw component.
+  rw [reprDiffChartCompOnE_eq_symm_tensorChartComponentRaw (I := I) g_bg hu₁ hu₂ α l b hb₀_src]
+  set N : ℝ := ‖S.toSection b₀‖ with hN_def
+  have hN_nn : 0 ≤ N := norm_nonneg _
+  -- Bound each raw component via leaf-2.
+  have h_lb : |tensorChartComponentRaw (I := I) (M := M) g_bg 0 2 S α
+      (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![l, b] b₀| ≤ Craw * N :=
+    hCraw_bd S b₀ hb₀_img ![l, b]
+  have h_bl : |tensorChartComponentRaw (I := I) (M := M) g_bg 0 2 S α
+      (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![b, l] b₀| ≤ Craw * N :=
+    hCraw_bd S b₀ hb₀_img ![b, l]
+  calc |(1 / 2 : ℝ) *
+          (tensorChartComponentRaw (I := I) (M := M) g_bg 0 2 S α
+              (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![l, b] b₀ +
+            tensorChartComponentRaw (I := I) (M := M) g_bg 0 2 S α
+              (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![b, l] b₀)|
+      = (1 / 2 : ℝ) *
+          |tensorChartComponentRaw (I := I) (M := M) g_bg 0 2 S α
+              (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![l, b] b₀ +
+            tensorChartComponentRaw (I := I) (M := M) g_bg 0 2 S α
+              (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![b, l] b₀| := by
+        rw [abs_mul]; norm_num
+    _ ≤ (1 / 2 : ℝ) * (Craw * N + Craw * N) := by
+        apply mul_le_mul_of_nonneg_left _ (by norm_num)
+        exact (abs_add_le _ _).trans (add_le_add h_lb h_bl)
+    _ = Craw * N := by ring
+
 end MetricRealization
 end IntrinsicSpectral
 end RicciFlow
