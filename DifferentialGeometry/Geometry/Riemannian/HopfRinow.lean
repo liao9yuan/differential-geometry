@@ -3602,7 +3602,9 @@ theorem isGeodesicOn_Ici_of_complete_Ioo
     (g : SmoothRiemannianMetric I M) {γ₀ : ℝ → M} {a₀ b₀ : ℝ}
     (ha₀ : a₀ < 0) (hb₀ : 0 < b₀)
     (hγ₀ : IsGeodesicOn (I := I) g γ₀ (Set.Ioo a₀ b₀))
+    (hγ₀_cont : ContinuousOn γ₀ (Set.Ioo a₀ b₀))
     (hreg : ∀ (γ : ℝ → M) (b : ℝ), 0 < b → IsGeodesicOn (I := I) g γ (Set.Ioo a₀ b) →
+      ContinuousOn γ (Set.Ioo a₀ b) →
       (∀ t, a₀ < t → t < b₀ → t < b → γ t = γ₀ t) →
       ∃ c : ℝ, 0 ≤ c ∧ ContMDiffOn 𝓘(ℝ,ℝ) I 1 γ (Set.Ioo a₀ b) ∧
         (∀ τ ∈ Set.Ioo a₀ b, ‖mfderiv 𝓘(ℝ,ℝ) I γ τ 1‖ₑ ≤ ENNReal.ofReal c) ∧
@@ -3610,20 +3612,18 @@ theorem isGeodesicOn_Ici_of_complete_Ioo
           (mfderiv 𝓘(ℝ,ℝ) I γ s 1) ≤ c^2)) :
     ∃ γ : ℝ → M, IsGeodesicOn (I := I) g γ (Set.Ioi a₀) ∧
       (∀ t, t < b₀ → γ t = γ₀ t) := by
-  -- The seed `γ₀` is continuous on `Ioo a₀ b₀` (from its `hreg` regularity at
-  -- the seed endpoint `b₀`).
-  have hγ₀_cont : ContinuousOn γ₀ (Set.Ioo a₀ b₀) := by
-    obtain ⟨_, _, hγ₀_smooth, _, _⟩ := hreg γ₀ b₀ hb₀ hγ₀ (fun t _ _ _ => rfl)
-    exact hγ₀_smooth.continuousOn
-  -- Endpoint-continuation provider from `hreg` + metric completeness.
+  -- Endpoint-continuation provider from `hreg` + metric completeness.  The
+  -- per-extension continuity of `γ` (an invariant of the colimit assembly) is
+  -- threaded into `hreg`, which uses it to upgrade the moving-foot geodesic to
+  -- the `C¹` regularity the endpoint-continuation producer needs.
   have hcont : ∀ (γ : ℝ → M) (b : ℝ), 0 < b →
       IsGeodesicOn (I := I) g γ (Set.Ioo a₀ b) →
       ContinuousOn γ (Set.Ioo a₀ b) →
       (∀ t < b₀, t < b → γ t = γ₀ t) →
       HasEndpointContinuation (I := I) g γ b := by
-    intro γ b hb hγ _hγ_cont hagree
+    intro γ b hb hγ hγ_cont hagree
     obtain ⟨c, hc_nonneg, hγ_smooth, hSpeedBound, hSpeedSq⟩ :=
-      hreg γ b hb hγ (fun t _ ht_b₀ ht_b => hagree t ht_b₀ ht_b)
+      hreg γ b hb hγ hγ_cont (fun t _ ht_b₀ ht_b => hagree t ht_b₀ ht_b)
     exact hasEndpointContinuation_of_complete (I := I) g (lt_trans ha₀ hb)
       hc_nonneg hγ_smooth hSpeedBound hSpeedSq hγ
   obtain ⟨γ, hgeo, _hcontΓ, hagreeΓ⟩ :=
