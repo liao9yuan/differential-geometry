@@ -1116,6 +1116,37 @@ theorem S5_exp_variation_construction
 
 /-! ## Interval-integrability of the index-form integrand -/
 
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- Continuity on a set `s ⊆ ℝ` of the scalar `t ↦ g.inner (γ t) (v t) (w t)`
+for a base curve `γ` and two sections `v, w` along `γ` presented through their
+total-space continuity. Mirrors `continuous_g_inner_along_param` in its
+`ContinuousOn` form over a single-parameter base curve. The diamond between
+the project's tangent-space norm instances and the `RiemannianBundle`-derived
+ones is resolved locally; the scalar `ℝ`-valued conclusion is independent of
+the disabled instances. -/
+private lemma continuousOn_g_inner_along_curve
+    (g : SmoothRiemannianMetric I M)
+    {γ : ℝ → M} {v w : ∀ t : ℝ, TangentSpace I (γ t)} {s : Set ℝ}
+    (hv : ContinuousOn (fun t : ℝ => TotalSpace.mk' E
+      (E := (TangentSpace I : M → Type _)) (γ t) (v t)) s)
+    (hw : ContinuousOn (fun t : ℝ => TotalSpace.mk' E
+      (E := (TangentSpace I : M → Type _)) (γ t) (w t)) s) :
+    ContinuousOn (fun t : ℝ => g.inner (γ t) (v t) (w t)) s := by
+  letI cg : Bundle.ContinuousRiemannianMetric E (TangentSpace I : M → Type _) :=
+    g.toContinuousRiemannianMetric
+  letI rb : Bundle.RiemannianBundle (TangentSpace I : M → Type _) :=
+    ⟨cg.toRiemannianMetric⟩
+  have h := ContinuousOn.inner_bundle (F := E) (B := M)
+    (E := (TangentSpace I : M → Type _)) (b := γ) (v := v) (w := w)
+    (s := s) hv hw
+  refine h.congr ?_
+  intro t _ht
+  rfl
+
+set_option maxHeartbeats 4000000 in
+set_option synthInstance.maxHeartbeats 4000000 in
+set_option maxSynthPendingDepth 4 in
 /-- **Interval-integrability of the index-form integrand on the
 sine-modulated parallel frame.** For a `C¹` unit-speed geodesic `γ` on `[0, L]`
 (`L > 0`) and a differentiable, parallel, orthonormal frame `e` of the
@@ -1151,7 +1182,179 @@ theorem indexFormIntegrand_intervalIntegrable
             (fun s => Real.sin (Real.pi * s / L)) (e i)).toFun)
           ((SectionAlongCurve.smulFun
             (fun s => Real.sin (Real.pi * s / L)) (e i)).toFun) t)
-        MeasureTheory.volume 0 L := sorry
+        MeasureTheory.volume 0 L := by
+  intro i
+  classical
+  set c : ℝ → ℝ := fun s => Real.sin (Real.pi * s / L) with hc_def
+  have hL_nn : (0 : ℝ) ≤ L := le_of_lt _hL
+  -- The sine factor `c` is `C^∞`, so it and its derivative are continuous.
+  have hc_contdiff : ContDiff ℝ ∞ c :=
+    Real.contDiff_sin.comp ((contDiff_const.mul contDiff_id).div_const _)
+  have hc_cont : Continuous c := hc_contdiff.continuous
+  have hderiv_c_cont : Continuous (deriv c) := hc_contdiff.continuous_deriv (by simp)
+  have hc_diff : ∀ t, DifferentiableAt ℝ c t :=
+    fun t => hc_contdiff.differentiable (by simp) t
+  -- (1) Total-space continuity of the parallel frame section `e i` on `[0, L]`.
+  have he_total : ContinuousOn
+      (fun t : ℝ => (TotalSpace.mk' E (γ t) ((e i).toFun t) : TangentBundle I M))
+      (Set.Icc 0 L) :=
+    DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong.sectionAlongCurve_continuousOn_totalSpace_of_contMDiffOn
+      (I := I) γ (e i).toFun _hγ_C1 (fun t ht => _heDiff i t ht)
+  -- (2) Continuity of `A t := g.inner (γ t) (e i t) (e i t)` on `[0, L]`.
+  have hA : ContinuousOn (fun t : ℝ => g.inner (γ t) ((e i).toFun t) ((e i).toFun t))
+      (Set.Icc 0 L) :=
+    continuousOn_g_inner_along_curve (I := I) (M := M) g he_total he_total
+  -- (3) Within-set velocity total-space continuity (via `tangentMapWithin`).
+  have hUnique : UniqueMDiffOn 𝓘(ℝ, ℝ) (Set.Icc (0 : ℝ) L) := by
+    intro u hu
+    rw [uniqueMDiffWithinAt_iff_uniqueDiffWithinAt]
+    exact (uniqueDiffOn_Icc _hL) u hu
+  have hTan := _hγ_C1.continuousOn_tangentMapWithin (le_refl 1) hUnique
+  have hLift : Continuous (fun u : ℝ =>
+      (⟨u, (1 : ℝ)⟩ : TangentBundle 𝓘(ℝ, ℝ) ℝ)) := by
+    have h_homeo :
+        Continuous ((tangentBundleModelSpaceHomeomorph 𝓘(ℝ, ℝ)).symm :
+          ModelProd ℝ ℝ → TangentBundle 𝓘(ℝ, ℝ) ℝ) :=
+      (tangentBundleModelSpaceHomeomorph 𝓘(ℝ, ℝ)).symm.continuous
+    exact h_homeo.comp (continuous_id.prodMk continuous_const)
+  have hMaps : Set.MapsTo
+      (fun u : ℝ => (⟨u, (1 : ℝ)⟩ : TangentBundle 𝓘(ℝ, ℝ) ℝ))
+      (Set.Icc (0 : ℝ) L) (Bundle.TotalSpace.proj ⁻¹' (Set.Icc (0 : ℝ) L)) := by
+    intro u hu
+    simpa using hu
+  have hVW : ContinuousOn
+      (fun t : ℝ =>
+        (TotalSpace.mk' E (E := (TangentSpace I : M → Type _))
+          (γ t)
+          (mfderivWithin 𝓘(ℝ, ℝ) I γ (Set.Icc (0 : ℝ) L) t (1 : ℝ)) :
+            TangentBundle I M))
+      (Set.Icc (0 : ℝ) L) := by
+    have hComp : ContinuousOn
+        (fun t : ℝ => tangentMapWithin 𝓘(ℝ, ℝ) I γ (Set.Icc (0 : ℝ) L)
+          (⟨t, (1 : ℝ)⟩ : TangentBundle 𝓘(ℝ, ℝ) ℝ))
+        (Set.Icc (0 : ℝ) L) :=
+      hTan.comp hLift.continuousOn hMaps
+    exact hComp.congr (fun t _ => rfl)
+  -- (4)+(5) Riemann operator section continuity composed with `γ`, then peeled
+  -- by `clm_bundle_apply` on the three vector slots (intermediate hom-bundle
+  -- types inferred under the pinned `E`-fibre total-space goal):
+  -- `t ↦ ⟨γ t, riemannOp (γ t) (e i t) (γ'within t) (γ'within t)⟩`.
+  have hR3 : ContinuousOn
+      (fun t : ℝ => (TotalSpace.mk' E
+        (E := (TangentSpace I : M → Type _))
+        (γ t)
+        (DifferentialGeometry.Integral.Connection.riemannOp
+          (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) (γ t)
+          ((e i).toFun t)
+          (mfderivWithin 𝓘(ℝ, ℝ) I γ (Set.Icc (0 : ℝ) L) t (1 : ℝ))
+          (mfderivWithin 𝓘(ℝ, ℝ) I γ (Set.Icc (0 : ℝ) L) t (1 : ℝ)))))
+      (Set.Icc 0 L) :=
+    ((((DifferentialGeometry.Integral.Connection.riemannOp_section_continuous
+        (I := I) g).comp_continuousOn
+        (s := Set.Icc (0 : ℝ) L) _hγ_C1.continuousOn).clm_bundle_apply
+        he_total).clm_bundle_apply hVW).clm_bundle_apply hVW
+  -- (6) Continuity of the curvature scalar `B t := g.inner (γ t) (riemannOp …) (e i t)`.
+  have hB : ContinuousOn
+      (fun t : ℝ => g.inner (γ t)
+        (DifferentialGeometry.Integral.Connection.riemannOp
+          (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) (γ t)
+          ((e i).toFun t)
+          (mfderivWithin 𝓘(ℝ, ℝ) I γ (Set.Icc (0 : ℝ) L) t (1 : ℝ))
+          (mfderivWithin 𝓘(ℝ, ℝ) I γ (Set.Icc (0 : ℝ) L) t (1 : ℝ)))
+        ((e i).toFun t))
+      (Set.Icc 0 L) :=
+    continuousOn_g_inner_along_curve (I := I) (M := M) g hR3 he_total
+  -- (7) The combined integrand, in `mfderivWithin` form, is continuous.
+  have hIntW : IntervalIntegrable
+      (fun t : ℝ =>
+        (deriv c t * deriv c t) * g.inner (γ t) ((e i).toFun t) ((e i).toFun t)
+        - (c t * c t) * g.inner (γ t)
+            (DifferentialGeometry.Integral.Connection.riemannOp
+              (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) (γ t)
+              ((e i).toFun t)
+              (mfderivWithin 𝓘(ℝ, ℝ) I γ (Set.Icc (0 : ℝ) L) t (1 : ℝ))
+              (mfderivWithin 𝓘(ℝ, ℝ) I γ (Set.Icc (0 : ℝ) L) t (1 : ℝ)))
+            ((e i).toFun t))
+      MeasureTheory.volume 0 L := by
+    apply ContinuousOn.intervalIntegrable
+    rw [Set.uIcc_of_le hL_nn]
+    refine ContinuousOn.sub ?_ ?_
+    · exact ((hderiv_c_cont.mul hderiv_c_cont).continuousOn).mul hA
+    · exact ((hc_cont.mul hc_cont).continuousOn).mul hB
+  -- (8) Transfer to the `indexFormIntegrand` (`mfderiv`) form by a.e.-equality on
+  -- the co-null interior `Ioo 0 L`, where `mfderivWithin = mfderiv`.
+  refine hIntW.congr_ae ?_
+  have hIoo_ae : ∀ᵐ t ∂(MeasureTheory.volume.restrict (Set.uIoc (0 : ℝ) L)),
+      t ∈ Set.Ioo (0 : ℝ) L := by
+    rw [Set.uIoc_of_le hL_nn, ← MeasureTheory.restrict_Ioo_eq_restrict_Ioc]
+    exact MeasureTheory.ae_restrict_mem measurableSet_Ioo
+  filter_upwards [hIoo_ae] with t ht
+  have htIcc : t ∈ Set.Icc (0 : ℝ) L := ⟨le_of_lt ht.1, le_of_lt ht.2⟩
+  have hmem : Set.Icc (0 : ℝ) L ∈ nhds t := Icc_mem_nhds ht.1 ht.2
+  change (deriv c t * deriv c t) * g.inner (γ t) ((e i).toFun t) ((e i).toFun t)
+      - (c t * c t) * g.inner (γ t)
+          (DifferentialGeometry.Integral.Connection.riemannOp
+            (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) (γ t)
+            ((e i).toFun t)
+            (mfderivWithin 𝓘(ℝ, ℝ) I γ (Set.Icc (0 : ℝ) L) t (1 : ℝ))
+            (mfderivWithin 𝓘(ℝ, ℝ) I γ (Set.Icc (0 : ℝ) L) t (1 : ℝ)))
+          ((e i).toFun t)
+    = indexFormIntegrand (I := I) g γ
+        ((SectionAlongCurve.smulFun c (e i)).toFun)
+        ((SectionAlongCurve.smulFun c (e i)).toFun) t
+  rw [mfderivWithin_of_mem_nhds hmem]
+  -- The covariant-derivative slot carries the unapplied section
+  -- `(smulFun c (e i)).toFun = fun s => c s • (e i).toFun s`; the parallel,
+  -- sine-modulated covariant derivative is `(deriv c t) • (e i t)`.
+  have hnabla :
+      DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong.covDerivAlong
+        (I := I) g γ (SectionAlongCurve.smulFun c (e i)).toFun t
+        = deriv c t • (e i).toFun t := by
+    have key :=
+      DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong.covDerivAlong_smulFun
+        (I := I) g γ c (e i).toFun t (hc_diff t) (_heDiff i t htIcc)
+    rw [_hParallel i t htIcc, smul_zero, add_zero] at key
+    exact key
+  -- Bilinearity of `g.inner` and ℝ-linearity of `riemannOp`'s first vector slot,
+  -- phrased through `TangentSpace I (γ t)`-typed vectors so `map_smul` sees the
+  -- fibre module smul (definitionally equal to the model-space `E` smul).
+  have hfac1 : g.inner (γ t) (deriv c t • (e i).toFun t) (deriv c t • (e i).toFun t)
+      = (deriv c t * deriv c t) * g.inner (γ t) ((e i).toFun t) ((e i).toFun t) := by
+    have key : ∀ (x : TangentSpace I (γ t)) (a : ℝ),
+        g.inner (γ t) (a • x) (a • x) = (a * a) * g.inner (γ t) x x := by
+      intro x a
+      simp only [map_smul, ContinuousLinearMap.smul_apply, smul_eq_mul]
+      ring
+    exact key ((e i).toFun t) (deriv c t)
+  have hfac2 : g.inner (γ t)
+      (DifferentialGeometry.Integral.Connection.riemannOp
+        (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) (γ t)
+        (c t • (e i).toFun t)
+        (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ)) (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ)))
+      (c t • (e i).toFun t)
+      = (c t * c t) * g.inner (γ t)
+          (DifferentialGeometry.Integral.Connection.riemannOp
+            (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) (γ t)
+            ((e i).toFun t)
+            (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ)) (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ)))
+          ((e i).toFun t) := by
+    have key : ∀ (x w : TangentSpace I (γ t)) (a : ℝ),
+        g.inner (γ t)
+          (DifferentialGeometry.Integral.Connection.riemannOp
+            (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) (γ t)
+            (a • x) w w) (a • x)
+          = (a * a) * g.inner (γ t)
+              (DifferentialGeometry.Integral.Connection.riemannOp
+                (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) (γ t)
+                x w w) x := by
+      intro x w a
+      simp only [map_smul, ContinuousLinearMap.smul_apply, smul_eq_mul]
+      ring
+    exact key ((e i).toFun t) (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ)) (c t)
+  -- Unfold the integrand and substitute the three identities.
+  unfold indexFormIntegrand
+  simp only [SectionAlongCurve.smulFun_toFun]
+  rw [hnabla, hfac1, hfac2]
 
 end Variation
 end Riemannian
