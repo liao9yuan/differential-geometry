@@ -675,6 +675,101 @@ private theorem perChart_jointContinuity_of_flowIdentifiedOn
   intro vt hvt
   exact hident vt.1 hvt.1 vt.2 hvt.2
 
+/-! ### General uniform confinement of a parameter-varying flow orbit
+
+The per-junction phase point `z v` varies with `v` (both the chart-coordinate of
+the *foot* `intrinsicGeodesic g hEnorm p v tₖ` and its chart velocity move with
+`v`); only at the base velocity does it sit at the flow's centre `z₀`.  The
+following purely-topological lemma extracts, from joint continuity of the flow
+`Φ` at the base phase-point–time `(z₀, 0)` together with continuity of the
+phase-parameter map `z` at `v₀` (with `z v₀ = z₀`), a *uniform* window
+`ball v₀ r' ×ˢ Ioo (-T') T'` on which the orbit `Φ (z v, s)` stays inside any
+prescribed neighbourhood `W` of `z₀`.  This is the foot-varying generalisation of
+`Exponential.exists_uniform_orbit_in_inner_ball` (which fixes the foot at the
+chart centre and varies only the velocity). -/
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- **Uniform confinement of a parameter-varying flow orbit.** Suppose `Φ` is
+continuous on `ball z₀ ρ_f ×ˢ Ioo (-T_f) T_f` with `Φ (z₀, 0) = z₀`, the
+phase-parameter map `z : N → E × E` is continuous at `v₀` with `z v₀ = z₀`, and
+`W` is a neighbourhood of `z₀`.  Then there are a parameter neighbourhood `S` of
+`v₀` with `z '' S ⊆ ball z₀ ρ_f` and a time horizon `T' ∈ (0, T_f)` such that the
+orbit `Φ (z v, s)` lies in `W` for all `v ∈ S` and `s ∈ Ioo (-T') T'`. -/
+private theorem flowOrbit_uniform_confinement
+    {N : Type*} [TopologicalSpace N]
+    {Φ : (E × E) × ℝ → E × E} {z₀ : E × E} {ρ_f T_f : ℝ}
+    {z : N → E × E} {v₀ : N} {W : Set (E × E)}
+    (hρ_f : 0 < ρ_f) (hT_f : 0 < T_f)
+    (hΦ : ContinuousOn Φ ((Metric.ball z₀ ρ_f) ×ˢ Set.Ioo (-T_f) T_f))
+    (hΦ0 : Φ (z₀, 0) = z₀)
+    (hz_cont : ContinuousAt z v₀) (hz0 : z v₀ = z₀)
+    (hW : W ∈ 𝓝 z₀) :
+    ∃ (S : Set N) (T' : ℝ), IsOpen S ∧ v₀ ∈ S ∧ 0 < T' ∧ T' < T_f ∧
+      (∀ v ∈ S, z v ∈ Metric.ball z₀ ρ_f) ∧
+      (∀ v ∈ S, ∀ s ∈ Set.Ioo (-T') T', Φ (z v, s) ∈ W) := by
+  classical
+  -- The flow domain is open and contains `(z₀, 0)`.
+  have h_open : IsOpen ((Metric.ball z₀ ρ_f) ×ˢ Set.Ioo (-T_f) T_f) :=
+    Metric.isOpen_ball.prod isOpen_Ioo
+  have hz₀0_mem : ((z₀, (0 : ℝ)) : (E × E) × ℝ) ∈
+      (Metric.ball z₀ ρ_f) ×ˢ Set.Ioo (-T_f) T_f :=
+    ⟨Metric.mem_ball_self hρ_f, ⟨by linarith, hT_f⟩⟩
+  have hΦ_contAt : ContinuousAt Φ ((z₀, (0 : ℝ)) : (E × E) × ℝ) :=
+    hΦ.continuousAt (h_open.mem_nhds hz₀0_mem)
+  -- The composite `(v, s) ↦ Φ (z v, s)` is continuous at `(v₀, 0)`.
+  have hpair_contAt : ContinuousAt (fun ws : N × ℝ => ((z ws.1, ws.2) : (E × E) × ℝ))
+      ((v₀, (0 : ℝ)) : N × ℝ) :=
+    (hz_cont.comp continuousAt_fst).prodMk continuousAt_snd
+  have hΨ_contAt : ContinuousAt (fun ws : N × ℝ => Φ ((z ws.1, ws.2) : (E × E) × ℝ))
+      ((v₀, (0 : ℝ)) : N × ℝ) := by
+    have hval : ((z v₀, (0 : ℝ)) : (E × E) × ℝ) = ((z₀, (0 : ℝ)) : (E × E) × ℝ) := by
+      rw [hz0]
+    refine ContinuousAt.comp ?_ hpair_contAt
+    rw [hval]; exact hΦ_contAt
+  -- `W` and `ball z₀ ρ_f` are neighbourhoods of `z₀ = Φ (z₀, 0)`.
+  have hW_nhds : W ∈ 𝓝 (Φ ((z₀, (0 : ℝ)) : (E × E) × ℝ)) := by rw [hΦ0]; exact hW
+  have h_orbit_preim : (fun ws : N × ℝ => Φ ((z ws.1, ws.2) : (E × E) × ℝ)) ⁻¹' W ∈
+      𝓝 ((v₀, (0 : ℝ)) : N × ℝ) := by
+    apply hΨ_contAt.preimage_mem_nhds
+    have hval : Φ ((z v₀, (0 : ℝ)) : (E × E) × ℝ) = Φ ((z₀, (0 : ℝ)) : (E × E) × ℝ) := by
+      rw [hz0]
+    rw [hval]; exact hW_nhds
+  -- The parameter-side preimage of `ball z₀ ρ_f` under `z` is a neighbourhood of `v₀`.
+  have hz_preim : z ⁻¹' (Metric.ball z₀ ρ_f) ∈ 𝓝 v₀ := by
+    apply hz_cont.preimage_mem_nhds
+    rw [hz0]; exact Metric.ball_mem_nhds _ hρ_f
+  -- Extract a product neighbourhood `S₀ ×ˢ V₀ ⊆ orbit-preimage of W`.
+  obtain ⟨S₁, V₁, hS₁_open, hS₁_mem, hV₁_open, hV₁_mem, h_sub⟩ :=
+    mem_nhds_prod_iff'.mp h_orbit_preim
+  -- Intersect the parameter side with the `ball z₀ ρ_f`-preimage neighbourhood.
+  obtain ⟨S₂, hS₂_sub, hS₂_open, hv₀_S₂⟩ := _root_.mem_nhds_iff.mp hz_preim
+  set S : Set N := S₁ ∩ S₂ with hS_def
+  have hS_open : IsOpen S := hS₁_open.inter hS₂_open
+  have hv₀_S : v₀ ∈ S := ⟨hS₁_mem, hv₀_S₂⟩
+  -- Time side: shrink `V₁` to `Ioo (-T') T'` with `T' < T_f`.
+  obtain ⟨T₀, hT₀_pos, hT₀_sub⟩ := Metric.isOpen_iff.mp hV₁_open (0 : ℝ) hV₁_mem
+  set T' : ℝ := min T₀ T_f / 2 with hT'_def
+  have hT'_pos : 0 < T' := by
+    rw [hT'_def]; have : 0 < min T₀ T_f := lt_min hT₀_pos hT_f; linarith
+  have hT'_lt_Tf : T' < T_f := by
+    rw [hT'_def]; have h1 : min T₀ T_f ≤ T_f := min_le_right _ _; linarith
+  have hT'_lt_T₀ : T' < T₀ := by
+    rw [hT'_def]; have h1 : min T₀ T_f ≤ T₀ := min_le_left _ _; linarith
+  have hIoo_sub_V₁ : Set.Ioo (-T') T' ⊆ V₁ := by
+    intro s hs
+    apply hT₀_sub
+    rw [Metric.mem_ball, Real.dist_eq, sub_zero, abs_lt]
+    exact ⟨by linarith [hs.1], by linarith [hs.2]⟩
+  refine ⟨S, T', hS_open, hv₀_S, hT'_pos, hT'_lt_Tf, ?_, ?_⟩
+  · intro v hv
+    exact hS₂_sub hv.2
+  · intro v hv s hs
+    have hv_S₁ : v ∈ S₁ := hv.1
+    have hs_V₁ : s ∈ V₁ := hIoo_sub_V₁ hs
+    have hpair : (v, s) ∈ S₁ ×ˢ V₁ := ⟨hv_S₁, hs_V₁⟩
+    exact h_sub hpair
+
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 /-- **Joint continuity of the chained intrinsic geodesic flow (analytic
