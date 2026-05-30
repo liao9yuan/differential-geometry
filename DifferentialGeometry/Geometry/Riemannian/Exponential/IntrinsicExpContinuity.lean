@@ -231,6 +231,233 @@ theorem intrinsicGeodesic_arc_finite_chart_cover
   · intro t r hr
     exact hq t r hr
 
+/-- **Chart-phase ODE uniqueness re-centred at a base time `t`.** The
+neighbourhood-of-`0` chart-coordinate ODE uniqueness
+`Geodesic.chartPhaseVF_orbit_uniqueness` re-based at an arbitrary base time `t`
+by a time-shift `s ↦ s + t`.  Two chart-phase ODE solutions agreeing at `t` and
+staying in the chart-target interior product near `t` agree on a neighbourhood
+of `t`. -/
+private theorem chartPhaseVF_orbit_uniqueness_at
+    {g : SmoothRiemannianMetric I M} {α : M}
+    {c₁ c₂ : ℝ → E × E} {z₀ : E × E} {t : ℝ}
+    (hz₀ : z₀ ∈ (interior (extChartAt I α).target) ×ˢ (Set.univ : Set E))
+    (h1 : c₁ t = z₀) (h2 : c₂ t = z₀)
+    (hd1 : ∀ᶠ s in 𝓝 t,
+      HasDerivAt c₁ (chartPhaseVF (I := I) g α (c₁ s)) s ∧
+        c₁ s ∈ (interior (extChartAt I α).target) ×ˢ (Set.univ : Set E))
+    (hd2 : ∀ᶠ s in 𝓝 t,
+      HasDerivAt c₂ (chartPhaseVF (I := I) g α (c₂ s)) s ∧
+        c₂ s ∈ (interior (extChartAt I α).target) ×ˢ (Set.univ : Set E)) :
+    c₁ =ᶠ[𝓝 t] c₂ := by
+  classical
+  set d₁ : ℝ → E × E := fun s => c₁ (s + t) with hd₁_def
+  set d₂ : ℝ → E × E := fun s => c₂ (s + t) with hd₂_def
+  have hshift : Filter.Tendsto (fun s : ℝ => s + t) (𝓝 0) (𝓝 t) := by
+    have h := (continuous_add_const t).tendsto (0 : ℝ)
+    simpa using h
+  have he1 : d₁ 0 = z₀ := by simp [hd₁_def, h1]
+  have he2 : d₂ 0 = z₀ := by simp [hd₂_def, h2]
+  have hdd1 : ∀ᶠ s in 𝓝 (0 : ℝ),
+      HasDerivAt d₁ (chartPhaseVF (I := I) g α (d₁ s)) s ∧
+        d₁ s ∈ (interior (extChartAt I α).target) ×ˢ (Set.univ : Set E) := by
+    filter_upwards [hshift.eventually hd1] with s hs
+    obtain ⟨hder, hmem⟩ := hs
+    refine ⟨?_, hmem⟩
+    have hadd : HasDerivAt (fun r : ℝ => r + t) 1 s := by
+      simpa using (hasDerivAt_id s).add_const t
+    have hcomp := HasDerivAt.scomp s hder hadd
+    simpa [hd₁_def, mul_one] using hcomp
+  have hdd2 : ∀ᶠ s in 𝓝 (0 : ℝ),
+      HasDerivAt d₂ (chartPhaseVF (I := I) g α (d₂ s)) s ∧
+        d₂ s ∈ (interior (extChartAt I α).target) ×ˢ (Set.univ : Set E) := by
+    filter_upwards [hshift.eventually hd2] with s hs
+    obtain ⟨hder, hmem⟩ := hs
+    refine ⟨?_, hmem⟩
+    have hadd : HasDerivAt (fun r : ℝ => r + t) 1 s := by
+      simpa using (hasDerivAt_id s).add_const t
+    have hcomp := HasDerivAt.scomp s hder hadd
+    simpa [hd₂_def, mul_one] using hcomp
+  have hdeq : d₁ =ᶠ[𝓝 (0 : ℝ)] d₂ :=
+    chartPhaseVF_orbit_uniqueness (I := I) (g := g) (α := α) hz₀ he1 he2 hdd1 hdd2
+  have hshift2 : Filter.Tendsto (fun s : ℝ => s - t) (𝓝 t) (𝓝 0) := by
+    have h := (continuous_add_const (-t)).tendsto t
+    simpa [sub_eq_add_neg] using h
+  filter_upwards [hshift2.eventually hdeq] with s hs
+  simp only [hd₁_def, hd₂_def] at hs
+  simpa using hs
+
+/-! ## 2b. Converse lift: from the moving-foot geodesic equation to a
+chart-centred integral curve
+
+The intrinsic geodesic exposes its data only through the *moving-foot*
+geodesic equation `HasGeodesicEquationAt g γ t` (`intrinsicGeodesic_isGeodesic`).
+The per-chart re-based flow machinery, by contrast, consumes a chart-`γ(t)`-
+centred *integral curve* on `TM` — the structure produced by
+`Geodesic.bm_c_gc_cross_vf_projection_uniqueness` from an `IsGeodesicAt`
+witness.
+
+The genuine missing link is therefore the converse direction:
+`HasGeodesicEquationAt g γ t → ` (a chart-`γ(t)`-centred integral curve whose
+projection agrees with `γ` near `t`).  We build it here by Picard–Lindelöf at
+the foot `γ t` with the chart velocity, plus chart-coordinate second-order ODE
+uniqueness (reduced to the first-order chart-phase system on `E × E` and
+discharged by the proven uniqueness `chartPhaseVF_orbit_uniqueness`). -/
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- **Converse lift from the moving-foot geodesic equation.**  If `γ` is a
+geodesic (`IsGeodesic g γ`, i.e. it satisfies the moving-foot geodesic equation
+at every time) and is continuous, then at every time `t` there is a
+chart-`γ(t)`-centred local integral curve `f₁` of the chart-fixed geodesic
+vector field at `γ t` whose projection agrees with `γ` on a neighbourhood of
+`t`.
+
+This is the mirror of `Geodesic.bm_c_gc_cross_vf_projection_uniqueness` but
+starting from the *moving-foot* geodesic equation (the structure the intrinsic
+geodesic exposes through `intrinsicGeodesic_isGeodesic`) rather than from
+`IsGeodesicAt`.  The proof:
+
+* extracts the chart velocity `v := deriv (chartCurve (γ t) γ) t`;
+* builds, via `exists_chartCenteredLift_at`, the chart-`γ(t)`-centred integral
+  curve `f₁` with `f₁ t = ⟨γ t, v⟩`;
+* reduces both the fixed-`γ(t)`-chart curve of `γ` and the chart-pushed lift of
+  `f₁` to first-order solutions of the chart-phase ODE `chartPhaseVF g (γ t)` on
+  a neighbourhood of `t` (the `γ`-side via the moving-foot → fixed-chart
+  conversion `hasGeodesicEquationAt_fixedChart_hasDerivAt_velocity` and its
+  eventual first-derivative companion
+  `hasGeodesicEquationAt_fixedChart_eventually_hasDerivAt`, applied at every
+  nearby time using `IsGeodesic`), matching at `t`, and applies the proven
+  chart-phase ODE uniqueness `chartPhaseVF_orbit_uniqueness` to conclude the two
+  agree, hence `γ` agrees with `projectCurve f₁` near `t` after applying the
+  chart inverse. -/
+theorem intrinsicGeodesic_hasGeodesicEquationAt_to_lift
+    (g : SmoothRiemannianMetric I M)
+    {γ : ℝ → M} (hγ : IsGeodesic (I := I) g γ) (hγ_cont : Continuous γ) (t : ℝ) :
+    ∃ f₁ : ℝ → TangentBundle I M,
+      (f₁ t).proj = γ t ∧
+      IsMIntegralCurveAt f₁ (geodesicVectorFieldChart (I := I) g (γ t)) t ∧
+      γ =ᶠ[𝓝 t] (fun s => (f₁ s).proj) := by
+  classical
+  -- Fixed chart basepoint `y := γ t`, and chart velocity `v`.
+  set y : M := γ t with hy_def
+  set v : E := deriv
+    (DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) y γ) t
+    with hv_def
+  -- Build the chart-`y`-centred integral curve `f₁` with `f₁ t = ⟨y, v⟩`.
+  obtain ⟨f₁, hf₁_init, hf₁⟩ := exists_chartCenteredLift_at (I := I) g y v t
+  have hf₁_proj_t : (f₁ t).proj = y := by rw [hf₁_init]
+  refine ⟨f₁, by rw [hf₁_proj_t], by rw [hy_def] at hf₁ ⊢; exact hf₁, ?_⟩
+  -- Abbreviation: the fixed-`y`-chart curve of `γ`.
+  set w : ℝ → E :=
+    DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) y γ with hw_def
+  -- (A) The `γ`-side chart-phase solution `c₁ s := (w s, deriv w s)`.
+  set c₁ : ℝ → E × E := fun s => (w s, deriv w s) with hc₁_def
+  have hy_src : y ∈ (chartAt H y).source := mem_chart_source H y
+  have hγ_src_ev : ∀ᶠ s in 𝓝 t, γ s ∈ (chartAt H y).source := by
+    apply hγ_cont.continuousAt.preimage_mem_nhds
+    exact (chartAt H y).open_source.mem_nhds (by rw [hy_def]; exact hy_src)
+  have hev_first : ∀ᶠ s in 𝓝 t, HasDerivAt w (deriv w s) s :=
+    hasGeodesicEquationAt_fixedChart_eventually_hasDerivAt (I := I) g y
+      hγ_cont.continuousAt (by rw [hy_def]; exact hy_src) (hγ t)
+  have hev_second : ∀ᶠ s in 𝓝 t,
+      HasDerivAt (deriv w)
+        (- chartChristoffelContraction (I := I) g y (deriv w s) (deriv w s) (w s)) s := by
+    filter_upwards [hγ_src_ev] with s hs
+    exact hasGeodesicEquationAt_fixedChart_hasDerivAt_velocity (I := I) g y
+      hγ_cont.continuousAt hs (hγ s)
+  have hc₁_phase : ∀ᶠ s in 𝓝 t,
+      HasDerivAt c₁ (chartPhaseVF (I := I) g y (c₁ s)) s ∧
+        c₁ s ∈ (interior (extChartAt I y).target) ×ˢ (Set.univ : Set E) := by
+    filter_upwards [hev_first, hev_second, hγ_src_ev] with s hf hsd hsrc
+    refine ⟨?_, ?_⟩
+    · have hpair : HasDerivAt c₁
+          ((deriv w s,
+            - chartChristoffelContraction (I := I) g y (deriv w s) (deriv w s) (w s))) s :=
+        hf.prodMk hsd
+      have hrhs : chartPhaseVF (I := I) g y (c₁ s) =
+          (deriv w s,
+            - chartChristoffelContraction (I := I) g y (deriv w s) (deriv w s) (w s)) := by
+        simp only [hc₁_def, chartPhaseVF_apply]
+      rw [hrhs]; exact hpair
+    · refine ⟨?_, Set.mem_univ _⟩
+      have hp_ext_src : γ s ∈ (extChartAt I y).source := by
+        rw [extChartAt_source_eq_chartAt_source (I := I)]; exact hsrc
+      have hp_target : extChartAt I y (γ s) ∈ (extChartAt I y).target :=
+        (extChartAt I y).map_source hp_ext_src
+      have : (c₁ s).1 = extChartAt I y (γ s) := by simp [hc₁_def, hw_def]
+      rw [this]
+      exact DifferentialGeometry.Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
+        (I := I) y hp_target
+  -- (B) The `f₁`-side chart-phase solution `c₂ := chartPushLift f₁ t`.
+  set c₂ : ℝ → E × E := chartPushLift (I := I) f₁ t with hc₂_def
+  have hπ_cont : Continuous (Bundle.TotalSpace.proj : TangentBundle I M → M) :=
+    FiberBundle.continuous_proj E (TangentSpace I)
+  have hproj_contAt : ContinuousAt (fun s => (f₁ s).proj) t :=
+    hπ_cont.continuousAt.comp hf₁.continuousAt
+  have hf_src_ev : ∀ᶠ s in 𝓝 t, (f₁ s).proj ∈ (chartAt H y).source := by
+    apply hproj_contAt.preimage_mem_nhds
+    rw [hf₁_proj_t]; exact (chartAt H y).open_source.mem_nhds hy_src
+  have hc₂_deriv : ∀ᶠ s in 𝓝 t, HasDerivAt (chartPushLift (I := I) f₁ t)
+      (chartPushVF (I := I) g y f₁ t s) s := by
+    have hf₁' : IsMIntegralCurveAt f₁ (geodesicVectorFieldChart (I := I) g y) t := hf₁
+    exact chartPushLift_eventually_hasDerivAt (I := I) (g := g) (α := y)
+      (t₀ := t) (f := f₁) hf₁'
+  have hc₂_phase : ∀ᶠ s in 𝓝 t,
+      HasDerivAt c₂ (chartPhaseVF (I := I) g y (c₂ s)) s ∧
+        c₂ s ∈ (interior (extChartAt I y).target) ×ˢ (Set.univ : Set E) := by
+    filter_upwards [hc₂_deriv, hf_src_ev] with s hd hs
+    refine ⟨?_, ?_⟩
+    · have heq := chartPushVF_eq_chartPhaseVF_at (I := I) g y (f := f₁) (t₀ := t)
+        hf₁_proj_t s hs
+      rw [heq] at hd; exact hd
+    · rw [hc₂_def, chartPushLift_eq_pair (I := I) t s (by rw [hf₁_proj_t]; exact hs)]
+      refine ⟨?_, Set.mem_univ _⟩
+      rw [hf₁_proj_t]
+      have hp_ext_src : (f₁ s).proj ∈ (extChartAt I y).source := by
+        rw [extChartAt_source_eq_chartAt_source (I := I)]; exact hs
+      have hp_target : extChartAt I y (f₁ s).proj ∈ (extChartAt I y).target :=
+        (extChartAt I y).map_source hp_ext_src
+      exact DifferentialGeometry.Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
+        (I := I) y hp_target
+  -- (C) Match at `t`: both `c₁ t` and `c₂ t` equal `(extChartAt I y y, v)`.
+  have hc₁_t : c₁ t = (extChartAt I y y, v) := by
+    have hwt : w t = extChartAt I y y := by simp [hw_def, hy_def]
+    have hvt : deriv w t = v := by rw [hv_def, hw_def]
+    simp only [hc₁_def, hwt, hvt]
+  have hc₂_t : c₂ t = (extChartAt I y y, v) := by
+    rw [hc₂_def, chartPushLift_self_pair (I := I) f₁ t, hf₁_proj_t]
+    have hfib : chartFiberCoord (I := I) y (f₁ t) = v := by
+      rw [show f₁ t = (⟨y, v⟩ : TangentBundle I M) from hf₁_init]
+      exact chartFiberCoord_mk_self (I := I) y v
+    rw [hfib]
+  have hz₀_int : (extChartAt I y y, v) ∈
+      (interior (extChartAt I y).target) ×ˢ (Set.univ : Set E) := by
+    refine ⟨?_, Set.mem_univ _⟩
+    have hp_ext_src : y ∈ (extChartAt I y).source := by
+      rw [extChartAt_source_eq_chartAt_source (I := I)]; exact hy_src
+    have hp_target : extChartAt I y y ∈ (extChartAt I y).target :=
+      (extChartAt I y).map_source hp_ext_src
+    exact DifferentialGeometry.Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
+      (I := I) y hp_target
+  -- (D) Chart-phase ODE uniqueness re-centred at `t`: `c₁ =ᶠ c₂`.
+  have hceq : c₁ =ᶠ[𝓝 t] c₂ :=
+    chartPhaseVF_orbit_uniqueness_at (I := I) (g := g) (α := y)
+      hz₀_int hc₁_t hc₂_t hc₁_phase hc₂_phase
+  -- (E) Project the first-component equality back to `γ =ᶠ projectCurve f₁`.
+  have hfst : ∀ᶠ s in 𝓝 t, extChartAt I y (γ s) = extChartAt I y (f₁ s).proj := by
+    filter_upwards [hceq, hf_src_ev] with s hs hsrc
+    have h1 : (c₁ s).1 = extChartAt I y (γ s) := by simp [hc₁_def, hw_def]
+    have h2 : (c₂ s).1 = extChartAt I y (f₁ s).proj := by
+      rw [hc₂_def, chartPushLift_eq_pair (I := I) t s (by rw [hf₁_proj_t]; exact hsrc)]
+      rw [hf₁_proj_t]
+    rw [← h1, ← h2, hs]
+  filter_upwards [hγ_src_ev, hf_src_ev, hfst] with s hγs hfs heq
+  have hγ_es : γ s ∈ (extChartAt I y).source := by
+    rw [extChartAt_source_eq_chartAt_source (I := I)]; exact hγs
+  have hf_es : (f₁ s).proj ∈ (extChartAt I y).source := by
+    rw [extChartAt_source_eq_chartAt_source (I := I)]; exact hfs
+  exact (extChartAt I y).injOn hγ_es hf_es heq
+
 /-! ## 3. Joint continuity of the chained flow (the analytic residual)
 
 The single remaining analytic input is the *uniform-in-`v`* joint continuity of
@@ -265,10 +492,12 @@ t_N` and chart base points `α_k := q tₖ` so that `γ₀([tₖ, tₖ₊₁]) �
         (∀ z ∈ ball z₀ ρ_k, ∀ τ ∈ Ioo (-T_k) T_k,
           IsMIntegralCurveAt (lift Φ_k z) (geodesicVectorFieldChart g (γ₀ tₖ)) 0)
     ```
-    (the `IsGeodesicAt g γ₀ tₖ` hypothesis is the chart-flow datum produced by the
-    extension engine of `IntrinsicExp.lean`; it is the converse direction
-    `HasGeodesicEquationAt → IsGeodesicAt` for the intrinsic geodesic, recorded as
-    `intrinsicGeodesic_isGeodesicAt` below).
+    (the chart-flow datum at `γ₀ tₖ` is the converse direction from the
+    moving-foot geodesic equation to a chart-`γ₀(tₖ)`-centred integral curve
+    matching `γ₀` near `tₖ`, recorded — fully proven and axiom-clean — as
+    `intrinsicGeodesic_hasGeodesicEquationAt_to_lift` above, which is the mirror
+    of `Geodesic.bm_c_gc_cross_vf_projection_uniqueness` but starting from
+    `IsGeodesic` rather than `IsGeodesicAt`).
 
 2.  **Uniqueness identification.** For `v` near `v₀`, the intrinsic geodesic
     `intrinsicGeodesic g hEnorm p v` and the re-based flow projection agree on a
