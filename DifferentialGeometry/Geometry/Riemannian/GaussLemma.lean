@@ -1770,6 +1770,87 @@ private theorem gauss_radial_lower_bound
   rw [hlhs]
   nlinarith [hββ_nn, mul_nonneg (sq_nonneg α) hupos.le]
 
+/-- **Equality case of the Gauss radial lower bound.** For a radial direction
+`u ≠ 0` inside the `C²` ball, the pullback speed-squared bound of
+`gauss_radial_lower_bound` is an *equality*
+`g_p(u, ζ)² / g_p(u, u) = g(dexp_u ζ, dexp_u ζ)` **iff** the exponential
+differential sends the `g_p`-orthogonal part `ζ - (g_p(u,ζ)/g_p(u,u))•u` of `ζ`
+to `0`, equivalently iff `dexp_u ζ` is the radial multiple
+`(g_p(u,ζ)/g_p(u,u)) • dexp_u u`.  This isolates the rigidity that turns the
+length lower bound into a radial-reparametrisation characterisation: along an
+equality-realising velocity the chart-image velocity is radial up to the
+exponential differential.  The proof tracks equality through the same
+orthogonal decomposition used by `gauss_radial_lower_bound`; positive
+definiteness of `g` at `q = exp_p u` converts the seminorm-zero of the
+orthogonal image into the vanishing of `dexp_u (ζ - α•u)`. -/
+private theorem gauss_radial_lower_bound_eq_iff
+    (g : SmoothRiemannianMetric I M) (p : M) {u : E}
+    (hu : (show TangentSpace I p from u) ∈ expDomain (I := I) g p)
+    (hsmall : ‖(u : E)‖ < expMapC2Radius (I := I) g p)
+    (hune : u ≠ 0) (ζ : E) :
+    (g.inner p u ζ)^2 / g.inner p u u =
+      g.inner (expMap (I := I) g p (show TangentSpace I p from u))
+        (mfderiv 𝓘(ℝ, E) I
+          (fun y : E => expMap (I := I) g p (show TangentSpace I p from y)) u
+          (show TangentSpace I p from ζ))
+        (mfderiv 𝓘(ℝ, E) I
+          (fun y : E => expMap (I := I) g p (show TangentSpace I p from y)) u
+          (show TangentSpace I p from ζ))
+    ↔ mfderiv 𝓘(ℝ, E) I
+          (fun y : E => expMap (I := I) g p (show TangentSpace I p from y)) u
+          (show TangentSpace I p from
+            (ζ - (g.inner p u ζ / g.inner p u u) • u)) = 0 := by
+  classical
+  obtain ⟨hdiag, hcross⟩ := gauss_lemma_pullback (I := I) g p hu hsmall
+  set q := expMap (I := I) g p (show TangentSpace I p from u) with hq
+  set D : E →L[ℝ] E :=
+    mfderiv 𝓘(ℝ, E) I (fun y : E => expMap (I := I) g p (show TangentSpace I p from y)) u
+    with hD
+  set B : E →L[ℝ] E →L[ℝ] ℝ := g.inner p with hB
+  set Bq : E →L[ℝ] E →L[ℝ] ℝ := g.inner q with hBq
+  have hupos : 0 < B u u := g.pos p u hune
+  have hune' : B u u ≠ 0 := ne_of_gt hupos
+  set α : ℝ := B u ζ / B u u with hα
+  set β : E := ζ - α • u with hβ
+  have hdecomp : ζ = β + α • u := by rw [hβ]; abel
+  have hβ_orth : B u β = 0 := by
+    have key : B u β + α * B u u = B u ζ := by
+      calc B u β + α * B u u = B u (β + α • u) := by rw [map_add, map_smul, smul_eq_mul]
+        _ = B u ζ := by rw [← hdecomp]
+    have hb : B u β = B u ζ - α * B u u := by linarith [key]
+    rw [hb, hα]; field_simp; ring
+  have hDζ : D ζ = D β + α • D u := by
+    rw [show ζ = β + α • u from hdecomp, map_add, map_smul]
+  -- Expand the right side exactly as in `gauss_radial_lower_bound`.
+  have hexpand : Bq (D ζ) (D ζ)
+      = Bq (D β) (D β) + α^2 * B u u := by
+    rw [hDζ]
+    simp only [map_add, map_smul, ContinuousLinearMap.add_apply,
+      ContinuousLinearMap.smul_apply, smul_eq_mul]
+    have hsym : Bq (D β) (D u) = Bq (D u) (D β) := g.symm q (D β) (D u)
+    have hdiag' : Bq (D u) (D u) = B u u := hdiag
+    have hcross' : Bq (D u) (D β) = 0 := hcross hβ_orth
+    rw [hsym, hdiag', hcross']; ring
+  have hlhs : B u ζ ^ 2 / B u u = α^2 * B u u := by rw [hα]; field_simp
+  -- The equality of `(B u ζ)²/B u u` with `Bq (Dζ)(Dζ)` is `Bq (Dβ)(Dβ) = 0`.
+  have hiff_seminorm :
+      (B u ζ ^ 2 / B u u = Bq (D ζ) (D ζ)) ↔ Bq (D β) (D β) = 0 := by
+    rw [hlhs, hexpand]
+    constructor
+    · intro h; linarith
+    · intro h; rw [h]; ring
+  -- `Bq (Dβ)(Dβ) = 0 ↔ D β = 0` by positive definiteness of `g` at `q`.
+  have hiff_zero : Bq (D β) (D β) = 0 ↔ D β = 0 := by
+    constructor
+    · intro h
+      by_contra hne
+      exact absurd h (ne_of_gt (g.pos q (D β) hne))
+    · intro h; rw [h]; simp
+  -- Assemble: the original equality (in `g.inner` form) ↔ `D β = 0`,
+  -- and `D β = D (ζ - α • u)` is the displayed orthogonal-part image.
+  change ((B u ζ) ^ 2 / B u u = Bq (D ζ) (D ζ)) ↔ D β = 0
+  rw [hiff_seminorm, hiff_zero]
+
 /-- **Chain rule for a curve confined to the normal chart.** If a curve `γ`
 is `MDifferentiableAt t`, stays in the normal-chart source near `t`, and its
 chart image `c(γt)` lies inside the `C²` ball, then the velocity of `γ` is the
@@ -2022,6 +2103,51 @@ private lemma image_radialDist_le_intervalIntegral_of_slope_le
     exact intervalIntegral.integral_hasDerivWithinAt_right hint_sub hmeas hcwa
   exact image_le_of_liminf_slope_right_le_deriv_boundary hρc hBa hBcont hBderiv hslope
     (Set.right_mem_Icc.2 hab)
+
+/-- **Equality case of the radial fencing (FTC tightness).** If `ρ` is
+continuous on `[a, b]`, has right-derivative `ρ'` at every interior point,
+`ρ'` is interval-integrable and bounded above by an integrable `φ` on the
+interior, and the *boundary value* `ρ b - ρ a` already saturates `∫ φ`
+(the fencing inequality `ρ b - ρ a ≤ ∫ φ` is an equality), then the
+right-derivative agrees with `φ` almost everywhere on `(a, b)`.
+
+This is the equality-case counterpart of
+`image_radialDist_le_intervalIntegral_of_slope_le`: there the slope estimate
+gave a one-sided length lower bound, here the *saturation* of that bound forces
+the pointwise estimate `ρ' ≤ φ` to be an a.e. equality.  The proof is the
+fundamental theorem of calculus (`∫ ρ' = ρ b - ρ a = ∫ φ`) fed into
+`MeasureTheory.integral_eq_iff_of_ae_le`: two integrable functions with `ρ' ≤ φ`
+a.e. and equal integrals coincide a.e.  It is the analytic gateway by which the
+length-equality hypothesis of the radial minimiser becomes the pointwise Gauss
+equality (and hence, via `gauss_radial_lower_bound_eq_iff`, the a.e. radiality
+of the velocity). -/
+private lemma ftc_fencing_equality_case
+    {ρ φ ρ' : ℝ → ℝ} {a b : ℝ} (hab : a ≤ b)
+    (hρc : ContinuousOn ρ (Set.Icc a b))
+    (hρderiv : ∀ x ∈ Set.Ioo a b, HasDerivWithinAt ρ (ρ' x) (Set.Ioi x) x)
+    (hρ'int : IntervalIntegrable ρ' MeasureTheory.volume a b)
+    (hφint : MeasureTheory.IntegrableOn φ (Set.Ioo a b) MeasureTheory.volume)
+    (hρ'φ : ∀ x ∈ Set.Ioo a b, ρ' x ≤ φ x)
+    (htight : ρ b - ρ a = ∫ t in a..b, φ t) :
+    ρ' =ᵐ[MeasureTheory.volume.restrict (Set.Ioo a b)] φ := by
+  -- Fundamental theorem of calculus: `∫ ρ' = ρ b - ρ a`.
+  have hftc : (∫ t in a..b, ρ' t) = ρ b - ρ a :=
+    intervalIntegral.integral_eq_sub_of_hasDeriv_right_of_le hab hρc hρderiv hρ'int
+  have heqint : (∫ t in a..b, ρ' t) = ∫ t in a..b, φ t := by rw [hftc, htight]
+  -- Push both interval integrals (a ≤ b) onto the open interval `Ioo a b`.
+  rw [intervalIntegral.integral_of_le hab, intervalIntegral.integral_of_le hab] at heqint
+  have hconvρ : (∫ t in Set.Ioc a b, ρ' t) = ∫ t in Set.Ioo a b, ρ' t :=
+    MeasureTheory.setIntegral_congr_set MeasureTheory.Ioo_ae_eq_Ioc.symm
+  have hconvφ : (∫ t in Set.Ioc a b, φ t) = ∫ t in Set.Ioo a b, φ t :=
+    MeasureTheory.setIntegral_congr_set MeasureTheory.Ioo_ae_eq_Ioc.symm
+  rw [hconvρ, hconvφ] at heqint
+  -- Integrability of `ρ'` over the open interval.
+  have hρ'Ioo : MeasureTheory.IntegrableOn ρ' (Set.Ioo a b) MeasureTheory.volume := by
+    rw [intervalIntegrable_iff_integrableOn_Ioo_of_le hab] at hρ'int; exact hρ'int
+  -- a.e. domination on the restricted measure, then the equality-case lemma.
+  have hae_le : ρ' ≤ᵐ[MeasureTheory.volume.restrict (Set.Ioo a b)] φ :=
+    MeasureTheory.ae_restrict_of_forall_mem measurableSet_Ioo hρ'φ
+  exact (MeasureTheory.integral_eq_iff_of_ae_le hρ'Ioo hφint hae_le).mp heqint
 
 end RadialLengthAnalyticEngine
 
