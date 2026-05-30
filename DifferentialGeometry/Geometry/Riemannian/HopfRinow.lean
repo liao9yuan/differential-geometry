@@ -812,6 +812,182 @@ theorem bm_c_gc_position_limit
             rw [ENNReal.ofReal_lt_ofReal_iff hδ₀_pos]; exact h_cts_lt
       _ < ε := hδ₀_ofReal_lt
 
+/-! ### Directional velocity limit at a finite endpoint
+
+The position limit `bm_c_gc_position_limit` supplies a single limit *point*
+`y : M` for a bounded-speed curve as `t → b⁻`.  For the genuine endpoint
+continuation one also needs the velocity to converge *with direction*: the
+chart-coordinate velocity `u' = (φ_α ∘ γ)'` should tend to a single vector
+`w : E`.  The engine below isolates the purely analytic content — a
+function with a *bounded derivative* on `Iio b` (finite `b`) converges from
+the left — and the geodesic-facing lemma supplies that bound from the
+chart-coordinate geodesic ODE `u'' = -Γ_α(u', u')(u)` together with the
+compactness of the chart image: a continuous Christoffel contraction on a
+compact box `{‖v‖ ≤ K₁} ×ˢ S` is bounded, so a unit-speed geodesic confined
+to a fixed chart has bounded chart-acceleration. -/
+
+/-- **Velocity convergence from a bounded derivative.** If `P : ℝ → E` has
+derivative `P' s` at every `s < b` (with `b` finite) and `‖P' s‖ ≤ C`
+throughout, then `P` converges to a genuine limit `w : E` as `s → b⁻`.
+
+The proof shows `Filter.map P (𝓝[<] b)` is Cauchy in the complete space `E`
+through `Metric.cauchy_iff`: any two `P`-images of `Ioo (b - η) b` are
+`< ε` apart by the mean-value bound `‖P t - P s‖ ≤ C · (t - s)` (from
+`norm_image_sub_le_of_norm_deriv_le_segment'`) with `η = ε / (C + 1)`.
+Completeness then yields the limit via `cauchy_map_iff_exists_tendsto`. -/
+theorem velocity_converges_of_bounded_accel
+    {P P' : ℝ → E} {b C : ℝ}
+    (hderiv : ∀ s : ℝ, s < b → HasDerivAt P (P' s) s)
+    (hbound : ∀ s : ℝ, s < b → ‖P' s‖ ≤ C) :
+    ∃ w : E, Tendsto P (𝓝[<] b) (𝓝 w) := by
+  haveI : CompleteSpace E := FiniteDimensional.complete ℝ E
+  haveI hNB : (𝓝[<] b).NeBot := nhdsLT_neBot b
+  -- It suffices to show `map P (𝓝[<] b)` is Cauchy; completeness gives the limit.
+  suffices hcauchy : Cauchy (Filter.map P (𝓝[<] b)) by
+    exact cauchy_map_iff_exists_tendsto.mp hcauchy
+  refine Metric.cauchy_iff.mpr ⟨Filter.map_neBot, ?_⟩
+  -- `C` is nonnegative (it dominates a norm at some point `< b`).
+  have hC_nn : 0 ≤ C := by
+    obtain ⟨s, hs⟩ := exists_lt b
+    exact le_trans (norm_nonneg _) (hbound s hs)
+  intro ε hε
+  have hCC_pos : 0 < C + 1 := by linarith
+  set η : ℝ := ε / (C + 1) with hη_def
+  have hη_pos : 0 < η := div_pos hε hCC_pos
+  -- The image of `Ioo (b - η) b` lies in `map P (𝓝[<] b)`.
+  have hIoo_mem : P '' Set.Ioo (b - η) b ∈ Filter.map P (𝓝[<] b) :=
+    Filter.image_mem_map (Ioo_mem_nhdsLT (by linarith : b - η < b))
+  refine ⟨P '' Set.Ioo (b - η) b, hIoo_mem, ?_⟩
+  rintro x ⟨sx, hsx, rfl⟩ y ⟨sy, hsy, rfl⟩
+  -- Work with `s := min sx sy`, `t := max sx sy`; `t - s < η`.
+  set s : ℝ := min sx sy with hs_def
+  set t : ℝ := max sx sy with ht_def
+  have hst : s ≤ t := min_le_max
+  have ht_hi : t < b := max_lt hsx.2 hsy.2
+  have hs_lo : b - η < s := lt_min hsx.1 hsy.1
+  have ht_sub_s_lt : t - s < η := by
+    rcases le_total sx sy with h | h
+    · rw [hs_def, ht_def, min_eq_left h, max_eq_right h]; linarith [hsy.2, hsx.1]
+    · rw [hs_def, ht_def, min_eq_right h, max_eq_left h]; linarith [hsx.2, hsy.1]
+  -- Mean-value bound on `[s, t] ⊆ Iio b`.
+  have hmvt : ‖P t - P s‖ ≤ C * (t - s) := by
+    have hIcc_sub : Set.Icc s t ⊆ Set.Iio b := fun τ hτ => lt_of_le_of_lt hτ.2 ht_hi
+    have hderivW : ∀ x ∈ Set.Icc s t, HasDerivWithinAt P (P' x) (Set.Icc s t) x :=
+      fun x hx => (hderiv x (hIcc_sub hx)).hasDerivWithinAt
+    have hboundW : ∀ x ∈ Set.Ico s t, ‖P' x‖ ≤ C :=
+      fun x hx => hbound x (lt_of_lt_of_le hx.2 ht_hi.le)
+    exact norm_image_sub_le_of_norm_deriv_le_segment' hderivW hboundW t
+      (right_mem_Icc.mpr hst)
+  -- `dist (P sx) (P sy) = ‖P t - P s‖` since `{sx, sy} = {s, t}`.
+  have h_dist_eq : dist (P sx) (P sy) = ‖P t - P s‖ := by
+    rcases le_total sx sy with h | h
+    · rw [hs_def, ht_def, min_eq_left h, max_eq_right h, dist_eq_norm, norm_sub_rev]
+    · rw [hs_def, ht_def, min_eq_right h, max_eq_left h, dist_eq_norm]
+  rw [h_dist_eq]
+  calc ‖P t - P s‖ ≤ C * (t - s) := hmvt
+    _ ≤ C * η := mul_le_mul_of_nonneg_left ht_sub_s_lt.le hC_nn
+    _ < ε := by
+        rw [hη_def]
+        have hrw : C * (ε / (C + 1)) = ε * (C / (C + 1)) := by ring
+        rw [hrw]
+        have hfrac : C / (C + 1) < 1 := by rw [div_lt_one hCC_pos]; linarith
+        have := mul_lt_mul_of_pos_left hfrac hε
+        rwa [mul_one] at this
+
+/-- **Joint continuity of the chart-Christoffel contraction.** As a function
+of `(v, y) : E × E`, the diagonal contraction `Γ_α(v, v)(y)` is continuous on
+`univ ×ˢ interior (extChartAt I α).target`, inheriting continuity in `y` from
+`chartChristoffel_contDiffOn_interior` and linearity in `v` from the
+chart-coordinate functionals `(chartModelBasis E).coord`. -/
+theorem chartChristoffelContraction_continuousOn_prod
+    (g : SmoothRiemannianMetric I M) (α : M) :
+    ContinuousOn
+      (fun p : E × E => chartChristoffelContraction (I := I) g α p.1 p.1 p.2)
+      (Set.univ ×ˢ interior (extChartAt I α).target) := by
+  classical
+  unfold chartChristoffelContraction
+  refine continuousOn_finset_sum _ (fun k _ => ?_)
+  refine ContinuousOn.smul ?_ continuousOn_const
+  refine continuousOn_finset_sum _ (fun i _ => ?_)
+  refine continuousOn_finset_sum _ (fun j _ => ?_)
+  have hΓ : ContinuousOn (fun y : E => chartChristoffel (I := I) g α i j k y)
+      (interior (extChartAt I α).target) :=
+    (chartChristoffel_contDiffOn_interior (I := I) g α i j k).continuousOn
+  have hΓp : ContinuousOn
+      (fun p : E × E => chartChristoffel (I := I) g α i j k p.2)
+      (Set.univ ×ˢ interior (extChartAt I α).target) :=
+    hΓ.comp continuousOn_snd (fun p hp => hp.2)
+  have hci : Continuous (fun p : E × E => chartCoord (E := E) i p.1) := by
+    have : Continuous (fun v : E => chartCoord (E := E) i v) :=
+      (((chartModelBasis E).coord i).toContinuousLinearMap).continuous
+    exact this.comp continuous_fst
+  have hcj : Continuous (fun p : E × E => chartCoord (E := E) j p.1) := by
+    have : Continuous (fun v : E => chartCoord (E := E) j v) :=
+      (((chartModelBasis E).coord j).toContinuousLinearMap).continuous
+    exact this.comp continuous_fst
+  exact (hΓp.mul hci.continuousOn).mul hcj.continuousOn
+
+/-- **Directional velocity limit in a fixed chart.** Let `α : M`, and let
+`u : ℝ → E` be the chart-`α` representation of a curve with chart-velocity
+`u' : ℝ → E`, satisfying the chart-coordinate geodesic equation in the chart
+at `α`.  Concretely we assume, for every `s < b`:
+
+* `HasDerivAt u (u' s) s` — the chart curve is `C¹` with velocity `u'`;
+* `HasDerivAt u' (-Γ_α(u' s, u' s)(u s)) s` — the chart geodesic equation
+  `u'' = -Γ_α(u', u')(u)`;
+* `‖u' s‖ ≤ K₁` — the chart velocity is bounded; and
+* `u s ∈ S` for a fixed compact `S ⊆ interior (extChartAt I α).target` — the
+  chart image stays in a compact subset of the chart domain.
+
+Then the chart-velocity converges to a genuine limit `w : E` as `s → b⁻`.
+
+The chart-acceleration `Γ_α(u' s, u' s)(u s)` is bounded by the supremum of
+the continuous contraction on the compact box `closedBall 0 K₁ ×ˢ S`
+(`chartChristoffelContraction_continuousOn_prod` and
+`IsCompact.exists_bound_of_continuousOn`), so the conclusion follows from
+`velocity_converges_of_bounded_accel` applied to `u'`. -/
+theorem chartVelocity_converges_at_finite_endpoint
+    (g : SmoothRiemannianMetric I M) (α : M)
+    {u u' : ℝ → E} {b K₁ : ℝ} {S : Set E}
+    (hS_compact : IsCompact S)
+    (hS_sub : S ⊆ interior (extChartAt I α).target)
+    (_hu_deriv : ∀ s : ℝ, s < b → HasDerivAt u (u' s) s)
+    (hu'_deriv : ∀ s : ℝ, s < b →
+      HasDerivAt u'
+        (- chartChristoffelContraction (I := I) g α (u' s) (u' s) (u s)) s)
+    (hu'_bound : ∀ s : ℝ, s < b → ‖u' s‖ ≤ K₁)
+    (hu_mem : ∀ s : ℝ, s < b → u s ∈ S) :
+    ∃ w : E, Tendsto u' (𝓝[<] b) (𝓝 w) := by
+  classical
+  -- The compact box `K := closedBall 0 K₁ ×ˢ S` carries a uniform bound on `Γ`.
+  set K : Set (E × E) := Metric.closedBall (0 : E) K₁ ×ˢ S with hK_def
+  have hK_compact : IsCompact K :=
+    (isCompact_closedBall (0 : E) K₁).prod hS_compact
+  have hΓcont := chartChristoffelContraction_continuousOn_prod (I := I) g α
+  have hΓcont_K : ContinuousOn
+      (fun p : E × E => chartChristoffelContraction (I := I) g α p.1 p.1 p.2) K := by
+    refine hΓcont.mono ?_
+    intro p hp
+    exact ⟨Set.mem_univ _, hS_sub hp.2⟩
+  obtain ⟨C, hC⟩ := hK_compact.exists_bound_of_continuousOn hΓcont_K
+  -- Apply the analytic engine with `P := u'` and `P' s := -Γ_α(u' s, u' s)(u s)`.
+  set P' : ℝ → E :=
+    fun s => - chartChristoffelContraction (I := I) g α (u' s) (u' s) (u s) with hP'_def
+  have hderiv_pf : ∀ s : ℝ, s < b → HasDerivAt u' (P' s) s := fun s hs => hu'_deriv s hs
+  have hbound_pf : ∀ s : ℝ, s < b → ‖P' s‖ ≤ C := by
+    intro s hs
+    have hmem : ((u' s, u s) : E × E) ∈ K := by
+      refine ⟨?_, hu_mem s hs⟩
+      rw [Metric.mem_closedBall, dist_zero_right]
+      exact hu'_bound s hs
+    have hCs :
+        ‖chartChristoffelContraction (I := I) g α (u' s) (u' s) (u s)‖ ≤ C :=
+      hC ((u' s, u s) : E × E) hmem
+    rw [hP'_def, norm_neg]
+    exact hCs
+  exact velocity_converges_of_bounded_accel (P := u') (P' := P') (b := b) (C := C)
+    hderiv_pf hbound_pf
+
 /-! ### Intrinsic geodesic completeness
 
 The remaining theorems of this section are phrased on the **intrinsic
