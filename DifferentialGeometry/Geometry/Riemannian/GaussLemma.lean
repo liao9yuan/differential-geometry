@@ -1041,6 +1041,164 @@ private lemma gauss_phi_hasDerivAt
 
 end GaussVariation
 
+section GaussAssembly
+
+open Bundle Topology
+open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
+open DifferentialGeometry.Geometry.Riemannian.MFDerivAlongCurve
+open DifferentialGeometry.Geometry.Riemannian.AlongCurve
+open DifferentialGeometry.Geometry.Riemannian.Variation
+open DifferentialGeometry.Geometry.Riemannian.Geodesic
+
+/-- **Radial chain rule.** For `‖t₀ • a‖ < expMapC2Radius g p`,
+`mfderiv (u ↦ exp_p (u • a)) t₀ 1 = mfderiv exp_p (t₀ • a) a`. -/
+private lemma radialCurve_mfderiv_chain
+    (g : SmoothRiemannianMetric I M) (p : M) (a : E) (t₀ : ℝ)
+    (ht : ‖t₀ • a‖ < expMapC2Radius (I := I) g p) :
+    mfderiv 𝓘(ℝ, ℝ) I
+        (fun u : ℝ => (expMap (I := I) g p (show TangentSpace I p from (u • a)) : M)) t₀ (1 : ℝ)
+      = mfderiv 𝓘(ℝ, E) I
+          (fun b : E => (expMap (I := I) g p (show TangentSpace I p from b) : M)) (t₀ • a)
+          (show TangentSpace I p from a) := by
+  have hexp_mdiff : MDifferentiableAt 𝓘(ℝ, E) I
+      (fun b : E => (expMap (I := I) g p (show TangentSpace I p from b) : M))
+        ((fun u : ℝ => u • a) t₀) :=
+    (expMap_contMDiffAt2_of_norm_lt_radius (I := I) g p ht).mdifferentiableAt (by decide)
+  have hsmul_mdiff : MDifferentiableAt 𝓘(ℝ, ℝ) 𝓘(ℝ, E) (fun u : ℝ => u • a) t₀ := by
+    have hs : ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, E) ∞ (fun u : ℝ => u • a) :=
+      contMDiff_id.smul contMDiff_const
+    exact hs.contMDiffAt.mdifferentiableAt (by decide)
+  have hcomp : (fun u : ℝ => (expMap (I := I) g p (show TangentSpace I p from (u • a)) : M))
+      = (fun b : E => (expMap (I := I) g p (show TangentSpace I p from b) : M)) ∘
+        (fun u : ℝ => u • a) := rfl
+  rw [hcomp, mfderiv_comp t₀ hexp_mdiff hsmul_mdiff]
+  simp only [ContinuousLinearMap.comp_apply]
+  have hlaunch : mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, E) (fun u : ℝ => u • a) t₀ (1 : ℝ) = a := by
+    rw [mfderiv_eq_fderiv]
+    have h : HasFDerivAt (fun u : ℝ => u • a)
+        (ContinuousLinearMap.smulRight (1 : ℝ →L[ℝ] ℝ) a) t₀ := by
+      simpa using (hasFDerivAt_id (t₀ : ℝ)).smul_const a
+    rw [h.fderiv]
+    change (ContinuousLinearMap.smulRight (1 : ℝ →L[ℝ] ℝ) a) (1 : ℝ) = a
+    rw [ContinuousLinearMap.smulRight_apply, ContinuousLinearMap.one_apply, one_smul]
+  rw [hlaunch]
+
+/-- **Continuity of the Gauss `φ`-integrand on `[0, 1]`.** For the clamped
+radial variation `F s t := expMap g p (t • (v + (gaussClamp δ s) • w))`, the
+scalar `t ↦ g.inner (F 0 t) (∂_t F 0 t) (∂_s F 0 t)` is continuous on the
+closed interval `[0, 1]`. -/
+private lemma gauss_phi_continuousOn
+    (g : SmoothRiemannianMetric I M) (p : M) (v w : E) (δ : ℝ)
+    (hsmall : ‖v‖ < expMapC2Radius (I := I) g p) :
+    ContinuousOn (fun t : ℝ => g.inner
+        (expMap (I := I) g p (show TangentSpace I p from (t • (v + (gaussClamp δ 0) • w))))
+        (mfderiv 𝓘(ℝ, ℝ) I
+          (fun u : ℝ => (expMap (I := I) g p
+            (show TangentSpace I p from (u • (v + (gaussClamp δ 0) • w))) : M)) t (1 : ℝ))
+        (mfderiv 𝓘(ℝ, ℝ) I
+          (fun u : ℝ => (expMap (I := I) g p
+            (show TangentSpace I p from (t • (v + (gaussClamp δ u) • w))) : M)) 0 (1 : ℝ)))
+      (Set.Icc (0 : ℝ) 1) := by
+  haveI : T2Space M := gauss_t2Space_base (I := I)
+  classical
+  set F : ℝ → ℝ → M := fun s t =>
+    (expMap (I := I) g p (show TangentSpace I p from (t • (v + (gaussClamp δ s) • w))) : M)
+    with hF
+  have hclamp0 : gaussClamp δ 0 = 0 := gaussClamp_zero δ
+  set γ : ℝ → M := fun t : ℝ => F 0 t with hγ
+  set V : ∀ t, TangentSpace I (γ t) := fun t : ℝ => mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ) with hVdef
+  set W : ∀ t, TangentSpace I (γ t) :=
+    fun t : ℝ => mfderiv 𝓘(ℝ, ℝ) I (fun u : ℝ => F u t) 0 (1 : ℝ) with hWdef
+  -- `‖t • v‖ < radius` on `[0, 1]`.
+  have hnorm_t : ∀ t ∈ Set.Icc (0 : ℝ) 1, ‖t • v‖ < expMapC2Radius (I := I) g p := by
+    intro t ht
+    rw [norm_smul, Real.norm_eq_abs]
+    obtain ⟨h0, h1⟩ := ht
+    have habs : |t| ≤ 1 := by rw [abs_of_nonneg h0]; exact h1
+    calc |t| * ‖v‖ ≤ 1 * ‖v‖ := mul_le_mul_of_nonneg_right habs (norm_nonneg _)
+      _ = ‖v‖ := one_mul _
+      _ < _ := hsmall
+  -- `γ` is `C²` on `[0, 1]`.
+  have hγC2 : ∀ t ∈ Set.Icc (0 : ℝ) 1, ContMDiffAt 𝓘(ℝ, ℝ) I 2 γ t := by
+    intro t ht
+    have heq : γ = fun u : ℝ => (expMap (I := I) g p (show TangentSpace I p from (u • v)) : M) := by
+      funext u; rw [hγ, hF]; simp only; rw [hclamp0, zero_smul, add_zero]
+    rw [heq]
+    exact radialCurve_contMDiffAt2 (I := I) g p v t (hnorm_t t ht)
+  -- Joint `C²` of chart-pulled `F` at `(0, t)` for `t ∈ [0, 1]`.
+  have hF2 : ∀ t ∈ Set.Icc (0 : ℝ) 1,
+      ContDiffAt ℝ 2 (fun q : ℝ × ℝ => extChartAt I (F 0 t) (F q.1 q.2)) (0, t) := by
+    intro t ht
+    have hlaunchMD : ContMDiff (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, E) ∞
+        (fun q : ℝ × ℝ => q.2 • (v + (gaussClamp δ q.1) • w)) := by
+      refine ContMDiff.smul contMDiff_snd ?_
+      exact contMDiff_const.add (((gaussClamp_contMDiff δ).comp contMDiff_fst).smul contMDiff_const)
+    have hFjoint : ContMDiffAt (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) I 2
+        (fun q : ℝ × ℝ => F q.1 q.2) (0, t) := by
+      have hbase : ContMDiffAt (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, E) 2
+          (fun q : ℝ × ℝ => q.2 • (v + (gaussClamp δ q.1) • w)) (0, t) :=
+        hlaunchMD.contMDiffAt.of_le ENat.LEInfty.out
+      have hexp : ContMDiffAt 𝓘(ℝ, E) I 2
+          (fun b : E => (expMap (I := I) g p (show TangentSpace I p from b) : M))
+            ((fun q : ℝ × ℝ => q.2 • (v + (gaussClamp δ q.1) • w)) (0, t)) := by
+        have hval : (fun q : ℝ × ℝ => q.2 • (v + (gaussClamp δ q.1) • w)) (0, t) = t • v := by
+          simp only; rw [hclamp0, zero_smul, add_zero]
+        rw [hval]
+        exact expMap_contMDiffAt2_of_norm_lt_radius (I := I) g p (hnorm_t t ht)
+      exact hexp.comp (0, t) hbase
+    have hext : ContMDiffAt I 𝓘(ℝ, E) 2 (extChartAt I (F 0 t)) (F 0 t) :=
+      contMDiffAt_extChartAt (I := I) (x := F 0 t)
+    have hcomp : ContMDiffAt (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, E) 2
+        (fun q : ℝ × ℝ => extChartAt I (F 0 t) (F q.1 q.2)) (0, t) :=
+      hext.comp (0, t) hFjoint
+    rw [← contMDiffAt_iff_contDiffAt, modelWithCornersSelf_prod, ← chartedSpaceSelf_prod]
+    exact hcomp
+  -- `V` chart-rep differentiable on `[0, 1]`.
+  have hVdiff : ∀ t ∈ Set.Icc (0 : ℝ) 1, DifferentiableAt ℝ (chartRepAt (I := I) γ V t) t :=
+    fun t ht => velocityChartRep_differentiableAt_of_contMDiffAt2 (I := I) γ t (hγC2 t ht)
+  -- `W` chart-rep differentiable on `[0, 1]`.
+  have hWdiff : ∀ t ∈ Set.Icc (0 : ℝ) 1, DifferentiableAt ℝ (chartRepAt (I := I) γ W t) t := by
+    intro t ht
+    have hslice_v_md : ∀ᶠ v' in nhds t,
+        MDifferentiableAt 𝓘(ℝ, ℝ) I (fun u : ℝ => F u v') 0 := by
+      have hcont_norm : ContinuousAt (fun v' : ℝ => ‖v' • v‖) t :=
+        (continuous_norm.comp (continuous_id.smul continuous_const)).continuousAt
+      have hnhds : {v' : ℝ | ‖v' • v‖ < expMapC2Radius (I := I) g p} ∈ nhds t :=
+        hcont_norm (isOpen_Iio.mem_nhds (hnorm_t t ht))
+      filter_upwards [hnhds] with v' hv'
+      have hbase : ContMDiffAt 𝓘(ℝ, ℝ) 𝓘(ℝ, E) 2
+          (fun u : ℝ => v' • (v + (gaussClamp δ u) • w)) 0 := by
+        have hMD : ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, E) ∞
+            (fun u : ℝ => v' • (v + (gaussClamp δ u) • w)) :=
+          ContMDiff.smul contMDiff_const
+            (contMDiff_const.add ((gaussClamp_contMDiff δ).smul contMDiff_const))
+        exact hMD.contMDiffAt.of_le ENat.LEInfty.out
+      have hexp : ContMDiffAt 𝓘(ℝ, E) I 2
+          (fun b : E => (expMap (I := I) g p (show TangentSpace I p from b) : M))
+            ((fun u : ℝ => v' • (v + (gaussClamp δ u) • w)) 0) := by
+        have hval : (fun u : ℝ => v' • (v + (gaussClamp δ u) • w)) 0 = v' • v := by
+          simp only; rw [hclamp0, zero_smul, add_zero]
+        rw [hval]
+        exact expMap_contMDiffAt2_of_norm_lt_radius (I := I) g p hv'
+      exact (hexp.comp 0 hbase).mdifferentiableAt (by decide)
+    exact variationFieldChartRep_differentiableAt_of_contDiffAt2 (I := I) F t (hF2 t ht)
+      (hγC2 t ht).continuousAt hslice_v_md
+  -- Two-section total-space continuity, then the inner product.
+  have hsecV : ContinuousOn
+      (fun t : ℝ => (TotalSpace.mk' E (γ t) (V t) : TangentBundle I M)) (Set.Icc (0 : ℝ) 1) :=
+    sectionAlongCurve_continuousOn_totalSpace (I := I) γ V
+      (fun t ht => (hγC2 t ht).continuousAt.continuousWithinAt) hVdiff
+  have hsecW : ContinuousOn
+      (fun t : ℝ => (TotalSpace.mk' E (γ t) (W t) : TangentBundle I M)) (Set.Icc (0 : ℝ) 1) :=
+    sectionAlongCurve_continuousOn_totalSpace (I := I) γ W
+      (fun t ht => (hγC2 t ht).continuousAt.continuousWithinAt) hWdiff
+  exact Variation.continuousOn_g_inner_along_curve (I := I) g hsecV hsecW
+
+-- `hv` records that `v` lies in the natural domain of `expMap g p`; it is part of
+-- the intended statement (the radial direction is in `expDomain`) and kept in the
+-- signature for downstream clarity, even though the stronger `C²`-ball hypothesis
+-- `hsmall` already guarantees `expMap g p v` is the genuine geodesic value.
+set_option linter.unusedVariables false in
 /-- **Gauss's lemma (pullback form).** At every radial direction
 `v ∈ expDomain g p` *inside the `C²` ball* (`‖v‖ < expMapC2Radius g p`),
 the pullback of `g` through `expMap g p` evaluates
@@ -1156,7 +1314,192 @@ theorem gauss_lemma_pullback
   --     `covDerivAlong_velocity_eq_zero_of_hasGeodesicEquationAt_C2`) live in
   --     `SecondVariation` / `CovariantDerivativeAlong`, which do NOT import this file,
   --     so importing them here is cycle-free.
-  sorry
+  haveI : T2Space M := gauss_t2Space_base (I := I)
+  -- The single key identity, for every transverse direction `w`:
+  --   `g.inner (exp_p v) (d exp_v v) (d exp_v w) = g.inner p v w`.
+  -- The pullback's `(v, v)` slot is the `w := v` specialisation; the `(v, w)`
+  -- slot for `g_p`-orthogonal `w` is the `g.inner p v w = 0` specialisation.
+  have key : ∀ w : E,
+      g.inner (expMap (I := I) g p (show TangentSpace I p from v))
+        (mfderiv 𝓘(ℝ, E) I
+          (fun u : E => (expMap (I := I) g p (show TangentSpace I p from u) : M)) v
+          (show TangentSpace I p from v))
+        (mfderiv 𝓘(ℝ, E) I
+          (fun u : E => (expMap (I := I) g p (show TangentSpace I p from u) : M)) v
+          (show TangentSpace I p from w)) = g.inner p v w := by
+    intro w
+    -- Choose a clamp scale `δ > 0` keeping the launch vector inside the `C²` ball.
+    set R : ℝ := expMapC2Radius (I := I) g p with hR
+    have hRpos : 0 < R - ‖v‖ := sub_pos.mpr hsmall
+    set δ : ℝ := (R - ‖v‖) / (2 * ((Real.pi / 2) * ‖w‖ + 1)) with hδdef
+    have hden_pos : 0 < 2 * ((Real.pi / 2) * ‖w‖ + 1) := by positivity
+    have hδ : 0 < δ := by rw [hδdef]; exact div_pos hRpos hden_pos
+    have hδsmall : ‖v‖ + δ * (Real.pi / 2) * ‖w‖ < R := by
+      have hstep : δ * ((Real.pi / 2) * ‖w‖ + 1) = (R - ‖v‖) / 2 := by
+        rw [hδdef]; field_simp
+      have hle : δ * (Real.pi / 2) * ‖w‖ ≤ δ * ((Real.pi / 2) * ‖w‖ + 1) := by
+        have heq : δ * (Real.pi / 2) * ‖w‖ = δ * ((Real.pi / 2) * ‖w‖) := by ring
+        rw [heq]
+        exact mul_le_mul_of_nonneg_left (by linarith [norm_nonneg w]) hδ.le
+      have hbnd : δ * (Real.pi / 2) * ‖w‖ ≤ (R - ‖v‖) / 2 := by rw [← hstep]; exact hle
+      linarith [hbnd, hRpos]
+    -- The variation and its `φ`-integrand.
+    set F : ℝ → ℝ → M := fun s t =>
+      (expMap (I := I) g p (show TangentSpace I p from (t • (v + (gaussClamp δ s) • w))) : M)
+      with hF
+    set φ : ℝ → ℝ := fun t : ℝ => g.inner
+        (expMap (I := I) g p (show TangentSpace I p from (t • (v + (gaussClamp δ 0) • w))))
+        (mfderiv 𝓘(ℝ, ℝ) I
+          (fun u : ℝ => (expMap (I := I) g p
+            (show TangentSpace I p from (u • (v + (gaussClamp δ 0) • w))) : M)) t (1 : ℝ))
+        (mfderiv 𝓘(ℝ, ℝ) I
+          (fun u : ℝ => (expMap (I := I) g p
+            (show TangentSpace I p from (t • (v + (gaussClamp δ u) • w))) : M)) 0 (1 : ℝ))
+      with hφdef
+    -- `φ'` is the constant `g.inner p v w` on `(0, 1)`.
+    have hderiv : ∀ t ∈ Set.Ioo (0 : ℝ) 1, HasDerivAt φ (g.inner p v w) t := by
+      intro t ht
+      rw [hφdef]
+      exact gauss_phi_hasDerivAt (I := I) g p v w δ hδ
+        (by rw [← hR]; exact hsmall) (by rw [← hR]; exact hδsmall) t ht
+    -- `φ` is continuous on `[0, 1]`.
+    have hcont : ContinuousOn φ (Set.Icc (0 : ℝ) 1) := by
+      rw [hφdef]
+      exact gauss_phi_continuousOn (I := I) g p v w δ (by rw [← hR]; exact hsmall)
+    -- FTC over `[0, 1]`: `∫₀¹ (g.inner p v w) = φ 1 - φ 0`.
+    have hint : IntervalIntegrable (fun _ : ℝ => g.inner p v w) MeasureTheory.volume 0 1 :=
+      intervalIntegrable_const
+    have hFTC : ∫ _t in (0 : ℝ)..1, (g.inner p v w) = φ 1 - φ 0 :=
+      intervalIntegral.integral_eq_sub_of_hasDerivAt_of_le (by norm_num) hcont hderiv hint
+    -- The constant integral over `[0, 1]` is `g.inner p v w`.
+    have hconstint : ∫ _t in (0 : ℝ)..1, (g.inner p v w) = g.inner p v w := by
+      rw [intervalIntegral.integral_const]; simp
+    have hφdiff : φ 1 - φ 0 = g.inner p v w := by rw [← hFTC, hconstint]
+    -- `φ 0 = 0`: the `s`-variation field at `t = 0` is zero (constant base point `p`).
+    have hsvar0 : mfderiv 𝓘(ℝ, ℝ) I
+        (fun u : ℝ => (expMap (I := I) g p
+          (show TangentSpace I p from ((0 : ℝ) • (v + (gaussClamp δ u) • w))) : M)) 0 (1 : ℝ)
+        = 0 := by
+      have hconstmap : (fun u : ℝ => (expMap (I := I) g p
+            (show TangentSpace I p from ((0 : ℝ) • (v + (gaussClamp δ u) • w))) : M))
+          = fun _ : ℝ => p := by
+        funext u; simp only; rw [zero_smul]; exact expMap_zero (I := I) g p
+      rw [hconstmap, mfderiv_const]; rfl
+    have hφ0 : φ 0 = 0 := by
+      have hφ0eval : φ 0 = g.inner
+          (expMap (I := I) g p (show TangentSpace I p from ((0 : ℝ) • (v + (gaussClamp δ 0) • w))))
+          (mfderiv 𝓘(ℝ, ℝ) I
+            (fun u : ℝ => (expMap (I := I) g p
+              (show TangentSpace I p from (u • (v + (gaussClamp δ 0) • w))) : M)) 0 (1 : ℝ))
+          (mfderiv 𝓘(ℝ, ℝ) I
+            (fun u : ℝ => (expMap (I := I) g p
+              (show TangentSpace I p from ((0 : ℝ) • (v + (gaussClamp δ u) • w))) : M)) 0
+              (1 : ℝ)) := rfl
+      rw [hφ0eval, hsvar0, ContinuousLinearMap.map_zero]
+    -- Therefore `φ 1 = g.inner p v w`.
+    have hφ1 : φ 1 = g.inner p v w := by rw [← hφdiff, hφ0, sub_zero]
+    -- Endpoint identifications, rewriting `φ 1` into the goal's `mfderiv exp_p v _` form.
+    -- `F 0 1 = exp_p v`.
+    have hbase1 : (expMap (I := I) g p
+        (show TangentSpace I p from ((1 : ℝ) • (v + (gaussClamp δ 0) • w))))
+        = (expMap (I := I) g p (show TangentSpace I p from v) : M) := by
+      rw [gaussClamp_zero δ, zero_smul, add_zero, one_smul]
+    -- `∂_t F 0 1 = mfderiv exp_p v v`.
+    have htvel1 : mfderiv 𝓘(ℝ, ℝ) I
+        (fun u : ℝ => (expMap (I := I) g p
+          (show TangentSpace I p from (u • (v + (gaussClamp δ 0) • w))) : M)) 1 (1 : ℝ)
+        = mfderiv 𝓘(ℝ, E) I
+          (fun u : E => (expMap (I := I) g p (show TangentSpace I p from u) : M)) v
+          (show TangentSpace I p from v) := by
+      have hav : v + (gaussClamp δ 0) • w = v := by rw [gaussClamp_zero δ, zero_smul, add_zero]
+      rw [hav]
+      have hnorm1 : ‖(1 : ℝ) • v‖ < expMapC2Radius (I := I) g p := by
+        rw [one_smul]; exact hsmall
+      rw [radialCurve_mfderiv_chain (I := I) g p v 1 hnorm1, one_smul]
+    -- `∂_s F 0 1 = mfderiv exp_p v w`.
+    have hsvar1 : mfderiv 𝓘(ℝ, ℝ) I
+        (fun u : ℝ => (expMap (I := I) g p
+          (show TangentSpace I p from ((1 : ℝ) • (v + (gaussClamp δ u) • w))) : M)) 0 (1 : ℝ)
+        = mfderiv 𝓘(ℝ, E) I
+          (fun u : E => (expMap (I := I) g p (show TangentSpace I p from u) : M)) v
+          (show TangentSpace I p from w) := by
+      set Hs : ℝ → E := fun u : ℝ => (1 : ℝ) • (v + (gaussClamp δ u) • w) with hHs
+      have hHs0 : Hs 0 = v := by
+        rw [hHs]; simp only; rw [gaussClamp_zero δ, zero_smul, add_zero, one_smul]
+      have hexp_mdiff : MDifferentiableAt 𝓘(ℝ, E) I
+          (fun b : E => (expMap (I := I) g p (show TangentSpace I p from b) : M)) (Hs 0) := by
+        rw [hHs0]
+        exact (expMap_contMDiffAt2_of_norm_lt_radius (I := I) g p hsmall).mdifferentiableAt
+          (by decide)
+      have hHs_mdiff : MDifferentiableAt 𝓘(ℝ, ℝ) 𝓘(ℝ, E) Hs 0 := by
+        have hMD : ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, E) ∞ Hs := by
+          rw [hHs]
+          exact ContMDiff.smul contMDiff_const
+            (contMDiff_const.add ((gaussClamp_contMDiff δ).smul contMDiff_const))
+        exact hMD.contMDiffAt.mdifferentiableAt (by decide)
+      have hcomp : (fun u : ℝ => (expMap (I := I) g p
+            (show TangentSpace I p from ((1 : ℝ) • (v + (gaussClamp δ u) • w))) : M))
+          = (fun b : E => (expMap (I := I) g p (show TangentSpace I p from b) : M)) ∘ Hs := rfl
+      rw [hcomp, mfderiv_comp 0 hexp_mdiff hHs_mdiff]
+      simp only [ContinuousLinearMap.comp_apply]
+      have hHsderiv : mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, E) Hs 0 (1 : ℝ) = w := by
+        rw [mfderiv_eq_fderiv]
+        have hclamp : HasDerivAt (gaussClamp δ) 1 0 := gaussClamp_hasDerivAt_one δ hδ
+        have hHd : HasDerivAt Hs w 0 := by
+          have h1 : HasDerivAt (fun u : ℝ => (gaussClamp δ u) • w) ((1 : ℝ) • w) 0 :=
+            hclamp.smul_const w
+          have h2 : HasDerivAt (fun u : ℝ => v + (gaussClamp δ u) • w)
+              ((0 : E) + (1 : ℝ) • w) 0 := (hasDerivAt_const (0 : ℝ) v).add h1
+          rw [zero_add, one_smul] at h2
+          have h3 : Hs = fun u : ℝ => v + (gaussClamp δ u) • w := by
+            rw [hHs]; funext u; rw [one_smul]
+          rw [h3]; exact h2
+        rw [hHd.hasFDerivAt.fderiv]
+        change (ContinuousLinearMap.smulRight (1 : ℝ →L[ℝ] ℝ) w) (1 : ℝ) = w
+        rw [ContinuousLinearMap.smulRight_apply, ContinuousLinearMap.one_apply, one_smul]
+      rw [hHsderiv, hHs0]
+    -- Rewrite `φ 1 = g.inner p v w` into the goal.
+    -- `φ 1` unfolds (by `rfl`) to the endpoint-indexed `g.inner`; rewrite the three
+    -- endpoint identifications to land on the goal's `mfderiv exp_p v _` form.
+    have hφ1eval : φ 1 = g.inner
+        (expMap (I := I) g p (show TangentSpace I p from ((1 : ℝ) • (v + (gaussClamp δ 0) • w))))
+        (mfderiv 𝓘(ℝ, ℝ) I
+          (fun u : ℝ => (expMap (I := I) g p
+            (show TangentSpace I p from (u • (v + (gaussClamp δ 0) • w))) : M)) 1 (1 : ℝ))
+        (mfderiv 𝓘(ℝ, ℝ) I
+          (fun u : ℝ => (expMap (I := I) g p
+            (show TangentSpace I p from ((1 : ℝ) • (v + (gaussClamp δ u) • w))) : M)) 0
+            (1 : ℝ)) := rfl
+    -- Identify the base point first (this fixes the fibre over which the two
+    -- vector arguments live), then the two velocity identifications.
+    have hcollapse : g.inner
+          (expMap (I := I) g p (show TangentSpace I p from ((1 : ℝ) • (v + (gaussClamp δ 0) • w))))
+          (mfderiv 𝓘(ℝ, ℝ) I
+            (fun u : ℝ => (expMap (I := I) g p
+              (show TangentSpace I p from (u • (v + (gaussClamp δ 0) • w))) : M)) 1 (1 : ℝ))
+          (mfderiv 𝓘(ℝ, ℝ) I
+            (fun u : ℝ => (expMap (I := I) g p
+              (show TangentSpace I p from ((1 : ℝ) • (v + (gaussClamp δ u) • w))) : M)) 0
+              (1 : ℝ))
+        = g.inner (expMap (I := I) g p (show TangentSpace I p from v))
+          (mfderiv 𝓘(ℝ, E) I
+            (fun u : E => (expMap (I := I) g p (show TangentSpace I p from u) : M)) v
+            (show TangentSpace I p from v))
+          (mfderiv 𝓘(ℝ, E) I
+            (fun u : E => (expMap (I := I) g p (show TangentSpace I p from u) : M)) v
+            (show TangentSpace I p from w)) := by
+      rw [htvel1, hsvar1, hbase1]
+    rw [hφ1eval, hcollapse] at hφ1
+    exact hφ1
+  -- Assemble both slots.
+  refine ⟨?_, ?_⟩
+  · -- `(v, v)` slot: `w := v` specialisation.
+    exact key v
+  · -- `(v, w)` slot: `g.inner p v w = 0` gives the value `0`.
+    intro w hw
+    rw [key w]; exact hw
+
+end GaussAssembly
 
 end GaussLemma
 
