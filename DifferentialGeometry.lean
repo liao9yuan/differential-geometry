@@ -1175,6 +1175,7 @@ import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.SmoothInSpace.Va
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.SmoothInSpace.VariationalLiftManifoldFlowOrbitReduction
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.SmoothInSpace.VariationalLiftManifoldFlowOrbitODE
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.SmoothInSpace.VariationalLiftFlatIdentity
+import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.SmoothInSpace.VariationalLiftFactorProducers
 import DifferentialGeometry.PDE.RicciFlow.Pullback.PushforwardVF
 import DifferentialGeometry.PDE.RicciFlow.Pullback.Metric
 import DifferentialGeometry.PDE.RicciFlow.Pullback.CartanFormula
@@ -1284,6 +1285,7 @@ import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization.Re
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.EigenvalueTailSummableUncond
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.SobolevScaleSummable
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.FaithfulH1Embedding
+import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.EigenCombination
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.PointwiseDeriv
 import DifferentialGeometry.PDE.RicciFlow.DeTurckShortTime
 import DifferentialGeometry.PDE.RicciFlow.DeTurckVFTimeFamily
