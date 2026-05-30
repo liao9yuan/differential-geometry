@@ -467,6 +467,7 @@ import DifferentialGeometry.Geometry.Riemannian.Exponential.IntrinsicExp
 import DifferentialGeometry.Geometry.Riemannian.Exponential.LocalDiffeomorphism
 import DifferentialGeometry.Geometry.Riemannian.Exponential.MfderivAtZero
 import DifferentialGeometry.Geometry.Riemannian.Exponential.PreconnectedPropagation
+import DifferentialGeometry.Geometry.Riemannian.Exponential.RescaleSmallnessUniform
 import DifferentialGeometry.Geometry.Riemannian.Exponential.RescaledLift
 import DifferentialGeometry.Geometry.Riemannian.Exponential.Smoothness
 import DifferentialGeometry.Geometry.Riemannian.Exponential.SmoothnessClose
