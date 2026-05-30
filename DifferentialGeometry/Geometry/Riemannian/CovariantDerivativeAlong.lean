@@ -99,6 +99,89 @@ lemma symmL_chartRepAt_self (γ : ℝ → M) (V : ∀ t, TangentSpace I (γ t)) 
   exact (trivializationAt E (TangentSpace I) (γ t)).symmL_continuousLinearMapAt
     (R := ℝ) hmem (V t)
 
+/-! ## Total-space (bundle-topology) continuity of an along-curve section
+
+A section `V` along `γ` packages into a `TangentBundle I M`-valued map
+`t ↦ ⟨γ t, V t⟩` (`TotalSpace.mk' E (γ t) (V t)`). Its continuity into the
+total space is governed by Mathlib's fibre-bundle continuity criterion
+`FiberBundle.continuousWithinAt_totalSpace`: continuity of the base curve
+`γ` together with continuity of the *fibre coordinate read in the
+trivialisation pinned at the foot `γ x₀`*. On the open set where `γ t` lands
+in the base set of that trivialisation, the fibre coordinate is exactly the
+chart-`(γ x₀)`-coordinate representation `chartRepAt γ V x₀`, whose
+differentiability at the diagonal point `x₀` supplies the needed pointwise
+continuity. (The bundle topology is independent of the choice of fibre norm,
+so the `TangentSpace`-norm diamond does not interfere with this continuity.) -/
+
+/-- **Total-space continuity at a point (within a set).** For a curve `γ`
+that is continuous within `s` at `x₀`, and a section `V` along `γ` whose
+pinned chart-`(γ x₀)`-coordinate representation `chartRepAt γ V x₀` is
+differentiable at `x₀`, the bundle-valued map `t ↦ ⟨γ t, V t⟩` is
+`ContinuousWithinAt` into `TangentBundle I M` at `x₀`.
+
+The proof goes through `FiberBundle.continuousWithinAt_totalSpace`: the base
+component is `hγ`; the fibre component coincides, eventually within `s` near
+`x₀` (where `γ t` lies in the base set of the trivialisation at `γ x₀`), with
+`chartRepAt γ V x₀`, which is continuous at `x₀` because it is differentiable
+there. -/
+theorem sectionAlongCurve_continuousWithinAt_totalSpace
+    (γ : ℝ → M) (V : ∀ t, TangentSpace I (γ t)) {s : Set ℝ} {x₀ : ℝ}
+    (hx₀ : x₀ ∈ s)
+    (hγ : ContinuousWithinAt γ s x₀)
+    (hV : DifferentiableAt ℝ (chartRepAt (I := I) γ V x₀) x₀) :
+    ContinuousWithinAt
+      (fun t => (TotalSpace.mk' E (γ t) (V t) : TangentBundle I M)) s x₀ := by
+  rw [FiberBundle.continuousWithinAt_totalSpace]
+  refine ⟨hγ, ?_⟩
+  -- the foot at `x₀` lies in the base set of its own trivialisation
+  have hbase₀ : γ x₀ ∈ (trivializationAt E (TangentSpace I) (γ x₀)).baseSet :=
+    FiberBundle.mem_baseSet_trivializationAt E (TangentSpace I) (γ x₀)
+  -- the base set is open
+  have hopen : IsOpen (trivializationAt E (TangentSpace I) (γ x₀)).baseSet :=
+    (trivializationAt E (TangentSpace I) (γ x₀)).open_baseSet
+  -- eventually within `s` near `x₀`, `γ t` lands in the base set
+  have hpre : γ ⁻¹' (trivializationAt E (TangentSpace I) (γ x₀)).baseSet ∈ 𝓝[s] x₀ :=
+    hγ.preimage_mem_nhdsWithin (hopen.mem_nhds hbase₀)
+  -- there the fibre coordinate is exactly the pinned chart-`(γ x₀)`-coordinate
+  have heq :
+      (fun t => ((trivializationAt E (TangentSpace I) (γ x₀))
+        (TotalSpace.mk' E (γ t) (V t))).2)
+        =ᶠ[𝓝[s] x₀] chartRepAt (I := I) γ V x₀ := by
+    filter_upwards [hpre] with t ht
+    rw [chartRepAt_apply]
+    rw [(trivializationAt E (TangentSpace I) (γ x₀)).continuousLinearMapAt_apply (R := ℝ)]
+    rw [(trivializationAt E (TangentSpace I) (γ x₀)).coe_linearMapAt_of_mem ht]
+  -- the chart-representation is continuous at `x₀` (differentiable ⟹ continuous)
+  have hcont : ContinuousWithinAt (chartRepAt (I := I) γ V x₀) s x₀ :=
+    hV.continuousAt.continuousWithinAt
+  exact hcont.congr_of_eventuallyEq heq (heq.eq_of_nhdsWithin hx₀)
+
+/-- **Total-space continuity on a set.** For a curve `γ` continuous on `s`
+and a section `V` along `γ` whose pinned chart-`(γ t)`-coordinate
+representations `chartRepAt γ V t` are differentiable at every `t ∈ s`, the
+bundle-valued map `t ↦ ⟨γ t, V t⟩` is `ContinuousOn s` into
+`TangentBundle I M`. This is the pointwise lemma quantified over `s`. -/
+theorem sectionAlongCurve_continuousOn_totalSpace
+    (γ : ℝ → M) (V : ∀ t, TangentSpace I (γ t)) {s : Set ℝ}
+    (hγ : ContinuousOn γ s)
+    (hV : ∀ t ∈ s, DifferentiableAt ℝ (chartRepAt (I := I) γ V t) t) :
+    ContinuousOn
+      (fun t => (TotalSpace.mk' E (γ t) (V t) : TangentBundle I M)) s := by
+  intro x₀ hx₀
+  exact sectionAlongCurve_continuousWithinAt_totalSpace (I := I) γ V hx₀
+    (hγ x₀ hx₀) (hV x₀ hx₀)
+
+/-- **Total-space continuity on a set, from `C¹` smoothness of the curve.**
+A convenience wrapper for `sectionAlongCurve_continuousOn_totalSpace` that
+extracts the base continuity from `ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ s`. -/
+theorem sectionAlongCurve_continuousOn_totalSpace_of_contMDiffOn
+    (γ : ℝ → M) (V : ∀ t, TangentSpace I (γ t)) {s : Set ℝ}
+    (hγ : ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ s)
+    (hV : ∀ t ∈ s, DifferentiableAt ℝ (chartRepAt (I := I) γ V t) t) :
+    ContinuousOn
+      (fun t => (TotalSpace.mk' E (γ t) (V t) : TangentBundle I M)) s :=
+  sectionAlongCurve_continuousOn_totalSpace (I := I) γ V hγ.continuousOn hV
+
 /-! ## The intrinsic covariant derivative along a curve -/
 
 /-- The intrinsic covariant derivative of a section `V` along `γ` at time
