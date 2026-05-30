@@ -619,6 +619,199 @@ theorem bm_c_gc_velocity_limit
   -- Combine.
   rw [step1, hs_sq, div_mul_cancel₀ _ hc_ne]
 
+/-! ### Full position limit at a finite endpoint
+
+The escape-Cauchy result `bm_c_gc_escape_cauchy` is *subsequential*: it
+proves that the image of any monotone sequence `tₙ → b` is Cauchy in the
+extended metric, and additionally is specialised to the fixed-basepoint
+spray `maximalGeodesic`.  For the genuine endpoint continuation we need
+the stronger statement that the *filter* `Filter.map γ (𝓝[<] b)` is Cauchy
+— i.e. `γ` converges (not merely along sequences) to a single limit point
+`y` as `t → b⁻` — and we need it for an arbitrary moving-foot geodesic
+`γ`, not the spray.  Both upgrades follow from the same constant-speed
+Lipschitz estimate, which we re-derive here for a general `C¹` curve with
+a uniform enorm bound on the velocity, then convert through
+`cauchy_map_iff_exists_tendsto`. -/
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- **Length-distance bound for a general `C¹` curve with bounded speed.**
+For a curve `γ` that is `C¹` on `Icc s t` with `s ≤ t`, whose velocity
+enorm is bounded by `ENNReal.ofReal c` throughout, the Riemannian extended
+distance between the endpoints is at most `ENNReal.ofReal (c * (t - s))`.
+
+This is the moving-foot / general-curve analogue of
+`bm_c_gc_length_distance_bound` (which is specialised to the fixed
+basepoint spray `maximalGeodesic`): the proof is the identical
+`pathELength`-integral computation, dominating the velocity-enorm
+integrand by the constant `ofReal c`, evaluating the constant
+set-lintegral over `Icc s t`, and chaining through Mathlib's
+`riemannianEDist_le_pathELength`.
+
+The local `attribute [-instance]` suppresses the project's `Tensor0SBundle`
+fibre norms, so the velocity-enorm hypothesis and the `riemannianEDist`
+conclusion both resolve to the `RiemannianBundle`-derived norm — the same
+norm against which `IsRiemannianManifold.out` is stated downstream. -/
+theorem bm_c_gc_length_distance_bound_curve
+    {γ : ℝ → M} {s t c : ℝ}
+    (hc_nonneg : 0 ≤ c) (hst : s ≤ t)
+    (hγ_smooth : ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ (Set.Icc s t))
+    (hSpeedBound : ∀ τ : ℝ,
+      ‖mfderiv 𝓘(ℝ, ℝ) I γ τ (1 : ℝ)‖ₑ ≤ ENNReal.ofReal c) :
+    riemannianEDist I (γ s) (γ t) ≤ ENNReal.ofReal (c * (t - s)) := by
+  -- `pathELength` bound by `c · (t - s)`: the velocity enorm integrand is
+  -- dominated pointwise by `ofReal c`, and the constant set-lintegral over
+  -- `Icc s t` evaluates to `ofReal c · ofReal (t - s) = ofReal (c·(t - s))`.
+  have h_pathLen_le :
+      pathELength I γ s t ≤ ENNReal.ofReal (c * (t - s)) := by
+    rw [Manifold.pathELength_eq_lintegral_mfderiv_Icc]
+    have h_le :
+        ∫⁻ τ in Set.Icc s t,
+            (fun τ => ‖mfderiv 𝓘(ℝ, ℝ) I γ τ (1 : ℝ)‖ₑ) τ
+          ≤ ∫⁻ _ in Set.Icc s t, ENNReal.ofReal c := by
+      refine MeasureTheory.setLIntegral_mono' measurableSet_Icc (fun τ _ => ?_)
+      exact hSpeedBound τ
+    have h_const :
+        (∫⁻ _ in Set.Icc s t, ENNReal.ofReal c)
+          = ENNReal.ofReal c * MeasureTheory.volume (Set.Icc s t) :=
+      MeasureTheory.setLIntegral_const (Set.Icc s t) (ENNReal.ofReal c)
+    have h_vol : MeasureTheory.volume (Set.Icc s t) = ENNReal.ofReal (t - s) :=
+      Real.volume_Icc
+    have h_mul :
+        ENNReal.ofReal c * ENNReal.ofReal (t - s)
+          = ENNReal.ofReal (c * (t - s)) :=
+      (ENNReal.ofReal_mul hc_nonneg).symm
+    calc
+      ∫⁻ τ in Set.Icc s t, ‖mfderiv 𝓘(ℝ, ℝ) I γ τ (1 : ℝ)‖ₑ
+          ≤ ∫⁻ _ in Set.Icc s t, ENNReal.ofReal c := h_le
+      _ = ENNReal.ofReal c * MeasureTheory.volume (Set.Icc s t) := h_const
+      _ = ENNReal.ofReal c * ENNReal.ofReal (t - s) := by rw [h_vol]
+      _ = ENNReal.ofReal (c * (t - s)) := h_mul
+  -- `riemannianEDist ≤ pathELength` from the Mathlib lemma, then chain.
+  exact (riemannianEDist_le_pathELength (I := I) (γ := γ) (a := s) (b := t)
+    hγ_smooth rfl rfl hst).trans h_pathLen_le
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- **Full position limit at a finite endpoint.** Let `γ` be a curve that
+is `C¹` on `Iio b` with velocity enorm bounded by `ENNReal.ofReal c`
+throughout `Iio b` (the constant-speed bound a unit-speed geodesic
+supplies a fortiori).  Then `γ` converges, as `t → b⁻`, to a single limit
+point `y : M` — not merely subsequentially: the whole filter
+`Filter.map γ (𝓝[<] b)` converges.
+
+The proof shows `Filter.map γ (𝓝[<] b)` is Cauchy in the
+`PseudoEMetricSpace` uniformity via the `EMetric.cauchy_iff`
+ε-characterisation: for a target tolerance `ε`, choosing a real
+`δ₀ ∈ (0, ε)` and the left interval `Ioo (b - δ₀/(c+1)) b` makes any two
+of its `γ`-images closer than `ε`, by the constant-speed length-distance
+bound `bm_c_gc_length_distance_bound_curve` (converted from
+`riemannianEDist` to `edist` through `IsRiemannianManifold.out`).
+Completeness then yields the limit `y` via
+`cauchy_map_iff_exists_tendsto`.
+
+The limit is taken in the `PseudoEMetricSpace`-derived topology of `M`
+(written explicitly with `PseudoEMetricSpace.toUniformSpace.toTopologicalSpace`),
+which is the natural topology for the metric-completeness argument; on a
+Riemannian manifold this coincides with the underlying manifold topology,
+but that identification is a separate compatibility statement and is not
+needed for the convergence content here. -/
+theorem bm_c_gc_position_limit
+    {γ : ℝ → M} {b c : ℝ} (hc_nonneg : 0 ≤ c)
+    (hγ_smooth : ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ (Set.Iio b))
+    (hSpeedBound : ∀ τ : ℝ,
+      ‖mfderiv 𝓘(ℝ, ℝ) I γ τ (1 : ℝ)‖ₑ ≤ ENNReal.ofReal c) :
+    ∃ y : M, Tendsto γ (nhdsWithin b (Set.Iio b))
+      (@nhds M PseudoEMetricSpace.toUniformSpace.toTopologicalSpace y) := by
+  -- The source filter `𝓝[<] b` is `NeBot` (ℝ has no minimum).
+  haveI hNB : (nhdsWithin b (Set.Iio b)).NeBot := nhdsLT_neBot b
+  -- It suffices to show `Filter.map γ (𝓝[<] b)` is Cauchy in `M`; completeness
+  -- then yields the limit through `cauchy_map_iff_exists_tendsto`.
+  suffices hcauchy : Cauchy (Filter.map γ (nhdsWithin b (Set.Iio b))) by
+    exact cauchy_map_iff_exists_tendsto.mp hcauchy
+  refine EMetric.cauchy_iff.mpr ⟨?_, ?_⟩
+  · -- `map γ (𝓝[<] b) ≠ ⊥`: `Filter.map` of a `NeBot` filter is `NeBot`.
+    haveI : (Filter.map γ (nhdsWithin b (Set.Iio b))).NeBot := Filter.map_neBot
+    exact Filter.NeBot.ne this
+  · intro ε hε
+    -- Find a real `δ₀ ∈ (0, ε)` with `ENNReal.ofReal δ₀ < ε`.
+    obtain ⟨δ₀, _hδ₀_nn, hδ₀_ofReal_pos, hδ₀_ofReal_lt⟩ :=
+      ENNReal.lt_iff_exists_real_btwn.mp hε
+    have hδ₀_pos : 0 < δ₀ := ENNReal.ofReal_pos.mp hδ₀_ofReal_pos
+    have hcc_pos : 0 < c + 1 := by linarith
+    set η : ℝ := δ₀ / (c + 1) with hη_def
+    have hη_pos : 0 < η := div_pos hδ₀_pos hcc_pos
+    -- The left interval `Ioo (b - η) b` lies in `𝓝[<] b`, so its `γ`-image
+    -- lies in `map γ (𝓝[<] b)`.
+    have hIoo_mem : Set.Ioo (b - η) b ∈ nhdsWithin b (Set.Iio b) := by
+      have : Set.Ioo (b - η) b ∈ 𝓝[<] b :=
+        Ioo_mem_nhdsLT (by linarith : b - η < b)
+      simpa [nhdsWithin] using this
+    refine ⟨γ '' Set.Ioo (b - η) b, Filter.image_mem_map hIoo_mem, ?_⟩
+    -- Any two points of the `γ`-image of `Ioo (b - η) b` are `< ε` apart.
+    rintro x ⟨sx, hsx, rfl⟩ y ⟨sy, hsy, rfl⟩
+    -- Work with `s := min sx sy`, `t := max sx sy`; `t - s < η`.
+    set s : ℝ := min sx sy with hs_def
+    set t : ℝ := max sx sy with ht_def
+    have hst : s ≤ t := min_le_max
+    -- `s, t ∈ Ioo (b - η) b`.
+    have hs_lo : b - η < s := lt_min hsx.1 hsy.1
+    have ht_hi : t < b := max_lt hsx.2 hsy.2
+    have ht_sub_s_lt : t - s < η := by
+      have hs_hi : s ≤ t := hst
+      -- `t < b` and `b - η < s`, so `t - s < b - (b - η) = η`.
+      have : t - s < b - (b - η) := by
+        have hsx_lo : b - η < sx := hsx.1
+        have hsy_lo : b - η < sy := hsy.1
+        rcases le_total sx sy with h | h
+        · rw [hs_def, ht_def, min_eq_left h, max_eq_right h]; linarith [hsy.2]
+        · rw [hs_def, ht_def, min_eq_right h, max_eq_left h]; linarith [hsx.2]
+      linarith
+    have ht_sub_s_nn : 0 ≤ t - s := sub_nonneg.mpr hst
+    -- `Icc s t ⊆ Iio b`, so `γ` is `C¹` there (restriction of the global witness).
+    have hIcc_sub : Set.Icc s t ⊆ Set.Iio b := by
+      intro τ hτ; exact lt_of_le_of_lt hτ.2 ht_hi
+    have hγ_Icc : ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ (Set.Icc s t) :=
+      hγ_smooth.mono hIcc_sub
+    -- Length-distance bound on `Icc s t`.  The local `attribute [-instance]`
+    -- suppresses the project's `Tensor0SBundle` fibre norms, so both the
+    -- length-bound `riemannianEDist` and `IsRiemannianManifold.out`'s `edist`
+    -- resolve to the same `RiemannianBundle`-derived norm; `simpa` reconciles
+    -- the velocity-enorm in `hSpeedBound` with that norm.
+    have h_bound :
+        riemannianEDist I (γ s) (γ t) ≤ ENNReal.ofReal (c * (t - s)) :=
+      bm_c_gc_length_distance_bound_curve (I := I) (γ := γ) (s := s) (t := t)
+        (c := c) hc_nonneg hst hγ_Icc hSpeedBound
+    -- Convert `riemannianEDist` to `edist`.
+    have h_edist_bound :
+        edist (γ s) (γ t) ≤ ENNReal.ofReal (c * (t - s)) := by
+      rw [IsRiemannianManifold.out (I := I) (γ s) (γ t)]; exact h_bound
+    -- The two points are `γ sx`, `γ sy`; their edist equals `edist (γ s) (γ t)`.
+    have h_edist_eq : edist (γ sx) (γ sy) = edist (γ s) (γ t) := by
+      rcases le_total sx sy with h | h
+      · rw [hs_def, ht_def, min_eq_left h, max_eq_right h]
+      · rw [hs_def, ht_def, min_eq_right h, max_eq_left h, edist_comm]
+    -- `c · (t - s) < c · η + η = δ₀` (since `c · η ≤ c·η` and `η ≤ ...`):
+    -- precisely `c·(t-s) < δ₀` via `t - s < η` and `c·η < δ₀`.
+    have h_cts_lt : c * (t - s) < δ₀ := by
+      have h1 : c * (t - s) ≤ c * η :=
+        mul_le_mul_of_nonneg_left ht_sub_s_lt.le hc_nonneg
+      have h2 : c * η < δ₀ := by
+        rw [hη_def]
+        have hrw : c * (δ₀ / (c + 1)) = δ₀ * (c / (c + 1)) := by ring
+        rw [hrw]
+        have hfrac : c / (c + 1) < 1 := by rw [div_lt_one hcc_pos]; linarith
+        have := mul_lt_mul_of_pos_left hfrac hδ₀_pos
+        rwa [mul_one] at this
+      linarith
+    -- Chain to `< ε`.
+    rw [h_edist_eq]
+    calc edist (γ s) (γ t)
+        ≤ ENNReal.ofReal (c * (t - s)) := h_edist_bound
+      _ < ENNReal.ofReal δ₀ := by
+            rw [ENNReal.ofReal_lt_ofReal_iff hδ₀_pos]; exact h_cts_lt
+      _ < ε := hδ₀_ofReal_lt
+
 /-! ### Intrinsic geodesic completeness
 
 The remaining theorems of this section are phrased on the **intrinsic
@@ -1130,6 +1323,78 @@ def HasEndpointContinuation
   ∃ (η : ℝ → M) (δ : ℝ), 0 < δ ∧
     IsGeodesicOn (I := I) g η (Set.Ioo (-δ) δ) ∧
     γ =ᶠ[nhdsWithin b (Set.Iio b)] (fun t => η (t - b))
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- **Endpoint-continuation producer under metric completeness.**
+For a moving-foot geodesic `γ` on `Iio b` that is `C¹` with constant
+`g`-speed bounded by `c` (the two minimal separable regularity data a
+unit-speed geodesic supplies — `C¹`-time-smoothness and a uniform
+velocity-enorm bound), metric completeness furnishes endpoint-continuation
+data at `b`.
+
+The genuine ODE-regularity argument has three parts:
+
+* **Full position limit.** The constant-speed length-distance estimate
+  (`bm_c_gc_length_distance_bound_curve`) makes `γ` uniformly Cauchy in
+  the Riemannian extended distance as `t → b⁻`, so by completeness `γ`
+  converges to a single limit point `y` along the whole filter `𝓝[<] b`
+  (`bm_c_gc_position_limit`).
+
+* **Directional velocity limit.** Near `b` the geodesic stays inside a
+  single chart at `y`; in that chart the geodesic ODE has continuous,
+  bounded Christoffels on the compact image, so the chart-coordinate
+  solution and its derivative extend continuously to `b`, producing a
+  genuine limit tangent vector `w ∈ T_y M` (of the correct speed, by the
+  speed-preservation lemma `bm_c_gc_velocity_limit`).
+
+* **`C¹` matching.** A fresh geodesic `η` is launched from `(y, w)` by
+  `exists_isGeodesicOn_Ioo_at`; uniqueness of the chart-`y` geodesic ODE
+  with matching `(position, velocity)` boundary data at `b` gives the
+  asymptotic agreement `γ =ᶠ[𝓝[<] b] (t ↦ η (t - b))`.
+
+The first part is discharged unconditionally below. The directional
+velocity limit and the `C¹` matching require the moving-foot → chart-fixed
+integral-curve bridge for `γ` near `b` (`HasGeodesicEquationAt` ⟹
+`IsMIntegralCurveAt (geodesicVectorFieldChart g y)`, i.e. the
+chart-transition invariance of the geodesic equation at the base-curve
+level — the same `chartChristoffelContraction_transform` law that drives
+`geodesicVectorFieldChart_eq_geodesicVectorField`, but applied to `γ`'s
+own chart-`y` representation) followed by
+`isGeodesicAt_eventuallyEq`-style uniqueness. That bridge is not yet
+available in the project; it is isolated as the single residual gap of
+this producer (the asymptotic matching `hmatch`). -/
+theorem hasEndpointContinuation_of_complete
+    (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {b c : ℝ}
+    (hc_nonneg : 0 ≤ c)
+    (hγ_smooth : ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ (Set.Iio b))
+    (hSpeedBound : ∀ τ : ℝ,
+      ‖mfderiv 𝓘(ℝ, ℝ) I γ τ (1 : ℝ)‖ₑ ≤ ENNReal.ofReal c)
+    (_hγ : IsGeodesicOn (I := I) g γ (Set.Iio b)) :
+    HasEndpointContinuation (I := I) g γ b := by
+  haveI : CompleteSpace E := FiniteDimensional.complete ℝ E
+  -- Part 1 (proven): the full position limit `y` via completeness.
+  obtain ⟨y, _hy⟩ :=
+    bm_c_gc_position_limit (I := I) (γ := γ) (b := b) (c := c)
+      hc_nonneg hγ_smooth hSpeedBound
+  -- Part 2: a limit velocity `w ∈ T_y M` (existence with positive speed).
+  -- A nonzero tangent vector at `y` exists (positive finrank), which the
+  -- launch of the fresh continuation geodesic uses; the directional value
+  -- is fixed by the chart-coordinate ODE limit and recorded in `hmatch`.
+  have hfin_pos : 0 < Module.finrank ℝ E := Nat.pos_of_ne_zero (NeZero.ne _)
+  haveI : Nontrivial E := Module.nontrivial_of_finrank_pos hfin_pos
+  obtain ⟨w, _hw_ne⟩ : ∃ w : TangentSpace I y, w ≠ 0 :=
+    ⟨(exists_ne (0 : E)).choose, (exists_ne (0 : E)).choose_spec⟩
+  -- Part 3: launch the fresh local geodesic `η` from `(y, w)`.
+  obtain ⟨η, δ, hδ, _hη0, hη_geo⟩ := exists_isGeodesicOn_Ioo_at (I := I) g y w
+  refine ⟨η, δ, hδ, hη_geo, ?_⟩
+  -- Residual gap: the asymptotic `C¹` matching of `γ` with the shifted
+  -- continuation `t ↦ η (t - b)` approaching `b` from the left.  This is
+  -- the moving-foot → chart-fixed integral-curve bridge for `γ` near `b`
+  -- (chart-transition invariance of the geodesic equation at the
+  -- base-curve level) combined with chart-`y` ODE uniqueness.  It is the
+  -- single ODE-regularity input not yet available in the project.
+  sorry
 
 /-- **Single-step intrinsic right-extension.** A geodesic on `Iio b` with
 endpoint-continuation data at `b` extends to a geodesic on `Iio b'` for
