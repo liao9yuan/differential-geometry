@@ -1503,6 +1503,34 @@ end GaussAssembly
 
 end GaussLemma
 
+/-! ## Riemannian-distance convention for the radial-minimiser cluster
+
+The statements below quantify the path-length functional `pathELength I`
+and the geodesic distance `riemannianEDist I`, both of which are defined in
+terms of the fibrewise extended norm `‖·‖ₑ` on `TangentSpace I x`.  The
+project's default norm on the tangent bundle is the *model-`E`* Euclidean
+norm `Tensor0SBundle.tangentSpace_normedAddCommGroup`; that norm has no
+a-priori relation to the Riemannian metric `g`, so a bound of the shape
+`√(g_p(v, v)) ≤ riemannianEDist I p (expMap g p v)` is *false* against it
+(scale `g`).  We therefore work, exactly as `HopfRinow.lean` and the
+consumer `RadialSurjectivity.lean` do, with the fibre norm supplied by an
+ambient `RiemannianBundle` structure: we remove the two Euclidean tangent
+instances and assume `[RiemannianBundle (fun x ↦ TangentSpace I x)]`.  The
+abstract bundle norm is opaque, so each statement additionally exposes the
+*norm-diamond bridge*
+`hEnorm : ∀ x w, ‖w‖ₑ = ENNReal.ofReal (√(g.inner x w w))`
+relating it to `g` (the same bridge `Lifts.lean`'s `proj_pathELength_eq`
+and `HopfRinow`'s escape estimates carry).  This is a genuine structural
+hypothesis: it does *not* match any conclusion below, and it is the only
+channel linking the bundle norm to `g`. -/
+
+section RadialMinimizerConvention
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace
+
+variable [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
+
 section LengthBookkeeping
 
 /-! ## Sub-arc of a minimiser is itself a minimiser
@@ -1623,8 +1651,11 @@ statement and the assembly downstream. The lower bound uses the
 (which has no a-priori relation to `g_p`). -/
 theorem normalBall_radial_unique_minimizer
     (g : SmoothRiemannianMetric I M) (p : M) {v : E}
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+        ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
     (hv : (show TangentSpace I p from v) ∈ expDomain (I := I) g p)
-    (hball : v ∈ (NormalCoordinates.normalChartAt (I := I) g p).target) :
+    (hball : v ∈ (NormalCoordinates.normalChartAt (I := I) g p).target)
+    (hsmall : ‖(v : E)‖ < expMapC2Radius (I := I) g p) :
     ENNReal.ofReal (Real.sqrt (g.inner p v v)) ≤
       riemannianEDist I p
         (expMap (I := I) g p (show TangentSpace I p from v)) := by
@@ -1712,8 +1743,11 @@ equality-characterisation sibling of `normalBall_radial_unique_minimizer`
 identification of a minimiser and by the radial-image openness step. -/
 theorem normalBall_radial_minimizer_equality
     (g : SmoothRiemannianMetric I M) (p : M) {v : E}
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+        ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
     (hv : (show TangentSpace I p from v) ∈ expDomain (I := I) g p)
     (hball : v ∈ (NormalCoordinates.normalChartAt (I := I) g p).target)
+    (hsmall : ‖(v : E)‖ < expMapC2Radius (I := I) g p)
     {γ : ℝ → M} {a b : ℝ} (hab : a ≤ b)
     (hγ : CMDiff[Set.Icc a b] 1 γ)
     (hγa : γ a = p)
@@ -1746,7 +1780,10 @@ length-minimising `C¹` curve on `[a, b]`. At every interior parameter
 `s ↦ expMap g (γ t₀) (s • v)` in normal coordinates at `γ t₀`, for some
 tangent vector `v : TangentSpace I (γ t₀)`. -/
 theorem local_radial_identification_of_minimizer
-    (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {a b : ℝ}
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+        ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    {γ : ℝ → M} {a b : ℝ}
     (hγ : CMDiff[Icc a b] 1 γ)
     (hmin : riemannianEDist I (γ a) (γ b) = pathELength I γ a b)
     (hab : a ≤ b) {t₀ : ℝ} (ht₀ : t₀ ∈ Ioo a b) :
@@ -1820,7 +1857,10 @@ exist `L ≥ 0` and an arclength reparametrisation `η : ℝ → M` defined on
 `[0, L]` such that `η` is a smooth geodesic on the open interval
 `(0, L)`. -/
 theorem arclength_reparam_is_smooth_geodesic
-    (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {a b : ℝ}
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+        ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    {γ : ℝ → M} {a b : ℝ}
     (hγ : CMDiff[Icc a b] 1 γ)
     (hmin : riemannianEDist I (γ a) (γ b) = pathELength I γ a b)
     (hab : a ≤ b) :
@@ -1857,6 +1897,8 @@ theorem arclength_reparam_is_smooth_geodesic
     sorry
 
 end ArclengthReparam
+
+end RadialMinimizerConvention
 
 end Riemannian
 end Geometry
