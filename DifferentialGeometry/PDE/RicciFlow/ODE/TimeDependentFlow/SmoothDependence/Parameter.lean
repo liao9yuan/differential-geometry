@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.ODE.FlowC1
+import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.SmoothInSpace.BanachIC
 
 noncomputable section
 open Set Function Filter Metric
@@ -7,23 +8,10 @@ open DifferentialGeometry.Analysis.ODE.Flow
 
 namespace DifferentialGeometry.PDE.RicciFlow.ODE
 
-/-! ## H4 — smooth dependence on parameters (headline) -/
+/-! ## Pending proof-target children — Euclidean (H4)
 
-theorem h4_exists_isLocalFlow_param_contDiffOn_top
-    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
-    {P : Type*} [NormedAddCommGroup P] [NormedSpace ℝ P] [FiniteDimensional ℝ P]
-    {f : ℝ → P → E → E} {t₀ : ℝ} {x₀ : E} {lam₀ : P}
-    (hf : ContDiff ℝ ∞ (fun q : ℝ × P × E => f q.1 q.2.1 q.2.2)) :
-    ∃ (ρP ρE ε : ℝ) (Φ : P × E × ℝ → E),
-      0 < ρP ∧ 0 < ρE ∧ 0 < ε ∧
-      (∀ lam ∈ Metric.ball lam₀ ρP, ∀ x ∈ Metric.ball x₀ ρE, Φ (lam, x, t₀) = x) ∧
-      (∀ lam ∈ Metric.ball lam₀ ρP, ∀ x ∈ Metric.ball x₀ ρE,
-          ∀ t ∈ Set.Ioo (t₀ - ε) (t₀ + ε),
-        HasDerivAt (fun s => Φ (lam, x, s)) (f t lam (Φ (lam, x, t))) t) ∧
-      ContDiffOn ℝ ∞ Φ
-        (Metric.ball lam₀ ρP ×ˢ Metric.ball x₀ ρE ×ˢ Set.Ioo (t₀ - ε) (t₀ + ε)) := sorry
-
-/-! ## Pending proof-target children — Euclidean (H4) -/
+The headline `h4_exists_isLocalFlow_param_contDiffOn_top` is stated *after* these
+children, because its proof composes them; the order is otherwise immaterial. -/
 
 -- [H4: augmented-field-contDiff-top]
 theorem h4_augmented_field_contDiff
@@ -125,6 +113,15 @@ theorem h4_projected_ode_initial
       simpa [hzdef] using this
     simpa [Function.comp, ContinuousLinearMap.coe_fst', hpar] using hfst
 
+/-! ## Reindex helper (under projected-flow-contDiffOn-top) -/
+
+-- [under projected-flow-contDiffOn-top]
+theorem reindex_contDiff_top
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    {P : Type*} [NormedAddCommGroup P] [NormedSpace ℝ P] :
+    ContDiff ℝ ∞ (fun w : P × E × ℝ => (((w.2.1, w.1) : E × P), w.2.2)) :=
+  ((contDiff_snd.fst).prodMk contDiff_fst).prodMk contDiff_snd.snd
+
 -- [H4: projected-flow-contDiffOn-top]
 theorem h4_projected_contDiffOn
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -136,15 +133,85 @@ theorem h4_projected_contDiffOn
       (Metric.ball lam₀ ρP ×ˢ Metric.ball x₀ ρE ×ˢ Set.Ioo (t₀ - T) (t₀ + T))
       (Metric.ball z₀ ρ ×ˢ Set.Ioo (t₀ - T) (t₀ + T))) :
     ContDiffOn ℝ ∞ (fun w : P × E × ℝ => (Ψ ((w.2.1, w.1), w.2.2)).1)
-      (Metric.ball lam₀ ρP ×ˢ Metric.ball x₀ ρE ×ˢ Set.Ioo (t₀ - T) (t₀ + T)) := sorry
+      (Metric.ball lam₀ ρP ×ˢ Metric.ball x₀ ρE ×ˢ Set.Ioo (t₀ - T) (t₀ + T)) := by
+  -- The target is `(fun u : (E × P) × ℝ => (Ψ u).1) ∘ reindex`, where
+  -- `reindex w = ((w.2.1, w.1), w.2.2)`.
+  -- `hΨsmooth.fst` projects the smooth flow onto its first component on the z-box;
+  -- `reindex` is smooth (proven sibling); `hmaps` is the required `MapsTo`.
+  have hg : ContDiffOn ℝ ∞ (fun u : (E × P) × ℝ => (Ψ u).1)
+      (Metric.ball z₀ ρ ×ˢ Set.Ioo (t₀ - T) (t₀ + T)) := hΨsmooth.fst
+  have hf : ContDiffOn ℝ ∞ (fun w : P × E × ℝ => (((w.2.1, w.1) : E × P), w.2.2))
+      (Metric.ball lam₀ ρP ×ˢ Metric.ball x₀ ρE ×ˢ Set.Ioo (t₀ - T) (t₀ + T)) :=
+    (reindex_contDiff_top).contDiffOn
+  exact hg.comp hf hmaps
 
-/-! ## Pending grandchild (under projected-flow-contDiffOn-top) -/
+/-! ## H4 — smooth dependence on parameters (headline) -/
 
--- [under projected-flow-contDiffOn-top]
-theorem reindex_contDiff_top
-    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-    {P : Type*} [NormedAddCommGroup P] [NormedSpace ℝ P] :
-    ContDiff ℝ ∞ (fun w : P × E × ℝ => (((w.2.1, w.1) : E × P), w.2.2)) :=
-  ((contDiff_snd.fst).prodMk contDiff_fst).prodMk contDiff_snd.snd
+-- [H4: h4-param-flow-contDiffOn]
+theorem h4_exists_isLocalFlow_param_contDiffOn_top
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
+    {P : Type*} [NormedAddCommGroup P] [NormedSpace ℝ P] [FiniteDimensional ℝ P]
+    {f : ℝ → P → E → E} {t₀ : ℝ} {x₀ : E} {lam₀ : P}
+    (hf : ContDiff ℝ ∞ (fun q : ℝ × P × E => f q.1 q.2.1 q.2.2)) :
+    ∃ (ρP ρE ε : ℝ) (Φ : P × E × ℝ → E),
+      0 < ρP ∧ 0 < ρE ∧ 0 < ε ∧
+      (∀ lam ∈ Metric.ball lam₀ ρP, ∀ x ∈ Metric.ball x₀ ρE, Φ (lam, x, t₀) = x) ∧
+      (∀ lam ∈ Metric.ball lam₀ ρP, ∀ x ∈ Metric.ball x₀ ρE,
+          ∀ t ∈ Set.Ioo (t₀ - ε) (t₀ + ε),
+        HasDerivAt (fun s => Φ (lam, x, s)) (f t lam (Φ (lam, x, t))) t) ∧
+      ContDiffOn ℝ ∞ Φ
+        (Metric.ball lam₀ ρP ×ˢ Metric.ball x₀ ρE ×ˢ Set.Ioo (t₀ - ε) (t₀ + ε)) := by
+  classical
+  -- Augment the state with the parameter: `z = (x, lam) ∈ E × P`, and flow the field
+  -- `g t z = (f t z.2 z.1, 0)`, whose parameter component is frozen.
+  set z₀ : E × P := (x₀, lam₀) with hz₀
+  set g : ℝ → (E × P) → E × P :=
+    fun (t : ℝ) (z : E × P) => ((f t z.2 z.1, (0 : P)) : E × P) with hg
+  -- (1) The augmented field is jointly `C^∞`.
+  have hg_smooth : ContDiff ℝ ∞ (Function.uncurry g) := h4_augmented_field_contDiff hf
+  -- (2) `C^∞` Euclidean flow existence on the augmented field at `(t₀, z₀)`.
+  obtain ⟨r, ε, hr_pos, hε_pos, Ψ, hΨ, ρ, T, hρ_pos, hT_pos, hρ_le_r, hT_le_ε, hΨsmooth⟩ :=
+    exists_isLocalFlow_contDiffOn_top (f := g) (t₀ := t₀) (x₀ := z₀) hg_smooth
+  -- (5) The parameter component is constant along orbits of the augmented flow.
+  have hinv : ∀ z ∈ Metric.closedBall z₀ (r : ℝ), ∀ t ∈ Set.Icc (t₀ - ε) (t₀ + ε),
+      (Ψ (z, t)).2 = z.2 := h4_orbit_param_invariant hΨ
+  -- Time-box containments: `Ioo (min ε T) ⊆ Ioo ε` and `⊆ Ioo T`.
+  have htimeε : Set.Ioo (t₀ - min ε T) (t₀ + min ε T) ⊆ Set.Ioo (t₀ - ε) (t₀ + ε) :=
+    Set.Ioo_subset_Ioo (by have := min_le_left ε T; linarith)
+      (by have := min_le_left ε T; linarith)
+  have htimeT : Set.Ioo (t₀ - min ε T) (t₀ + min ε T) ⊆ Set.Ioo (t₀ - T) (t₀ + T) :=
+    Set.Ioo_subset_Ioo (by have := min_le_right ε T; linarith)
+      (by have := min_le_right ε T; linarith)
+  -- Membership: `x ∈ ball x₀ (ρ/2)`, `lam ∈ ball lam₀ (ρ/2)` ⇒ `(x,lam) ∈ closedBall z₀ r`.
+  have hmem : ∀ lam ∈ Metric.ball lam₀ (ρ / 2), ∀ x ∈ Metric.ball x₀ (ρ / 2),
+      ((x, lam) : E × P) ∈ Metric.closedBall z₀ (r : ℝ) := by
+    intro lam hlam x hx
+    have h1 : ((x, lam) : E × P) ∈ Metric.ball z₀ (ρ / 2) := by
+      rw [hz₀, ← ball_prod_same]; exact ⟨hx, hlam⟩
+    exact Metric.ball_subset_closedBall
+      (Metric.ball_subset_ball (by linarith) h1)
+  -- (3) The projected flow `Φ (λ, x, t) := (Ψ ((x, λ), t)).1`.
+  refine ⟨ρ / 2, ρ / 2, min ε T, fun w : P × E × ℝ => (Ψ ((w.2.1, w.1), w.2.2)).1,
+    by positivity, by positivity, lt_min hε_pos hT_pos, ?_, ?_, ?_⟩
+  · -- Initial value clause.
+    intro lam hlam x hx
+    have hz := hmem lam hlam x hx
+    exact (h4_projected_ode_initial hΨ hinv x lam hz).1
+  · -- ODE clause on the shrunk open time interval.
+    intro lam hlam x hx t ht
+    have hz := hmem lam hlam x hx
+    exact (h4_projected_ode_initial hΨ hinv x lam hz).2 t (htimeε ht)
+  · -- Joint `C^∞` regularity, via the projected-flow ContDiffOn sibling and `mono`.
+    have hmaps : Set.MapsTo (fun w : P × E × ℝ => (((w.2.1, w.1) : E × P), w.2.2))
+        (Metric.ball lam₀ (ρ / 2) ×ˢ Metric.ball x₀ (ρ / 2) ×ˢ Set.Ioo (t₀ - T) (t₀ + T))
+        (Metric.ball z₀ ρ ×ˢ Set.Ioo (t₀ - T) (t₀ + T)) := by
+      rintro ⟨lam, x, t⟩ ⟨hlam, hx, ht⟩
+      refine ⟨?_, ht⟩
+      have h1 : ((x, lam) : E × P) ∈ Metric.ball z₀ (ρ / 2) := by
+        rw [hz₀, ← ball_prod_same]; exact ⟨hx, hlam⟩
+      exact Metric.ball_subset_ball (by linarith) h1
+    have hcd := h4_projected_contDiffOn (t₀ := t₀) (z₀ := z₀) (Ψ := Ψ) (ρ := ρ) (T := T)
+      hΨsmooth (lam₀ := lam₀) (x₀ := x₀) (ρP := ρ / 2) (ρE := ρ / 2) hmaps
+    refine hcd.mono (Set.prod_mono (le_refl _) (Set.prod_mono (le_refl _) htimeT))
 
 end DifferentialGeometry.PDE.RicciFlow.ODE
