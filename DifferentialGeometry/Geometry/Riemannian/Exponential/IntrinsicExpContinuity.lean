@@ -531,6 +531,150 @@ uniform-in-`v` cross-junction joint continuity that the chart-fixed
 *true* on all of `[0, 1]` (not just on a small ball) because the underlying object
 is the genuine complete geodesic. -/
 
+/-! ### Foot-varying per-chart flow projection
+
+The existing `chartFlowOrbitLift` (`Exponential/ChartFlowToTangentLift.lean`) fixes
+both the chart centre `α` and the phase basepoint at `(extChartAt I α α, v)`,
+i.e. the foot is the chart centre.  For the cross-junction gluing the foot
+`intrinsicGeodesic g p v tₖ` *varies* with `v`, so we need a version of the lift
+in which the phase initial point `z ∈ E × E` is an explicit parameter (the foot's
+chart coordinate paired with its chart velocity coordinate), both continuous in
+`v`.  We package the resulting *flow projection* and its joint continuity here.
+
+`flowProj α Φ z s := (extChartAt I α).symm (Φ (z, s)).1` is the base-manifold
+projection of the chart-`α`-centred phase flow `Φ` started at the phase point `z`,
+evaluated after running for time `s`.  Whenever `(Φ (z, s)).1` stays in the
+(open) chart target `(extChartAt I α).target`, this projection is continuous
+jointly in `(z, s)` because `Φ` is and `(extChartAt I α).symm` is continuous on
+its target. -/
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- The base-manifold projection of the chart-`α`-centred phase flow `Φ` started
+at phase point `z` and run for time `s`. -/
+private def flowProj (α : M) (Φ : (E × E) × ℝ → E × E) (z : E × E) (s : ℝ) : M :=
+  (extChartAt I α).symm (Φ (z, s)).1
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- **Joint continuity of the foot-varying flow projection.** Suppose `Φ` is
+continuous on the phase-product `ball z₀ ρ ×ˢ Ioo (-T) T`, the phase parameter
+map `z : N → E × E` is continuous on the parameter set `s` with values in
+`ball z₀ ρ`, and for every `(n, τ)` in `s ×ˢ Ioo (-T) T` the flowed first
+component `(Φ (z n, τ)).1` lies in the (open) chart target `(extChartAt I α).target`.
+Then `(n, τ) ↦ flowProj α Φ (z n) τ` is continuous on `s ×ˢ Ioo (-T) T`. -/
+private theorem flowProj_continuousOn
+    [I.Boundaryless]
+    {α : M} {Φ : (E × E) × ℝ → E × E} {z₀ : E × E} {ρ T : ℝ}
+    {N : Type*} [TopologicalSpace N] {z : N → E × E} {S : Set N}
+    (hΦ : ContinuousOn Φ ((Metric.ball z₀ ρ) ×ˢ Set.Ioo (-T) T))
+    (hz_cont : ContinuousOn z S)
+    (hz_ball : ∀ n ∈ S, z n ∈ Metric.ball z₀ ρ)
+    (htgt : ∀ n ∈ S, ∀ τ ∈ Set.Ioo (-T) T,
+      (Φ (z n, τ)).1 ∈ (extChartAt I α).target) :
+    ContinuousOn (fun nτ : N × ℝ => flowProj (I := I) α Φ (z nτ.1) nτ.2)
+      (S ×ˢ Set.Ioo (-T) T) := by
+  classical
+  -- The phase map `(n, τ) ↦ (z n, τ)` is continuous on `S ×ˢ Ioo (-T) T` and lands
+  -- in `ball z₀ ρ ×ˢ Ioo (-T) T`.
+  have hpair_cont : ContinuousOn (fun nτ : N × ℝ => (z nτ.1, nτ.2))
+      (S ×ˢ Set.Ioo (-T) T) := by
+    refine ContinuousOn.prodMk ?_ ?_
+    · exact hz_cont.comp continuousOn_fst (fun x hx => hx.1)
+    · exact continuousOn_snd
+  have hpair_maps : Set.MapsTo (fun nτ : N × ℝ => (z nτ.1, nτ.2))
+      (S ×ˢ Set.Ioo (-T) T) ((Metric.ball z₀ ρ) ×ˢ Set.Ioo (-T) T) := by
+    intro nτ hnτ
+    exact ⟨hz_ball nτ.1 hnτ.1, hnτ.2⟩
+  -- `Φ ∘ (phase map)` is continuous on `S ×ˢ Ioo (-T) T`.
+  have hΦcomp : ContinuousOn (fun nτ : N × ℝ => Φ (z nτ.1, nτ.2))
+      (S ×ˢ Set.Ioo (-T) T) :=
+    hΦ.comp hpair_cont hpair_maps
+  -- Take the first component, which is continuous.
+  have hfst : ContinuousOn (fun nτ : N × ℝ => (Φ (z nτ.1, nτ.2)).1)
+      (S ×ˢ Set.Ioo (-T) T) :=
+    (continuous_fst.comp_continuousOn hΦcomp)
+  -- Compose with `(extChartAt I α).symm`, continuous on `(extChartAt I α).target`.
+  have hsymm : ContinuousOn (extChartAt I α).symm (extChartAt I α).target :=
+    continuousOn_extChartAt_symm (I := I) α
+  have hmaps : Set.MapsTo (fun nτ : N × ℝ => (Φ (z nτ.1, nτ.2)).1)
+      (S ×ˢ Set.Ioo (-T) T) (extChartAt I α).target := by
+    intro nτ hnτ
+    exact htgt nτ.1 hnτ.1 nτ.2 hnτ.2
+  exact hsymm.comp hfst hmaps
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- **Per-chart foot-varying joint continuity, from a flow identification.**
+This is the reusable producer of the induction step: on a window
+`ball v₀ r ×ˢ Ioo (tₖ - ε) (tₖ + ε)`, suppose the intrinsic geodesic
+`(v, t) ↦ intrinsicGeodesic g hEnorm p v t` agrees with the foot-varying flow
+projection `flowProj α Φ (z v) (t - tₖ)`, where `Φ` is continuous on the phase
+product `ball z₀ ρ ×ˢ Ioo (-T) T`, the phase parameter `z` is continuous in `v`
+on `ball v₀ r` with values in `ball z₀ ρ`, and the flowed first component stays in
+the chart target.  Then the intrinsic geodesic is jointly continuous on the
+window.
+
+The hypothesis `hident` is a genuine geometric *identification* of two a priori
+distinct objects (the intrinsic geodesic and the projection of a per-chart phase
+flow), supplied by geodesic uniqueness at the foot; it is **not** the continuity
+conclusion.  Joint continuity then follows from `flowProj_continuousOn` and a
+change of time variable `t ↦ t - tₖ`. -/
+private theorem perChart_jointContinuity_of_flowIdentifiedOn
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (p : M) (v₀ : TangentSpace I p)
+    {α : M} {Φ : (E × E) × ℝ → E × E} {z₀ : E × E} {z : TangentSpace I p → E × E}
+    {tₖ ε r ρ T : ℝ}
+    (hεT : ε ≤ T)
+    (hΦ : ContinuousOn Φ ((Metric.ball z₀ ρ) ×ˢ Set.Ioo (-T) T))
+    (hz_cont : ContinuousOn z (Metric.ball v₀ r))
+    (hz_ball : ∀ v ∈ Metric.ball v₀ r, z v ∈ Metric.ball z₀ ρ)
+    (htgt : ∀ v ∈ Metric.ball v₀ r, ∀ τ ∈ Set.Ioo (-ε) ε,
+      (Φ (z v, τ)).1 ∈ (extChartAt I α).target)
+    (hident : ∀ v ∈ Metric.ball v₀ r, ∀ t ∈ Set.Ioo (tₖ - ε) (tₖ + ε),
+      intrinsicGeodesic (I := I) g hEnorm p v t =
+        flowProj (I := I) α Φ (z v) (t - tₖ)) :
+    ContinuousOn
+      (fun vt : TangentSpace I p × ℝ =>
+        intrinsicGeodesic (I := I) g hEnorm p vt.1 vt.2)
+      ((Metric.ball v₀ r) ×ˢ Set.Ioo (tₖ - ε) (tₖ + ε)) := by
+  classical
+  -- The time-shift homeomorphism `t ↦ t - tₖ` maps the window
+  -- `Ioo (tₖ - ε) (tₖ + ε)` onto `Ioo (-ε) ε`.
+  have hshift_cont : ContinuousOn (fun vt : TangentSpace I p × ℝ => (vt.1, vt.2 - tₖ))
+      ((Metric.ball v₀ r) ×ˢ Set.Ioo (tₖ - ε) (tₖ + ε)) :=
+    (continuousOn_fst).prodMk ((continuousOn_snd).sub continuousOn_const)
+  have hshift_maps : Set.MapsTo (fun vt : TangentSpace I p × ℝ => (vt.1, vt.2 - tₖ))
+      ((Metric.ball v₀ r) ×ˢ Set.Ioo (tₖ - ε) (tₖ + ε))
+      ((Metric.ball v₀ r) ×ˢ Set.Ioo (-ε) ε) := by
+    intro vt hvt
+    refine ⟨hvt.1, ?_, ?_⟩
+    · exact lt_sub_iff_add_lt.mpr (by linarith [hvt.2.1])
+    · exact sub_lt_iff_lt_add.mpr (by linarith [hvt.2.2])
+  -- The flow projection is jointly continuous on `ball v₀ r ×ˢ Ioo (-ε) ε`.
+  have hbase_cont : ContinuousOn
+      (fun vτ : TangentSpace I p × ℝ => flowProj (I := I) α Φ (z vτ.1) vτ.2)
+      ((Metric.ball v₀ r) ×ˢ Set.Ioo (-ε) ε) := by
+    have hΦ' : ContinuousOn Φ ((Metric.ball z₀ ρ) ×ˢ Set.Ioo (-ε) ε) :=
+      hΦ.mono (Set.prod_mono (le_refl _)
+        (Set.Ioo_subset_Ioo (by linarith) hεT))
+    exact flowProj_continuousOn (I := I) (α := α) (Φ := Φ) (z₀ := z₀)
+      (ρ := ρ) (T := ε) (z := z) (S := Metric.ball v₀ r)
+      hΦ' hz_cont hz_ball htgt
+  -- Compose: `(v, t) ↦ flowProj α Φ (z v) (t - tₖ)` is continuous on the window.
+  have hcomp_cont : ContinuousOn
+      (fun vt : TangentSpace I p × ℝ => flowProj (I := I) α Φ (z vt.1) (vt.2 - tₖ))
+      ((Metric.ball v₀ r) ×ˢ Set.Ioo (tₖ - ε) (tₖ + ε)) :=
+    hbase_cont.comp hshift_cont hshift_maps
+  -- Rewrite via the identification.
+  apply hcomp_cont.congr
+  intro vt hvt
+  exact hident vt.1 hvt.1 vt.2 hvt.2
+
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 /-- **Joint continuity of the chained intrinsic geodesic flow (analytic
@@ -538,12 +682,39 @@ residual).** For every launch velocity `v₀` there is a radius `ρ > 0` such th
 `(v, t) ↦ intrinsicGeodesic g hEnorm p v t` is jointly continuous on
 `ball v₀ ρ ×ˢ [0, 1]`.
 
-This is the only `sorry` in the file; its sub-lemma decomposition is in the
-section docstring above (per-chart re-based continuous flow via the proven
-cross-chart re-basing `bm_c_gc_cross_vf_projection_uniqueness`, uniqueness
-identification via `isGeodesicAt_eventuallyEq_of_lift_eq`, and finite junction
-gluing).  Everything else in the file (`intrinsicGeodesic_compactArc`,
-`intrinsicGeodesic_arc_finite_chart_cover`,
+This is the only `sorry` in the file.  Its closure is now reduced to a single
+clean analytic input by the two fully-proven producers above:
+
+* `flowProj_continuousOn` — the foot-varying flow projection
+  `(n, τ) ↦ (extChartAt I α).symm (Φ (z n, τ)).1` is jointly continuous whenever
+  the per-chart phase flow `Φ` is continuous, the phase parameter `z` is
+  continuous, and the flowed first component stays in the chart target;
+* `perChart_jointContinuity_of_flowIdentifiedOn` — given a *uniform-in-`v`*
+  identification of the intrinsic geodesic with the foot-varying flow projection
+  on a window `ball v₀ r ×ˢ Ioo (tₖ - ε) (tₖ + ε)`, the intrinsic geodesic is
+  jointly continuous there.
+
+What remains is to supply, junction by junction along the finite chart cover
+`intrinsicGeodesic_arc_finite_chart_cover`, the data feeding
+`perChart_jointContinuity_of_flowIdentifiedOn`: the per-chart phase flow `Φ`
+(`Geodesic.SmoothFlow.exists_chartPhase_contDiffOn_isLocalFlow_combined`,
+jointly `C¹` hence continuous), the continuous-in-`v` phase point `z v`
+(the chart-`α`-coordinate of the foot `intrinsicGeodesic g hEnorm p v tₖ` paired
+with its chart velocity, carried by the induction hypothesis at `tₖ`), and the
+*uniform-in-`v`* identification `hident`.  The identification holds for each
+fixed `v` by geodesic uniqueness at the foot
+(`intrinsicGeodesic_hasGeodesicEquationAt_to_lift` plus
+`isGeodesicAt_eventuallyEq` / `bm_c_gc_vf_chart_coincidence`); the genuinely
+remaining analytic content is upgrading that per-`v` eventual equality to a
+window uniform in `v`, which needs the local flow's uniform-in-phase-point
+chart-target confinement.  The base case `tₖ = 0` has chart centre `p` and phase
+point `(extChartAt I p p, v)` (continuous in `v`); the induction then propagates
+the foot/velocity continuity from each junction to the next, and
+`perChart_jointContinuity_of_flowIdentifiedOn` together with the finite cover and
+`ContinuousOn.union` assembles joint continuity on `ball v₀ (min_k r_k) ×ˢ [0, 1]`.
+
+Everything else in the file (`intrinsicGeodesic_compactArc`,
+`intrinsicGeodesic_arc_finite_chart_cover`, the two producers above, and
 `expMapIntrinsic_continuous_of_jointContinuity`) is proved unconditionally, and
 `expMapIntrinsic_continuous` follows from this residual in one step. -/
 theorem intrinsicGeodesic_jointContinuity
