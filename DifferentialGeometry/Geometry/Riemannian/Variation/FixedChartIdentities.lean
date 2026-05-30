@@ -259,10 +259,11 @@ symmetry of the second Fréchet derivative of the chart-pulled-back map
 Christoffel-contraction terms agree by `chartChristoffelContraction_symm`.
 Because the chart `extChartAt I (f s t)` is held fixed, there is no
 moving-foot transition correction. -/
-theorem commute_ds_dt_fixed_chart
+theorem commute_ds_dt_fixed_chart_C2
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M)
-    (hf : IsSmoothVariation (I := I) f)
-    (s t : ℝ) :
+    (s t : ℝ)
+    (hF2 : ContDiffAt ℝ 2
+      (fun p : ℝ × ℝ => extChartAt I (f s t) (f p.1 p.2)) (s, t)) :
     chartCovDerivAlong (I := I) g (f s t) (fun u : ℝ => f u t)
       (fun u : ℝ => fderiv ℝ (fun v : ℝ => extChartAt I (f s t) (f u v)) t (1 : ℝ)) s
     = chartCovDerivAlong (I := I) g (f s t) (fun v : ℝ => f s v)
@@ -270,8 +271,6 @@ theorem commute_ds_dt_fixed_chart
   classical
   set α : M := f s t with hα
   set F : ℝ → ℝ → E := fun u v => extChartAt I α (f u v) with hF_def
-  have hF2 : ContDiffAt ℝ 2 (fun p : ℝ × ℝ => F p.1 p.2) (s, t) :=
-    chartPulled_contDiffAt (I := I) f hf s t
   -- Unfold both chart covariant derivatives.
   rw [chartCovDerivAlong_def, chartCovDerivAlong_def]
   -- The deriv-of-section terms commute by Schwarz.
@@ -310,6 +309,35 @@ theorem commute_ds_dt_fixed_chart
       (fderiv ℝ (fun u : ℝ => F u t) s (1 : ℝ))
       (fderiv ℝ (fun v : ℝ => F s v) t (1 : ℝ)) (F s t)
   rw [hsec, hChristoffel]
+
+/-- **Fixed-chart commutation of mixed covariant derivatives.** For a smooth
+two-parameter variation `f`, with chart basepoint pinned at `f s t` and the
+parameter velocities read off as chart-coordinate sections
+`fderiv ℝ (fun v => extChartAt I (f s t) (f u v)) t 1` (resp. with the roles of
+`u, v` swapped), the chart-local covariant derivatives along the two parameter
+directions commute.
+
+Unfolding `chartCovDerivAlong`, each side is a deriv-of-section term plus a
+Christoffel-contraction term. The deriv-of-section terms agree by Schwarz
+symmetry of the second Fréchet derivative of the chart-pulled-back map
+`F (u, v) := extChartAt I (f s t) (f u v)` (`mixed_partialFderiv_comm`); the
+Christoffel-contraction terms agree by `chartChristoffelContraction_symm`.
+Because the chart `extChartAt I (f s t)` is held fixed, there is no
+moving-foot transition correction.
+
+This is the smooth-variation wrapper of `commute_ds_dt_fixed_chart_C2`: the only
+regularity it uses is the `C²` chart-pullback fact, which `IsSmoothVariation`
+supplies via `chartPulled_contDiffAt`. -/
+theorem commute_ds_dt_fixed_chart
+    (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M)
+    (hf : IsSmoothVariation (I := I) f)
+    (s t : ℝ) :
+    chartCovDerivAlong (I := I) g (f s t) (fun u : ℝ => f u t)
+      (fun u : ℝ => fderiv ℝ (fun v : ℝ => extChartAt I (f s t) (f u v)) t (1 : ℝ)) s
+    = chartCovDerivAlong (I := I) g (f s t) (fun v : ℝ => f s v)
+      (fun v : ℝ => fderiv ℝ (fun u : ℝ => extChartAt I (f s t) (f u v)) s (1 : ℝ)) t :=
+  commute_ds_dt_fixed_chart_C2 (I := I) g f s t
+    (chartPulled_contDiffAt (I := I) f hf s t)
 
 section FixedChartCurvatureHelpers
 open DifferentialGeometry.Integral.DivergenceTheorem

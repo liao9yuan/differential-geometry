@@ -1035,19 +1035,28 @@ theorem S2_diff_under_interval_integral
 
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong in
 /-- **Metric compatibility (Leibniz rule) for the `g`-inner product of two
-sections along a smooth curve.** For a smooth curve `γ` and two sections
-`V, W : ∀ t, TangentSpace I (γ t)` whose pinned chart-`(γ t₀)`-coordinate
-representations are differentiable at `t₀`, the `t`-derivative of
-`t ↦ g.inner (γ t) (V t) (W t)` at `t₀` equals
+sections along a curve, `C²`-level hypotheses.** For a curve `γ` continuous at
+`t₀` whose pinned chart-`(γ t₀)`-coordinate trajectory `chartCurve (γ t₀) γ` is
+differentiable at `t₀`, and two sections `V, W : ∀ t, TangentSpace I (γ t)`
+whose pinned chart-`(γ t₀)`-coordinate representations are differentiable at
+`t₀`, the `t`-derivative of `t ↦ g.inner (γ t) (V t) (W t)` at `t₀` equals
 `⟨∇_t V, W⟩_g + ⟨V, ∇_t W⟩_g`, where `∇_t` is the intrinsic covariant
 derivative `covDerivAlong g γ · t₀`. This is the genuine metric-compatibility
 identity (`∇g = 0`), proved by pinning the chart at the foot `γ t₀`,
 identifying the inner product with the chart-Gram bilinear form, and applying
-the covariant product rule `chartGramAlongCurve_hasDerivAt_covariant`. -/
-private lemma metric_compat_hasDerivAt_inner
+the covariant product rule `chartGramAlongCurve_hasDerivAt_covariant`.
+
+The hypotheses are the minimal regularity the proof consumes: continuity of `γ`
+at `t₀` (for the chart-source neighbourhood) and differentiability of the
+chart trajectory and the two chart-reps at `t₀`. The smooth-curve form
+`metric_compat_hasDerivAt_inner` is a wrapper supplying these from
+`ContMDiff … ∞ γ`. -/
+private lemma metric_compat_hasDerivAt_inner_of_chartCurveDeriv
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (V W : ∀ t, TangentSpace I (γ t)) (t₀ : ℝ)
-    (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ)
+    (hγ_cont : ContinuousAt γ t₀)
+    (hγ_chartDeriv :
+      DifferentiableAt ℝ (chartCurve (I := I) (γ t₀) γ) t₀)
     (hVdiff : DifferentiableAt ℝ (chartRepAt (I := I) γ V t₀) t₀)
     (hWdiff : DifferentiableAt ℝ (chartRepAt (I := I) γ W t₀) t₀) :
     HasDerivAt (fun s : ℝ => g.inner (γ s) (V s) (W s))
@@ -1058,15 +1067,13 @@ private lemma metric_compat_hasDerivAt_inner
   set Vrep : ℝ → E := chartRepAt (I := I) γ V t₀ with hVrep_def
   set Wrep : ℝ → E := chartRepAt (I := I) γ W t₀ with hWrep_def
   -- The foot `γ t₀ = α` is in the base set of its own trivialisation; that base
-  -- set is open, so `γ s` lands in it for `s` near `t₀`.
+  -- set is open, so `γ s` lands in it for `s` near `t₀` (by continuity of `γ` at `t₀`).
   have hbase_t₀ : γ t₀ ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
     rw [TangentBundle.trivializationAt_baseSet]; exact mem_chart_source H (γ t₀)
   have hbaseSet_open : IsOpen (trivializationAt E (TangentSpace I) α).baseSet :=
     (trivializationAt E (TangentSpace I) α).open_baseSet
-  have hsrc_open : IsOpen {s : ℝ | γ s ∈ (trivializationAt E (TangentSpace I) α).baseSet} :=
-    hbaseSet_open.preimage hγ.continuous
   have hsrc_mem : {s : ℝ | γ s ∈ (trivializationAt E (TangentSpace I) α).baseSet} ∈ 𝓝 t₀ :=
-    hsrc_open.mem_nhds hbase_t₀
+    hγ_cont (hbaseSet_open.mem_nhds hbase_t₀)
   -- Round trips for `V` and `W` near `t₀`.
   have hVround : ∀ s ∈ {s : ℝ | γ s ∈ (trivializationAt E (TangentSpace I) α).baseSet},
       (trivializationAt E (TangentSpace I) α).symmL ℝ (γ s) (Vrep s) = V s := by
@@ -1101,14 +1108,8 @@ private lemma metric_compat_hasDerivAt_inner
     rw [DifferentialGeometry.Integral.DivergenceTheorem.chartGramOnE_def, hinv]
   -- The chart trajectory has the prescribed velocity at `t₀`, in the interior of the target.
   have hu_hasDerivAt : HasDerivAt (chartCurve (I := I) α γ)
-      (deriv (chartCurve (I := I) α γ) t₀) t₀ := by
-    have hcd : ContDiffAt ℝ ∞ (chartCurve (I := I) α γ) t₀ := by
-      have hmdiff : ContMDiffAt 𝓘(ℝ, ℝ) 𝓘(ℝ, E) ∞ ((extChartAt I α) ∘ γ) t₀ := by
-        have hφ : ContMDiffAt I 𝓘(ℝ, E) ∞ (extChartAt I α) (γ t₀) :=
-          contMDiffAt_extChartAt (I := I) (x := α) (n := ∞)
-        exact hφ.comp t₀ (hγ.contMDiffAt)
-      exact contMDiffAt_iff_contDiffAt.mp hmdiff
-    exact (hcd.differentiableAt (by simp)).hasDerivAt
+      (deriv (chartCurve (I := I) α γ) t₀) t₀ :=
+    hγ_chartDeriv.hasDerivAt
   have hmem_int : chartCurve (I := I) α γ t₀ ∈ interior (extChartAt I α).target := by
     have hxsrc : γ t₀ ∈ (extChartAt I α).source := by
       rw [extChartAt_source]; exact mem_chart_source H (γ t₀)
@@ -1210,6 +1211,32 @@ private lemma metric_compat_hasDerivAt_inner
   -- Both `hDVchart`/`hDWchart` rewrite the chart-covariant value into the explicit
   -- (deriv + Christoffel) form appearing in the engine; rewrite the RHS backwards.
   simp only [← hDVchart, ← hDWchart]
+
+open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong in
+/-- **Metric compatibility (Leibniz rule) for the `g`-inner product of two
+sections along a smooth curve.** Smooth-curve wrapper of
+`metric_compat_hasDerivAt_inner_of_chartCurveDeriv`: from `ContMDiff … ∞ γ` it
+supplies continuity of `γ` at `t₀` and differentiability of the chart trajectory
+`chartCurve (γ t₀) γ` at `t₀`. -/
+private lemma metric_compat_hasDerivAt_inner
+    (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
+    (V W : ∀ t, TangentSpace I (γ t)) (t₀ : ℝ)
+    (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ)
+    (hVdiff : DifferentiableAt ℝ (chartRepAt (I := I) γ V t₀) t₀)
+    (hWdiff : DifferentiableAt ℝ (chartRepAt (I := I) γ W t₀) t₀) :
+    HasDerivAt (fun s : ℝ => g.inner (γ s) (V s) (W s))
+      (g.inner (γ t₀) (covDerivAlong (I := I) g γ V t₀) (W t₀)
+        + g.inner (γ t₀) (V t₀) (covDerivAlong (I := I) g γ W t₀)) t₀ := by
+  -- The chart trajectory `chartCurve (γ t₀) γ = extChartAt (γ t₀) ∘ γ` is `C^∞`,
+  -- hence differentiable at `t₀`.
+  have hchartDeriv : DifferentiableAt ℝ (chartCurve (I := I) (γ t₀) γ) t₀ := by
+    have hmdiff : ContMDiffAt 𝓘(ℝ, ℝ) 𝓘(ℝ, E) ∞ ((extChartAt I (γ t₀)) ∘ γ) t₀ := by
+      have hφ : ContMDiffAt I 𝓘(ℝ, E) ∞ (extChartAt I (γ t₀)) (γ t₀) :=
+        contMDiffAt_extChartAt (I := I) (x := γ t₀) (n := ∞)
+      exact hφ.comp t₀ (hγ.contMDiffAt)
+    exact (contMDiffAt_iff_contDiffAt.mp hmdiff).differentiableAt (by simp)
+  exact metric_compat_hasDerivAt_inner_of_chartCurveDeriv (I := I) g γ V W t₀
+    hγ.continuous.continuousAt hchartDeriv hVdiff hWdiff
 
 /-! ## Intrinsic commutation of mixed covariant derivatives -/
 

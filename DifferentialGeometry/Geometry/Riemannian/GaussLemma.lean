@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Riemannian.Exponential.Definition
 import DifferentialGeometry.Geometry.Riemannian.Exponential.MfderivAtZero
+import DifferentialGeometry.Geometry.Riemannian.Exponential.OffZeroRegularity
 import DifferentialGeometry.Geometry.Riemannian.NormalCoordinates
 import DifferentialGeometry.Geometry.Riemannian.InjectivityRadius
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.Equation
@@ -64,19 +65,58 @@ variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 The pullback of the Riemannian metric through `expMap g p` at a radial
 direction `v` (inside the natural domain) preserves the radial inner
 product and annihilates the radial/orthogonal cross term. We split the
-two equalities into two theorems for clean downstream consumption. -/
+two equalities into two theorems for clean downstream consumption.
+
+The variational argument behind Gauss's lemma differentiates the radial
+geodesic variation `f (s, t) := expMap g p (t • (v + s • w))` twice; this
+requires `expMap g p` to be `C²` on a neighbourhood of the segment
+`{t • (v + s • w)}`.  The exponential map is only known to be `C²` on a
+small ball around the origin (`expMap_contMDiffAt2_of_norm_lt`), so the
+pullback statement is restricted to that ball.  The radius is recorded as
+`expMapC2Radius g p` below. -/
+
+/-- The radius of a ball around the origin on which `expMap g p` is `C²`,
+extracted from `expMap_contMDiffAt2_of_norm_lt`.  On `‖w‖ < expMapC2Radius g p`
+the map `u ↦ expMap g p u` is `ContMDiffAt 𝓘(ℝ, E) I 2`.  This is the
+genuine domain on which the second-order variational argument behind
+Gauss's lemma is available. -/
+def expMapC2Radius (g : SmoothRiemannianMetric I M) (p : M) : ℝ :=
+  Classical.choose (Exponential.expMap_contMDiffAt2_of_norm_lt (I := I) g p)
+
+/-- The `C²` radius is strictly positive. -/
+lemma expMapC2Radius_pos (g : SmoothRiemannianMetric I M) (p : M) :
+    0 < expMapC2Radius (I := I) g p :=
+  (Classical.choose_spec
+    (Exponential.expMap_contMDiffAt2_of_norm_lt (I := I) g p)).1
+
+/-- On the ball of radius `expMapC2Radius g p`, `expMap g p` is `C²`. -/
+lemma expMap_contMDiffAt2_of_norm_lt_radius
+    (g : SmoothRiemannianMetric I M) (p : M) {w : E}
+    (hw : ‖w‖ < expMapC2Radius (I := I) g p) :
+    ContMDiffAt 𝓘(ℝ, E) I 2
+      (fun u : E => (expMap (I := I) g p (show TangentSpace I p from u) : M)) w :=
+  (Classical.choose_spec
+    (Exponential.expMap_contMDiffAt2_of_norm_lt (I := I) g p)).2 w hw
 
 /-- **Gauss's lemma (pullback form).** At every radial direction
-`v ∈ expDomain g p`, the pullback of `g` through `expMap g p` evaluates
+`v ∈ expDomain g p` *inside the `C²` ball* (`‖v‖ < expMapC2Radius g p`),
+the pullback of `g` through `expMap g p` evaluates
 to `g_p(v, v)` on the `(v, v)` slot, and annihilates the `(v, w)` slot
 for every `w` that is `g_p`-orthogonal to `v`. The orthogonality and
 the target value are stated in the abstract metric `g.inner p`; the
 model-space Euclidean inner product `inner ℝ` on `E` is unrelated to
 `g.inner p` in general (its appearance in earlier skeleton drafts was a
-defect: the classical Gauss lemma is intrinsic to `g`). -/
+defect: the classical Gauss lemma is intrinsic to `g`).
+
+The hypothesis `hsmall : ‖v‖ < expMapC2Radius g p` restricts `v` to the
+ball on which `expMap g p` is twice continuously differentiable; this is
+mathematically necessary, as the proof differentiates the radial geodesic
+variation `f (s, t) := expMap g p (t • (v + s • w))` twice in `t` and once
+in `s`. -/
 theorem gauss_lemma_pullback
     (g : SmoothRiemannianMetric I M) (p : M) {v : E}
-    (hv : (show TangentSpace I p from v) ∈ expDomain (I := I) g p) :
+    (hv : (show TangentSpace I p from v) ∈ expDomain (I := I) g p)
+    (hsmall : ‖(v : E)‖ < expMapC2Radius (I := I) g p) :
     g.inner (expMap (I := I) g p (show TangentSpace I p from v))
         (mfderiv 𝓘(ℝ, E) I
           (fun u : E => expMap (I := I) g p (show TangentSpace I p from u)) v
@@ -94,6 +134,60 @@ theorem gauss_lemma_pullback
             (fun u : E => expMap (I := I) g p (show TangentSpace I p from u)) v
             (show TangentSpace I p from w)) =
         (0 : ℝ) := by
+  -- The radial geodesic variation `f (s, t) := expMap g p (t • (v + s • w))` is
+  -- the natural witness.  By `expMap_contMDiffAt2_of_norm_lt_radius` and
+  -- `hsmall`, `expMap g p` is `C²` near the segment, so `f` is jointly `C²` on
+  -- a neighbourhood of `[0, 1] × {0}` (composition with the smooth
+  -- `(s, t) ↦ t • (v + s • w)`); this is the only place `hsmall` is used, and
+  -- it is genuinely necessary because the argument differentiates `f` twice.
+  --
+  -- (v, v) slot: the central curve `t ↦ f (0, t) = expMap g p (t • v)` is a
+  -- radial geodesic, hence has constant speed-squared
+  -- `g.inner (f 0 t) (∂_t f) (∂_t f) = g_p (v, v)` (constant-speed of a
+  -- geodesic, via `chartGramAlongCurve_hasDerivAt_covariant` + the geodesic
+  -- equation, exactly the computation in `isGeodesicOn_speedSq_hasDerivAt_zero`);
+  -- evaluating the chain rule
+  -- `mfderiv (fun u => expMap g p u) v v = ∂_t f (0, 1)` at `t = 1` gives the slot.
+  --
+  -- (v, w) slot: set `φ t := g.inner (f 0 t) (∂_t f) (∂_s f)`.  Then
+  -- `φ' = ⟨∇_t ∂_t f, ∂_s f⟩ + ⟨∂_t f, ∇_t ∂_s f⟩`; the first term vanishes
+  -- (radial geodesic), and the second equals `½ ∂_s g.inner_p (v + s•w, v + s•w)|₀
+  -- = g_p (v, w)` after the mixed-derivative commutation `∇_t ∂_s f = ∇_s ∂_t f`.
+  -- Integrating from `φ 0 = 0` (since `∂_s f (0, 0) = 0` by orthogonality bookkeeping)
+  -- gives `φ 1 = g_p (v, w) = 0`.
+  --
+  -- RESIDUAL (precise missing infrastructure, verified during dispatch):
+  --   * The `C²`-hypothesis variants of the variation engines are now AVAILABLE
+  --     and consumer-safe: `commute_ds_dt_fixed_chart_C2`
+  --     (FixedChartIdentities.lean) takes
+  --     `ContDiffAt ℝ 2 (fun p => extChartAt I (f s t) (f p.1 p.2)) (s, t)`
+  --     directly, and `metric_compat_hasDerivAt_inner_of_chartCurveDeriv`
+  --     (SecondVariation.lean) takes `ContinuousAt γ t₀` plus
+  --     `DifferentiableAt ℝ (chartCurve (γ t₀) γ) t₀` plus the two chart-rep
+  --     differentiabilities.  The radial variation `f s t := expMap g p (t • (v + s • w))`
+  --     is jointly `C²` near `[0,1] × {0}` by
+  --     `expMap_contMDiffAt2_of_norm_lt_radius` composed with the smooth
+  --     `(s, t) ↦ t • (v + s • w)`, so these variants apply.
+  --   * Two genuine geometric inputs remain MISSING in this file's import graph
+  --     (verified by exhaustive grep; none exist as importable statements):
+  --       (a) The radial geodesic property of `t ↦ expMap g p (t • v)` as a clean
+  --           `covDerivAlong`-level / `HasGeodesicEquationAt` fact.  The maximal
+  --           interval only provides `IsGeodesicAt` for an existentially-bound
+  --           witness curve that *agrees* with the maximal geodesic, under a
+  --           foot-in-chart-source clause (`exists_isGeodesicAt_of_mem_maximalGeodesicInterval`,
+  --           MaximalInterval.lean).  `IsGeodesicOn`/`covDerivAlong = 0` of the
+  --           radial curve lives only DOWNSTREAM (`Exponential/IntrinsicExp`,
+  --           which imports HopfRinow, which imports this file).  It must be
+  --           re-derived here from `radialChartCurve_secondDeriv_zero`
+  --           (NormalCoordinates.lean — the normal-chart linear structure) plus
+  --           a chart-change from `normalChartAt` to the `extChartAt`-based
+  --           `covDerivAlong`; this chart-change bridge does not yet exist.
+  --       (b) The radial chain rule identifying `mfderiv (fun u => exp_p u) v v`
+  --           with `∂_t f (0, 1)` and the `w`-direction Jacobi velocity — both
+  --           requiring an `mfderiv`→`fderiv` velocity bridge at the `C²`
+  --           (`MDifferentiableAt`) level, generalising
+  --           `chartCoord_mfderiv_along_curve_eq_fderiv` (MFDerivAlongCurve.lean),
+  --           which currently demands `ContMDiff … ∞`.
   sorry
 
 end GaussLemma
@@ -252,6 +346,15 @@ theorem normalBall_radial_unique_minimizer
     -- decomposition of `γ'` against the radial direction (via
     -- `gauss_lemma_pullback`) plus a `∫|r(t)| ≥ |∫r(t)|`-style
     -- integral inequality.
+    --
+    -- NOTE: `gauss_lemma_pullback` now carries the genuine domain hypothesis
+    -- `‖v‖ < expMapC2Radius g p` (the `C²` ball on which the variational
+    -- argument is available).  When filling this lower bound, invoke it on the
+    -- radial directions `s • v` arising from the orthogonal decomposition, each
+    -- of which satisfies `‖s • v‖ ≤ ‖v‖`; so the caller must first establish
+    -- `‖v‖ < expMapC2Radius g p` (a new hypothesis to thread onto this theorem,
+    -- as `hball : v ∈ normalChartAt.target` only places `v` in the opaque
+    -- `expMapDiffeo`-source, which has no proven relation to the `C²` radius).
     sorry
   -- Now combine with the infimum characterisation of `riemannianEDist`.
   refine le_of_forall_gt (fun r hr => ?_)
