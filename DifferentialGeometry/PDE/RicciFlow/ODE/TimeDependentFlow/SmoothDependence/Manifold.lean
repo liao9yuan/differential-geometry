@@ -369,16 +369,6 @@ theorem field_form_identity_trivreading_eq_chartvelocity
       = tangentCoordChange I ((extChartAt I p₀).symm c) p₀ ((extChartAt I p₀).symm c)
           (X s ((extChartAt I p₀).symm c)) := rfl
 
--- chart→intrinsic bridge [H3 v5: OFF the H3 critical path. Documents the chart-coordinate hSmoothX_chart ⇒ the
---  intrinsic section hX gap — precisely the project TangentSpace:=E frame diamond. A user holding only chart data
---  discharges H3's `hX` through this. NOT a child/ancestor of h3.]
-theorem chart_field_smooth_to_intrinsic_section
-    (X : ℝ → ∀ x : M, TangentSpace I x)
-    (hSmoothX_chart : ∀ α : M, ContDiff ℝ ∞ (Function.uncurry fun t y =>
-      (X t ((chartAt H α).symm (I.symm y)) : E))) :
-    ContMDiff (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
-      (fun q : ℝ × M => (TotalSpace.mk' E q.2 (X q.1 q.2) : TangentBundle I M)) := sorry
-
 -- [H3: pushforward→bare velocity cancellation (under chartflow-eq-bareflow-on-U)]
 -- (The cancellation is a purely chart-theoretic chain-rule identity; the section-level instances
 --  `[FiniteDimensional ℝ E] [BoundarylessManifold I M] [T2Space M]` are not consumed, so they are
