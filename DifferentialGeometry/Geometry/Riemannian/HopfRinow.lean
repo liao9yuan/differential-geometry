@@ -894,6 +894,87 @@ theorem velocity_converges_of_bounded_accel
         have := mul_lt_mul_of_pos_left hfrac hε
         rwa [mul_one] at this
 
+/-- **Velocity convergence from a bounded derivative on an open interval.**
+The `Set.Ioo`-localised version of `velocity_converges_of_bounded_accel`: if
+`P : ℝ → E` has derivative `P' s` at every `s ∈ Ioo a b` (with `a < b`) and
+`‖P' s‖ ≤ C` throughout that interval, then `P` converges to a genuine limit
+`w : E` as `s → b⁻`.
+
+The proof is identical to the `s < b` version, except every Cauchy-witness
+interval is taken inside `Ioo a b`: for a target tolerance `ε`, the witness is
+`P '' Ioo (max a (b - η)) b` with `η = ε/(C+1)`, which sits in `Ioo a b` (it
+lies above `a` since the lower endpoint is `≥ a`) and the mean-value bound
+`‖P t - P s‖ ≤ C·(t - s)` applies on each subinterval `Icc s t ⊆ Ioo a b`. -/
+theorem velocity_converges_of_bounded_accel_Ioo
+    {P P' : ℝ → E} {a b C : ℝ} (hab : a < b)
+    (hderiv : ∀ s : ℝ, s ∈ Set.Ioo a b → HasDerivAt P (P' s) s)
+    (hbound : ∀ s : ℝ, s ∈ Set.Ioo a b → ‖P' s‖ ≤ C) :
+    ∃ w : E, Tendsto P (𝓝[<] b) (𝓝 w) := by
+  haveI : CompleteSpace E := FiniteDimensional.complete ℝ E
+  haveI hNB : (𝓝[<] b).NeBot := nhdsLT_neBot b
+  -- It suffices to show `map P (𝓝[<] b)` is Cauchy; completeness gives the limit.
+  suffices hcauchy : Cauchy (Filter.map P (𝓝[<] b)) by
+    exact cauchy_map_iff_exists_tendsto.mp hcauchy
+  refine Metric.cauchy_iff.mpr ⟨Filter.map_neBot, ?_⟩
+  -- `C` is nonnegative (it dominates a norm at the interval midpoint).
+  have hC_nn : 0 ≤ C := by
+    have hmid : (a + b) / 2 ∈ Set.Ioo a b := by
+      constructor <;> [linarith; linarith]
+    exact le_trans (norm_nonneg _) (hbound _ hmid)
+  intro ε hε
+  have hCC_pos : 0 < C + 1 := by linarith
+  set η : ℝ := ε / (C + 1) with hη_def
+  have hη_pos : 0 < η := div_pos hε hCC_pos
+  -- Lower endpoint of the working interval: `lo := max a (b - η) < b`.
+  set lo : ℝ := max a (b - η) with hlo_def
+  have hlo_lt_b : lo < b := max_lt hab (by linarith)
+  have ha_le_lo : a ≤ lo := le_max_left _ _
+  -- `Ioo lo b ⊆ Ioo a b`.
+  have hsub : Set.Ioo lo b ⊆ Set.Ioo a b :=
+    fun τ hτ => ⟨lt_of_le_of_lt ha_le_lo hτ.1, hτ.2⟩
+  -- The image of `Ioo lo b` lies in `map P (𝓝[<] b)`.
+  have hIoo_mem : P '' Set.Ioo lo b ∈ Filter.map P (𝓝[<] b) :=
+    Filter.image_mem_map (Ioo_mem_nhdsLT hlo_lt_b)
+  refine ⟨P '' Set.Ioo lo b, hIoo_mem, ?_⟩
+  rintro x ⟨sx, hsx, rfl⟩ y ⟨sy, hsy, rfl⟩
+  -- Work with `s := min sx sy`, `t := max sx sy`; `t - s < η`.
+  set s : ℝ := min sx sy with hs_def
+  set t : ℝ := max sx sy with ht_def
+  have hst : s ≤ t := min_le_max
+  have ht_hi : t < b := max_lt hsx.2 hsy.2
+  have hs_lo : lo < s := lt_min hsx.1 hsy.1
+  have ht_sub_s_lt : t - s < η := by
+    have hlo_ge : b - η ≤ lo := le_max_right _ _
+    rcases le_total sx sy with h | h
+    · rw [hs_def, ht_def, min_eq_left h, max_eq_right h]; linarith [hsy.2, hsx.1]
+    · rw [hs_def, ht_def, min_eq_right h, max_eq_left h]; linarith [hsx.2, hsy.1]
+  -- Mean-value bound on `[s, t] ⊆ Ioo a b`.
+  have hmvt : ‖P t - P s‖ ≤ C * (t - s) := by
+    have hIcc_sub : Set.Icc s t ⊆ Set.Ioo a b := by
+      intro τ hτ
+      exact hsub ⟨lt_of_lt_of_le hs_lo hτ.1, lt_of_le_of_lt hτ.2 ht_hi⟩
+    have hderivW : ∀ x ∈ Set.Icc s t, HasDerivWithinAt P (P' x) (Set.Icc s t) x :=
+      fun x hx => (hderiv x (hIcc_sub hx)).hasDerivWithinAt
+    have hboundW : ∀ x ∈ Set.Ico s t, ‖P' x‖ ≤ C :=
+      fun x hx => hbound x (hIcc_sub (Set.Ico_subset_Icc_self hx))
+    exact norm_image_sub_le_of_norm_deriv_le_segment' hderivW hboundW t
+      (right_mem_Icc.mpr hst)
+  -- `dist (P sx) (P sy) = ‖P t - P s‖` since `{sx, sy} = {s, t}`.
+  have h_dist_eq : dist (P sx) (P sy) = ‖P t - P s‖ := by
+    rcases le_total sx sy with h | h
+    · rw [hs_def, ht_def, min_eq_left h, max_eq_right h, dist_eq_norm, norm_sub_rev]
+    · rw [hs_def, ht_def, min_eq_right h, max_eq_left h, dist_eq_norm]
+  rw [h_dist_eq]
+  calc ‖P t - P s‖ ≤ C * (t - s) := hmvt
+    _ ≤ C * η := mul_le_mul_of_nonneg_left ht_sub_s_lt.le hC_nn
+    _ < ε := by
+        rw [hη_def]
+        have hrw : C * (ε / (C + 1)) = ε * (C / (C + 1)) := by ring
+        rw [hrw]
+        have hfrac : C / (C + 1) < 1 := by rw [div_lt_one hCC_pos]; linarith
+        have := mul_lt_mul_of_pos_left hfrac hε
+        rwa [mul_one] at this
+
 /-- **Joint continuity of the chart-Christoffel contraction.** As a function
 of `(v, y) : E × E`, the diagonal contraction `Γ_α(v, v)(y)` is continuous on
 `univ ×ˢ interior (extChartAt I α).target`, inheriting continuity in `y` from
@@ -987,6 +1068,361 @@ theorem chartVelocity_converges_at_finite_endpoint
     exact hCs
   exact velocity_converges_of_bounded_accel (P := u') (P' := P') (b := b) (C := C)
     hderiv_pf hbound_pf
+
+/-- **Directional velocity limit in a fixed chart, open-interval form.** The
+`Set.Ioo`-localised version of `chartVelocity_converges_at_finite_endpoint`:
+the chart-coordinate geodesic data are only assumed on `Ioo a b` (with
+`a < b`), which is all the `𝓝[<] b` filter sees.  Identical proof, with the
+analytic engine replaced by its `Ioo`-localised version
+`velocity_converges_of_bounded_accel_Ioo`. -/
+theorem chartVelocity_converges_at_finite_endpoint_Ioo
+    (g : SmoothRiemannianMetric I M) (α : M)
+    {u u' : ℝ → E} {a b K₁ : ℝ} {S : Set E} (hab : a < b)
+    (hS_compact : IsCompact S)
+    (hS_sub : S ⊆ interior (extChartAt I α).target)
+    (_hu_deriv : ∀ s : ℝ, s ∈ Set.Ioo a b → HasDerivAt u (u' s) s)
+    (hu'_deriv : ∀ s : ℝ, s ∈ Set.Ioo a b →
+      HasDerivAt u'
+        (- chartChristoffelContraction (I := I) g α (u' s) (u' s) (u s)) s)
+    (hu'_bound : ∀ s : ℝ, s ∈ Set.Ioo a b → ‖u' s‖ ≤ K₁)
+    (hu_mem : ∀ s : ℝ, s ∈ Set.Ioo a b → u s ∈ S) :
+    ∃ w : E, Tendsto u' (𝓝[<] b) (𝓝 w) := by
+  classical
+  set K : Set (E × E) := Metric.closedBall (0 : E) K₁ ×ˢ S with hK_def
+  have hK_compact : IsCompact K :=
+    (isCompact_closedBall (0 : E) K₁).prod hS_compact
+  have hΓcont := chartChristoffelContraction_continuousOn_prod (I := I) g α
+  have hΓcont_K : ContinuousOn
+      (fun p : E × E => chartChristoffelContraction (I := I) g α p.1 p.1 p.2) K := by
+    refine hΓcont.mono ?_
+    intro p hp
+    exact ⟨Set.mem_univ _, hS_sub hp.2⟩
+  obtain ⟨C, hC⟩ := hK_compact.exists_bound_of_continuousOn hΓcont_K
+  set P' : ℝ → E :=
+    fun s => - chartChristoffelContraction (I := I) g α (u' s) (u' s) (u s) with hP'_def
+  have hderiv_pf : ∀ s : ℝ, s ∈ Set.Ioo a b → HasDerivAt u' (P' s) s :=
+    fun s hs => hu'_deriv s hs
+  have hbound_pf : ∀ s : ℝ, s ∈ Set.Ioo a b → ‖P' s‖ ≤ C := by
+    intro s hs
+    have hmem : ((u' s, u s) : E × E) ∈ K := by
+      refine ⟨?_, hu_mem s hs⟩
+      rw [Metric.mem_closedBall, dist_zero_right]
+      exact hu'_bound s hs
+    have hCs :
+        ‖chartChristoffelContraction (I := I) g α (u' s) (u' s) (u s)‖ ≤ C :=
+      hC ((u' s, u s) : E × E) hmem
+    rw [hP'_def, norm_neg]
+    exact hCs
+  exact velocity_converges_of_bounded_accel_Ioo (P := u') (P' := P') (a := a)
+    (b := b) (C := C) hab hderiv_pf hbound_pf
+
+/-! ### Chart-coordinate velocity bound near the limit point
+
+The directional velocity limit `chartVelocity_converges_at_finite_endpoint_Ioo`
+consumes a uniform bound `‖u' s‖ ≤ K₁` on the chart-coordinate velocity.  We
+supply that bound from the constant `g`-speed of the geodesic, via the Gram
+quadratic form: the squared `g`-speed `⟨γ', γ'⟩_g` equals the Gram quadratic
+form of the chart velocity, and the Gram matrix is uniformly positive definite
+on a compact subset of the chart target.  The chart velocity is thus bounded by
+`c / √m`, where `m` is the uniform Gram lower bound. -/
+
+/-- The chart-`y` Gram quadratic form on the model space: at a chart-target
+point `z` and a vector `V`, this is `∑ᵢⱼ G_{ij}(z) · Vⁱ · Vʲ`, where
+`G_{ij}(z) = chartGramOnE g y i j z`.  It is the chart-coordinate expression of
+the squared `g`-length of the tangent vector `symmL_y(z) V`. -/
+private def chartGramQuad (g : SmoothRiemannianMetric I M) (y : M)
+    (z : E) (V : E) : ℝ :=
+  ∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+    chartGramOnE (I := I) g y i j z *
+      chartCoord (E := E) i V * chartCoord (E := E) j V
+
+/-- The Gram quadratic form equals the squared `g`-length of the
+inverse-trivialisation image of `V`, for `z` in the chart target. -/
+private lemma chartGramQuad_eq_inner
+    (g : SmoothRiemannianMetric I M) (y : M) {z : E}
+    (_hz : z ∈ (extChartAt I y).target) (V : E) :
+    chartGramQuad (I := I) g y z V =
+      g.inner ((extChartAt I y).symm z)
+        ((trivializationAt E (TangentSpace I) y).symmL ℝ ((extChartAt I y).symm z) V)
+        ((trivializationAt E (TangentSpace I) y).symmL ℝ ((extChartAt I y).symm z) V) := by
+  classical
+  set x : M := (extChartAt I y).symm z with hx_def
+  rw [chartGramQuad,
+    inner_eq_chartGramOnE_bilinear_on_baseSet (I := I) g y (x := x) V V]
+  refine Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun j _ => ?_))
+  rw [chartGramOnE_def, hx_def]
+
+/-- The Gram quadratic form is nonnegative, and strictly positive when `V ≠ 0`,
+for `z` in the chart target.  Positivity uses the positive-definiteness of `g`
+together with the injectivity of the inverse trivialisation on the base set. -/
+private lemma chartGramQuad_pos
+    (g : SmoothRiemannianMetric I M) (y : M) {z : E}
+    (hz : z ∈ (extChartAt I y).target) {V : E} (hV : V ≠ 0) :
+    0 < chartGramQuad (I := I) g y z V := by
+  classical
+  rw [chartGramQuad_eq_inner (I := I) g y hz V]
+  set x : M := (extChartAt I y).symm z with hx_def
+  -- `x` is in the trivialisation base set at `y`.
+  have hx_src : x ∈ (chartAt H y).source := by
+    rw [hx_def, ← extChartAt_source_eq_chartAt_source (I := I)]
+    exact (extChartAt I y).map_target hz
+  have hbase : x ∈ (trivializationAt E (TangentSpace I) y).baseSet := by
+    rw [TangentBundle.trivializationAt_baseSet]; exact hx_src
+  -- The inverse trivialisation is injective on the base set: `continuousLinearMapAt`
+  -- is a left inverse of `symmL`, so `symmL V = 0 ⟹ V = 0`.
+  have hsymm_ne : (trivializationAt E (TangentSpace I) y).symmL ℝ x V ≠ 0 := by
+    intro hzero
+    apply hV
+    have hround :
+        ((trivializationAt E (TangentSpace I) y).continuousLinearMapAt ℝ x)
+            ((trivializationAt E (TangentSpace I) y).symmL ℝ x V) = V :=
+      (trivializationAt E (TangentSpace I) y).continuousLinearMapAt_symmL
+        (R := ℝ) hbase V
+    rw [hzero, map_zero] at hround
+    exact hround.symm
+  exact g.pos x _ hsymm_ne
+
+/-- The Gram quadratic form is quadratically homogeneous: scaling `V` by `a`
+multiplies the form by `a²`. -/
+private lemma chartGramQuad_smul
+    (g : SmoothRiemannianMetric I M) (y : M) (z : E) (a : ℝ) (V : E) :
+    chartGramQuad (I := I) g y z (a • V) = a ^ 2 * chartGramQuad (I := I) g y z V := by
+  classical
+  unfold chartGramQuad
+  rw [Finset.mul_sum]
+  refine Finset.sum_congr rfl (fun i _ => ?_)
+  rw [Finset.mul_sum]
+  refine Finset.sum_congr rfl (fun j _ => ?_)
+  rw [chartCoord_smul, chartCoord_smul]
+  ring
+
+/-- Joint continuity of the Gram quadratic form `(z, V) ↦ chartGramQuad g y z V`
+on `(extChartAt I y).target ×ˢ univ`: the Gram coefficients are smooth on the
+target, and the chart coordinates are continuous linear functionals. -/
+private lemma chartGramQuad_continuousOn
+    (g : SmoothRiemannianMetric I M) (y : M) :
+    ContinuousOn (fun p : E × E => chartGramQuad (I := I) g y p.1 p.2)
+      ((extChartAt I y).target ×ˢ (Set.univ : Set E)) := by
+  classical
+  unfold chartGramQuad
+  refine continuousOn_finset_sum _ (fun i _ => continuousOn_finset_sum _ (fun j _ => ?_))
+  -- Gram coefficient as a function of `p.1`, continuous on the target factor.
+  have hG : ContinuousOn (fun p : E × E => chartGramOnE (I := I) g y i j p.1)
+      ((extChartAt I y).target ×ˢ (Set.univ : Set E)) :=
+    ((chartGramOnE_contDiffOn (I := I) g y i j).continuousOn).comp continuousOn_fst
+      (fun p hp => hp.1)
+  -- Chart coordinates of `p.2`, continuous everywhere.
+  have hci : Continuous (fun p : E × E => chartCoord (E := E) i p.2) :=
+    (((chartModelBasis E).coord i).toContinuousLinearMap).continuous.comp continuous_snd
+  have hcj : Continuous (fun p : E × E => chartCoord (E := E) j p.2) :=
+    (((chartModelBasis E).coord j).toContinuousLinearMap).continuous.comp continuous_snd
+  exact (hG.mul hci.continuousOn).mul hcj.continuousOn
+
+/-- **Uniform Gram lower bound on a compact subset of the chart target.**
+For a nonempty compact set `S` inside the chart target at `y`, there is a
+positive constant `m` with `m · ‖V‖² ≤ chartGramQuad g y z V` for every
+`z ∈ S` and every `V : E`.
+
+The bound is the minimum of the quadratic form — continuous on
+`target ×ˢ univ`, strictly positive on the compact set `S ×ˢ sphere 0 1`
+(unit vectors, where positivity is `chartGramQuad_pos`) — transferred to a
+general `V` by the quadratic homogeneity `chartGramQuad_smul`. -/
+private lemma exists_chartGramQuad_lower_bound
+    (g : SmoothRiemannianMetric I M) (y : M) {S : Set E}
+    (hS_compact : IsCompact S) (hS_sub : S ⊆ (extChartAt I y).target)
+    (hS_ne : S.Nonempty) :
+    ∃ m : ℝ, 0 < m ∧ ∀ z ∈ S, ∀ V : E, m * ‖V‖ ^ 2 ≤ chartGramQuad (I := I) g y z V := by
+  classical
+  -- The compact set `T := S ×ˢ sphere 0 1`, nonempty since `E` is nontrivial.
+  have hfin_pos : 0 < Module.finrank ℝ E := Nat.pos_of_ne_zero (NeZero.ne _)
+  haveI : Nontrivial E := Module.nontrivial_of_finrank_pos hfin_pos
+  set T : Set (E × E) := S ×ˢ Metric.sphere (0 : E) 1 with hT_def
+  have hsphere_compact : IsCompact (Metric.sphere (0 : E) 1) :=
+    isCompact_sphere (0 : E) 1
+  have hT_compact : IsCompact T := hS_compact.prod hsphere_compact
+  have hsphere_ne : (Metric.sphere (0 : E) 1).Nonempty :=
+    NormedSpace.sphere_nonempty.mpr zero_le_one
+  have hT_ne : T.Nonempty := hS_ne.prod hsphere_ne
+  -- The quadratic form is continuous on `T` (which sits in `target ×ˢ univ`).
+  have hQcont : ContinuousOn (fun p : E × E => chartGramQuad (I := I) g y p.1 p.2) T := by
+    refine (chartGramQuad_continuousOn (I := I) g y).mono ?_
+    intro p hp
+    exact ⟨hS_sub hp.1, Set.mem_univ _⟩
+  -- The minimum of the form over the compact nonempty `T` is attained at `p₀`.
+  obtain ⟨p₀, hp₀_mem, hp₀_min⟩ :=
+    hT_compact.exists_isMinOn hT_ne hQcont
+  set m : ℝ := chartGramQuad (I := I) g y p₀.1 p₀.2 with hm_def
+  -- `m > 0`: `p₀.2` is a unit vector (hence nonzero), `p₀.1 ∈ S ⊆ target`.
+  have hp₀1_mem : p₀.1 ∈ S := hp₀_mem.1
+  have hp₀2_sphere : p₀.2 ∈ Metric.sphere (0 : E) 1 := hp₀_mem.2
+  have hp₀2_ne : p₀.2 ≠ 0 := by
+    intro hz
+    rw [Metric.mem_sphere, hz, dist_self] at hp₀2_sphere
+    exact one_ne_zero hp₀2_sphere.symm
+  have hm_pos : 0 < m :=
+    chartGramQuad_pos (I := I) g y (hS_sub hp₀1_mem) hp₀2_ne
+  refine ⟨m, hm_pos, ?_⟩
+  intro z hz V
+  rcases eq_or_ne V 0 with hV | hV
+  · subst hV; simp [chartGramQuad]
+  · -- Normalise `V` to the unit sphere: `V = ‖V‖ • (‖V‖⁻¹ • V)` with unit `V̂`.
+    set r : ℝ := ‖V‖ with hr_def
+    have hr_pos : 0 < r := by rw [hr_def]; exact norm_pos_iff.mpr hV
+    set Vhat : E := r⁻¹ • V with hVhat_def
+    have hVhat_unit : Vhat ∈ Metric.sphere (0 : E) 1 := by
+      rw [Metric.mem_sphere, dist_zero_right, hVhat_def, norm_smul, norm_inv,
+        Real.norm_eq_abs, abs_of_pos hr_pos, hr_def]
+      field_simp
+    -- `(z, Vhat) ∈ T`, so the minimum bound applies.
+    have hmem_T : ((z, Vhat) : E × E) ∈ T := ⟨hz, hVhat_unit⟩
+    have hmin : m ≤ chartGramQuad (I := I) g y z Vhat :=
+      isMinOn_iff.mp hp₀_min ((z, Vhat) : E × E) hmem_T
+    -- `chartGramQuad g y z V = r² · chartGramQuad g y z Vhat`.
+    have hV_eq : V = r • Vhat := by
+      rw [hVhat_def, smul_smul, mul_inv_cancel₀ (ne_of_gt hr_pos), one_smul]
+    have hscale : chartGramQuad (I := I) g y z V = r ^ 2 * chartGramQuad (I := I) g y z Vhat := by
+      conv_lhs => rw [hV_eq]
+      rw [chartGramQuad_smul]
+    rw [hscale, hr_def]
+    have hr2_nn : (0 : ℝ) ≤ ‖V‖ ^ 2 := sq_nonneg _
+    calc m * ‖V‖ ^ 2 = ‖V‖ ^ 2 * m := by ring
+      _ ≤ ‖V‖ ^ 2 * chartGramQuad (I := I) g y z Vhat :=
+          mul_le_mul_of_nonneg_left hmin hr2_nn
+
+/-- **Chart-coordinate velocity bound near the limit point.** Let `γ` be a
+curve converging (in the manifold topology) to `y` as `s → b⁻`, with squared
+`g`-speed bounded by `c²`.  Then on some left-interval `Ioo (b - ε) b` the
+chart-`y`-coordinate velocity `deriv (chartCurve y γ) s` is bounded in norm by
+`c / √m`, and the chart image `chartCurve y γ s` stays in a fixed compact set
+`S ⊆ interior (extChartAt I y).target`.
+
+The compact set `S` is a closed ball around `extChartAt I y y` inside the
+interior of the target; `γ s → y` and continuity of the chart map keep
+`chartCurve y γ s` inside it for `s` near `b`.  On `S` the chart Gram matrix is
+uniformly positive definite (`exists_chartGramQuad_lower_bound`), so the squared
+speed `chartGramQuad g y (u s)(V s) = ⟨γ', γ'⟩_g ≤ c²` yields `‖V s‖ ≤ c/√m`. -/
+theorem chartVelocity_bound_near_limit
+    (g : SmoothRiemannianMetric I M) (y : M) {γ : ℝ → M} {b c : ℝ}
+    (hc_nonneg : 0 ≤ c)
+    (hγ_mdiff : MDifferentiable 𝓘(ℝ, ℝ) I γ)
+    (_hγ_cont : Continuous γ)
+    (hy_lim : Tendsto γ (𝓝[<] b) (𝓝 y))
+    (hSpeedSq : ∀ s : ℝ,
+      (g.inner (γ s)) (mfderiv 𝓘(ℝ, ℝ) I γ s 1) (mfderiv 𝓘(ℝ, ℝ) I γ s 1) ≤ c ^ 2) :
+    ∃ (ε K : ℝ) (S : Set E), 0 < ε ∧ IsCompact S ∧
+      S ⊆ interior (extChartAt I y).target ∧
+      (∀ s ∈ Set.Ioo (b - ε) b,
+        ‖deriv (chartCurve (I := I) y γ) s‖ ≤ K ∧
+          chartCurve (I := I) y γ s ∈ S) := by
+  classical
+  -- The chart image of `y` lies in the interior of the target (boundaryless).
+  have hy_src : y ∈ (chartAt H y).source := mem_chart_source H y
+  have hy_ext_src : y ∈ (extChartAt I y).source := by
+    rw [extChartAt_source_eq_chartAt_source (I := I)]; exact hy_src
+  have hy_target : extChartAt I y y ∈ (extChartAt I y).target :=
+    (extChartAt I y).map_source hy_ext_src
+  have hy_interior : extChartAt I y y ∈ interior (extChartAt I y).target :=
+    extChartAt_target_subset_interior_of_boundaryless (I := I) y hy_target
+  -- A radius `ρ > 0` with the closed ball `closedBall (φ y) ρ ⊆ interior target`.
+  obtain ⟨ρ, hρ_pos, hρ_sub⟩ :=
+    Metric.isOpen_iff.mp isOpen_interior _ hy_interior
+  -- Use the half-radius closed ball as the compact set `S`.
+  set S : Set E := Metric.closedBall (extChartAt I y y) (ρ / 2) with hS_def
+  have hS_compact : IsCompact S := isCompact_closedBall _ _
+  have hS_sub : S ⊆ interior (extChartAt I y).target := by
+    intro z hz
+    refine hρ_sub ?_
+    rw [Metric.mem_ball]
+    rw [hS_def, Metric.mem_closedBall] at hz
+    linarith [hz]
+  have hS_ne : S.Nonempty := ⟨extChartAt I y y, by
+    rw [hS_def, Metric.mem_closedBall, dist_self]; linarith⟩
+  -- Uniform Gram lower bound on `S`.
+  obtain ⟨m, hm_pos, hm_bound⟩ :=
+    exists_chartGramQuad_lower_bound (I := I) g y hS_compact
+      (hS_sub.trans interior_subset) hS_ne
+  -- The velocity bound constant: `K := c / √m`.
+  set K : ℝ := c / Real.sqrt m with hK_def
+  -- `chartCurve y γ s → φ y` as `s → b⁻` (continuity of the chart map at `y`).
+  have hu_lim : Tendsto (chartCurve (I := I) y γ) (𝓝[<] b) (𝓝 (extChartAt I y y)) := by
+    have hcont_at : ContinuousAt (extChartAt I y) y :=
+      (continuousAt_extChartAt (I := I) y)
+    have : Tendsto (fun s => extChartAt I y (γ s)) (𝓝[<] b) (𝓝 (extChartAt I y y)) :=
+      hcont_at.tendsto.comp hy_lim
+    simpa [chartCurve] using this
+  -- For `s` near `b`, `chartCurve y γ s ∈ closedBall (φ y) (ρ/2) = S`.
+  have hu_mem_ev : ∀ᶠ s in 𝓝[<] b, chartCurve (I := I) y γ s ∈ S := by
+    have hball_nhds : Metric.closedBall (extChartAt I y y) (ρ / 2) ∈
+        𝓝 (extChartAt I y y) :=
+      Metric.closedBall_mem_nhds _ (by linarith)
+    exact hu_lim hball_nhds
+  -- For `s` near `b`, `γ s ∈ (chartAt H y).source` (continuity to `y`).
+  have hsrc_ev : ∀ᶠ s in 𝓝[<] b, γ s ∈ (chartAt H y).source := by
+    have hsrc_nhds : (chartAt H y).source ∈ 𝓝 y :=
+      (chartAt H y).open_source.mem_nhds hy_src
+    exact hy_lim hsrc_nhds
+  -- Combine the two eventual memberships into a left-interval `Ioo (b - ε) b`.
+  obtain ⟨U, hU_nhds, hU_sub⟩ :=
+    mem_nhdsWithin_iff_exists_mem_nhds_inter.mp
+      (Filter.inter_mem hu_mem_ev hsrc_ev)
+  obtain ⟨δ, hδ_pos, hδ_sub⟩ := Metric.mem_nhds_iff.mp hU_nhds
+  refine ⟨δ, K, S, hδ_pos, hS_compact, hS_sub, ?_⟩
+  intro s hs
+  -- `s ∈ Ioo (b - δ) b ⟹ s ∈ ball b δ ∩ Iio b ⊆ U ∩ Iio b`.
+  have hs_ball : s ∈ Metric.ball b δ := by
+    rw [Metric.mem_ball, Real.dist_eq, abs_lt]
+    constructor <;> [linarith [hs.1]; linarith [hs.2]]
+  have hs_Iio : s ∈ Set.Iio b := hs.2
+  have hs_both : chartCurve (I := I) y γ s ∈ S ∧ γ s ∈ (chartAt H y).source :=
+    hU_sub ⟨hδ_sub hs_ball, hs_Iio⟩
+  obtain ⟨hu_memS, hγ_src⟩ := hs_both
+  refine ⟨?_, hu_memS⟩
+  -- Velocity bound at `s`.
+  -- The chart velocity `V s := deriv (chartCurve y γ) s = fderiv (φ_y ∘ γ) s 1`.
+  set V : E := deriv (chartCurve (I := I) y γ) s with hV_def
+  have hVeq : (fderiv ℝ ((extChartAt I y) ∘ γ) s : ℝ →L[ℝ] E) (1 : ℝ) = V := by
+    rw [hV_def, deriv]; rfl
+  -- The raw velocity is `symmL_y(γ s)(V)`.
+  have hγ_s : MDifferentiableAt 𝓘(ℝ, ℝ) I γ s := hγ_mdiff s
+  have hraw := bm_c_raw_mfderiv_eq_symmL_fderiv_at (I := I) (γ := γ) (α := y)
+    (s := s) hγ_s hγ_src
+  rw [hVeq] at hraw
+  -- `chartCurve y γ s ∈ target` (from `S ⊆ interior target ⊆ target`).
+  have hu_target : chartCurve (I := I) y γ s ∈ (extChartAt I y).target :=
+    interior_subset (hS_sub hu_memS)
+  -- `(extChartAt I y).symm (chartCurve y γ s) = γ s`.
+  have hinv : (extChartAt I y).symm (chartCurve (I := I) y γ s) = γ s := by
+    rw [chartCurve_def]
+    exact (extChartAt I y).left_inv (by
+      rw [extChartAt_source_eq_chartAt_source (I := I)]; exact hγ_src)
+  -- Squared-speed identity: `chartGramQuad g y (u s)(V) = ⟨γ', γ'⟩_g ≤ c²`.
+  have hspeed_eq :
+      chartGramQuad (I := I) g y (chartCurve (I := I) y γ s) V =
+        (g.inner (γ s)) (mfderiv 𝓘(ℝ, ℝ) I γ s 1) (mfderiv 𝓘(ℝ, ℝ) I γ s 1) := by
+    rw [chartGramQuad_eq_inner (I := I) g y hu_target V, hinv]
+    rw [← hraw]
+    rfl
+  have hQ_le : chartGramQuad (I := I) g y (chartCurve (I := I) y γ s) V ≤ c ^ 2 := by
+    rw [hspeed_eq]; exact hSpeedSq s
+  -- Lower bound: `m · ‖V‖² ≤ chartGramQuad ... ≤ c²`.
+  have hlow : m * ‖V‖ ^ 2 ≤ c ^ 2 :=
+    le_trans (hm_bound (chartCurve (I := I) y γ s) hu_memS V) hQ_le
+  -- Hence `‖V‖² ≤ c²/m`, so `‖V‖ ≤ c/√m = K`.
+  have hVsq_le : ‖V‖ ^ 2 ≤ c ^ 2 / m := by
+    rw [le_div_iff₀ hm_pos]; linarith [hlow]
+  have hsqrt_m_pos : 0 < Real.sqrt m := Real.sqrt_pos.mpr hm_pos
+  -- `‖V‖ ≤ c / √m`.
+  rw [hK_def]
+  rw [le_div_iff₀ hsqrt_m_pos]
+  -- Square both sides (both nonneg): `(‖V‖ · √m)² = ‖V‖² · m ≤ c² = c·c`.
+  have hlhs_nn : 0 ≤ ‖V‖ * Real.sqrt m := mul_nonneg (norm_nonneg _) hsqrt_m_pos.le
+  have hsq : (‖V‖ * Real.sqrt m) ^ 2 ≤ c ^ 2 := by
+    rw [mul_pow, Real.sq_sqrt hm_pos.le]
+    calc ‖V‖ ^ 2 * m ≤ (c ^ 2 / m) * m :=
+          mul_le_mul_of_nonneg_right hVsq_le hm_pos.le
+      _ = c ^ 2 := by field_simp
+  have := Real.sqrt_le_sqrt hsq
+  rwa [Real.sqrt_sq hlhs_nn, Real.sqrt_sq hc_nonneg] at this
 
 /-! ### Intrinsic geodesic completeness
 
@@ -1529,17 +1965,30 @@ The genuine ODE-regularity argument has three parts:
   with matching `(position, velocity)` boundary data at `b` gives the
   asymptotic agreement `γ =ᶠ[𝓝[<] b] (t ↦ η (t - b))`.
 
-The first part is discharged unconditionally below. The directional
-velocity limit and the `C¹` matching require the moving-foot → chart-fixed
-integral-curve bridge for `γ` near `b` (`HasGeodesicEquationAt` ⟹
-`IsMIntegralCurveAt (geodesicVectorFieldChart g y)`, i.e. the
-chart-transition invariance of the geodesic equation at the base-curve
-level — the same `chartChristoffelContraction_transform` law that drives
-`geodesicVectorFieldChart_eq_geodesicVectorField`, but applied to `γ`'s
-own chart-`y` representation) followed by
-`isGeodesicAt_eventuallyEq`-style uniqueness. That bridge is not yet
-available in the project; it is isolated as the single residual gap of
-this producer (the asymptotic matching `hmatch`). -/
+The first part is discharged unconditionally below.  The directional
+velocity-limit machinery is now available: the chart-coordinate velocity is
+bounded near `b` by the constant-speed Gram estimate
+(`chartVelocity_bound_near_limit`, via the uniform positive-definiteness of the
+chart Gram matrix on a compact neighbourhood of `y`), and a bounded
+chart-acceleration then forces the chart velocity to a genuine limit
+(`chartVelocity_converges_at_finite_endpoint_Ioo`, on the analytic engine
+`velocity_converges_of_bounded_accel_Ioo`), with the chart-fixed second-order
+ODE supplied pointwise by `hasGeodesicEquationAt_fixedChart_hasDerivAt_velocity`.
+
+Two infrastructure pieces remain before the `C¹` matching `hmatch` closes,
+both genuinely absent from the project:
+
+* the topology compatibility identifying the `PseudoEMetricSpace`-metric
+  topology (in which `bm_c_gc_position_limit` delivers `γ → y`) with the
+  manifold `ChartedSpace` topology (in which `chartVelocity_bound_near_limit`
+  consumes `γ → y`); and
+* a strengthened local-existence lemma exposing the *initial velocity* of the
+  continuation geodesic `η` (so that `η`'s chart velocity at `0` equals `γ`'s
+  limit velocity `w`), followed by the second-order chart-ODE uniqueness
+  (reduction to a first-order system on `E × E` and `ODE_solution_unique_of_mem_Ioo`)
+  matching `γ` and `t ↦ η (t - b)` from the common boundary data at `b`.
+
+The residual `sorry` is isolated to the asymptotic matching `hmatch`. -/
 theorem hasEndpointContinuation_of_complete
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {b c : ℝ}
     (hc_nonneg : 0 ≤ c)
@@ -1565,11 +2014,25 @@ theorem hasEndpointContinuation_of_complete
   obtain ⟨η, δ, hδ, _hη0, hη_geo⟩ := exists_isGeodesicOn_Ioo_at (I := I) g y w
   refine ⟨η, δ, hδ, hη_geo, ?_⟩
   -- Residual gap: the asymptotic `C¹` matching of `γ` with the shifted
-  -- continuation `t ↦ η (t - b)` approaching `b` from the left.  This is
-  -- the moving-foot → chart-fixed integral-curve bridge for `γ` near `b`
-  -- (chart-transition invariance of the geodesic equation at the
-  -- base-curve level) combined with chart-`y` ODE uniqueness.  It is the
-  -- single ODE-regularity input not yet available in the project.
+  -- continuation `t ↦ η (t - b)` approaching `b` from the left.
+  --
+  -- The directional-velocity-limit engine is now available:
+  --   `chartVelocity_bound_near_limit` bounds `deriv (chartCurve y γ)` near `b`
+  --   (uniform Gram positive-definiteness on a compact nbhd of `y`), and
+  --   `chartVelocity_converges_at_finite_endpoint_Ioo` (on the analytic engine
+  --   `velocity_converges_of_bounded_accel_Ioo`) then yields the limit velocity,
+  --   with the chart-fixed second-order ODE supplied pointwise by
+  --   `hasGeodesicEquationAt_fixedChart_hasDerivAt_velocity`.
+  -- Two pieces of infrastructure still block the matching, both genuinely
+  -- absent from the project:
+  --   (A) the topology compatibility between the `PseudoEMetricSpace`-metric
+  --       topology (in which `bm_c_gc_position_limit` gives `γ → y`) and the
+  --       manifold `ChartedSpace` topology (consumed by the velocity bound);
+  --   (B) a strengthened local-existence lemma exposing `η`'s initial chart
+  --       velocity (to pin it to `γ`'s limit velocity `w`), plus the
+  --       second-order chart-ODE uniqueness (first-order reduction on `E × E`
+  --       and `ODE_solution_unique_of_mem_Ioo`) matching the common boundary
+  --       data at `b`.
   sorry
 
 /-- **Single-step intrinsic right-extension.** A geodesic on `Iio b` with
