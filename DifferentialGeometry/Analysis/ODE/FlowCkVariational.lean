@@ -450,6 +450,97 @@ theorem contDiffOn_flow_of_isVariationalFlowProjection_top
 
 end RecursiveFlow
 
+/-! ## Regularity-independent coproduct identity for `fderiv ℝ Φ`
+
+The `fderiv_eq` clause of `IsVariationalFlowProjection` — that `fderiv ℝ Φ` splits as the
+coproduct of a spatial piece and the time piece — is a *regularity-independent* statement:
+it follows from the joint Fréchet-derivative formula `hasFDerivAt_flow_jointly_at`, which
+requires only `C^1` of `f`.  We package it once here, with the spatial piece realised as
+the spatial restriction `(fderiv ℝ Φ q).comp (inl ℝ E ℝ)` of the joint derivative, so that
+it is a clean total function on `E × ℝ`.
+
+This piece is the half of `IsVariationalFlowProjection` that *can* be discharged from the
+existing infrastructure.  The other half — joint `C^k` smoothness of the spatial piece, i.e.
+smooth parameter-dependence of the variational linear ODE — is the genuine remaining
+mathematical content and is not provided by this lemma. -/
+
+section FderivCoprodIdentity
+
+variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
+
+/-- The **spatial piece** of the joint Fréchet derivative of the flow: the spatial
+restriction `(fderiv ℝ Φ q).comp (inl ℝ E ℝ)` of the joint derivative, viewed as a total
+`CLM`-valued function of `q = (x, t)`.  By `hasFDerivAt_flow_jointly_at`, at every interior
+point this equals the variational linear map along the orbit through `x`. -/
+def spatialPieceFn (Φ : E × ℝ → E) : E × ℝ → (E →L[ℝ] E) :=
+  fun q => (fderiv ℝ Φ q).comp (ContinuousLinearMap.inl ℝ E ℝ)
+
+@[simp]
+lemma spatialPieceFn_apply (Φ : E × ℝ → E) (q : E × ℝ) :
+    spatialPieceFn Φ q = (fderiv ℝ Φ q).comp (ContinuousLinearMap.inl ℝ E ℝ) := rfl
+
+/-- **Regularity-independent coproduct identity.**  Under the standard `C^1` flow
+hypotheses (three-layer nested setup of `contDiffOn_flow_of_isLocalFlow`), at every point
+`q = (x, t)` of the strictly-interior open neighbourhood the joint Fréchet derivative of
+the flow splits as the coproduct of its spatial piece and the time piece:
+`fderiv ℝ Φ q = (spatialPieceFn Φ q).coprod (timePieceFn f Φ q)`.
+
+This is exactly the `fderiv_eq` clause of `IsVariationalFlowProjection`, realised for the
+canonical spatial piece `spatialPieceFn Φ`.  Only `C^1` of `f` is required. -/
+theorem fderiv_flow_eq_coprod_spatialPiece
+    (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
+    (hf_C1 : ContDiffOn ℝ 1 (uncurry f) (Set.univ : Set (ℝ × E)))
+    {T_out T_mid T M : ℝ} (hT : 0 < T) (hT_lt_mid : T < T_mid) (hT_mid_lt_out : T_mid < T_out)
+    (hM : 0 ≤ M) (hMT_mid : M * T_mid < 1)
+    (hsub : Icc (t₀ - T_out) (t₀ + T_out) ⊆ Icc tmin tmax)
+    {ρ_out ρ_mid ρ : ℝ≥0} {r' : ℝ≥0} (hr' : 0 < r')
+    (hρ_lt_mid : (ρ : ℝ) < (ρ_mid : ℝ)) (hρ_mid_lt_out : (ρ_mid : ℝ) < (ρ_out : ℝ))
+    (hρρ' : (ρ_mid : ℝ) + (r' : ℝ) ≤ (r : ℝ))
+    (_hρ_out_le_r : (ρ_out : ℝ) ≤ (r : ℝ))
+    (hA_bd : ∀ x ∈ closedBall x₀ (ρ_out : ℝ), ∀ τ ∈ Icc (t₀ - T_out) (t₀ + T_out),
+      ‖fderiv ℝ (f τ) (Φ ⟨x, τ⟩)‖ ≤ M) :
+    ∀ q ∈ ((ball x₀ (ρ : ℝ)) ×ˢ Ioo (t₀ - T) (t₀ + T)),
+      fderiv ℝ Φ q = (spatialPieceFn Φ q).coprod (timePieceFn f Φ q) := by
+  have hT_mid_pos : 0 < T_mid := lt_trans hT hT_lt_mid
+  have hρ_mid_pos : 0 < (ρ_mid : ℝ) := lt_of_le_of_lt (ρ.coe_nonneg) hρ_lt_mid
+  have hsub_mid_out : Icc (t₀ - T_mid) (t₀ + T_mid) ⊆ Icc (t₀ - T_out) (t₀ + T_out) :=
+    Icc_subset_Icc (by linarith) (by linarith)
+  have hsub_mid : Icc (t₀ - T_mid) (t₀ + T_mid) ⊆ Icc tmin tmax := hsub_mid_out.trans hsub
+  have hA_bd_mid : ∀ x ∈ closedBall x₀ (ρ_mid : ℝ), ∀ τ ∈ Icc (t₀ - T_mid) (t₀ + T_mid),
+      ‖fderiv ℝ (f τ) (Φ ⟨x, τ⟩)‖ ≤ M := fun x hx τ hτ =>
+    hA_bd x (closedBall_subset_closedBall (le_of_lt hρ_mid_lt_out) hx) τ (hsub_mid_out hτ)
+  intro q hq
+  rcases hq with ⟨hq_x, hq_t⟩
+  rw [mem_ball] at hq_x
+  obtain ⟨x, t⟩ := q
+  have hx_cb_mid : x ∈ closedBall x₀ (ρ_mid : ℝ) :=
+    mem_closedBall.mpr (le_of_lt (lt_trans hq_x hρ_lt_mid))
+  have hq_t_mid : t ∈ Ioo (t₀ - T_mid) (t₀ + T_mid) :=
+    ⟨by linarith [hq_t.1], by linarith [hq_t.2]⟩
+  -- The joint Fréchet derivative at `(x, t)`.
+  have hfd_at := hasFDerivAt_flow_jointly_at hΦ hf_C1 hT_mid_pos hM hMT_mid hsub_mid hr' hρρ'
+    hA_bd_mid hx_cb_mid hq_t_mid
+  have hfd_eq := hfd_at.fderiv
+  -- Decompose the coproduct via its spatial/time restrictions.
+  set Lsp : E →L[ℝ] E :=
+    variationalLinearMapAt (f := f) (α := fun s => Φ ⟨x, s⟩) (t₀ := t₀)
+      hT_mid_pos hM hMT_mid
+      (((hΦ.restrict_center_of_norm_le (x₁ := x) (r' := r') (by
+          rw [mem_closedBall] at hx_cb_mid; linarith)).continuousOn_fderiv_along_orbit hf_C1 x
+        (Metric.mem_closedBall_self (by exact_mod_cast (le_of_lt hr')))).mono hsub_mid)
+      (fun τ hτ => hA_bd_mid x hx_cb_mid τ hτ) (Ioo_subset_Icc_self hq_t_mid) with hLsp_def
+  set Lti : ℝ →L[ℝ] E :=
+    (ContinuousLinearMap.id ℝ ℝ).smulRight (f t (Φ ⟨x, t⟩)) with hLti_def
+  -- The time piece equals `Lti` by definition.
+  have hti_eq : timePieceFn f Φ (x, t) = Lti := rfl
+  -- The spatial piece equals `Lsp`: it is the `inl`-restriction of the coproduct.
+  have hsp_eq : spatialPieceFn Φ (x, t) = Lsp := by
+    rw [spatialPieceFn_apply, hfd_eq]
+    exact ContinuousLinearMap.coprod_comp_inl Lsp Lti
+  rw [hsp_eq, hti_eq, hfd_eq]
+
+end FderivCoprodIdentity
+
 /-! ## The `k = 2` specialization via V.2.c.2 on the augmented system
 
 For `k = 2`, the variational-flow projection at level `1` reduces to *joint continuity*
