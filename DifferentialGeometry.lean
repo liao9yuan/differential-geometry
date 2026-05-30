@@ -1286,6 +1286,7 @@ import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.EigenvalueTailSummab
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.SobolevScaleSummable
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.FaithfulH1Embedding
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.EigenCombination
+import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.EigenComboGardingReduction
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.PointwiseDeriv
 import DifferentialGeometry.PDE.RicciFlow.DeTurckShortTime
 import DifferentialGeometry.PDE.RicciFlow.DeTurckVFTimeFamily
