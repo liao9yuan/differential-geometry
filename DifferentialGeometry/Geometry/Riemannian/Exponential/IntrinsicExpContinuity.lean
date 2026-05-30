@@ -770,6 +770,250 @@ private theorem flowOrbit_uniform_confinement
     have hpair : (v, s) ∈ S₁ ×ˢ V₁ := ⟨hv_S₁, hs_V₁⟩
     exact h_sub hpair
 
+/-! ### Geodesic-side fixed-chart phase ODE on a window
+
+For the uniform identification we need the *geodesic side* expressed in a single
+*fixed* chart `α` (the junction chart centre, generally distinct from the moving
+foot).  The fixed-chart curve `s ↦ extChartAt I α (γ s)` paired with its
+time-derivative satisfies the genuine chart-phase ODE `chartPhaseVF g α` wherever
+`γ` stays in the chart-`α` source — this is the fixed-chart reading of the
+moving-foot geodesic equation, supplied pointwise by
+`Geodesic.hasGeodesicEquationAt_fixedChart_eventually_hasDerivAt` (first-order
+differentiability companion) and
+`Geodesic.hasGeodesicEquationAt_fixedChart_hasDerivAt_velocity` (second-order
+velocity ODE). -/
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- **Geodesic-side fixed-chart phase curve satisfies `chartPhaseVF` on a
+window.** Let `γ` be a geodesic, continuous, whose values on an open set
+`U ∋ t` all lie in the chart-`α` source.  Then the fixed-`α`-chart phase curve
+`c s := (extChartAt I α (γ s), deriv (extChartAt I α ∘ γ) s)` satisfies the
+chart-phase ODE `HasDerivAt c (chartPhaseVF g α (c s)) s` at every `s ∈ U`, and
+`(c s).1 ∈ interior (extChartAt I α).target`.
+
+This is the fixed-chart reading of the moving-foot geodesic equation: at each
+`s ∈ U`, `γ s` lies in the chart-`α` source, so the moving-foot equation
+`hγ.hasGeodesicEquationAt s` transforms (via the chart-transition Christoffel law)
+into the fixed-`α`-chart second-order ODE, which combines with the first-order
+differentiability companion into the first-order phase system on `E × E`. -/
+private theorem geodesic_chartPhaseVF_on_open
+    {g : SmoothRiemannianMetric I M} {α : M} {γ : ℝ → M}
+    (hγ : IsGeodesic (I := I) g γ) (hγ_cont : Continuous γ)
+    {U : Set ℝ} (hU_open : IsOpen U)
+    (hγ_src : ∀ s ∈ U, γ s ∈ (chartAt H α).source) :
+    ∀ s ∈ U,
+      HasDerivAt
+        (fun r : ℝ =>
+          ((DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve
+              (I := I) α γ r,
+            deriv (DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve
+              (I := I) α γ) r) : E × E))
+        (chartPhaseVF (I := I) g α
+          ((DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve
+              (I := I) α γ s,
+            deriv (DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve
+              (I := I) α γ) s) : E × E)) s ∧
+      (DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) α γ s)
+        ∈ interior (extChartAt I α).target := by
+  classical
+  set w : ℝ → E :=
+    DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) α γ
+    with hw_def
+  intro s hs
+  have hsU_nhds : U ∈ 𝓝 s := hU_open.mem_nhds hs
+  have hs_src : γ s ∈ (chartAt H α).source := hγ_src s hs
+  -- First-order differentiability of the fixed-chart curve near `s`.
+  have hev_first : ∀ᶠ r in 𝓝 s, HasDerivAt w (deriv w r) r :=
+    DifferentialGeometry.Geometry.Riemannian.Geodesic.hasGeodesicEquationAt_fixedChart_eventually_hasDerivAt
+      (I := I) g α hγ_cont.continuousAt hs_src (hγ s)
+  have hfirst : HasDerivAt w (deriv w s) s := hev_first.self_of_nhds
+  -- Second-order velocity ODE at `s`.
+  have hsecond : HasDerivAt (deriv w)
+      (- chartChristoffelContraction (I := I) g α (deriv w s) (deriv w s) (w s)) s :=
+    DifferentialGeometry.Geometry.Riemannian.Geodesic.hasGeodesicEquationAt_fixedChart_hasDerivAt_velocity
+      (I := I) g α hγ_cont.continuousAt hs_src (hγ s)
+  refine ⟨?_, ?_⟩
+  · -- Combine into the phase ODE.
+    have hpair : HasDerivAt
+        (fun r : ℝ => (w r, deriv w r))
+        ((deriv w s,
+          - chartChristoffelContraction (I := I) g α (deriv w s) (deriv w s) (w s))) s :=
+      hfirst.prodMk hsecond
+    have hrhs : chartPhaseVF (I := I) g α (w s, deriv w s) =
+        (deriv w s,
+          - chartChristoffelContraction (I := I) g α (deriv w s) (deriv w s) (w s)) := by
+      simp only [chartPhaseVF_apply]
+    rw [hrhs]; exact hpair
+  · -- Chart-target interior membership.
+    have hp_ext_src : γ s ∈ (extChartAt I α).source := by
+      rw [extChartAt_source_eq_chartAt_source (I := I)]; exact hs_src
+    have hp_target : extChartAt I α (γ s) ∈ (extChartAt I α).target :=
+      (extChartAt I α).map_source hp_ext_src
+    have hval : w s = extChartAt I α (γ s) := by simp [hw_def]
+    rw [hval]
+    exact DifferentialGeometry.Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
+      (I := I) α hp_target
+
+/-! ### Per-junction uniform geodesic↔flow identification (the residual bootstrap)
+
+The genuine analytic content of the assembly is the *uniform-in-`v`* identification
+of the intrinsic geodesic with a foot-varying chart-phase flow projection on a
+window `ball v₀ r ×ˢ Ioo (tₖ - T') (tₖ + T')`.  The following producer supplies
+that identification from the per-junction data: a chart centre `α`, a jointly-`C¹`
+per-chart flow `Φ` (from
+`Geodesic.SmoothFlow.exists_chartPhase_contDiffOn_isLocalFlow_combined`), the
+continuous-in-`v` phase point `z v` (chart-coordinate of the foot
+`intrinsicGeodesic g hEnorm p v tₖ` paired with its chart velocity), uniform
+confinement of both the geodesic and the flow orbit to a compact ball inside the
+chart-target interior, and the matching of initial phase data at `tₖ`.
+
+`chartPhaseVF_orbit_uniqueness_uniform_Ioo` then identifies the two chart-phase
+solutions on the *whole* window (uniqueness on the compact confinement ball over
+the entire `Ioo`), and projecting the first-component equality through
+`(extChartAt I α).symm` yields the geodesic↔`flowProj` identification `hident`.
+
+The hypotheses are genuine geometric inputs (confinement of the actual geodesic /
+flow orbit to a ball, and matching initial data), **not** the continuity
+conclusion; in particular the confinement is a true geometric fact about the
+specific curves, not a packaging of the joint-continuity goal. -/
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- **Per-junction uniform geodesic↔flow-projection identification.** On a window
+`ball v₀ r ×ˢ Ioo (tₖ - T') (tₖ + T')`, with `Φ` continuous on the phase product
+`ball z₀ ρ ×ˢ Ioo (-T) T` and satisfying the chart-phase ODE along each orbit
+`Φ (z v, ·)` confined to the compact ball `closedBall z₀ R ⊆ interior target ×ˢ
+univ`, the geodesic `intrinsicGeodesic g hEnorm p v` confined in chart `α` to the
+same ball, and matching initial phase data `z v = (extChartAt I α (γ_v tₖ),
+deriv (chartCurve α γ_v) tₖ)`, the intrinsic geodesic agrees with the foot-varying
+flow projection `flowProj α Φ (z v) (t - tₖ)` on the window.
+
+This is the uniform identification feeding `perChart_jointContinuity_of_flowIdentifiedOn`. -/
+private theorem perJunction_flowIdentification
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (p : M) (v₀ : TangentSpace I p)
+    {α : M} {Φ : (E × E) × ℝ → E × E} {z₀ : E × E}
+    {z : TangentSpace I p → E × E}
+    {tₖ r R T' : ℝ}
+    (hT'_pos : 0 < T')
+    (hball : Metric.closedBall z₀ R ⊆
+      (interior (extChartAt I α).target) ×ˢ (Set.univ : Set E))
+    (hΦ_phase : ∀ v ∈ Metric.ball v₀ r, ∀ s ∈ Set.Ioo (-T') T',
+      HasDerivAt (fun τ => Φ (z v, τ))
+        (chartPhaseVF (I := I) g α (Φ (z v, s))) s)
+    (hΦ_in : ∀ v ∈ Metric.ball v₀ r, ∀ s ∈ Set.Ioo (-T') T',
+      Φ (z v, s) ∈ Metric.closedBall z₀ R)
+    (hgeo_src : ∀ v ∈ Metric.ball v₀ r, ∀ t ∈ Set.Ioo (tₖ - T') (tₖ + T'),
+      intrinsicGeodesic (I := I) g hEnorm p v t ∈ (chartAt H α).source)
+    (hgeo_in : ∀ v ∈ Metric.ball v₀ r, ∀ t ∈ Set.Ioo (tₖ - T') (tₖ + T'),
+      ((DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) α
+          (intrinsicGeodesic (I := I) g hEnorm p v) t,
+        deriv (DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) α
+          (intrinsicGeodesic (I := I) g hEnorm p v)) t) : E × E)
+        ∈ Metric.closedBall z₀ R)
+    (hinit : ∀ v ∈ Metric.ball v₀ r,
+      ((DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) α
+          (intrinsicGeodesic (I := I) g hEnorm p v) tₖ,
+        deriv (DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) α
+          (intrinsicGeodesic (I := I) g hEnorm p v)) tₖ) : E × E) = z v)
+    (hΦinit : ∀ v ∈ Metric.ball v₀ r, Φ (z v, 0) = z v) :
+    ∀ v ∈ Metric.ball v₀ r, ∀ t ∈ Set.Ioo (tₖ - T') (tₖ + T'),
+      intrinsicGeodesic (I := I) g hEnorm p v t =
+        flowProj (I := I) α Φ (z v) (t - tₖ) := by
+  classical
+  intro v hv t ht
+  set γ : ℝ → M := intrinsicGeodesic (I := I) g hEnorm p v with hγ_def
+  have hγ_geo : IsGeodesic (I := I) g γ :=
+    intrinsicGeodesic_isGeodesic (I := I) g hEnorm p v
+  have hγ_cont : Continuous γ := intrinsicGeodesic_continuous (I := I) g hEnorm p v
+  set w : ℝ → E :=
+    DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) α γ
+    with hw_def
+  -- The geodesic-side phase curve, time-shifted to be centred at `tₖ`.
+  set c₁ : ℝ → E × E := fun s => (w (tₖ + s), deriv w (tₖ + s)) with hc₁_def
+  -- The flow-side phase curve.
+  set c₂ : ℝ → E × E := fun s => Φ (z v, s) with hc₂_def
+  -- Open window `U := Ioo (tₖ - T') (tₖ + T')` on which the geodesic is in chart `α`.
+  set U : Set ℝ := Set.Ioo (tₖ - T') (tₖ + T') with hU_def
+  have hU_open : IsOpen U := isOpen_Ioo
+  have hsrc_U : ∀ s ∈ U, γ s ∈ (chartAt H α).source := by
+    intro s hsU; exact hgeo_src v hv s hsU
+  -- Geodesic-side phase ODE on `U` (in the fixed chart `α`).
+  have hgeo_phase := geodesic_chartPhaseVF_on_open (I := I) (g := g) (α := α) (γ := γ)
+    hγ_geo hγ_cont hU_open hsrc_U
+  -- `c₁` satisfies `chartPhaseVF g α` on `Ioo (-T') T'` (via the time shift `s ↦ tₖ + s`).
+  have hc₁_phase : ∀ s ∈ Set.Ioo (-T') T',
+      HasDerivAt c₁ (chartPhaseVF (I := I) g α (c₁ s)) s := by
+    intro s hs
+    have htks : tₖ + s ∈ U := by
+      rw [hU_def, Set.mem_Ioo]
+      exact ⟨by linarith [hs.1], by linarith [hs.2]⟩
+    obtain ⟨hder, _⟩ := hgeo_phase (tₖ + s) htks
+    -- `hder : HasDerivAt (fun r => (w r, deriv w r)) (chartPhaseVF g α (w (tₖ+s), deriv w (tₖ+s))) (tₖ+s)`.
+    have hshift : HasDerivAt (fun r : ℝ => tₖ + r) 1 s := by
+      simpa using (hasDerivAt_id s).const_add tₖ
+    have hcomp := hder.scomp s hshift
+    simp only [one_smul] at hcomp
+    -- `hcomp : HasDerivAt ((fun r => (w r, deriv w r)) ∘ (fun r => tₖ + r)) (...) s`.
+    -- The composition equals `c₁` and the right-hand side equals `chartPhaseVF g α (c₁ s)`.
+    have hfun : ((fun r : ℝ => ((w r, deriv w r) : E × E)) ∘ fun r : ℝ => tₖ + r) = c₁ := by
+      funext r; simp only [Function.comp_apply, hc₁_def]
+    rw [hfun] at hcomp
+    have hrhs : c₁ s = ((w (tₖ + s), deriv w (tₖ + s)) : E × E) := by rw [hc₁_def]
+    rw [hrhs]; exact hcomp
+  -- `c₂` satisfies `chartPhaseVF g α` on `Ioo (-T') T'`.
+  have hc₂_phase : ∀ s ∈ Set.Ioo (-T') T',
+      HasDerivAt c₂ (chartPhaseVF (I := I) g α (c₂ s)) s := by
+    intro s hs; exact hΦ_phase v hv s hs
+  -- Both confined to `closedBall z₀ R`.
+  have hc₁_in : ∀ s ∈ Set.Ioo (-T') T', c₁ s ∈ Metric.closedBall z₀ R := by
+    intro s hs
+    have htks : tₖ + s ∈ U := by
+      rw [hU_def, Set.mem_Ioo]
+      exact ⟨by linarith [hs.1], by linarith [hs.2]⟩
+    have := hgeo_in v hv (tₖ + s) htks
+    rw [hc₁_def]; exact this
+  have hc₂_in : ∀ s ∈ Set.Ioo (-T') T', c₂ s ∈ Metric.closedBall z₀ R := by
+    intro s hs; exact hΦ_in v hv s hs
+  -- Match at `0`.
+  have hc₁_zero : c₁ 0 = z v := by
+    rw [hc₁_def]; simp only [add_zero]; exact hinit v hv
+  have hc₂_zero : c₂ 0 = z v := by rw [hc₂_def]; exact hΦinit v hv
+  have hmatch : c₁ 0 = c₂ 0 := by rw [hc₁_zero, hc₂_zero]
+  -- Uniform-in-parameter chart-phase ODE uniqueness on the compact ball.
+  have heq : ∀ s ∈ Set.Ioo (-T') T', c₁ s = c₂ s :=
+    chartPhaseVF_orbit_uniqueness_uniform_Ioo_closedBall (I := I) g α
+      hball hT'_pos hc₁_phase hc₂_phase hc₁_in hc₂_in hmatch
+  -- Evaluate at `s := t - tₖ ∈ Ioo (-T') T'`.
+  have hs_mem : (t - tₖ) ∈ Set.Ioo (-T') T' := by
+    rw [Set.mem_Ioo]
+    refine ⟨?_, ?_⟩
+    · have := ht.1; rw [Set.mem_Ioo] at ht; linarith [ht.1]
+    · rw [Set.mem_Ioo] at ht; linarith [ht.2]
+  have hfst := congrArg Prod.fst (heq (t - tₖ) hs_mem)
+  -- `(c₁ (t-tₖ)).1 = w (tₖ + (t - tₖ)) = w t = extChartAt I α (γ t)`.
+  have hc₁_fst : (c₁ (t - tₖ)).1 = extChartAt I α (γ t) := by
+    rw [hc₁_def]
+    simp only []
+    rw [show tₖ + (t - tₖ) = t by ring, hw_def]
+    simp only [DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve_def]
+  have hc₂_fst : (c₂ (t - tₖ)).1 = (Φ (z v, t - tₖ)).1 := by rw [hc₂_def]
+  rw [hc₁_fst, hc₂_fst] at hfst
+  -- `hfst : extChartAt I α (γ t) = (Φ (z v, t - tₖ)).1`.
+  -- Now `flowProj α Φ (z v) (t - tₖ) = (extChartAt I α).symm (Φ (z v, t - tₖ)).1`.
+  have hγ_es : γ t ∈ (extChartAt I α).source := by
+    rw [extChartAt_source_eq_chartAt_source (I := I)]
+    exact hsrc_U t ht
+  have hsymm : (extChartAt I α).symm (extChartAt I α (γ t)) = γ t :=
+    (extChartAt I α).left_inv hγ_es
+  -- Goal (after `set γ`): `γ t = flowProj α Φ (z v) (t - tₖ)`.
+  rw [flowProj, ← hfst, hsymm]
+
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 /-- **Joint continuity of the chained intrinsic geodesic flow (analytic
@@ -777,8 +1021,8 @@ residual).** For every launch velocity `v₀` there is a radius `ρ > 0` such th
 `(v, t) ↦ intrinsicGeodesic g hEnorm p v t` is jointly continuous on
 `ball v₀ ρ ×ˢ [0, 1]`.
 
-This is the only `sorry` in the file.  Its closure is now reduced to a single
-clean analytic input by the two fully-proven producers above:
+Its closure is reduced to the per-junction phase-point/confinement data by the
+fully-proven producers above:
 
 * `flowProj_continuousOn` — the foot-varying flow projection
   `(n, τ) ↦ (extChartAt I α).symm (Φ (z n, τ)).1` is jointly continuous whenever
@@ -787,33 +1031,43 @@ clean analytic input by the two fully-proven producers above:
 * `perChart_jointContinuity_of_flowIdentifiedOn` — given a *uniform-in-`v`*
   identification of the intrinsic geodesic with the foot-varying flow projection
   on a window `ball v₀ r ×ˢ Ioo (tₖ - ε) (tₖ + ε)`, the intrinsic geodesic is
-  jointly continuous there.
+  jointly continuous there;
+* `geodesic_chartPhaseVF_on_open` — the geodesic's *fixed*-`α`-chart phase curve
+  satisfies the genuine chart-phase ODE `chartPhaseVF g α` wherever the geodesic
+  stays in the chart-`α` source (the fixed-chart reading of the moving-foot
+  geodesic equation);
+* `perJunction_flowIdentification` — the **uniform-in-`v` identification**
+  `intrinsicGeodesic g hEnorm p v t = flowProj α Φ (z v) (t - tₖ)` on a window,
+  from the geodesic-side and flow-side chart-phase ODEs together with confinement
+  of both to a common compact ball and matching initial phase data, via
+  `chartPhaseVF_orbit_uniqueness_uniform_Ioo`.  This is the genuine analytic
+  heart (STEP 1, the residual bootstrap) — fully proven.
 
-What remains is to supply, junction by junction along the finite chart cover
-`intrinsicGeodesic_arc_finite_chart_cover`, the data feeding
-`perChart_jointContinuity_of_flowIdentifiedOn`: the per-chart phase flow `Φ`
-(`Geodesic.SmoothFlow.exists_chartPhase_contDiffOn_isLocalFlow_combined`,
-jointly `C¹` hence continuous), the continuous-in-`v` phase point `z v`
-(the chart-`α`-coordinate of the foot `intrinsicGeodesic g hEnorm p v tₖ` paired
-with its chart velocity, carried by the induction hypothesis at `tₖ`), and the
-*uniform-in-`v`* identification `hident`.  The identification holds for each
-fixed `v` by geodesic uniqueness at the foot
-(`intrinsicGeodesic_hasGeodesicEquationAt_to_lift` plus
-`isGeodesicAt_eventuallyEq` / `bm_c_gc_vf_chart_coincidence`); the genuinely
-remaining analytic content is upgrading that per-`v` eventual equality to a
-window uniform in `v`, which needs the local flow's uniform-in-phase-point
-chart-target confinement.  The base case `tₖ = 0` has chart centre `p` and phase
-point `(extChartAt I p p, v)` (continuous in `v`); the induction then propagates
-the foot/velocity continuity from each junction to the next, and
-`perChart_jointContinuity_of_flowIdentifiedOn` together with the finite cover and
-`ContinuousOn.union` assembles joint continuity on `ball v₀ (min_k r_k) ×ˢ [0, 1]`.
+What remains is the finite-cover induction (STEP 2): supply, junction by junction
+along the finite chart cover `intrinsicGeodesic_arc_finite_chart_cover`, the data
+feeding `perJunction_flowIdentification` / `perChart_jointContinuity_of_flowIdentifiedOn`.
+The per-chart phase flow `Φ` comes from
+`Geodesic.SmoothFlow.exists_chartPhase_contDiffOn_isLocalFlow_combined` (jointly
+`C¹` hence continuous), centred at the base-velocity phase point at the junction;
+`flowOrbit_uniform_confinement` produces the uniform-in-`v` confinement window for
+the flow orbit.  The base case `tₖ = 0` has chart centre `p` and phase point
+`(extChartAt I p p, v)` (continuous in `v` directly).  The genuinely remaining
+analytic content is the **cross-junction propagation of the phase-point
+continuity** `z : v ↦ (extChartAt I α (γ_v tₖ), deriv (chartCurve α γ_v) tₖ)`: at
+an interior junction the chart velocity `deriv (chartCurve α γ_v) tₖ` must be
+shown continuous in `v`, which couples the joint continuity established on the
+*previous* window (for the foot continuity) with the `C¹`-in-time regularity
+`intrinsicGeodesic_contMDiffOn` and the `C¹` flow `Φ` (for the velocity
+continuity).  Once that phase-point continuity is propagated, `ContinuousOn.union`
+over the finite cover assembles joint continuity on `ball v₀ (min_k r_k) ×ˢ [0, 1]`.
 
 Everything else in the file (`intrinsicGeodesic_compactArc`,
-`intrinsicGeodesic_arc_finite_chart_cover`, the two producers above, and
-`expMapIntrinsic_continuous_of_jointContinuity`) is proved unconditionally, and
-`expMapIntrinsic_continuous` follows from this residual in one step. -/
+`intrinsicGeodesic_arc_finite_chart_cover`, and the producers above) is proved
+unconditionally, and `expMapIntrinsic_continuous` follows from this residual in
+one step. -/
 theorem intrinsicGeodesic_jointContinuity
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [T2Space (TangentBundle I M)]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -902,6 +1156,7 @@ The proof is the reduction `expMapIntrinsic_continuous_of_jointContinuity` fed b
 the joint-continuity producer `intrinsicGeodesic_jointContinuity`. -/
 theorem expMapIntrinsic_continuous
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [T2Space (TangentBundle I M)]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
