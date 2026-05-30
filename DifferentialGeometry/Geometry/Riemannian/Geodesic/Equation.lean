@@ -195,6 +195,18 @@ lemma chartChristoffelContraction_smul_smul
         intro j _
         ring
 
+/-- The Christoffel contraction is even in its (repeated) velocity slot:
+negating the velocity vector leaves `Γ(v, v)(y)` unchanged. This is the
+key sign cancellation behind time-reversal invariance of the geodesic
+equation, where the velocity flips sign but the acceleration does not. -/
+lemma chartChristoffelContraction_neg
+    (g : SmoothRiemannianMetric I M) (α : M) (v : E) (y : E) :
+    chartChristoffelContraction (I := I) g α (-v) (-v) y =
+      chartChristoffelContraction (I := I) g α v v y := by
+  have hneg : (-v : E) = ((-1 : ℝ) • v) := (neg_one_smul ℝ v).symm
+  rw [hneg, chartChristoffelContraction_smul_smul (I := I) g α (-1 : ℝ) v y]
+  norm_num
+
 /-! ## The geodesic vector field on the tangent bundle
 
 The geodesic vector field is a second-order vector field on the tangent
@@ -608,6 +620,100 @@ theorem isGeodesic_comp_add
     exact ha.comp_add_const t b
   · -- Geodesic identity: foot point of the shifted curve at `t` is `γ (t + b)`.
     exact hgeo
+
+/-! ## Time-reversal reparametrisation preserves the geodesic property
+
+If `γ` is a geodesic, so is its time reversal `s ↦ γ (-s)`. Writing
+`u(s) := φ_{γ t}(γ s)` for the chart-local curve of `γ`, the chart-local
+curve of the reversed curve at base time `τ` is `u(-·)` read in the chart
+at `(fun s => γ (-s)) τ = γ (-τ)`. The velocity flips sign,
+`v(s) = -u'(-s)`, but the acceleration does not, `v''(s) = u''(-s)`,
+because the chain rule contributes `(-1)² = 1` to the second derivative.
+Since the Christoffel contraction `Γ(v, v)` is even in `v`
+(`chartChristoffelContraction_neg`), the geodesic identity
+`u''(-τ) + Γ(u'(-τ), u'(-τ)) = 0` for `γ` at `-τ` transfers verbatim to
+the reversed curve at `τ`. -/
+
+/-- The chart-local curve of the time-reversed curve `s ↦ γ (-s)` at base
+time `τ` equals the chart-local curve of `γ` at the reflected base time
+`-τ`, precomposed with negation: `chartLocalCurve (γ ∘ neg) τ = u ∘ neg`
+where `u = chartLocalCurve γ (-τ)`. Holds definitionally. -/
+lemma chartLocalCurve_comp_neg (γ : ℝ → M) (τ : ℝ) :
+    chartLocalCurve (I := I) (fun s => γ (-s)) τ =
+      (fun s => chartLocalCurve (I := I) γ (-τ) (-s)) := rfl
+
+/-- **Pointwise time-reversal of the geodesic equation.** If `γ` satisfies
+the moving-foot geodesic equation at `-τ`, then the time-reversed curve
+`s ↦ γ (-s)` satisfies it at `τ`. The reversed-curve velocity is the
+negation of the original velocity at `-τ`; the acceleration is unchanged;
+and the Christoffel contraction is even in the velocity, so the geodesic
+identity carries over unchanged. -/
+theorem hasGeodesicEquationAt_comp_neg
+    {g : SmoothRiemannianMetric I M} {γ : ℝ → M} {τ : ℝ}
+    (hγ : HasGeodesicEquationAt (I := I) g γ (-τ)) :
+    HasGeodesicEquationAt (I := I) g (fun s => γ (-s)) τ := by
+  obtain ⟨v, a, hv, hev, ha, hgeo⟩ := hγ
+  -- Abbreviations for the original chart-local curve at `-τ`.
+  set u : ℝ → E := chartLocalCurve (I := I) γ (-τ) with hu_def
+  -- The chart-local curve of the reversed curve at `τ` is `u ∘ neg`.
+  have hrev : chartLocalCurve (I := I) (fun s => γ (-s)) τ = (fun s => u (-s)) :=
+    chartLocalCurve_comp_neg (I := I) γ τ
+  -- The `deriv` of the reversed chart-local curve is `s ↦ -(deriv u) (-s)`.
+  have hderiv_rev : deriv (chartLocalCurve (I := I) (fun s => γ (-s)) τ) =
+      (fun s => -(deriv u (-s))) := by
+    rw [hrev]; funext s; exact deriv_comp_neg u s
+  -- New velocity is `-v`; new acceleration is `a`.
+  refine ⟨-v, a, ?_, ?_, ?_, ?_⟩
+  · -- Velocity clause: `(u ∘ neg)'(τ) = (-1) • u'(-τ) = -v`.
+    rw [hrev]
+    have hcomp : HasDerivAt (fun s => u (-s)) ((-1 : ℝ) • v) τ := by
+      have := (hv.scomp τ (hasDerivAt_neg τ))
+      simpa [Function.comp_def] using this
+    simpa using hcomp
+  · -- Eventual first-derivative clause near `τ`.
+    rw [hderiv_rev, hrev]
+    -- The eventually-statement of `γ` at `-τ` pulled back under `· ↦ -·`.
+    have hcont : Filter.Tendsto (fun s : ℝ => -s) (nhds τ) (nhds (-τ)) :=
+      (continuous_neg.tendsto τ)
+    have hev' : ∀ᶠ s in nhds τ,
+        HasDerivAt u (deriv u (-s)) (-s) := hcont.eventually hev
+    filter_upwards [hev'] with s hs
+    -- `(u ∘ neg)'(s) = (-1) • (deriv u (-s)) = -(deriv u (-s))`.
+    have := hs.scomp s (hasDerivAt_neg s)
+    simpa [Function.comp_def] using this
+  · -- Acceleration clause: `(s ↦ -(deriv u)(-s))'(τ) = a`.
+    rw [hderiv_rev]
+    -- First differentiate `deriv u` composed with negation: derivative `-a` at `τ`.
+    have hinner : HasDerivAt (fun s => deriv u (-s)) ((-1 : ℝ) • a) τ := by
+      have := (ha.scomp τ (hasDerivAt_neg τ))
+      simpa [Function.comp_def] using this
+    -- Then negate: derivative `-((-1) • a) = a`.
+    have hfin := hinner.neg
+    simpa using hfin
+  · -- Geodesic identity: foot point and velocity even-ness.
+    -- `(fun s => γ (-s)) τ = γ (-τ)` definitionally; velocity slot `-v`.
+    rw [chartChristoffelContraction_neg (I := I) g _ v]
+    exact hgeo
+
+/-- **Time-reversal of a global geodesic.** If `γ` is a geodesic, so is its
+time reversal `s ↦ γ (-s)`. -/
+theorem isGeodesic_comp_neg
+    {g : SmoothRiemannianMetric I M} {γ : ℝ → M}
+    (hγ : IsGeodesic (I := I) g γ) :
+    IsGeodesic (I := I) g (fun s => γ (-s)) := by
+  intro τ
+  exact hasGeodesicEquationAt_comp_neg (I := I) (hγ (-τ))
+
+/-- **Time-reversal of a geodesic on a set.** If `γ` is a geodesic on
+`s : Set ℝ`, then the time reversal `t ↦ γ (-t)` is a geodesic on the
+preimage `Neg.neg ⁻¹' s = {τ | -τ ∈ s}`. -/
+theorem isGeodesicOn_comp_neg
+    {g : SmoothRiemannianMetric I M} {γ : ℝ → M} {s : Set ℝ}
+    (hγ : IsGeodesicOn (I := I) g γ s) :
+    IsGeodesicOn (I := I) g (fun t => γ (-t)) (Neg.neg ⁻¹' s) := by
+  intro τ hτ
+  -- `hτ : τ ∈ Neg.neg ⁻¹' s`, i.e. `-τ ∈ s`.
+  exact hasGeodesicEquationAt_comp_neg (I := I) (hγ (-τ) hτ)
 
 /-! ## Smoothness of the geodesic vector field (chart-fixed formulation)
 
