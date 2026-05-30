@@ -1289,6 +1289,7 @@ import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.SmoothDependence
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.SmoothDependence.VariationalEquation
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.SmoothDependence.Parameter
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.SmoothDependence.Manifold
+import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.SmoothDependence.GlobalClosedManifold
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization.PosDefPerturbation
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization.TensorHsRealize
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization.HeatOutputRealize
