@@ -46,9 +46,15 @@ genuine flow/field data of `chart_overlap_chart_alpha_coord_ode`:
 
 * `(a)` the orbit stays in the chart-overlap (the `αRep` trajectory lies in the *target* chart
   source on `[0, S]`) — an analytic continuity/openness datum (the Lemma-A pattern); and
-* `(b)` `hcompat` — the chart-transition derivative fixes the field `X` along the trajectory,
-  the genuine field-naturality datum that is automatic for chart-invariant fields and is the
-  honest separable hypothesis for a general field.
+* `(b)` `hcompat` — the chart-transition derivative fixes the field `X` (read as a fixed
+  `E`-vector through the chart-coordinate trivialisation) along the trajectory. This is a genuine
+  *restrictive* analytic hypothesis: it holds for fields whose chart transitions act affinely on
+  the coordinate velocity, but it is **not** automatic for a general field. In particular it does
+  **not** hold for `deTurckVF` on a manifold with non-affine chart transitions (the chart-coordinate
+  Picard velocity is the bare `E`-coercion, not the trivialisation pushforward, so the transition
+  Jacobian does not fix it). This reconciliation lemma is therefore a true conditional statement
+  that cannot be specialised to `deTurckVF`; the geometric `deTurckVF` flow requires the bare
+  manifold-integral-flow route (with joint `(t, x)` regularity), not this chart-cover route.
 
 Neither is hypothesis-packaging: they are flow/field data (a membership statement on a closed
 interval, and a `HasFDerivAt` + linear-fixing `E`-equation), never the operator-valued or
