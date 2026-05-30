@@ -1,6 +1,7 @@
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.ManifoldIntegralFlow
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.BareFlowFromJointC1
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.ManifoldFlowFamily
+import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.SmoothInSpace.BanachIC
 import DifferentialGeometry.Analysis.ODE.FlowC1
 import Mathlib.Geometry.Manifold.ContMDiff.Atlas
 import Mathlib.Geometry.Manifold.ContMDiffMFDeriv
@@ -28,21 +29,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [BoundarylessManifold I M] [T2Space M]
 
--- H3 headline (v5: intrinsic jointly-smooth section input `hX`; `[I.Boundaryless]` added — needed by
---  isOpen_extChartAt_target / extChartAt_target_mem_nhds, NOT derivable from [BoundarylessManifold I M].)
-theorem h3_local_flow_jointSmooth_and_integralCurve [CompleteSpace E] [I.Boundaryless]
-    (X : ℝ → ∀ x : M, TangentSpace I x)
-    (hX : ContMDiff (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
-      (fun q : ℝ × M => (TotalSpace.mk' E q.2 (X q.1 q.2) : TangentBundle I M)))
-    (t₀ : ℝ) (p₀ : M) :
-    ∃ (U : Set M) (_hU : IsOpen U) (_hp₀ : p₀ ∈ U) (T : ℝ) (_hT : 0 < T)
-      (Φ : M → ℝ → M),
-      (∀ p ∈ U, Φ p t₀ = p) ∧
-      ContMDiffOn (𝓘(ℝ, ℝ).prod I) I ∞ (fun q : ℝ × M => Φ q.2 q.1)
-        (Set.Ioo (t₀ - T) (t₀ + T) ×ˢ U) ∧
-      (∀ p ∈ U, ∀ t ∈ Set.Ioo (t₀ - T) (t₀ + T),
-        HasMFDerivAt 𝓘(ℝ, ℝ) I (fun s => Φ p s) t
-          ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φ p t)))) := sorry
 
 -- [H3: chartcoord-jointContDiffOn-pushforward-to-contMDiffOn]
 theorem h3_manifoldFlow_contMDiffOn_of_jointContDiffOn
@@ -541,6 +527,191 @@ theorem chartflow_eq_bareflow_on_U
   -- (`hvel.symm`); the function parts agree definitionally (`u s = ΦE (extChartAt I p₀ p, s)`).
   rw [← hvel]
   exact hbridge
+
+-- H3 headline (v5: intrinsic jointly-smooth section input `hX`; `[I.Boundaryless]` added — needed by
+--  isOpen_extChartAt_target / extChartAt_target_mem_nhds, NOT derivable from [BoundarylessManifold I M].)
+theorem h3_local_flow_jointSmooth_and_integralCurve [CompleteSpace E] [I.Boundaryless]
+    (X : ℝ → ∀ x : M, TangentSpace I x)
+    (hX : ContMDiff (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
+      (fun q : ℝ × M => (TotalSpace.mk' E q.2 (X q.1 q.2) : TangentBundle I M)))
+    (t₀ : ℝ) (p₀ : M) :
+    ∃ (U : Set M) (_hU : IsOpen U) (_hp₀ : p₀ ∈ U) (T : ℝ) (_hT : 0 < T)
+      (Φ : M → ℝ → M),
+      (∀ p ∈ U, Φ p t₀ = p) ∧
+      ContMDiffOn (𝓘(ℝ, ℝ).prod I) I ∞ (fun q : ℝ × M => Φ q.2 q.1)
+        (Set.Ioo (t₀ - T) (t₀ + T) ×ˢ U) ∧
+      (∀ p ∈ U, ∀ t ∈ Set.Ioo (t₀ - T) (t₀ + T),
+        HasMFDerivAt 𝓘(ℝ, ℝ) I (fun s => Φ p s) t
+          ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φ p t)))) := by
+  -- The chart centre in the Euclidean model.
+  set x₀ : E := extChartAt I p₀ p₀ with hx₀
+  -- (chart-ball radius) `x₀` lies in the (open, by `[I.Boundaryless]`) extended-chart target,
+  -- so there is a ball `ball x₀ ρ ⊆ target` on which the chart-pushforward field is defined.
+  have hx₀_tgt : x₀ ∈ (extChartAt I p₀).target := by
+    rw [hx₀]; exact (extChartAt I p₀).map_source (mem_extChartAt_source p₀)
+  obtain ⟨ρ, hρ_pos, hρ_sub⟩ :=
+    Metric.isOpen_iff.mp (isOpen_extChartAt_target p₀) x₀ hx₀_tgt
+  -- (C2) Cutoff-globalize C1's chart-pushforward field `F` to a globally-`C∞` field `G`,
+  -- agreeing with `F` on the inner ball `ball x₀ ρ'`.
+  obtain ⟨G, ρ', hρ'_pos, hρ'_le, hG_smooth, hGF⟩ :=
+    chart_pushforward_field_cutoff_globalContDiff X hX p₀ hρ_pos hρ_sub
+  -- (C3) The Euclidean `C∞` flow of the cutoff field `G` at `(t₀, x₀)`: Picard radius `r`,
+  -- horizon `ε`, and a joint-`ContDiffOn` smoothness radius `ρ_E ≤ r`, horizon `T_E ≤ ε`.
+  obtain ⟨r, ε, hr_pos, hε_pos, ΦE, hflow, ρ_E, T_E, hρE_pos, hTE_pos, hρE_le_r, hTE_le_ε,
+      hΦE_smooth⟩ :=
+    exists_isLocalFlow_contDiffOn_top (f := G) (t₀ := t₀) (x₀ := x₀) hG_smooth
+  -- (operative agreement radius) `ρ'ₒₚ := min ρ' ρ_E ≤ ρ_E ≤ r`, still inside the `G = F` ball.
+  set ρ'ₒₚ : ℝ := min ρ' ρ_E with hρ'ₒₚ
+  have hρ'ₒₚ_pos : 0 < ρ'ₒₚ := lt_min hρ'_pos hρE_pos
+  have hρ'ₒₚ_le_ρ' : ρ'ₒₚ ≤ ρ' := min_le_left _ _
+  have hρ'ₒₚ_le_ρE : ρ'ₒₚ ≤ ρ_E := min_le_right _ _
+  have hρ'ₒₚ_le_r : ρ'ₒₚ ≤ (r : ℝ) := le_trans hρ'ₒₚ_le_ρE hρE_le_r
+  -- A1 hasn't run yet, but the full seed-radius chain `ρ'' ≤ ρ'ₒₚ ≤ r` is recorded after A1.
+  -- The Euclidean flow is continuous on `ball x₀ ρ_E ×ˢ Ioo (t₀ ± T_E)` (from `ContDiffOn`).
+  have hΦE_cont : ContinuousOn ΦE
+      (Metric.ball x₀ ρ_E ×ˢ Set.Ioo (t₀ - T_E) (t₀ + T_E)) :=
+    hΦE_smooth.continuousOn
+  -- The flow fixes initial data on `ball x₀ ρ_E` (⊆ `closedBall x₀ r`, by `ρ_E ≤ r`).
+  have hinit_ρE : ∀ c ∈ Metric.ball x₀ ρ_E, ΦE (c, t₀) = c := by
+    intro c hc
+    have hc_cb : c ∈ Metric.closedBall x₀ (r : ℝ) :=
+      Metric.ball_subset_closedBall (Metric.ball_subset_ball hρE_le_r hc)
+    exact hflow.apply_initial c hc_cb
+  -- (A1) Confine the orbit (started in `ball ρ''`) into the agreement ball `ρ'ₒₚ` on `Ioo (t₀ ± T')`.
+  obtain ⟨ρ'', T', hρ''_pos, hT'_pos, hρ''_le, hT'_le, hconf⟩ :=
+    chartflow_confined_to_agreementBall (I := I) p₀ ΦE
+      (ρ := ρ_E) (ρ' := ρ'ₒₚ) (T := T_E) (t₀ := t₀)
+      hρ'ₒₚ_pos hρ'ₒₚ_le_ρE hTE_pos hΦE_cont hinit_ρE
+  -- Seed-radius cap into the Picard validity ball: `ρ'' ≤ ρ'ₒₚ ≤ r`.
+  have hρ''_le_r : ρ'' ≤ (r : ℝ) := le_trans hρ''_le hρ'ₒₚ_le_r
+  -- (A2) On the confined region the GENUINE field `F` drives the chart ODE on `Ioo (t₀ ± T')`,
+  -- because `G = F` on `ball x₀ ρ'ₒₚ` (the orbit stays there).  Abbreviate the genuine field `F`.
+  set F : ℝ → E → E := fun (s : ℝ) (c : E) =>
+    ((trivializationAt E (TangentSpace I) p₀)
+      (TotalSpace.mk' E ((extChartAt I p₀).symm c) (X s ((extChartAt I p₀).symm c)))).2 with hF
+  -- The cutoff agreement `G = F` on the operative agreement ball `ball x₀ ρ'ₒₚ ⊆ ball x₀ ρ'`.
+  have hGF_op : ∀ (s : ℝ), ∀ y ∈ Metric.ball x₀ ρ'ₒₚ, G s y = F s y := by
+    intro s y hy
+    have hy' : y ∈ Metric.ball x₀ ρ' := Metric.ball_subset_ball hρ'ₒₚ_le_ρ' hy
+    exact hGF s y hy'
+  -- The Picard validity ball contains the agreement ball: `ball x₀ ρ'ₒₚ ⊆ closedBall x₀ r`.
+  have hball_sub : Metric.ball x₀ ρ'ₒₚ ⊆ Metric.closedBall x₀ (r : ℝ) := by
+    intro y hy
+    exact Metric.ball_subset_closedBall (Metric.ball_subset_ball hρ'ₒₚ_le_r hy)
+  -- The time window `Ioo (t₀ ± T') ⊆ Icc (t₀ - ε) (t₀ + ε)` (the `IsLocalFlow` domain), via `T' ≤ ε`.
+  have hT'_le_ε : T' ≤ ε := le_trans hT'_le hTE_le_ε
+  have hIoo_sub : Set.Ioo (t₀ - T') (t₀ + T') ⊆ Set.Icc (t₀ - ε) (t₀ + ε) := by
+    intro s hs
+    exact ⟨by linarith [hs.1], by linarith [hs.2]⟩
+  -- A2 delivers the chart ODE with the genuine velocity `F` on the seed ball `ball x₀ ρ''`.
+  have hchartODE_raw :
+      ∀ c ∈ Metric.ball x₀ ρ'', ∀ t ∈ Set.Ioo (t₀ - T') (t₀ + T'),
+        HasDerivWithinAt (fun s => ΦE (c, s)) (F t (ΦE (c, t)))
+          (Set.Ioo (t₀ - T') (t₀ + T')) t :=
+    chartODE_genuineF_on_Ioo (I := I) p₀ G F ΦE r
+      (hρ''_le := hρ''_le) (hflow := hflow) (hIoo_sub := hIoo_sub)
+      (hball_sub := hball_sub) (hGF := hGF_op) (hconf := hconf)
+  -- (the open neighbourhood `U` and the manifold flow `Φ`)
+  set U : Set M := (extChartAt I p₀).source ∩ (extChartAt I p₀) ⁻¹' (Metric.ball x₀ ρ'') with hU
+  set Φ : M → ℝ → M := fun p s => (extChartAt I p₀).symm (ΦE (extChartAt I p₀ p, s)) with hΦ
+  -- `U` is open: chart source ∩ continuous-preimage of an open ball.
+  have hU_open : IsOpen U :=
+    (continuousOn_extChartAt p₀).isOpen_inter_preimage
+      (isOpen_extChartAt_source p₀) Metric.isOpen_ball
+  -- `p₀ ∈ U`: it is in its own chart source, and `extChartAt I p₀ p₀ = x₀ ∈ ball x₀ ρ''`.
+  have hp₀_U : p₀ ∈ U := by
+    refine ⟨mem_extChartAt_source p₀, ?_⟩
+    rw [Set.mem_preimage, ← hx₀]
+    exact Metric.mem_ball_self hρ''_pos
+  -- `U ⊆ source` and the chart membership facts on `U`.
+  have hU_src : U ⊆ (extChartAt I p₀).source := Set.inter_subset_left
+  have hU_ball : ∀ p ∈ U, extChartAt I p₀ p ∈ Metric.ball x₀ ρ'' := fun p hp => hp.2
+  -- (chart-coordinate reindexing) the chart-`p₀` ODE rephrased over points `p ∈ U`.
+  have hchartODE :
+      ∀ (p : M), p ∈ U → ∀ t ∈ Set.Ioo (t₀ - T') (t₀ + T'),
+        HasDerivWithinAt (fun s => ΦE (extChartAt I p₀ p, s))
+          (F t (ΦE (extChartAt I p₀ p, t))) (Set.Ioo (t₀ - T') (t₀ + T')) t :=
+    fun p hp t ht => hchartODE_raw (extChartAt I p₀ p) (hU_ball p hp) t ht
+  -- (confinement to the chart target) on `U × Ioo` the orbit lands in `(extChartAt I p₀).target`.
+  have hconf_tgt :
+      ∀ (p : M), p ∈ U → ∀ t ∈ Set.Ioo (t₀ - T') (t₀ + T'),
+        ΦE (extChartAt I p₀ p, t) ∈ (extChartAt I p₀).target := by
+    intro p hp t ht
+    have hmem : ΦE (extChartAt I p₀ p, t) ∈ Metric.ball x₀ ρ'ₒₚ :=
+      hconf (extChartAt I p₀ p) (hU_ball p hp) t ht
+    have hsub_ρ : Metric.ball x₀ ρ'ₒₚ ⊆ Metric.ball x₀ ρ :=
+      Metric.ball_subset_ball (le_trans hρ'ₒₚ_le_ρ' hρ'_le)
+    exact hρ_sub (hsub_ρ hmem)
+  -- (field-form identity) supplies C6's `hF` hypothesis.
+  have hF_id : ∀ (s : ℝ) (c : E), F s c =
+      tangentCoordChange I ((extChartAt I p₀).symm c) p₀
+        ((extChartAt I p₀).symm c) (X s ((extChartAt I p₀).symm c)) := by
+    intro s c
+    rw [hF]
+    exact field_form_identity_trivreading_eq_chartvelocity X p₀ s c
+  -- (C5) push the joint `ContDiffOn` flow through `(extChartAt I p₀).symm` to manifold `ContMDiffOn`.
+  -- The chart-ball/coordinate hypotheses are stated via `I ((chartAt H p₀) ·)`; reconcile with
+  -- `extChartAt I p₀ · = I ((chartAt H p₀) ·)` (`extChartAt_coe`).
+  have hcoe : ∀ p : M, I ((chartAt H p₀) p) = extChartAt I p₀ p := by
+    intro p; rw [extChartAt_coe]; rfl
+  have hcoe₀ : I ((chartAt H p₀) p₀) = x₀ := by rw [hcoe, hx₀]
+  have hContMDiffOn :
+      ContMDiffOn (𝓘(ℝ, ℝ).prod I) I ∞
+        (fun q : ℝ × M => (extChartAt I p₀).symm (ΦE (I ((chartAt H p₀) q.2), q.1)))
+        (Set.Ioo (t₀ - T') (t₀ + T') ×ˢ U) := by
+    refine h3_manifoldFlow_contMDiffOn_of_jointContDiffOn (I := I) p₀ ΦE
+      (ρ := ρ'ₒₚ) (T := T') (t₀ := t₀) U hU_open ?_ ?_ ?_ ?_
+    · -- `U ⊆ (chartAt H p₀).source`.
+      rw [← extChartAt_source (I := I)]; exact hU_src
+    · -- `hUball`: chart coordinate of each `p ∈ U` lies in `ball (I (chartAt H p₀ p₀)) ρ'ₒₚ`.
+      intro p hp
+      rw [hcoe p, hcoe₀]
+      exact Metric.ball_subset_ball hρ''_le (hU_ball p hp)
+    · -- `hΦE_smooth` on `ball (I (chartAt H p₀ p₀)) ρ'ₒₚ ×ˢ Ioo (t₀ ± T')`.
+      rw [hcoe₀]
+      refine hΦE_smooth.mono (Set.prod_mono ?_ ?_)
+      · exact Metric.ball_subset_ball hρ'ₒₚ_le_ρE
+      · exact Set.Ioo_subset_Ioo (by linarith [hT'_le]) (by linarith [hT'_le])
+    · -- `htgt`: the orbit lands in the chart target.
+      intro p hp s hs
+      rw [hcoe p]
+      exact hconf_tgt p hp s hs
+  -- Rephrase the `ContMDiffOn` to the `Φ`-form (`extChartAt I p₀ = I ∘ chartAt H p₀`).
+  have hContMDiffOn' :
+      ContMDiffOn (𝓘(ℝ, ℝ).prod I) I ∞ (fun q : ℝ × M => Φ q.2 q.1)
+        (Set.Ioo (t₀ - T') (t₀ + T') ×ˢ U) := by
+    refine hContMDiffOn.congr ?_
+    intro q _
+    rw [hΦ, hcoe q.2]
+  -- (C6) the bare-velocity `HasMFDerivWithinAt` on `U × Ioo`.
+  have hbare_within :
+      ∀ (p : M), p ∈ U → ∀ t ∈ Set.Ioo (t₀ - T') (t₀ + T'),
+        HasMFDerivWithinAt 𝓘(ℝ, ℝ) I
+          (fun s => (extChartAt I p₀).symm (ΦE (extChartAt I p₀ p, s)))
+          (Set.Ioo (t₀ - T') (t₀ + T')) t
+          ((1 : ℝ →L[ℝ] ℝ).smulRight
+            (X t ((extChartAt I p₀).symm (ΦE (extChartAt I p₀ p, t))))) :=
+    chartflow_eq_bareflow_on_U (I := I) X p₀ F ΦE U hchartODE hF_id hconf_tgt hU_src
+  -- (C7) upgrade within→full: `Ioo (t₀ ± T') ∈ 𝓝 t`.
+  have hbare :
+      ∀ (p : M), p ∈ U → ∀ t ∈ Set.Ioo (t₀ - T') (t₀ + T'),
+        HasMFDerivAt 𝓘(ℝ, ℝ) I (fun s => Φ p s) t
+          ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φ p t))) := by
+    intro p hp t ht
+    have hnhds : Set.Ioo (t₀ - T') (t₀ + T') ∈ 𝓝 t :=
+      isOpen_Ioo.mem_nhds ht
+    have := (hbare_within p hp t ht).hasMFDerivAt hnhds
+    rw [hΦ]; exact this
+  -- (initial value) `Φ p t₀ = p` for `p ∈ U`, via `apply_initial` + chart left-inverse.
+  have hΦinit : ∀ p ∈ U, Φ p t₀ = p := by
+    intro p hp
+    have hcb : extChartAt I p₀ p ∈ Metric.closedBall x₀ (r : ℝ) :=
+      Metric.ball_subset_closedBall (Metric.ball_subset_ball hρ''_le_r (hU_ball p hp))
+    change (extChartAt I p₀).symm (ΦE (extChartAt I p₀ p, t₀)) = p
+    rw [hflow.apply_initial (extChartAt I p₀ p) hcb]
+    exact (extChartAt I p₀).left_inv (hU_src hp)
+  -- Package the headline.
+  exact ⟨U, hU_open, hp₀_U, T', hT'_pos, Φ, hΦinit, hContMDiffOn', hbare⟩
 
 end Manifold
 
