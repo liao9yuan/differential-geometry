@@ -285,6 +285,206 @@ theorem augVF_uncurry_continuousOn_of_C1
 
 end AugVFSmoothness
 
+/-! ## Nesting / bound data for the flow regularity recursion
+
+The variational-flow inductive step (`contDiffOn_flow_succ_via_augFlow`) consumes a large
+block of geometric bookkeeping: a uniform bound `M` on the linearization
+`(x, τ) ↦ ‖fderiv ℝ (f τ) (Φ ⟨x, τ⟩)‖` over a closed ball of initial conditions and a
+closed time interval, nested radii `ρ < ρ_mid < ρ_out` inside the flow ball, and nested
+times `T < T_mid < T_out` inside the flow's time domain with `M · T_mid < 1`.
+
+This section *derives* all of this data from the bare `IsLocalFlow` hypothesis together
+with joint `C^1` regularity of `f`, in finite dimensions (where closed balls are compact).
+The single genuine extra requirement is that `t₀` lie strictly inside the flow's time
+domain `Ioo tmin tmax` (a two-sided time neighbourhood is impossible at a boundary time)
+and that the flow ball be non-degenerate (`0 < r`). -/
+
+section NestingData
+
+variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
+
+/-- **Joint continuity of the linearization along the flow.**  For a local flow `Φ` of a
+jointly `C^1` field `f`, the map `(x, τ) ↦ fderiv ℝ (f τ) (Φ ⟨x, τ⟩)` is continuous on the
+product `closedBall x₀ ρ ×ˢ Icc tmin tmax`, for any radius `ρ ≤ r`. -/
+theorem continuousOn_fderiv_along_flow_joint
+    (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
+    (hf : ContDiffOn ℝ 1 (uncurry f) (Set.univ : Set (ℝ × E)))
+    {ρ : ℝ} (hρ : ρ ≤ (r : ℝ)) :
+    ContinuousOn (fun p : E × ℝ => fderiv ℝ (f p.2) (Φ p))
+      ((closedBall x₀ ρ) ×ˢ (Icc tmin tmax)) := by
+  -- The partial Fréchet derivative `(τ, x) ↦ fderiv ℝ (f τ) x` is continuous on `univ`.
+  have hpartial : ContinuousOn (fun p : ℝ × E => fderiv ℝ (f p.1) p.2)
+      (Set.univ : Set (ℝ × E)) := by
+    have h := continuousOn_partialFDeriv_uncurry (f := f)
+      (s := (Set.univ : Set ℝ)) (u := (Set.univ : Set E))
+      (by rwa [Set.univ_prod_univ]) isOpen_univ isOpen_univ
+    rwa [Set.univ_prod_univ] at h
+  -- `Φ` is continuous on the (sub-)ball × time interval.
+  have hΦcont : ContinuousOn Φ ((closedBall x₀ ρ) ×ˢ Icc tmin tmax) :=
+    hΦ.continuousOn.mono (Set.prod_mono (closedBall_subset_closedBall hρ) (le_refl _))
+  -- `(x, τ) ↦ (τ, Φ ⟨x, τ⟩)` is continuous into `univ`.
+  have hmap : ContinuousOn (fun p : E × ℝ => (p.2, Φ p))
+      ((closedBall x₀ ρ) ×ˢ Icc tmin tmax) :=
+    (continuousOn_snd).prodMk hΦcont
+  have hmaps : MapsTo (fun p : E × ℝ => (p.2, Φ p))
+      ((closedBall x₀ ρ) ×ˢ Icc tmin tmax) (Set.univ : Set (ℝ × E)) := fun _ _ => mem_univ _
+  exact hpartial.comp hmap hmaps
+
+variable [FiniteDimensional ℝ E]
+
+/-- **Joint bound on the linearization along the flow.**  In finite dimensions, the
+continuous linearization map is bounded on the compact product `closedBall x₀ ρ ×ˢ Icc tmin
+tmax`.  This produces the uniform constant `M` required by the variational-flow step. -/
+theorem exists_norm_fderiv_le_along_flow_joint
+    (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
+    (hf : ContDiffOn ℝ 1 (uncurry f) (Set.univ : Set (ℝ × E)))
+    {ρ : ℝ} (hρ_nonneg : 0 ≤ ρ) (hρ : ρ ≤ (r : ℝ)) :
+    ∃ M : ℝ, 0 ≤ M ∧ ∀ x ∈ closedBall x₀ ρ, ∀ τ ∈ Icc tmin tmax,
+      ‖fderiv ℝ (f τ) (Φ ⟨x, τ⟩)‖ ≤ M := by
+  have hcont := continuousOn_fderiv_along_flow_joint hΦ hf hρ
+  -- The norm is continuous on the compact product.
+  have hcontN : ContinuousOn (fun p : E × ℝ => ‖fderiv ℝ (f p.2) (Φ p)‖)
+      ((closedBall x₀ ρ) ×ˢ (Icc tmin tmax)) := continuous_norm.comp_continuousOn hcont
+  have hcompact : IsCompact ((closedBall x₀ ρ) ×ˢ (Icc tmin tmax)) :=
+    (isCompact_closedBall x₀ ρ).prod isCompact_Icc
+  have hne : ((closedBall x₀ ρ) ×ˢ (Icc tmin tmax)).Nonempty :=
+    ⟨(x₀, t₀), ⟨mem_closedBall_self hρ_nonneg, hΦ.t₀_mem_Icc⟩⟩
+  obtain ⟨p, hp, hp_max⟩ := hcompact.exists_isMaxOn hne hcontN
+  refine ⟨‖fderiv ℝ (f p.2) (Φ p)‖, norm_nonneg _, ?_⟩
+  intro x hx τ hτ
+  have hmem : ((x, τ) : E × ℝ) ∈ (closedBall x₀ ρ) ×ˢ (Icc tmin tmax) := ⟨hx, hτ⟩
+  exact hp_max hmem
+
+/-- **Uniform Lipschitz bound for `f t` on a closed ball.**  In finite dimensions, joint
+`C^1` regularity of `f` gives a single constant `K` with `f t` `K`-Lipschitz on `closedBall
+x₀ ρ` for every `t` in a compact interval.  The constant is the maximum spatial-derivative
+norm over the compact product `Icc × closedBall`. -/
+theorem exists_lipschitzOnWith_closedBall_of_C1
+    (hf : ContDiffOn ℝ 1 (uncurry f) (Set.univ : Set (ℝ × E)))
+    (x₀ : E) (ρ : ℝ) (a b : ℝ) (hab : a ≤ b) :
+    ∃ K : ℝ≥0, ∀ t ∈ Icc a b, LipschitzOnWith K (f t) (closedBall x₀ ρ) := by
+  -- The partial Fréchet derivative is continuous on `univ`, hence bounded on the compact
+  -- product `Icc a b ×ˢ closedBall x₀ ρ`.
+  have hpartial : ContinuousOn (fun p : ℝ × E => fderiv ℝ (f p.1) p.2)
+      (Set.univ : Set (ℝ × E)) := by
+    have h := continuousOn_partialFDeriv_uncurry (f := f)
+      (s := (Set.univ : Set ℝ)) (u := (Set.univ : Set E))
+      (by rwa [Set.univ_prod_univ]) isOpen_univ isOpen_univ
+    rwa [Set.univ_prod_univ] at h
+  have hcontN : ContinuousOn (fun p : ℝ × E => ‖fderiv ℝ (f p.1) p.2‖)
+      ((Icc a b) ×ˢ (closedBall x₀ ρ)) :=
+    (continuous_norm.comp_continuousOn (hpartial.mono (subset_univ _)))
+  have hcompact : IsCompact ((Icc a b) ×ˢ (closedBall x₀ ρ)) :=
+    isCompact_Icc.prod (isCompact_closedBall x₀ ρ)
+  -- Differentiability of `f t` at every point (from `C^1` of `uncurry f`).
+  have hdiff : ∀ t : ℝ, ∀ x : E, DifferentiableAt ℝ (f t) x := by
+    intro t x
+    have hDiff_joint : DifferentiableAt ℝ (uncurry f) (t, x) :=
+      (hf.contDiffAt (isOpen_univ.mem_nhds (mem_univ _))).differentiableAt one_ne_zero
+    have hg : DifferentiableAt ℝ (fun y : E => (t, y)) x :=
+      (differentiableAt_const t).prodMk differentiableAt_id
+    exact hDiff_joint.comp x hg
+  by_cases hball : (closedBall x₀ ρ).Nonempty
+  · obtain ⟨x₁, hx₁⟩ := hball
+    have hne : ((Icc a b) ×ˢ (closedBall x₀ ρ)).Nonempty := ⟨(a, x₁), ⟨⟨le_rfl, hab⟩, hx₁⟩⟩
+    obtain ⟨p, hp, hp_max⟩ := hcompact.exists_isMaxOn hne hcontN
+    set C : ℝ := ‖fderiv ℝ (f p.1) p.2‖ with hC_def
+    refine ⟨⟨C, norm_nonneg _⟩, ?_⟩
+    intro t ht
+    apply Convex.lipschitzOnWith_of_nnnorm_fderiv_le (𝕜 := ℝ)
+      (fun x _ => hdiff t x) ?_ (convex_closedBall x₀ ρ)
+    intro x hx
+    have hmem : ((t, x) : ℝ × E) ∈ (Icc a b) ×ˢ (closedBall x₀ ρ) :=
+      Set.mem_prod.mpr ⟨ht, hx⟩
+    have : ‖fderiv ℝ (f t) x‖ ≤ C := hp_max hmem
+    rw [← NNReal.coe_le_coe]
+    simpa [coe_nnnorm] using this
+  · refine ⟨0, ?_⟩
+    intro t _
+    rw [not_nonempty_iff_eq_empty] at hball
+    rw [hball]
+    exact lipschitzOnWith_empty 0 (f t)
+
+/-- **Nesting and bound data for the flow recursion.**
+
+From a local flow `Φ` of a jointly `C^1` field `f` in finite dimensions, with the initial
+time `t₀` strictly interior in `Icc tmin tmax` and a non-degenerate flow ball (`0 < r`),
+all the geometric bookkeeping consumed by the variational-flow inductive step is produced:
+nested radii `0 < ρ < ρ_mid < ρ_out ≤ r` with `ρ_mid + r' ≤ r`, nested times
+`0 < T < T_mid < T_out` with `M · T_mid < 1`, a closed time interval inside the flow's time
+domain, and a uniform bound `M` on the linearization over the closed ball of initial
+conditions and the closed time interval. -/
+theorem exists_flow_nesting_data
+    (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
+    (hf : ContDiffOn ℝ 1 (uncurry f) (Set.univ : Set (ℝ × E)))
+    (ht₀ : t₀ ∈ Ioo tmin tmax) (hr_pos : 0 < (r : ℝ)) :
+    ∃ (T_out T_mid T M : ℝ) (ρ_out ρ_mid ρ r' : ℝ≥0),
+      0 < T ∧ T < T_mid ∧ T_mid < T_out ∧ 0 ≤ M ∧ M * T_mid < 1 ∧ 0 < (r' : ℝ) ∧
+      0 < (ρ : ℝ) ∧ (ρ : ℝ) < (ρ_mid : ℝ) ∧ (ρ_mid : ℝ) < (ρ_out : ℝ) ∧
+      (ρ_mid : ℝ) + (r' : ℝ) ≤ (r : ℝ) ∧ (ρ_out : ℝ) ≤ (r : ℝ) ∧
+      Icc (t₀ - T_out) (t₀ + T_out) ⊆ Icc tmin tmax ∧
+      (∀ x ∈ closedBall x₀ (ρ_out : ℝ), ∀ τ ∈ Icc (t₀ - T_out) (t₀ + T_out),
+        ‖fderiv ℝ (f τ) (Φ ⟨x, τ⟩)‖ ≤ M) := by
+  -- Radii: ρ = r/8 < ρ_mid = r/4 < ρ_out = r/2 ≤ r ; r' = r/2 with ρ_mid + r' = 3r/4 ≤ r.
+  let ρ_out : ℝ≥0 := r / 2
+  let ρ_mid : ℝ≥0 := r / 4
+  let ρ : ℝ≥0 := r / 8
+  let r' : ℝ≥0 := r / 2
+  have hρ_out_coe : (ρ_out : ℝ) = (r : ℝ) / 2 := by simp only [ρ_out]; push_cast; ring
+  have hρ_mid_coe : (ρ_mid : ℝ) = (r : ℝ) / 4 := by simp only [ρ_mid]; push_cast; ring
+  have hρ_coe : (ρ : ℝ) = (r : ℝ) / 8 := by simp only [ρ]; push_cast; ring
+  have hr'_coe : (r' : ℝ) = (r : ℝ) / 2 := by simp only [r']; push_cast; ring
+  have hρ_pos : 0 < (ρ : ℝ) := by rw [hρ_coe]; linarith
+  have hρ_lt_mid : (ρ : ℝ) < (ρ_mid : ℝ) := by rw [hρ_coe, hρ_mid_coe]; linarith
+  have hρ_mid_lt_out : (ρ_mid : ℝ) < (ρ_out : ℝ) := by rw [hρ_mid_coe, hρ_out_coe]; linarith
+  have hρρ' : (ρ_mid : ℝ) + (r' : ℝ) ≤ (r : ℝ) := by rw [hρ_mid_coe, hr'_coe]; linarith
+  have hρ_out_le_r : (ρ_out : ℝ) ≤ (r : ℝ) := by rw [hρ_out_coe]; linarith
+  have hr'_pos : 0 < (r' : ℝ) := by rw [hr'_coe]; linarith
+  -- Outer time radius T_out = d/2 where d = min(t₀ - tmin, tmax - t₀) > 0.
+  set d : ℝ := min (t₀ - tmin) (tmax - t₀) with hd_def
+  have hd_pos : 0 < d := lt_min (by linarith [ht₀.1]) (by linarith [ht₀.2])
+  set T_out : ℝ := d / 2 with hT_out_def
+  have hT_out_pos : 0 < T_out := by rw [hT_out_def]; linarith
+  -- The closed time interval is inside `Icc tmin tmax`.
+  have hsub : Icc (t₀ - T_out) (t₀ + T_out) ⊆ Icc tmin tmax := by
+    apply Icc_subset_Icc
+    · have : d ≤ t₀ - tmin := min_le_left _ _
+      rw [hT_out_def]; linarith
+    · have : d ≤ tmax - t₀ := min_le_right _ _
+      rw [hT_out_def]; linarith
+  -- The bound `M` over `closedBall x₀ ρ_out × Icc tmin tmax`, restricted to the inner times.
+  obtain ⟨M, hM_nonneg, hM_bd⟩ :=
+    exists_norm_fderiv_le_along_flow_joint hΦ hf (ρ := (ρ_out : ℝ))
+      (NNReal.coe_nonneg ρ_out) hρ_out_le_r
+  have hA_bd : ∀ x ∈ closedBall x₀ (ρ_out : ℝ), ∀ τ ∈ Icc (t₀ - T_out) (t₀ + T_out),
+      ‖fderiv ℝ (f τ) (Φ ⟨x, τ⟩)‖ ≤ M := by
+    intro x hx τ hτ
+    exact hM_bd x hx τ (hsub hτ)
+  -- Inner times: T_mid = min(T_out/2, 1/(2(M+1))), T = T_mid/2.
+  set T_mid : ℝ := min (T_out / 2) (1 / (2 * (M + 1))) with hT_mid_def
+  have hM1_pos : 0 < 2 * (M + 1) := by linarith
+  have hT_mid_pos : 0 < T_mid := lt_min (by linarith) (by positivity)
+  have hT_mid_lt_out : T_mid < T_out := by
+    calc T_mid ≤ T_out / 2 := min_le_left _ _
+      _ < T_out := by linarith
+  set T : ℝ := T_mid / 2 with hT_def
+  have hT_pos : 0 < T := by rw [hT_def]; linarith
+  have hT_lt_mid : T < T_mid := by rw [hT_def]; linarith
+  -- `M * T_mid < 1`.
+  have hMT_mid : M * T_mid < 1 := by
+    have hle : T_mid ≤ 1 / (2 * (M + 1)) := min_le_right _ _
+    have hM_T_mid : M * T_mid ≤ M * (1 / (2 * (M + 1))) := by
+      apply mul_le_mul_of_nonneg_left hle hM_nonneg
+    calc M * T_mid ≤ M * (1 / (2 * (M + 1))) := hM_T_mid
+      _ = M / (2 * (M + 1)) := by ring
+      _ < 1 := by
+          rw [div_lt_one hM1_pos]; linarith
+  exact ⟨T_out, T_mid, T, M, ρ_out, ρ_mid, ρ, r', hT_pos, hT_lt_mid, hT_mid_lt_out,
+    hM_nonneg, hMT_mid, hr'_pos, hρ_pos, hρ_lt_mid, hρ_mid_lt_out, hρρ', hρ_out_le_r,
+    hsub, hA_bd⟩
+
+end NestingData
+
 /-! ## The variational-flow projection predicate
 
 The bridge between "augmented flow `aΦ` is jointly `C^k`" and "the variational linear
@@ -1505,6 +1705,40 @@ theorem contDiffOn_flow_succ_via_augFlow
     hρ_lt_mid hρ_mid_lt_out hρρ' hρ_out_le_r hA_bd hf_succ hΦ_Ck hLsp_Ck hLsp_eq
 
 end VariationalLinearMapSmooth
+
+/-! ## Unconditional `C^1` flow regularity (existence form)
+
+Combining the nesting/bound-data derivation (`exists_flow_nesting_data`) with the
+unconditional `C^1` flow theorem (`exists_contDiffOn_flow_of_contDiff`), we obtain the
+fully unconditional `C^1` local-flow regularity statement in finite dimensions: from a bare
+local flow `Φ` of a jointly `C^1` field, with `t₀` strictly interior in the flow's time
+domain and a non-degenerate flow ball, the flow is jointly `C^1` on an open neighbourhood of
+`(x₀, t₀)`.  No bound, nesting, or Lipschitz data is required as input — it is all produced
+internally from compactness of closed balls. -/
+
+section UnconditionalC1
+
+variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
+
+/-- **Unconditional `C^1` flow regularity (existence form).**
+
+In finite dimensions, a local flow `Φ` of a jointly `C^1` field `f` is jointly `C^1` on an
+open neighbourhood of `(x₀, t₀)`, with all bound/nesting data derived internally.  The two
+genuine non-degeneracy requirements are that `t₀` lie strictly interior in `Icc tmin tmax`
+(a two-sided time neighbourhood is impossible at a boundary time) and that the flow ball be
+non-degenerate (`0 < r`). -/
+theorem exists_contDiffOn_flow_C1 [FiniteDimensional ℝ E]
+    (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
+    (hf : ContDiffOn ℝ 1 (uncurry f) (Set.univ : Set (ℝ × E)))
+    (ht₀ : t₀ ∈ Ioo tmin tmax) (hr_pos : 0 < (r : ℝ)) :
+    ∃ U : Set (E × ℝ), IsOpen U ∧ (x₀, t₀) ∈ U ∧ ContDiffOn ℝ 1 Φ U := by
+  obtain ⟨T_out, T_mid, T, M, ρ_out, ρ_mid, ρ, r',
+    hT, hT_lt_mid, hT_mid_lt_out, hM, hMT_mid, hr', hρ_pos, hρ_lt_mid, hρ_mid_lt_out,
+    hρρ', hρ_out_le_r, hsub, hA_bd⟩ := exists_flow_nesting_data hΦ hf ht₀ hr_pos
+  exact exists_contDiffOn_flow_of_contDiff hΦ (le_refl 1) hf hT hT_lt_mid hT_mid_lt_out hM hMT_mid
+    hsub hr' hρ_pos hρ_lt_mid hρ_mid_lt_out hρρ' hρ_out_le_r hA_bd
+
+end UnconditionalC1
 
 end Flow
 end ODE
