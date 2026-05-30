@@ -6,6 +6,10 @@ import DifferentialGeometry.Geometry.Riemannian.InjectivityRadius
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.Equation
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.Uniqueness
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.MaximalInterval
+import DifferentialGeometry.Geometry.Riemannian.Geodesic.CrossVFReduction
+import DifferentialGeometry.Geometry.Riemannian.Exponential.RescaleSmallnessUniform
+import DifferentialGeometry.Geometry.Riemannian.Exponential.RescaledLift
+import DifferentialGeometry.Geometry.Riemannian.Exponential.UniformExistence
 import DifferentialGeometry.Integral.Measure.ChartDensity
 import Mathlib.Geometry.Manifold.Riemannian.PathELength
 
@@ -50,6 +54,7 @@ namespace Riemannian
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Geometry.Riemannian.Exponential
+open DifferentialGeometry.Geometry.Riemannian.Geodesic
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
   [Module.Finite ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -97,6 +102,128 @@ lemma expMap_contMDiffAt2_of_norm_lt_radius
       (fun u : E => (expMap (I := I) g p (show TangentSpace I p from u) : M)) w :=
   (Classical.choose_spec
     (Exponential.expMap_contMDiffAt2_of_norm_lt (I := I) g p)).2 w hw
+
+/-! ## Radial geodesic property (Step 1)
+
+For a small initial velocity `v`, the radial curve `t ↦ maximalGeodesic g p v t`
+is a geodesic at every `t ∈ [0, 1]`: it satisfies the intrinsic moving-foot
+geodesic equation `HasGeodesicEquationAt g (maximalGeodesic g p v) t`.
+
+The argument routes the whole arc through the **single** chart-pushed flow orbit
+`Φ` of `exists_uniform_existence_interval`: the rescaled manifold lift
+`chartFlowOrbitLiftRescaled Φ p t' v_base` (with `t' = T / 2`, `v_base = (1/t')•v`,
+so `t' • v_base = v`) is, on the open interval `Ioo (-T/t') (T/t') = Ioo (-2) 2 ⊇
+[0, 1]`, an integral curve of the chart-`p`-fixed geodesic vector field whose
+projection equals `maximalGeodesic g p v`. This packages a *single*
+`IsGeodesicOnWithInitial` witness on an open interval containing `[0, 1]`, so the
+unconditional `IsGeodesicOnWithInitial.isGeodesicAt → IsGeodesicAt.hasGeodesicEquationAt`
+chain applies at every `t ∈ [0, 1]` (the foot-in-source clause coming from the
+orbit's chart-source confinement). -/
+
+/-- **Radial geodesic property on `[0, 1]` for small velocity.** There is an
+explicit `ρ > 0` such that for every `v` with `‖v‖ < ρ`, the maximal geodesic
+`t ↦ maximalGeodesic g p v t` satisfies the intrinsic moving-foot geodesic
+equation at every `t ∈ [0, 1]`. -/
+theorem radial_maximalGeodesic_hasGeodesicEquationAt_of_small
+    (g : SmoothRiemannianMetric I M) (p : M) :
+    ∃ ρ : ℝ, 0 < ρ ∧
+      ∀ {v : TangentSpace I p}, ‖(v : E)‖ < ρ →
+        ∀ t ∈ Set.Icc (0 : ℝ) 1,
+          DifferentialGeometry.Geometry.Riemannian.Geodesic.HasGeodesicEquationAt
+            (I := I) g (fun s : ℝ => maximalGeodesic (I := I) g p v s) t := by
+  classical
+  obtain ⟨ρ₀, T, Φ, hρ₀_pos, hT_pos, hΦ_init, hΦ_target, hΦ_phase, _hF⟩ :=
+    Exponential.exists_uniform_existence_interval (I := I) (g := g) (p := p)
+  -- Working scale `t' = T / 2 ∈ (0, T)`, so `T / t' = 2`.
+  set t' : ℝ := T / 2 with ht'_def
+  have ht'_pos : 0 < t' := by rw [ht'_def]; linarith
+  have ht'_lt_T : t' < T := by rw [ht'_def]; linarith
+  refine ⟨t' * ρ₀, mul_pos ht'_pos hρ₀_pos, ?_⟩
+  intro v hv t ht
+  -- Base velocity `vb = (1/t') • v` in the uniform ball; `t' • vb = v`.
+  set w : E := (v : E) with hw_def
+  have ht'_ne : t' ≠ 0 := ne_of_gt ht'_pos
+  obtain ⟨vb, hvb_def⟩ : ∃ vb : E, vb = (1 / t') • w := ⟨_, rfl⟩
+  have hvb_resc : t' • vb = (v : E) := by
+    rw [hvb_def, smul_smul, mul_one_div, div_self ht'_ne, one_smul, hw_def]
+  have hw_norm : ‖w‖ < t' * ρ₀ := by rw [hw_def]; exact hv
+  have hvb_ball : vb ∈ Metric.ball (0 : E) ρ₀ := by
+    rw [Metric.mem_ball, dist_zero_right, hvb_def, norm_smul]
+    rw [Real.norm_eq_abs, abs_of_pos (by positivity : (0 : ℝ) < 1 / t')]
+    rw [one_div, ← div_eq_inv_mul]
+    rw [div_lt_iff₀ ht'_pos]
+    linarith [hw_norm, mul_comm t' ρ₀]
+  -- The open interval `J = Ioo (-T/t') (T/t') = Ioo (-2) 2` contains `[0, 1]`.
+  have hT_div : T / t' = 2 := by rw [ht'_def]; field_simp
+  set J : Set ℝ := Set.Ioo (-T / t') (T / t') with hJ_def
+  have hJ_open : IsOpen J := isOpen_Ioo
+  have hJ_eq : J = Set.Ioo (-2 : ℝ) 2 := by rw [hJ_def, neg_div, hT_div]
+  have hIcc_sub_J : Set.Icc (0 : ℝ) 1 ⊆ J := by
+    rw [hJ_eq]; intro x hx; obtain ⟨hx0, hx1⟩ := hx; exact ⟨by linarith, by linarith⟩
+  have ht_J : t ∈ J := hIcc_sub_J ht
+  have h0_J : (0 : ℝ) ∈ J := hIcc_sub_J ⟨le_rfl, zero_le_one⟩
+  -- The rescaled manifold lift `F := chartFlowOrbitLiftRescaled Φ p t' vb`.
+  set F : ℝ → TangentBundle I M :=
+    Exponential.chartFlowOrbitLiftRescaled (I := I) Φ p t' vb with hF_def
+  -- `F 0 = ⟨p, t' • vb⟩ = ⟨p, v⟩` and `F` is an integral curve on `J`.
+  have hF0 : F 0 = (⟨p, t' • vb⟩ : TangentBundle I M) :=
+    Exponential.chartFlowOrbitLiftRescaled_zero (I := I) p vb t' (hΦ_init vb hvb_ball)
+  have hF_int :
+      IsMIntegralCurveOn F
+        (Geodesic.geodesicVectorFieldChart (I := I) g p) J :=
+    Exponential.chartFlowOrbitLiftRescaled_isMIntegralCurveOn_Ioo (I := I) g p vb
+      ht'_pos (hΦ_target vb hvb_ball) (hΦ_phase vb hvb_ball)
+  -- The projection of `F` equals `maximalGeodesic g p v` on `J`.
+  have hF_proj : ∀ s ∈ J,
+      (F s).proj = maximalGeodesic (I := I) g p v s := by
+    intro s hs
+    have h := Exponential.chartFlowOrbitLiftRescaled_proj_eq_maximalGeodesic_on_Ioo
+      (I := I) (g := g) (p := p) (v := vb) (T := T) (t' := t') ht'_pos
+      (hΦ_init vb hvb_ball) (hΦ_target vb hvb_ball) (hΦ_phase vb hvb_ball) (s := s) hs
+    rw [show (t' • vb : TangentSpace I p) = v from hvb_resc] at h
+    exact h
+  -- `IsGeodesicOnWithInitial g (F.proj) J p v` (a single witness; the witness
+  -- curve is `F` itself, so the projection clause is definitional).
+  have hgeo_init :
+      Geodesic.IsGeodesicOnWithInitial (I := I) g
+        (fun s : ℝ => (F s).proj) J p v := by
+    refine ⟨F, fun _ => rfl, ?_, hF_int⟩
+    -- `F 0 = ⟨p, t' • vb⟩ = ⟨p, v⟩`.
+    rw [hF0, show (t' • vb : TangentSpace I p) = v from hvb_resc]
+  -- Foot-in-source for `F.proj` at `t`: `F.proj t = maximalGeodesic g p v t`
+  -- lies in `(chartAt H p).source` by `foot_in_source_throughout`.
+  obtain ⟨ρ_src, hρ_src_pos, hsrc⟩ :=
+    Exponential.foot_in_source_throughout (I := I) (g := g) (p := p)
+  -- The two radii are the same construction `(T/2) * ρ₀` — `foot_in_source_throughout`
+  -- and the present proof both extract from `exists_uniform_existence_interval`. We do
+  -- not rely on that coincidence: instead we prove foot-in-source for `F.proj` directly
+  -- from the orbit's chart-source confinement (`chartFlowOrbitLiftRescaled_proj_mem_…`).
+  have hF_src : (F t).proj ∈ (chartAt H p).source := by
+    have hts_Icc : t' * t ∈ Set.Icc (-T) T := by
+      obtain ⟨ht0, ht1⟩ := ht
+      exact ⟨by nlinarith [ht'_pos.le, hT_pos.le], by nlinarith [ht'_lt_T.le, ht'_pos.le]⟩
+    have hΦ_target_tt := hΦ_target vb hvb_ball (t' * t) hts_Icc
+    have hsrc' :=
+      Exponential.chartFlowOrbitLiftRescaled_proj_mem_chartAt_source (I := I) p vb t' t
+        hΦ_target_tt
+    rw [hF_def]; exact hsrc'
+  -- `IsGeodesicAt g (F.proj) t` (interior point `t ∈ J`, foot-in-source).
+  have hgeoAt :
+      Geodesic.IsGeodesicAt (I := I) g (fun s : ℝ => (F s).proj) t :=
+    hgeo_init.isGeodesicAt (hJ_open.mem_nhds ht_J) hF_src
+  -- `HasGeodesicEquationAt g (F.proj) t` (unconditional bridge).
+  have hgeoEqF :
+      Geodesic.HasGeodesicEquationAt (I := I) g (fun s : ℝ => (F s).proj) t :=
+    hgeoAt.hasGeodesicEquationAt g
+  -- Transfer to `maximalGeodesic g p v` via eventual equality on the open `J ∋ t`.
+  have hEvEq : (fun s : ℝ => maximalGeodesic (I := I) g p v s)
+      =ᶠ[nhds t] (fun s : ℝ => (F s).proj) := by
+    filter_upwards [hJ_open.mem_nhds ht_J] with s hs
+    exact (hF_proj s hs).symm
+  exact Geodesic.HasGeodesicEquationAt.congr_of_eventuallyEq_at
+    (γ := fun s : ℝ => maximalGeodesic (I := I) g p v s)
+    (γ' := fun s : ℝ => (F s).proj) (t₀ := t)
+    (hF_proj t ht_J).symm hEvEq hgeoEqF
 
 /-- **Gauss's lemma (pullback form).** At every radial direction
 `v ∈ expDomain g p` *inside the `C²` ball* (`‖v‖ < expMapC2Radius g p`),
@@ -156,56 +283,46 @@ theorem gauss_lemma_pullback
   -- Integrating from `φ 0 = 0` (since `∂_s f (0, 0) = 0` by orthogonality bookkeeping)
   -- gives `φ 1 = g_p (v, w) = 0`.
   --
-  -- RESIDUAL (precise missing infrastructure, verified during dispatch):
-  --   * The `C²`-hypothesis variants of the variation engines are now AVAILABLE
-  --     and consumer-safe: `commute_ds_dt_fixed_chart_C2`
-  --     (FixedChartIdentities.lean) takes
-  --     `ContDiffAt ℝ 2 (fun p => extChartAt I (f s t) (f p.1 p.2)) (s, t)`
-  --     directly, and `metric_compat_hasDerivAt_inner_of_chartCurveDeriv`
-  --     (SecondVariation.lean) takes `ContinuousAt γ t₀` plus
-  --     `DifferentiableAt ℝ (chartCurve (γ t₀) γ) t₀` plus the two chart-rep
-  --     differentiabilities.  The radial variation `f s t := expMap g p (t • (v + s • w))`
-  --     is jointly `C²` near `[0,1] × {0}` by
-  --     `expMap_contMDiffAt2_of_norm_lt_radius` composed with the smooth
-  --     `(s, t) ↦ t • (v + s • w)`, so these variants apply.
-  --   * Bridge (b) is now AVAILABLE:
+  -- STATUS (verified during dispatch):
+  --   * STEP 1 (radial geodesic property) is now CLOSED:
+  --     `radial_maximalGeodesic_hasGeodesicEquationAt_of_small` (above, this file)
+  --     proves, for every small `v` (`‖v‖ < (T/2)·ρ₀`) and every `t ∈ [0, 1]`,
+  --     `HasGeodesicEquationAt g (fun s => maximalGeodesic g p v s) t`.  It routes
+  --     the whole radial arc through the single uniform chart-pushed flow orbit of
+  --     `exists_uniform_existence_interval`: the rescaled manifold lift
+  --     `chartFlowOrbitLiftRescaled` is, on `Ioo (-2) 2 ⊇ [0, 1]`, a SINGLE
+  --     `IsGeodesicOnWithInitial` witness whose projection equals
+  --     `maximalGeodesic g p v`; the unconditional
+  --     `IsGeodesicOnWithInitial.isGeodesicAt → IsGeodesicAt.hasGeodesicEquationAt`
+  --     chain (foot-in-source from `chartFlowOrbitLiftRescaled_proj_mem_chartAt_source`)
+  --     then gives the geodesic equation at every interior `t`, transferred to
+  --     `maximalGeodesic` by `HasGeodesicEquationAt.congr_of_eventuallyEq_at`.
+  --     This replaces the former blocker (a): no normal-chart / `expMapDiffeo`
+  --     identification and no import cycle is needed.
+  --   * STEP 2 (the variational assembly itself) is the remaining residual.  The
+  --     `C²`-relaxed chart-level engines are public:
+  --     `commute_ds_dt_fixed_chart_C2`, `hasDerivAt_innerW`, `nabla_t_nabla_s_eq`,
+  --     `nabla_s_nabla_t_eq` (FixedChartIdentities.lean), and the velocity bridge
   --     `chartCoord_mfderiv_along_curve_eq_fderiv_of_mdifferentiableAt`
-  --     (MFDerivAlongCurve.lean) is the `MDifferentiableAt`/`C²`-level form of the
-  --     `mfderiv → fderiv` velocity bridge (the original
-  --     `chartCoord_mfderiv_along_curve_eq_fderiv` demanded `ContMDiff … ∞`; the
-  --     relaxed variant takes `MDifferentiableAt 𝓘(ℝ, ℝ) I γ t` directly, since
-  --     the original proof used the `C^∞` hypothesis only to extract that one
-  --     `MDifferentiableAt`).
-  --   * Bridge (a) remains genuinely MISSING in this file's import graph
-  --     (verified by exhaustive grep; no importable upstream statement exists):
-  --       The radial geodesic property of `t ↦ expMap g p (t • v)` as a
-  --       `covDerivAlong = 0` / `HasGeodesicEquationAt`-at-every-`t` fact.  The
-  --       variation argument needs the radial curve to be a geodesic at EVERY
-  --       `t ∈ [0, 1]` (so the `⟨∇_t ∂_t f, ∂_s f⟩` term vanishes pointwise).
-  --       `radialChartCurve_secondDeriv_zero` (NormalCoordinates.lean) supplies
-  --       only the s = 0 (CENTRE) chart-acceleration vanishing in the normal
-  --       chart at `p`; it is strictly weaker than the full radial-Christoffel-
-  --       vanishing-along-the-ray (`Γ(v, v)(s • v) = 0` for all s) that a
-  --       geodesic-at-every-`t` requires, and no general-scale sibling exists.
-  --       The two unconditional routes to a moving-foot `HasGeodesicEquationAt`
-  --       are both blocked upstream of this file:
-  --         (a1) `IsGeodesicAt.hasGeodesicEquationAt` (CrossVFReduction.lean,
-  --              unconditional) would convert `IsGeodesicAt g (radial) t`, but
-  --              `IsGeodesicAt` for the radial curve needs BOTH the rescaling
-  --              `expMap g p (t • v) = maximalGeodesic g p v t`
-  --              (MaximalRescaling.lean) under its `h1_in_agreement` chart-
-  --              coordinate-agreement side condition, AND the foot-in-source
-  --              clause `expMap g p (t • v) ∈ (chartAt H p).source` — and the
-  --              normal-chart source is the opaque `expMapDiffeo` image, with NO
-  --              proven relation to `(chartAt H p).source`.
-  --         (a2) `IsGeodesic` / `IsGeodesicOn` of the radial exp curve lives only
-  --              DOWNSTREAM in `Exponential/IntrinsicExp` (`intrinsicGeodesic_isGeodesic`),
-  --              which imports HopfRinow, which imports THIS file — a genuine
-  --              import cycle.
-  --       Closing (a) requires either lifting the radial-Christoffel-vanishing-
-  --       along-rays (the Gauss-lemma geometric core) into NormalCoordinates.lean
-  --       as a general-scale statement, or relocating the upstream/downstream
-  --       split so the radial `IsGeodesic` fact is available here without a cycle.
+  --     (MFDerivAlongCurve.lean).  But the INTRINSIC metric-compatibility product
+  --     rule that converts a `t`-derivative of `g.inner (γ t) (V t) (W t)` into
+  --     `⟨∇_t V, W⟩ + ⟨V, ∇_t W⟩` at `C²` regularity —
+  --     `metric_compat_hasDerivAt_inner_of_chartCurveDeriv` (SecondVariation.lean) —
+  --     is `private`, hence not importable here; and the conversion
+  --     `HasGeodesicEquationAt → covDerivAlong velocity = 0` exists only in the
+  --     `C^∞`-hypothesis form `covDerivAlong_velocity_eq_zero_iff_hasGeodesicEquationAt`
+  --     (CovariantDerivativeAlong.lean), whereas the radial variation is only `C²`.
+  --     Closing STEP 2 therefore requires: (i) de-privatising
+  --     `metric_compat_hasDerivAt_inner_of_chartCurveDeriv` (a minimal,
+  --     dependency-free visibility change); (ii) a `C²`-form
+  --     `HasGeodesicEquationAt → covDerivAlong velocity = 0` (the backward direction
+  --     of the existing iff uses only the unpacked geodesic identity, so it relaxes
+  --     to `C²`, but it must be re-stated with `DifferentiableAt`-level hypotheses on
+  --     `chartCurve (γ t) γ`); and (iii) the integration argument itself (FTC over
+  --     `[0, 1]`, continuity / interval-integrability of the `C²`-only integrand,
+  --     and the `½ ∂_s g.inner_p (v + s•w, v + s•w)|₀ = g.inner_p (v, w)` endpoint
+  --     computation).  This is substantial new `C²`-relaxed infrastructure rather
+  --     than a thin assembly, and is left as the residual.
   sorry
 
 end GaussLemma
