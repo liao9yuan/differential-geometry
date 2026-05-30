@@ -56,9 +56,13 @@ the metric appears solely through the paired bridge substitution, exactly as `�
 
 This is the honest paired replacement for `variational_flow_flat_pairing_hasDerivAt`: same
 conclusion (`-lieDerivMetric + metricTransportResidual`), with the two per-slot metric-carrying
-`hcorr_v`/`hcorr_w` replaced by two metric-free flat-value identities plus the genuinely-paired
-bridge data (a goodset-membership and section-differentiability datum at the basepoint, and the
-convention-bridge side conditions).  No `sorry`, no `axiom`, no `HasLocallyConstantChartAt`-style
+`hcorr_v`/`hcorr_w` replaced by two metric-free flat-value identities plus the two basepoint-bridge
+`E`-equations (`∇_u X = F(u) + Γ(u)`).  The bridge equations are *not* assumed: the
+combined-instance lemma `leviCivita_basepoint_eq_rawFderiv_add_corrections` (section A) discharges
+each from the genuinely-paired bridge data (a goodset-membership and section-differentiability
+datum at the basepoint, plus the convention-bridge side conditions), and they cross into the
+inner-product-only pairing assembly (section B) as plain `E`-equations.  No `sorry`, no `axiom`,
+no `HasLocallyConstantChartAt`-style
 hypothesis, no joint-`C^∞`-on-`ℝ × M` predicate, and **no** false `D²φ = Γ` identification — the
 metric Christoffel is never assumed equal to a smooth-structure jet per slot; it enters only
 paired, derived from `∇g = 0`.  No hypothesis-packaging: the flat-value inputs are `E`-equations,
@@ -80,12 +84,20 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.PDE.DeTurck
 open DifferentialGeometry.PDE.RicciFlow.Pullback
 
-section Paired
+/-! ## (A) The basepoint bridge (`∇g = 0` read on the chart)
+
+The bridge lemma needs the tangent-bundle charted space underlying the `T%`
+section-differentiability notation `MDiffAt (T% X)`, which requires a *standalone*
+`[NormedSpace ℝ E]`.  It is therefore stated in a section declaring **both** `[NormedSpace ℝ E]`
+and `[InnerProductSpace ℝ E]` (matching `chartLeviCivitaInnerCLM_basepoint_eq_rawFderiv_add_corrections`).
+Its conclusion is an `E`-equation, so it crosses cleanly into the inner-product-only world of the
+pairing assembly (B): there it is the genuinely-paired channel by which the metric `Γ` enters. -/
+
+section Bridge
 
 -- Both `[NormedSpace ℝ E]` (for the tangent-bundle charted space underlying the `T%`
--- section-differentiability notation `MDiffAt (T% X)`) and `[InnerProductSpace ℝ E]` (for the
--- metric pairing `g.inner`) are declared, matching the
--- `chartLeviCivitaInnerCLM_basepoint_eq_rawFderiv_add_corrections` section.
+-- section-differentiability notation `MDiffAt (T% X)`) and `[InnerProductSpace ℝ E]` are
+-- declared, matching the `chartLeviCivitaInnerCLM_basepoint_eq_rawFderiv_add_corrections` section.
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
@@ -162,19 +174,45 @@ theorem leviCivita_basepoint_eq_rawFderiv_add_corrections
   exact chartLeviCivitaInnerCLM_basepoint_eq_rawFderiv_add_corrections (I := I) g α X w
     hRdiff hCdiff
 
+end Bridge
+
+/-! ## (B) The paired pairing assembly (inner-product world)
+
+Stated in an `[InnerProductSpace ℝ E]`-only section (no standalone `[NormedSpace ℝ E]`), so the
+producers' factor jets `T'v, P'v, … : E →L[ℝ] E` and `RawVariationalIdentityFlat`,
+`metricTransportResidual` all live over the *same* `InnerProductSpace.toNormedSpace` module
+instance — avoiding the two-`NormedSpace` diamond.  The basepoint bridge enters here as the two
+`E`-equation hypotheses `hbridge_v`/`hbridge_w` (`∇_u X = F(u) + Γ(u)`), discharged by the
+combined-instance lemma `leviCivita_basepoint_eq_rawFderiv_add_corrections` at any call site that
+has the `T%` differentiability datum — exactly the channel by which the metric `Γ` enters, and
+only paired. -/
+
+section MainPairing
+
+variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
+
 /-- **PAIRED flat-route Cartan pairing of the moving-pushforward inner product.**
 
 The honest **paired-residual** replacement for `variational_flow_flat_pairing_hasDerivAt`.  Given
 the two flat per-slot identities (`RawVariationalIdentityFlat` for `v` and `w`, the producers'
-output) and the two **metric-free** flat-value identities
+output), the two **metric-free** flat-value identities
 
   `T'v (dΦv) + P'v v = -(fderiv (chartRawRepr α X) (φ α) dΦv + movingTrivCorrection α X dΦv)`
   `T'w (dΦw) + P'w w = -(fderiv (chartRawRepr α X) (φ α) dΦw + movingTrivCorrection α X dΦw)`
 
 — each asserting only that the orbit-pushforward flat derivative is the negative trivialised flat
-(Lie-type) derivative `-F(·)`, with **no** metric and **no** `Γ`/`D²φ` identification — together
-with the genuinely-paired bridge data (`hα`, `hX`, the convention-bridge differentiability side
-conditions), the frozen-metric moving-pushforward inner-product variation curve
+(Lie-type) derivative `-F(·)`, carrying **no** metric and **no** `Γ`/`D²φ` identification — and
+the two basepoint-bridge `E`-equations (`∇g = 0`)
+
+  `(LeviCivita g) X α dΦv = (fderiv (chartRawRepr α X) (φ α) dΦv + movingTrivCorrection α X dΦv)
+                              + christoffelCorrection g α α (X̃_α α) dΦv`     (and slot `w`),
+
+discharged by `leviCivita_basepoint_eq_rawFderiv_add_corrections`, the frozen-metric
+moving-pushforward inner-product variation curve
 
   `s ↦ g.inner (Φ_fam t x) (mfderiv (Φ_fam s) x v) (mfderiv (Φ_fam s) x w)`
 
@@ -182,13 +220,15 @@ has at `t` the derivative
 
   `-lieDerivMetric g X (Φ_fam t x) dΦv dΦw + metricTransportResidual g X Φ_fam t x v w`.
 
-The metric `Γ` is introduced **only paired**, inside the proof, via
-`leviCivita_basepoint_eq_rawFderiv_add_corrections` (`∇g = 0`): substituting
-`F(u) = ∇_u X - Γ(u)` into the symmetric pairing `-g_α(F(dΦv), dΦw) - g_α(dΦv, F(dΦw))`, the
-covariant pieces assemble to `-lieDerivMetric` (`neg_lieDerivMetric_eq_neg_killing_sum`) and the
-metric Christoffel pieces survive *paired* as `metricTransportResidual`.  The metric-free factor
-jets cancel across slots; the false per-slot `D²φ = Γ` is never used.  No hypothesis-packaging:
-the flat-value inputs are `E`-equations, the conclusion is the scalar pairing `HasDerivAt`. -/
+The metric `Γ` enters **only paired**: combining the metric-free flat-value identity
+`Vflat = -F(dΦv)` with the bridge `∇_{dΦv} X = F(dΦv) + Γ(dΦv)` gives `Vflat = -∇_{dΦv} X + Γ(dΦv)`
+(and slot `w`); the metric-free factor jets `F` cancel against `∇ - Γ` slot by slot, the covariant
+pieces assemble to `-lieDerivMetric` (`neg_lieDerivMetric_eq_neg_killing_sum`), and the metric
+Christoffel pieces survive *paired* as `metricTransportResidual`.  The false per-slot `D²φ = Γ`
+is never used: each bridge `E`-equation is the *true* chart formula `∂X = ∇X - ΓX`, not an
+identification of a smooth-structure jet with the metric symbol.  No hypothesis-packaging: the
+flat-value and bridge inputs are `E`-equations, the conclusion is the scalar pairing
+`HasDerivAt`, a distinct object. -/
 theorem variational_flow_flat_paired_residual_hasDerivAt
     (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -197,14 +237,6 @@ theorem variational_flow_flat_paired_residual_hasDerivAt
     (T'v P'v T'w P'w : E →L[ℝ] E)
     (hv_flat : RawVariationalIdentityFlat (I := I) Φ_fam t x v T'v P'v)
     (hw_flat : RawVariationalIdentityFlat (I := I) Φ_fam t x w T'w P'w)
-    (hα : Φ_fam t x ∈ chartLeviCivitaGoodSet (I := I) (Φ_fam t x))
-    (hX : MDiffAt (T% (X : ∀ y : M, TangentSpace I y)) (Φ_fam t x))
-    (hRdiff : DifferentiableAt ℝ
-      (chartRawRepr (I := I) (Φ_fam t x) (X : ∀ y : M, TangentSpace I y))
-      (extChartAt I (Φ_fam t x) (Φ_fam t x)))
-    (hCdiff : DifferentiableAt ℝ
-      (fun z => chartMovingTriv (I := I) (Φ_fam t x) z)
-      (extChartAt I (Φ_fam t x) (Φ_fam t x)))
     (hflatval_v :
       T'v (mfderiv I I (Φ_fam t : M → M) x v) + P'v v
         = -(fderiv ℝ (chartRawRepr (I := I) (Φ_fam t x)
@@ -222,7 +254,35 @@ theorem variational_flow_flat_paired_residual_hasDerivAt
               (mfderiv I I (Φ_fam t : M → M) x w)
             + movingTrivCorrection (I := I) (Φ_fam t x)
                 (X : ∀ y : M, TangentSpace I y)
-                (mfderiv I I (Φ_fam t : M → M) x w))) :
+                (mfderiv I I (Φ_fam t : M → M) x w)))
+    (hbridge_v :
+      (LeviCivita (I := I) g) (X : ∀ y : M, TangentSpace I y) (Φ_fam t x)
+          (mfderiv I I (Φ_fam t : M → M) x v)
+        = (fderiv ℝ (chartRawRepr (I := I) (Φ_fam t x)
+                (X : ∀ y : M, TangentSpace I y))
+              (extChartAt I (Φ_fam t x) (Φ_fam t x))
+              (mfderiv I I (Φ_fam t : M → M) x v)
+            + movingTrivCorrection (I := I) (Φ_fam t x)
+                (X : ∀ y : M, TangentSpace I y)
+                (mfderiv I I (Φ_fam t : M → M) x v))
+          + christoffelCorrection (I := I) g (Φ_fam t x) (Φ_fam t x)
+              (chartE_section_repr (I := I) (Φ_fam t x)
+                (X : ∀ y : M, TangentSpace I y) (Φ_fam t x))
+              (mfderiv I I (Φ_fam t : M → M) x v))
+    (hbridge_w :
+      (LeviCivita (I := I) g) (X : ∀ y : M, TangentSpace I y) (Φ_fam t x)
+          (mfderiv I I (Φ_fam t : M → M) x w)
+        = (fderiv ℝ (chartRawRepr (I := I) (Φ_fam t x)
+                (X : ∀ y : M, TangentSpace I y))
+              (extChartAt I (Φ_fam t x) (Φ_fam t x))
+              (mfderiv I I (Φ_fam t : M → M) x w)
+            + movingTrivCorrection (I := I) (Φ_fam t x)
+                (X : ∀ y : M, TangentSpace I y)
+                (mfderiv I I (Φ_fam t : M → M) x w))
+          + christoffelCorrection (I := I) g (Φ_fam t x) (Φ_fam t x)
+              (chartE_section_repr (I := I) (Φ_fam t x)
+                (X : ∀ y : M, TangentSpace I y) (Φ_fam t x))
+              (mfderiv I I (Φ_fam t : M → M) x w)) :
     HasDerivAt
       (fun s : ℝ => g.inner (Φ_fam t x)
         (mfderiv I I (Φ_fam s : M → M) x v)
@@ -261,23 +321,17 @@ theorem variational_flow_flat_paired_residual_hasDerivAt
   -- flat derivative is the negative trivialised flat (Lie-type) derivative `-F(·)`; no metric.
   have hVflat_eq : Vflat = -Fv := hflatval_v
   have hWflat_eq : Wflat = -Fw := hflatval_w
-  -- (2) Basepoint bridge (`∇g = 0`): `∇_u X = F(u) + Γ(u)`, hence `Fv = nablaV - Cv` etc.
-  have hbridge_v : nablaV = Fv + Cv := by
-    rw [hnablaV, hCv, hXα, hFv]
-    exact leviCivita_basepoint_eq_rawFderiv_add_corrections (I := I) g α
-      (X : ∀ y : M, TangentSpace I y) dΦv hα hX hRdiff hCdiff
-  have hbridge_w : nablaW = Fw + Cw := by
-    rw [hnablaW, hCw, hXα, hFw]
-    exact leviCivita_basepoint_eq_rawFderiv_add_corrections (I := I) g α
-      (X : ∀ y : M, TangentSpace I y) dΦw hα hX hRdiff hCdiff
+  -- (2) Basepoint bridge (`∇g = 0`), abbreviated: `nablaV = Fv + Cv`, `nablaW = Fw + Cw`.
+  have hbr_v : nablaV = Fv + Cv := hbridge_v
+  have hbr_w : nablaW = Fw + Cw := hbridge_w
   -- (3) Combining (1) and (2): `Vflat = -nablaV + Cv`, `Wflat = -nablaW + Cw` — the metric `Γ`
   -- (`Cv`/`Cw`) now sits *paired* with the bundled covariant value, exactly the input shape the
   -- covariant pairing consumes.  The metric-free factor jets `Fv`/`Fw` have been folded into the
   -- difference `nablaV - Cv`, so no per-slot `D²φ = Γ` survives.
   have hcorr_v' : Vflat = -nablaV + Cv := by
-    rw [hVflat_eq, hbridge_v]; abel
+    rw [hVflat_eq, hbr_v]; abel
   have hcorr_w' : Wflat = -nablaW + Cw := by
-    rw [hWflat_eq, hbridge_w]; abel
+    rw [hWflat_eq, hbr_w]; abel
   -- (4) The genuine derivative of the frozen-metric moving-pushforward inner product is the
   -- flat product rule against the fixed bilinear form `g.inner α`.
   have h_total :=
@@ -317,7 +371,7 @@ theorem variational_flow_flat_paired_residual_hasDerivAt
   -- Transport the derivative value.
   rwa [hval] at h_total
 
-end Paired
+end MainPairing
 
 end ODE
 end RicciFlow
