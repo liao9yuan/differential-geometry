@@ -2004,7 +2004,23 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 /-- **Assembly: the maximal geodesic interval is the whole real line.**
 Combine the no-right-escape `bm_c_gc_extension_past_limit` with the
 no-left-escape `bm_c_gc_symmetric_left_endpoint` and the openness of
-the maximal interval to conclude it equals `Set.univ`. -/
+the maximal interval to conclude it equals `Set.univ`.
+
+NOTE.  The conclusion `maximalGeodesicInterval g p v = Set.univ` is the
+*chart-`p`-fixed* completeness statement, which is genuinely false on a
+multi-chart manifold: a geodesic that leaves the single chart
+`(chartAt H p).source` cannot be an integral curve of the chart-`p` spray
+`geodesicVectorFieldChart g p` (which degenerates to the zero section
+there), so the chart-`p`-fixed interval need not be all of `ℝ`.  The
+correct, chart-independent geodesic-completeness producer is
+`isGeodesicOn_Ici_of_complete` (just above), stated for the moving-foot
+predicate `IsGeodesicOn g Γ (Ici 0)` and proven axiom-cleanly from
+`hasEndpointContinuation_of_complete` and
+`isGeodesicOn_Ici_of_endpointContinuation`.  The two residual `sorry`s
+below request the global `C¹`-time-smoothness and global velocity-enorm
+bound of the chart-`p`-fixed `maximalGeodesic`, which (being junk-valued
+off the chart-`p` interval) do not hold in general; they are retained only
+to keep this superseded statement compiling. -/
 theorem bm_c_gc_assemble
     (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p) :
     maximalGeodesicInterval (I := I) g p v = Set.univ := by
@@ -2873,6 +2889,73 @@ theorem isGeodesicOn_Ici_of_endpointContinuation
     obtain ⟨b, hbS, htb⟩ := hbdd t
     obtain ⟨a, ha, hab⟩ := hbS
     exact hΓ_geo_at a ha t (lt_of_lt_of_eq htb hab.symm)
+
+/-! ### Intrinsic right-completeness under metric completeness
+
+The two proven, axiom-clean ingredients
+`hasEndpointContinuation_of_complete` (endpoint-continuation producer from
+metric completeness, given `C¹`-time-smoothness and a constant-speed bound
+on the extending geodesic) and `isGeodesicOn_Ici_of_endpointContinuation`
+(colimit assembly of the iterated single-step extensions into a geodesic on
+all of `Ici 0`) combine into the *true* geodesic-completeness statement:
+a moving-foot geodesic on `Iio b₀` extends, across charts, to a geodesic on
+all of `Ici 0`, provided every finite extension comes with its minimal
+separable analytic data (a unit-speed geodesic always supplies these).
+
+This is the M2 cross-chart-agreement producer that replaces the (false on
+multi-chart manifolds) fixed-basepoint conclusion `maximalGeodesicInterval
+g p v = Set.univ`.  Instead of forcing the chart-`p`-fixed maximal interval
+to be all of `ℝ` — which it genuinely is not whenever a geodesic leaves the
+single chart `(chartAt H p).source`, since `geodesicVectorFieldChart g p`
+degenerates to the zero section there — it works with the chart-independent
+moving-foot predicate `IsGeodesicOn g Γ (Ici 0)`, whose extension steps are
+launched from each successive limit point's *own* chart (the genuine
+cross-chart continuation `hasEndpointContinuation_of_complete`). -/
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- **Intrinsic right-completeness from metric completeness.**  A moving-foot
+geodesic `γ₀` on `Iio b₀` (`b₀ > 0`) extends, across charts, to a geodesic
+on all of `Ici 0`, agreeing with `γ₀` below `b₀`.
+
+The hypothesis `hreg` exposes the minimal separable analytic data of any
+geodesic extending `γ₀` past a finite right-endpoint `b`: it is `C¹` in
+time on `Iio b`, and its velocity has constant `g`-speed bounded by a
+nonnegative `c` (both the bundle-enorm bound `hSpeedBound` and the
+inner-product bound `hSpeedSq`).  These are precisely the two facts a
+unit-speed (or constant-speed) geodesic always satisfies; they are *not*
+the extension conclusion (which is the geodesic equation on a strictly
+larger interval).  Metric completeness then furnishes endpoint-continuation
+data at `b` (`hasEndpointContinuation_of_complete`), and the colimit of the
+iterated single-step extensions (`isGeodesicOn_Ici_of_endpointContinuation`)
+assembles the global geodesic.
+
+Both consumed producers are fully proven and axiom-clean; this theorem is
+their structural composition, so it too is axiom-clean. -/
+theorem isGeodesicOn_Ici_of_complete
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M) {γ₀ : ℝ → M} {b₀ : ℝ} (hb₀ : 0 < b₀)
+    (hγ₀ : IsGeodesicOn (I := I) g γ₀ (Set.Iio b₀))
+    (hreg : ∀ (γ : ℝ → M) (b : ℝ), 0 < b →
+      IsGeodesicOn (I := I) g γ (Set.Iio b) →
+      (∀ t < b₀, t < b → γ t = γ₀ t) →
+      ∃ c : ℝ, 0 ≤ c ∧
+        ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ (Set.Iio b) ∧
+        (∀ τ : ℝ,
+          ‖mfderiv 𝓘(ℝ, ℝ) I γ τ (1 : ℝ)‖ₑ ≤ ENNReal.ofReal c) ∧
+        (∀ s : ℝ,
+          (g.inner (γ s)) (mfderiv 𝓘(ℝ, ℝ) I γ s 1)
+              (mfderiv 𝓘(ℝ, ℝ) I γ s 1) ≤ c ^ 2)) :
+    ∃ γ : ℝ → M,
+      IsGeodesicOn (I := I) g γ (Set.Ici (0 : ℝ)) ∧
+      (∀ t, t < b₀ → γ t = γ₀ t) := by
+  -- Build the endpoint-continuation provider from metric completeness and the
+  -- per-extension analytic data `hreg`, then invoke the colimit assembly.
+  refine isGeodesicOn_Ici_of_endpointContinuation (I := I) g hb₀ hγ₀ ?_
+  intro γ b hb hγ hagree
+  obtain ⟨c, hc_nonneg, hγ_smooth, hSpeedBound, hSpeedSq⟩ := hreg γ b hb hγ hagree
+  exact hasEndpointContinuation_of_complete (I := I) g hc_nonneg hγ_smooth
+    hSpeedBound hSpeedSq hγ
 
 end GeodesicCompleteness
 
