@@ -365,8 +365,9 @@ theorem pairwise_edist_bound_from_geodesic
                   (fun s => Real.sin (Real.pi * s / L)) (e i)).toFun)
                 ((SectionAlongCurve.smulFun
                   (fun s => Real.sin (Real.pi * s / L)) (e i)).toFun) t)
-              MeasureTheory.volume 0 L := by
-        sorry
+              MeasureTheory.volume 0 L :=
+        DifferentialGeometry.Geometry.Riemannian.Variation.indexFormIntegrand_intervalIntegrable
+          (I := I) g γ L hL_pos hγ_C1 hγ_geoOn hγ_unit_mfderiv e heDiff hParallel hON hPerp
       -- (v) interval-integrability of `t ↦ Ric(γ t)(uPrime t)(uPrime t)`.
       -- The Ricci tensor is a smooth `(0,2)`-tensor bundle section
       -- (`ricciTensor_contMDiff`); pulled back along the `C¹` curve `γ` it
