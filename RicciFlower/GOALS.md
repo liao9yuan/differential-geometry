@@ -224,10 +224,12 @@ fields available for Section 12, and `ham3_pinch_imp` remains a checked display
 wrapper.  The Section 9 Ricci nonnegativity and shifted pinching package now
 feeds the Lemma 10.8 reaction sign through unordered pointwise eigenvalue
 data, and checked scalar sign lemmas reduce the Lemma 10.6 book RHS to the
-drift term.  The remaining important local frontier is to convert
-`pinchEvol_book` into a `parabolicOperatorWithDrift P_epsilon <= 0` statement
-on compact slabs, produce the compact initial maximum constant, and apply the
-scalar maximum principle.
+drift term.  The former local frontier is now checked: `pinchQuotient_parabolic_nonpos`
+converts `pinchEvol_book` into a drifted `parabolicOperatorWithDrift
+P_epsilon <= 0` statement on compact slabs, `pinchQuotient_initial_bound`
+produces the compact initial maximum constant, `pinchQuot_slab_bound` applies
+the scalar maximum principle to `C - P_epsilon`, and `pinchEstimate_sol`
+assembles the Section 10 estimate.
 
 ### G8. Convergence To Constant Positive Curvature
 

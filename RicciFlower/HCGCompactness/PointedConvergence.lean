@@ -1,6 +1,7 @@
 import RicciFlower.HCGCompactness.Basic
 import RicciFlower.Tensor.RSTensor.MetricCompatibility
 import RicciFlower.Tensor.RSTensor.NablaOnTensors.Regularity.TotalNabla0S
+import RicciFlower.VectorBundle.Frame
 import Mathlib.Geometry.Manifold.LocalDiffeomorph
 import Mathlib.Geometry.Manifold.MFDeriv.Basic
 
@@ -23,7 +24,7 @@ universe u
 namespace RicciFlower
 namespace HCGCompactness
 
-open scoped Manifold ContDiff
+open scoped Manifold ContDiff Topology
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
@@ -95,6 +96,297 @@ noncomputable def metricCovDeriv
       by
         simpa [Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using
           metricCovDerivStep (I := I) gRef a A)
+
+/-- Evaluation of the first canonical background covariant derivative of a
+metric tensor.  The leading slot is the derivative direction; evaluating it on
+a smooth vector field recovers the existing directional `nabla0SFun` API. -/
+theorem metricCovDeriv_one_apply_section
+    (h gRef : SmoothRiemannianMetric I M)
+    (X :
+      ContMDiffSection I E (∞ : WithTop ℕ∞)
+        (TangentSpace I : M -> Type _))
+    (x : M) (slots : Fin 2 -> TangentSpace I x) :
+    metricCovDeriv (I := I) h gRef 1 x (Fin.cons (X x) slots) =
+      Tensor0SBundle.nabla0SFun (𝕜 := Real) (E := E) (H := H)
+        (I := I) (M := M) 2
+        (LeviCivita.leviCivitaConnectionOfMetric (I := I) gRef)
+        X (metricCovDeriv (I := I) h gRef 0) x slots := by
+  haveI : IsManifold I 1 M :=
+    IsManifold.of_le (I := I) (M := M) (n := ∞)
+      (by decide : (1 : WithTop ℕ∞) ≤ ∞)
+  haveI : IsManifold I 2 M :=
+    IsManifold.of_le (I := I) (M := M) (n := ∞)
+      (by decide : (2 : WithTop ℕ∞) ≤ ∞)
+  haveI : IsManifold I ((∞ : WithTop ℕ∞) + 1) M := by
+    change IsManifold I ∞ M
+    infer_instance
+  let cov :=
+    LeviCivita.leviCivitaConnectionOfMetric (I := I) gRef
+  let A : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2 :=
+    metricCovDeriv (I := I) h gRef 0
+  let hcov :
+      CovariantDerivative.ContMDiffCovariantDerivativeLocally
+        (I := I) (E := E) (M := M) cov (∞ : WithTop ℕ∞) := by
+    simpa [cov] using
+      LeviCivita.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
+        (I := I) (M := M) gRef
+  let hreg :=
+    Tensor0SBundle.totalNabla0S_reg (E := E) (H := H)
+      (I := I) (M := M) 2 cov hcov A
+  change
+    (Tensor0SBundle.totalNabla0S (𝕜 := Real) (E := E) (H := H)
+        (I := I) (M := M) 2 cov A hreg x) (Fin.cons (X x) slots) =
+      Tensor0SBundle.nabla0SFun (𝕜 := Real) (E := E) (H := H)
+        (I := I) (M := M) 2 cov X A x slots
+  exact Tensor0SBundle.totalNabla0SFun_apply_section
+    (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 cov X A x slots
+
+/-- Smooth-slot expansion of the first background covariant derivative of a
+metric tensor.  This is the invariant form of the first displayed formula in
+the second part of MSM135 Lemma 3.11. -/
+theorem metricCovDeriv_one_eval_smooth_slots
+    (h gRef : SmoothRiemannianMetric I M)
+    (X :
+      ContMDiffSection I E (∞ : WithTop ℕ∞)
+        (TangentSpace I : M -> Type _))
+    (V : Fin 2 ->
+      ContMDiffSection I E (∞ : WithTop ℕ∞)
+        (TangentSpace I : M -> Type _))
+    (x : M) :
+    metricCovDeriv (I := I) h gRef 1 x
+        (Fin.cons (X x) (fun a : Fin 2 => V a x)) =
+      extDerivFun (I := I)
+          (fun p : M => h.inner p (V 0 p) (V 1 p)) x (X x) -
+        ∑ a : Fin 2,
+          h.inner x
+            ((Function.update (fun b : Fin 2 => V b x) a
+              (((LeviCivita.leviCivitaConnectionOfMetric (I := I) gRef)
+                  (fun p : M => V a p) x) (X x))) 0)
+            ((Function.update (fun b : Fin 2 => V b x) a
+              (((LeviCivita.leviCivitaConnectionOfMetric (I := I) gRef)
+                  (fun p : M => V a p) x) (X x))) 1) := by
+  classical
+  haveI : IsManifold I 1 M :=
+    IsManifold.of_le (I := I) (M := M) (n := ∞)
+      (by decide : (1 : WithTop ℕ∞) ≤ ∞)
+  haveI : IsManifold I 2 M :=
+    IsManifold.of_le (I := I) (M := M) (n := ∞)
+      (by decide : (2 : WithTop ℕ∞) ≤ ∞)
+  haveI : IsManifold I ((∞ : WithTop ℕ∞) + 1) M := by
+    change IsManifold I ∞ M
+    infer_instance
+  let cov :=
+    LeviCivita.leviCivitaConnectionOfMetric (I := I) gRef
+  have hzero :
+      metricCovDeriv (I := I) h gRef 0 =
+        Tensor0SBundle.metricTensorField (I := I) h := by
+    rfl
+  have hdir :=
+    metricCovDeriv_one_apply_section (I := I) h gRef X x
+      (fun a : Fin 2 => V a x)
+  have heval :=
+    Tensor0SBundle.nabla0SFun_eval_smooth_slots (𝕜 := Real)
+      (E := E) (H := H) (I := I) (M := M)
+      cov X V (metricCovDeriv (I := I) h gRef 0) x
+  rw [hdir, heval]
+  simp [hzero, cov, Tensor0SBundle.metricTensorField_apply]
+
+private theorem extDerivFun_congr_eventually_real
+    {f g : M -> Real} {x : M} (v : TangentSpace I x)
+    (h : f =ᶠ[𝓝 x] g) :
+    extDerivFun (I := I) f x v = extDerivFun (I := I) g x v := by
+  have hmf := Filter.EventuallyEq.mfderiv_eq (I := I) (I' := 𝓘(Real, Real)) h
+  have hx : f x = g x := h.eq_of_nhds
+  unfold extDerivFun
+  rw [hmf, hx]
+
+/-- Local-frame evaluation of the first background covariant derivative of a
+metric tensor.
+
+This is the local-frame form of the first displayed formula in the second part
+of MSM135 Lemma 3.11:
+`(nabla_gRef h)_{d a b}` is the directional derivative of `h_{a b}` minus the
+two Christoffel corrections for the background connection. -/
+theorem metricCovDeriv_one_eval_localFrame
+    {Idx : Type*} {u : Set M}
+    (h gRef : SmoothRiemannianMetric I M)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u)
+    (hu : IsOpen u) {x : M} (hx : x ∈ u)
+    (d a b : Idx) :
+    metricCovDeriv (I := I) h gRef 1 x
+        (Fin.cons (frame d x)
+          (fun q : Fin 2 => if q = 0 then frame a x else frame b x)) =
+      extDerivFun (I := I)
+          (fun y : M => h.inner y (frame a y) (frame b y)) x (frame d x) -
+        (h.inner x
+            (((LeviCivita.leviCivitaConnectionOfMetric (I := I) gRef)
+                (frame a) x) (frame d x))
+            (frame b x) +
+          h.inner x (frame a x)
+            (((LeviCivita.leviCivitaConnectionOfMetric (I := I) gRef)
+                (frame b) x) (frame d x))) := by
+  classical
+  haveI : IsManifold I 1 M :=
+    IsManifold.of_le (I := I) (M := M) (n := ∞)
+      (by decide : (1 : WithTop ℕ∞) ≤ ∞)
+  haveI : IsManifold I 2 M :=
+    IsManifold.of_le (I := I) (M := M) (n := ∞)
+      (by decide : (2 : WithTop ℕ∞) ≤ ∞)
+  haveI : IsManifold I ((∞ : WithTop ℕ∞) + 1) M := by
+    change IsManifold I ∞ M
+    infer_instance
+  obtain ⟨sec, hsec⟩ :=
+    hframe.exists_contMDiffSection_eqOn_nhd hu hx
+  let cov :=
+    LeviCivita.leviCivitaConnectionOfMetric (I := I) gRef
+  let X :
+      ContMDiffSection I E (∞ : WithTop ℕ∞)
+        (TangentSpace I : M -> Type _) := sec d
+  let V : Fin 2 ->
+      ContMDiffSection I E (∞ : WithTop ℕ∞)
+        (TangentSpace I : M -> Type _) :=
+    fun q => if q = 0 then sec a else sec b
+  have hsec_ev (i : Idx) :
+      (fun y : M => sec i y) =ᶠ[𝓝 x] frame i :=
+    hsec.mono fun y hy => hy i
+  have hsec_x (i : Idx) : sec i x = frame i x :=
+    (hsec_ev i).self_of_nhds
+  have hpair_ev :
+      (fun y : M => h.inner y (V 0 y) (V 1 y)) =ᶠ[𝓝 x]
+        (fun y : M => h.inner y (frame a y) (frame b y)) := by
+    filter_upwards [hsec_ev a, hsec_ev b] with y ha hb
+    simp [V, ha, hb]
+  have hXx : X x = frame d x := by
+    simpa [X] using hsec_x d
+  have hV0x : V 0 x = frame a x := by
+    simp [V, hsec_x a]
+  have hV1x : V 1 x = frame b x := by
+    simp [V, hsec_x b]
+  have hcov_a :
+      ((cov (fun y : M => V 0 y) x) (X x)) =
+        ((cov (frame a) x) (frame d x)) := by
+    have hconn :
+        cov (fun y : M => V 0 y) x = cov (frame a) x := by
+      exact cov.isCovariantDerivativeOnUniv.congr_of_eventuallyEq
+        ((V 0).contMDiff.contMDiffAt.mdifferentiableAt (by simp))
+        ((hframe.contMDiffAt hu hx a).mdifferentiableAt (by simp))
+        (by simp)
+        (by simpa [V] using hsec_ev a)
+    rw [hconn, hXx]
+  have hcov_b :
+      ((cov (fun y : M => V 1 y) x) (X x)) =
+        ((cov (frame b) x) (frame d x)) := by
+    have hconn :
+        cov (fun y : M => V 1 y) x = cov (frame b) x := by
+      exact cov.isCovariantDerivativeOnUniv.congr_of_eventuallyEq
+        ((V 1).contMDiff.contMDiffAt.mdifferentiableAt (by simp))
+        ((hframe.contMDiffAt hu hx b).mdifferentiableAt (by simp))
+        (by simp)
+        (by simpa [V] using hsec_ev b)
+    rw [hconn, hXx]
+  have hcov_a' :
+      (((LeviCivita.leviCivitaConnectionOfMetric (I := I) gRef)
+          (fun y : M => sec a y) x) (X x)) =
+        (((LeviCivita.leviCivitaConnectionOfMetric (I := I) gRef)
+          (frame a) x) (frame d x)) := by
+    simpa [cov, V] using hcov_a
+  have hcov_b' :
+      (((LeviCivita.leviCivitaConnectionOfMetric (I := I) gRef)
+          (fun y : M => sec b y) x) (X x)) =
+        (((LeviCivita.leviCivitaConnectionOfMetric (I := I) gRef)
+          (frame b) x) (frame d x)) := by
+    simpa [cov, V] using hcov_b
+  have hcov_a_candidate :
+      ((LeviCivita.leviCivitaConnectionCandidateAt (I := I) gRef
+          (fun y : M => sec a y) x) (X x)) =
+        ((LeviCivita.leviCivitaConnectionCandidateAt (I := I) gRef
+          (frame a) x) (frame d x)) := by
+    simpa [LeviCivita.leviCivitaConnectionOfMetric] using hcov_a'
+  have hcov_b_candidate :
+      ((LeviCivita.leviCivitaConnectionCandidateAt (I := I) gRef
+          (fun y : M => sec b y) x) (X x)) =
+        ((LeviCivita.leviCivitaConnectionCandidateAt (I := I) gRef
+          (frame b) x) (frame d x)) := by
+    simpa [LeviCivita.leviCivitaConnectionOfMetric] using hcov_b'
+  have hmain :=
+    metricCovDeriv_one_eval_smooth_slots (I := I) h gRef X V x
+  have hderiv :
+      extDerivFun (I := I)
+          (fun y : M => h.inner y (V 0 y) (V 1 y)) x (X x) =
+        extDerivFun (I := I)
+          (fun y : M => h.inner y (frame a y) (frame b y)) x
+          (frame d x) := by
+    rw [hXx]
+    exact extDerivFun_congr_eventually_real (I := I) (x := x)
+      (frame d x) hpair_ev
+  calc
+    metricCovDeriv (I := I) h gRef 1 x
+        (Fin.cons (frame d x)
+          (fun q : Fin 2 => if q = 0 then frame a x else frame b x))
+        =
+      metricCovDeriv (I := I) h gRef 1 x
+        (Fin.cons (X x) (fun q : Fin 2 => V q x)) := by
+          congr
+          · exact hXx.symm
+          · funext q
+            fin_cases q
+            · simpa [V] using hV0x.symm
+            · simpa [V] using hV1x.symm
+    _ =
+      extDerivFun (I := I)
+          (fun y : M => h.inner y (frame a y) (frame b y)) x (frame d x) -
+        (h.inner x
+            (((LeviCivita.leviCivitaConnectionOfMetric (I := I) gRef)
+                (frame a) x) (frame d x))
+            (frame b x) +
+          h.inner x (frame a x)
+            (((LeviCivita.leviCivitaConnectionOfMetric (I := I) gRef)
+                (frame b) x) (frame d x))) := by
+          rw [hmain, hderiv, Fin.sum_univ_two]
+          simp [V, hsec_x a, hsec_x b, hcov_a_candidate, hcov_b_candidate]
+
+set_option linter.unusedFintypeInType false in
+set_option linter.unusedDecidableInType false in
+/-- Component form of `metricCovDeriv_one_eval_localFrame`. -/
+theorem metricCovDeriv_one_component_localFrame
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {u : Set M}
+    (h gRef : SmoothRiemannianMetric I M)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u)
+    (hu : IsOpen u) {x : M} (hx : x ∈ u)
+    (d a b : Idx) :
+    Tensor0SBundle.component0S (I := I) (hframe.toBasisAt hx)
+        (metricCovDeriv (I := I) h gRef 1 x)
+        (Fin.cons d (fun q : Fin 2 => if q = 0 then a else b) :
+          Fin 3 -> Idx) =
+      extDerivFun (I := I)
+          (fun y : M => h.inner y (frame a y) (frame b y)) x (frame d x) -
+        (h.inner x
+            (((LeviCivita.leviCivitaConnectionOfMetric (I := I) gRef)
+                (frame a) x) (frame d x))
+            (frame b x) +
+          h.inner x (frame a x)
+            (((LeviCivita.leviCivitaConnectionOfMetric (I := I) gRef)
+                (frame b) x) (frame d x))) := by
+  rw [Tensor0SBundle.component0S_apply]
+  simp only [IsLocalFrameOn.toBasisAt_coe]
+  have hslots :
+      (fun a_1 : Fin 3 =>
+        frame
+          ((Fin.cons d (fun q : Fin 2 => if q = 0 then a else b) :
+            Fin 3 -> Idx) a_1) x) =
+      Fin.cons (frame d x)
+        (fun q : Fin 2 => if q = 0 then frame a x else frame b x) := by
+    funext q
+    fin_cases q <;> rfl
+  exact
+    (congrArg
+        (fun slots : Fin 3 -> TangentSpace I x =>
+          metricCovDeriv (I := I) h gRef 1 x slots) hslots).trans
+      (metricCovDeriv_one_eval_localFrame (I := I) h gRef frame hframe hu hx
+        d a b)
 
 /-- The pointwise tensor `∇^a(g_k - g_infty)`, represented as the difference of
 the iterated covariant derivatives of the two metric tensors. -/

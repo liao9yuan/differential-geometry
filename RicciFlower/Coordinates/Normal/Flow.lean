@@ -426,6 +426,56 @@ theorem plFlow_eq_of_solution
   intro t ht
   exact hEq ht
 
+/-- A functional Picard-Lindelof flow agrees with any controlled solution
+through any initial point in the controlling closed ball. -/
+theorem plFlow_eq_of_solution_at
+    {F : Type*} [NormedAddCommGroup F] [NormedSpace Real F] [CompleteSpace F]
+    {f : Real -> F -> F} {tmin tmax : Real}
+    {t0 : Set.Icc tmin tmax} {x0 x : F} {a r L K : NNReal}
+    (hf : IsPicardLindelof f t0 x0 a r L K)
+    (ht0 : (t0 : Real) ∈ Set.Ioo tmin tmax)
+    (hx : x ∈ Metric.closedBall x0 r)
+    {alpha : F -> Real -> F}
+    (hflow : ∀ y ∈ Metric.closedBall x0 r,
+      alpha y t0 = y ∧
+        ∀ t ∈ Set.Icc tmin tmax,
+          HasDerivWithinAt (alpha y) (f t (alpha y t))
+            (Set.Icc tmin tmax) t)
+    (hbound : ∀ y ∈ Metric.closedBall x0 r, ∀ t : Real,
+      alpha y t ∈ Metric.closedBall x0 a)
+    {beta : Real -> F}
+    (hbeta0 : beta t0 = x)
+    (hbetacont : ContinuousOn beta (Set.Icc tmin tmax))
+    (hbetaderiv : ∀ t ∈ Set.Ioo tmin tmax,
+      HasDerivAt beta (f t (beta t)) t)
+    (hbetabound : ∀ t ∈ Set.Icc tmin tmax,
+      beta t ∈ Metric.closedBall x0 a) :
+    ∀ t ∈ Set.Icc tmin tmax, alpha x t = beta t := by
+  have halphacont : ContinuousOn (alpha x) (Set.Icc tmin tmax) := by
+    exact HasDerivWithinAt.continuousOn
+      (fun t ht => (hflow x hx).2 t ht)
+  have halphaderiv : ∀ t ∈ Set.Ioo tmin tmax,
+      HasDerivAt (alpha x) (f t (alpha x t)) t := by
+    intro t ht
+    have hwithin := (hflow x hx).2 t (Set.Ioo_subset_Icc_self ht)
+    have hIcc_mem : Set.Icc tmin tmax ∈ 𝓝 t := by
+      simpa using Icc_mem_nhds ht.1 ht.2
+    exact hwithin.hasDerivAt hIcc_mem
+  have hinit : alpha x t0 = beta t0 := by
+    rw [(hflow x hx).1, hbeta0]
+  have hEq : Set.EqOn (alpha x) beta (Set.Icc tmin tmax) := by
+    exact ODE_solution_unique_of_mem_Icc
+      (v := f) (s := fun _ : Real => Metric.closedBall x0 a)
+      (K := K) (t₀ := (t0 : Real)) (a := tmin) (b := tmax)
+      (fun t ht => hf.lipschitzOnWith t (Set.Ioo_subset_Icc_self ht))
+      ht0 halphacont halphaderiv
+      (fun _ _ => hbound x hx _)
+      hbetacont hbetaderiv
+      (fun t ht => hbetabound t (Set.Ioo_subset_Icc_self ht))
+      hinit
+  intro t ht
+  exact hEq ht
+
 /-- Picard-Lindelof vector fields are interval-integrable along a controlled
 continuous trajectory. -/
 lemma pl_int

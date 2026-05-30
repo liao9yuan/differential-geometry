@@ -1,6 +1,7 @@
 import RicciFlower.Coordinates.Christoffel
 import RicciFlower.Coordinates.Tensor
 import RicciFlower.Tensor.RSTensor.NablaOnTensors.ConnectionDifference
+import RicciFlower.Tensor.RSTensor.TensorRSRiemannian
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -46,9 +47,48 @@ theorem tensor12Comp_connectionDifferenceTensorAt
       christoffelSymbolDifferenceInFrame cov cov' frame hframe x i j k := by
   unfold tensor12CompInFrame tensorRSComponentInFrame
     christoffelSymbolDifferenceInFrame
+  change
+    componentRS (I := I) (hframe.toBasisAt hx)
+        (connectionDifferenceTensorAt (I := I) cov cov' x)
+        (fun _ : Fin 1 => k)
+        (fun q : Fin 2 => if q = 0 then i else j) =
+      (hframe.coeff k x)
+        (((CovariantDerivative.difference cov cov' x) (frame j x)) (frame i x))
   rw [componentRS_connectionDifferenceTensorAt]
-  simp [upperIdx1, lowerIdx2, slots2, IsLocalFrameOn.coeff, hx,
-    IsLocalFrameOn.toBasisAt_coe]
+  simp [IsLocalFrameOn.coeff, hx, IsLocalFrameOn.toBasisAt_coe]
+
+/-- In a local frame whose inverse-metric components are the identity, the
+invariant squared norm of the connection-difference tensor is the sum of
+squares of the Christoffel-symbol difference components. -/
+theorem normSqRS_connectionDifferenceTensorAt_eq_christoffel_sum
+    [IsManifold I ∞ M]
+    [VectorBundle Real E (TangentSpace I : M -> Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
+    (g : SmoothMetric I M)
+    (cov cov' : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (hframe : IsLocalFrameOn I E 1 frame u)
+    {x : M} (hx : x ∈ u)
+    (hinv :
+      MetricInverseInBasis (I := I) g x (hframe.toBasisAt hx)
+        (identityInvMetric (Idx := Idx))) :
+    normSqRS (I := I) (g := g) (x := x) 1 2
+        (connectionDifferenceTensorAt (I := I) cov cov' x) =
+      ∑ k : Idx, ∑ i : Idx, ∑ j : Idx,
+        (christoffelSymbolDifferenceInFrame cov cov' frame hframe x i j k) ^ 2 := by
+  rw [normSqRS_one_two_identity_eq_sum (I := I) g x
+    (hframe.toBasisAt hx) hinv
+    (connectionDifferenceTensorAt (I := I) cov cov' x)]
+  apply Finset.sum_congr rfl
+  intro k _
+  apply Finset.sum_congr rfl
+  intro i _
+  apply Finset.sum_congr rfl
+  intro j _
+  congr 1
+  unfold christoffelSymbolDifferenceInFrame
+  rw [componentRS_connectionDifferenceTensorAt]
+  simp [IsLocalFrameOn.coeff, hx, IsLocalFrameOn.toBasisAt_coe]
 
 end
 

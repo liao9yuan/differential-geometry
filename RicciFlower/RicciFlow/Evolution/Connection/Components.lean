@@ -68,6 +68,30 @@ def christoffelEvolutionRHSInFrame
   ∑ l : Idx,
     gInv t x k l * christoffelVariationLoweredRHSInFrame nablaRic t x i j l
 
+/-- In a frame where the inverse metric components are the identity, the
+raised Ricci-flow Christoffel RHS is the book's component formula
+`-nabla_i Ric_jk - nabla_j Ric_ik + nabla_k Ric_ij`. -/
+theorem christoffelRHS_id
+    (gInv : Real -> Realized.InverseMetricComponents M Idx)
+    (nablaRic : Real -> M -> Idx -> Idx -> Idx -> Real)
+    {t : Real} {x : M}
+    (hinv_id : ∀ e l : Idx, gInv t x e l = if e = l then 1 else 0)
+    (i j k : Idx) :
+    christoffelEvolutionRHSInFrame (M := M) gInv nablaRic t x i j k =
+      -nablaRic t x i j k - nablaRic t x j i k + nablaRic t x k i j := by
+  calc
+    christoffelEvolutionRHSInFrame (M := M) gInv nablaRic t x i j k =
+        ∑ l : Idx,
+          (if k = l then (1 : Real) else 0) *
+            christoffelVariationLoweredRHSInFrame nablaRic t x i j l := by
+          refine Finset.sum_congr rfl fun l _hl => ?_
+          rw [hinv_id k l]
+    _ = christoffelVariationLoweredRHSInFrame nablaRic t x i j k := by
+          simp
+    _ = -nablaRic t x i j k - nablaRic t x j i k +
+          nablaRic t x k i j := by
+          rfl
+
 /-- Raise an arbitrary lowered connection-variation RHS to Christoffel
 components using the inverse metric in the chosen frame. -/
 def christoffelVariationRHSFromLoweredInFrame

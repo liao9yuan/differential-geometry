@@ -122,6 +122,134 @@ theorem coordInner0S_identity_eq_sum_sq
   rw [coordInner0S_diagonal_eq_sum (I := I) (x := x) s (fun _ : Idx => 1) A basis]
   simp
 
+/-- Coordinate inner product for the identity inverse metric. -/
+theorem coordInner0S_identity_eq_sum
+    (s : Nat) (A B : Tensor0SSpace s I x)
+    (basis : Module.Basis Idx Real (TangentSpace I x)) :
+    coordInner0S (I := I) (x := x) s identityInvMetric A B basis =
+      ∑ I0 : Fin s -> Idx,
+        tensor0SComponent (I := I) A (fun i => basis i) I0 *
+          tensor0SComponent (I := I) B (fun i => basis i) I0 := by
+  classical
+  unfold coordInner0S
+  apply Finset.sum_congr rfl
+  intro I0 _
+  rw [Finset.sum_eq_single I0]
+  · simp [identityInvMetric, diagonalInvMetric]
+  · intro J0 _ hJ0
+    have hprod :
+        (∏ a : Fin s, identityInvMetric (Idx := Idx) (I0 a) (J0 a)) = 0 := by
+      exact prod_diagonalInvMetric_eq_zero_of_ne
+        (μ := fun _ : Idx => 1) (Ne.symm hJ0)
+    rw [hprod]
+    ring
+  · intro hnotmem
+    exact False.elim (hnotmem (Finset.mem_univ I0))
+
+/-- In an orthonormal-coordinate basis, pairing a covariant tensor with a basis
+covariant tensor reads off the matching component. -/
+theorem inner0S_basisTensor_left_identity
+    (g : SmoothMetric I M) (x : M) (s : Nat)
+    (basis : Module.Basis Idx Real (TangentSpace I x))
+    (hinv :
+      MetricInverseInBasis (I := I) g x basis (identityInvMetric (Idx := Idx)))
+    (slots : Fin s -> Idx) (A : Tensor0SSpace s I x) :
+    inner0S (I := I) g x s (basisTensor0S (I := I) basis slots) A =
+      component0S (I := I) basis A slots := by
+  classical
+  rw [inner0S_eq_coord (I := I) g x s basis (identityInvMetric (Idx := Idx)) hinv,
+    coordInner0S_identity_eq_sum (I := I) (x := x) s
+      (basisTensor0S (I := I) basis slots) A basis]
+  rw [Finset.sum_eq_single slots]
+  · change
+      component0S (I := I) basis (basisTensor0S (I := I) basis slots) slots *
+          component0S (I := I) basis A slots =
+        component0S (I := I) basis A slots
+    rw [basisTensor0S_component]
+    simp
+  · intro slots' _ hslots'
+    have hcomp :
+        tensor0SComponent (I := I) (basisTensor0S (I := I) basis slots)
+          (fun i => basis i) slots' = 0 := by
+      change component0S (I := I) basis
+        (basisTensor0S (I := I) basis slots) slots' = 0
+      rw [basisTensor0S_component]
+      simp [Ne.symm hslots']
+    rw [hcomp]
+    ring
+  · intro hnotmem
+    exact False.elim (hnotmem (Finset.mem_univ slots))
+
+/-- In an orthonormal-coordinate basis, pairing a covariant tensor against a
+basis covariant tensor on the right reads off the matching component. -/
+theorem inner0S_basisTensor_right_identity
+    (g : SmoothMetric I M) (x : M) (s : Nat)
+    (basis : Module.Basis Idx Real (TangentSpace I x))
+    (hinv :
+      MetricInverseInBasis (I := I) g x basis (identityInvMetric (Idx := Idx)))
+    (A : Tensor0SSpace s I x) (slots : Fin s -> Idx) :
+    inner0S (I := I) g x s A (basisTensor0S (I := I) basis slots) =
+      component0S (I := I) basis A slots := by
+  classical
+  rw [inner0S_eq_coord (I := I) g x s basis (identityInvMetric (Idx := Idx)) hinv,
+    coordInner0S_identity_eq_sum (I := I) (x := x) s
+      A (basisTensor0S (I := I) basis slots) basis]
+  rw [Finset.sum_eq_single slots]
+  · change
+      component0S (I := I) basis A slots *
+          component0S (I := I) basis (basisTensor0S (I := I) basis slots) slots =
+        component0S (I := I) basis A slots
+    rw [basisTensor0S_component]
+    simp
+  · intro slots' _ hslots'
+    have hcomp :
+        tensor0SComponent (I := I) (basisTensor0S (I := I) basis slots)
+          (fun i => basis i) slots' = 0 := by
+      change component0S (I := I) basis
+        (basisTensor0S (I := I) basis slots) slots' = 0
+      rw [basisTensor0S_component]
+      simp [Ne.symm hslots']
+    rw [hcomp]
+    ring
+  · intro hnotmem
+    exact False.elim (hnotmem (Finset.mem_univ slots))
+
+/-- In an orthonormal-coordinate basis, the squared norm of a covariant tensor
+is the sum of squares of its components. -/
+theorem normSq0S_identity_eq_sum_sq
+    (g : SmoothMetric I M) (x : M) (s : Nat)
+    (basis : Module.Basis Idx Real (TangentSpace I x))
+    (hinv :
+      MetricInverseInBasis (I := I) g x basis (identityInvMetric (Idx := Idx)))
+    (A : Tensor0SSpace s I x) :
+    normSq0S (I := I) g x s A =
+      ∑ slots : Fin s -> Idx,
+        (component0S (I := I) basis A slots) ^ 2 := by
+  rw [normSq0S_eq_coord (I := I) g x s basis
+    (identityInvMetric (Idx := Idx)) hinv,
+    coordInner0S_identity_eq_sum_sq (I := I) (x := x) s A basis]
+  apply Finset.sum_congr rfl
+  intro slots _
+  rfl
+
+/-- The `(0,3)` specialization of `normSq0S_identity_eq_sum_sq`, with the
+first slot separated as the derivative direction. -/
+theorem normSq0S_three_identity_eq_sum
+    (g : SmoothMetric I M) (x : M)
+    (basis : Module.Basis Idx Real (TangentSpace I x))
+    (hinv :
+      MetricInverseInBasis (I := I) g x basis (identityInvMetric (Idx := Idx)))
+    (A : Tensor0SSpace 3 I x) :
+    normSq0S (I := I) g x 3 A =
+      ∑ d : Idx, ∑ a : Idx, ∑ b : Idx,
+        (component0S (I := I) basis A
+          (Fin.cons d (fun q : Fin 2 => if q = 0 then a else b))) ^ 2 := by
+  rw [normSq0S_identity_eq_sum_sq (I := I) g x 3 basis hinv A]
+  rw [sum_fin_succ_fun (s := 2)]
+  apply Finset.sum_congr rfl
+  intro d _
+  rw [sum_fin_two_fun]
+
 /-- Diagonal-coordinate norm comparison for covariant tensors.
 
 If every diagonal inverse component `μ_i` of `h^{-1}` is bounded by `C`, then

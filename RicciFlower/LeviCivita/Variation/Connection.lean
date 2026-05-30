@@ -1,4 +1,5 @@
 import RicciFlower.Coordinates.Christoffel
+import RicciFlower.Coordinates.ChristoffelTensor
 import RicciFlower.Coordinates.MetricCompatibility
 import RicciFlower.Curvature.Basic
 import RicciFlower.Curvature.Components
@@ -937,6 +938,64 @@ theorem componentL2Sq3_nonneg
   unfold componentL2Sq3
   exact Finset.sum_nonneg fun p _ => sq_nonneg _
 
+/-- Expand `componentL2Sq3` into the direct nested sum over its three
+component indices. -/
+theorem componentL2Sq3_eq_sum
+    (A : Idx -> Idx -> Idx -> Real) :
+    componentL2Sq3 A =
+      ∑ i : Idx, ∑ j : Idx, ∑ k : Idx, (A i j k) ^ 2 := by
+  classical
+  unfold componentL2Sq3
+  rw [Fintype.sum_prod_type]
+  apply Finset.sum_congr rfl
+  intro i _
+  rw [Fintype.sum_prod_type]
+
+/-- Expand `componentL2Sq3` in the order used by the mixed `(1,2)` tensor norm:
+upper index first, then the two lower indices. -/
+theorem componentL2Sq3_eq_sum_upper_first
+    (A : Idx -> Idx -> Idx -> Real) :
+    componentL2Sq3 A =
+      ∑ k : Idx, ∑ i : Idx, ∑ j : Idx, (A i j k) ^ 2 := by
+  classical
+  rw [componentL2Sq3_eq_sum]
+  calc
+    (∑ i : Idx, ∑ j : Idx, ∑ k : Idx, (A i j k) ^ 2)
+        = ∑ i : Idx, ∑ k : Idx, ∑ j : Idx, (A i j k) ^ 2 := by
+          apply Finset.sum_congr rfl
+          intro i _
+          rw [Finset.sum_comm]
+    _ = ∑ k : Idx, ∑ i : Idx, ∑ j : Idx, (A i j k) ^ 2 := by
+          rw [Finset.sum_comm]
+
+/-- Convert an orthonormal-frame component realization of a `(0,3)` tensor into
+the `componentL2Sq3` squared norm used by the local Christoffel estimates. -/
+theorem normSq0S_three_eq_componentL2Sq3_of_components [DecidableEq Idx]
+    (g : SmoothRiemannianMetric I M) (x : M)
+    (basis : Module.Basis Idx Real (TangentSpace I x))
+    (hinv :
+      Tensor0SBundle.MetricInverseInBasis
+        (I := I) g x basis (Tensor0SBundle.identityInvMetric (Idx := Idx)))
+    (A : Tensor0SBundle.Tensor0SSpace
+      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x)
+    (C : Idx -> Idx -> Idx -> Real)
+    (hcomp :
+      ∀ d a b : Idx,
+        Tensor0SBundle.component0S (I := I) basis A
+          (Fin.cons d (fun q : Fin 2 => if q = 0 then a else b)) =
+            C d a b) :
+    Tensor0SBundle.normSq0S (I := I) g x 3 A =
+      componentL2Sq3 C := by
+  rw [Tensor0SBundle.normSq0S_three_identity_eq_sum (I := I) g x basis hinv A,
+    componentL2Sq3_eq_sum]
+  apply Finset.sum_congr rfl
+  intro d _
+  apply Finset.sum_congr rfl
+  intro a _
+  apply Finset.sum_congr rfl
+  intro b _
+  rw [hcomp d a b]
+
 private theorem three_sq_le (x y z : Real) :
     (x + y - z) ^ 2 <= 3 * (x ^ 2 + y ^ 2 + z ^ 2) := by
   nlinarith [sq_nonneg (x - y), sq_nonneg (x + z), sq_nonneg (y + z)]
@@ -1318,6 +1377,55 @@ theorem metricCovGeom_l2_le [DecidableEq Idx]
   intro a b c
   simpa [hmetric_id] using
     metricCov_gammaSub (I := I) G hLC frame hframe hu hx base var a b c
+
+/-- In a `G.metric var`-orthonormal frame, the invariant norm of the
+connection-difference tensor is the component `l^2` size of the Christoffel
+difference used in the MSM135 Lemma 3.11 estimates. -/
+theorem normSqRS_connDiff_eq_componentL2Sq3 [DecidableEq Idx]
+    (G : Realized.RealizedMetricFamily (I := I) (M := M) Real)
+    (gInv : Curvature.InverseMetricComponents M Idx)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (hframe : IsLocalFrameOn I E 1 frame u)
+    (hu : IsOpen u) {x : M} (hx : x ∈ u)
+    (base var : Real)
+    (hinv :
+      Curvature.InverseMetricComponentsInFrame
+        (I := I) (G.metric var) gInv frame)
+    (hinv_id : ∀ e l : Idx, gInv x e l = if e = l then 1 else 0) :
+    Tensor0SBundle.normSqRS (I := I) (g := G.metric var) (x := x) 1 2
+        (Tensor0SBundle.connectionDifferenceTensorAt
+          (I := I) (G.connection var) (G.connection base) x) =
+      componentL2Sq3
+        (fun a b e : Idx =>
+          Coordinates.christoffelSymbolInFrame
+              (G.connection var) frame hframe x a b e -
+            Coordinates.christoffelSymbolInFrame
+              (G.connection base) frame hframe x a b e) := by
+  classical
+  have hinvBasis :
+      Tensor0SBundle.MetricInverseInBasis
+        (I := I) (G.metric var) x (hframe.toBasisAt hx)
+        (Tensor0SBundle.identityInvMetric (Idx := Idx)) := by
+    intro i j
+    constructor
+    · simpa [Tensor0SBundle.identityInvMetric, Tensor0SBundle.diagonalInvMetric,
+        IsLocalFrameOn.toBasisAt_coe, hinv_id] using (hinv x i j).1
+    · simpa [Tensor0SBundle.identityInvMetric, Tensor0SBundle.diagonalInvMetric,
+        IsLocalFrameOn.toBasisAt_coe, hinv_id] using (hinv x i j).2
+  rw [Coordinates.normSqRS_connectionDifferenceTensorAt_eq_christoffel_sum
+    (I := I) (g := G.metric var) (G.connection var) (G.connection base)
+    frame hframe hx hinvBasis]
+  rw [componentL2Sq3_eq_sum_upper_first]
+  apply Finset.sum_congr rfl
+  intro k _
+  apply Finset.sum_congr rfl
+  intro i _
+  apply Finset.sum_congr rfl
+  intro j _
+  congr 1
+  exact Coordinates.christoffelSymbolDifferenceInFrame_eq_sub
+    (I := I) (G.connection var) (G.connection base) frame hframe i j k
+    ((hframe.contMDiffAt hu hx j).mdifferentiableAt one_ne_zero)
 
 /-- Component-level equivalence between the background covariant derivative of
 the varied metric and the connection difference.
