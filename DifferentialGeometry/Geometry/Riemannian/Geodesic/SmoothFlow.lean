@@ -4,6 +4,7 @@ import DifferentialGeometry.Geometry.Riemannian.Geodesic.MaximalInterval
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.Smoothness
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.Uniqueness
 import DifferentialGeometry.Analysis.ODE.FlowC1Continuous
+import DifferentialGeometry.Analysis.ODE.FlowCkVariational
 import Mathlib.Analysis.Calculus.BumpFunction.FiniteDimension
 
 set_option linter.unusedSectionVars false
@@ -333,6 +334,25 @@ lemma chartPhaseVFTime_uncurry_contDiffOn_univ_one
   have h1 : ContDiff ℝ 1 (Function.uncurry (chartPhaseVFTime (I := I) g α z₀ b)) :=
     h.of_le (by exact_mod_cast (le_top : (1 : ℕ∞) ≤ ⊤))
   exact h1.contDiffOn
+
+/-- The uncurried time-padded cutoff vector field is `C^2` on
+`Set.univ : Set (ℝ × (E × E))`, the regularity required by the generic
+local-flow `C^2`-regularity theorem. -/
+lemma chartPhaseVFTime_uncurry_contDiffOn_univ_two
+    (g : SmoothRiemannianMetric I M) (α : M)
+    (z₀ : E × E) (b : ContDiffBump z₀)
+    (hb_sub : Metric.closedBall z₀ b.rOut ⊆
+      (interior (extChartAt I α).target) ×ˢ (Set.univ : Set E)) :
+    ContDiffOn ℝ 2 (Function.uncurry (chartPhaseVFTime (I := I) g α z₀ b))
+      (Set.univ : Set (ℝ × (E × E))) := by
+  have h := chartPhaseVFTime_uncurry_contDiff (I := I) g α z₀ b hb_sub
+  have hle : (2 : WithTop ℕ∞) ≤ ∞ := by
+    have h2le : ((2 : ℕ∞) : WithTop ℕ∞) ≤ ∞ :=
+      by exact_mod_cast (le_top : (2 : ℕ∞) ≤ ⊤)
+    simpa using h2le
+  have h2 : ContDiff ℝ 2 (Function.uncurry (chartPhaseVFTime (I := I) g α z₀ b)) :=
+    h.of_le hle
+  exact h2.contDiffOn
 
 /-! ## Existence of a base-point bump -/
 
@@ -784,6 +804,119 @@ theorem exists_chartPhase_contDiffOn_isLocalFlow_combined
     hΦ'.apply_initial (x₀, v₀) (Metric.mem_closedBall_self (by
       exact_mod_cast (le_of_lt hrN)))
   exact ⟨b, rN, εN, (ρ : ℝ), T, Φ, hrN, hεN, hρ_pos, hT_pos, hb_sub, hΦ', hCDOn, hinitial⟩
+
+/-! ## `C^2` combined packaging via the unconditional `C^2` flow theorem
+
+We now produce the `C^2` analogue of
+`exists_chartPhase_contDiffOn_isLocalFlow_combined`. The cutoff vector
+field is globally `C^∞`, hence in particular jointly `C^2` on
+`ℝ × (E × E)`; the Picard–Lindelöf flow `Φ` produced by
+`exists_isLocalFlow_of_contDiffOn_univ` (which needs only `C^1` of the
+field) is therefore jointly `C^2` on an open neighbourhood of
+`((x₀, v₀), 0)`, by the unconditional finite-order flow-regularity
+theorem `exists_contDiffOn_flow_C2`. Restricting that open neighbourhood
+to a basic product `ball ((x₀, v₀)) ρ ×ˢ Ioo (-T) T` recovers the same
+shape as the `C^1` packaging, now at regularity order `2`. -/
+
+/-- **Combined joint-`C^2` and `IsLocalFlow` packaging.** For every base
+phase-space point `(x₀, v₀)` with `x₀` in the chart-target interior,
+there exist a `ContDiffBump` `b`, Picard–Lindelöf radii `(r, ε)`, a
+joint-`C^2` radius `(ρ, T)`, and a map `Φ : (E × E) × ℝ → E × E` that is
+both an `IsLocalFlow` of the time-padded cutoff field
+`chartPhaseVFTime g α (x₀, v₀) b` (on the larger Picard radius) and
+jointly `C^2` on `ball ((x₀, v₀)) ρ × Ioo (-T) T`.
+
+This is the `C^2` strengthening of
+`exists_chartPhase_contDiffOn_isLocalFlow_combined`: the flow regularity
+is upgraded from `ContDiffOn ℝ 1` to `ContDiffOn ℝ 2` by routing through
+the unconditional finite-order flow-existence theorem
+`exists_contDiffOn_flow_C2` (in place of the `C^1`
+`contDiffOn_flow_of_isLocalFlow`). -/
+theorem exists_chartPhase_contDiffOn_isLocalFlow_combined_two
+    [CompleteSpace E]
+    (g : SmoothRiemannianMetric I M) (α : M) {x₀ v₀ : E}
+    (hx₀ : x₀ ∈ interior (extChartAt I α).target) :
+    ∃ (b : ContDiffBump ((x₀, v₀) : E × E))
+      (r : ℝ≥0) (ε : ℝ) (ρ T : ℝ)
+      (Φ : (E × E) × ℝ → E × E),
+      0 < r ∧ 0 < ε ∧ 0 < ρ ∧ 0 < T ∧
+      Metric.closedBall ((x₀, v₀) : E × E) b.rOut ⊆
+        (interior (extChartAt I α).target) ×ˢ (Set.univ : Set E) ∧
+      DifferentialGeometry.Analysis.ODE.Flow.IsLocalFlow
+        (chartPhaseVFTime (I := I) g α (x₀, v₀) b)
+        (0 : ℝ) (x₀, v₀) r (-ε) ε Φ ∧
+      ContDiffOn ℝ 2 Φ
+        ((Metric.ball ((x₀, v₀) : E × E) ρ) ×ˢ Set.Ioo (-T) T) ∧
+      Φ (((x₀, v₀) : E × E), 0) = (x₀, v₀) := by
+  classical
+  -- Step 1: build the bump and the Picard–Lindelöf local flow exactly as
+  -- in the `C^1` packaging (the flow only needs `C^1` of the field).
+  obtain ⟨b, hb_sub⟩ :=
+    exists_contDiffBump_subset_chart_interior (I := I) (α := α)
+      (x₀ := x₀) (v₀ := v₀) hx₀
+  have hC1 :
+      ContDiffOn ℝ 1
+        (Function.uncurry (chartPhaseVFTime (I := I) g α (x₀, v₀) b))
+        (Set.univ : Set (ℝ × (E × E))) :=
+    chartPhaseVFTime_uncurry_contDiffOn_univ_one (I := I) g α (x₀, v₀) b hb_sub
+  have hC2 :
+      ContDiffOn ℝ 2
+        (Function.uncurry (chartPhaseVFTime (I := I) g α (x₀, v₀) b))
+        (Set.univ : Set (ℝ × (E × E))) :=
+    chartPhaseVFTime_uncurry_contDiffOn_univ_two (I := I) g α (x₀, v₀) b hb_sub
+  obtain ⟨rN, εN, hrN, hεN, Φ, hΦ⟩ :=
+    DifferentialGeometry.Analysis.ODE.Flow.exists_isLocalFlow_of_contDiffOn_univ
+      (E := E × E) (chartPhaseVFTime (I := I) g α (x₀, v₀) b) hC1 0 (x₀, v₀)
+  -- Step 2: the `IsLocalFlow` predicate has time interval `(0 - εN, 0 + εN)`;
+  -- `0` is strictly interior, and `rN > 0`.
+  have ht₀_mem : (0 : ℝ) ∈ Set.Ioo ((0 : ℝ) - εN) ((0 : ℝ) + εN) :=
+    ⟨by linarith, by linarith⟩
+  have hrN_pos : 0 < (rN : ℝ) := hrN
+  -- Step 3: feed `exists_contDiffOn_flow_C2` (the carrier space is `E × E`,
+  -- finite-dimensional and complete by instance resolution).
+  obtain ⟨U, hU_open, hU_mem, hU_C2⟩ :=
+    DifferentialGeometry.Analysis.ODE.Flow.exists_contDiffOn_flow_C2
+      (E := E × E) hΦ hC2 ht₀_mem hrN_pos
+  -- Step 4: `U` is an open neighbourhood of `((x₀, v₀), 0)`, so it contains a
+  -- basic product `ball ((x₀, v₀)) ρ ×ˢ Ioo (-T) T`.
+  have hU_nhds : U ∈ 𝓝 (((x₀, v₀) : E × E), (0 : ℝ)) :=
+    hU_open.mem_nhds hU_mem
+  obtain ⟨Uspace, Utime, hUspace_open, hUspace_mem, hUtime_open, hUtime_mem,
+      hU_prod_sub⟩ := mem_nhds_prod_iff'.mp hU_nhds
+  -- Extract a ball from the spatial open set.
+  obtain ⟨ρ, hρ_pos, hρ_sub⟩ :=
+    Metric.isOpen_iff.mp hUspace_open ((x₀, v₀) : E × E) hUspace_mem
+  -- Extract a symmetric open interval `Ioo (-T) T` from the time open set.
+  obtain ⟨δ, hδ_pos, hδ_sub⟩ :=
+    Metric.isOpen_iff.mp hUtime_open (0 : ℝ) hUtime_mem
+  set T : ℝ := δ with hT_def
+  have hT_pos : 0 < T := hδ_pos
+  have hIoo_sub : Set.Ioo (-T) T ⊆ Utime := by
+    intro t ht
+    apply hδ_sub
+    rw [Metric.mem_ball, Real.dist_eq, sub_zero, abs_lt]
+    exact ⟨ht.1, ht.2⟩
+  -- The product `ball ρ ×ˢ Ioo (-T) T` is contained in `U`.
+  have hprod_sub : (Metric.ball ((x₀, v₀) : E × E) ρ) ×ˢ Set.Ioo (-T) T ⊆ U := by
+    intro w hw
+    refine hU_prod_sub ⟨hρ_sub hw.1, hIoo_sub hw.2⟩
+  -- Restrict the `C^2` regularity to the basic product.
+  have hCDOn : ContDiffOn ℝ 2 Φ
+      ((Metric.ball ((x₀, v₀) : E × E) ρ) ×ˢ Set.Ioo (-T) T) :=
+    hU_C2.mono hprod_sub
+  -- Repackage the `IsLocalFlow` time interval as `(-εN) εN`.
+  have heq1 : (0 : ℝ) - εN = -εN := by ring
+  have heq2 : (0 : ℝ) + εN = εN := by ring
+  have hΦ' : DifferentialGeometry.Analysis.ODE.Flow.IsLocalFlow
+        (chartPhaseVFTime (I := I) g α (x₀, v₀) b)
+        (0 : ℝ) (x₀, v₀) rN (-εN) εN Φ := by
+    have := hΦ
+    rw [heq1, heq2] at this
+    exact this
+  have hinitial : Φ (((x₀, v₀) : E × E), 0) = (x₀, v₀) :=
+    hΦ'.apply_initial (x₀, v₀) (Metric.mem_closedBall_self (by
+      exact_mod_cast (le_of_lt hrN)))
+  exact ⟨b, rN, εN, ρ, T, Φ, hrN, hεN, hρ_pos, hT_pos, hb_sub, hΦ', hCDOn, hinitial⟩
 
 end Geodesic
 end Riemannian
