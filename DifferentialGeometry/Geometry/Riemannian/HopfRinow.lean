@@ -1407,8 +1407,7 @@ speed `chartGramQuad g y (u s)(V s) = ⟨γ', γ'⟩_g ≤ c²` yields `‖V s�
 theorem chartVelocity_bound_near_limit
     (g : SmoothRiemannianMetric I M) (y : M) {γ : ℝ → M} {b c : ℝ}
     (hc_nonneg : 0 ≤ c)
-    (hγ_mdiff : MDifferentiable 𝓘(ℝ, ℝ) I γ)
-    (_hγ_cont : Continuous γ)
+    (hγ_mdiff : MDifferentiableOn 𝓘(ℝ, ℝ) I γ (Set.Iio b))
     (hy_lim : Tendsto γ (𝓝[<] b) (𝓝 y))
     (hSpeedSq : ∀ s : ℝ,
       (g.inner (γ s)) (mfderiv 𝓘(ℝ, ℝ) I γ s 1) (mfderiv 𝓘(ℝ, ℝ) I γ s 1) ≤ c ^ 2) :
@@ -1485,8 +1484,10 @@ theorem chartVelocity_bound_near_limit
   set V : E := deriv (chartCurve (I := I) y γ) s with hV_def
   have hVeq : (fderiv ℝ ((extChartAt I y) ∘ γ) s : ℝ →L[ℝ] E) (1 : ℝ) = V := by
     rw [hV_def, deriv]; rfl
-  -- The raw velocity is `symmL_y(γ s)(V)`.
-  have hγ_s : MDifferentiableAt 𝓘(ℝ, ℝ) I γ s := hγ_mdiff s
+  -- The raw velocity is `symmL_y(γ s)(V)`.  `Iio b` is open, so the
+  -- within-differentiability at `s ∈ Iio b` upgrades to plain differentiability.
+  have hγ_s : MDifferentiableAt 𝓘(ℝ, ℝ) I γ s :=
+    (hγ_mdiff s hs_Iio).mdifferentiableAt (isOpen_Iio.mem_nhds hs_Iio)
   have hraw := bm_c_raw_mfderiv_eq_symmL_fderiv_at (I := I) (γ := γ) (α := y)
     (s := s) hγ_s hγ_src
   rw [hVeq] at hraw
@@ -1602,6 +1603,86 @@ theorem exists_isGeodesicOn_Ioo_at
     ⟨y, f, hηt, ht_src, hf_at_t⟩
   -- Convert to the moving-foot geodesic equation via the unconditional bridge.
   exact hgeo_at.hasGeodesicEquationAt g
+
+/-- **Local geodesic existence on an open interval, exposing the launch
+velocity.** Strengthens `exists_isGeodesicOn_Ioo_at`: the fresh local geodesic
+`η` launched from `(y, w)` not only satisfies the moving-foot geodesic equation
+on a symmetric interval `Ioo (-δ) δ`, but additionally `η 0 = y`, `η` is
+continuous at `0`, and its raw manifold velocity at the launch time is the seed
+vector `w`: `mfderiv 𝓘(ℝ, ℝ) I η 0 1 = w`.
+
+The proof reuses the integral-curve construction of `exists_isGeodesicOn_Ioo_at`
+(the same lift `f` of the chart-fixed geodesic spray with `f 0 = ⟨y, w⟩`),
+and reads off the launch velocity through
+`IsMIntegralCurveAt.mfderiv_proj_one`: the manifold derivative of the projected
+curve at the launch time equals the fibre vector `(f 0).snd = w`. -/
+theorem exists_isGeodesicOn_Ioo_at_velocity
+    (g : SmoothRiemannianMetric I M) (y : M) (w : TangentSpace I y) :
+    ∃ (η : ℝ → M) (δ : ℝ), 0 < δ ∧ η 0 = y ∧ ContinuousAt η 0 ∧
+      (mfderiv 𝓘(ℝ, ℝ) I η 0 (1 : ℝ) : E) = (w : E) ∧
+      (∀ t ∈ Set.Ioo (-δ) δ, MDifferentiableAt 𝓘(ℝ, ℝ) I η t) ∧
+      (∀ t ∈ Set.Ioo (-δ) δ, η t ∈ (chartAt H y).source) ∧
+      IsGeodesicOn (I := I) g η (Set.Ioo (-δ) δ) := by
+  haveI : CompleteSpace E := FiniteDimensional.complete ℝ E
+  obtain ⟨η, f, hf0, hηproj, hη0, hf_int, _hgeo⟩ := exists_geodesic_at (I := I) g y w
+  subst hηproj
+  -- Pointwise identity `projectCurve f t = (f t).proj`.
+  have hηt : ∀ t, projectCurve (I := I) f t = (f t).proj := fun _ => rfl
+  -- The lift's foot at the launch time is `y`.
+  have hf0proj : (f 0).proj = y := by rw [hf0]
+  -- The base projection of the lift is continuous at the launch time.
+  have hηcont : ContinuousAt (projectCurve (I := I) f) 0 := by
+    have hc : Continuous (fun p : TangentBundle I M => p.proj) :=
+      FiberBundle.continuous_proj E (TangentSpace I)
+    exact hc.continuousAt.comp hf_int.continuousAt
+  -- The integral-curve property holds on a ball `Metric.ball 0 ε`.
+  obtain ⟨ε, hε, hf_on⟩ := isMIntegralCurveAt_iff'.mp hf_int
+  -- The set of times whose foot is in the launch chart is a neighbourhood of `0`.
+  have hsrc_nhds : {t : ℝ | (f t).proj ∈ (chartAt H y).source} ∈ 𝓝 (0 : ℝ) := by
+    have hopen : IsOpen ((chartAt H y).source) := (chartAt H y).open_source
+    have hmem : (f 0).proj ∈ (chartAt H y).source := by
+      rw [hf0proj]; exact mem_chart_source H y
+    exact hηcont.preimage_mem_nhds (hopen.mem_nhds hmem)
+  -- Intersect with the integral-curve ball to find a symmetric interval `(-δ, δ)`.
+  have hball_nhds : Metric.ball (0 : ℝ) ε ∈ 𝓝 (0 : ℝ) := Metric.ball_mem_nhds _ hε
+  obtain ⟨δ, hδ, hδ_sub⟩ :=
+    Metric.mem_nhds_iff.mp (Filter.inter_mem hball_nhds hsrc_nhds)
+  -- The launch velocity: `mfderiv (projectCurve f) 0 1 = (f 0).snd = w`.
+  have hf0_src : (f 0).proj ∈ (chartAt H y).source := by
+    rw [hf0proj]; exact mem_chart_source H y
+  have hmf : mfderiv 𝓘(ℝ, ℝ) I (fun t => (f t).proj) 0 (1 : ℝ) = (f 0).snd :=
+    IsMIntegralCurveAt.mfderiv_proj_one (I := I) (g := g) (α := y) (t₀ := 0)
+      hf_int hf0_src
+  have hf0snd : ((f 0).snd : E) = (w : E) := by rw [hf0]
+  -- For `t ∈ Ioo (-δ) δ`: the ball/source membership, integral-curve property.
+  have hf_at_t : ∀ t ∈ Set.Ioo (-δ) δ,
+      IsMIntegralCurveAt f (geodesicVectorFieldChart (I := I) g y) t ∧
+        (f t).proj ∈ (chartAt H y).source := by
+    intro t ht
+    have htball : t ∈ Metric.ball (0 : ℝ) δ := by
+      rw [Metric.mem_ball, Real.dist_eq, sub_zero, abs_lt]; exact ⟨ht.1, ht.2⟩
+    have ht_both := hδ_sub htball
+    exact ⟨hf_on.isMIntegralCurveAt (Metric.isOpen_ball.mem_nhds ht_both.1), ht_both.2⟩
+  refine ⟨projectCurve (I := I) f, δ, hδ, hη0, hηcont, ?_, ?_, ?_, ?_⟩
+  · -- `mfderiv (projectCurve f) 0 1 = w`.
+    rw [show (projectCurve (I := I) f) = (fun t => (f t).proj) from rfl, hmf, hf0snd]
+  · -- `η = projectCurve f` is mdifferentiable at each `t ∈ Ioo (-δ) δ`.
+    intro t ht
+    have hfd : MDifferentiableAt 𝓘(ℝ, ℝ) I.tangent f t :=
+      (hf_at_t t ht).1.hasMFDerivAt.mdifferentiableAt
+    have hpd : MDifferentiableAt I.tangent I
+        (Bundle.TotalSpace.proj : TangentBundle I M → M) (f t) :=
+      (Bundle.contMDiffAt_proj (E := (TangentSpace I : M → Type _)) (n := 1)).mdifferentiableAt
+        (by norm_num)
+    exact (hpd.comp t hfd)
+  · -- The foot stays in the chart-`y` source on `Ioo (-δ) δ`.
+    intro t ht
+    exact (hf_at_t t ht).2
+  · -- The moving-foot geodesic equation on `Ioo (-δ) δ`.
+    intro t ht
+    have hgeo_at : IsGeodesicAt (I := I) g (projectCurve (I := I) f) t :=
+      ⟨y, f, hηt, (hf_at_t t ht).2, (hf_at_t t ht).1⟩
+    exact hgeo_at.hasGeodesicEquationAt g
 
 /-- **Intrinsic extension past a finite endpoint, given the continuation.**
 Let `γ` be a geodesic (intrinsic moving-foot sense) on `Iio T`, and let
@@ -2039,6 +2120,47 @@ def HasEndpointContinuation
     IsGeodesicOn (I := I) g η (Set.Ioo (-δ) δ) ∧
     γ =ᶠ[nhdsWithin b (Set.Iio b)] (fun t => η (t - b))
 
+/-! ### Chart-phase ODE uniqueness with endpoint matching
+
+The asymptotic `C¹` matching `hmatch` is closed by a uniqueness argument for the
+chart-`y`-coordinate *phase* curve `s ↦ (chartCurve y · s, deriv (chartCurve y ·) s)`
+of the chart-`y` representation.  Both `γ` and the shifted continuation
+`t ↦ η (t - b)` give phase curves that solve the autonomous first-order system
+`z' = chartPhaseVF g y z` (the phase form of the second-order geodesic ODE), stay
+in a fixed compact set near the limit point, and share value + velocity at the
+endpoint `b`.  Mathlib's left-endpoint ODE uniqueness `ODE_solution_unique_of_mem_Icc_left`
+(with the Lipschitz constant from `chartPhaseVF_lipschitzOnWith_of_compact`) then
+forces them to agree up to `b`, which transports back to the manifold matching. -/
+
+/-- **Chart-phase ODE uniqueness on `Icc a b`, left-endpoint form.**  Two phase
+curves `c₁, c₂ : ℝ → E × E` that solve the chart-`α` phase geodesic ODE
+`z' = chartPhaseVF g α z` (in one-sided `Iic`-derivative form) on `Ioc a b`,
+are continuous on `Icc a b`, stay inside a compact set `K` contained in the
+chart-target interior product, and agree at the right endpoint `b`, agree on all
+of `Icc a b`.  Direct application of `ODE_solution_unique_of_mem_Icc_left` with
+the uniform Lipschitz constant of `chartPhaseVF g α` on `K`. -/
+theorem chartPhaseVF_orbit_uniqueness_Icc_left
+    (g : SmoothRiemannianMetric I M) (α : M)
+    {K : Set (E × E)} (hK_compact : IsCompact K)
+    (hK_subset : K ⊆ (interior (extChartAt I α).target) ×ˢ (Set.univ : Set E))
+    {a b : ℝ}
+    {c₁ c₂ : ℝ → E × E}
+    (hc₁_cont : ContinuousOn c₁ (Set.Icc a b))
+    (hc₂_cont : ContinuousOn c₂ (Set.Icc a b))
+    (hc₁_deriv : ∀ s ∈ Set.Ioc a b,
+      HasDerivWithinAt c₁ (chartPhaseVF (I := I) g α (c₁ s)) (Set.Iic s) s)
+    (hc₂_deriv : ∀ s ∈ Set.Ioc a b,
+      HasDerivWithinAt c₂ (chartPhaseVF (I := I) g α (c₂ s)) (Set.Iic s) s)
+    (hc₁_in_K : ∀ s ∈ Set.Ioc a b, c₁ s ∈ K)
+    (hc₂_in_K : ∀ s ∈ Set.Ioc a b, c₂ s ∈ K)
+    (h_eq_at_b : c₁ b = c₂ b) :
+    Set.EqOn c₁ c₂ (Set.Icc a b) := by
+  obtain ⟨L, hLip⟩ :=
+    chartPhaseVF_lipschitzOnWith_of_compact (I := I) g α hK_compact hK_subset
+  exact ODE_solution_unique_of_mem_Icc_left
+    (v := fun _ z => chartPhaseVF (I := I) g α z) (s := fun _ => K) (K := L)
+    (fun t _ => hLip) hc₁_cont hc₁_deriv hc₁_in_K hc₂_cont hc₂_deriv hc₂_in_K h_eq_at_b
+
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 /-- **Endpoint-continuation producer under metric completeness.**
@@ -2091,52 +2213,494 @@ both genuinely absent from the project:
   (reduction to a first-order system on `E × E` and `ODE_solution_unique_of_mem_Ioo`)
   matching `γ` and `t ↦ η (t - b)` from the common boundary data at `b`.
 
-The residual `sorry` is isolated to the asymptotic matching `hmatch`. -/
+The asymptotic matching `hmatch` is closed via the chart-`y`-coordinate phase
+curve: `γ` and the shifted continuation `t ↦ η (t - b)` both solve the
+autonomous chart-`y` phase ODE near `b`, share the common boundary datum
+`(φ_y y, w)` at the endpoint, and hence agree by left-endpoint ODE uniqueness. -/
 theorem hasEndpointContinuation_of_complete
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {b c : ℝ}
     (hc_nonneg : 0 ≤ c)
     (hγ_smooth : ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ (Set.Iio b))
     (hSpeedBound : ∀ τ : ℝ,
       ‖mfderiv 𝓘(ℝ, ℝ) I γ τ (1 : ℝ)‖ₑ ≤ ENNReal.ofReal c)
+    (hSpeedSq : ∀ s : ℝ,
+      (g.inner (γ s)) (mfderiv 𝓘(ℝ, ℝ) I γ s 1) (mfderiv 𝓘(ℝ, ℝ) I γ s 1) ≤ c ^ 2)
     (_hγ : IsGeodesicOn (I := I) g γ (Set.Iio b)) :
     HasEndpointContinuation (I := I) g γ b := by
   haveI : CompleteSpace E := FiniteDimensional.complete ℝ E
+  -- `γ` is mdifferentiable on `Iio b` and continuous there.
+  have hγ_mdiff_on : MDifferentiableOn 𝓘(ℝ, ℝ) I γ (Set.Iio b) :=
+    hγ_smooth.mdifferentiableOn (by norm_num)
   -- Part 1 (proven): the full position limit `y` via completeness.
-  obtain ⟨y, _hy⟩ :=
+  obtain ⟨y, hy_metric⟩ :=
     bm_c_gc_position_limit (I := I) (γ := γ) (b := b) (c := c)
       hc_nonneg hγ_smooth hSpeedBound
-  -- Part 2: a limit velocity `w ∈ T_y M` (existence with positive speed).
-  -- A nonzero tangent vector at `y` exists (positive finrank), which the
-  -- launch of the fresh continuation geodesic uses; the directional value
-  -- is fixed by the chart-coordinate ODE limit and recorded in `hmatch`.
-  have hfin_pos : 0 < Module.finrank ℝ E := Nat.pos_of_ne_zero (NeZero.ne _)
-  haveI : Nontrivial E := Module.nontrivial_of_finrank_pos hfin_pos
-  obtain ⟨w, _hw_ne⟩ : ∃ w : TangentSpace I y, w ≠ 0 :=
-    ⟨(exists_ne (0 : E)).choose, (exists_ne (0 : E)).choose_spec⟩
-  -- Part 3: launch the fresh local geodesic `η` from `(y, w)`.
-  obtain ⟨η, δ, hδ, _hη0, hη_geo⟩ := exists_isGeodesicOn_Ioo_at (I := I) g y w
+  -- The position limit transported into the manifold topology (topology bridge).
+  have hy_mfld : Tendsto γ (𝓝[<] b) (𝓝 y) :=
+    tendsto_nhds_of_tendsto_metric_nhds (I := I) (l := 𝓝[<] b) (f := γ) (p := y)
+      hy_metric
+  -- Abbreviation for the chart-`y` representation curve `u = φ_y ∘ γ`.
+  set u : ℝ → E := chartCurve (I := I) y γ with hu_def
+  -- `φ_y y` lies in the chart-target interior (boundaryless).
+  have hy_src : y ∈ (chartAt H y).source := mem_chart_source H y
+  have hy_ext_src : y ∈ (extChartAt I y).source := by
+    rw [extChartAt_source_eq_chartAt_source (I := I)]; exact hy_src
+  have hy_target : extChartAt I y y ∈ (extChartAt I y).target :=
+    (extChartAt I y).map_source hy_ext_src
+  have hy_interior : extChartAt I y y ∈ interior (extChartAt I y).target :=
+    extChartAt_target_subset_interior_of_boundaryless (I := I) y hy_target
+  -- `u s → φ_y y` as `s → b⁻` (continuity of the chart map at `y`).
+  have hu_lim : Tendsto u (𝓝[<] b) (𝓝 (extChartAt I y y)) := by
+    have hcont_at : ContinuousAt (extChartAt I y) y := continuousAt_extChartAt (I := I) y
+    have := hcont_at.tendsto.comp hy_mfld
+    simpa [hu_def, chartCurve] using this
+  -- Eventually `γ s` lies in the chart-`y` source as `s → b⁻`.
+  have hsrc_ev : ∀ᶠ s in 𝓝[<] b, γ s ∈ (chartAt H y).source :=
+    hy_mfld ((chartAt H y).open_source.mem_nhds hy_src)
+  -- Part 2: the chart-coordinate velocity is bounded near `b` and stays in a
+  -- compact subset of the chart target.
+  obtain ⟨ε, K₁, S, hε, hS_compact, hS_sub, hbound⟩ :=
+    chartVelocity_bound_near_limit (I := I) g y (γ := γ) (b := b) (c := c)
+      hc_nonneg hγ_mdiff_on hy_mfld hSpeedSq
+  -- A concrete left-interval `Ioo a₀ b` on which `γ s ∈ (chartAt H y).source`.
+  obtain ⟨a₀, ha₀_lt, ha₀_src⟩ :
+      ∃ a₀ < b, ∀ s ∈ Set.Ioo a₀ b, γ s ∈ (chartAt H y).source := by
+    obtain ⟨U, hU_nhds, hU_sub⟩ :=
+      mem_nhdsWithin_iff_exists_mem_nhds_inter.mp hsrc_ev
+    obtain ⟨ρ, hρ_pos, hρ_sub⟩ := Metric.mem_nhds_iff.mp hU_nhds
+    refine ⟨b - ρ, by linarith, fun s hs => ?_⟩
+    have hs_ball : s ∈ Metric.ball b ρ := by
+      rw [Metric.mem_ball, Real.dist_eq, abs_lt]
+      exact ⟨by linarith [hs.1], by linarith [hs.2]⟩
+    exact hU_sub ⟨hρ_sub hs_ball, hs.2⟩
+  -- The common working left-interval `Ioo a b` (`a := max (b - ε) a₀ < b`).
+  set a : ℝ := max (b - ε) a₀ with ha_def
+  have ha_lt_b : a < b := max_lt (by linarith) ha₀_lt
+  have ha_ge_ε : b - ε ≤ a := le_max_left _ _
+  have ha_ge_a₀ : a₀ ≤ a := le_max_right _ _
+  -- On `Ioo a b`: `γ s` in the chart source, in the velocity-bound interval.
+  have hsrc_on : ∀ s ∈ Set.Ioo a b, γ s ∈ (chartAt H y).source :=
+    fun s hs => ha₀_src s ⟨lt_of_le_of_lt ha_ge_a₀ hs.1, hs.2⟩
+  have hbound_on : ∀ s ∈ Set.Ioo a b,
+      ‖deriv u s‖ ≤ K₁ ∧ u s ∈ S := by
+    intro s hs
+    have : s ∈ Set.Ioo (b - ε) b := ⟨lt_of_le_of_lt ha_ge_ε hs.1, hs.2⟩
+    simpa [hu_def] using hbound s this
+  -- `γ` is continuous at each `s ∈ Ioo a b` (open subset of `Iio b`).
+  have hγ_contAt : ∀ s ∈ Set.Ioo a b, ContinuousAt γ s := by
+    intro s hs
+    have hs_Iio : s ∈ Set.Iio b := hs.2
+    exact ((hγ_smooth.continuousOn).continuousAt (isOpen_Iio.mem_nhds hs_Iio))
+  -- `γ` is mdifferentiable at each `s ∈ Ioo a b`.
+  have hγ_mdiffAt : ∀ s ∈ Set.Ioo a b, MDifferentiableAt 𝓘(ℝ, ℝ) I γ s := by
+    intro s hs
+    have hs_Iio : s ∈ Set.Iio b := hs.2
+    exact (hγ_mdiff_on s hs_Iio).mdifferentiableAt (isOpen_Iio.mem_nhds hs_Iio)
+  -- The chart-`y` second-order ODE for `γ` at each `s ∈ Ioo a b`.
+  have hODE_γ : ∀ s ∈ Set.Ioo a b,
+      HasDerivAt (deriv u)
+        (- chartChristoffelContraction (I := I) g y (deriv u s) (deriv u s) (u s)) s := by
+    intro s hs
+    have hgeq : HasGeodesicEquationAt (I := I) g γ s := _hγ s hs.2
+    simpa [hu_def] using
+      hasGeodesicEquationAt_fixedChart_hasDerivAt_velocity (I := I) g y
+        (γ := γ) (t := s) (hγ_contAt s hs) (hsrc_on s hs) hgeq
+  -- The chart-`y` first-order velocity derivative for `γ` at each `s ∈ Ioo a b`.
+  have hDeriv_γ : ∀ s ∈ Set.Ioo a b, HasDerivAt u (deriv u s) s := by
+    intro s hs
+    -- `u = φ_y ∘ γ` is differentiable at `s` (chart map ∘ mdifferentiable curve).
+    have hφ_mdiff : MDifferentiableAt I 𝓘(ℝ, E) (extChartAt I y) (γ s) :=
+      mdifferentiableAt_extChartAt (I := I) (x := y) (hsrc_on s hs)
+    have hcomp : MDifferentiableAt 𝓘(ℝ, ℝ) 𝓘(ℝ, E) ((extChartAt I y) ∘ γ) s :=
+      hφ_mdiff.comp s (hγ_mdiffAt s hs)
+    have hdiff : DifferentiableAt ℝ ((extChartAt I y) ∘ γ) s :=
+      hcomp.differentiableAt
+    simpa [hu_def, chartCurve] using hdiff.hasDerivAt
+  -- Part 3: the chart-`y` velocity converges to a genuine limit `wγ : E`.
+  obtain ⟨wγ, hwγ⟩ :=
+    chartVelocity_converges_at_finite_endpoint_Ioo (I := I) g y
+      (u := u) (u' := deriv u) (a := a) (b := b) (K₁ := K₁) (S := S)
+      ha_lt_b hS_compact hS_sub
+      (fun s hs => by simpa [hu_def] using hDeriv_γ s hs)
+      (fun s hs => by simpa [hu_def] using hODE_γ s hs)
+      (fun s hs => (hbound_on s hs).1)
+      (fun s hs => (hbound_on s hs).2)
+  -- Part 4: launch the continuation geodesic `η` from `(y, w)` with the seed
+  -- velocity `w := symmL_y(y) wγ` chosen so that `η`'s chart-`y` velocity at `0`
+  -- equals `γ`'s limit velocity `wγ`.
+  set w : TangentSpace I y :=
+    (trivializationAt E (TangentSpace I) y).symmL ℝ y wγ with hw_def
+  obtain ⟨η, δ, hδ, hη0, hηcont, hη_mfd, hη_mdiffOn, hη_srcOn, hη_geo⟩ :=
+    exists_isGeodesicOn_Ioo_at_velocity (I := I) g y w
   refine ⟨η, δ, hδ, hη_geo, ?_⟩
-  -- Residual gap: the asymptotic `C¹` matching of `γ` with the shifted
-  -- continuation `t ↦ η (t - b)` approaching `b` from the left.
-  --
-  -- The directional-velocity-limit engine is now available:
-  --   `chartVelocity_bound_near_limit` bounds `deriv (chartCurve y γ)` near `b`
-  --   (uniform Gram positive-definiteness on a compact nbhd of `y`), and
-  --   `chartVelocity_converges_at_finite_endpoint_Ioo` (on the analytic engine
-  --   `velocity_converges_of_bounded_accel_Ioo`) then yields the limit velocity,
-  --   with the chart-fixed second-order ODE supplied pointwise by
-  --   `hasGeodesicEquationAt_fixedChart_hasDerivAt_velocity`.
-  -- Two pieces of infrastructure still block the matching, both genuinely
-  -- absent from the project:
-  --   (A) the topology compatibility between the `PseudoEMetricSpace`-metric
-  --       topology (in which `bm_c_gc_position_limit` gives `γ → y`) and the
-  --       manifold `ChartedSpace` topology (consumed by the velocity bound);
-  --   (B) a strengthened local-existence lemma exposing `η`'s initial chart
-  --       velocity (to pin it to `γ`'s limit velocity `w`), plus the
-  --       second-order chart-ODE uniqueness (first-order reduction on `E × E`
-  --       and `ODE_solution_unique_of_mem_Ioo`) matching the common boundary
-  --       data at `b`.
-  sorry
+  have hδ_mem0 : (0 : ℝ) ∈ Set.Ioo (-δ) δ := ⟨by linarith, hδ⟩
+  -- The chart-`y` velocity of `η` at `0` equals `wγ` (round-trip through the
+  -- trivialisation at the chart centre `y`).
+  have hη_chartVel0 : deriv (chartCurve (I := I) y η) 0 = wγ := by
+    -- `deriv (chartCurve y η) 0 = fderiv (φ_y ∘ η) 0 1`.
+    have hη0_src : η 0 ∈ (chartAt H y).source := by rw [hη0]; exact hy_src
+    have hη_mdiff0 : MDifferentiableAt 𝓘(ℝ, ℝ) I η 0 := hη_mdiffOn 0 hδ_mem0
+    -- The trivialisation coordinate of `mfderiv η 0 1` is `fderiv (φ_y ∘ η) 0 1`.
+    have hCC := bm_c_chartCoord_mfderiv_eq_fderiv_at (I := I) (γ := η) (α := y)
+      (s := 0) hη_mdiff0 hη0_src
+    -- `mfderiv η 0 1 = w = symmL_y(y) wγ`.
+    have hbase : (η 0) ∈ (trivializationAt E (TangentSpace I) y).baseSet := by
+      rw [TangentBundle.trivializationAt_baseSet]; exact hη0_src
+    have hround :
+        ((trivializationAt E (TangentSpace I) y).continuousLinearMapAt ℝ (η 0))
+            ((mfderiv 𝓘(ℝ, ℝ) I η 0 : ℝ →L[ℝ] _) (1 : ℝ)) = wγ := by
+      rw [hη_mfd, hw_def, hη0]
+      exact (trivializationAt E (TangentSpace I) y).continuousLinearMapAt_symmL
+        (R := ℝ) (by rw [TangentBundle.trivializationAt_baseSet]; exact hy_src) wγ
+    -- `deriv (chartCurve y η) 0 = fderiv (φ_y ∘ η) 0 1`.
+    have hderiv_eq : deriv (chartCurve (I := I) y η) 0 =
+        (fderiv ℝ ((extChartAt I y) ∘ η) 0 : ℝ →L[ℝ] E) (1 : ℝ) := by
+      rw [deriv]; rfl
+    rw [hderiv_eq, ← hCC, hround]
+  -- Abbreviation for `η`'s chart-`y` curve.
+  set uη : ℝ → E := chartCurve (I := I) y η with huη_def
+  -- η is continuous on `Ioo (-δ) δ` (from pointwise mdifferentiability).
+  have hη_contOn : ∀ t ∈ Set.Ioo (-δ) δ, ContinuousAt η t :=
+    fun t ht => (hη_mdiffOn t ht).continuousAt
+  -- The chart-`y` first-order velocity derivative for `η` at each `t ∈ Ioo (-δ) δ`.
+  have hDeriv_η : ∀ t ∈ Set.Ioo (-δ) δ, HasDerivAt uη (deriv uη t) t := by
+    intro t ht
+    have hφ_mdiff : MDifferentiableAt I 𝓘(ℝ, E) (extChartAt I y) (η t) :=
+      mdifferentiableAt_extChartAt (I := I) (x := y) (hη_srcOn t ht)
+    have hcomp : MDifferentiableAt 𝓘(ℝ, ℝ) 𝓘(ℝ, E) ((extChartAt I y) ∘ η) t :=
+      hφ_mdiff.comp t (hη_mdiffOn t ht)
+    have hdiff : DifferentiableAt ℝ ((extChartAt I y) ∘ η) t :=
+      hcomp.differentiableAt
+    simpa [huη_def, chartCurve] using hdiff.hasDerivAt
+  -- The chart-`y` second-order ODE for `η` at each `t ∈ Ioo (-δ) δ`.
+  have hODE_η : ∀ t ∈ Set.Ioo (-δ) δ,
+      HasDerivAt (deriv uη)
+        (- chartChristoffelContraction (I := I) g y (deriv uη t) (deriv uη t) (uη t)) t := by
+    intro t ht
+    simpa [huη_def] using
+      hasGeodesicEquationAt_fixedChart_hasDerivAt_velocity (I := I) g y
+        (γ := η) (t := t) (hη_contOn t ht) (hη_srcOn t ht) (hη_geo t ht)
+  -- `uη 0 = φ_y y` (since `η 0 = y`).
+  have huη0 : uη 0 = extChartAt I y y := by rw [huη_def, chartCurve_def, hη0]
+  -- `S` is closed (compact in a Hausdorff space), so it contains the chart limit
+  -- `φ_y y` (a limit of the `u`-images, which lie in `S` near `b`).
+  have hS_closed : IsClosed S := hS_compact.isClosed
+  have hφy_in_S : extChartAt I y y ∈ S := by
+    refine hS_closed.mem_of_tendsto hu_lim ?_
+    filter_upwards [Ioo_mem_nhdsLT ha_lt_b] with s hs using (hbound_on s hs).2
+  -- `‖wγ‖ ≤ K₁` (limit of the chart-velocity bound).
+  have hwγ_norm : ‖wγ‖ ≤ K₁ := by
+    refine le_of_tendsto (Tendsto.norm hwγ) ?_
+    filter_upwards [Ioo_mem_nhdsLT ha_lt_b] with s hs using (hbound_on s hs).1
+  -- The phase vector field's `Iic`-derivative form for `γ` on `Ioo a b`.
+  -- The phase curve `cγ s := (u s, deriv u s)`, continuously extended to `b` by
+  -- the limit datum `(φ_y y, wγ)`.
+  set cγ : ℝ → E × E := fun s => if s < b then (u s, deriv u s)
+    else (extChartAt I y y, wγ) with hcγ_def
+  -- The phase curve `cη s := (uη (s - b), deriv uη (s - b))` of the shifted
+  -- continuation; differentiable across `b` (interior point `0` for `η`).
+  set cη : ℝ → E × E := fun s => (uη (s - b), deriv uη (s - b)) with hcη_def
+  -- `cγ` agrees with `(u, deriv u)` on `Iio b` (the `if` picks the first branch).
+  have hcγ_lt : ∀ s, s < b → cγ s = (u s, deriv u s) := fun s hs => by
+    simp only [hcγ_def, if_pos hs]
+  -- `cγ b = (φ_y y, wγ)`.
+  have hcγ_b : cγ b = (extChartAt I y y, wγ) := by
+    simp only [hcγ_def, if_neg (lt_irrefl b)]
+  -- The γ-side phase ODE holds (two-sided) at each `s ∈ Ioo a b`.
+  have hcγ_deriv_open : ∀ s ∈ Set.Ioo a b,
+      HasDerivAt cγ (chartPhaseVF (I := I) g y (cγ s)) s := by
+    intro s hs
+    -- On a neighbourhood of `s` (`s < b`, `Iio b` open), `cγ = (u, deriv u)`.
+    have heq : cγ =ᶠ[𝓝 s] (fun r => (u r, deriv u r)) := by
+      filter_upwards [isOpen_Iio.mem_nhds hs.2] with r hr using hcγ_lt r hr
+    have hpair : HasDerivAt (fun r => (u r, deriv u r))
+        (deriv u s,
+          - chartChristoffelContraction (I := I) g y (deriv u s) (deriv u s) (u s)) s :=
+      (hDeriv_γ s hs).prodMk (hODE_γ s hs)
+    rw [hcγ_lt s hs.2, chartPhaseVF_mk]
+    exact hpair.congr_of_eventuallyEq heq
+  -- The component functions of `cγ`.
+  set Uγ : ℝ → E := fun s => (cγ s).1 with hUγ_def
+  set Vγ : ℝ → E := fun s => (cγ s).2 with hVγ_def
+  -- On `Iio b`, `Uγ = u` and `Vγ = deriv u`.
+  have hUγ_eq : ∀ s, s < b → Uγ s = u s := fun s hs => by
+    simp only [hUγ_def, hcγ_lt s hs]
+  have hVγ_eq : ∀ s, s < b → Vγ s = deriv u s := fun s hs => by
+    simp only [hVγ_def, hcγ_lt s hs]
+  have hUγ_b : Uγ b = extChartAt I y y := by simp only [hUγ_def, hcγ_b]
+  have hVγ_b : Vγ b = wγ := by simp only [hVγ_def, hcγ_b]
+  -- The chart-acceleration limit `-Γ_y(deriv u s, deriv u s)(u s) → -Γ_y(wγ,wγ)(φ_y y)`.
+  have hAccel_lim : Tendsto
+      (fun s => - chartChristoffelContraction (I := I) g y (deriv u s) (deriv u s) (u s))
+      (𝓝[<] b)
+      (𝓝 (- chartChristoffelContraction (I := I) g y wγ wγ (extChartAt I y y))) := by
+    have hΓcont := chartChristoffelContraction_continuousOn_prod (I := I) g y
+    have hcontAt : ContinuousAt
+        (fun p : E × E => chartChristoffelContraction (I := I) g y p.1 p.1 p.2)
+        (wγ, extChartAt I y y) :=
+      (hΓcont.continuousAt (((isOpen_univ.prod isOpen_interior)).mem_nhds
+        ⟨Set.mem_univ _, hy_interior⟩))
+    have hpair_lim : Tendsto (fun s => ((deriv u s, u s) : E × E)) (𝓝[<] b)
+        (𝓝 (wγ, extChartAt I y y)) := hwγ.prodMk_nhds hu_lim
+    exact (hcontAt.tendsto.comp hpair_lim).neg
+  -- `Ioo a b ∈ 𝓝[<] b`.
+  have hIoo_nhdsLT : Set.Ioo a b ∈ 𝓝[<] b := Ioo_mem_nhdsLT ha_lt_b
+  -- `Uγ`, `Vγ` are differentiable on `Ioo a b` (agreeing with `u`, `deriv u`).
+  have hUγ_diffOn : DifferentiableOn ℝ Uγ (Set.Ioo a b) := by
+    intro s hs
+    refine ((hDeriv_γ s hs).differentiableAt.differentiableWithinAt).congr
+      (fun r hr => (hUγ_eq r hr.2)) (hUγ_eq s hs.2)
+  have hVγ_diffOn : DifferentiableOn ℝ Vγ (Set.Ioo a b) := by
+    intro s hs
+    refine ((hODE_γ s hs).differentiableAt.differentiableWithinAt).congr
+      (fun r hr => (hVγ_eq r hr.2)) (hVγ_eq s hs.2)
+  -- Continuity (within `Ioo a b`) of `Uγ`, `Vγ` at `b`.
+  have hUγ_contAt : ContinuousWithinAt Uγ (Set.Ioo a b) b := by
+    have ht : Tendsto Uγ (𝓝[<] b) (𝓝 (extChartAt I y y)) :=
+      hu_lim.congr' (by filter_upwards [self_mem_nhdsWithin] with s hs using (hUγ_eq s hs).symm)
+    have : Tendsto Uγ (𝓝[Set.Ioo a b] b) (𝓝 (Uγ b)) := by
+      rw [hUγ_b]; exact ht.mono_left (nhdsWithin_mono b (fun s hs => hs.2))
+    exact this
+  have hVγ_contAt : ContinuousWithinAt Vγ (Set.Ioo a b) b := by
+    have ht : Tendsto Vγ (𝓝[<] b) (𝓝 wγ) :=
+      hwγ.congr' (by filter_upwards [self_mem_nhdsWithin] with s hs using (hVγ_eq s hs).symm)
+    have : Tendsto Vγ (𝓝[Set.Ioo a b] b) (𝓝 (Vγ b)) := by
+      rw [hVγ_b]; exact ht.mono_left (nhdsWithin_mono b (fun s hs => hs.2))
+    exact this
+  -- `deriv Uγ → wγ`, `deriv Vγ → -Γ_y(wγ,wγ)(φ_y y)` along `𝓝[<] b`.
+  have hderiv_Uγ_lim : Tendsto (fun s => deriv Uγ s) (𝓝[<] b) (𝓝 wγ) := by
+    refine hwγ.congr' ?_
+    filter_upwards [self_mem_nhdsWithin] with s hs
+    have heq : Uγ =ᶠ[𝓝 s] u := by
+      filter_upwards [isOpen_Iio.mem_nhds hs] with r hr using hUγ_eq r hr
+    exact (heq.deriv_eq).symm
+  have hderiv_Vγ_lim : Tendsto (fun s => deriv Vγ s) (𝓝[<] b)
+      (𝓝 (- chartChristoffelContraction (I := I) g y wγ wγ (extChartAt I y y))) := by
+    refine hAccel_lim.congr' ?_
+    filter_upwards [hIoo_nhdsLT] with s hsa
+    -- `deriv Vγ s = deriv (deriv u) s = -Γ_y(deriv u s, deriv u s)(u s)`.
+    have heqV : Vγ =ᶠ[𝓝 s] deriv u := by
+      filter_upwards [isOpen_Iio.mem_nhds hsa.2] with r hr using hVγ_eq r hr
+    rw [heqV.deriv_eq, (hODE_γ s hsa).deriv]
+  -- The one-sided boundary derivatives of the components at `b` (derivative
+  -- extends to the closure since it converges).
+  have hUγ_bderiv : HasDerivWithinAt Uγ wγ (Set.Iic b) b :=
+    hasDerivWithinAt_Iic_of_tendsto_deriv hUγ_diffOn hUγ_contAt hIoo_nhdsLT hderiv_Uγ_lim
+  have hVγ_bderiv : HasDerivWithinAt Vγ
+      (- chartChristoffelContraction (I := I) g y wγ wγ (extChartAt I y y))
+      (Set.Iic b) b :=
+    hasDerivWithinAt_Iic_of_tendsto_deriv hVγ_diffOn hVγ_contAt hIoo_nhdsLT hderiv_Vγ_lim
+  -- The γ-side phase ODE in `Iic`-derivative form at the endpoint `b`.
+  have hcγ_bderiv : HasDerivWithinAt cγ (chartPhaseVF (I := I) g y (cγ b))
+      (Set.Iic b) b := by
+    have hprod : HasDerivWithinAt cγ
+        (wγ, - chartChristoffelContraction (I := I) g y wγ wγ (extChartAt I y y))
+        (Set.Iic b) b := hUγ_bderiv.prodMk hVγ_bderiv
+    rw [hcγ_b, chartPhaseVF_mk]
+    exact hprod
+  -- The common compact set `K = closedBall (φ_y y) R ×ˢ closedBall 0 (K₁+1)`,
+  -- with `R` chosen so the position ball lies inside the chart-target interior.
+  obtain ⟨R, hR_pos, hR_sub⟩ :=
+    Metric.isOpen_iff.mp isOpen_interior _ hy_interior
+  set Kset : Set (E × E) :=
+    Metric.closedBall (extChartAt I y y) (R / 2) ×ˢ Metric.closedBall (0 : E) (K₁ + 1)
+    with hKset_def
+  have hKset_compact : IsCompact Kset :=
+    (isCompact_closedBall _ _).prod (isCompact_closedBall _ _)
+  have hKset_sub : Kset ⊆ (interior (extChartAt I y).target) ×ˢ (Set.univ : Set E) := by
+    intro p hp
+    refine ⟨hR_sub ?_, Set.mem_univ _⟩
+    rw [Metric.mem_ball]
+    have := hp.1; rw [Metric.mem_closedBall] at this
+    linarith
+  -- `(φ_y y, wγ) ∈ Kset` (`R/2 > 0`, `‖wγ‖ ≤ K₁ < K₁ + 1`).
+  have hpair_in_Kset : ((extChartAt I y y, wγ) : E × E) ∈ Kset := by
+    refine ⟨?_, ?_⟩
+    · rw [Metric.mem_closedBall, dist_self]; linarith
+    · rw [Metric.mem_closedBall, dist_zero_right]; linarith
+  -- `Kset` is a neighbourhood of `(φ_y y, wγ)`.
+  have hKset_nhds : Kset ∈ 𝓝 ((extChartAt I y y, wγ) : E × E) := by
+    rw [hKset_def, nhds_prod_eq]
+    refine Filter.prod_mem_prod (Metric.closedBall_mem_nhds _ (by linarith))
+      (Metric.closedBall_mem_nhds_of_mem ?_)
+    rw [Metric.mem_ball, dist_zero_right]; linarith
+  -- `cγ → (φ_y y, wγ)` along `𝓝[<] b`.
+  have hcγ_lim : Tendsto cγ (𝓝[<] b) (𝓝 ((extChartAt I y y, wγ) : E × E)) := by
+    refine (hu_lim.prodMk_nhds hwγ).congr' ?_
+    filter_upwards [self_mem_nhdsWithin] with s hs using (hcγ_lt s hs).symm
+  -- `uη` and `deriv uη` are continuous at `0` (with values `φ_y y`, `wγ`).
+  have huη_contAt0 : ContinuousAt uη 0 := (hDeriv_η 0 hδ_mem0).continuousAt
+  have hduη_contAt0 : ContinuousAt (deriv uη) 0 := (hODE_η 0 hδ_mem0).continuousAt
+  -- The shift `s - b → 0` along `𝓝[<] b`.
+  have hshift0 : Tendsto (fun s : ℝ => s - b) (𝓝[<] b) (𝓝 (0 : ℝ)) := by
+    have : Tendsto (fun s : ℝ => s - b) (𝓝 b) (𝓝 (0 : ℝ)) := by
+      have hc := (continuous_sub_right b).tendsto b
+      simpa using hc
+    exact this.mono_left nhdsWithin_le_nhds
+  -- `cη → (φ_y y, wγ)` along `𝓝[<] b`.
+  have hcη_lim : Tendsto cη (𝓝[<] b) (𝓝 ((extChartAt I y y, wγ) : E × E)) := by
+    have hu0 : Tendsto (fun s => uη (s - b)) (𝓝[<] b) (𝓝 (extChartAt I y y)) := by
+      have := huη_contAt0.tendsto.comp hshift0
+      rwa [huη0] at this
+    have hdu0 : Tendsto (fun s => deriv uη (s - b)) (𝓝[<] b) (𝓝 wγ) := by
+      have := hduη_contAt0.tendsto.comp hshift0
+      rwa [hη_chartVel0] at this
+    exact hu0.prodMk_nhds hdu0
+  -- A concrete shrunk left-interval `Ioo a' b` on which both phase curves lie
+  -- in `Kset` and the shift `s - b` lies in `Ioo (-δ) δ`.
+  have hev_all : ∀ᶠ s in 𝓝[<] b,
+      cγ s ∈ Kset ∧ cη s ∈ Kset ∧ (s - b) ∈ Set.Ioo (-δ) δ := by
+    have h1 : ∀ᶠ s in 𝓝[<] b, cγ s ∈ Kset := hcγ_lim hKset_nhds
+    have h2 : ∀ᶠ s in 𝓝[<] b, cη s ∈ Kset := hcη_lim hKset_nhds
+    have h3 : ∀ᶠ s in 𝓝[<] b, (s - b) ∈ Set.Ioo (-δ) δ :=
+      hshift0 (isOpen_Ioo.mem_nhds hδ_mem0)
+    filter_upwards [h1, h2, h3] with s hs1 hs2 hs3 using ⟨hs1, hs2, hs3⟩
+  obtain ⟨a', ha'_lt, ha'_all⟩ :
+      ∃ a' < b, ∀ s ∈ Set.Ioo a' b,
+        cγ s ∈ Kset ∧ cη s ∈ Kset ∧ (s - b) ∈ Set.Ioo (-δ) δ := by
+    obtain ⟨U, hU_nhds, hU_sub⟩ :=
+      mem_nhdsWithin_iff_exists_mem_nhds_inter.mp hev_all
+    obtain ⟨ρ, hρ_pos, hρ_sub⟩ := Metric.mem_nhds_iff.mp hU_nhds
+    refine ⟨b - ρ, by linarith, fun s hs => ?_⟩
+    have hs_ball : s ∈ Metric.ball b ρ := by
+      rw [Metric.mem_ball, Real.dist_eq, abs_lt]
+      exact ⟨by linarith [hs.1], by linarith [hs.2]⟩
+    exact hU_sub ⟨hρ_sub hs_ball, hs.2⟩
+  -- The common working interval `Icc a'' b` with `max a a' < a'' < b` (the strict
+  -- lower bound keeps the whole `Icc a'' b ∖ {b}` inside `Ioo (max a a') b ⊆
+  -- Ioo a b ∩ Ioo a' b`, where the chart curve is differentiable and both phase
+  -- curves stay in `Kset`, so continuity holds even at the left endpoint).
+  set a₁ : ℝ := max a a' with ha₁_def
+  have ha₁_lt : a₁ < b := max_lt ha_lt_b ha'_lt
+  set a'' : ℝ := (a₁ + b) / 2 with ha''_def
+  have ha''_gt_a₁ : a₁ < a'' := by rw [ha''_def]; linarith
+  have ha''_lt : a'' < b := by rw [ha''_def]; linarith
+  have ha''_gt_a : a < a'' := lt_of_le_of_lt (le_max_left _ _) ha''_gt_a₁
+  have ha''_gt_a' : a' < a'' := lt_of_le_of_lt (le_max_right _ _) ha''_gt_a₁
+  have hsub_a'' : Set.Ioo a'' b ⊆ Set.Ioo a b :=
+    fun s hs => ⟨lt_of_lt_of_le ha''_gt_a hs.1.le, hs.2⟩
+  have hsub_a''' : Set.Ioo a'' b ⊆ Set.Ioo a' b :=
+    fun s hs => ⟨lt_of_lt_of_le ha''_gt_a' hs.1.le, hs.2⟩
+  -- `Icc a'' b ∖ {b} ⊆ Ioo a b` and `⊆ Ioo a' b`.
+  have hIcc_lt_sub : ∀ s ∈ Set.Icc a'' b, s < b → s ∈ Set.Ioo a b :=
+    fun s hs hlt => ⟨lt_of_lt_of_le ha''_gt_a hs.1, hlt⟩
+  have hIcc_lt_sub' : ∀ s ∈ Set.Icc a'' b, s < b → s ∈ Set.Ioo a' b :=
+    fun s hs hlt => ⟨lt_of_lt_of_le ha''_gt_a' hs.1, hlt⟩
+  -- The η-side phase ODE (two-sided) at each `s ∈ Ioo a'' b`.
+  -- The η-side phase ODE (two-sided) at each `s` with `s - b ∈ Ioo (-δ) δ`.
+  have hcη_deriv_at : ∀ s : ℝ, (s - b) ∈ Set.Ioo (-δ) δ →
+      HasDerivAt cη (chartPhaseVF (I := I) g y (cη s)) s := by
+    intro s hsh
+    have h1 : HasDerivAt (fun r => uη (r - b)) (deriv uη (s - b)) s :=
+      (hDeriv_η (s - b) hsh).comp_sub_const s b
+    have h2 : HasDerivAt (fun r => deriv uη (r - b))
+        (- chartChristoffelContraction (I := I) g y (deriv uη (s - b)) (deriv uη (s - b))
+          (uη (s - b))) s :=
+      (hODE_η (s - b) hsh).comp_sub_const s b
+    have := h1.prodMk h2
+    rw [hcη_def, chartPhaseVF_mk]
+    exact this
+  have hcη_deriv_open : ∀ s ∈ Set.Ioo a'' b,
+      HasDerivAt cη (chartPhaseVF (I := I) g y (cη s)) s :=
+    fun s hs => hcη_deriv_at s (ha'_all s (hsub_a''' hs)).2.2
+  -- `cη b = (φ_y y, wγ)` (interior point `0` for `η`).
+  have hcη_b : cη b = (extChartAt I y y, wγ) := by
+    simp only [hcη_def, sub_self, huη0, hη_chartVel0]
+  -- The endpoint match `cγ b = cη b`.
+  have h_eq_at_b : cγ b = cη b := by rw [hcγ_b, hcη_b]
+  -- `Iic`-derivative forms on `Ioc a'' b` for both phase curves.
+  have hcγ_deriv_Ioc : ∀ s ∈ Set.Ioc a'' b,
+      HasDerivWithinAt cγ (chartPhaseVF (I := I) g y (cγ s)) (Set.Iic s) s := by
+    intro s hs
+    rcases lt_or_eq_of_le hs.2 with hlt | heq
+    · exact (hcγ_deriv_open s (hsub_a'' ⟨hs.1, hlt⟩)).hasDerivWithinAt
+    · rw [heq]; exact hcγ_bderiv
+  have hcη_deriv_Ioc : ∀ s ∈ Set.Ioc a'' b,
+      HasDerivWithinAt cη (chartPhaseVF (I := I) g y (cη s)) (Set.Iic s) s := by
+    intro s hs
+    rcases lt_or_eq_of_le hs.2 with hlt | heq
+    · exact (hcη_deriv_open s ⟨hs.1, hlt⟩).hasDerivWithinAt
+    · -- At `s = b`, `cη` is differentiable two-sided (interior point `0`).
+      rw [heq]
+      exact (hcη_deriv_at b (by rw [sub_self]; exact hδ_mem0)).hasDerivWithinAt
+  -- Left-continuity at `b`: a `𝓝[<] b`-limit plus the value match gives the
+  -- within-`Icc a'' b` limit (points of `Icc a'' b` near `b` are `≤ b`, hence
+  -- approached from the left or equal to `b`).
+  have hContAt_b : ∀ (cf : ℝ → E × E) (L : E × E), cf b = L →
+      Tendsto cf (𝓝[<] b) (𝓝 L) → ContinuousWithinAt cf (Set.Icc a'' b) b := by
+    intro cf L hval hlim
+    have hIic : Tendsto cf (𝓝[Set.Iic b] b) (𝓝 L) := by
+      rw [show Set.Iic b = Set.Iio b ∪ {b} from (Set.Iio_union_right).symm,
+        nhdsWithin_union, Filter.tendsto_sup]
+      refine ⟨hlim, ?_⟩
+      rw [nhdsWithin_singleton, Filter.tendsto_pure_left]
+      intro s hs; rw [hval]; exact mem_of_mem_nhds hs
+    -- `ContinuousWithinAt cf (Icc a'' b) b = Tendsto cf (𝓝[Icc a'' b] b) (𝓝 (cf b))`.
+    have hmono : Tendsto cf (𝓝[Set.Icc a'' b] b) (𝓝 L) :=
+      hIic.mono_left (nhdsWithin_mono b (fun s hs => hs.2))
+    show Tendsto cf (𝓝[Set.Icc a'' b] b) (𝓝 (cf b))
+    rw [hval]; exact hmono
+  have hcγ_contOn : ContinuousOn cγ (Set.Icc a'' b) := by
+    intro s hs
+    rcases lt_or_eq_of_le hs.2 with hlt | heq
+    · exact ((hcγ_deriv_open s (hIcc_lt_sub s hs hlt)).continuousAt).continuousWithinAt
+    · rw [show s = b from heq]
+      exact hContAt_b cγ (extChartAt I y y, wγ) hcγ_b hcγ_lim
+  have hcη_contOn : ContinuousOn cη (Set.Icc a'' b) := by
+    intro s hs
+    rcases lt_or_eq_of_le hs.2 with hlt | heq
+    · exact ((hcη_deriv_at s (ha'_all s (hIcc_lt_sub' s hs hlt)).2.2).continuousAt).continuousWithinAt
+    · rw [show s = b from heq]
+      exact hContAt_b cη (extChartAt I y y, wγ) hcη_b hcη_lim
+  -- Membership in `Kset` on `Ioc a'' b` for both phase curves.
+  have hcγ_in_K : ∀ s ∈ Set.Ioc a'' b, cγ s ∈ Kset := by
+    intro s hs
+    rcases lt_or_eq_of_le hs.2 with hlt | heq
+    · exact (ha'_all s (hsub_a''' ⟨hs.1, hlt⟩)).1
+    · subst heq; rw [hcγ_b]; exact hpair_in_Kset
+  have hcη_in_K : ∀ s ∈ Set.Ioc a'' b, cη s ∈ Kset := by
+    intro s hs
+    rcases lt_or_eq_of_le hs.2 with hlt | heq
+    · exact (ha'_all s (hsub_a''' ⟨hs.1, hlt⟩)).2.1
+    · subst heq; rw [hcη_b]; exact hpair_in_Kset
+  -- Apply the left-endpoint chart-phase ODE uniqueness.
+  have hEqOn : Set.EqOn cγ cη (Set.Icc a'' b) :=
+    chartPhaseVF_orbit_uniqueness_Icc_left (I := I) g y hKset_compact hKset_sub
+      hcγ_contOn hcη_contOn hcγ_deriv_Ioc hcη_deriv_Ioc hcγ_in_K hcη_in_K h_eq_at_b
+  -- Transport the chart-coordinate agreement back to the manifold: on `Ioo a'' b`
+  -- the first components agree (`u s = uη (s - b)`), so applying the chart inverse
+  -- (both feet lie in the chart-`y` source) gives `γ s = η (s - b)`.
+  refine Filter.eventually_of_mem (U := Set.Ioo a'' b) (Ioo_mem_nhdsLT ha''_lt) ?_
+  intro s hs
+  -- The phase-curve agreement at `s ∈ Ioo a'' b ⊆ Icc a'' b`.
+  have hs_Icc : s ∈ Set.Icc a'' b := ⟨hs.1.le, hs.2.le⟩
+  have hpair_eq : cγ s = cη s := hEqOn hs_Icc
+  -- First components: `u s = uη (s - b)`.
+  have hfst : u s = uη (s - b) := by
+    have : (cγ s).1 = (cη s).1 := by rw [hpair_eq]
+    rwa [hcγ_lt s hs.2, hcη_def] at this
+  -- `u s = φ_y (γ s)`, `uη (s - b) = φ_y (η (s - b))`, both feet in chart source.
+  have hγ_src_s : γ s ∈ (chartAt H y).source := hsrc_on s (hsub_a'' hs)
+  have hη_src_s : η (s - b) ∈ (chartAt H y).source :=
+    hη_srcOn (s - b) (ha'_all s (hsub_a''' hs)).2.2
+  have hγ_ext_src : γ s ∈ (extChartAt I y).source := by
+    rw [extChartAt_source_eq_chartAt_source (I := I)]; exact hγ_src_s
+  have hη_ext_src : η (s - b) ∈ (extChartAt I y).source := by
+    rw [extChartAt_source_eq_chartAt_source (I := I)]; exact hη_src_s
+  -- Apply `(extChartAt I y).symm` to `u s = uη (s - b)` and use both round-trips.
+  have hround_γ : (extChartAt I y).symm (extChartAt I y (γ s)) = γ s :=
+    (extChartAt I y).left_inv hγ_ext_src
+  have hround_η : (extChartAt I y).symm (extChartAt I y (η (s - b))) = η (s - b) :=
+    (extChartAt I y).left_inv hη_ext_src
+  -- `u s = φ_y (γ s)` and `uη (s - b) = φ_y (η (s - b))` (definitional).
+  have hu_s : u s = extChartAt I y (γ s) := by rw [hu_def, chartCurve_def]
+  have huη_s : uη (s - b) = extChartAt I y (η (s - b)) := by rw [huη_def, chartCurve_def]
+  calc γ s = (extChartAt I y).symm (extChartAt I y (γ s)) := hround_γ.symm
+    _ = (extChartAt I y).symm (u s) := by rw [hu_s]
+    _ = (extChartAt I y).symm (uη (s - b)) := by rw [hfst]
+    _ = (extChartAt I y).symm (extChartAt I y (η (s - b))) := by rw [huη_s]
+    _ = η (s - b) := hround_η
 
 /-- **Single-step intrinsic right-extension.** A geodesic on `Iio b` with
 endpoint-continuation data at `b` extends to a geodesic on `Iio b'` for
