@@ -336,6 +336,175 @@ theorem bm_c_gc_constant_speed
     fun s t => is_const_of_deriv_eq_zero hF_diff hF_deriv_eq s t
   exact hF_const
 
+/-- **Pointwise vanishing of the speed derivative on an open set.**  If `γ`
+satisfies the moving-foot geodesic equation at every point of an open set `s`
+and is `ContMDiffOn 𝓘(ℝ, ℝ) I 1` on `s`, then the speed-squared function
+`F t = g.inner (γ t) (γ'(t)) (γ'(t))` has derivative `0` at every `t ∈ s`.
+
+This is the open-set generalisation of the pointwise `hF_deriv` step inside
+`bm_c_gc_constant_speed`: the differentiation of the speed integrand is purely
+local at `t`, requiring only the moving-foot geodesic equation at `t` and the
+mdifferentiability of `γ` on a neighbourhood of `t` (supplied here by the
+`ContMDiffOn` hypothesis on the open set `s`). -/
+theorem isGeodesicOn_speedSq_hasDerivAt_zero
+    (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {s : Set ℝ} {t : ℝ}
+    (hs : IsOpen s) (ht : t ∈ s)
+    (hγ : IsGeodesicOn (I := I) g γ s)
+    (hγ_C1 : ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ s) :
+    HasDerivAt (fun r =>
+      (g.inner (γ r)) (mfderiv 𝓘(ℝ, ℝ) I γ r 1)
+        (mfderiv 𝓘(ℝ, ℝ) I γ r 1)) 0 t := by
+  haveI : CompleteSpace E := FiniteDimensional.complete ℝ E
+  -- `γ` is mdifferentiable on `s` (from the `C^1` hypothesis), and `s` is open,
+  -- so it is mdifferentiable at every point of `s`.
+  have hγ_mdiff_on : MDifferentiableOn 𝓘(ℝ, ℝ) I γ s :=
+    hγ_C1.mdifferentiableOn (by norm_num)
+  have hγ_mdiffAt : ∀ r ∈ s, MDifferentiableAt 𝓘(ℝ, ℝ) I γ r :=
+    fun r hr => (hγ_mdiff_on r hr).mdifferentiableAt (hs.mem_nhds hr)
+  -- The speed-squared function `F : ℝ → ℝ`.
+  set F : ℝ → ℝ := fun r =>
+      (g.inner (γ r)) (mfderiv 𝓘(ℝ, ℝ) I γ r 1)
+        (mfderiv 𝓘(ℝ, ℝ) I γ r 1) with hF_def
+  -- The geodesic equation at `t` (delivered directly by `IsGeodesicOn`).
+  have hγ_eq : HasGeodesicEquationAt (I := I) g γ t := hγ t ht
+  set α : M := γ t with hα_def
+  obtain ⟨v, a, hv, hev, ha, hgeo⟩ := hγ_eq
+  set u : ℝ → E := chartCurve (I := I) α γ with hu_def
+  set V : ℝ → E := fun r => deriv u r with hV_def
+  have hv' : HasDerivAt u v t := hv
+  have ha' : HasDerivAt V a t := ha
+  have hVt : V t = v := by rw [hV_def]; exact hv'.deriv
+  have hut_src : γ t ∈ (chartAt H α).source := by
+    rw [hα_def]; exact mem_chart_source H (γ t)
+  have hut_ext_src : γ t ∈ (extChartAt I α).source := by
+    rw [extChartAt_source_eq_chartAt_source (I := I)]; exact hut_src
+  have hut_target : extChartAt I α (γ t) ∈ (extChartAt I α).target :=
+    (extChartAt I α).map_source hut_ext_src
+  have hmem : u t ∈ interior (extChartAt I α).target := by
+    rw [hu_def, chartCurve_def]
+    exact extChartAt_target_subset_interior_of_boundaryless (I := I) α hut_target
+  -- The chart-covariant derivative `D V/dt` vanishes at `t` (geodesic equation).
+  have hDV0 : a + chartChristoffelContraction (I := I) g α v v (u t) = 0 := by
+    rw [hu_def, chartCurve_def]; exact hgeo
+  -- Leibniz/covariant derivative of the Gram form `r ↦ ⟨V, V⟩_G`.
+  have hcov := chartGramAlongCurve_hasDerivAt_covariant (I := I) g α γ V V
+    (uPrime := fun _ => v) (Vprime := fun _ => a) (Wprime := fun _ => a)
+    (t := t) hv' hmem ha' ha'
+  have hval0 :
+      (∑ l : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+          chartGramOnE (I := I) g α l j (u t) *
+            chartCoord (E := E) l
+              (a + chartChristoffelContraction (I := I) g α v (V t) (u t)) *
+            chartCoord (E := E) j (V t))
+        + (∑ i : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
+          chartGramOnE (I := I) g α i l (u t) *
+            chartCoord (E := E) i (V t) *
+            chartCoord (E := E) l
+              (a + chartChristoffelContraction (I := I) g α v (V t) (u t)))
+      = 0 := by
+    have hcorr0 :
+        a + chartChristoffelContraction (I := I) g α v (V t) (u t) = 0 := by
+      rw [hVt]; exact hDV0
+    simp only [hcorr0, chartCoord_zero, mul_zero, zero_mul,
+      Finset.sum_const_zero, add_zero]
+  have hcov0 : HasDerivAt (fun r => chartGramAlongCurve (I := I) g α γ V V r)
+      0 t := by
+    have := hcov
+    rw [hval0] at this
+    exact this
+  -- `F =ᶠ[𝓝 t] (fun r => chartGramAlongCurve g α γ V V r)`.
+  have hF_eq : F =ᶠ[nhds t] (fun r => chartGramAlongCurve (I := I) g α γ V V r) := by
+    -- Neighbourhood on which `γ r` is in the chart source, `r ∈ s`, and `u` is
+    -- differentiable (from the eventual first-derivative witness `hev`).
+    have hsrc_nhds : {r : ℝ | γ r ∈ (chartAt H α).source} ∈ nhds t := by
+      have hcont : ContinuousAt γ t :=
+        (hγ_C1.continuousOn.continuousAt (hs.mem_nhds ht))
+      exact hcont.preimage_mem_nhds
+        ((chartAt H α).open_source.mem_nhds hut_src)
+    have hs_nhds : s ∈ nhds t := hs.mem_nhds ht
+    filter_upwards [hev, hsrc_nhds, hs_nhds] with r hur hsrc hrs
+    have hγ_r : MDifferentiableAt 𝓘(ℝ, ℝ) I γ r := hγ_mdiffAt r hrs
+    have hraw := bm_c_raw_mfderiv_eq_symmL_fderiv_at (I := I) (γ := γ)
+      (α := α) (s := r) hγ_r hsrc
+    have hfderiv_eq :
+        (fderiv ℝ ((extChartAt I α) ∘ γ) r : ℝ →L[ℝ] E) (1 : ℝ) = V r := rfl
+    have hmf : (mfderiv 𝓘(ℝ, ℝ) I γ r) (1 : ℝ) =
+        ((trivializationAt E (TangentSpace I) α).symmL ℝ (γ r)) (V r) := by
+      rw [hraw, hfderiv_eq]
+    change F r = chartGramAlongCurve (I := I) g α γ V V r
+    have hFr : F r =
+        (g.inner (γ r))
+          (((trivializationAt E (TangentSpace I) α).symmL ℝ (γ r)) (V r))
+          (((trivializationAt E (TangentSpace I) α).symmL ℝ (γ r)) (V r)) := by
+      rw [hF_def]
+      change (g.inner (γ r)) ((mfderiv 𝓘(ℝ, ℝ) I γ r) (1 : ℝ))
+          ((mfderiv 𝓘(ℝ, ℝ) I γ r) (1 : ℝ)) = _
+      rw [hmf]
+    rw [hFr, inner_eq_chartGramOnE_bilinear_on_baseSet (I := I) g α (x := γ r)
+      (V r) (V r)]
+    rw [chartGramAlongCurve_def]
+    refine Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun j _ => ?_))
+    have hinv : (extChartAt I α).symm (u r) = γ r := by
+      rw [hu_def, chartCurve_def]
+      exact (extChartAt I α).left_inv (by
+        rw [extChartAt_source_eq_chartAt_source (I := I)]; exact hsrc)
+    rw [chartGramOnE_def, hinv]
+  exact hcov0.congr_of_eventuallyEq hF_eq
+
+/-- **Constant speed of a geodesic on an open interval.**  If `γ` satisfies the
+moving-foot geodesic equation at every point of an open set `s` and is
+`ContMDiffOn 𝓘(ℝ, ℝ) I 1` on `s`, then for any two times `t₀, t₁ ∈ s` whose
+spanning closed interval `Icc (min t₀ t₁) (max t₀ t₁)` lies inside `s`, the
+`g`-speed-squared agrees:
+`g.inner (γ t₀) (γ'(t₀)) (γ'(t₀)) = g.inner (γ t₁) (γ'(t₁)) (γ'(t₁))`.
+
+The closed-interval hypothesis is automatic when `s` is an interval (in
+particular `Ioo a₀ b`), which is the use case for the `Ioo`-seeded
+forward-completeness engine.  The proof feeds the pointwise speed-derivative
+vanishing `isGeodesicOn_speedSq_hasDerivAt_zero` to the convex-set constancy
+lemma `Convex.is_const_of_fderivWithin_eq_zero`. -/
+theorem isGeodesicOn_speedSq_const
+    (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {s : Set ℝ} {t₀ t₁ : ℝ}
+    (hs : IsOpen s)
+    (hγ : IsGeodesicOn (I := I) g γ s)
+    (hγ_C1 : ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ s)
+    (hIcc : Set.Icc (min t₀ t₁) (max t₀ t₁) ⊆ s) :
+    (g.inner (γ t₀)) (mfderiv 𝓘(ℝ, ℝ) I γ t₀ 1) (mfderiv 𝓘(ℝ, ℝ) I γ t₀ 1) =
+      (g.inner (γ t₁)) (mfderiv 𝓘(ℝ, ℝ) I γ t₁ 1)
+        (mfderiv 𝓘(ℝ, ℝ) I γ t₁ 1) := by
+  set F : ℝ → ℝ := fun r =>
+      (g.inner (γ r)) (mfderiv 𝓘(ℝ, ℝ) I γ r 1)
+        (mfderiv 𝓘(ℝ, ℝ) I γ r 1) with hF_def
+  -- The goal is `F t₀ = F t₁` (after `set F`).
+  -- Degenerate case `t₀ = t₁`: trivial.
+  rcases eq_or_ne t₀ t₁ with rfl | hne
+  · rfl
+  -- The spanning closed interval `K = Icc (min t₀ t₁) (max t₀ t₁)`.
+  set K : Set ℝ := Set.Icc (min t₀ t₁) (max t₀ t₁) with hK_def
+  have hmin_lt_max : min t₀ t₁ < max t₀ t₁ := by
+    rcases lt_or_gt_of_ne hne with h | h
+    · rw [min_eq_left h.le, max_eq_right h.le]; exact h
+    · rw [min_eq_right h.le, max_eq_left h.le]; exact h
+  have hK_convex : Convex ℝ K := convex_Icc _ _
+  have hK_uniqueDiff : UniqueDiffOn ℝ K := uniqueDiffOn_Icc hmin_lt_max
+  -- On `K`, `F` has derivative `0` at every point (since `K ⊆ s`).
+  have hF_deriv : ∀ r ∈ K, HasDerivAt F 0 r := fun r hr =>
+    isGeodesicOn_speedSq_hasDerivAt_zero (I := I) g hs (hIcc hr) hγ hγ_C1
+  -- Hence `F` is differentiable on `K` and `fderivWithin ... = 0` on `K`.
+  have hF_diffOn : DifferentiableOn ℝ F K := fun r hr =>
+    (hF_deriv r hr).differentiableAt.differentiableWithinAt
+  have hF_fderivWithin : ∀ r ∈ K, fderivWithin ℝ F K r = 0 := by
+    intro r hr
+    rw [(hF_deriv r hr).hasFDerivAt.hasFDerivWithinAt.fderivWithin
+      (hK_uniqueDiff r hr)]
+    simp
+  -- Membership of `t₀, t₁` in `K`.
+  have ht₀_K : t₀ ∈ K := ⟨min_le_left _ _, le_max_left _ _⟩
+  have ht₁_K : t₁ ∈ K := ⟨min_le_right _ _, le_max_right _ _⟩
+  -- `F t₀ = F t₁` by convex-set constancy.
+  exact hK_convex.is_const_of_fderivWithin_eq_zero hF_diffOn hF_fderivWithin
+    ht₀_K ht₁_K
+
 variable [PseudoEMetricSpace M] [IsRiemannianManifold I M]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
@@ -656,7 +825,7 @@ theorem bm_c_gc_length_distance_bound_curve
     {γ : ℝ → M} {s t c : ℝ}
     (hc_nonneg : 0 ≤ c) (hst : s ≤ t)
     (hγ_smooth : ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ (Set.Icc s t))
-    (hSpeedBound : ∀ τ : ℝ,
+    (hSpeedBound : ∀ τ ∈ Set.Icc s t,
       ‖mfderiv 𝓘(ℝ, ℝ) I γ τ (1 : ℝ)‖ₑ ≤ ENNReal.ofReal c) :
     riemannianEDist I (γ s) (γ t) ≤ ENNReal.ofReal (c * (t - s)) := by
   -- `pathELength` bound by `c · (t - s)`: the velocity enorm integrand is
@@ -669,8 +838,8 @@ theorem bm_c_gc_length_distance_bound_curve
         ∫⁻ τ in Set.Icc s t,
             (fun τ => ‖mfderiv 𝓘(ℝ, ℝ) I γ τ (1 : ℝ)‖ₑ) τ
           ≤ ∫⁻ _ in Set.Icc s t, ENNReal.ofReal c := by
-      refine MeasureTheory.setLIntegral_mono' measurableSet_Icc (fun τ _ => ?_)
-      exact hSpeedBound τ
+      refine MeasureTheory.setLIntegral_mono' measurableSet_Icc (fun τ hτ => ?_)
+      exact hSpeedBound τ hτ
     have h_const :
         (∫⁻ _ in Set.Icc s t, ENNReal.ofReal c)
           = ENNReal.ofReal c * MeasureTheory.volume (Set.Icc s t) :=
@@ -717,9 +886,9 @@ Riemannian manifold this coincides with the underlying manifold topology,
 but that identification is a separate compatibility statement and is not
 needed for the convergence content here. -/
 theorem bm_c_gc_position_limit
-    {γ : ℝ → M} {b c : ℝ} (hc_nonneg : 0 ≤ c)
-    (hγ_smooth : ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ (Set.Iio b))
-    (hSpeedBound : ∀ τ : ℝ,
+    {γ : ℝ → M} {a b c : ℝ} (hab : a < b) (hc_nonneg : 0 ≤ c)
+    (hγ_smooth : ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ (Set.Ioo a b))
+    (hSpeedBound : ∀ τ ∈ Set.Ioo a b,
       ‖mfderiv 𝓘(ℝ, ℝ) I γ τ (1 : ℝ)‖ₑ ≤ ENNReal.ofReal c) :
     ∃ y : M, Tendsto γ (nhdsWithin b (Set.Iio b))
       (@nhds M PseudoEMetricSpace.toUniformSpace.toTopologicalSpace y) := by
@@ -739,8 +908,13 @@ theorem bm_c_gc_position_limit
       ENNReal.lt_iff_exists_real_btwn.mp hε
     have hδ₀_pos : 0 < δ₀ := ENNReal.ofReal_pos.mp hδ₀_ofReal_pos
     have hcc_pos : 0 < c + 1 := by linarith
-    set η : ℝ := δ₀ / (c + 1) with hη_def
-    have hη_pos : 0 < η := div_pos hδ₀_pos hcc_pos
+    -- `η` chosen so that `b - η > a` (so `Ioo (b - η) b ⊆ Ioo a b`) AND
+    -- `c · η < δ₀`.  Both hold for `η := min (δ₀/(c+1)) ((b - a)/2)`.
+    set η : ℝ := min (δ₀ / (c + 1)) ((b - a) / 2) with hη_def
+    have hη_le1 : η ≤ δ₀ / (c + 1) := min_le_left _ _
+    have hη_le2 : η ≤ (b - a) / 2 := min_le_right _ _
+    have hη_pos : 0 < η := lt_min (div_pos hδ₀_pos hcc_pos) (by linarith)
+    have hba_gt : a < b - η := by linarith
     -- The left interval `Ioo (b - η) b` lies in `𝓝[<] b`, so its `γ`-image
     -- lies in `map γ (𝓝[<] b)`.
     have hIoo_mem : Set.Ioo (b - η) b ∈ nhdsWithin b (Set.Iio b) := by
@@ -768,9 +942,10 @@ theorem bm_c_gc_position_limit
         · rw [hs_def, ht_def, min_eq_right h, max_eq_left h]; linarith [hsx.2]
       linarith
     have ht_sub_s_nn : 0 ≤ t - s := sub_nonneg.mpr hst
-    -- `Icc s t ⊆ Iio b`, so `γ` is `C¹` there (restriction of the global witness).
-    have hIcc_sub : Set.Icc s t ⊆ Set.Iio b := by
-      intro τ hτ; exact lt_of_le_of_lt hτ.2 ht_hi
+    -- `Icc s t ⊆ Ioo a b` (`a < b - η < s` and `t < b`), so `γ` is `C¹` there.
+    have hIcc_sub : Set.Icc s t ⊆ Set.Ioo a b := by
+      intro τ hτ
+      exact ⟨lt_of_lt_of_le (lt_trans hba_gt hs_lo) hτ.1, lt_of_le_of_lt hτ.2 ht_hi⟩
     have hγ_Icc : ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ (Set.Icc s t) :=
       hγ_smooth.mono hIcc_sub
     -- Length-distance bound on `Icc s t`.  The local `attribute [-instance]`
@@ -781,7 +956,8 @@ theorem bm_c_gc_position_limit
     have h_bound :
         riemannianEDist I (γ s) (γ t) ≤ ENNReal.ofReal (c * (t - s)) :=
       bm_c_gc_length_distance_bound_curve (I := I) (γ := γ) (s := s) (t := t)
-        (c := c) hc_nonneg hst hγ_Icc hSpeedBound
+        (c := c) hc_nonneg hst hγ_Icc
+        (fun τ hτ => hSpeedBound τ (hIcc_sub hτ))
     -- Convert `riemannianEDist` to `edist`.
     have h_edist_bound :
         edist (γ s) (γ t) ≤ ENNReal.ofReal (c * (t - s)) := by
@@ -797,12 +973,16 @@ theorem bm_c_gc_position_limit
       have h1 : c * (t - s) ≤ c * η :=
         mul_le_mul_of_nonneg_left ht_sub_s_lt.le hc_nonneg
       have h2 : c * η < δ₀ := by
-        rw [hη_def]
+        have h2a : c * η ≤ c * (δ₀ / (c + 1)) :=
+          mul_le_mul_of_nonneg_left hη_le1 hc_nonneg
         have hrw : c * (δ₀ / (c + 1)) = δ₀ * (c / (c + 1)) := by ring
-        rw [hrw]
         have hfrac : c / (c + 1) < 1 := by rw [div_lt_one hcc_pos]; linarith
-        have := mul_lt_mul_of_pos_left hfrac hδ₀_pos
-        rwa [mul_one] at this
+        have h2b : δ₀ * (c / (c + 1)) < δ₀ := by
+          have := mul_lt_mul_of_pos_left hfrac hδ₀_pos
+          rwa [mul_one] at this
+        calc c * η ≤ c * (δ₀ / (c + 1)) := h2a
+          _ = δ₀ * (c / (c + 1)) := hrw
+          _ < δ₀ := h2b
       linarith
     -- Chain to `< ε`.
     rw [h_edist_eq]
@@ -1405,11 +1585,11 @@ interior of the target; `γ s → y` and continuity of the chart map keep
 uniformly positive definite (`exists_chartGramQuad_lower_bound`), so the squared
 speed `chartGramQuad g y (u s)(V s) = ⟨γ', γ'⟩_g ≤ c²` yields `‖V s‖ ≤ c/√m`. -/
 theorem chartVelocity_bound_near_limit
-    (g : SmoothRiemannianMetric I M) (y : M) {γ : ℝ → M} {b c : ℝ}
-    (hc_nonneg : 0 ≤ c)
-    (hγ_mdiff : MDifferentiableOn 𝓘(ℝ, ℝ) I γ (Set.Iio b))
+    (g : SmoothRiemannianMetric I M) (y : M) {γ : ℝ → M} {a b c : ℝ}
+    (hab : a < b) (hc_nonneg : 0 ≤ c)
+    (hγ_mdiff : MDifferentiableOn 𝓘(ℝ, ℝ) I γ (Set.Ioo a b))
     (hy_lim : Tendsto γ (𝓝[<] b) (𝓝 y))
-    (hSpeedSq : ∀ s : ℝ,
+    (hSpeedSq : ∀ s ∈ Set.Ioo a b,
       (g.inner (γ s)) (mfderiv 𝓘(ℝ, ℝ) I γ s 1) (mfderiv 𝓘(ℝ, ℝ) I γ s 1) ≤ c ^ 2) :
     ∃ (ε K : ℝ) (S : Set E), 0 < ε ∧ IsCompact S ∧
       S ⊆ interior (extChartAt I y).target ∧
@@ -1467,16 +1647,24 @@ theorem chartVelocity_bound_near_limit
   obtain ⟨U, hU_nhds, hU_sub⟩ :=
     mem_nhdsWithin_iff_exists_mem_nhds_inter.mp
       (Filter.inter_mem hu_mem_ev hsrc_ev)
-  obtain ⟨δ, hδ_pos, hδ_sub⟩ := Metric.mem_nhds_iff.mp hU_nhds
+  obtain ⟨δ₀, hδ₀_pos, hδ₀_sub⟩ := Metric.mem_nhds_iff.mp hU_nhds
+  -- Shrink the radius so that the output interval `Ioo (b - δ) b` lies inside
+  -- `Ioo a b` (i.e. `b - δ > a`), keeping the chosen `δ ≤ δ₀`.
+  set δ : ℝ := min δ₀ ((b - a) / 2) with hδ_def
+  have hδ_pos : 0 < δ := lt_min hδ₀_pos (by linarith)
+  have hδ_le : δ ≤ δ₀ := min_le_left _ _
+  have hδ_le2 : δ ≤ (b - a) / 2 := min_le_right _ _
+  have hba_gt : a < b - δ := by linarith
   refine ⟨δ, K, S, hδ_pos, hS_compact, hS_sub, ?_⟩
   intro s hs
-  -- `s ∈ Ioo (b - δ) b ⟹ s ∈ ball b δ ∩ Iio b ⊆ U ∩ Iio b`.
-  have hs_ball : s ∈ Metric.ball b δ := by
+  -- `s ∈ Ioo (b - δ) b ⟹ s ∈ ball b δ₀ ∩ Ioo a b ⊆ U ∩ Iio b`.
+  have hs_ball : s ∈ Metric.ball b δ₀ := by
     rw [Metric.mem_ball, Real.dist_eq, abs_lt]
-    constructor <;> [linarith [hs.1]; linarith [hs.2]]
+    refine ⟨by linarith [hs.1, hδ_le], by linarith [hs.2]⟩
+  have hs_Ioo : s ∈ Set.Ioo a b := ⟨lt_trans hba_gt hs.1, hs.2⟩
   have hs_Iio : s ∈ Set.Iio b := hs.2
   have hs_both : chartCurve (I := I) y γ s ∈ S ∧ γ s ∈ (chartAt H y).source :=
-    hU_sub ⟨hδ_sub hs_ball, hs_Iio⟩
+    hU_sub ⟨hδ₀_sub hs_ball, hs_Iio⟩
   obtain ⟨hu_memS, hγ_src⟩ := hs_both
   refine ⟨?_, hu_memS⟩
   -- Velocity bound at `s`.
@@ -1487,7 +1675,7 @@ theorem chartVelocity_bound_near_limit
   -- The raw velocity is `symmL_y(γ s)(V)`.  `Iio b` is open, so the
   -- within-differentiability at `s ∈ Iio b` upgrades to plain differentiability.
   have hγ_s : MDifferentiableAt 𝓘(ℝ, ℝ) I γ s :=
-    (hγ_mdiff s hs_Iio).mdifferentiableAt (isOpen_Iio.mem_nhds hs_Iio)
+    (hγ_mdiff s hs_Ioo).mdifferentiableAt (isOpen_Ioo.mem_nhds hs_Ioo)
   have hraw := bm_c_raw_mfderiv_eq_symmL_fderiv_at (I := I) (γ := γ) (α := y)
     (s := s) hγ_s hγ_src
   rw [hVeq] at hraw
@@ -1507,7 +1695,7 @@ theorem chartVelocity_bound_near_limit
     rw [← hraw]
     rfl
   have hQ_le : chartGramQuad (I := I) g y (chartCurve (I := I) y γ s) V ≤ c ^ 2 := by
-    rw [hspeed_eq]; exact hSpeedSq s
+    rw [hspeed_eq]; exact hSpeedSq s hs_Ioo
   -- Lower bound: `m · ‖V‖² ≤ chartGramQuad ... ≤ c²`.
   have hlow : m * ‖V‖ ^ 2 ≤ c ^ 2 :=
     le_trans (hm_bound (chartCurve (I := I) y γ s) hu_memS V) hQ_le
@@ -2134,6 +2322,7 @@ def HasEndpointContinuation
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M) (b : ℝ) : Prop :=
   ∃ (η : ℝ → M) (δ : ℝ), 0 < δ ∧
     IsGeodesicOn (I := I) g η (Set.Ioo (-δ) δ) ∧
+    (∀ t ∈ Set.Ioo (-δ) δ, MDifferentiableAt 𝓘(ℝ, ℝ) I η t) ∧
     γ =ᶠ[nhdsWithin b (Set.Iio b)] (fun t => η (t - b))
 
 /-! ### Chart-phase ODE uniqueness with endpoint matching
@@ -2235,23 +2424,24 @@ autonomous chart-`y` phase ODE near `b`, share the common boundary datum
 `(φ_y y, w)` at the endpoint, and hence agree by left-endpoint ODE uniqueness. -/
 theorem hasEndpointContinuation_of_complete
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
-    (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {b c : ℝ}
+    (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {aL b c : ℝ}
+    (haLb : aL < b)
     (hc_nonneg : 0 ≤ c)
-    (hγ_smooth : ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ (Set.Iio b))
-    (hSpeedBound : ∀ τ : ℝ,
+    (hγ_smooth : ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ (Set.Ioo aL b))
+    (hSpeedBound : ∀ τ ∈ Set.Ioo aL b,
       ‖mfderiv 𝓘(ℝ, ℝ) I γ τ (1 : ℝ)‖ₑ ≤ ENNReal.ofReal c)
-    (hSpeedSq : ∀ s : ℝ,
+    (hSpeedSq : ∀ s ∈ Set.Ioo aL b,
       (g.inner (γ s)) (mfderiv 𝓘(ℝ, ℝ) I γ s 1) (mfderiv 𝓘(ℝ, ℝ) I γ s 1) ≤ c ^ 2)
-    (_hγ : IsGeodesicOn (I := I) g γ (Set.Iio b)) :
+    (_hγ : IsGeodesicOn (I := I) g γ (Set.Ioo aL b)) :
     HasEndpointContinuation (I := I) g γ b := by
   haveI : CompleteSpace E := FiniteDimensional.complete ℝ E
-  -- `γ` is mdifferentiable on `Iio b` and continuous there.
-  have hγ_mdiff_on : MDifferentiableOn 𝓘(ℝ, ℝ) I γ (Set.Iio b) :=
+  -- `γ` is mdifferentiable on `Ioo aL b` and continuous there.
+  have hγ_mdiff_on : MDifferentiableOn 𝓘(ℝ, ℝ) I γ (Set.Ioo aL b) :=
     hγ_smooth.mdifferentiableOn (by norm_num)
   -- Part 1 (proven): the full position limit `y` via completeness.
   obtain ⟨y, hy_metric⟩ :=
-    bm_c_gc_position_limit (I := I) (γ := γ) (b := b) (c := c)
-      hc_nonneg hγ_smooth hSpeedBound
+    bm_c_gc_position_limit (I := I) (γ := γ) (a := aL) (b := b) (c := c)
+      haLb hc_nonneg hγ_smooth hSpeedBound
   -- The position limit transported into the manifold topology (topology bridge).
   have hy_mfld : Tendsto γ (𝓝[<] b) (𝓝 y) :=
     tendsto_nhds_of_tendsto_metric_nhds (I := I) (l := 𝓝[<] b) (f := γ) (p := y)
@@ -2277,8 +2467,8 @@ theorem hasEndpointContinuation_of_complete
   -- Part 2: the chart-coordinate velocity is bounded near `b` and stays in a
   -- compact subset of the chart target.
   obtain ⟨ε, K₁, S, hε, hS_compact, hS_sub, hbound⟩ :=
-    chartVelocity_bound_near_limit (I := I) g y (γ := γ) (b := b) (c := c)
-      hc_nonneg hγ_mdiff_on hy_mfld hSpeedSq
+    chartVelocity_bound_near_limit (I := I) g y (γ := γ) (a := aL) (b := b) (c := c)
+      haLb hc_nonneg hγ_mdiff_on hy_mfld hSpeedSq
   -- A concrete left-interval `Ioo a₀ b` on which `γ s ∈ (chartAt H y).source`.
   obtain ⟨a₀, ha₀_lt, ha₀_src⟩ :
       ∃ a₀ < b, ∀ s ∈ Set.Ioo a₀ b, γ s ∈ (chartAt H y).source := by
@@ -2290,11 +2480,17 @@ theorem hasEndpointContinuation_of_complete
       rw [Metric.mem_ball, Real.dist_eq, abs_lt]
       exact ⟨by linarith [hs.1], by linarith [hs.2]⟩
     exact hU_sub ⟨hρ_sub hs_ball, hs.2⟩
-  -- The common working left-interval `Ioo a b` (`a := max (b - ε) a₀ < b`).
-  set a : ℝ := max (b - ε) a₀ with ha_def
-  have ha_lt_b : a < b := max_lt (by linarith) ha₀_lt
-  have ha_ge_ε : b - ε ≤ a := le_max_left _ _
-  have ha_ge_a₀ : a₀ ≤ a := le_max_right _ _
+  -- The common working left-interval `Ioo a b`
+  -- (`a := max (max (b - ε) a₀) aL < b`); the extra `aL` factor keeps
+  -- `Ioo a b ⊆ Ioo aL b`, where the seed hypotheses live.
+  set a : ℝ := max (max (b - ε) a₀) aL with ha_def
+  have ha_lt_b : a < b := max_lt (max_lt (by linarith) ha₀_lt) haLb
+  have ha_ge_ε : b - ε ≤ a := le_trans (le_max_left _ _) (le_max_left _ _)
+  have ha_ge_a₀ : a₀ ≤ a := le_trans (le_max_right _ _) (le_max_left _ _)
+  have ha_ge_aL : aL ≤ a := le_max_right _ _
+  -- `Ioo a b ⊆ Ioo aL b` (used to feed the seed hypotheses on `Ioo aL b`).
+  have hsub_aL : Set.Ioo a b ⊆ Set.Ioo aL b :=
+    fun s hs => ⟨lt_of_le_of_lt ha_ge_aL hs.1, hs.2⟩
   -- On `Ioo a b`: `γ s` in the chart source, in the velocity-bound interval.
   have hsrc_on : ∀ s ∈ Set.Ioo a b, γ s ∈ (chartAt H y).source :=
     fun s hs => ha₀_src s ⟨lt_of_le_of_lt ha_ge_a₀ hs.1, hs.2⟩
@@ -2306,19 +2502,19 @@ theorem hasEndpointContinuation_of_complete
   -- `γ` is continuous at each `s ∈ Ioo a b` (open subset of `Iio b`).
   have hγ_contAt : ∀ s ∈ Set.Ioo a b, ContinuousAt γ s := by
     intro s hs
-    have hs_Iio : s ∈ Set.Iio b := hs.2
-    exact ((hγ_smooth.continuousOn).continuousAt (isOpen_Iio.mem_nhds hs_Iio))
+    have hs_Ioo : s ∈ Set.Ioo aL b := hsub_aL hs
+    exact ((hγ_smooth.continuousOn).continuousAt (isOpen_Ioo.mem_nhds hs_Ioo))
   -- `γ` is mdifferentiable at each `s ∈ Ioo a b`.
   have hγ_mdiffAt : ∀ s ∈ Set.Ioo a b, MDifferentiableAt 𝓘(ℝ, ℝ) I γ s := by
     intro s hs
-    have hs_Iio : s ∈ Set.Iio b := hs.2
-    exact (hγ_mdiff_on s hs_Iio).mdifferentiableAt (isOpen_Iio.mem_nhds hs_Iio)
+    have hs_Ioo : s ∈ Set.Ioo aL b := hsub_aL hs
+    exact (hγ_mdiff_on s hs_Ioo).mdifferentiableAt (isOpen_Ioo.mem_nhds hs_Ioo)
   -- The chart-`y` second-order ODE for `γ` at each `s ∈ Ioo a b`.
   have hODE_γ : ∀ s ∈ Set.Ioo a b,
       HasDerivAt (deriv u)
         (- chartChristoffelContraction (I := I) g y (deriv u s) (deriv u s) (u s)) s := by
     intro s hs
-    have hgeq : HasGeodesicEquationAt (I := I) g γ s := _hγ s hs.2
+    have hgeq : HasGeodesicEquationAt (I := I) g γ s := _hγ s (hsub_aL hs)
     simpa [hu_def] using
       hasGeodesicEquationAt_fixedChart_hasDerivAt_velocity (I := I) g y
         (γ := γ) (t := s) (hγ_contAt s hs) (hsrc_on s hs) hgeq
@@ -2349,7 +2545,7 @@ theorem hasEndpointContinuation_of_complete
     (trivializationAt E (TangentSpace I) y).symmL ℝ y wγ with hw_def
   obtain ⟨η, δ, hδ, hη0, hηcont, hη_mfd, hη_mdiffOn, hη_srcOn, hη_geo⟩ :=
     exists_isGeodesicOn_Ioo_at_velocity (I := I) g y w
-  refine ⟨η, δ, hδ, hη_geo, ?_⟩
+  refine ⟨η, δ, hδ, hη_geo, hη_mdiffOn, ?_⟩
   have hδ_mem0 : (0 : ℝ) ∈ Set.Ioo (-δ) δ := ⟨by linarith, hδ⟩
   -- The chart-`y` velocity of `η` at `0` equals `wγ` (round-trip through the
   -- trivialisation at the chart centre `y`).
@@ -2729,7 +2925,7 @@ theorem isGeodesicOn_Iio_extend
     ∃ (γ' : ℝ → M) (b' : ℝ), b < b' ∧
       IsGeodesicOn (I := I) g γ' (Set.Iio b') ∧
       (∀ t < b, γ' t = γ t) := by
-  obtain ⟨η, δ, hδ, hη, hmatch⟩ := hcont
+  obtain ⟨η, δ, hδ, hη, _hη_mdiff, hmatch⟩ := hcont
   obtain ⟨γ', hgeo', hagree⟩ :=
     isGeodesicOn_extends_past_finite_endpoint (I := I) g hδ hγ hη hmatch
   exact ⟨γ', b + δ, by linarith, hgeo', hagree⟩
@@ -3104,9 +3300,9 @@ theorem isGeodesicOn_Ici_of_complete
       (∀ t < b₀, t < b → γ t = γ₀ t) →
       ∃ c : ℝ, 0 ≤ c ∧
         ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ (Set.Iio b) ∧
-        (∀ τ : ℝ,
+        (∀ τ ∈ Set.Iio b,
           ‖mfderiv 𝓘(ℝ, ℝ) I γ τ (1 : ℝ)‖ₑ ≤ ENNReal.ofReal c) ∧
-        (∀ s : ℝ,
+        (∀ s ∈ Set.Iio b,
           (g.inner (γ s)) (mfderiv 𝓘(ℝ, ℝ) I γ s 1)
               (mfderiv 𝓘(ℝ, ℝ) I γ s 1) ≤ c ^ 2)) :
     ∃ γ : ℝ → M,
@@ -3117,8 +3313,322 @@ theorem isGeodesicOn_Ici_of_complete
   refine isGeodesicOn_Ici_of_endpointContinuation (I := I) g hb₀ hγ₀ ?_
   intro γ b hb hγ hagree
   obtain ⟨c, hc_nonneg, hγ_smooth, hSpeedBound, hSpeedSq⟩ := hreg γ b hb hγ hagree
-  exact hasEndpointContinuation_of_complete (I := I) g hc_nonneg hγ_smooth
-    hSpeedBound hSpeedSq hγ
+  -- Restrict the `Iio b` analytic data to the bounded interval `Ioo (b - 1) b`,
+  -- which is all the (left-neighbourhood-only) endpoint-continuation producer
+  -- needs.
+  have hsub : Set.Ioo (b - 1) b ⊆ Set.Iio b := fun s hs => hs.2
+  exact hasEndpointContinuation_of_complete (I := I) g (by linarith : b - 1 < b)
+    hc_nonneg (hγ_smooth.mono hsub) (fun τ hτ => hSpeedBound τ (hsub hτ))
+    (fun s hs => hSpeedSq s (hsub hs)) (hγ.mono hsub)
+
+/-! ### `Ioo`-seeded intrinsic right-completeness
+
+The endpoint-continuation engine above is seeded by a geodesic on a
+left-*unbounded* interval `Iio b₀`.  The local seed
+`exists_isGeodesicOn_Ioo_at_velocity` only delivers a geodesic on a *bounded*
+interval `Ioo (-δ) δ`.  The bounded-left analogue developed here keeps a fixed
+left endpoint `a₀` throughout: extension records are geodesics on `Ioo a₀ b`,
+the single-step extension is the bounded-left glue `isGeodesicOn_glue_at_limit_Ioo`,
+and the colimit is a geodesic on the right-unbounded interval `Ioi a₀`. -/
+
+/-- **Single-step bounded-left right-extension.** A geodesic on a bounded
+interval `Ioo a₀ b` (`a₀ < b`) with endpoint-continuation data at `b` extends to
+a geodesic on `Ioo a₀ b'` for some `b' > b`, agreeing with the original below
+`b`.  Bounded-left analogue of `isGeodesicOn_Iio_extend`, built on the
+bounded-left glue. -/
+theorem isGeodesicOn_Ioo_extend
+    (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {a₀ b : ℝ} (ha₀b : a₀ < b)
+    (hγ : IsGeodesicOn (I := I) g γ (Set.Ioo a₀ b))
+    (hγ_cont : ContinuousOn γ (Set.Ioo a₀ b))
+    (hcont : HasEndpointContinuation (I := I) g γ b) :
+    ∃ (γ' : ℝ → M) (b' : ℝ), b < b' ∧
+      IsGeodesicOn (I := I) g γ' (Set.Ioo a₀ b') ∧
+      ContinuousOn γ' (Set.Ioo a₀ b') ∧
+      (∀ t < b, γ' t = γ t) := by
+  haveI : CompleteSpace E := FiniteDimensional.complete ℝ E
+  obtain ⟨η, δ, hδ, hη, hη_mdiff, hmatch⟩ := hcont
+  set G : ℝ → M := fun t => if t < b then γ t else η (t - b) with hG_def
+  -- `η` is continuous on `Ioo (-δ) δ` (from pointwise mdifferentiability).
+  have hη_cont : ContinuousOn η (Set.Ioo (-δ) δ) :=
+    fun t ht => (hη_mdiff t ht).continuousAt.continuousWithinAt
+  -- The shifted continuation `ηb t := η (t - b)`, continuous on `Ioo (b - δ) (b + δ)`.
+  have hηb_cont : ContinuousOn (fun t => η (t - b)) (Set.Ioo (b - δ) (b + δ)) := by
+    have hshift : ContinuousOn (fun t : ℝ => t - b) (Set.Ioo (b - δ) (b + δ)) :=
+      (continuous_sub_right b).continuousOn
+    have hmaps : Set.MapsTo (fun t : ℝ => t - b) (Set.Ioo (b - δ) (b + δ))
+        (Set.Ioo (-δ) δ) := fun t ht => ⟨by linarith [ht.1], by linarith [ht.2]⟩
+    exact hη_cont.comp hshift hmaps
+  -- Continuity of the glued curve `G` on `Ioo a₀ (b + δ)`.
+  have hG_cont : ContinuousOn G (Set.Ioo a₀ (b + δ)) := by
+    intro t ht
+    rcases lt_trichotomy t b with hlt | heq | hgt
+    · -- `t < b`: `G = γ` on `Ioo a₀ b` (a nbhd of `t` within `Ioo a₀ (b+δ)`).
+      have htγ : t ∈ Set.Ioo a₀ b := ⟨ht.1, hlt⟩
+      have hGγ : G =ᶠ[𝓝[Set.Ioo a₀ (b + δ)] t] γ := by
+        have hnhds : Set.Iio b ∈ 𝓝 t := isOpen_Iio.mem_nhds hlt
+        filter_upwards [nhdsWithin_le_nhds hnhds] with s hs
+        simp only [hG_def, if_pos (mem_Iio.mp hs)]
+      have hγ_at : ContinuousWithinAt γ (Set.Ioo a₀ (b + δ)) t := by
+        refine (hγ_cont t htγ).mono_of_mem_nhdsWithin ?_
+        exact mem_nhdsWithin_of_mem_nhds (isOpen_Ioo.mem_nhds htγ)
+      refine hγ_at.congr_of_eventuallyEq hGγ ?_
+      simp only [hG_def, if_pos hlt]
+    · -- `t = b`: left side via match (= shifted η), right side directly η.
+      subst heq
+      have hG_eq_ηb : G =ᶠ[𝓝[Set.Ioo a₀ (t + δ)] t] (fun s => η (s - t)) := by
+        rw [eventuallyEq_nhdsWithin_iff]
+        -- Split into `s < t` (use match) and `s ≥ t` (use def).
+        have hleft : ∀ᶠ s in 𝓝[<] t, G s = η (s - t) := by
+          have hmatch' : γ =ᶠ[𝓝[<] t] (fun s => η (s - t)) := hmatch
+          have hGγ : G =ᶠ[𝓝[<] t] γ := by
+            filter_upwards [self_mem_nhdsWithin] with s hs
+            simp only [hG_def, if_pos (mem_Iio.mp hs)]
+          exact hGγ.trans hmatch'
+        have hright : ∀ᶠ s in 𝓝[≥] t, G s = η (s - t) := by
+          filter_upwards [self_mem_nhdsWithin] with s hs
+          simp only [hG_def, if_neg (not_lt.mpr (mem_Ici.mp hs))]
+        have hfull : G =ᶠ[𝓝 t] (fun s => η (s - t)) := by
+          rw [← nhdsLT_sup_nhdsGE t, Filter.EventuallyEq, eventually_sup]
+          exact ⟨hleft, hright⟩
+        filter_upwards [hfull] with s hs _ using hs
+      have hηb_at : ContinuousWithinAt (fun s => η (s - t)) (Set.Ioo a₀ (t + δ)) t := by
+        have htmem : t ∈ Set.Ioo (t - δ) (t + δ) := ⟨by linarith, by linarith⟩
+        refine (hηb_cont t htmem).mono_of_mem_nhdsWithin ?_
+        exact mem_nhdsWithin_of_mem_nhds (isOpen_Ioo.mem_nhds htmem)
+      refine hηb_at.congr_of_eventuallyEq hG_eq_ηb ?_
+      simp only [hG_def, if_neg (lt_irrefl t), sub_self]
+    · -- `t > b`: `G = η(·-b)` near `t`.
+      have htηb : t ∈ Set.Ioo (b - δ) (b + δ) := ⟨by linarith, ht.2⟩
+      have hGηb : G =ᶠ[𝓝[Set.Ioo a₀ (b + δ)] t] (fun s => η (s - b)) := by
+        have hnhds : Set.Ioi b ∈ 𝓝 t := isOpen_Ioi.mem_nhds hgt
+        filter_upwards [nhdsWithin_le_nhds hnhds] with s hs
+        simp only [hG_def, if_neg (not_lt.mpr (le_of_lt (mem_Ioi.mp hs)))]
+      refine ContinuousWithinAt.congr_of_eventuallyEq ?_ hGηb ?_
+      · refine (hηb_cont t htηb).mono_of_mem_nhdsWithin ?_
+        exact mem_nhdsWithin_of_mem_nhds (isOpen_Ioo.mem_nhds htηb)
+      · simp only [hG_def, if_neg (not_lt.mpr (le_of_lt hgt))]
+  refine ⟨G, b + δ, by linarith,
+    Geodesic.isGeodesicOn_glue_at_limit_Ioo (I := I) g hδ ha₀b hγ hη hmatch,
+    hG_cont, ?_⟩
+  intro t ht
+  simp only [hG_def, if_pos ht]
+
+/-- **`Ioo`-seeded intrinsic right-completeness.** Suppose that for every
+geodesic on a bounded interval `Ioo a₀ b` (`b > 0`) extending the initial
+geodesic `γ₀` (which is a geodesic on `Ioo a₀ b₀`), endpoint-continuation data is
+available at `b`.  Then the initial geodesic extends to a geodesic on the
+right-unbounded interval `Ioi a₀`, agreeing with `γ₀` below `b₀`.
+
+Bounded-left analogue of `isGeodesicOn_Ici_of_endpointContinuation`: the
+extension records are geodesics on `Ioo a₀ b` with the fixed left endpoint `a₀`,
+ordered by interval inclusion plus agreement below the shorter endpoint, and the
+union over a maximal chain is the colimit geodesic on `Ioi a₀`.  Each step is the
+bounded-left `isGeodesicOn_Ioo_extend`; the maximal-chain colimit assembly is
+identical to the `Iio` engine since both only inspect left-neighbourhoods of the
+growing right endpoint. -/
+theorem isGeodesicOn_Ioi_of_endpointContinuation
+    (g : SmoothRiemannianMetric I M) {γ₀ : ℝ → M} {a₀ b₀ : ℝ}
+    (ha₀ : a₀ < 0) (hb₀ : 0 < b₀)
+    (hγ₀ : IsGeodesicOn (I := I) g γ₀ (Set.Ioo a₀ b₀))
+    (hγ₀_cont : ContinuousOn γ₀ (Set.Ioo a₀ b₀))
+    (hcont : ∀ (γ : ℝ → M) (b : ℝ), 0 < b →
+      IsGeodesicOn (I := I) g γ (Set.Ioo a₀ b) →
+      ContinuousOn γ (Set.Ioo a₀ b) →
+      (∀ t < b₀, t < b → γ t = γ₀ t) →
+      HasEndpointContinuation (I := I) g γ b) :
+    ∃ γ : ℝ → M,
+      IsGeodesicOn (I := I) g γ (Set.Ioi a₀) ∧
+      ContinuousOn γ (Set.Ioi a₀) ∧
+      (∀ t, t < b₀ → γ t = γ₀ t) := by
+  classical
+  haveI : CompleteSpace E := FiniteDimensional.complete ℝ E
+  have ha₀b₀ : a₀ < b₀ := lt_trans ha₀ hb₀
+  -- Records: endpoint `b ≥ b₀`, geodesic + continuous on `Ioo a₀ b`, agreeing
+  -- with `γ₀` below `b₀`.
+  let Good : (ℝ × (ℝ → M)) → Prop := fun br =>
+    b₀ ≤ br.1 ∧ IsGeodesicOn (I := I) g br.2 (Set.Ioo a₀ br.1) ∧
+      ContinuousOn br.2 (Set.Ioo a₀ br.1) ∧
+      (∀ t < b₀, br.2 t = γ₀ t)
+  let Rec := {br : ℝ × (ℝ → M) // Good br}
+  -- Order: longer interval, agreeing below the shorter endpoint.
+  let R : Rec → Rec → Prop := fun a a' =>
+    a.1.1 ≤ a'.1.1 ∧ (∀ t < a.1.1, a'.1.2 t = a.1.2 t)
+  have hGood_r₀ : Good (b₀, γ₀) := ⟨le_refl _, hγ₀, hγ₀_cont, fun t _ => rfl⟩
+  let r₀ : Rec := ⟨(b₀, γ₀), hGood_r₀⟩
+  -- The singleton chain `{r₀}` extends to a maximal chain `Mc`.
+  have hchain0 : IsChain R {r₀} := by
+    intro a ha b hb hab
+    rw [Set.mem_singleton_iff] at ha hb; exact absurd (ha.trans hb.symm) hab
+  obtain ⟨Mc, hMc_max, hMc_sub⟩ := hchain0.exists_maxChain
+  have hr₀_mem : r₀ ∈ Mc := hMc_sub (Set.mem_singleton _)
+  have hMc_chain : IsChain R Mc := hMc_max.1
+  -- Consistency: chain members agree wherever both are defined.
+  have hconsist : ∀ a ∈ Mc, ∀ a' ∈ Mc, ∀ t, t < a.1.1 → t < a'.1.1 →
+      a.1.2 t = a'.1.2 t := by
+    intro a ha a' ha' t hta hta'
+    rcases eq_or_ne a a' with rfl | hne
+    · rfl
+    · rcases hMc_chain ha ha' hne with hR | hR
+      · exact (hR.2 t hta).symm
+      · exact hR.2 t hta'
+  -- The union curve.
+  let Γ : ℝ → M := fun t =>
+    if h : ∃ a : Rec, a ∈ Mc ∧ t < a.1.1 then (h.choose.1.2 t) else γ₀ t
+  -- On a chain member's interval, `Γ` equals that member's curve.
+  have hΓ_val : ∀ a ∈ Mc, ∀ t, t < a.1.1 → Γ t = a.1.2 t := by
+    intro a ha t hta
+    have hex : ∃ a : Rec, a ∈ Mc ∧ t < a.1.1 := ⟨a, ha, hta⟩
+    change (if h : ∃ a : Rec, a ∈ Mc ∧ t < a.1.1 then (h.choose.1.2 t)
+      else γ₀ t) = a.1.2 t
+    rw [dif_pos hex]
+    obtain ⟨hb_mem, hb_lt⟩ := hex.choose_spec
+    exact hconsist _ hb_mem a ha t hb_lt hta
+  -- `Γ` agrees with `γ₀` below `b₀`.
+  have hΓ_agree : ∀ t, t < b₀ → Γ t = γ₀ t := by
+    intro t ht
+    have := hΓ_val r₀ hr₀_mem t ht
+    simpa [r₀] using this
+  -- `Γ` satisfies the geodesic equation at each `t` with `a₀ < t` below a chain
+  -- endpoint.
+  have hΓ_geo_at : ∀ a ∈ Mc, ∀ t, a₀ < t → t < a.1.1 →
+      HasGeodesicEquationAt (I := I) g Γ t := by
+    intro a ha t hta_lo hta
+    have hIoo_nhds : Set.Ioo a₀ a.1.1 ∈ 𝓝 t := isOpen_Ioo.mem_nhds ⟨hta_lo, hta⟩
+    have heq : Γ =ᶠ[𝓝 t] a.1.2 := by
+      filter_upwards [hIoo_nhds] with s hs
+      exact hΓ_val a ha s hs.2
+    exact hasGeodesicEquationAt_congr_of_eventuallyEq (g := g) heq
+      (a.2.2.1 t ⟨hta_lo, hta⟩)
+  -- `Γ` is continuous at each `t` with `a₀ < t` below a chain endpoint.
+  have hΓ_cont_at : ∀ a ∈ Mc, ∀ t, a₀ < t → t < a.1.1 →
+      ContinuousWithinAt Γ (Set.Ioi a₀) t := by
+    intro a ha t hta_lo hta
+    have htmem : t ∈ Set.Ioo a₀ a.1.1 := ⟨hta_lo, hta⟩
+    -- `Γ` agrees with the member's curve on the open `Ioo a₀ a.1.1` near `t`.
+    have heq : Γ =ᶠ[𝓝[Set.Ioi a₀] t] a.1.2 := by
+      have hnhds : Set.Iio a.1.1 ∈ 𝓝 t := isOpen_Iio.mem_nhds hta
+      filter_upwards [nhdsWithin_le_nhds hnhds] with s hs
+      exact hΓ_val a ha s (mem_Iio.mp hs)
+    -- The member's curve is continuous within `Ioi a₀` at `t`.
+    have hmem_at : ContinuousWithinAt a.1.2 (Set.Ioi a₀) t := by
+      refine ((a.2.2.2.1 t htmem)).mono_of_mem_nhdsWithin ?_
+      exact mem_nhdsWithin_of_mem_nhds (isOpen_Ioo.mem_nhds htmem)
+    exact hmem_at.congr_of_eventuallyEq heq (hΓ_val a ha t hta)
+  -- The endpoint set.
+  let S : Set ℝ := (fun a : Rec => a.1.1) '' Mc
+  have hS_ne : S.Nonempty := ⟨b₀, ⟨r₀, hr₀_mem, rfl⟩⟩
+  by_cases hbdd : BddAbove S
+  · -- Bounded endpoints contradict maximality of `Mc`.
+    exfalso
+    let s := sSup S
+    have hb₀_le_s : b₀ ≤ s := le_csSup hbdd ⟨r₀, hr₀_mem, rfl⟩
+    have hs_pos : 0 < s := lt_of_lt_of_le hb₀ hb₀_le_s
+    have ha₀_lt_s : a₀ < s := lt_of_lt_of_le ha₀b₀ hb₀_le_s
+    have hΓ_geo_Ioos : IsGeodesicOn (I := I) g Γ (Set.Ioo a₀ s) := by
+      intro t ht
+      obtain ⟨b, hbS, htb⟩ := exists_lt_of_lt_csSup hS_ne ht.2
+      obtain ⟨a, ha, hab⟩ := hbS
+      exact hΓ_geo_at a ha t ht.1 (lt_of_lt_of_eq htb hab.symm)
+    have hΓ_cont_Ioos : ContinuousOn Γ (Set.Ioo a₀ s) := by
+      intro t ht
+      obtain ⟨b, hbS, htb⟩ := exists_lt_of_lt_csSup hS_ne ht.2
+      obtain ⟨a, ha, hab⟩ := hbS
+      have hcw := hΓ_cont_at a ha t ht.1 (lt_of_lt_of_eq htb hab.symm)
+      exact hcw.mono (fun u hu => hu.1)
+    have hagree_s : ∀ t < b₀, t < s → Γ t = γ₀ t := fun t ht _ => hΓ_agree t ht
+    have hcont_s : HasEndpointContinuation (I := I) g Γ s :=
+      hcont Γ s hs_pos hΓ_geo_Ioos hΓ_cont_Ioos hagree_s
+    obtain ⟨Γ', s', hss', hΓ'_geo, hΓ'_cont, hΓ'_agree⟩ :=
+      isGeodesicOn_Ioo_extend (I := I) g ha₀_lt_s hΓ_geo_Ioos hΓ_cont_Ioos hcont_s
+    have hGood' : Good (s', Γ') := by
+      refine ⟨le_trans hb₀_le_s hss'.le, hΓ'_geo, hΓ'_cont, ?_⟩
+      intro t ht
+      have ht_s : t < s := lt_of_lt_of_le ht hb₀_le_s
+      change Γ' t = γ₀ t
+      rw [hΓ'_agree t ht_s]; exact hΓ_agree t ht
+    let r' : Rec := ⟨(s', Γ'), hGood'⟩
+    have hr'_notMem : r' ∉ Mc := by
+      intro hmem
+      have hmemS : s' ∈ S := ⟨r', hmem, rfl⟩
+      exact absurd (le_csSup hbdd hmemS) (not_le.mpr hss')
+    have hchain' : IsChain R (insert r' Mc) := by
+      refine hMc_chain.insert ?_
+      intro a ha _
+      right
+      have ha_mem_S : a.1.1 ∈ S := ⟨a, ha, rfl⟩
+      have ha_le_s : a.1.1 ≤ s := le_csSup hbdd ha_mem_S
+      refine ⟨?_, ?_⟩
+      · change a.1.1 ≤ s'
+        exact le_trans ha_le_s hss'.le
+      · intro t hta
+        have ht_s : t < s := lt_of_lt_of_le hta ha_le_s
+        change Γ' t = a.1.2 t
+        rw [hΓ'_agree t ht_s]; exact hΓ_val a ha t hta
+    have heq_chain : Mc = insert r' Mc :=
+      hMc_max.2 hchain' (Set.subset_insert _ _)
+    exact hr'_notMem (heq_chain ▸ Set.mem_insert _ _)
+  · -- Unbounded endpoints: `Γ` is a geodesic (and continuous) on all of `Ioi a₀`.
+    refine ⟨Γ, ?_, ?_, hΓ_agree⟩
+    · intro t ht
+      rw [not_bddAbove_iff] at hbdd
+      obtain ⟨b, hbS, htb⟩ := hbdd t
+      obtain ⟨a, ha, hab⟩ := hbS
+      exact hΓ_geo_at a ha t ht (lt_of_lt_of_eq htb hab.symm)
+    · intro t ht
+      rw [not_bddAbove_iff] at hbdd
+      obtain ⟨b, hbS, htb⟩ := hbdd t
+      obtain ⟨a, ha, hab⟩ := hbS
+      exact hΓ_cont_at a ha t ht (lt_of_lt_of_eq htb hab.symm)
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- **`Ioo`-seeded forward geodesic completeness from metric completeness.**
+A moving-foot geodesic `γ₀` on a bounded interval `Ioo a₀ b₀` (`a₀ < 0 < b₀`)
+extends, across charts, to a geodesic on the right-unbounded interval `Ioi a₀`,
+agreeing with `γ₀` below `b₀`.
+
+This is the bounded-left analogue of `isGeodesicOn_Ici_of_complete`, seeded by
+the *bounded* interval `Ioo a₀ b₀` produced by the local seed
+`exists_isGeodesicOn_Ioo_at_velocity` (rather than a left-unbounded `Iio b₀`).
+The per-extension analytic data `hreg` is the minimal separable regularity a
+constant-speed geodesic supplies: `C¹`-in-time on `Ioo a₀ b`, with constant
+`g`-speed bounded by a nonnegative `c`.  Metric completeness furnishes
+endpoint-continuation data at each finite right endpoint `b`
+(`hasEndpointContinuation_of_complete`, in its bounded-left form), and the colimit
+assembly (`isGeodesicOn_Ioi_of_endpointContinuation`) produces the global forward
+geodesic. -/
+theorem isGeodesicOn_Ici_of_complete_Ioo
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M) {γ₀ : ℝ → M} {a₀ b₀ : ℝ}
+    (ha₀ : a₀ < 0) (hb₀ : 0 < b₀)
+    (hγ₀ : IsGeodesicOn (I := I) g γ₀ (Set.Ioo a₀ b₀))
+    (hreg : ∀ (γ : ℝ → M) (b : ℝ), 0 < b → IsGeodesicOn (I := I) g γ (Set.Ioo a₀ b) →
+      (∀ t, a₀ < t → t < b₀ → t < b → γ t = γ₀ t) →
+      ∃ c : ℝ, 0 ≤ c ∧ ContMDiffOn 𝓘(ℝ,ℝ) I 1 γ (Set.Ioo a₀ b) ∧
+        (∀ τ ∈ Set.Ioo a₀ b, ‖mfderiv 𝓘(ℝ,ℝ) I γ τ 1‖ₑ ≤ ENNReal.ofReal c) ∧
+        (∀ s ∈ Set.Ioo a₀ b, (g.inner (γ s)) (mfderiv 𝓘(ℝ,ℝ) I γ s 1)
+          (mfderiv 𝓘(ℝ,ℝ) I γ s 1) ≤ c^2)) :
+    ∃ γ : ℝ → M, IsGeodesicOn (I := I) g γ (Set.Ioi a₀) ∧
+      (∀ t, t < b₀ → γ t = γ₀ t) := by
+  -- The seed `γ₀` is continuous on `Ioo a₀ b₀` (from its `hreg` regularity at
+  -- the seed endpoint `b₀`).
+  have hγ₀_cont : ContinuousOn γ₀ (Set.Ioo a₀ b₀) := by
+    obtain ⟨_, _, hγ₀_smooth, _, _⟩ := hreg γ₀ b₀ hb₀ hγ₀ (fun t _ _ _ => rfl)
+    exact hγ₀_smooth.continuousOn
+  -- Endpoint-continuation provider from `hreg` + metric completeness.
+  have hcont : ∀ (γ : ℝ → M) (b : ℝ), 0 < b →
+      IsGeodesicOn (I := I) g γ (Set.Ioo a₀ b) →
+      ContinuousOn γ (Set.Ioo a₀ b) →
+      (∀ t < b₀, t < b → γ t = γ₀ t) →
+      HasEndpointContinuation (I := I) g γ b := by
+    intro γ b hb hγ _hγ_cont hagree
+    obtain ⟨c, hc_nonneg, hγ_smooth, hSpeedBound, hSpeedSq⟩ :=
+      hreg γ b hb hγ (fun t _ ht_b₀ ht_b => hagree t ht_b₀ ht_b)
+    exact hasEndpointContinuation_of_complete (I := I) g (lt_trans ha₀ hb)
+      hc_nonneg hγ_smooth hSpeedBound hSpeedSq hγ
+  obtain ⟨γ, hgeo, _hcontΓ, hagreeΓ⟩ :=
+    isGeodesicOn_Ioi_of_endpointContinuation (I := I) g ha₀ hb₀ hγ₀ hγ₀_cont hcont
+  exact ⟨γ, hgeo, hagreeΓ⟩
 
 end GeodesicCompleteness
 

@@ -1042,6 +1042,71 @@ theorem isGeodesicOn_glue_at_limit [I.Boundaryless] [CompleteSpace E]
     refine HasGeodesicEquationAt.congr_of_eventuallyEq_at (γ' := ηT) ?_ hGηT_t hηeq
     simp only [hG, hηT]; rw [if_neg (not_lt.mpr (le_of_lt hgt))]
 
+/-- **Gluing two geodesic arcs at a matching limit point, bounded-left form.**
+Let `γ` be a geodesic on the bounded interval `Ioo a T` (`a < T`) and `η` a
+geodesic on `Ioo (-δ) δ` (`δ > 0`), and suppose `γ` agrees with the shifted
+right-arc `s ↦ η (s - T)` on a punctured-left neighbourhood of `T`.  Then the
+curve obtained by following `γ` left of `T` and the shifted `η` at and right of
+`T` is a geodesic on `Ioo a (T + δ)`.
+
+This is the left-bounded analogue of `isGeodesicOn_glue_at_limit`, needed by the
+`Ioo`-seeded forward-completeness engine where the left endpoint of every
+extension record is held fixed at a finite `a`.  The proof is identical to the
+`Iio` glue except that the `t < T` branch additionally records `a < t` (from
+`t ∈ Ioo a (T + δ)`), so that the left-arc geodesic equation `hγ` (now only on
+`Ioo a T`) applies. -/
+theorem isGeodesicOn_glue_at_limit_Ioo [I.Boundaryless] [CompleteSpace E]
+    (g : SmoothRiemannianMetric I M)
+    {γ η : ℝ → M} {a T δ : ℝ} (hδ : 0 < δ) (haT : a < T)
+    (hγ : IsGeodesicOn (I := I) g γ (Set.Ioo a T))
+    (hη : IsGeodesicOn (I := I) g η (Set.Ioo (-δ) δ))
+    (hmatch : γ =ᶠ[nhdsWithin T (Set.Iio T)] (fun t => η (t - T))) :
+    IsGeodesicOn (I := I) g (fun t => if t < T then γ t else η (t - T))
+      (Set.Ioo a (T + δ)) := by
+  classical
+  set G : ℝ → M := fun t => if t < T then γ t else η (t - T) with hG
+  set ηT : ℝ → M := fun s => η (s - T) with hηT
+  -- `G` agrees with `γ` on `𝓝[<] T` and with `ηT` on `𝓝[≥] T`.
+  have hGγ_lt : G =ᶠ[𝓝[<] T] γ :=
+    Filter.eventually_of_mem self_mem_nhdsWithin
+      (fun t ht => by simp only [hG]; rw [if_pos (mem_Iio.mp ht)])
+  have hGηT_ge : G =ᶠ[𝓝[≥] T] ηT :=
+    Filter.eventually_of_mem self_mem_nhdsWithin
+      (fun t ht => by simp only [hG, hηT]; rw [if_neg (not_lt.mpr (mem_Ici.mp ht))])
+  have hGηT_lt : G =ᶠ[𝓝[<] T] ηT := hGγ_lt.trans hmatch
+  have hGηT_T : G =ᶠ[𝓝 T] ηT := by
+    rw [← nhdsLT_sup_nhdsGE T, Filter.EventuallyEq, eventually_sup]
+    exact ⟨hGηT_lt, hGηT_ge⟩
+  -- Pointwise check of the geodesic equation on `Ioo a (T + δ)`.
+  intro t ht
+  obtain ⟨ht_lo, ht_hi⟩ := ht
+  rcases lt_trichotomy t T with hlt | heq | hgt
+  · -- `a < t < T`: glue agrees with `γ` near `t`; use `hγ` on `Ioo a T`.
+    have hGγ_t : G =ᶠ[𝓝 t] γ :=
+      Filter.eventually_of_mem ((isOpen_Iio).mem_nhds hlt)
+        (fun s hs => by simp only [hG]; rw [if_pos (mem_Iio.mp hs)])
+    refine HasGeodesicEquationAt.congr_of_eventuallyEq_at (γ' := γ) ?_ hGγ_t ?_
+    · simp only [hG]; rw [if_pos hlt]
+    · exact hγ t ⟨ht_lo, hlt⟩
+  · -- `t = T`: glue agrees with `ηT` on a full neighbourhood; use shifted `hη`.
+    subst heq
+    have hmem0 : t - t ∈ Set.Ioo (-δ) δ := by
+      rw [sub_self]; exact ⟨neg_lt_zero.mpr hδ, hδ⟩
+    have hηeq : HasGeodesicEquationAt (I := I) g ηT t :=
+      hasGeodesicEquationAt_comp_sub_const (hη (t - t) hmem0)
+    refine HasGeodesicEquationAt.congr_of_eventuallyEq_at (γ' := ηT) ?_ hGηT_T hηeq
+    simp only [hG, hηT]; rw [if_neg (lt_irrefl t)]
+  · -- `t > T`: glue agrees with `ηT` near `t`; use shifted `hη`.
+    have hGηT_t : G =ᶠ[𝓝 t] ηT :=
+      Filter.eventually_of_mem ((isOpen_Ioi).mem_nhds hgt)
+        (fun s hs => by
+          simp only [hG, hηT]; rw [if_neg (not_lt.mpr (le_of_lt (mem_Ioi.mp hs)))])
+    have hmem : t - T ∈ Set.Ioo (-δ) δ := ⟨by linarith, by linarith⟩
+    have hηeq : HasGeodesicEquationAt (I := I) g ηT t :=
+      hasGeodesicEquationAt_comp_sub_const (hη (t - T) hmem)
+    refine HasGeodesicEquationAt.congr_of_eventuallyEq_at (γ' := ηT) ?_ hGηT_t hηeq
+    simp only [hG, hηT]; rw [if_neg (not_lt.mpr (le_of_lt hgt))]
+
 end Geodesic
 end Riemannian
 end Geometry
