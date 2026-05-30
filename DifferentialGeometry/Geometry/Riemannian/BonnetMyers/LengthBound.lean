@@ -231,7 +231,7 @@ theorem sum_index_form_integrand_eval
     (_hUnit : ∀ t ∈ Set.Icc (0 : ℝ) L, g.inner (γ t) (uPrime t) (uPrime t) = 1)
     (e : Fin (Module.finrank ℝ E - 1) → SectionAlongCurve I M γ)
     (_heDiff : ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L,
-      DifferentiableAt ℝ (e i).toFun t)
+      DifferentiableAt ℝ (chartRepAt (I := I) γ (e i).toFun t) t)
     (_hParallel : ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L,
       covDerivAlong (I := I) g γ (e i).toFun t = 0)
     (_hON : ∀ t ∈ Set.Icc (0 : ℝ) L, ∀ i j,
@@ -299,11 +299,11 @@ theorem sum_index_form_integrand_eval
     -- the chart-`(γ t)`-coordinate representation `chartRepAt γ (e i) t` is
     -- differentiable at `t`.  This is the same "varies differentiably along γ"
     -- regularity that the intrinsic Leibniz rule `covDerivAlong_smulFun`
-    -- requires (cf. `perp_to_velocity_preserved`'s `hVdiff`); it is supplied
-    -- here as a structural regularity fact about the parallel frame.
+    -- requires (cf. `perp_to_velocity_preserved`'s `hVdiff`); it is the frame
+    -- regularity hypothesis `_heDiff`, now stated in chart-representation form.
     have h_chartrep_diff :
-        DifferentiableAt ℝ (chartRepAt (I := I) γ (e i).toFun t) t := by
-      sorry
+        DifferentiableAt ℝ (chartRepAt (I := I) γ (e i).toFun t) t :=
+      _heDiff i t ht
     -- The underlying function of `smulFun ...` is `s ↦ sin(πs/L) • (e i).toFun s`;
     -- this is definitional, so `covDerivAlong` of the section coincides with
     -- `covDerivAlong` of the scalar-function multiple of `(e i).toFun`.
@@ -573,7 +573,7 @@ theorem sum_index_form_frame_evaluation
     (hUnit : ∀ t ∈ Set.Icc (0 : ℝ) L, g.inner (γ t) (uPrime t) (uPrime t) = 1)
     (e : Fin (Module.finrank ℝ E - 1) → SectionAlongCurve I M γ)
     (heDiff : ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L,
-      DifferentiableAt ℝ (e i).toFun t)
+      DifferentiableAt ℝ (chartRepAt (I := I) γ (e i).toFun t) t)
     (hParallel : ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L,
       covDerivAlong (I := I) g γ (e i).toFun t = 0)
     (hON : ∀ t ∈ Set.Icc (0 : ℝ) L, ∀ i j,
@@ -696,7 +696,7 @@ theorem sum_index_form_bound_by_curvature_hypothesis
     (hUnit : ∀ t ∈ Set.Icc (0 : ℝ) L, g.inner (γ t) (uPrime t) (uPrime t) = 1)
     (e : Fin (Module.finrank ℝ E - 1) → SectionAlongCurve I M γ)
     (heDiff : ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L,
-      DifferentiableAt ℝ (e i).toFun t)
+      DifferentiableAt ℝ (chartRepAt (I := I) γ (e i).toFun t) t)
     (hParallel : ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L,
       covDerivAlong (I := I) g γ (e i).toFun t = 0)
     (hON : ∀ t ∈ Set.Icc (0 : ℝ) L, ∀ i j,
@@ -900,7 +900,7 @@ theorem length_bound_contradiction_assembly
     (_hUnit : ∀ t ∈ Set.Icc (0 : ℝ) L, g.inner (γ t) (uPrime t) (uPrime t) = 1)
     (e : Fin (Module.finrank ℝ E - 1) → SectionAlongCurve I M γ)
     (_heDiff : ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L,
-      DifferentiableAt ℝ (e i).toFun t)
+      DifferentiableAt ℝ (chartRepAt (I := I) γ (e i).toFun t) t)
     (_hParallel : ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L,
       covDerivAlong (I := I) g γ (e i).toFun t = 0)
     (_hON : ∀ t ∈ Set.Icc (0 : ℝ) L, ∀ i j,

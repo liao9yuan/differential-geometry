@@ -343,7 +343,7 @@ theorem pairwise_edist_bound_from_geodesic
       have h_frame :
           ∃ e : Fin (Module.finrank ℝ E - 1) → SectionAlongCurve I M γ,
             (∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L,
-              DifferentiableAt ℝ (e i).toFun t) ∧
+              DifferentiableAt ℝ (chartRepAt (I := I) γ (e i).toFun t) t) ∧
             (∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L,
               covDerivAlong (I := I) g γ (e i).toFun t = 0) ∧
             (∀ t ∈ Set.Icc (0 : ℝ) L, ∀ i j,

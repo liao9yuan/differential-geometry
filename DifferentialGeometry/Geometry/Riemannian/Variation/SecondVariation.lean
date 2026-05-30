@@ -1133,7 +1133,10 @@ theorem indexFormIntegrand_intervalIntegrable
           (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ))
           (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ)) = 1)
     (e : Fin (Module.finrank ℝ E - 1) → SectionAlongCurve I M γ)
-    (_heDiff : ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L, DifferentiableAt ℝ (e i).toFun t)
+    (_heDiff : ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L,
+      DifferentiableAt ℝ
+        (DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong.chartRepAt
+          (I := I) γ (e i).toFun t) t)
     (_hParallel : ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L,
       DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong.covDerivAlong
         (I := I) g γ (e i).toFun t = 0)

@@ -42,47 +42,305 @@ open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 open DifferentialGeometry.Geometry.Riemannian.Variation
 
+/-! ## Abstract `g`-Gram–Schmidt of a `g`-linearly-independent family
+
+For a positive-definite symmetric bilinear form `B : E →L[ℝ] E →L[ℝ] ℝ` and a
+`B`-linearly-independent family `v : Fin m → E`, the hand-rolled Gram–Schmidt
+recursion produces a `B`-orthonormal family `bGramSchmidt B v : Fin m → E`. This
+is the pointwise algebraic core (no smoothness, no chart data) underlying the
+parallel perpendicular frame; it is the inner-product `B := g.inner (γ 0)`
+specialisation of the established chart-frame orthonormalisation, written
+abstractly so it applies to a basis of the `g`-orthogonal complement of the
+geodesic velocity. -/
+
+namespace PerpFrameAux
+
+variable {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+
+/-- The normalised Gram–Schmidt vector at index `i` for the `B`-bilinear form
+applied to the family `v`. Defined by well-founded recursion on `i.val`. -/
+private noncomputable def bGramSchmidt
+    (B : F →L[ℝ] F →L[ℝ] ℝ) {m : ℕ} (v : Fin m → F) (i : Fin m) : F :=
+  let raw : F :=
+    v i - ∑ j : Fin i.val,
+      (B (v i) (bGramSchmidt B v ⟨j.val, lt_trans j.isLt i.isLt⟩)) •
+        bGramSchmidt B v ⟨j.val, lt_trans j.isLt i.isLt⟩
+  (Real.sqrt (B raw raw))⁻¹ • raw
+termination_by i.val
+decreasing_by exact j.isLt
+
+/-- The unnormalised Gram–Schmidt vector at index `i`:
+`raw_i = v i - ∑_{j < i} B(v i, e_j) • e_j`. -/
+private noncomputable def bGramSchmidtRaw
+    (B : F →L[ℝ] F →L[ℝ] ℝ) {m : ℕ} (v : Fin m → F) (i : Fin m) : F :=
+  v i - ∑ j : Fin i.val,
+    (B (v i) (bGramSchmidt B v ⟨j.val, lt_trans j.isLt i.isLt⟩)) •
+      bGramSchmidt B v ⟨j.val, lt_trans j.isLt i.isLt⟩
+
+private lemma bGramSchmidt_eq
+    (B : F →L[ℝ] F →L[ℝ] ℝ) {m : ℕ} (v : Fin m → F) (i : Fin m) :
+    bGramSchmidt B v i =
+      (Real.sqrt (B (bGramSchmidtRaw B v i) (bGramSchmidtRaw B v i)))⁻¹ •
+        bGramSchmidtRaw B v i := by
+  unfold bGramSchmidt bGramSchmidtRaw
+  rfl
+
+/-- Bilinear distribution in the right slot. -/
+private lemma B_sum_right
+    (B : F →L[ℝ] F →L[ℝ] ℝ) (x : F)
+    {ι : Type*} (s : Finset ι) (w : ι → F) (c : ι → ℝ) :
+    B x (∑ k ∈ s, c k • w k) = ∑ k ∈ s, c k * B x (w k) := by
+  classical
+  induction s using Finset.induction_on with
+  | empty => simp
+  | @insert a s has ih =>
+    rw [Finset.sum_insert has, Finset.sum_insert has, map_add,
+      show (B x) (c a • w a) = c a * B x (w a) from by
+        rw [map_smul, smul_eq_mul], ih]
+
+/-- The self `B`-norm of the `i`-th Gram–Schmidt vector is `1`, provided the
+raw vector is nonzero (and `B` is positive-definite). -/
+private lemma bGramSchmidt_self_norm
+    (B : F →L[ℝ] F →L[ℝ] ℝ)
+    (Bpos : ∀ x : F, x ≠ 0 → 0 < B x x)
+    {m : ℕ} (v : Fin m → F) (i : Fin m)
+    (hne : bGramSchmidtRaw B v i ≠ 0) :
+    B (bGramSchmidt B v i) (bGramSchmidt B v i) = 1 := by
+  have hpos : 0 < B (bGramSchmidtRaw B v i) (bGramSchmidtRaw B v i) := Bpos _ hne
+  have hs_sq : Real.sqrt (B (bGramSchmidtRaw B v i) (bGramSchmidtRaw B v i)) *
+      Real.sqrt (B (bGramSchmidtRaw B v i) (bGramSchmidtRaw B v i)) =
+      B (bGramSchmidtRaw B v i) (bGramSchmidtRaw B v i) :=
+    Real.mul_self_sqrt (le_of_lt hpos)
+  set s : ℝ := Real.sqrt (B (bGramSchmidtRaw B v i) (bGramSchmidtRaw B v i)) with hs_def
+  have hei_eq : bGramSchmidt B v i = s⁻¹ • bGramSchmidtRaw B v i := by
+    rw [bGramSchmidt_eq B v i, ← hs_def]
+  rw [hei_eq]
+  have hsmul : B (s⁻¹ • bGramSchmidtRaw B v i) (s⁻¹ • bGramSchmidtRaw B v i) =
+      s⁻¹ * (s⁻¹ * B (bGramSchmidtRaw B v i) (bGramSchmidtRaw B v i)) := by
+    have h1 : B (s⁻¹ • bGramSchmidtRaw B v i) = s⁻¹ • B (bGramSchmidtRaw B v i) := by
+      rw [map_smul]
+    rw [h1, ContinuousLinearMap.smul_apply, smul_eq_mul]
+    rw [show (B (bGramSchmidtRaw B v i)) (s⁻¹ • bGramSchmidtRaw B v i) =
+        s⁻¹ * B (bGramSchmidtRaw B v i) (bGramSchmidtRaw B v i) from by
+      rw [map_smul, smul_eq_mul]]
+  rw [hsmul]
+  rw [show s⁻¹ * (s⁻¹ * B (bGramSchmidtRaw B v i) (bGramSchmidtRaw B v i)) =
+      (s * s)⁻¹ * B (bGramSchmidtRaw B v i) (bGramSchmidtRaw B v i) from by
+    rw [mul_inv]; ring]
+  rw [hs_sq]; exact inv_mul_cancel₀ (ne_of_gt hpos)
+
+set_option maxHeartbeats 4000000 in
+/-- Strong-induction package: for a `B`-linearly-independent family `v`,
+the Gram–Schmidt recursion is well-defined (raw vectors nonzero) and
+`B`-orthonormal. `B` is assumed symmetric and positive-definite. -/
+private theorem bGramSchmidt_orth_strong_aux
+    (B : F →L[ℝ] F →L[ℝ] ℝ)
+    (Bsymm : ∀ x y : F, B x y = B y x)
+    (Bpos : ∀ x : F, x ≠ 0 → 0 < B x x)
+    {m : ℕ} (v : Fin m → F) (hLI : LinearIndependent ℝ v) :
+    ∀ k : ℕ, ∀ i : Fin m, i.val ≤ k →
+      bGramSchmidtRaw B v i ≠ 0 ∧
+      (∀ j : Fin m, j.val < i.val →
+        B (bGramSchmidt B v j) (bGramSchmidt B v i) = 0) ∧
+      B (bGramSchmidt B v i) (bGramSchmidt B v i) = 1 := by
+  classical
+  intro k
+  induction k with
+  | zero =>
+    intro i hi_le
+    have hi_val : i.val = 0 := Nat.le_zero.mp hi_le
+    have hempty : IsEmpty (Fin i.val) := by rw [hi_val]; exact Fin.isEmpty
+    have hraw : bGramSchmidtRaw B v i = v i := by
+      unfold bGramSchmidtRaw
+      rw [Finset.sum_eq_zero (fun j _ => hempty.elim j)]
+      simp
+    have hne : bGramSchmidtRaw B v i ≠ 0 := by rw [hraw]; exact hLI.ne_zero i
+    refine ⟨hne, ?_, ?_⟩
+    · intro j hj; rw [hi_val] at hj; omega
+    · -- ⟨e_i, e_i⟩ = 1, with raw_i = v i ≠ 0.
+      exact bGramSchmidt_self_norm B Bpos v i hne
+  | succ k ih =>
+    intro i hi_le
+    by_cases hi_lt : i.val ≤ k
+    · exact ih i hi_lt
+    · have hi_eq : i.val = k + 1 := by omega
+      have ih_below : ∀ j : Fin m, j.val < i.val →
+          bGramSchmidtRaw B v j ≠ 0 ∧
+          (∀ j' : Fin m, j'.val < j.val →
+            B (bGramSchmidt B v j') (bGramSchmidt B v j) = 0) ∧
+          B (bGramSchmidt B v j) (bGramSchmidt B v j) = 1 :=
+        fun j hj => ih j (by omega)
+      -- Step 1: orthogonality of raw_i to each e_j with j.val < i.val.
+      have horth_raw : ∀ j : Fin m, j.val < i.val →
+          B (bGramSchmidt B v j) (bGramSchmidtRaw B v i) = 0 := by
+        intro j hj_lt
+        rw [show bGramSchmidtRaw B v i =
+            v i - ∑ j' : Fin i.val,
+              (B (v i) (bGramSchmidt B v ⟨j'.val, lt_trans j'.isLt i.isLt⟩)) •
+                bGramSchmidt B v ⟨j'.val, lt_trans j'.isLt i.isLt⟩ from rfl]
+        rw [map_sub]
+        rw [B_sum_right B (bGramSchmidt B v j) (Finset.univ : Finset (Fin i.val))
+            (fun j' => bGramSchmidt B v ⟨j'.val, lt_trans j'.isLt i.isLt⟩)
+            (fun j' => B (v i)
+              (bGramSchmidt B v ⟨j'.val, lt_trans j'.isLt i.isLt⟩))]
+        have hsum_eq :
+            ∑ j' ∈ (Finset.univ : Finset (Fin i.val)),
+                B (v i) (bGramSchmidt B v ⟨j'.val, lt_trans j'.isLt i.isLt⟩) *
+                  B (bGramSchmidt B v j)
+                    (bGramSchmidt B v ⟨j'.val, lt_trans j'.isLt i.isLt⟩) =
+              B (bGramSchmidt B v j) (v i) := by
+          set j_inFin : Fin i.val := ⟨j.val, hj_lt⟩
+          rw [Finset.sum_eq_single j_inFin]
+          · -- the j' = j term: B(v i, e_j) * B(e_j, e_j) = B(v i, e_j) = B(e_j, v i).
+            have hj_eq : (⟨j_inFin.val, lt_trans j_inFin.isLt i.isLt⟩ : Fin m) = j :=
+              Fin.ext rfl
+            rw [hj_eq, (ih_below j hj_lt).2.2, mul_one, Bsymm]
+          · intro j' _ hj'
+            have hj'_neq : j'.val ≠ j.val := fun h => hj' (Fin.ext h)
+            by_cases hcompare : j'.val < j.val
+            · have hzero := (ih_below j hj_lt).2.1
+                ⟨j'.val, lt_trans hcompare j.isLt⟩ hcompare
+              rw [show B (bGramSchmidt B v j)
+                  (bGramSchmidt B v ⟨j'.val, lt_trans j'.isLt i.isLt⟩) =
+                  B (bGramSchmidt B v ⟨j'.val, lt_trans hcompare j.isLt⟩)
+                    (bGramSchmidt B v j) from by rw [Bsymm]]
+              rw [hzero, mul_zero]
+            · have hcompare' : j.val < j'.val :=
+                lt_of_le_of_ne (Nat.le_of_not_lt hcompare) hj'_neq.symm
+              have hzero := (ih_below ⟨j'.val, lt_trans j'.isLt i.isLt⟩ j'.isLt).2.1
+                j hcompare'
+              rw [hzero, mul_zero]
+          · intro h; exact absurd (Finset.mem_univ j_inFin) h
+        rw [hsum_eq, Bsymm (bGramSchmidt B v j) (v i)]; ring
+      -- Step 2: raw_i ≠ 0 (else v i ∈ span of earlier e's ⊆ span of earlier v's).
+      have hraw_ne : bGramSchmidtRaw B v i ≠ 0 := by
+        intro hraw_zero
+        have hv_eq : v i =
+            ∑ j' : Fin i.val,
+              (B (v i) (bGramSchmidt B v ⟨j'.val, lt_trans j'.isLt i.isLt⟩)) •
+                bGramSchmidt B v ⟨j'.val, lt_trans j'.isLt i.isLt⟩ := by
+          have h_eq : v i -
+              ∑ j' : Fin i.val,
+                (B (v i) (bGramSchmidt B v ⟨j'.val, lt_trans j'.isLt i.isLt⟩)) •
+                  bGramSchmidt B v ⟨j'.val, lt_trans j'.isLt i.isLt⟩ = 0 := by
+            simpa [bGramSchmidtRaw] using hraw_zero
+          exact sub_eq_zero.mp h_eq
+        -- e_j ∈ span {v 0, …, v (i-1)} for all j < i.
+        have h_e_in_span : ∀ kk : ℕ, ∀ mm : Fin m, mm.val ≤ kk → mm.val < i.val →
+            bGramSchmidt B v mm ∈
+              Submodule.span ℝ
+                ((fun n : Fin i.val => v ⟨n.val, lt_trans n.isLt i.isLt⟩) '' Set.univ) := by
+          intro kk
+          induction kk with
+          | zero =>
+            intro mm hm_le hm_lt
+            have hm_val : mm.val = 0 := Nat.le_zero.mp hm_le
+            have hempty : IsEmpty (Fin mm.val) := by rw [hm_val]; exact Fin.isEmpty
+            rw [bGramSchmidt_eq B v mm]
+            apply Submodule.smul_mem
+            have hraw_mm : bGramSchmidtRaw B v mm = v mm := by
+              unfold bGramSchmidtRaw
+              rw [Finset.sum_eq_zero (fun j _ => hempty.elim j)]; simp
+            rw [hraw_mm]
+            apply Submodule.subset_span
+            exact ⟨⟨mm.val, hm_lt⟩, Set.mem_univ _, rfl⟩
+          | succ kk ih_kk =>
+            intro mm hm_le hm_lt
+            by_cases hcase : mm.val ≤ kk
+            · exact ih_kk mm hcase hm_lt
+            · rw [bGramSchmidt_eq B v mm]
+              apply Submodule.smul_mem
+              unfold bGramSchmidtRaw
+              apply Submodule.sub_mem
+              · apply Submodule.subset_span
+                exact ⟨⟨mm.val, hm_lt⟩, Set.mem_univ _, rfl⟩
+              · apply Submodule.sum_mem
+                intro j _
+                apply Submodule.smul_mem
+                have hj_in : j.val < i.val := lt_trans j.isLt hm_lt
+                have hj_le : j.val ≤ kk := by have := j.isLt; omega
+                exact ih_kk ⟨j.val, lt_trans j.isLt mm.isLt⟩ hj_le hj_in
+        have hvi_in_span : v i ∈
+            Submodule.span ℝ
+              ((fun n : Fin i.val => v ⟨n.val, lt_trans n.isLt i.isLt⟩) '' Set.univ) := by
+          rw [hv_eq]
+          apply Submodule.sum_mem
+          intro j' _
+          apply Submodule.smul_mem
+          have hj'_le : j'.val ≤ k := by have := j'.isLt; omega
+          exact h_e_in_span k ⟨j'.val, lt_trans j'.isLt i.isLt⟩ hj'_le j'.isLt
+        -- Contradiction with LI.
+        have hset_eq :
+            ((fun n : Fin i.val => v ⟨n.val, lt_trans n.isLt i.isLt⟩) '' Set.univ) =
+              (v '' {n : Fin m | n.val < i.val}) := by
+          ext x
+          constructor
+          · rintro ⟨n, _, rfl⟩
+            exact ⟨⟨n.val, lt_trans n.isLt i.isLt⟩, n.isLt, rfl⟩
+          · rintro ⟨n, hn, rfl⟩
+            exact ⟨⟨n.val, hn⟩, Set.mem_univ _, rfl⟩
+        rw [hset_eq] at hvi_in_span
+        have hi_notin : i ∉ {n : Fin m | n.val < i.val} := by simp [Set.mem_setOf_eq]
+        exact hLI.notMem_span_image hi_notin hvi_in_span
+      -- Step 3: orthogonality + unit-norm of e_i.
+      set s : ℝ := Real.sqrt (B (bGramSchmidtRaw B v i) (bGramSchmidtRaw B v i))
+        with hs_def
+      have hei_eq : bGramSchmidt B v i = s⁻¹ • bGramSchmidtRaw B v i := by
+        rw [bGramSchmidt_eq B v i, ← hs_def]
+      refine ⟨hraw_ne, ?_, ?_⟩
+      · intro j hj_lt
+        rw [hei_eq,
+          show (B (bGramSchmidt B v j)) (s⁻¹ • bGramSchmidtRaw B v i) =
+            s⁻¹ * B (bGramSchmidt B v j) (bGramSchmidtRaw B v i) from by
+          rw [map_smul, smul_eq_mul]]
+        rw [horth_raw j hj_lt, mul_zero]
+      · exact bGramSchmidt_self_norm B Bpos v i hraw_ne
+
+/-- **`B`-orthonormality of the abstract Gram–Schmidt family.** For a symmetric
+positive-definite bilinear form `B` and a `B`-linearly-independent family `v`,
+`bGramSchmidt B v` is `B`-orthonormal: `B (e i) (e j) = δ_{ij}`. -/
+private theorem bGramSchmidt_orthonormal
+    (B : F →L[ℝ] F →L[ℝ] ℝ)
+    (Bsymm : ∀ x y : F, B x y = B y x)
+    (Bpos : ∀ x : F, x ≠ 0 → 0 < B x x)
+    {m : ℕ} (v : Fin m → F) (hLI : LinearIndependent ℝ v) (i j : Fin m) :
+    B (bGramSchmidt B v i) (bGramSchmidt B v j) = if i = j then 1 else 0 := by
+  classical
+  rcases Nat.lt_trichotomy i.val j.val with hlt | heq | hgt
+  · have h := bGramSchmidt_orth_strong_aux B Bsymm Bpos v hLI j.val j (le_refl _)
+    have hne : i ≠ j := fun h_eq => by rw [h_eq] at hlt; omega
+    rw [if_neg hne]; exact h.2.1 i hlt
+  · have hij : i = j := Fin.ext heq
+    rw [if_pos hij, ← hij]
+    exact (bGramSchmidt_orth_strong_aux B Bsymm Bpos v hLI i.val i (le_refl _)).2.2
+  · have h := bGramSchmidt_orth_strong_aux B Bsymm Bpos v hLI i.val i (le_refl _)
+    have hne : i ≠ j := fun h_eq => by rw [h_eq] at hgt; omega
+    rw [if_neg hne, Bsymm]; exact h.2.1 j hgt
+
+/-- Each Gram–Schmidt output lies in the submodule spanned by the input family
+(in fact in the span of `v`); hence if every `v k` lies in a submodule `W`, so
+does every `bGramSchmidt B v i`. -/
+private theorem bGramSchmidt_mem
+    (B : F →L[ℝ] F →L[ℝ] ℝ) {m : ℕ} (v : Fin m → F)
+    (W : Submodule ℝ F) (hv : ∀ k, v k ∈ W) (i : Fin m) :
+    bGramSchmidt B v i ∈ W := by
+  classical
+  -- Strong recursion on `i.val`.
+  induction hk : i.val using Nat.strong_induction_on generalizing i with
+  | _ n ih =>
+    subst hk
+    rw [bGramSchmidt_eq B v i]
+    apply Submodule.smul_mem
+    unfold bGramSchmidtRaw
+    refine W.sub_mem (hv i) (Submodule.sum_mem _ ?_)
+    intro j _
+    exact Submodule.smul_mem _ _ (ih j.val j.isLt ⟨j.val, lt_trans j.isLt i.isLt⟩ rfl)
+
+end PerpFrameAux
+
 section PerpFrame
 
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
-
-/-- **Existence of a parallel orthonormal perpendicular frame.** For a `C^∞`
-unit-speed geodesic `γ` on `Icc 0 L` (`L > 0`), there is a frame
-`e : Fin (finrank E - 1) → SectionAlongCurve I M γ` such that each `e i` is
-differentiable on `Icc 0 L`, parallel along `γ` (the *intrinsic* covariant
-derivative `covDerivAlong g γ (e i) t` vanishes), the frame is pointwise
-`g`-orthonormal, and each frame vector is `g`-orthogonal to the velocity
-`dγ_t(1)`. This is the standalone form of the frame package consumed in the
-Bonnet–Myers second-variation contradiction.
-
-The construction is the genuine Gram–Schmidt-of-an-orthonormal-basis-of
-`(γ'(0))^⊥`-then-parallel-transport: seed an orthonormal basis of the
-`g`-orthogonal complement of `dγ_0(1)` at the basepoint `γ 0` and parallel
-transport each seed along `γ` (`parallelTransport`); the transported sections
-are parallel by construction (`parallelTransport_isParallel`, bridged to the
-intrinsic `covDerivAlong` via `covDerivAlong_eq_zero_iff` /
-`chartCovDerivAlong_movingFoot_eq_zero_of_isParallelChart_centered`),
-`g`-orthonormality is preserved by parallel transport
-(`parallelTransport_preserves_inner_product`), and perpendicularity to the
-velocity is preserved because the velocity field of a geodesic is itself
-parallel (`perp_to_velocity_preserved`). -/
-theorem exists_parallel_orthonormal_perp_frame
-    (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
-    (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) (hgeo : IsGeodesic (I := I) g γ)
-    {L : ℝ} (hL : 0 < L)
-    (hUnit : ∀ t ∈ Set.Icc (0 : ℝ) L,
-      g.inner (γ t) (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ) : E)
-        (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ) : E) = 1) :
-    ∃ e : Fin (Module.finrank ℝ E - 1) → SectionAlongCurve I M γ,
-      (∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L, DifferentiableAt ℝ (e i).toFun t) ∧
-      (∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L,
-        covDerivAlong (I := I) g γ (e i).toFun t = 0) ∧
-      (∀ t ∈ Set.Icc (0 : ℝ) L, ∀ i j,
-        g.inner (γ t) ((e i).toFun t) ((e j).toFun t) =
-          if i = j then 1 else 0) ∧
-      (∀ t ∈ Set.Icc (0 : ℝ) L, ∀ i,
-        g.inner (γ t) ((e i).toFun t) (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ) : E) = 0) :=
-  sorry
 
 set_option linter.unusedVariables false in
 /-- **Perpendicularity to the velocity is preserved.** If a section `V` along a
@@ -310,6 +568,137 @@ theorem perp_to_velocity_preserved
   simp only at hft
   rw [hft]
   exact hPerp0
+
+/-- **Existence of a parallel orthonormal perpendicular frame.** For a `C^∞`
+unit-speed geodesic `γ` on `Icc 0 L` (`L > 0`), there is a frame
+`e : Fin (finrank E - 1) → SectionAlongCurve I M γ` such that each `e i` is
+differentiable on `Icc 0 L`, parallel along `γ` (the *intrinsic* covariant
+derivative `covDerivAlong g γ (e i) t` vanishes), the frame is pointwise
+`g`-orthonormal, and each frame vector is `g`-orthogonal to the velocity
+`dγ_t(1)`. This is the standalone form of the frame package consumed in the
+Bonnet–Myers second-variation contradiction.
+
+The construction is the genuine Gram–Schmidt-of-an-orthonormal-basis-of
+`(γ'(0))^⊥`-then-parallel-transport: seed an orthonormal basis of the
+`g`-orthogonal complement of `dγ_0(1)` at the basepoint `γ 0` and parallel
+transport each seed along `γ` (`parallelTransport`); the transported sections
+are parallel by construction (`parallelTransport_isParallel`, bridged to the
+intrinsic `covDerivAlong` via `covDerivAlong_eq_zero_iff` /
+`chartCovDerivAlong_movingFoot_eq_zero_of_isParallelChart_centered`),
+`g`-orthonormality is preserved by parallel transport
+(`parallelTransport_preserves_inner_product`), and perpendicularity to the
+velocity is preserved because the velocity field of a geodesic is itself
+parallel (`perp_to_velocity_preserved`). -/
+theorem exists_parallel_orthonormal_perp_frame
+    (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
+    (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) (hgeo : IsGeodesic (I := I) g γ)
+    {L : ℝ} (hL : 0 < L)
+    (hUnit : ∀ t ∈ Set.Icc (0 : ℝ) L,
+      g.inner (γ t) (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ) : E)
+        (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ) : E) = 1) :
+    ∃ e : Fin (Module.finrank ℝ E - 1) → SectionAlongCurve I M γ,
+      (∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L,
+        DifferentiableAt ℝ (chartRepAt (I := I) γ (e i).toFun t) t) ∧
+      (∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L,
+        covDerivAlong (I := I) g γ (e i).toFun t = 0) ∧
+      (∀ t ∈ Set.Icc (0 : ℝ) L, ∀ i j,
+        g.inner (γ t) ((e i).toFun t) ((e j).toFun t) =
+          if i = j then 1 else 0) ∧
+      (∀ t ∈ Set.Icc (0 : ℝ) L, ∀ i,
+        g.inner (γ t) ((e i).toFun t) (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ) : E) = 0) := by
+  classical
+  -- The base point, velocity, and the bilinear form `B := g.inner (γ 0)`.
+  set u₀ : E := (mfderiv 𝓘(ℝ, ℝ) I γ 0 (1 : ℝ) : E) with hu₀_def
+  set B : E →L[ℝ] E →L[ℝ] ℝ := g.inner (γ 0) with hB_def
+  have hBsymm : ∀ x y : E, B x y = B y x := fun x y => g.symm (γ 0) x y
+  have hBpos : ∀ x : E, x ≠ 0 → 0 < B x x := fun x hx => g.pos (γ 0) x hx
+  have h0mem : (0 : ℝ) ∈ Set.Icc (0 : ℝ) L := ⟨le_refl _, hL.le⟩
+  -- `u₀` is `B`-unit, hence nonzero, and the functional `B u₀` is nonzero.
+  have hu₀_unit : B u₀ u₀ = 1 := hUnit 0 h0mem
+  have hu₀_ne : u₀ ≠ 0 := by
+    intro h; rw [h] at hu₀_unit; simp at hu₀_unit
+  -- The `g`-orthogonal complement of `u₀`: the kernel of the functional `B u₀`.
+  set φ : E →ₗ[ℝ] ℝ := (B u₀).toLinearMap with hφ_def
+  set W : Submodule ℝ E := LinearMap.ker φ with hW_def
+  -- `φ` is surjective (since `φ u₀ = 1 ≠ 0`), so `finrank W = finrank E - 1`.
+  have hφ_u₀ : φ u₀ = 1 := hu₀_unit
+  have hφ_surj : Function.Surjective φ := by
+    intro c
+    refine ⟨c • u₀, ?_⟩
+    rw [map_smul, hφ_u₀, smul_eq_mul, mul_one]
+  have hrange : LinearMap.range φ = ⊤ := LinearMap.range_eq_top.mpr hφ_surj
+  have hfr_range : Module.finrank ℝ ↥(LinearMap.range φ) = 1 := by
+    rw [hrange]; simp
+  have hfinrankW : Module.finrank ℝ ↥W = Module.finrank ℝ E - 1 := by
+    have hsum := LinearMap.finrank_range_add_finrank_ker φ
+    rw [hfr_range] at hsum
+    have : Module.finrank ℝ ↥W = Module.finrank ℝ ↥(LinearMap.ker φ) := rfl
+    rw [this]; omega
+  -- A basis of `W`, indexed by `Fin (finrank E - 1)`.
+  letI : Module.Finite ℝ ↥W := inferInstance
+  set bW : Module.Basis (Fin (Module.finrank ℝ E - 1)) ℝ ↥W :=
+    Module.finBasisOfFinrankEq ℝ ↥W hfinrankW with hbW_def
+  -- The basis vectors as a `B`-linearly-independent family of `E`-vectors in `W`.
+  set vfam : Fin (Module.finrank ℝ E - 1) → E := fun i => (bW i : E) with hvfam_def
+  have hvfam_mem : ∀ i, vfam i ∈ W := fun i => (bW i).2
+  have hvfam_LI : LinearIndependent ℝ vfam := by
+    have hbWLI : LinearIndependent ℝ (fun i => bW i) := bW.linearIndependent
+    have := hbWLI.map' (W.subtype) (Submodule.ker_subtype W)
+    exact this
+  -- The `B`-orthonormal Gram–Schmidt seed of the perpendicular subspace.
+  set seed : Fin (Module.finrank ℝ E - 1) → E :=
+    fun i => PerpFrameAux.bGramSchmidt B vfam i with hseed_def
+  have hseed_ON : ∀ i j, B (seed i) (seed j) = if i = j then 1 else 0 :=
+    fun i j => PerpFrameAux.bGramSchmidt_orthonormal B hBsymm hBpos vfam hvfam_LI i j
+  have hseed_mem : ∀ i, seed i ∈ W :=
+    fun i => PerpFrameAux.bGramSchmidt_mem B vfam W hvfam_mem i
+  -- Each seed vector is `g`-orthogonal to `u₀` (it lies in `W = ker (B u₀)`).
+  have hseed_perp : ∀ i, B (seed i) u₀ = 0 := by
+    intro i
+    have hker : φ (seed i) = 0 := (LinearMap.mem_ker).mp (hseed_mem i)
+    have : B u₀ (seed i) = 0 := hker
+    rw [hBsymm (seed i) u₀]; exact this
+  -- Parallel-transport each seed vector along `γ` over `Icc 0 L`.
+  have htransport : ∀ i, ∃ V : ∀ t, TangentSpace I (γ t),
+      V 0 = seed i ∧
+      (∀ t ∈ Set.Icc (0 : ℝ) L, DifferentiableAt ℝ (chartRepAt (I := I) γ V t) t) ∧
+      (∀ t ∈ Set.Icc (0 : ℝ) L, covDerivAlong (I := I) g γ V t = 0) := by
+    intro i
+    exact DifferentialGeometry.Geometry.Riemannian.Variation.exists_global_parallel_transport_on_Icc
+      (I := I) g γ hγ hL (seed i)
+  choose Vfun hV0 hVdiff hVpar using htransport
+  -- The frame: each transported section, wrapped as a `SectionAlongCurve`.
+  refine ⟨fun i => ⟨fun t => Vfun i t⟩, ?_, ?_, ?_, ?_⟩
+  · -- Chart-representation differentiability (from the global transport).
+    intro i t ht; exact hVdiff i t ht
+  · -- Parallelism: intrinsic covariant derivative vanishes (from the transport).
+    intro i t ht; exact hVpar i t ht
+  · -- `g`-orthonormality: transport is a `g`-isometry, seed is `g`-orthonormal.
+    intro t ht i j
+    have hconst :=
+      DifferentialGeometry.Geometry.Riemannian.Variation.global_parallel_transport_preserves_inner
+        (I := I) g γ hγ hL.le (Vfun i) (Vfun j)
+        (hVdiff i) (hVdiff j) (hVpar i) (hVpar j) t ht
+    -- `g.inner (γ t) (Vi t) (Vj t) = g.inner (γ 0) (seed i) (seed j) = B (seed i)(seed j)`.
+    rw [show ((fun i => (⟨fun t => Vfun i t⟩ : SectionAlongCurve I M γ)) i).toFun t = Vfun i t
+        from rfl,
+      show ((fun i => (⟨fun t => Vfun i t⟩ : SectionAlongCurve I M γ)) j).toFun t = Vfun j t
+        from rfl]
+    rw [hconst, hV0 i, hV0 j]
+    exact hseed_ON i j
+  · -- `g`-perpendicularity to the velocity (from `perp_to_velocity_preserved`).
+    intro t ht i
+    have hperp :=
+      perp_to_velocity_preserved (I := I) g γ hγ hgeo hL (Vfun i)
+        (hVdiff i) (hVpar i)
+        (by
+          -- `g.inner (γ 0) (Vi 0) (dγ_0 1) = B (seed i) u₀ = 0`.
+          rw [hV0 i]
+          exact hseed_perp i)
+        t ht
+    rw [show ((fun i => (⟨fun t => Vfun i t⟩ : SectionAlongCurve I M γ)) i).toFun t = Vfun i t
+        from rfl]
+    exact hperp
 
 /-- **Foot bridge: chart parallelism implies moving-foot covariant vanishing.**
 If a section's `E`-valued representation `X` is parallel along `γ` in the chart
