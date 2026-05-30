@@ -1377,10 +1377,10 @@ the radial geodesic variation behind Gauss's lemma, whose variation is jointly
 theorem commute_ds_dt_intrinsic_C2
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M) (t : ℝ)
     (hF2 : ContDiffAt ℝ 2 (fun p : ℝ × ℝ => extChartAt I (f 0 t) (f p.1 p.2)) (0, t))
-    (hslice_u : ∀ s : ℝ, ContMDiffAt 𝓘(ℝ, ℝ) I 2 (fun u : ℝ => f s u) t)
-    (hslice_v : ∀ v : ℝ, ContMDiffAt 𝓘(ℝ, ℝ) I 2 (fun u : ℝ => f u v) 0)
-    (htransverse_cont : Continuous (fun s : ℝ => f s t))
-    (hcentral_cont : Continuous (fun v : ℝ => f 0 v)) :
+    (hslice_u : ∀ᶠ s in 𝓝 (0 : ℝ), ContMDiffAt 𝓘(ℝ, ℝ) I 2 (fun u : ℝ => f s u) t)
+    (hslice_v : ∀ᶠ v in 𝓝 t, ContMDiffAt 𝓘(ℝ, ℝ) I 2 (fun u : ℝ => f u v) 0)
+    (htransverse_cont : ContinuousAt (fun s : ℝ => f s t) 0)
+    (hcentral_cont : ContinuousAt (fun v : ℝ => f 0 v) t) :
     covDerivAlong (I := I) g (fun s : ℝ => f s t)
         (fun s : ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f s u) t (1 : ℝ)) 0
       = covDerivAlong (I := I) g (fun v : ℝ => f 0 v)
@@ -1399,15 +1399,14 @@ theorem commute_ds_dt_intrinsic_C2
   set secR : ℝ → E :=
     fun v : ℝ => fderiv ℝ (fun u : ℝ => extChartAt I α (f u v)) 0 (1 : ℝ) with hsecR
   -- `repL =ᶠ secL` near `0`, via the `MDifferentiableAt` chain-rule bridge.
-  have hopenL : IsOpen {s : ℝ | f s t ∈ (chartAt H α).source} :=
-    htransverse_cont.isOpen_preimage _ (chartAt H α).open_source
-  have h0L : (0 : ℝ) ∈ {s : ℝ | f s t ∈ (chartAt H α).source} := by
-    change f 0 t ∈ (chartAt H α).source; rw [hα]; exact mem_chart_source H (f 0 t)
+  have hsrcL_nhds : {s : ℝ | f s t ∈ (chartAt H α).source} ∈ 𝓝 (0 : ℝ) := by
+    refine htransverse_cont.preimage_mem_nhds ?_
+    rw [hα]; exact (chartAt H α).open_source.mem_nhds (mem_chart_source H (f 0 t))
   have hrepL_eq : repL =ᶠ[𝓝 (0 : ℝ)] secL := by
-    filter_upwards [hopenL.mem_nhds h0L] with s hs
+    filter_upwards [hsrcL_nhds, hslice_u] with s hs hslice_u_s
     have hsrc : (fun u : ℝ => f s u) t ∈ (chartAt H α).source := hs
     have hmdiff : MDifferentiableAt 𝓘(ℝ, ℝ) I (fun u : ℝ => f s u) t :=
-      (hslice_u s).mdifferentiableAt (by decide)
+      hslice_u_s.mdifferentiableAt (by decide)
     have hbridge :=
       MFDerivAlongCurve.chartCoord_mfderiv_along_curve_eq_fderiv_of_mdifferentiableAt
         (I := I) (M := M) (γ := fun u : ℝ => f s u) hmdiff α (t := t) hsrc
@@ -1420,15 +1419,14 @@ theorem commute_ds_dt_intrinsic_C2
     rw [hcompfun] at hbridge
     exact hbridge
   -- `repR =ᶠ secR` near `t`.
-  have hopenR : IsOpen {v : ℝ | f 0 v ∈ (chartAt H α).source} :=
-    hcentral_cont.isOpen_preimage _ (chartAt H α).open_source
-  have h0R : t ∈ {v : ℝ | f 0 v ∈ (chartAt H α).source} := by
-    change f 0 t ∈ (chartAt H α).source; rw [hα]; exact mem_chart_source H (f 0 t)
+  have hsrcR_nhds : {v : ℝ | f 0 v ∈ (chartAt H α).source} ∈ 𝓝 t := by
+    refine hcentral_cont.preimage_mem_nhds ?_
+    rw [hα]; exact (chartAt H α).open_source.mem_nhds (mem_chart_source H (f 0 t))
   have hrepR_eq : repR =ᶠ[𝓝 t] secR := by
-    filter_upwards [hopenR.mem_nhds h0R] with v hv
+    filter_upwards [hsrcR_nhds, hslice_v] with v hv hslice_v_v
     have hsrc : (fun u : ℝ => f u v) 0 ∈ (chartAt H α).source := hv
     have hmdiff : MDifferentiableAt 𝓘(ℝ, ℝ) I (fun u : ℝ => f u v) 0 :=
-      (hslice_v v).mdifferentiableAt (by decide)
+      hslice_v_v.mdifferentiableAt (by decide)
     have hbridge :=
       MFDerivAlongCurve.chartCoord_mfderiv_along_curve_eq_fderiv_of_mdifferentiableAt
         (I := I) (M := M) (γ := fun u : ℝ => f u v) hmdiff α (t := 0) hsrc
@@ -1974,6 +1972,7 @@ theorem S5_exp_variation_construction
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 /-- Continuity on a set `s ⊆ ℝ` of the scalar `t ↦ g.inner (γ t) (v t) (w t)`
 for a base curve `γ` and two sections `v, w` along `γ` presented through their
 total-space continuity. Mirrors `continuous_g_inner_along_param` in its
@@ -1981,7 +1980,7 @@ total-space continuity. Mirrors `continuous_g_inner_along_param` in its
 the project's tangent-space norm instances and the `RiemannianBundle`-derived
 ones is resolved locally; the scalar `ℝ`-valued conclusion is independent of
 the disabled instances. -/
-private lemma continuousOn_g_inner_along_curve
+lemma continuousOn_g_inner_along_curve
     (g : SmoothRiemannianMetric I M)
     {γ : ℝ → M} {v w : ∀ t : ℝ, TangentSpace I (γ t)} {s : Set ℝ}
     (hv : ContinuousOn (fun t : ℝ => TotalSpace.mk' E
