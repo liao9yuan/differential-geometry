@@ -210,7 +210,7 @@ theorem exists_complete_geodesic_at_velocity
       ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
     (p : M) (v : TangentSpace I p) :
     ∃ Γ : ℝ → M, IsGeodesic (I := I) g Γ ∧ Γ 0 = p ∧
-      (mfderiv 𝓘(ℝ, ℝ) I Γ 0 (1 : ℝ) : E) = (v : E) := by
+      (mfderiv 𝓘(ℝ, ℝ) I Γ 0 (1 : ℝ) : E) = (v : E) ∧ Continuous Γ := by
   classical
   haveI : CompleteSpace E := FiniteDimensional.complete ℝ E
   -- SEED on `Ioo (-δ) δ`.
@@ -244,12 +244,21 @@ theorem exists_complete_geodesic_at_velocity
     hη_geo.mono (fun t ht => ⟨lt_trans ha₀_gt ht.1, ht.2⟩)
   have hη_cont' : ContinuousOn η (Set.Ioo a₀ δ) :=
     hη_cont.mono (fun t ht => ⟨lt_trans ha₀_gt ht.1, ht.2⟩)
-  -- FORWARD extension: a geodesic `Γf` on `Ioi a₀` agreeing with `η` below `δ`.
-  obtain ⟨Γf, hΓf_geo, hΓf_agree⟩ :=
-    HopfRinow.isGeodesicOn_Ici_of_complete_Ioo (I := I) g ha₀_neg hδ hη_geo' hη_cont'
-      (fun γ b hb hγ hγ_cont hagree =>
-        isGeodesicOn_hreg_record (I := I) g hEnorm ha₀_neg hδ hc_nonneg hηspeed_le
-          hγ hγ_cont hb (fun t ht_a₀ ht_δ ht_b => hagree t ht_a₀ ht_δ ht_b))
+  -- FORWARD extension: a geodesic `Γf` on `Ioi a₀` agreeing with `η` below `δ`,
+  -- captured together with its (per-extension) continuity on the open `Ioi a₀`.
+  -- We call `isGeodesicOn_Ioi_of_endpointContinuation` directly (rather than the
+  -- `Ici`-wrapper) so that the `ContinuousOn` conjunct it produces is exposed; the
+  -- `HasEndpointContinuation` provider is reconstructed from the `hreg` record via
+  -- the metric-completeness endpoint-continuation producer.
+  obtain ⟨Γf, hΓf_geo, hΓf_cont, hΓf_agree⟩ :=
+    HopfRinow.isGeodesicOn_Ioi_of_endpointContinuation (I := I) g ha₀_neg hδ
+      hη_geo' hη_cont'
+      (fun γ b hb hγ hγ_cont hagree => by
+        obtain ⟨c', hc'_nonneg, hγ_smooth, hSpeedBound, hSpeedSq⟩ :=
+          isGeodesicOn_hreg_record (I := I) g hEnorm ha₀_neg hδ hc_nonneg hηspeed_le
+            hγ hγ_cont hb (fun t _ht_a₀ ht_δ ht_b => hagree t ht_δ ht_b)
+        exact HopfRinow.hasEndpointContinuation_of_complete (I := I) g
+          (lt_trans ha₀_neg hb) hc'_nonneg hγ_smooth hSpeedBound hSpeedSq hγ)
   -- BACKWARD: reversal `ηr t := η (-t)` is a geodesic on `Ioo a₀ δ` (the window
   -- `Ioo (-δ) δ` is symmetric), with foot `ηr 0 = p`.  Its launch speed equals
   -- that of `η` (the reversal negates the velocity, which preserves the metric
@@ -295,12 +304,16 @@ theorem exists_complete_geodesic_at_velocity
   have hηr_speed_le : (g.inner (ηr 0)) (mfderiv 𝓘(ℝ, ℝ) I ηr 0 1)
       (mfderiv 𝓘(ℝ, ℝ) I ηr 0 1) ≤ c ^ 2 := by rw [hηr_speed0]; exact hηspeed_le
   -- FORWARD extension of the reversal: a geodesic `Γrf` on `Ioi a₀` agreeing
-  -- with `ηr` below `δ`.
-  obtain ⟨Γrf, hΓrf_geo, hΓrf_agree⟩ :=
-    HopfRinow.isGeodesicOn_Ici_of_complete_Ioo (I := I) g ha₀_neg hδ hηr_geo' hηr_cont'
-      (fun γ b hb hγ hγ_cont hagree =>
-        isGeodesicOn_hreg_record (I := I) g hEnorm ha₀_neg hδ hc_nonneg hηr_speed_le
-          hγ hγ_cont hb (fun t ht_a₀ ht_δ ht_b => hagree t ht_a₀ ht_δ ht_b))
+  -- with `ηr` below `δ`, again captured with its continuity on `Ioi a₀`.
+  obtain ⟨Γrf, hΓrf_geo, hΓrf_cont, hΓrf_agree⟩ :=
+    HopfRinow.isGeodesicOn_Ioi_of_endpointContinuation (I := I) g ha₀_neg hδ
+      hηr_geo' hηr_cont'
+      (fun γ b hb hγ hγ_cont hagree => by
+        obtain ⟨c', hc'_nonneg, hγ_smooth, hSpeedBound, hSpeedSq⟩ :=
+          isGeodesicOn_hreg_record (I := I) g hEnorm ha₀_neg hδ hc_nonneg hηr_speed_le
+            hγ hγ_cont hb (fun t _ht_a₀ ht_δ ht_b => hagree t ht_δ ht_b)
+        exact HopfRinow.hasEndpointContinuation_of_complete (I := I) g
+          (lt_trans ha₀_neg hb) hc'_nonneg hγ_smooth hSpeedBound hSpeedSq hγ)
   -- Reflect the reversal extension back: `Γb t := Γrf (-t)` is a geodesic on
   -- `Iio (-a₀)`, agreeing with `η` above `-δ` (in particular near and left of `0`).
   set Γb : ℝ → M := fun t => Γrf (-t) with hΓb_def
@@ -311,6 +324,13 @@ theorem exists_complete_geodesic_at_velocity
     intro t ht
     -- `t < -a₀ ⟹ -t ∈ Ioi a₀`, i.e. `a₀ < -t`.
     simp only [Set.mem_preimage, Set.mem_Ioi]
+    linarith [Set.mem_Iio.mp ht]
+  -- Continuity of `Γb` on the open `Iio (-a₀)`: it is `Γrf ∘ (-·)`, and `Γrf` is
+  -- continuous on `Ioi a₀`, the image of `Iio (-a₀)` under negation.
+  have hΓb_cont : ContinuousOn Γb (Set.Iio (-a₀)) := by
+    refine ContinuousOn.comp hΓrf_cont continuous_neg.continuousOn ?_
+    intro t ht
+    simp only [Set.mem_Ioi]
     linarith [Set.mem_Iio.mp ht]
   -- `Γb` agrees with `η` for `t > -δ` (where `-t < δ`, so `Γrf(-t) = ηr(-t) = η t`).
   have hΓb_agree : ∀ t, -δ < t → Γb t = η t := by
@@ -362,8 +382,41 @@ theorem exists_complete_geodesic_at_velocity
       refine HasGeodesicEquationAt.congr_of_eventuallyEq_at (γ' := Γf) ?_ hΓΓf ?_
       · rw [hΓ_def]; simp only [if_neg (not_lt.mpr hgt.le)]
       · exact hΓf_geo t (Set.mem_Ioi.mpr (lt_trans ha₀_neg hgt))
+  -- `Γ` is continuous on all of `ℝ`.  The two halves `Γb` (continuous on the open
+  -- `Iio (-a₀) ⊇ Iic 0`) and `Γf` (continuous on the open `Ioi a₀ ⊇ Ici 0`) agree
+  -- at the splice point `0` (both equal `η 0 = p`), so the half-line glue is
+  -- continuous by `continuous_if_le` (with `f = id`, `g = 0`).  Since `Γb 0 = Γf 0`,
+  -- the `if · ≤ 0` glue agrees pointwise with the `if · < 0` definition of `Γ`.
+  have hΓb0 : Γb 0 = p := by
+    have := hΓb_agree 0 (by linarith [hδ]); rw [this, hη0]
+  have hΓf0 : Γf 0 = p := by
+    have := hΓf_agree' 0 hδ; rw [this, hη0]
+  have hΓb_cont_Iic : ContinuousOn Γb {x : ℝ | x ≤ 0} := by
+    refine hΓb_cont.mono ?_
+    intro x hx; exact Set.mem_Iio.mpr (lt_of_le_of_lt hx (by rw [hma₀]; exact hδ2_pos))
+  have hΓf_cont_Ici : ContinuousOn Γf {x : ℝ | (0 : ℝ) ≤ x} := by
+    refine hΓf_cont.mono ?_
+    intro x hx; exact Set.mem_Ioi.mpr (lt_of_lt_of_le ha₀_neg hx)
+  have hΓ_cont : Continuous Γ := by
+    have hsplice : ∀ x : ℝ, (fun t : ℝ => t) x = (fun _ : ℝ => (0 : ℝ)) x →
+        Γb x = Γf x := by
+      intro x hx
+      have hx0 : x = 0 := hx
+      rw [hx0, hΓb0, hΓf0]
+    have hglue : Continuous (fun t : ℝ => if t ≤ 0 then Γb t else Γf t) := by
+      have := continuous_if_le (f := fun t : ℝ => t) (g := fun _ : ℝ => (0 : ℝ))
+        (f' := Γb) (g' := Γf) continuous_id continuous_const
+        hΓb_cont_Iic hΓf_cont_Ici hsplice
+      simpa using this
+    refine hglue.congr (fun t => ?_)
+    have hΓt : Γ t = if t < 0 then Γb t else Γf t := by rw [hΓ_def]
+    rw [hΓt]
+    rcases lt_trichotomy t 0 with hlt | heq | hgt
+    · rw [if_pos hlt.le, if_pos hlt]
+    · subst heq; rw [if_pos le_rfl, if_neg (lt_irrefl 0), hΓf0, hΓb0]
+    · rw [if_neg (not_le.mpr hgt), if_neg (not_lt.mpr hgt.le)]
   -- Value and velocity at `0` survive the gluing (via the `𝓝 0`-agreement with `η`).
-  refine ⟨Γ, hΓ_geo, ?_, ?_⟩
+  refine ⟨Γ, hΓ_geo, ?_, ?_, hΓ_cont⟩
   · rw [hΓ_nhds_η.eq_of_nhds, hη0]
   · rw [show mfderiv 𝓘(ℝ, ℝ) I Γ 0 = mfderiv 𝓘(ℝ, ℝ) I η 0 from hΓ_nhds_η.mfderiv_eq]
     exact hηv
@@ -424,7 +477,7 @@ theorem intrinsicGeodesic_mfderiv_zero
     (p : M) (v : TangentSpace I p) :
     (mfderiv 𝓘(ℝ, ℝ) I (intrinsicGeodesic (I := I) g hEnorm p v) 0 (1 : ℝ) : E)
       = (v : E) :=
-  (Classical.choose_spec (exists_complete_geodesic_at_velocity (I := I) g hEnorm p v)).2.2
+  (Classical.choose_spec (exists_complete_geodesic_at_velocity (I := I) g hEnorm p v)).2.2.1
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
@@ -464,10 +517,12 @@ continuity and hence the `C¹`-in-time regularity are recorded as stubs.
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Continuity of the intrinsic geodesic.  Provable once
-`exists_complete_geodesic_at_velocity` is built from the (continuous) chart-glue
-of local geodesics; recorded here as the regularity datum feeding the `C¹`-in-time
-lemma below. -/
+/-- Continuity of the intrinsic geodesic.  The complete geodesic
+`exists_complete_geodesic_at_velocity` produces is the half-line glue of the
+forward / backward cross-chart extensions, each continuous on its open half-line
+(the per-extension continuity tracked by `isGeodesicOn_Ioi_of_endpointContinuation`);
+the two halves agree at the splice point, so the glue is continuous.  This is the
+regularity datum feeding the `C¹`-in-time lemma below. -/
 theorem intrinsicGeodesic_continuous
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -475,8 +530,8 @@ theorem intrinsicGeodesic_continuous
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
       ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
     (p : M) (v : TangentSpace I p) :
-    Continuous (intrinsicGeodesic (I := I) g hEnorm p v) := by
-  sorry
+    Continuous (intrinsicGeodesic (I := I) g hEnorm p v) :=
+  (Classical.choose_spec (exists_complete_geodesic_at_velocity (I := I) g hEnorm p v)).2.2.2
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
