@@ -168,26 +168,44 @@ theorem gauss_lemma_pullback
   --     is jointly `C²` near `[0,1] × {0}` by
   --     `expMap_contMDiffAt2_of_norm_lt_radius` composed with the smooth
   --     `(s, t) ↦ t • (v + s • w)`, so these variants apply.
-  --   * Two genuine geometric inputs remain MISSING in this file's import graph
-  --     (verified by exhaustive grep; none exist as importable statements):
-  --       (a) The radial geodesic property of `t ↦ expMap g p (t • v)` as a clean
-  --           `covDerivAlong`-level / `HasGeodesicEquationAt` fact.  The maximal
-  --           interval only provides `IsGeodesicAt` for an existentially-bound
-  --           witness curve that *agrees* with the maximal geodesic, under a
-  --           foot-in-chart-source clause (`exists_isGeodesicAt_of_mem_maximalGeodesicInterval`,
-  --           MaximalInterval.lean).  `IsGeodesicOn`/`covDerivAlong = 0` of the
-  --           radial curve lives only DOWNSTREAM (`Exponential/IntrinsicExp`,
-  --           which imports HopfRinow, which imports this file).  It must be
-  --           re-derived here from `radialChartCurve_secondDeriv_zero`
-  --           (NormalCoordinates.lean — the normal-chart linear structure) plus
-  --           a chart-change from `normalChartAt` to the `extChartAt`-based
-  --           `covDerivAlong`; this chart-change bridge does not yet exist.
-  --       (b) The radial chain rule identifying `mfderiv (fun u => exp_p u) v v`
-  --           with `∂_t f (0, 1)` and the `w`-direction Jacobi velocity — both
-  --           requiring an `mfderiv`→`fderiv` velocity bridge at the `C²`
-  --           (`MDifferentiableAt`) level, generalising
-  --           `chartCoord_mfderiv_along_curve_eq_fderiv` (MFDerivAlongCurve.lean),
-  --           which currently demands `ContMDiff … ∞`.
+  --   * Bridge (b) is now AVAILABLE:
+  --     `chartCoord_mfderiv_along_curve_eq_fderiv_of_mdifferentiableAt`
+  --     (MFDerivAlongCurve.lean) is the `MDifferentiableAt`/`C²`-level form of the
+  --     `mfderiv → fderiv` velocity bridge (the original
+  --     `chartCoord_mfderiv_along_curve_eq_fderiv` demanded `ContMDiff … ∞`; the
+  --     relaxed variant takes `MDifferentiableAt 𝓘(ℝ, ℝ) I γ t` directly, since
+  --     the original proof used the `C^∞` hypothesis only to extract that one
+  --     `MDifferentiableAt`).
+  --   * Bridge (a) remains genuinely MISSING in this file's import graph
+  --     (verified by exhaustive grep; no importable upstream statement exists):
+  --       The radial geodesic property of `t ↦ expMap g p (t • v)` as a
+  --       `covDerivAlong = 0` / `HasGeodesicEquationAt`-at-every-`t` fact.  The
+  --       variation argument needs the radial curve to be a geodesic at EVERY
+  --       `t ∈ [0, 1]` (so the `⟨∇_t ∂_t f, ∂_s f⟩` term vanishes pointwise).
+  --       `radialChartCurve_secondDeriv_zero` (NormalCoordinates.lean) supplies
+  --       only the s = 0 (CENTRE) chart-acceleration vanishing in the normal
+  --       chart at `p`; it is strictly weaker than the full radial-Christoffel-
+  --       vanishing-along-the-ray (`Γ(v, v)(s • v) = 0` for all s) that a
+  --       geodesic-at-every-`t` requires, and no general-scale sibling exists.
+  --       The two unconditional routes to a moving-foot `HasGeodesicEquationAt`
+  --       are both blocked upstream of this file:
+  --         (a1) `IsGeodesicAt.hasGeodesicEquationAt` (CrossVFReduction.lean,
+  --              unconditional) would convert `IsGeodesicAt g (radial) t`, but
+  --              `IsGeodesicAt` for the radial curve needs BOTH the rescaling
+  --              `expMap g p (t • v) = maximalGeodesic g p v t`
+  --              (MaximalRescaling.lean) under its `h1_in_agreement` chart-
+  --              coordinate-agreement side condition, AND the foot-in-source
+  --              clause `expMap g p (t • v) ∈ (chartAt H p).source` — and the
+  --              normal-chart source is the opaque `expMapDiffeo` image, with NO
+  --              proven relation to `(chartAt H p).source`.
+  --         (a2) `IsGeodesic` / `IsGeodesicOn` of the radial exp curve lives only
+  --              DOWNSTREAM in `Exponential/IntrinsicExp` (`intrinsicGeodesic_isGeodesic`),
+  --              which imports HopfRinow, which imports THIS file — a genuine
+  --              import cycle.
+  --       Closing (a) requires either lifting the radial-Christoffel-vanishing-
+  --       along-rays (the Gauss-lemma geometric core) into NormalCoordinates.lean
+  --       as a general-scale statement, or relocating the upstream/downstream
+  --       split so the radial `IsGeodesic` fact is available here without a cycle.
   sorry
 
 end GaussLemma

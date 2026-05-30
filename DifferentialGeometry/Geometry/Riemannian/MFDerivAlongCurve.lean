@@ -124,6 +124,48 @@ theorem chartCoord_mfderiv_along_curve_eq_fderiv
     rw [← hmf_eq_f, hchain]; rfl
   rw [hRHS]; rfl
 
+/-- **`MDifferentiableAt`-level chart-`α`-coordinate chain rule.**
+
+The same chain-rule identity as `chartCoord_mfderiv_along_curve_eq_fderiv`, but
+requiring only `MDifferentiableAt 𝓘(ℝ, ℝ) I γ t` (in place of global `C^∞`
+smoothness of `γ`). The original proof uses the `C^∞` hypothesis solely to
+extract `MDifferentiableAt 𝓘(ℝ, ℝ) I γ t`; everything downstream
+(`mfderiv_comp`, `mfderiv_eq_fderiv`, `mdifferentiableAt_extChartAt`,
+`TangentBundle.continuousLinearMapAt_trivializationAt`) is `MDifferentiableAt`-
+level. This `C²`/`MDifferentiableAt`-relaxed form is the velocity bridge consumed
+by second-order variational arguments where the curve is only twice continuously
+differentiable (e.g. the radial geodesic variation behind Gauss's lemma). -/
+theorem chartCoord_mfderiv_along_curve_eq_fderiv_of_mdifferentiableAt
+    {γ : ℝ → M} {t : ℝ} (hγ : MDifferentiableAt 𝓘(ℝ, ℝ) I γ t)
+    (α : M) (ht : γ t ∈ (chartAt H α).source) :
+    ((trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ (γ t))
+        ((mfderiv 𝓘(ℝ, ℝ) I γ t : ℝ →L[ℝ] _) (1 : ℝ)) =
+      (fderiv ℝ ((extChartAt I α) ∘ γ) t : ℝ →L[ℝ] E) (1 : ℝ) := by
+  -- Rewrite the trivialization CLM as the mfderiv of `extChartAt`.
+  rw [TangentBundle.continuousLinearMapAt_trivializationAt (I := I)
+        (x₀ := α) (x := γ t) ht]
+  -- mdifferentiabilities (the curve one is now a direct hypothesis).
+  have hφ_mdiff : MDifferentiableAt I 𝓘(ℝ, E) (extChartAt I α) (γ t) :=
+    mdifferentiableAt_extChartAt (I := I) (x := α) ht
+  -- Chain rule on the composed manifold map.
+  have hchain :
+      mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, E) ((extChartAt I α) ∘ γ) t =
+        (mfderiv I 𝓘(ℝ, E) (extChartAt I α) (γ t)).comp
+          (mfderiv 𝓘(ℝ, ℝ) I γ t) :=
+    mfderiv_comp t hφ_mdiff hγ
+  -- For maps between model spaces, `mfderiv = fderiv`.
+  have hmf_eq_f :
+      mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, E) ((extChartAt I α) ∘ γ) t =
+        fderiv ℝ ((extChartAt I α) ∘ γ) t :=
+    mfderiv_eq_fderiv (𝕜 := ℝ) (f := (extChartAt I α) ∘ γ) (x := t)
+  -- Apply both sides to `(1 : ℝ)`.
+  have hRHS :
+      (fderiv ℝ ((extChartAt I α) ∘ γ) t : ℝ →L[ℝ] E) (1 : ℝ) =
+        ((mfderiv I 𝓘(ℝ, E) (extChartAt I α) (γ t)).comp
+            (mfderiv 𝓘(ℝ, ℝ) I γ t)) (1 : ℝ) := by
+    rw [← hmf_eq_f, hchain]; rfl
+  rw [hRHS]; rfl
+
 /-! ### Continuity of the chart-`α`-pullback derivative -/
 
 /-- The chart-`α`-pullback `t ↦ (fderiv ℝ (extChartAt I α ∘ γ) t : ℝ → E) 1`
