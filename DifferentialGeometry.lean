@@ -1270,6 +1270,7 @@ import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.ChartLocalFlowPr
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.ManifoldIntegralFlow
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.ChartBridgeProducer
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.BareFlowFromJointC1
+import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.SmoothInSpace.ForwardIntegralCurveUniqueness
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.VariationalFlow
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.VariationalFlowFlatPairing
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.VariationalFlowFlatPairedResidual
