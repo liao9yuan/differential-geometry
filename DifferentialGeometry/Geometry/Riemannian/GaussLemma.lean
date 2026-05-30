@@ -1501,6 +1501,190 @@ theorem gauss_lemma_pullback
 
 end GaussAssembly
 
+section RadialLengthEngine
+
+/-! ## Radial length-comparison engine
+
+The classical Gauss-lemma length comparison: inside a normal ball, the
+radial direction is the unique length-minimising direction.  The engine
+below packages the pointwise content used by the radial-minimiser cluster.
+
+* `expMap_normalChartAt` — on the chart source, `expMap g p` inverts the
+  normal chart.
+* `gauss_radial_lower_bound` — the algebraic core: at a radial direction
+  `u ≠ 0` inside the `C²` ball, the pullback speed-squared dominates the
+  squared radial component, `g_p(u, ζ)² / g_p(u, u) ≤ g(dexp_u ζ, dexp_u ζ)`,
+  proved by the Gauss orthogonal decomposition of `ζ` against `u`.
+* `radial_chain_mfderiv` — for a curve confined to the chart, the velocity
+  factors as `exp`-differential of the chart-image velocity.
+* `radialDist_hasDerivAt` — the derivative of the radial distance
+  `s ↦ √(g_p(ψ s, ψ s))`.
+* `gauss_pointwise_speed_lower_bound` — the pointwise Gauss speed bound:
+  the radial-distance derivative squared is dominated by the intrinsic
+  speed-squared. -/
+
+open DifferentialGeometry.Geometry.Riemannian.NormalCoordinates
+
+/-- On the source of the normal chart, `expMap g p` inverts the chart. -/
+private theorem expMap_normalChartAt (g : SmoothRiemannianMetric I M) (p : M) {x : M}
+    (hx : x ∈ (NormalCoordinates.normalChartAt (I := I) g p).source) :
+    (expMap (I := I) g p
+      (show TangentSpace I p from (NormalCoordinates.normalChartAt (I := I) g p x))) = x := by
+  have hmem := (NormalCoordinates.normalChartAt (I := I) g p).map_source hx
+  have h2 := NormalCoordinates.normalChartAt_symm_apply (I := I) g p
+    (v := NormalCoordinates.normalChartAt (I := I) g p x) hmem
+  have h1 := NormalCoordinates.normalChartAt_left_inv (I := I) g p hx
+  rw [← h2, h1]
+
+/-- **Gauss radial lower bound.** For a radial direction `u ≠ 0` inside the
+`C²` ball, the pullback speed-squared at `u` dominates the squared radial
+component: `g_p(u, ζ)² / g_p(u, u) ≤ g(exp u, dexp_u ζ, dexp_u ζ)`.  Proved
+by decomposing `ζ` into the `g_p`-radial component along `u` and the
+`g_p`-orthogonal remainder, then applying the two Gauss-lemma slots:
+`g(dexp_u u, dexp_u u) = g_p(u, u)` (diagonal) and
+`g(dexp_u u, dexp_u β) = 0` for `g_p`-orthogonal `β` (cross). -/
+private theorem gauss_radial_lower_bound
+    (g : SmoothRiemannianMetric I M) (p : M) {u : E}
+    (hu : (show TangentSpace I p from u) ∈ expDomain (I := I) g p)
+    (hsmall : ‖(u : E)‖ < expMapC2Radius (I := I) g p)
+    (hune : u ≠ 0) (ζ : E) :
+    (g.inner p u ζ)^2 / g.inner p u u ≤
+      g.inner (expMap (I := I) g p (show TangentSpace I p from u))
+        (mfderiv 𝓘(ℝ, E) I
+          (fun y : E => expMap (I := I) g p (show TangentSpace I p from y)) u
+          (show TangentSpace I p from ζ))
+        (mfderiv 𝓘(ℝ, E) I
+          (fun y : E => expMap (I := I) g p (show TangentSpace I p from y)) u
+          (show TangentSpace I p from ζ)) := by
+  classical
+  obtain ⟨hdiag, hcross⟩ := gauss_lemma_pullback (I := I) g p hu hsmall
+  set q := expMap (I := I) g p (show TangentSpace I p from u) with hq
+  set D : E →L[ℝ] E :=
+    mfderiv 𝓘(ℝ, E) I (fun y : E => expMap (I := I) g p (show TangentSpace I p from y)) u
+    with hD
+  set B : E →L[ℝ] E →L[ℝ] ℝ := g.inner p with hB
+  set Bq : E →L[ℝ] E →L[ℝ] ℝ := g.inner q with hBq
+  have hupos : 0 < B u u := g.pos p u hune
+  have hune' : B u u ≠ 0 := ne_of_gt hupos
+  set α : ℝ := B u ζ / B u u with hα
+  set β : E := ζ - α • u with hβ
+  have hdecomp : ζ = β + α • u := by rw [hβ]; abel
+  have hβ_orth : B u β = 0 := by
+    have key : B u β + α * B u u = B u ζ := by
+      calc B u β + α * B u u = B u (β + α • u) := by rw [map_add, map_smul, smul_eq_mul]
+        _ = B u ζ := by rw [← hdecomp]
+    have hb : B u β = B u ζ - α * B u u := by linarith [key]
+    rw [hb, hα]; field_simp; ring
+  have hDζ : D ζ = D β + α • D u := by
+    rw [show ζ = β + α • u from hdecomp, map_add, map_smul]
+  change B u ζ ^ 2 / B u u ≤ Bq (D ζ) (D ζ)
+  rw [hDζ]
+  have hexpand : Bq (D β + α • D u) (D β + α • D u)
+      = Bq (D β) (D β) + 2 * α * Bq (D u) (D β) + α^2 * Bq (D u) (D u) := by
+    simp only [map_add, map_smul, ContinuousLinearMap.add_apply,
+      ContinuousLinearMap.smul_apply, smul_eq_mul]
+    have hsym : Bq (D β) (D u) = Bq (D u) (D β) := g.symm q (D β) (D u)
+    rw [hsym]; ring
+  rw [hexpand]
+  have hdiag' : Bq (D u) (D u) = B u u := hdiag
+  have hcross' : Bq (D u) (D β) = 0 := hcross hβ_orth
+  rw [hdiag', hcross']
+  have hββ_nn : 0 ≤ Bq (D β) (D β) := by
+    rcases eq_or_ne (D β) 0 with h | h
+    · rw [h]; simp
+    · exact (g.pos q (D β) h).le
+  have hlhs : B u ζ ^ 2 / B u u = α^2 * B u u := by rw [hα]; field_simp
+  rw [hlhs]
+  nlinarith [hββ_nn, mul_nonneg (sq_nonneg α) hupos.le]
+
+/-- **Chain rule for a curve confined to the normal chart.** If a curve `γ`
+is `MDifferentiableAt t`, stays in the normal-chart source near `t`, and its
+chart image `c(γt)` lies inside the `C²` ball, then the velocity of `γ` is the
+exponential differential applied to the velocity of the chart-image curve. -/
+private theorem radial_chain_mfderiv
+    (g : SmoothRiemannianMetric I M) (p : M) {γ : ℝ → M} {t : ℝ}
+    (hγdiff : MDifferentiableAt 𝓘(ℝ, ℝ) I γ t)
+    (hsrc : γ t ∈ (NormalCoordinates.normalChartAt (I := I) g p).source)
+    (hball : ‖NormalCoordinates.normalChartAt (I := I) g p (γ t)‖ <
+      expMapC2Radius (I := I) g p)
+    (hev : ∀ᶠ s in nhds t, γ s ∈ (NormalCoordinates.normalChartAt (I := I) g p).source) :
+    mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ)
+    = mfderiv 𝓘(ℝ, E) I (fun y : E => (expMap (I := I) g p (show TangentSpace I p from y) : M))
+        (NormalCoordinates.normalChartAt (I := I) g p (γ t))
+        (mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, E)
+          (fun s => NormalCoordinates.normalChartAt (I := I) g p (γ s)) t (1:ℝ)) := by
+  classical
+  set c := NormalCoordinates.normalChartAt (I := I) g p with hc
+  set ψ : ℝ → E := fun s => c (γ s) with hψ
+  have hγeq : γ =ᶠ[nhds t] (fun s => expMap (I := I) g p (show TangentSpace I p from ψ s)) := by
+    filter_upwards [hev] with s hs
+    exact (expMap_normalChartAt (I := I) g p hs).symm
+  rw [hγeq.mfderiv_eq]
+  have hexp_diff : MDifferentiableAt 𝓘(ℝ, E) I
+      (fun y : E => (expMap (I := I) g p (show TangentSpace I p from y) : M)) (ψ t) :=
+    (expMap_contMDiffAt2_of_norm_lt_radius (I := I) g p hball).mdifferentiableAt (by decide)
+  have hψ_diff : MDifferentiableAt 𝓘(ℝ, ℝ) 𝓘(ℝ, E) ψ t := by
+    have hc_diff : MDifferentiableAt I 𝓘(ℝ, E) c (γ t) :=
+      ((NormalCoordinates.normalChartAt_contMDiffOn (I := I) g p).mdifferentiableOn one_ne_zero
+        (γ t) hsrc).mdifferentiableAt
+        ((NormalCoordinates.normalChartAt_open_source (I := I) g p).mem_nhds hsrc)
+    exact hc_diff.comp t hγdiff
+  rw [show (fun s => expMap (I := I) g p (show TangentSpace I p from ψ s))
+      = (fun y : E => (expMap (I := I) g p (show TangentSpace I p from y) : M)) ∘ ψ from rfl,
+    mfderiv_comp t hexp_diff hψ_diff]
+  rfl
+
+/-- **Radial-distance derivative.** For a bilinear positive form `B`, a curve
+`ψ` differentiable at `t` with `B(ψt)(ψt) > 0`, the radial distance
+`s ↦ √(B(ψs)(ψs))` has derivative `B(ψt)(ψ't) / √(B(ψt)(ψt))` at `t`. -/
+private theorem radialDist_hasDerivAt
+    (B : E →L[ℝ] E →L[ℝ] ℝ) (hBsym : ∀ a b : E, B a b = B b a)
+    (ψ : ℝ → E) (ψ' : E) {t : ℝ}
+    (hψ : HasDerivAt ψ ψ' t) (hpos : 0 < B (ψ t) (ψ t)) :
+    HasDerivAt (fun s => Real.sqrt (B (ψ s) (ψ s)))
+      (B (ψ t) ψ' / Real.sqrt (B (ψ t) (ψ t))) t := by
+  have hf : HasDerivAt (fun s => B (ψ s) (ψ s)) (B ψ' (ψ t) + B (ψ t) ψ') t :=
+    (B.hasFDerivAt.comp_hasDerivAt t hψ).clm_apply hψ
+  have hsqrt := hf.sqrt (ne_of_gt hpos)
+  have hcoef : (B ψ' (ψ t) + B (ψ t) ψ') / (2 * Real.sqrt (B (ψ t) (ψ t)))
+      = B (ψ t) ψ' / Real.sqrt (B (ψ t) (ψ t)) := by
+    rw [hBsym ψ' (ψ t), show B (ψ t) ψ' + B (ψ t) ψ' = 2 * B (ψ t) ψ' by ring,
+      mul_div_mul_left _ _ (by norm_num : (2:ℝ) ≠ 0)]
+  rwa [hcoef] at hsqrt
+
+/-- **Pointwise Gauss speed lower bound.** At a curve point confined to the
+normal chart with nonzero, in-`C²`-ball chart image, the radial-distance
+derivative squared (computed from the chart-image velocity) is dominated by
+the intrinsic speed-squared `g(γt, γ't, γ't)`. -/
+private theorem gauss_pointwise_speed_lower_bound
+    (g : SmoothRiemannianMetric I M) (p : M) {γ : ℝ → M} {t : ℝ}
+    (hγdiff : MDifferentiableAt 𝓘(ℝ, ℝ) I γ t)
+    (hsrc : γ t ∈ (NormalCoordinates.normalChartAt (I := I) g p).source)
+    (hdom : (show TangentSpace I p from (NormalCoordinates.normalChartAt (I := I) g p (γ t)))
+      ∈ expDomain (I := I) g p)
+    (hball : ‖NormalCoordinates.normalChartAt (I := I) g p (γ t)‖ <
+      expMapC2Radius (I := I) g p)
+    (hune : NormalCoordinates.normalChartAt (I := I) g p (γ t) ≠ 0)
+    (hev : ∀ᶠ s in nhds t, γ s ∈ (NormalCoordinates.normalChartAt (I := I) g p).source) :
+    (g.inner p (NormalCoordinates.normalChartAt (I := I) g p (γ t))
+        (mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, E)
+          (fun s => NormalCoordinates.normalChartAt (I := I) g p (γ s)) t (1:ℝ)))^2
+      / g.inner p (NormalCoordinates.normalChartAt (I := I) g p (γ t))
+          (NormalCoordinates.normalChartAt (I := I) g p (γ t))
+    ≤ g.inner (γ t) (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ)) (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ)) := by
+  have hchain := radial_chain_mfderiv (I := I) g p hγdiff hsrc hball hev
+  have hbase : γ t = expMap (I := I) g p
+      (show TangentSpace I p from (NormalCoordinates.normalChartAt (I := I) g p (γ t))) :=
+    (expMap_normalChartAt (I := I) g p hsrc).symm
+  have hkernel := gauss_radial_lower_bound (I := I) g p hdom hball hune
+    (mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, E)
+      (fun s => NormalCoordinates.normalChartAt (I := I) g p (γ s)) t (1:ℝ))
+  rw [← hbase] at hkernel
+  rw [hchain]
+  exact hkernel
+
+end RadialLengthEngine
+
 end GaussLemma
 
 /-! ## Riemannian-distance convention for the radial-minimiser cluster
