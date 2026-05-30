@@ -245,6 +245,7 @@ private lemma chartPulled_contDiffAt
 
 /-! ## Commutation of mixed covariant derivatives (fixed chart) -/
 
+omit [T2Space M] [SigmaCompactSpace M] in
 /-- **Fixed-chart commutation of mixed covariant derivatives.** For a smooth
 two-parameter variation `f`, with chart basepoint pinned at `f s t` and the
 parameter velocities read off as chart-coordinate sections

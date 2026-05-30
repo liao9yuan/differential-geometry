@@ -1033,6 +1033,7 @@ theorem S2_diff_under_interval_integral
 
 /-! ## Metric compatibility for two distinct sections -/
 
+omit [T2Space M] [SigmaCompactSpace M] in
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong in
 /-- **Metric compatibility (Leibniz rule) for the `g`-inner product of two
 sections along a curve, `C²`-level hypotheses.** For a curve `γ` continuous at
@@ -1051,7 +1052,7 @@ at `t₀` (for the chart-source neighbourhood) and differentiability of the
 chart trajectory and the two chart-reps at `t₀`. The smooth-curve form
 `metric_compat_hasDerivAt_inner` is a wrapper supplying these from
 `ContMDiff … ∞ γ`. -/
-private lemma metric_compat_hasDerivAt_inner_of_chartCurveDeriv
+lemma metric_compat_hasDerivAt_inner_of_chartCurveDeriv
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (V W : ∀ t, TangentSpace I (γ t)) (t₀ : ℝ)
     (hγ_cont : ContinuousAt γ t₀)
@@ -1353,6 +1354,109 @@ private lemma commute_ds_dt_intrinsic
   -- `hchartL`/`hchartR` rewrite the chart-covariant values, and `hcommute'` closes them.
   rw [hchartL, hchartR]
   -- Now both `symmL` basepoints are `f 0 t = α`; apply `hcommute'`.
+  rw [hcommute']
+
+omit [T2Space M] [SigmaCompactSpace M] in
+open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong in
+/-- **Intrinsic mixed-covariant commutation at the central curve, `C²`-level
+hypotheses.** For a two-parameter map `f : ℝ → ℝ → M` whose chart-`(f 0 t)`-pullback
+is `ContDiffAt ℝ 2` at `(0, t)` and whose longitudinal / transverse slices are
+`ContMDiffAt 𝓘(ℝ, ℝ) I 2` at the relevant points, the transverse covariant
+derivative of the longitudinal velocity at `s = 0` equals the longitudinal
+covariant derivative of the transverse (variation-field) velocity, both viewed as
+intrinsic `covDerivAlong` vectors at the common foot `f 0 t`:
+`∇_s ∂_t f|_{s = 0} = ∇_t ∂_s f|_{s = 0}`.
+
+This is the `C²`-relaxed sibling of `commute_ds_dt_intrinsic`: the only changes are
+(i) the chain-rule bridge specialises to the `MDifferentiableAt`-level
+`chartCoord_mfderiv_along_curve_eq_fderiv_of_mdifferentiableAt`, and (ii) the
+fixed-chart commutation is supplied directly by `commute_ds_dt_fixed_chart_C2`
+(rather than through the `IsSmoothVariation` wrapper). It is the form consumed by
+the radial geodesic variation behind Gauss's lemma, whose variation is jointly
+`C²` but not known to be jointly `C^∞`. -/
+theorem commute_ds_dt_intrinsic_C2
+    (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M) (t : ℝ)
+    (hF2 : ContDiffAt ℝ 2 (fun p : ℝ × ℝ => extChartAt I (f 0 t) (f p.1 p.2)) (0, t))
+    (hslice_u : ∀ s : ℝ, ContMDiffAt 𝓘(ℝ, ℝ) I 2 (fun u : ℝ => f s u) t)
+    (hslice_v : ∀ v : ℝ, ContMDiffAt 𝓘(ℝ, ℝ) I 2 (fun u : ℝ => f u v) 0)
+    (htransverse_cont : Continuous (fun s : ℝ => f s t))
+    (hcentral_cont : Continuous (fun v : ℝ => f 0 v)) :
+    covDerivAlong (I := I) g (fun s : ℝ => f s t)
+        (fun s : ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f s u) t (1 : ℝ)) 0
+      = covDerivAlong (I := I) g (fun v : ℝ => f 0 v)
+        (fun v : ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f u v) 0 (1 : ℝ)) t := by
+  classical
+  set α : M := f 0 t with hα
+  rw [covDerivAlong_def, covDerivAlong_def]
+  have hfootL : (fun s : ℝ => f s t) 0 = α := by rw [hα]
+  have hfootR : (fun v : ℝ => f 0 v) t = α := by rw [hα]
+  set repL : ℝ → E := chartRepAt (I := I) (fun s : ℝ => f s t)
+    (fun s : ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f s u) t (1 : ℝ)) 0 with hrepL
+  set repR : ℝ → E := chartRepAt (I := I) (fun v : ℝ => f 0 v)
+    (fun v : ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f u v) 0 (1 : ℝ)) t with hrepR
+  set secL : ℝ → E :=
+    fun s : ℝ => fderiv ℝ (fun v : ℝ => extChartAt I α (f s v)) t (1 : ℝ) with hsecL
+  set secR : ℝ → E :=
+    fun v : ℝ => fderiv ℝ (fun u : ℝ => extChartAt I α (f u v)) 0 (1 : ℝ) with hsecR
+  -- `repL =ᶠ secL` near `0`, via the `MDifferentiableAt` chain-rule bridge.
+  have hopenL : IsOpen {s : ℝ | f s t ∈ (chartAt H α).source} :=
+    htransverse_cont.isOpen_preimage _ (chartAt H α).open_source
+  have h0L : (0 : ℝ) ∈ {s : ℝ | f s t ∈ (chartAt H α).source} := by
+    change f 0 t ∈ (chartAt H α).source; rw [hα]; exact mem_chart_source H (f 0 t)
+  have hrepL_eq : repL =ᶠ[𝓝 (0 : ℝ)] secL := by
+    filter_upwards [hopenL.mem_nhds h0L] with s hs
+    have hsrc : (fun u : ℝ => f s u) t ∈ (chartAt H α).source := hs
+    have hmdiff : MDifferentiableAt 𝓘(ℝ, ℝ) I (fun u : ℝ => f s u) t :=
+      (hslice_u s).mdifferentiableAt (by decide)
+    have hbridge :=
+      MFDerivAlongCurve.chartCoord_mfderiv_along_curve_eq_fderiv_of_mdifferentiableAt
+        (I := I) (M := M) (γ := fun u : ℝ => f s u) hmdiff α (t := t) hsrc
+    change (trivializationAt E (TangentSpace I) ((fun s : ℝ => f s t) 0)).continuousLinearMapAt ℝ
+        ((fun s : ℝ => f s t) s) (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f s u) t (1 : ℝ))
+      = fderiv ℝ (fun v : ℝ => extChartAt I α (f s v)) t (1 : ℝ)
+    rw [hfootL]
+    have hcompfun : ((extChartAt I α) ∘ (fun u : ℝ => f s u))
+        = (fun v : ℝ => extChartAt I α (f s v)) := rfl
+    rw [hcompfun] at hbridge
+    exact hbridge
+  -- `repR =ᶠ secR` near `t`.
+  have hopenR : IsOpen {v : ℝ | f 0 v ∈ (chartAt H α).source} :=
+    hcentral_cont.isOpen_preimage _ (chartAt H α).open_source
+  have h0R : t ∈ {v : ℝ | f 0 v ∈ (chartAt H α).source} := by
+    change f 0 t ∈ (chartAt H α).source; rw [hα]; exact mem_chart_source H (f 0 t)
+  have hrepR_eq : repR =ᶠ[𝓝 t] secR := by
+    filter_upwards [hopenR.mem_nhds h0R] with v hv
+    have hsrc : (fun u : ℝ => f u v) 0 ∈ (chartAt H α).source := hv
+    have hmdiff : MDifferentiableAt 𝓘(ℝ, ℝ) I (fun u : ℝ => f u v) 0 :=
+      (hslice_v v).mdifferentiableAt (by decide)
+    have hbridge :=
+      MFDerivAlongCurve.chartCoord_mfderiv_along_curve_eq_fderiv_of_mdifferentiableAt
+        (I := I) (M := M) (γ := fun u : ℝ => f u v) hmdiff α (t := 0) hsrc
+    change (trivializationAt E (TangentSpace I) ((fun v : ℝ => f 0 v) t)).continuousLinearMapAt ℝ
+        ((fun v : ℝ => f 0 v) v) (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f u v) 0 (1 : ℝ))
+      = fderiv ℝ (fun u : ℝ => extChartAt I α (f u v)) 0 (1 : ℝ)
+    rw [hfootR]
+    have hcompfun : ((extChartAt I α) ∘ (fun u : ℝ => f u v))
+        = (fun u : ℝ => extChartAt I α (f u v)) := rfl
+    rw [hcompfun] at hbridge
+    exact hbridge
+  -- Transport the chart-`α`-coordinate covariant derivatives through the eventual
+  -- equalities; the resulting values are the two sides of `commute_ds_dt_fixed_chart_C2`.
+  have hchartL : chartCovDerivAlong (I := I) g ((fun s : ℝ => f s t) 0) (fun s : ℝ => f s t) repL 0
+      = chartCovDerivAlong (I := I) g α (fun s : ℝ => f s t) secL 0 := by
+    rw [hfootL, chartCovDerivAlong_def, chartCovDerivAlong_def, hrepL_eq.deriv_eq,
+      hrepL_eq.eq_of_nhds]
+  have hchartR : chartCovDerivAlong (I := I) g ((fun v : ℝ => f 0 v) t) (fun v : ℝ => f 0 v) repR t
+      = chartCovDerivAlong (I := I) g α (fun v : ℝ => f 0 v) secR t := by
+    rw [hfootR, chartCovDerivAlong_def, chartCovDerivAlong_def, hrepR_eq.deriv_eq,
+      hrepR_eq.eq_of_nhds]
+  have hcommute := commute_ds_dt_fixed_chart_C2 (I := I) g f 0 t (by rw [← hα]; exact hF2)
+  rw [show f (0 : ℝ) t = α from hα] at hcommute
+  have hcommute' :
+      chartCovDerivAlong (I := I) g α (fun s : ℝ => f s t) secL 0
+        = chartCovDerivAlong (I := I) g α (fun v : ℝ => f 0 v) secR t :=
+    hcommute
+  rw [hchartL, hchartR]
   rw [hcommute']
 
 /-! ## Differentiability of the variation-field and velocity chart-reps -/

@@ -299,30 +299,46 @@ theorem gauss_lemma_pullback
   --     `maximalGeodesic` by `HasGeodesicEquationAt.congr_of_eventuallyEq_at`.
   --     This replaces the former blocker (a): no normal-chart / `expMapDiffeo`
   --     identification and no import cycle is needed.
-  --   * STEP 2 (the variational assembly itself) is the remaining residual.  The
-  --     `C²`-relaxed chart-level engines are public:
-  --     `commute_ds_dt_fixed_chart_C2`, `hasDerivAt_innerW`, `nabla_t_nabla_s_eq`,
-  --     `nabla_s_nabla_t_eq` (FixedChartIdentities.lean), and the velocity bridge
-  --     `chartCoord_mfderiv_along_curve_eq_fderiv_of_mdifferentiableAt`
-  --     (MFDerivAlongCurve.lean).  But the INTRINSIC metric-compatibility product
-  --     rule that converts a `t`-derivative of `g.inner (γ t) (V t) (W t)` into
-  --     `⟨∇_t V, W⟩ + ⟨V, ∇_t W⟩` at `C²` regularity —
-  --     `metric_compat_hasDerivAt_inner_of_chartCurveDeriv` (SecondVariation.lean) —
-  --     is `private`, hence not importable here; and the conversion
-  --     `HasGeodesicEquationAt → covDerivAlong velocity = 0` exists only in the
-  --     `C^∞`-hypothesis form `covDerivAlong_velocity_eq_zero_iff_hasGeodesicEquationAt`
-  --     (CovariantDerivativeAlong.lean), whereas the radial variation is only `C²`.
-  --     Closing STEP 2 therefore requires: (i) de-privatising
-  --     `metric_compat_hasDerivAt_inner_of_chartCurveDeriv` (a minimal,
-  --     dependency-free visibility change); (ii) a `C²`-form
-  --     `HasGeodesicEquationAt → covDerivAlong velocity = 0` (the backward direction
-  --     of the existing iff uses only the unpacked geodesic identity, so it relaxes
-  --     to `C²`, but it must be re-stated with `DifferentiableAt`-level hypotheses on
-  --     `chartCurve (γ t) γ`); and (iii) the integration argument itself (FTC over
-  --     `[0, 1]`, continuity / interval-integrability of the `C²`-only integrand,
-  --     and the `½ ∂_s g.inner_p (v + s•w, v + s•w)|₀ = g.inner_p (v, w)` endpoint
-  --     computation).  This is substantial new `C²`-relaxed infrastructure rather
-  --     than a thin assembly, and is left as the residual.
+  --   * STEP 2 (the variational assembly itself) is the remaining residual.  All of
+  --     the `C²`-relaxed structural keystones are now PUBLIC and axiom-clean:
+  --       - `commute_ds_dt_fixed_chart_C2` (FixedChartIdentities.lean) — the
+  --         fixed-chart mixed-derivative commutation at `ContDiffAt 2`;
+  --       - `metric_compat_hasDerivAt_inner_of_chartCurveDeriv` (SecondVariation.lean)
+  --         — the INTRINSIC metric-compatibility product rule converting a
+  --         `t`-derivative of `g.inner (γ t) (V t) (W t)` into
+  --         `⟨∇_t V, W⟩ + ⟨V, ∇_t W⟩`, now de-privatised and with the unused
+  --         `[T2Space M] [SigmaCompactSpace M]` typeclasses omitted so it applies in
+  --         this section's context;
+  --       - `commute_ds_dt_intrinsic_C2` (SecondVariation.lean) — the intrinsic
+  --         `∇_s ∂_t f|_{s=0} = ∇_t ∂_s f|_{s=0}` mixed commutation, `C²` hypotheses;
+  --       - `covDerivAlong_velocity_eq_zero_of_hasGeodesicEquationAt_C2`
+  --         (CovariantDerivativeAlong.lean) — the `C²`-form
+  --         `HasGeodesicEquationAt → covDerivAlong velocity = 0` (the backward
+  --         direction needs only `ContMDiffAt 𝓘(ℝ,ℝ) I 2 γ t`).
+  --     The radial variation `f s t := expMap g p (t • (v + s • w))` is jointly `C²`
+  --     near `[0,1] × {0}` (compose the smooth `(s,t) ↦ t • (v + s • w)` with
+  --     `expMap_contMDiffAt2_of_norm_lt_radius`), and its central curve
+  --     `t ↦ f 0 t = expMap g p (t • v) = maximalGeodesic g p v t`
+  --     (`maximalGeodesic_rescale_at_one_of_small`) is a geodesic at every
+  --     `t ∈ [0,1]` (`radial_maximalGeodesic_hasGeodesicEquationAt_of_small`).
+  --     What remains is the variation-specific FTC plumbing, none of which needs new
+  --     structural infrastructure:
+  --       (i)   the per-variation regularity bookkeeping (chart-pulled
+  --             `ContDiffAt 2`; slice `ContMDiffAt 2`; `DifferentiableAt` of the
+  --             velocity / variation-field chart-reps) feeding the keystones;
+  --       (ii)  the FTC over `[0,1]` for `φ t := g.inner (f 0 t) (∂_t f) (∂_s f)`
+  --             with `φ' = ⟨∇_t ∂_t f, ∂_s f⟩ + ⟨∂_t f, ∇_t ∂_s f⟩` (metric-compat),
+  --             first term `= 0` (geodesic + the `C²` covDeriv bridge), second term
+  --             `= ⟨∂_t f, ∇_s ∂_t f⟩` (`commute_ds_dt_intrinsic_C2`);
+  --       (iii) the endpoint constant-speed computation
+  --             `⟨∂_t f, ∇_s ∂_t f⟩ = ½ ∂_s g.inner_p (v + s•w, v + s•w)|₀
+  --             = g.inner_p (v, w)`, plus `φ 0 = 0` (since `∂_s f (0,0) = 0`) and the
+  --             radial chain-rule identification `∂_s f (0,t) = t · d exp_{tv}(w)`
+  --             connecting the variation field to the goal's
+  --             `mfderiv (fun u => expMap g p u) v w`.
+  --     This is the remaining residual: the assembly is now a matter of `C²`
+  --     regularity bookkeeping plus the integration/endpoint computation, with every
+  --     structural lemma it consumes already proven and public.
   sorry
 
 end GaussLemma

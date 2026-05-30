@@ -545,6 +545,110 @@ theorem covDerivAlong_velocity_eq_zero_iff_hasGeodesicEquationAt
     -- `extChartAt I (γ t) (γ t) = u t`; `hid : a + Γ(v, v)(extChartAt I (γt) (γt)) = 0`.
     exact hid
 
+/-- **`C²`-form velocity equivalence (backward direction).** For a curve `γ`
+that is `ContMDiffAt 𝓘(ℝ, ℝ) I 2 γ t` (twice continuously differentiable at `t`
+in the manifold sense), if `γ` satisfies the chart-coordinate geodesic equation
+at `t` (`HasGeodesicEquationAt`), then the intrinsic covariant derivative of the
+velocity field `s ↦ dγ_s(1)` vanishes at `t`.
+
+This is the `C²`-relaxed backward direction of
+`covDerivAlong_velocity_eq_zero_iff_hasGeodesicEquationAt`. The full iff is stated
+under `ContMDiff 𝓘(ℝ, ℝ) I ∞ γ`, but the geodesic-implies-zero direction needs
+only `C²` regularity: the chart trajectory `chartCurve (γ t) γ` is `ContDiffOn 2`
+on an open neighbourhood of `t` (where `γ` is `C²` and lands in the chart source),
+hence its first derivative is `C¹` and the eventual `HasDerivAt` clauses hold; the
+velocity chart-representation equals `deriv (chartCurve (γ t) γ)` near `t` via the
+`MDifferentiableAt`-level chain-rule bridge
+`chartCoord_mfderiv_along_curve_eq_fderiv_of_mdifferentiableAt`. This is the form
+consumed by second-order variational arguments where the central curve is only
+twice continuously differentiable (e.g. the radial geodesic variation behind
+Gauss's lemma, whose velocity field is `C²` but not known to be `C^∞`). -/
+theorem covDerivAlong_velocity_eq_zero_of_hasGeodesicEquationAt_C2
+    (g : SmoothRiemannianMetric I M) (γ : ℝ → M) (t : ℝ)
+    (hγ2 : ContMDiffAt 𝓘(ℝ, ℝ) I 2 γ t)
+    (hgeo : HasGeodesicEquationAt (I := I) g γ t) :
+    covDerivAlong (I := I) g γ
+        (fun s => (mfderiv 𝓘(ℝ, ℝ) I γ s : ℝ →L[ℝ] _) (1 : ℝ)) t = 0 := by
+  classical
+  set u : ℝ → E := chartCurve (I := I) (γ t) γ with hu_def
+  set rep : ℝ → E :=
+    chartRepAt (I := I) γ (fun s => (mfderiv 𝓘(ℝ, ℝ) I γ s : ℝ →L[ℝ] _) (1 : ℝ)) t with hrep_def
+  -- Eventual `C²` of `γ` near `t` (uses `IsManifold I 2 M`, auto from `IsManifold I ∞ M`).
+  have hev_c2 : ∀ᶠ s in 𝓝 t, ContMDiffAt 𝓘(ℝ, ℝ) I 2 γ s :=
+    (contMDiffAt_iff_contMDiffAt_nhds (n := 2) (by decide)).mp hγ2
+  -- The chart-source preimage is a neighbourhood of `t` (`γ` continuous at `t`).
+  have hev_src : ∀ᶠ s in 𝓝 t, γ s ∈ (chartAt H (γ t)).source := by
+    have : (chartAt H (γ t)).source ∈ 𝓝 (γ t) :=
+      (chartAt H (γ t)).open_source.mem_nhds (mem_chart_source H (γ t))
+    exact hγ2.continuousAt.preimage_mem_nhds this
+  -- Combine into an open set `U ∋ t` carrying both properties.
+  obtain ⟨U, hU_sub, hU_open, ht_U⟩ := eventually_nhds_iff.mp (hev_c2.and hev_src)
+  have hUsub_c2 : ∀ s ∈ U, ContMDiffAt 𝓘(ℝ, ℝ) I 2 γ s := fun s hs => (hU_sub s hs).1
+  have hUsub_src : ∀ s ∈ U, γ s ∈ (chartAt H (γ t)).source := fun s hs => (hU_sub s hs).2
+  have hU_nhds : U ∈ 𝓝 t := hU_open.mem_nhds ht_U
+  -- `u = chartCurve (γ t) γ` is `ContDiffOn 2` on `U`.
+  have hu_cdiffOn : ContDiffOn ℝ 2 u U := by
+    have h_comp_mdiff : ContMDiffOn 𝓘(ℝ, ℝ) 𝓘(ℝ, E) 2 ((extChartAt I (γ t)) ∘ γ) U := by
+      have hφ : ContMDiffOn I 𝓘(ℝ, E) 2 (extChartAt I (γ t)) (chartAt H (γ t)).source :=
+        contMDiffOn_extChartAt (I := I) (n := 2) (x := γ t)
+      have hγU : ContMDiffOn 𝓘(ℝ, ℝ) I 2 γ U := fun s hs => (hUsub_c2 s hs).contMDiffWithinAt
+      have hmaps : MapsTo γ U (chartAt H (γ t)).source := fun s hs => hUsub_src s hs
+      exact hφ.comp hγU hmaps
+    have hfun : u = ((extChartAt I (γ t)) ∘ γ) := rfl
+    rw [hfun]; exact contMDiffOn_iff_contDiffOn.mp h_comp_mdiff
+  -- `deriv u` is `ContDiffOn 1` on `U`; in particular differentiable on `U`.
+  have hderiv_u_cdiffOn : ContDiffOn ℝ 1 (deriv u) U :=
+    hu_cdiffOn.deriv_of_isOpen hU_open (by norm_num)
+  have hu_diffAt : DifferentiableAt ℝ u t :=
+    (hu_cdiffOn.differentiableOn (by norm_num) t ht_U).differentiableAt hU_nhds
+  have hu_hasDerivAt : HasDerivAt u (deriv u t) t := hu_diffAt.hasDerivAt
+  have hu_diffOn : DifferentiableOn ℝ u U := hu_cdiffOn.differentiableOn (by norm_num)
+  have hu_eventually_hasDerivAt : ∀ᶠ s in 𝓝 t, HasDerivAt u (deriv u s) s := by
+    filter_upwards [hU_nhds] with s hs
+    exact ((hu_diffOn s hs).differentiableAt (hU_open.mem_nhds hs)).hasDerivAt
+  have hderiv_u_diffAt : DifferentiableAt ℝ (deriv u) t :=
+    (hderiv_u_cdiffOn.differentiableOn (by norm_num) t ht_U).differentiableAt hU_nhds
+  have hderiv_u_hasDerivAt : HasDerivAt (deriv u) (deriv (deriv u) t) t :=
+    hderiv_u_diffAt.hasDerivAt
+  -- The velocity chart-rep equals `deriv u` on `U` (via the `MDifferentiableAt`
+  -- chart-`(γ t)`-coordinate chain rule).
+  have hrep_eqOn : EqOn rep (deriv u) U := by
+    intro s hs
+    have hs_src : γ s ∈ (chartAt H (γ t)).source := hUsub_src s hs
+    have hs_mdiff : MDifferentiableAt 𝓘(ℝ, ℝ) I γ s :=
+      (hUsub_c2 s hs).mdifferentiableAt (by decide)
+    rw [hrep_def, chartRepAt_apply]
+    rw [MFDerivAlongCurve.chartCoord_mfderiv_along_curve_eq_fderiv_of_mdifferentiableAt
+      (I := I) (M := M) (γ := γ) hs_mdiff (γ t) (t := s) hs_src]
+    rfl
+  have hrep_eq : rep =ᶠ[𝓝 t] deriv u := hrep_eqOn.eventuallyEq_of_mem hU_nhds
+  have hrep_t : rep t = deriv u t := hrep_eq.eq_of_nhds
+  have hderiv_rep_t : deriv rep t = deriv (deriv u) t := hrep_eq.deriv_eq
+  -- The chart-`(γ t)`-coordinate covariant derivative computed explicitly.
+  have hchart :
+      chartCovDerivAlong (I := I) g (γ t) γ rep t =
+        deriv (deriv u) t +
+          chartChristoffelContraction (I := I) g (γ t) (deriv u t) (deriv u t)
+            (extChartAt I (γ t) (γ t)) := by
+    rw [chartCovDerivAlong_def]
+    rw [hderiv_rep_t, hrep_t]
+    rfl
+  -- Reduce `covDerivAlong = 0` to `chartCovDerivAlong = 0` and apply the geodesic identity.
+  rw [covDerivAlong_eq_zero_iff (I := I) g γ
+    (fun s => (mfderiv 𝓘(ℝ, ℝ) I γ s : ℝ →L[ℝ] _) (1 : ℝ)) t]
+  change chartCovDerivAlong (I := I) g (γ t) γ rep t = 0
+  rw [hchart]
+  obtain ⟨v, a, hv, _hev, ha, hid⟩ := hgeo
+  -- `chartLocalCurve γ t = u`, so `v = deriv u t` and `a = deriv (deriv u) t`.
+  have hv_eq : v = deriv u t := by
+    have : HasDerivAt u v t := hv
+    exact this.deriv.symm ▸ rfl
+  have ha_eq : a = deriv (deriv u) t := by
+    have : HasDerivAt (deriv u) a t := ha
+    exact this.deriv.symm ▸ rfl
+  rw [← hv_eq, ← ha_eq]
+  exact hid
+
 end CovariantDerivativeAlong
 
 end Riemannian
