@@ -1189,7 +1189,7 @@ variable [CompleteSpace E]
 
 /-- For smooth global tangent sections `X, Y, Z`, the section
 `b ↦ ⟨b, riemannSec (LeviCivita g) X Y Z b⟩` of the tangent bundle is smooth. -/
-private theorem riemannSec_section_smooth
+theorem riemannSec_section_smooth
     (g : SmoothRiemannianMetric I M)
     {X Y Z : Π b : M, TangentSpace I b}
     (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% X))
@@ -1268,6 +1268,80 @@ private theorem riemannSec_section_smooth
   intro b
   -- Goal: (T% (sub-section)) b = (T% (riemannSec...)) b. Reduces by `rfl`.
   rfl
+
+/-! ### Smoothness of `riemannOp` as a `Hom`-bundle (trilinear CLM) section
+
+The bundled Riemann curvature operator `b ↦ riemannOp (LeviCivita g) b` is a section of
+the four-fold Hom-bundle
+`fun x : M => TangentSpace I x →L TangentSpace I x →L TangentSpace I x →L TangentSpace I x`,
+whose model fibre is `E →L[ℝ] E →L[ℝ] E →L[ℝ] E`. We prove its `C^∞`-smoothness by a
+three-stage descent through the operator-to-bundle bridge
+`cotangentCov_clmSection_smooth_aux`, peeling one tangent-vector slot at each stage. The
+base case — smoothness of `b ↦ riemannOp (LeviCivita g) b (X b) (Y b) (Z b)` as a tangent
+section for smooth tangent fields `X, Y, Z` — is supplied by `riemannOp_apply_smooth`
+(identifying the pointwise value with the section-level Riemann formula) together with
+`riemannSec_section_smooth`. -/
+
+/-- **Smoothness of the Riemann curvature operator as a Hom-bundle section.** For a smooth
+Riemannian metric `g` on `M`, the section
+`b ↦ ⟨b, riemannOp (LeviCivita g) b⟩` of the four-fold Hom-bundle
+`fun x : M => TangentSpace I x →L TangentSpace I x →L TangentSpace I x →L TangentSpace I x`
+(model fibre `E →L[ℝ] E →L[ℝ] E →L[ℝ] E`) is `C^∞`. The descent uses the
+operator-to-bundle bridge `cotangentCov_clmSection_smooth_aux` three times, reducing to the
+tangent-section smoothness `riemannSec_section_smooth` via `riemannOp_apply_smooth`. -/
+theorem riemannOp_section_contMDiff (g : SmoothRiemannianMetric I M) :
+    ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] E →L[ℝ] E)) ∞
+      (fun b : M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] E →L[ℝ] E)
+        (E := fun x : M =>
+          TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ]
+            TangentSpace I x)
+        b (riemannOp (LeviCivita (I := I) g) b)) := by
+  classical
+  -- Stage 1: peel the X-slot. For each smooth tangent section `X`, the section
+  -- `b ↦ ⟨b, riemannOp (LeviCivita g) b (X b)⟩` of the trilinear Hom-bundle is smooth.
+  apply cotangentCov_clmSection_smooth_aux
+    (V₂ := fun x : M =>
+      TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x)
+    (φ := fun x : M => riemannOp (LeviCivita (I := I) g) x)
+  intro X
+  -- Stage 2: peel the Y-slot. For each smooth tangent section `Y`, the section
+  -- `b ↦ ⟨b, riemannOp (LeviCivita g) b (X b) (Y b)⟩` of the bilinear Hom-bundle is smooth.
+  apply cotangentCov_clmSection_smooth_aux
+    (V₂ := fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x)
+    (φ := fun x : M => riemannOp (LeviCivita (I := I) g) x (X x))
+  intro Y
+  -- Stage 3: peel the Z-slot. For each smooth tangent section `Z`, the tangent section
+  -- `b ↦ ⟨b, riemannOp (LeviCivita g) b (X b) (Y b) (Z b)⟩` is smooth.
+  apply cotangentCov_clmSection_smooth_aux
+    (V₂ := fun x : M => TangentSpace I x)
+    (φ := fun x : M => riemannOp (LeviCivita (I := I) g) x (X x) (Y x))
+  intro Z
+  -- Base case: identify the pointwise value with the section-level Riemann formula and
+  -- conclude by `riemannSec_section_smooth`.
+  have hsec : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (T% (fun b : M => riemannSec (LeviCivita (I := I) g) X Y Z b)) :=
+    riemannSec_section_smooth g X.contMDiff Y.contMDiff Z.contMDiff
+  refine hsec.congr ?_
+  intro b
+  -- Goal (from `congr`): `⟨b, riemannOp g b (X b) (Y b) (Z b)⟩ = (T% (riemannSec g X Y Z)) b`.
+  change TotalSpace.mk' E (E := TangentSpace I) b
+      (riemannOp (LeviCivita (I := I) g) b (X b) (Y b) (Z b)) =
+    TotalSpace.mk' E (E := TangentSpace I) b
+      (riemannSec (LeviCivita (I := I) g) X Y Z b)
+  rw [riemannOp_apply_smooth (cov := LeviCivita (I := I) g)
+    X.contMDiff Y.contMDiff Z.contMDiff]
+
+/-- **Continuity of the Riemann curvature operator section.** The section
+`b ↦ ⟨b, riemannOp (LeviCivita g) b⟩` of the four-fold Hom-bundle is continuous. This is
+the form consumed by downstream integrability arguments (e.g. for the index form). -/
+theorem riemannOp_section_continuous (g : SmoothRiemannianMetric I M) :
+    Continuous
+      (fun b : M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] E →L[ℝ] E)
+        (E := fun x : M =>
+          TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ]
+            TangentSpace I x)
+        b (riemannOp (LeviCivita (I := I) g) b)) :=
+  (riemannOp_section_contMDiff g).continuous
 
 /-- The local trace formula: for `b` in a trivialization base set, the trace of an
 endomorphism `F : T_b M →L[ℝ] T_b M` decomposes as a sum of dual-frame pairings using
