@@ -1687,6 +1687,171 @@ end RadialLengthEngine
 
 end GaussLemma
 
+/-! ## Generic analytic engine for the radial length lower bound
+
+The radial length lower bound integrates the pointwise Gauss speed estimate
+against the radial-distance function `ρ(t) := √(g_p(ψ(γt), ψ(γt)))`, where
+`ψ` is the normal chart at `p`.  The two ingredients packaged here are
+field-independent of the manifold structure:
+
+* `psd_*` — Cauchy–Schwarz, the (reverse) triangle inequality and the global
+  Lipschitz property for the seminorm `x ↦ √(B x x)` attached to a symmetric
+  positive-semidefinite continuous bilinear form `B`.  These supply the
+  continuity of `ρ` and the limit of its right-difference quotient at the
+  singular point `ψ(γt) = 0`.
+* `image_radialDist_le_intervalIntegral_of_slope_le` — a fencing theorem:
+  a nonnegative continuous `ρ` whose right-side difference quotient is
+  dominated by a continuous `φ` at every interior point satisfies
+  `ρ b ≤ ∫ φ`.  This is the fundamental-theorem-of-calculus core that turns
+  the pointwise speed estimate into a length comparison without requiring
+  `ρ` to be differentiable at the centre. -/
+
+section RadialLengthAnalyticEngine
+
+open MeasureTheory intervalIntegral
+
+variable {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+
+/-- **Cauchy–Schwarz for a symmetric positive-semidefinite continuous
+bilinear form.** -/
+private lemma psd_cauchy_schwarz (B : F →L[ℝ] F →L[ℝ] ℝ)
+    (hsym : ∀ x y, B x y = B y x) (hnn : ∀ x, 0 ≤ B x x) (x y : F) :
+    (B x y) ^ 2 ≤ B x x * B y y := by
+  by_cases hy : B y y = 0
+  · have key : ∀ t : ℝ, 0 ≤ B x x - 2 * t * B x y := by
+      intro t
+      have h := hnn (x - t • y)
+      have expand : B (x - t • y) (x - t • y) = B x x - 2 * t * B x y + t ^ 2 * B y y := by
+        simp only [map_sub, map_smul, ContinuousLinearMap.sub_apply,
+          ContinuousLinearMap.smul_apply, smul_eq_mul]
+        rw [hsym y x]; ring
+      rw [expand, hy] at h; linarith [h]
+    rw [hy, mul_zero]
+    by_contra hcon
+    rw [not_le] at hcon
+    have hxy : B x y ≠ 0 := by intro h0; rw [h0] at hcon; norm_num at hcon
+    have h2 : 2 * ((B x x + 1) / (2 * B x y)) * B x y = B x x + 1 := by field_simp
+    have := key ((B x x + 1) / (2 * B x y))
+    rw [h2] at this; linarith
+  · have hpos : 0 < B y y := lt_of_le_of_ne (hnn y) (Ne.symm hy)
+    have h := hnn (x - (B x y / B y y) • y)
+    have expand : B (x - (B x y / B y y) • y) (x - (B x y / B y y) • y)
+        = B x x - (B x y) ^ 2 / B y y := by
+      simp only [map_sub, map_smul, ContinuousLinearMap.sub_apply,
+        ContinuousLinearMap.smul_apply, smul_eq_mul]
+      rw [hsym y x]; field_simp; ring
+    rw [expand] at h
+    have hb : (B x y) ^ 2 / B y y ≤ B x x := by linarith
+    have := (div_le_iff₀ hpos).mp hb
+    linarith [this]
+
+/-- **Triangle inequality for the seminorm `x ↦ √(B x x)`** of a symmetric
+positive-semidefinite continuous bilinear form. -/
+private lemma psd_seminorm_triangle (B : F →L[ℝ] F →L[ℝ] ℝ)
+    (hsym : ∀ x y, B x y = B y x) (hnn : ∀ x, 0 ≤ B x x) (x y : F) :
+    Real.sqrt (B (x + y) (x + y)) ≤ Real.sqrt (B x x) + Real.sqrt (B y y) := by
+  have hxx := hnn x; have hyy := hnn y
+  have hcs := psd_cauchy_schwarz B hsym hnn x y
+  have hexp : B (x + y) (x + y) = B x x + 2 * B x y + B y y := by
+    simp only [map_add, ContinuousLinearMap.add_apply]; rw [hsym y x]; ring
+  have hbxy_le : B x y ≤ Real.sqrt (B x x) * Real.sqrt (B y y) := by
+    have h1 : B x y ≤ |B x y| := le_abs_self _
+    have h2 : |B x y| ≤ Real.sqrt (B x x) * Real.sqrt (B y y) := by
+      rw [← Real.sqrt_sq_eq_abs, ← Real.sqrt_mul hxx]
+      exact Real.sqrt_le_sqrt hcs
+    linarith
+  have hrhs : (Real.sqrt (B x x) + Real.sqrt (B y y)) ^ 2
+      = B x x + 2 * (Real.sqrt (B x x) * Real.sqrt (B y y)) + B y y := by
+    rw [add_sq, Real.sq_sqrt hxx, Real.sq_sqrt hyy]; ring
+  have hle : B (x + y) (x + y) ≤ (Real.sqrt (B x x) + Real.sqrt (B y y)) ^ 2 := by
+    rw [hexp, hrhs]; linarith
+  calc Real.sqrt (B (x + y) (x + y))
+        ≤ Real.sqrt ((Real.sqrt (B x x) + Real.sqrt (B y y)) ^ 2) := Real.sqrt_le_sqrt hle
+    _ = Real.sqrt (B x x) + Real.sqrt (B y y) := by rw [Real.sqrt_sq (by positivity)]
+
+/-- **Reverse triangle inequality for the seminorm `x ↦ √(B x x)`.** -/
+private lemma psd_reverse_triangle (B : F →L[ℝ] F →L[ℝ] ℝ)
+    (hsym : ∀ x y, B x y = B y x) (hnn : ∀ x, 0 ≤ B x x) (x y : F) :
+    |Real.sqrt (B x x) - Real.sqrt (B y y)| ≤ Real.sqrt (B (x - y) (x - y)) := by
+  have h1 : Real.sqrt (B x x) ≤ Real.sqrt (B (x - y) (x - y)) + Real.sqrt (B y y) := by
+    have := psd_seminorm_triangle B hsym hnn (x - y) y
+    rwa [sub_add_cancel] at this
+  have h2 : Real.sqrt (B y y) ≤ Real.sqrt (B (y - x) (y - x)) + Real.sqrt (B x x) := by
+    have := psd_seminorm_triangle B hsym hnn (y - x) x
+    rwa [sub_add_cancel] at this
+  have hsymq : B (y - x) (y - x) = B (x - y) (x - y) := by
+    have hyx : y - x = -(x - y) := by abel
+    rw [hyx]
+    simp only [map_neg, ContinuousLinearMap.neg_apply, neg_neg]
+  rw [hsymq] at h2
+  rw [abs_sub_le_iff]; constructor <;> linarith
+
+/-- **The seminorm `x ↦ √(B x x)` is globally Lipschitz** with constant
+`√‖B‖`, hence continuous and locally Lipschitz on every set. -/
+private lemma psd_sqrt_lipschitz (B : F →L[ℝ] F →L[ℝ] ℝ)
+    (hsym : ∀ x y, B x y = B y x) (hnn : ∀ x, 0 ≤ B x x) :
+    LipschitzWith (Real.toNNReal (Real.sqrt ‖B‖)) (fun x => Real.sqrt (B x x)) := by
+  rw [lipschitzWith_iff_dist_le_mul]
+  intro x y
+  rw [Real.dist_eq, Real.coe_toNNReal _ (Real.sqrt_nonneg _), dist_eq_norm]
+  have hb0 : (0 : ℝ) ≤ ‖B‖ := by positivity
+  calc |Real.sqrt (B x x) - Real.sqrt (B y y)|
+        ≤ Real.sqrt (B (x - y) (x - y)) := psd_reverse_triangle B hsym hnn x y
+    _ ≤ Real.sqrt ‖B‖ * ‖x - y‖ := by
+        have hbz : B (x - y) (x - y) ≤ ‖B‖ * (‖x - y‖ * ‖x - y‖) := by
+          calc B (x - y) (x - y) ≤ ‖B (x - y) (x - y)‖ := le_abs_self _
+            _ ≤ ‖B‖ * ‖x - y‖ * ‖x - y‖ := B.le_opNorm₂ (x - y) (x - y)
+            _ = ‖B‖ * (‖x - y‖ * ‖x - y‖) := by ring
+        calc Real.sqrt (B (x - y) (x - y))
+              ≤ Real.sqrt (‖B‖ * (‖x - y‖ * ‖x - y‖)) := Real.sqrt_le_sqrt hbz
+          _ = Real.sqrt ‖B‖ * ‖x - y‖ := by
+              rw [Real.sqrt_mul hb0, show ‖x - y‖ * ‖x - y‖ = ‖x - y‖ ^ 2 by ring,
+                Real.sqrt_sq (norm_nonneg _)]
+
+/-- **Right-difference-quotient fencing theorem.** If `ρ` is continuous on
+`[a, b]` with `ρ a ≤ 0`, and `φ` is integrable on `[a, b]`, continuous from
+the right at every interior point, and dominates the right-side limit inferior
+of the difference quotient of `ρ` there, then `ρ b ≤ ∫ φ`.  This is the
+fundamental-theorem-of-calculus core of the radial length lower bound: it
+turns the pointwise speed estimate into an integral length comparison without
+assuming `ρ` is differentiable everywhere (in particular it tolerates the
+corner of `ρ` at the centre `ψ(γt) = 0`), and it only asks for `φ` to be
+right-continuous in the interior (the velocity speed of a curve `C¹` on a
+closed interval need not be continuous at the endpoints). -/
+private lemma image_radialDist_le_intervalIntegral_of_slope_le
+    {ρ φ : ℝ → ℝ} {a b : ℝ} (hab : a ≤ b)
+    (hρc : ContinuousOn ρ (Set.Icc a b)) (hρa : ρ a ≤ 0)
+    (hφint : MeasureTheory.IntegrableOn φ (Set.Icc a b) MeasureTheory.volume)
+    (hφcont : ∀ x ∈ Set.Ico a b, ContinuousWithinAt φ (Set.Ioi x) x)
+    (hslope : ∀ x ∈ Set.Ico a b, ∀ r, φ x < r →
+      ∃ᶠ z in nhdsWithin x (Set.Ioi x), slope ρ x z < r) :
+    ρ b ≤ ∫ t in a..b, φ t := by
+  set B : ℝ → ℝ := fun x => ∫ t in a..x, φ t with hB
+  have hφii : IntervalIntegrable φ volume a b := by
+    rw [intervalIntegrable_iff_integrableOn_Icc_of_le hab]; exact hφint
+  have hBa : ρ a ≤ B a := by simp [hB, hρa]
+  have hBcont : ContinuousOn B (Set.Icc a b) := by
+    have h := continuousOn_primitive_interval' (f := φ) (μ := volume) (a := a)
+      (b₁ := a) (b₂ := b) hφii Set.left_mem_uIcc
+    rw [Set.uIcc_of_le hab] at h; exact h
+  have hBderiv : ∀ x ∈ Set.Ico a b, HasDerivWithinAt B (φ x) (Set.Ici x) x := by
+    intro x hx
+    have hcwa : ContinuousWithinAt φ (Set.Ioi x) x := hφcont x hx
+    have hmem : Set.Icc a b ∈ nhdsWithin x (Set.Ioi x) := by
+      rw [mem_nhdsWithin]
+      exact ⟨Set.Iio b, isOpen_Iio, hx.2, by
+        intro z hz; exact ⟨le_trans hx.1 (le_of_lt hz.2), le_of_lt hz.1⟩⟩
+    have hmeas : StronglyMeasurableAtFilter φ (nhdsWithin x (Set.Ioi x)) volume :=
+      ⟨Set.Icc a b, hmem, hφint.aestronglyMeasurable⟩
+    have hint_sub : IntervalIntegrable φ volume a x :=
+      hφii.mono_set (by
+        rw [Set.uIcc_of_le hab, Set.uIcc_of_le hx.1]; exact Set.Icc_subset_Icc le_rfl hx.2.le)
+    exact intervalIntegral.integral_hasDerivWithinAt_right hint_sub hmeas hcwa
+  exact image_le_of_liminf_slope_right_le_deriv_boundary hρc hBa hBcont hBderiv hslope
+    (Set.right_mem_Icc.2 hab)
+
+end RadialLengthAnalyticEngine
+
 /-! ## Riemannian-distance convention for the radial-minimiser cluster
 
 The statements below quantify the path-length functional `pathELength I`
@@ -1847,41 +2012,295 @@ theorem normalBall_radial_unique_minimizer
   -- forall-greater formulation of `riemannianEDist` as an infimum.
   -- For every `r` strictly larger than the distance, there is a smooth
   -- path `γ : [0, 1] → M` from `p` to `exp_p v` of `pathELength < r`.
-  -- The Gauss-lemma curve-length lower bound (the orthogonal-decomposition
-  -- argument inside a normal ball: pull back `γ` through normal
-  -- coordinates, decompose the velocity into a radial and orthogonal
-  -- part, and integrate) then forces `√(g_p(v,v)) ≤ pathELength γ`.
-  -- Combining yields `√(g_p(v,v)) ≤ r` for every such `r`, which by
-  -- forall-greater gives `√(g_p(v,v)) ≤ riemannianEDist`.
-  --
-  -- The curve-length lower bound (Gauss-lemma consequence inside a
-  -- normal ball) is the substantive geometric content; isolating it as
-  -- a named auxiliary fact captures the precise statement to be filled
-  -- once `gauss_lemma_pullback` (still `sorry` above) is available.
+  -- The Gauss-lemma curve-length lower bound (the pointwise radial speed
+  -- estimate `gauss_pointwise_speed_lower_bound` integrated against the
+  -- radial distance `√(g_p(ψ(γt), ψ(γt)))` via the fundamental theorem of
+  -- calculus) then forces `√(g_p(v,v)) ≤ pathELength γ`.  Combining yields
+  -- `√(g_p(v,v)) ≤ r` for every such `r`, which by forall-greater gives
+  -- `√(g_p(v,v)) ≤ riemannianEDist`.
   set q := expMap (I := I) g p (show TangentSpace I p from v) with hq_def
-  -- The curve-length lower bound inside a normal ball, restated so it
-  -- can be quantified over candidate paths produced by the infimum.
+  classical
+  -- Abbreviation for the normal chart at `p`.
+  set ψ := NormalCoordinates.normalChartAt (I := I) g p with hψ_def
+  -- The Gauss-lemma length lower bound, restated so it can be quantified over
+  -- candidate paths produced by the infimum.  The hypotheses `hsrc`/`hbball`
+  -- record that the candidate stays inside the normal chart's source and
+  -- inside the `C²` ball (in chart coordinates): both are genuine domain
+  -- conditions (a curve escaping the chart is handled by the caller via
+  -- first-exit truncation), supplied here so that the pointwise Gauss speed
+  -- estimate `gauss_pointwise_speed_lower_bound` is available at every
+  -- interior parameter.  The bound is assembled by the
+  -- fundamental-theorem-of-calculus engine
+  -- `image_radialDist_le_intervalIntegral_of_slope_le` applied to the radial
+  -- distance `ρ(t) = √(g_p(ψ(γt), ψ(γt)))`, whose right-difference quotient is
+  -- dominated by the intrinsic speed `√(g(γt)(γ't)(γ't))` at every interior
+  -- parameter (the pointwise Gauss estimate, with the corner at `ψ(γt) = 0`
+  -- handled by the seminorm-continuity limit of the difference quotient). -/
   have curveLengthLowerBound :
       ∀ {γ : ℝ → M} {a b : ℝ},
         a ≤ b → γ a = p → γ b = q → CMDiff[Set.Icc a b] 1 γ →
+        (∀ t ∈ Set.Icc a b, γ t ∈ ψ.source) →
+        (∀ t ∈ Set.Icc a b, ‖ψ (γ t)‖ < expMapC2Radius (I := I) g p) →
         (∀ t ∈ Set.Icc a b,
-          γ t ∈ (NormalCoordinates.normalChartAt (I := I) g p).source) →
+          (show TangentSpace I p from ψ (γ t)) ∈ expDomain (I := I) g p) →
         ENNReal.ofReal (Real.sqrt (g.inner p v v)) ≤
           pathELength I γ a b := by
-    -- This is the Gauss-lemma length lower bound: orthogonal
-    -- decomposition of `γ'` against the radial direction (via
-    -- `gauss_lemma_pullback`) plus a `∫|r(t)| ≥ |∫r(t)|`-style
-    -- integral inequality.
-    --
-    -- NOTE: `gauss_lemma_pullback` now carries the genuine domain hypothesis
-    -- `‖v‖ < expMapC2Radius g p` (the `C²` ball on which the variational
-    -- argument is available).  When filling this lower bound, invoke it on the
-    -- radial directions `s • v` arising from the orthogonal decomposition, each
-    -- of which satisfies `‖s • v‖ ≤ ‖v‖`; so the caller must first establish
-    -- `‖v‖ < expMapC2Radius g p` (a new hypothesis to thread onto this theorem,
-    -- as `hball : v ∈ normalChartAt.target` only places `v` in the opaque
-    -- `expMapDiffeo`-source, which has no proven relation to the `C²` radius).
-    sorry
+    intro γ a b hab hγa hγb hγ hsrc hbball hdom
+    -- Chart-image curve `c(t) = ψ(γt) ∈ E`, and radial distance `ρ`.
+    set B : E →L[ℝ] E →L[ℝ] ℝ := g.inner p with hB_def
+    have hBsym : ∀ x y : E, B x y = B y x := g.symm p
+    have hBnn : ∀ x : E, 0 ≤ B x x := fun x => by
+      rcases eq_or_ne x 0 with h | h
+      · subst h; simp
+      · exact (g.pos p x h).le
+    set c : ℝ → E := fun t => ψ (γ t) with hc_def
+    set ρ : ℝ → ℝ := fun t => Real.sqrt (B (c t) (c t)) with hρ_def
+    -- Speed integrand in the *within*-velocity form, which is continuous on
+    -- the whole closed interval (the `mfderiv` form may be discontinuous at the
+    -- endpoints `a`, `b` since `γ` is only `C¹` on `[a, b]`).
+    set φ : ℝ → ℝ := fun t =>
+      Real.sqrt (g.inner (γ t)
+        (mfderivWithin 𝓘(ℝ, ℝ) I γ (Set.Icc a b) t 1)
+        (mfderivWithin 𝓘(ℝ, ℝ) I γ (Set.Icc a b) t 1))
+      with hφ_def
+    -- Continuity of `c` (chart-image of a `C¹` curve confined to the source).
+    have hγcont : ContinuousOn γ (Set.Icc a b) := hγ.continuousOn
+    have hψcont : ContinuousOn ψ ψ.source :=
+      (NormalCoordinates.normalChartAt_contMDiffOn (I := I) g p).continuousOn
+    have hccont : ContinuousOn c (Set.Icc a b) := hψcont.comp hγcont hsrc
+    -- Continuity of `ρ = (√(B · ·)) ∘ c` via the seminorm Lipschitz property.
+    have hρc : ContinuousOn ρ (Set.Icc a b) :=
+      ((psd_sqrt_lipschitz B hBsym hBnn).continuous.comp_continuousOn hccont)
+    -- Endpoint values: `ρ a = 0` and `ρ b = √(g_p(v, v))`.
+    have hca : c a = 0 := by
+      rw [hc_def]; simp only; rw [hγa, hψ_def]
+      exact NormalCoordinates.normalChartAt_centre (I := I) g p
+    have hρa : ρ a ≤ 0 := by
+      rw [hρ_def]; simp only [hca, map_zero, Real.sqrt_zero, le_refl]
+    have hcb : c b = v := by
+      have hsource : v ∈ ψ.symm.source := hball
+      have hsymm := NormalCoordinates.normalChartAt_symm_apply (I := I) g p (v := v) hsource
+      have hkey : ψ (expMap (I := I) g p (show TangentSpace I p from v)) = v := by
+        rw [hψ_def, ← hsymm]
+        exact NormalCoordinates.normalChartAt_right_inv (I := I) g p hball
+      rw [hc_def]; simp only; rw [hγb, hq_def]; exact hkey
+    have hρb : ρ b = Real.sqrt (g.inner p v v) := by
+      simp only [hρ_def, hcb, hB_def]; rfl
+    -- Degenerate interval `a = b`: `ρ a = ρ b` and `pathELength = 0` makes the
+    -- bound trivial (`ρ b = ρ a ≤ 0`, and `√(g_p(v,v)) ≥ 0`, forcing both to
+    -- be `0`).
+    rcases eq_or_lt_of_le hab with hab_eq | hab_lt
+    · subst hab_eq
+      have hle0 : Real.sqrt (g.inner p v v) ≤ 0 := by rw [← hρb]; exact hρa
+      have hzero : Real.sqrt (g.inner p v v) = 0 :=
+        le_antisymm hle0 (Real.sqrt_nonneg _)
+      rw [hzero, ENNReal.ofReal_zero]; exact bot_le
+    -- Non-degenerate interval `a < b`.
+    -- Continuity of `φ` on `[a, b]` (within-velocity speed of a `C¹` curve).
+    have hUnique : UniqueMDiffOn 𝓘(ℝ, ℝ) (Set.Icc a b) := fun x hx => by
+      rw [uniqueMDiffWithinAt_iff_uniqueDiffWithinAt]; exact (uniqueDiffOn_Icc hab_lt) x hx
+    have hLift : Continuous (fun t : ℝ => (⟨t, (1 : ℝ)⟩ : TangentBundle 𝓘(ℝ, ℝ) ℝ)) :=
+      (tangentBundleModelSpaceHomeomorph 𝓘(ℝ, ℝ)).symm.continuous.comp
+        (continuous_id.prodMk continuous_const)
+    have hMaps : Set.MapsTo (fun t : ℝ => (⟨t, (1 : ℝ)⟩ : TangentBundle 𝓘(ℝ, ℝ) ℝ))
+        (Set.Icc a b) (Bundle.TotalSpace.proj ⁻¹' (Set.Icc a b)) := fun t ht => by simpa using ht
+    have hVel : ContinuousOn (fun t : ℝ => TotalSpace.mk' E
+        (E := (TangentSpace I : M → Type _)) (γ t)
+        (mfderivWithin 𝓘(ℝ, ℝ) I γ (Set.Icc a b) t 1)) (Set.Icc a b) :=
+      ((hγ.continuousOn_tangentMapWithin (le_refl 1) hUnique).comp
+        hLift.continuousOn hMaps).congr (fun t _ => rfl)
+    have hφc : ContinuousOn φ (Set.Icc a b) := by
+      rw [hφ_def]
+      exact Real.continuous_sqrt.comp_continuousOn
+        (Variation.continuousOn_g_inner_along_curve (I := I) g hVel hVel)
+    have hφnn : ∀ t ∈ Set.Icc a b, 0 ≤ φ t := fun t _ => Real.sqrt_nonneg _
+    have hφint : MeasureTheory.IntegrableOn φ (Set.Icc a b) MeasureTheory.volume :=
+      hφc.integrableOn_compact isCompact_Icc
+    have hφcont : ∀ x ∈ Set.Ico a b, ContinuousWithinAt φ (Set.Ioi x) x := by
+      intro x hx
+      refine (hφc x ⟨hx.1, hx.2.le⟩).mono_of_mem_nhdsWithin ?_
+      rw [mem_nhdsWithin]
+      exact ⟨Set.Iio b, isOpen_Iio, hx.2, by
+        intro z hz; exact ⟨le_trans hx.1 (le_of_lt hz.2), le_of_lt hz.1⟩⟩
+    -- On the interior `Ioo a b`, the within-velocity speed coincides with the
+    -- `mfderiv` speed, so `φ` agrees there with the pathlength integrand.
+    have hφ_eq_mfderiv : ∀ t ∈ Set.Ioo a b,
+        φ t = Real.sqrt
+          (g.inner (γ t) (mfderiv 𝓘(ℝ, ℝ) I γ t 1) (mfderiv 𝓘(ℝ, ℝ) I γ t 1)) := by
+      intro t ht
+      rw [hφ_def]; simp only
+      rw [mfderivWithin_of_mem_nhds (Icc_mem_nhds ht.1 ht.2)]
+    -- The pointwise right-slope estimate: at every interior parameter the
+    -- right-side difference quotient of `ρ` is dominated by the intrinsic
+    -- speed `φ`.  This is the pointwise Gauss speed estimate
+    -- (`gauss_pointwise_speed_lower_bound`) where `ψ(γt) ≠ 0`, and the
+    -- seminorm-continuity limit of the difference quotient at the radial
+    -- centre `ψ(γt) = 0` (where `mfderiv ψ = id`, so the right slope equals
+    -- `√(g_p(γ't, γ't)) = φ t` exactly).
+    have hslope : ∀ x ∈ Set.Ico a b, ∀ r, φ x < r →
+        ∃ᶠ z in nhdsWithin x (Set.Ioi x), slope ρ x z < r := by
+      intro x hx r hr
+      have hxIcc : x ∈ Set.Icc a b := ⟨hx.1, hx.2.le⟩
+      -- Right derivative of `c = ψ ∘ γ` at `x` (within `[a, b]`).
+      set cv : E := mfderivWithin 𝓘(ℝ, ℝ) 𝓘(ℝ, E) c (Set.Icc a b) x 1 with hcv_def
+      have hcderiv : HasDerivWithinAt c cv (Set.Ici x) x := by
+        have hγdiff : MDifferentiableWithinAt 𝓘(ℝ, ℝ) I γ (Set.Icc a b) x :=
+          (hγ.mdifferentiableOn (by norm_num)) x hxIcc
+        have hψdiff : MDifferentiableWithinAt I 𝓘(ℝ, E) ψ ψ.source (γ x) :=
+          (NormalCoordinates.normalChartAt_contMDiffOn (I := I) g p).mdifferentiableOn
+            one_ne_zero (γ x) (hsrc x hxIcc)
+        have hcomp : MDifferentiableWithinAt 𝓘(ℝ, ℝ) 𝓘(ℝ, E) c (Set.Icc a b) x :=
+          hψdiff.comp x hγdiff (fun t ht => hsrc t ht)
+        have hmf : HasMFDerivWithinAt 𝓘(ℝ, ℝ) 𝓘(ℝ, E) c (Set.Icc a b) x
+            (mfderivWithin 𝓘(ℝ, ℝ) 𝓘(ℝ, E) c (Set.Icc a b) x) := hcomp.hasMFDerivWithinAt
+        rw [hasMFDerivWithinAt_iff_hasFDerivWithinAt] at hmf
+        have hHDW : HasDerivWithinAt c cv (Set.Icc a b) x := hmf.hasDerivWithinAt
+        refine hHDW.mono_of_mem_nhdsWithin ?_
+        rw [mem_nhdsWithin]
+        exact ⟨Set.Iio b, isOpen_Iio, hx.2, by
+          intro z hz; exact ⟨le_trans hx.1 hz.2, le_of_lt hz.1⟩⟩
+      -- Speed in `mfderivWithin` form: `φ x = √(g_p? …)`.  Decompose on `c x`.
+      by_cases hcx : c x = 0
+      · -- Singular case (`ψ(γx) = 0`, i.e. `γx = p`): the right-difference
+        -- quotient of `ρ` converges to `√(B cv cv) = φ x`, so eventually `< r`.
+        have htend : Filter.Tendsto (fun z => slope ρ x z)
+            (nhdsWithin x (Set.Ioi x)) (nhds (Real.sqrt (B cv cv))) := by
+          have hcz : Filter.Tendsto (fun z => (z - x)⁻¹ • c z)
+              (nhdsWithin x (Set.Ioi x)) (nhds cv) := by
+            have h0 := hcderiv.mono (Set.Ioi_subset_Ici_self)
+            rw [hasDerivWithinAt_iff_tendsto_slope] at h0
+            have hset : Set.Ioi x \ {x} = Set.Ioi x := by
+              ext z; simp only [Set.mem_diff, Set.mem_Ioi, Set.mem_singleton_iff]
+              exact ⟨fun h => h.1, fun h => ⟨h, ne_of_gt h⟩⟩
+            rw [hset] at h0
+            refine (Filter.tendsto_congr' ?_).mp h0
+            filter_upwards with z; rw [slope_def_module, hcx, sub_zero]
+          have hcont : Continuous (fun w : E => Real.sqrt (B w w)) := by fun_prop
+          have htend2 := (hcont.tendsto cv).comp hcz
+          refine (Filter.tendsto_congr' ?_).mp htend2
+          filter_upwards [self_mem_nhdsWithin] with z hz
+          have hzx : 0 < z - x := sub_pos.mpr hz
+          have heq : slope ρ x z
+              = Real.sqrt (B ((z - x)⁻¹ • c z) ((z - x)⁻¹ • c z)) := by
+            rw [hρ_def, slope_def_module, hcx]
+            simp only [map_zero, Real.sqrt_zero, sub_zero, smul_eq_mul, map_smul,
+              ContinuousLinearMap.smul_apply]
+            rw [show (z - x)⁻¹ * ((z - x)⁻¹ * B (c z) (c z))
+                = ((z - x)⁻¹) ^ 2 * B (c z) (c z) by ring,
+              Real.sqrt_mul (by positivity), Real.sqrt_sq (by positivity), mul_comm]
+          simp only [Function.comp_apply]
+          exact heq.symm
+        -- `√(B cv cv) = φ x`:  at `x`, `γx = p`, `mfderivWithin ψ = id`, so `cv = γ'`.
+        have hφx_eq : φ x = Real.sqrt (B cv cv) := by
+          have hγx_p : γ x = p := by
+            have hcx' : ψ (γ x) = 0 := hcx
+            -- `ψ (γ x) = 0 = ψ p`, and `ψ` is injective on its source.
+            have hpsrc : p ∈ ψ.source := by
+              rw [hψ_def]; exact NormalCoordinates.normalChartAt_source (I := I) g p
+            have hψp : ψ p = 0 := by
+              rw [hψ_def]; exact NormalCoordinates.normalChartAt_centre (I := I) g p
+            exact ψ.injOn (hsrc x hxIcc) hpsrc (by rw [hcx', hψp])
+          -- `cv = mfderivWithin γ (Icc a b) x 1` because `mfderivWithin ψ p = id`.
+          have hcv_eq : cv = mfderivWithin 𝓘(ℝ, ℝ) I γ (Set.Icc a b) x 1 := by
+            rw [hcv_def]
+            have hUnique : UniqueMDiffWithinAt 𝓘(ℝ, ℝ) (Set.Icc a b) x := by
+              rw [uniqueMDiffWithinAt_iff_uniqueDiffWithinAt]
+              exact (uniqueDiffOn_Icc hab_lt) x hxIcc
+            have hγdiff : MDifferentiableWithinAt 𝓘(ℝ, ℝ) I γ (Set.Icc a b) x :=
+              (hγ.mdifferentiableOn (by norm_num)) x hxIcc
+            have hψdiff : MDifferentiableWithinAt I 𝓘(ℝ, E) ψ ψ.source (γ x) :=
+              (NormalCoordinates.normalChartAt_contMDiffOn (I := I) g p).mdifferentiableOn
+                one_ne_zero (γ x) (hsrc x hxIcc)
+            have hchain := mfderivWithin_comp (I := 𝓘(ℝ, ℝ)) (I' := I) (I'' := 𝓘(ℝ, E))
+              (f := γ) (g := ψ) (s := Set.Icc a b) (u := ψ.source) x hψdiff hγdiff
+              (fun t ht => hsrc t ht) hUnique
+            have hcomp_eq : c = ψ ∘ γ := rfl
+            rw [hcomp_eq, hchain]
+            simp only [Function.comp_apply]
+            have hsource_nhds : ψ.source ∈ nhds (γ x) :=
+              (NormalCoordinates.normalChartAt_open_source (I := I) g p).mem_nhds (hsrc x hxIcc)
+            rw [mfderivWithin_of_mem_nhds hsource_nhds, hγx_p,
+              NormalCoordinates.mfderiv_normalChartAt_self]
+            rfl
+          simp only [hφ_def]
+          rw [hcv_eq, hγx_p, hB_def]; rfl
+        rw [hφx_eq] at hr
+        exact (htend.eventually_lt_const hr).frequently
+      · -- Regular case (`ψ(γx) ≠ 0`): `ρ` is differentiable at `x` with
+        -- `ρ'(x) ≤ φ x < r`, so the right liminf slope is `≤ ρ'(x) < r`.
+        -- `c x ≠ 0` forces `x ≠ a` (since `c a = 0`), hence `x ∈ Ioo a b`.
+        have hxIoo : x ∈ Set.Ioo a b := by
+          refine ⟨lt_of_le_of_ne hx.1 ?_, hx.2⟩
+          intro hxa; apply hcx; rw [← hxa]; exact hca
+        have hmem : Set.Icc a b ∈ nhds x := Icc_mem_nhds hxIoo.1 hxIoo.2
+        -- Two-sided differentiability of `γ` and `c = ψ ∘ γ` at `x`.
+        have hγdiff : MDifferentiableAt 𝓘(ℝ, ℝ) I γ x :=
+          ((hγ.mdifferentiableOn (by norm_num)) x hxIcc).mdifferentiableAt hmem
+        have hψdiff : MDifferentiableAt I 𝓘(ℝ, E) ψ (γ x) :=
+          ((NormalCoordinates.normalChartAt_contMDiffOn (I := I) g p).mdifferentiableOn
+            one_ne_zero (γ x) (hsrc x hxIcc)).mdifferentiableAt
+            ((NormalCoordinates.normalChartAt_open_source (I := I) g p).mem_nhds (hsrc x hxIcc))
+        have hcdiff : MDifferentiableAt 𝓘(ℝ, ℝ) 𝓘(ℝ, E) c x := hψdiff.comp x hγdiff
+        set cv₂ : E := mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, E) c x 1 with hcv₂_def
+        have hcHDA : HasDerivAt c cv₂ x := by
+          have hmf : HasMFDerivAt 𝓘(ℝ, ℝ) 𝓘(ℝ, E) c x (mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, E) c x) :=
+            hcdiff.hasMFDerivAt
+          rw [hasMFDerivAt_iff_hasFDerivAt] at hmf
+          exact hmf.hasDerivAt
+        have hpos : 0 < B (c x) (c x) := by rw [hB_def]; exact g.pos p (c x) hcx
+        -- `ρ` has derivative `ρ'(x) = B (c x) cv₂ / √(B (c x) (c x))` at `x`.
+        have hρderiv : HasDerivAt ρ (B (c x) cv₂ / Real.sqrt (B (c x) (c x))) x :=
+          radialDist_hasDerivAt B hBsym c cv₂ hcHDA hpos
+        set ρ' : ℝ := B (c x) cv₂ / Real.sqrt (B (c x) (c x)) with hρ'_def
+        -- Pointwise Gauss estimate: `(ρ'(x))² ≤ g(γx)(γ'x)(γ'x) = (φ x)²`.
+        have hev : ∀ᶠ s in nhds x, γ s ∈ ψ.source := by
+          have hopen : Set.Ioo a b ∈ nhds x := isOpen_Ioo.mem_nhds hxIoo
+          filter_upwards [hopen] with s hs using hsrc s (Ioo_subset_Icc_self hs)
+        have hball : ‖ψ (γ x)‖ < expMapC2Radius (I := I) g p := hbball x hxIcc
+        have hune : ψ (γ x) ≠ 0 := hcx
+        have hgauss := gauss_pointwise_speed_lower_bound (I := I) g p hγdiff
+          (hsrc x hxIcc) (hdom x hxIcc) hball hune hev
+        -- `cv₂ = mfderiv c x 1` is the chart-image velocity of the Gauss bound.
+        have hcv₂_eq : cv₂ = mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, E)
+            (fun s => ψ (γ s)) x (1 : ℝ) := rfl
+        -- `(ρ')² ≤ g(γx)(mfderiv γ x 1)(mfderiv γ x 1)`.
+        have hρ'sq_le : ρ' ^ 2 ≤
+            g.inner (γ x) (mfderiv 𝓘(ℝ, ℝ) I γ x 1) (mfderiv 𝓘(ℝ, ℝ) I γ x 1) := by
+          have hρ'sq : ρ' ^ 2 = (B (c x) cv₂) ^ 2 / B (c x) (c x) := by
+            rw [hρ'_def, div_pow, Real.sq_sqrt hpos.le]
+          rw [hρ'sq, hcv₂_eq, hB_def]
+          exact hgauss
+        -- `φ x = √(g(γx)(mfderiv γ x 1)(…))` (interior: `mfderivWithin = mfderiv`).
+        have hφx_eq : φ x = Real.sqrt
+            (g.inner (γ x) (mfderiv 𝓘(ℝ, ℝ) I γ x 1) (mfderiv 𝓘(ℝ, ℝ) I γ x 1)) := by
+          simp only [hφ_def]
+          rw [mfderivWithin_of_mem_nhds hmem]
+        -- Hence `ρ'(x) ≤ φ x < r`.
+        have hρ'_le : ρ' ≤ φ x := by
+          rw [hφx_eq]
+          calc ρ' ≤ |ρ'| := le_abs_self _
+            _ = Real.sqrt (ρ' ^ 2) := (Real.sqrt_sq_eq_abs _).symm
+            _ ≤ _ := Real.sqrt_le_sqrt hρ'sq_le
+        have hρ'_lt : ρ' < r := lt_of_le_of_lt hρ'_le hr
+        exact (hρderiv.hasDerivWithinAt (s := Set.Ici x)).liminf_right_slope_le hρ'_lt
+    -- Assemble: `√(g_p(v,v)) = ρ b ≤ ∫ φ ≤ pathELength`.
+    have hftc : ρ b ≤ ∫ t in a..b, φ t :=
+      image_radialDist_le_intervalIntegral_of_slope_le hab hρc hρa hφint hφcont hslope
+    have hpath : ENNReal.ofReal (∫ t in a..b, φ t) ≤ pathELength I γ a b := by
+      rw [pathELength_eq_lintegral_mfderiv_Ioo,
+        intervalIntegral.integral_of_le hab, MeasureTheory.integral_Ioc_eq_integral_Ioo,
+        MeasureTheory.ofReal_integral_eq_lintegral_ofReal
+          (hφint.mono_set Ioo_subset_Icc_self)
+          (by filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioo] with x hx
+              using hφnn x (Ioo_subset_Icc_self hx))]
+      apply MeasureTheory.setLIntegral_mono_ae' measurableSet_Ioo
+      filter_upwards with t ht
+      rw [hφ_eq_mfderiv t ht]
+      exact le_of_eq (hEnorm (γ t) (mfderiv 𝓘(ℝ, ℝ) I γ t 1)).symm
+    calc ENNReal.ofReal (Real.sqrt (g.inner p v v))
+          = ENNReal.ofReal (ρ b) := by rw [hρb]
+      _ ≤ ENNReal.ofReal (∫ t in a..b, φ t) := ENNReal.ofReal_le_ofReal hftc
+      _ ≤ pathELength I γ a b := hpath
   -- Now combine with the infimum characterisation of `riemannianEDist`.
   refine le_of_forall_gt (fun r hr => ?_)
   -- For every `r > riemannianEDist I p q`, get a path from `p` to `q`
@@ -1900,18 +2319,30 @@ theorem normalBall_radial_unique_minimizer
   -- applies on the truncated piece). We state and consume this
   -- in-ball hypothesis as a self-contained intermediate step.
   have hγ_inBall :
-      ∀ t ∈ Set.Icc (0 : ℝ) 1,
-        γ t ∈ (NormalCoordinates.normalChartAt (I := I) g p).source := by
-    -- Truncation argument: if `γ` leaves the normal ball, replace it
-    -- by its initial in-ball segment plus an angle-correction; the
-    -- length only decreases. This is the standard Gauss-lemma
-    -- handling of paths that "escape" the normal chart's source.
+      (∀ t ∈ Set.Icc (0 : ℝ) 1,
+        γ t ∈ (NormalCoordinates.normalChartAt (I := I) g p).source) ∧
+      (∀ t ∈ Set.Icc (0 : ℝ) 1,
+        ‖NormalCoordinates.normalChartAt (I := I) g p (γ t)‖ <
+          expMapC2Radius (I := I) g p) ∧
+      (∀ t ∈ Set.Icc (0 : ℝ) 1,
+        (show TangentSpace I p from
+            NormalCoordinates.normalChartAt (I := I) g p (γ t))
+          ∈ expDomain (I := I) g p) := by
+    -- Truncation argument: if `γ` leaves the `C²` ball in normal
+    -- coordinates, replace it by its initial in-ball segment up to the
+    -- first exit; the sub-arc to the exit sphere already has
+    -- `pathELength ≥` the exit radius `≥ √(g_p(v, v))` (since
+    -- `expMap g p v` is interior to the ball), so the length comparison
+    -- holds.  This is the standard Gauss-lemma handling of paths that
+    -- "escape" the normal chart's `C²` ball.  The `C²`-ball confinement
+    -- yields both the chart-norm bound and the exponential-domain
+    -- membership of the chart image needed by the radial estimate.
     sorry
   have hγ1' : γ 1 = q := by simp [hq_def, hγ1]
   have hlb : ENNReal.ofReal (Real.sqrt (g.inner p v v)) ≤
       pathELength I γ (0 : ℝ) 1 :=
     curveLengthLowerBound zero_le_one hγ0 hγ1'
-      hγ_smooth.contMDiffOn hγ_inBall
+      hγ_smooth.contMDiffOn hγ_inBall.1 hγ_inBall.2.1 hγ_inBall.2.2
   exact lt_of_le_of_lt hlb hγ_len
 
 /-- **Equality case of the radial unique-minimiser bound.** Inside the
