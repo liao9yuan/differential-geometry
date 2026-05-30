@@ -2465,6 +2465,184 @@ theorem chartCoord_chartTransitionAt_comp_hasDerivAt [I.Boundaryless]
     chartTransitionJacEntry_comp_hasDerivAt (I := I) α β a i hc hmem
   simpa using hJ.mul_const (chartCoord (E := E) i v)
 
+/-! ## Foot-slot derivative of the transition Jacobian as a second-derivative
+correction
+
+The Fréchet derivative of the foot-dependent transition Jacobian
+`z ↦ chartTransitionAt α β z` is a bilinear map; contracting it on the velocity
+slot and the velocity vector itself yields the inhomogeneous second-derivative
+correction `chartTransitionSecondDerivCorrection`, pushed forward through the
+forward Jacobian `chartTransitionAt α β x`. -/
+
+/-- **Coordinate of the foot-slot derivative of the transition Jacobian.**
+For `x` in the chart-transition source, the `a`-th chart coordinate of the
+foot-slot derivative `(fderiv (chartTransitionAt α β ·) x v) w` equals the
+second-derivative sum `∑_{i,j} (∂_i J^a_j x) vⁱ wʲ`, where
+`J = chartTransitionJacEntry α β`. -/
+lemma chartCoord_fderiv_chartTransitionAt_general [I.Boundaryless]
+    (α β : M) {x : E} (hx : x ∈ chartTransitionSource (I := I) α β)
+    (a : Fin (Module.finrank ℝ E)) (v w : E) :
+    chartCoord (E := E) a
+        ((fderiv ℝ (fun z => chartTransitionAt (I := I) α β z) x v) w) =
+      ∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+        partialDeriv (E := E) i
+          (fun z => chartTransitionJacEntry (I := I) α β z a j) x *
+          chartCoord (E := E) i v * chartCoord (E := E) j w := by
+  classical
+  set A : E → (E →L[ℝ] E) := fun z => chartTransitionAt (I := I) α β z with hA
+  have hcA : DifferentiableAt ℝ A x := by
+    have h_open : IsOpen (chartTransitionSource (I := I) α β) :=
+      chartTransitionSource_isOpen (I := I) α β
+    have hcd : ContDiffOn ℝ ∞
+        (fun z => (chartTransitionAt (I := I) α β z : E →L[ℝ] E))
+        (chartTransitionSource (I := I) α β) :=
+      chartTransitionAt_smooth (I := I) α β
+    exact (hcd.contDiffAt (h_open.mem_nhds hx)).differentiableAt (by simp)
+  -- The evaluation CLM `eval : (E →L E) →L ℝ`, `L ↦ chartCoord a (L w)`.
+  set coordCLM : E →L[ℝ] ℝ :=
+    LinearMap.toContinuousLinearMap ((chartModelBasis E).coord a) with hcoordCLM
+  set eval : (E →L[ℝ] E) →L[ℝ] ℝ :=
+    coordCLM.comp (ContinuousLinearMap.apply ℝ E w) with heval
+  have hstep1 :
+      chartCoord (E := E) a ((fderiv ℝ A x v) w) = eval (fderiv ℝ A x v) := by
+    rw [heval, ContinuousLinearMap.comp_apply, ContinuousLinearMap.apply_apply,
+      hcoordCLM]
+    simp only [LinearMap.coe_toContinuousLinearMap', Module.Basis.coord_apply]
+    rfl
+  have hstep2 : eval (fderiv ℝ A x v) = fderiv ℝ (fun z => eval (A z)) x v := by
+    have hcomp_hasD : HasFDerivAt (fun z => eval (A z))
+        (eval.comp (fderiv ℝ A x)) x :=
+      eval.hasFDerivAt.comp x hcA.hasFDerivAt
+    rw [hcomp_hasD.fderiv]
+    rfl
+  have heval_eq : (fun z => eval (A z)) =
+      (fun z => ∑ j : Fin (Module.finrank ℝ E),
+        chartTransitionJacEntry (I := I) α β z a j * chartCoord (E := E) j w) := by
+    funext z
+    rw [heval, ContinuousLinearMap.comp_apply, ContinuousLinearMap.apply_apply, hA,
+      hcoordCLM]
+    simp only [LinearMap.coe_toContinuousLinearMap', Module.Basis.coord_apply]
+    change chartCoord (E := E) a (chartTransitionAt (I := I) α β z w) = _
+    exact chartCoord_chartTransitionAt (I := I) α β z w a
+  rw [hstep1, hstep2, heval_eq]
+  have hsum_fderiv :
+      fderiv ℝ (fun z => ∑ j : Fin (Module.finrank ℝ E),
+          chartTransitionJacEntry (I := I) α β z a j * chartCoord (E := E) j w) x v =
+        ∑ j : Fin (Module.finrank ℝ E),
+          fderiv ℝ (fun z => chartTransitionJacEntry (I := I) α β z a j *
+            chartCoord (E := E) j w) x v := by
+    have hdiff : ∀ j : Fin (Module.finrank ℝ E),
+        DifferentiableAt ℝ (fun z => chartTransitionJacEntry (I := I) α β z a j *
+          chartCoord (E := E) j w) x := by
+      intro j
+      exact (chartTransitionJacEntry_differentiableAt (I := I) α β a j hx).mul_const _
+    rw [fderiv_fun_sum (fun j _ => hdiff j)]
+    rw [ContinuousLinearMap.sum_apply]
+  rw [hsum_fderiv]
+  have hLHS_expand :
+      (∑ j : Fin (Module.finrank ℝ E),
+          fderiv ℝ (fun z => chartTransitionJacEntry (I := I) α β z a j *
+            chartCoord (E := E) j w) x v) =
+        ∑ j : Fin (Module.finrank ℝ E), ∑ i : Fin (Module.finrank ℝ E),
+          partialDeriv (E := E) i
+            (fun z => chartTransitionJacEntry (I := I) α β z a j) x *
+            chartCoord (E := E) i v * chartCoord (E := E) j w := by
+    refine Finset.sum_congr rfl (fun j _ => ?_)
+    rw [fderiv_mul_const (chartTransitionJacEntry_differentiableAt (I := I) α β a j hx) _]
+    rw [ContinuousLinearMap.smul_apply, smul_eq_mul]
+    rw [fderiv_chartTransitionJacEntry_eq_sum_partialDeriv (I := I) α β a j x v]
+    rw [Finset.mul_sum]
+    refine Finset.sum_congr rfl (fun i _ => ?_)
+    ring
+  rw [hLHS_expand]
+  rw [Finset.sum_comm]
+
+/-- **Foot-slot derivative of the transition Jacobian = pushforward of the
+second-derivative correction.** For `x` in the chart-transition source, the
+foot-slot derivative `(fderiv (chartTransitionAt α β ·) x v) w` equals the
+forward Jacobian `chartTransitionAt α β x` applied to the second-derivative
+correction `chartTransitionSecondDerivCorrection α β v w x`. This is the
+vector-valued cancellation identity that converts the moving-foot Jacobian
+derivative into the Christoffel-transformation correction term. -/
+lemma fderiv_chartTransitionAt_apply_eq_pushCorrection [I.Boundaryless]
+    (α β : M) {x : E} (hx : x ∈ chartTransitionSource (I := I) α β) (v w : E) :
+    (fderiv ℝ (fun z => chartTransitionAt (I := I) α β z) x v) w =
+      chartTransitionAt (I := I) α β x
+        (chartTransitionSecondDerivCorrection (I := I) α β v w x) := by
+  classical
+  refine (chartModelBasis E).ext_elem (fun a => ?_)
+  change chartCoord (E := E) a
+      ((fderiv ℝ (fun z => chartTransitionAt (I := I) α β z) x v) w) =
+    chartCoord (E := E) a
+      (chartTransitionAt (I := I) α β x
+        (chartTransitionSecondDerivCorrection (I := I) α β v w x))
+  rw [chartCoord_fderiv_chartTransitionAt_general (I := I) α β hx a v w]
+  rw [chartCoord_chartTransitionAt (I := I) α β x
+    (chartTransitionSecondDerivCorrection (I := I) α β v w x) a]
+  have hcorrCoord : ∀ c : Fin (Module.finrank ℝ E),
+      chartCoord (E := E) c
+          (chartTransitionSecondDerivCorrection (I := I) α β v w x) =
+        ∑ d : Fin (Module.finrank ℝ E),
+          chartTransitionJacEntry (I := I) β α
+            (chartTransitionMap (I := I) α β x) c d *
+            (∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+              partialDeriv (E := E) i
+                (fun z => chartTransitionJacEntry (I := I) α β z d j) x *
+                chartCoord (E := E) i v * chartCoord (E := E) j w) := by
+    intro c
+    rw [chartTransitionSecondDerivCorrection_def, chartCoord, map_sum,
+      Finsupp.finset_sum_apply]
+    rw [Finset.sum_eq_single_of_mem c (Finset.mem_univ c)]
+    · rw [map_smul, Finsupp.smul_apply, smul_eq_mul,
+        (chartModelBasis E).repr_self_apply c c, if_pos rfl, mul_one]
+    · intro k _ hkc
+      rw [map_smul, Finsupp.smul_apply, smul_eq_mul,
+        (chartModelBasis E).repr_self_apply k c, if_neg hkc, mul_zero]
+  rw [Finset.sum_congr rfl (fun c (_ : c ∈ Finset.univ) =>
+    congrArg (fun t => chartTransitionJacEntry (I := I) α β x a c * t) (hcorrCoord c))]
+  set D : Fin (Module.finrank ℝ E) → ℝ := fun d =>
+    ∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+      partialDeriv (E := E) i
+        (fun z => chartTransitionJacEntry (I := I) α β z d j) x *
+        chartCoord (E := E) i v * chartCoord (E := E) j w with hD_def
+  symm
+  calc
+    (∑ c : Fin (Module.finrank ℝ E),
+        chartTransitionJacEntry (I := I) α β x a c *
+          (∑ d : Fin (Module.finrank ℝ E),
+            chartTransitionJacEntry (I := I) β α
+              (chartTransitionMap (I := I) α β x) c d * D d))
+        = ∑ d : Fin (Module.finrank ℝ E),
+            (∑ c : Fin (Module.finrank ℝ E),
+              chartTransitionJacEntry (I := I) α β x a c *
+                chartTransitionJacEntry (I := I) β α
+                  (chartTransitionMap (I := I) α β x) c d) * D d := by
+          rw [show (∑ c : Fin (Module.finrank ℝ E),
+                chartTransitionJacEntry (I := I) α β x a c *
+                  (∑ d : Fin (Module.finrank ℝ E),
+                    chartTransitionJacEntry (I := I) β α
+                      (chartTransitionMap (I := I) α β x) c d * D d)) =
+              ∑ c : Fin (Module.finrank ℝ E), ∑ d : Fin (Module.finrank ℝ E),
+                chartTransitionJacEntry (I := I) α β x a c *
+                  (chartTransitionJacEntry (I := I) β α
+                    (chartTransitionMap (I := I) α β x) c d * D d) from by
+            refine Finset.sum_congr rfl (fun c _ => ?_)
+            rw [Finset.mul_sum]]
+          rw [Finset.sum_comm]
+          refine Finset.sum_congr rfl (fun d _ => ?_)
+          rw [Finset.sum_mul]
+          refine Finset.sum_congr rfl (fun c _ => ?_)
+          ring
+    _ = ∑ d : Fin (Module.finrank ℝ E),
+            (if a = d then (1 : ℝ) else 0) * D d := by
+          refine Finset.sum_congr rfl (fun d _ => ?_)
+          rw [chartTransitionJacEntry_mul_sum' (I := I) α β hx a d]
+    _ = D a := by
+          rw [Finset.sum_eq_single_of_mem a (Finset.mem_univ a)]
+          · rw [if_pos rfl, one_mul]
+          · intro k _ hka
+            rw [if_neg (fun h => hka h.symm), zero_mul]
+
 end Geodesic
 end Riemannian
 end Geometry

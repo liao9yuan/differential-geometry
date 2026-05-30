@@ -3,9 +3,11 @@ import DifferentialGeometry.Geometry.Riemannian.Geodesic.GeodesicEquationBridge
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.Uniqueness
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.ProjDerivative
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.ChartTransition
+import DifferentialGeometry.Geometry.Riemannian.AlongCurve
 import DifferentialGeometry.Integral.Measure.ChartDensity
 import Mathlib.Geometry.Manifold.IntegralCurve.Basic
 import Mathlib.Analysis.Calculus.FDeriv.CompCLM
+import Mathlib.Analysis.Calculus.Deriv.Mul
 
 set_option linter.unusedSectionVars false
 
@@ -33,6 +35,7 @@ namespace Geodesic
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Geometry.Riemannian.Exponential
+open DifferentialGeometry.Geometry.Riemannian.AlongCurve
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
   [Module.Finite ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -645,6 +648,216 @@ theorem IsGeodesicAt.hasGeodesicEquationAt
     bm_c_gc_cross_vf_projection_uniqueness (I := I) (g := g) (γ := γ) (t₀ := t₀) hγ
   exact IsGeodesicAt.hasGeodesicEquationAt_of_chartCentered_lift_eventuallyEq
     (I := I) (g := g) (γ := γ) (t₀ := t₀) hγ (f₁ := f₁) hf₁ hf₁_proj_t₀ hcross
+
+/-! ## Moving-foot → fixed-chart conversion of the geodesic equation
+
+The moving-foot geodesic equation `HasGeodesicEquationAt g γ t` reads the
+chart-coordinate second-order ODE in the chart centred at the *moving* foot
+`γ t`. The fixed-endpoint velocity-limit machinery
+(`chartVelocity_converges_at_finite_endpoint`) instead consumes the ODE written
+in a *single fixed* chart at some basepoint `y`. The two are related by the
+chart-transition law: the chart-coordinate geodesic equation is covariant under
+chart change, with the inhomogeneous second-derivative correction of the
+Christoffel transformation law exactly cancelling the moving-foot Jacobian
+derivative.
+
+We deliver the conversion at a single time `t`: from the moving-foot equation at
+`t` (plus `γ t` lying in the chart at `y` and continuity of `γ` at `t`), the
+fixed-`y`-chart curve `u(s) := φ_y(γ s)` satisfies the second-order ODE
+`u''(t) = -Γ_y(u'(t), u'(t))(u(t))`. -/
+
+section MovingFootToFixedChart
+
+variable [I.Boundaryless]
+
+/-- **Moving-foot → fixed-chart geodesic ODE.** Suppose `γ` satisfies the
+moving-foot geodesic equation `HasGeodesicEquationAt g γ t` (the chart-coordinate
+second-order equation read in the chart centred at the moving foot `γ t`), with
+`γ t` lying in the chart at the fixed basepoint `y` and `γ` continuous at `t`.
+Then the fixed-`y`-chart curve `u := chartCurve y γ` satisfies the fixed-chart
+second-order ODE
+`u''(t) = -Γ_y(u'(t), u'(t))(u(t))`,
+in the form `HasDerivAt (deriv u) (-Γ_y(deriv u t, deriv u t)(u t)) t`.
+
+This is the fixed-chart hypothesis fed (pointwise in `t`) to
+`chartVelocity_converges_at_finite_endpoint`. The proof transforms the
+moving-foot equation in the chart at `γ t` to the chart at `y` via the
+chart-transition Jacobian (first derivative) and the chart-Christoffel
+transformation law `chartChristoffelContraction_transform` (second derivative),
+whose inhomogeneous second-derivative correction
+`chartTransitionSecondDerivCorrection` exactly cancels the moving-foot Jacobian
+derivative `fderiv (chartTransitionAt (γ t) y ·) (w t)`, leaving the fixed-`y`
+Christoffel acceleration. -/
+theorem hasGeodesicEquationAt_fixedChart_hasDerivAt_velocity
+    (g : SmoothRiemannianMetric I M) (y : M) {γ : ℝ → M} {t : ℝ}
+    (hγ_cont : ContinuousAt γ t)
+    (hy : γ t ∈ (chartAt H y).source)
+    (h : HasGeodesicEquationAt (I := I) g γ t) :
+    HasDerivAt (deriv (chartCurve (I := I) y γ))
+      (- chartChristoffelContraction (I := I) g y
+          (deriv (chartCurve (I := I) y γ) t)
+          (deriv (chartCurve (I := I) y γ) t)
+          (chartCurve (I := I) y γ t)) t := by
+  classical
+  set α : M := γ t with hα_def
+  set x : E := chartCurve (I := I) α γ t with hx_def
+  -- Unpack the moving-foot equation. Note `chartLocalCurve γ t = chartCurve (γ t) γ`.
+  obtain ⟨v, a, hv0, hev0, ha0, hgeo⟩ := h
+  -- Rewrite the clauses in terms of `chartCurve α γ` (defeq to `chartLocalCurve γ t`).
+  have hwdef : chartLocalCurve (I := I) γ t = chartCurve (I := I) α γ := by
+    funext s; rw [chartLocalCurve_def, hα_def, chartCurve_def]
+  rw [hwdef] at hv0 hev0 ha0
+  -- `hv0 : HasDerivAt (chartCurve α γ) v t`
+  -- `hev0 : ∀ᶠ s in 𝓝 t, HasDerivAt (chartCurve α γ) (deriv (chartCurve α γ) s) s`
+  -- `ha0 : HasDerivAt (deriv (chartCurve α γ)) a t`
+  -- `hgeo : a + Γ_α(v,v)(extChartAt I (γ t) (γ t)) = 0`.
+  -- Chart-source memberships.
+  have hα_src : γ t ∈ (chartAt H α).source := by
+    rw [hα_def]; exact mem_chart_source H (γ t)
+  have hx_src : x ∈ chartTransitionSource (I := I) α y :=
+    extChartAt_mem_chartTransitionSource (I := I) α y hα_src hy
+  -- `x = extChartAt I (γ t) (γ t)`.
+  have hx_eq : x = extChartAt I (γ t) (γ t) := by rw [hx_def, chartCurve_def, hα_def]
+  -- Eventually `γ s` is in both chart sources.
+  have hboth_nhds : (fun s => γ s) ⁻¹'
+      ((chartAt H α).source ∩ (chartAt H y).source) ∈ 𝓝 t :=
+    hγ_cont.preimage_mem_nhds
+      (((chartAt H α).open_source.inter (chartAt H y).open_source).mem_nhds ⟨hα_src, hy⟩)
+  -- The fixed-`y`-chart curve `u` and moving-foot chart curve `w`.
+  set u : ℝ → E := chartCurve (I := I) y γ with hu_def
+  set w : ℝ → E := chartCurve (I := I) α γ with hw_def
+  -- `w t = x`.
+  have hwt : w t = x := by rw [hw_def, hx_def]
+  -- Near `t`, `u = chartTransitionMap α y ∘ w` (both agree where `γ s` is in both
+  -- chart sources).
+  have hcurve_eq : u =ᶠ[𝓝 t]
+      (fun s => chartTransitionMap (I := I) α y (w s)) := by
+    filter_upwards [hboth_nhds] with s hs
+    obtain ⟨hsα, _hsy⟩ := hs
+    rw [hu_def, hw_def, chartCurve_def, chartCurve_def]
+    exact (chartTransitionMap_apply_extChartAt (I := I) α y hsα).symm
+  -- The forward chart-transition map is differentiable on the source.
+  have hTdiff : ∀ {z : E}, z ∈ chartTransitionSource (I := I) α y →
+      DifferentiableAt ℝ (chartTransitionMap (I := I) α y) z :=
+    fun hz => chartTransitionMap_differentiableAt (I := I) α y hz
+  -- For `s` near `t`, the composite `chartTransitionMap α y ∘ w` has derivative
+  -- `chartTransitionAt α y (w s) (deriv w s)`; this transfers to `u` since
+  -- `u =ᶠ[𝓝 s] chartTransitionMap α y ∘ w` (local form of `hcurve_eq`).
+  have hu_hasDerivAt_ev : ∀ᶠ s in 𝓝 t,
+      HasDerivAt u (chartTransitionAt (I := I) α y (w s) (deriv w s)) s := by
+    filter_upwards [hev0, hboth_nhds, hcurve_eq.eventually_nhds] with s hs hs_both hs_eq
+    -- `w s = chartCurve α γ s ∈ chartTransitionSource α y`.
+    have hws_src : w s ∈ chartTransitionSource (I := I) α y := by
+      rw [hw_def, chartCurve_def]
+      exact extChartAt_mem_chartTransitionSource (I := I) α y hs_both.1 hs_both.2
+    have hcomp : HasDerivAt
+        (fun r => chartTransitionMap (I := I) α y (w r))
+        (chartTransitionAt (I := I) α y (w s) (deriv w s)) s := by
+      have := (hTdiff hws_src).hasFDerivAt.comp_hasDerivAt s hs
+      simpa [chartTransitionAt_def] using this
+    exact hcomp.congr_of_eventuallyEq hs_eq
+  -- First derivative of `u` at `t`: `u'(t) = T'_{α,y}(x)(v)`.
+  have hdw_t : deriv w t = v := hv0.deriv
+  have hu_deriv_t : HasDerivAt u (chartTransitionAt (I := I) α y x v) t := by
+    have h0 := hu_hasDerivAt_ev.self_of_nhds
+    rwa [hwt, hdw_t] at h0
+  -- `deriv u t = T'_{α,y}(x)(v)`.
+  have hderiv_u_t : deriv u t = chartTransitionAt (I := I) α y x v := hu_deriv_t.deriv
+  -- Eventually, `deriv u s = T'_{α,y}(w s)(deriv w s)`.
+  have hderiv_u_ev : (fun s => deriv u s) =ᶠ[𝓝 t]
+      (fun s => chartTransitionAt (I := I) α y (w s) (deriv w s)) := by
+    filter_upwards [hu_hasDerivAt_ev] with s hds
+    exact hds.deriv
+  -- Now differentiate `s ↦ T'_{α,y}(w s)(deriv w s)` at `t` via the clm_apply rule.
+  -- `c s := chartTransitionAt α y (w s)` (CLM-valued), `u₂ s := deriv w s`.
+  -- `c` is differentiable at `t` (smooth Jacobian ∘ smooth curve `w`).
+  have hAdiff : DifferentiableAt ℝ
+      (fun z => (chartTransitionAt (I := I) α y z : E →L[ℝ] E)) x := by
+    have h_open : IsOpen (chartTransitionSource (I := I) α y) :=
+      chartTransitionSource_isOpen (I := I) α y
+    exact ((chartTransitionAt_smooth (I := I) α y).contDiffAt
+      (h_open.mem_nhds hx_src)).differentiableAt (by simp)
+  have hAdiff_wt : DifferentiableAt ℝ
+      (fun z => (chartTransitionAt (I := I) α y z : E →L[ℝ] E)) (w t) := by
+    rw [hwt]; exact hAdiff
+  have hcA : HasDerivAt
+      (fun s => (chartTransitionAt (I := I) α y (w s) : E →L[ℝ] E))
+      ((fderiv ℝ (fun z => chartTransitionAt (I := I) α y z) x) v) t := by
+    have hc0 := hAdiff_wt.hasFDerivAt.comp_hasDerivAt t hv0
+    rw [hwt] at hc0
+    exact hc0
+  -- `clm_apply`: `HasDerivAt (s ↦ (c s)(deriv w s)) ((c' (deriv w t)) + (c t)(a)) t`.
+  have hVderiv : HasDerivAt
+      (fun s => chartTransitionAt (I := I) α y (w s) (deriv w s))
+      (((fderiv ℝ (fun z => chartTransitionAt (I := I) α y z) x) v) v
+        + chartTransitionAt (I := I) α y x a) t := by
+    have hclm := hcA.clm_apply ha0
+    -- `(c t) = chartTransitionAt α y x` since `w t = x`; `deriv w t = v`.
+    rw [hwt, hdw_t] at hclm
+    exact hclm
+  -- Transfer `hVderiv` to `deriv u` via the eventual equality.
+  have hUderiv : HasDerivAt (deriv u)
+      (((fderiv ℝ (fun z => chartTransitionAt (I := I) α y z) x) v) v
+        + chartTransitionAt (I := I) α y x a) t :=
+    hVderiv.congr_of_eventuallyEq hderiv_u_ev
+  -- Now collapse the derivative value to `-Γ_y(u'(t), u'(t))(u t)`.
+  -- Foot-slot derivative = pushforward of the second-derivative correction.
+  have hfoot :
+      ((fderiv ℝ (fun z => chartTransitionAt (I := I) α y z) x) v) v =
+        chartTransitionAt (I := I) α y x
+          (chartTransitionSecondDerivCorrection (I := I) α y v v x) :=
+    fderiv_chartTransitionAt_apply_eq_pushCorrection (I := I) α y hx_src v v
+  -- The chart-Christoffel transformation law (α → y at the manifold point γ t).
+  have htransform :
+      chartChristoffelContraction (I := I) g α v v x =
+        chartTransitionAt (I := I) y α (chartTransitionMap (I := I) α y x)
+            (chartChristoffelContraction (I := I) g y
+              (chartTransitionAt (I := I) α y x v)
+              (chartTransitionAt (I := I) α y x v)
+              (chartTransitionMap (I := I) α y x))
+          + chartTransitionSecondDerivCorrection (I := I) α y v v x := by
+    rw [hx_eq]
+    exact chartChristoffelContraction_transform (I := I) g α y hα_src hy v v
+  -- `u t = chartTransitionMap α y x` and `u'(t) = chartTransitionAt α y x v`.
+  have hu_t : u t = chartTransitionMap (I := I) α y x := by
+    have hxα : x = extChartAt I α (γ t) := by rw [hx_def, hw_def, chartCurve_def]
+    rw [hu_def, chartCurve_def, hxα]
+    exact (chartTransitionMap_apply_extChartAt (I := I) α y hα_src).symm
+  have hu'_t : deriv u t = chartTransitionAt (I := I) α y x v := hderiv_u_t
+  -- The derivative value `D = c'(v)(v) + (c t)(a)` collapses to `-Γ_y(u'(t), u'(t))(u t)`.
+  have hDcollapse :
+      ((fderiv ℝ (fun z => chartTransitionAt (I := I) α y z) x) v) v
+        + chartTransitionAt (I := I) α y x a
+        = - chartChristoffelContraction (I := I) g y
+            (deriv u t) (deriv u t) (u t) := by
+    -- Substitute `a = -Γ_α(v,v)(x)` from `hgeo` (`α = γ t`, `x = extChartAt I (γ t)(γ t)`).
+    have ha_eq : a = - chartChristoffelContraction (I := I) g α v v x := by
+      rw [hx_eq]; exact eq_neg_of_add_eq_zero_left hgeo
+    rw [hfoot, ha_eq, map_neg, ← sub_eq_add_neg, ← map_sub]
+    -- `corr - Γ_α(v,v)(x) = - chartTransitionAt y α (Tx) (Γ_y(...))`.
+    have hsub :
+        chartTransitionSecondDerivCorrection (I := I) α y v v x -
+            chartChristoffelContraction (I := I) g α v v x =
+          - chartTransitionAt (I := I) y α (chartTransitionMap (I := I) α y x)
+              (chartChristoffelContraction (I := I) g y
+                (chartTransitionAt (I := I) α y x v)
+                (chartTransitionAt (I := I) α y x v)
+                (chartTransitionMap (I := I) α y x)) := by
+      rw [htransform]; abel
+    rw [hsub, map_neg]
+    -- `chartTransitionAt α y x ∘ chartTransitionAt y α (Tx) = id`.
+    have hinv := chartTransitionAt_comp_chartTransitionAt' (I := I) α y hx_src
+    have hid := congrArg (fun L : E →L[ℝ] E => L
+        (chartChristoffelContraction (I := I) g y
+          (chartTransitionAt (I := I) α y x v)
+          (chartTransitionAt (I := I) α y x v)
+          (chartTransitionMap (I := I) α y x))) hinv
+    simp only [ContinuousLinearMap.comp_apply, ContinuousLinearMap.id_apply] at hid
+    rw [hid, hu_t, hu'_t]
+  rw [hDcollapse] at hUderiv
+  exact hUderiv
+
+end MovingFootToFixedChart
 
 /-! ## Gluing two geodesic arcs at a matching limit point
 
