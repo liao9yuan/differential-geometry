@@ -274,6 +274,125 @@ lemma maximalGeodesic_rescale_of_norm_lt_radius
     (Exponential.maximalGeodesic_rescale_at_one_of_small (I := I) g p)).2
     (lt_of_lt_of_le hv (le_trans (min_le_right _ _) (min_le_right _ _))) t ht
 
+/-! ## Coercivity of `g_p` and the `g_p`-ball radius
+
+The default norm on the model space `E` (Euclidean) and the fibre quadratic
+form `g.inner p` are unrelated a priori, but on a finite-dimensional `E` the
+positive-definite continuous bilinear form `g.inner p` is *coercive*: there is
+`c > 0` with `c · ‖x‖² ≤ g_p(x, x)` for all `x`.  This lets us convert a
+`g_p`-ball smallness condition into the Euclidean `C²`-ball smallness needed by
+the variational machinery, and conversely fit a `g_p`-ball inside the Euclidean
+`C²`-ball.  The relevant `g_p`-radius is `expRadiusGp g p := √c · expMapC2Radius g p`. -/
+
+/-- **Coercivity of `g_p`.** The positive-definite continuous bilinear form
+`g.inner p` on a finite-dimensional space is bounded below by a multiple of the
+squared Euclidean norm: there is `c > 0` with `c · ‖x‖² ≤ g_p(x, x)` for all `x`.
+The unit sphere is compact (finite dimension), `g_p(x, x) > 0` there, and the
+minimum is the constant `c`. -/
+private lemma gp_coercive (g : SmoothRiemannianMetric I M) (p : M) :
+    ∃ c : ℝ, 0 < c ∧ ∀ x : E, c * ‖x‖ ^ 2 ≤ g.inner p x x := by
+  classical
+  haveI : ProperSpace E := FiniteDimensional.proper_rclike (K := ℝ) (E := E)
+  set B : E →L[ℝ] E →L[ℝ] ℝ := g.inner p with hB_def
+  -- The continuous quadratic form on the unit sphere.
+  set Q : E → ℝ := fun x => B x x with hQ
+  have hQcont : Continuous Q := by
+    have : Continuous (fun x : E => B x x) :=
+      (B.continuous₂).comp (continuous_id.prodMk continuous_id)
+    simpa [hQ] using this
+  have hsphere : IsCompact (Metric.sphere (0 : E) 1) := isCompact_sphere 0 1
+  have hQpos : ∀ x ∈ Metric.sphere (0 : E) 1, (0 : ℝ) < Q x := by
+    intro x hx
+    have hxne : x ≠ 0 := by
+      intro h; rw [h] at hx
+      simp only [mem_sphere_zero_iff_norm, norm_zero] at hx
+      exact (zero_ne_one hx)
+    exact g.pos p x hxne
+  obtain ⟨c, hc_pos, hc_le⟩ :=
+    hsphere.exists_forall_le' hQcont.continuousOn hQpos
+  refine ⟨c, hc_pos, fun x => ?_⟩
+  -- It suffices to bound `B x x = g.inner p x x`.
+  change c * ‖x‖ ^ 2 ≤ B x x
+  rcases eq_or_ne x 0 with hx0 | hx0
+  · subst hx0
+    rw [ContinuousLinearMap.map_zero₂, norm_zero]
+    simp
+  · -- scaling: x = ‖x‖ • (‖x‖⁻¹ • x), unit vector on sphere
+    have hnx_pos : 0 < ‖x‖ := norm_pos_iff.mpr hx0
+    set u : E := ‖x‖⁻¹ • x with hu_def
+    have hu_sphere : u ∈ Metric.sphere (0 : E) 1 := by
+      rw [mem_sphere_zero_iff_norm, hu_def, norm_smul]
+      simp only [norm_inv, Real.norm_eq_abs, abs_of_pos hnx_pos]
+      exact inv_mul_cancel₀ (ne_of_gt hnx_pos)
+    have hcu : c ≤ B u u := hc_le u hu_sphere
+    have hx_eq : x = ‖x‖ • u := by
+      rw [hu_def, smul_smul, mul_inv_cancel₀ (ne_of_gt hnx_pos), one_smul]
+    have hQscale : B x x = ‖x‖ ^ 2 * B u u := by
+      nth_rewrite 1 [hx_eq]
+      nth_rewrite 2 [hx_eq]
+      rw [ContinuousLinearMap.map_smul₂, ContinuousLinearMap.map_smul, smul_eq_mul, smul_eq_mul]
+      ring
+    rw [hQscale]
+    have hsq_nn : 0 ≤ ‖x‖ ^ 2 := sq_nonneg _
+    calc c * ‖x‖ ^ 2 = ‖x‖ ^ 2 * c := by ring
+      _ ≤ ‖x‖ ^ 2 * B u u := mul_le_mul_of_nonneg_left hcu hsq_nn
+
+/-- The coercivity constant of `g.inner p`, packaged as a `Classical.choose`. -/
+private def gpCoerciveConst (g : SmoothRiemannianMetric I M) (p : M) : ℝ :=
+  Classical.choose (gp_coercive (I := I) g p)
+
+private lemma gpCoerciveConst_pos (g : SmoothRiemannianMetric I M) (p : M) :
+    0 < gpCoerciveConst (I := I) g p :=
+  (Classical.choose_spec (gp_coercive (I := I) g p)).1
+
+private lemma gpCoerciveConst_le (g : SmoothRiemannianMetric I M) (p : M) (x : E) :
+    gpCoerciveConst (I := I) g p * ‖x‖ ^ 2 ≤ g.inner p x x :=
+  (Classical.choose_spec (gp_coercive (I := I) g p)).2 x
+
+/-- **The `g_p`-ball radius** on which the radial-minimiser cluster is available:
+`√c · expMapC2Radius g p`, where `c` is the coercivity constant of `g.inner p`.
+A `g_p`-ball of this radius fits inside the Euclidean `C²`-ball of radius
+`expMapC2Radius g p`, and conversely a `g_p`-smallness `√(g_p(v,v)) < expRadiusGp g p`
+implies the Euclidean smallness `‖v‖ < expMapC2Radius g p`.  This is the correct
+domain radius for the radial length lower bound: under an anisotropic `g_p` the
+Euclidean radius would let `√(g_p(v,v))` exceed the realised radial distance. -/
+def expRadiusGp (g : SmoothRiemannianMetric I M) (p : M) : ℝ :=
+  Real.sqrt (gpCoerciveConst (I := I) g p) * expMapC2Radius (I := I) g p
+
+/-- The `g_p`-ball radius is strictly positive. -/
+lemma expRadiusGp_pos (g : SmoothRiemannianMetric I M) (p : M) :
+    0 < expRadiusGp (I := I) g p := by
+  rw [expRadiusGp]
+  exact mul_pos (Real.sqrt_pos.mpr (gpCoerciveConst_pos (I := I) g p))
+    (expMapC2Radius_pos (I := I) g p)
+
+/-- If `√(g_p(x,x)) < expRadiusGp g p`, then `‖x‖_E < expMapC2Radius g p`:
+the `g_p`-ball of radius `expRadiusGp g p` fits inside the Euclidean `C²`-ball
+(via coercivity). -/
+lemma norm_lt_expMapC2Radius_of_sqrt_inner_lt
+    (g : SmoothRiemannianMetric I M) (p : M) {x : E}
+    (hx : Real.sqrt (g.inner p x x) < expRadiusGp (I := I) g p) :
+    ‖x‖ < expMapC2Radius (I := I) g p := by
+  have hc_pos : 0 < gpCoerciveConst (I := I) g p := gpCoerciveConst_pos (I := I) g p
+  -- From `√(g_p(x,x)) < √c · R` get `g_p(x,x) < c · R²`.
+  have hsq : g.inner p x x < (expRadiusGp (I := I) g p) ^ 2 :=
+    Real.lt_sq_of_sqrt_lt hx
+  have hR : (expRadiusGp (I := I) g p) ^ 2
+      = gpCoerciveConst (I := I) g p * (expMapC2Radius (I := I) g p) ^ 2 := by
+    rw [expRadiusGp, mul_pow, Real.sq_sqrt hc_pos.le]
+  rw [hR] at hsq
+  -- Coercivity: `c · ‖x‖² ≤ g_p(x,x) < c · R²`, so `‖x‖² < R²`, hence `‖x‖ < R`.
+  have hcoerc : gpCoerciveConst (I := I) g p * ‖x‖ ^ 2 ≤ g.inner p x x :=
+    gpCoerciveConst_le (I := I) g p x
+  have hlt : gpCoerciveConst (I := I) g p * ‖x‖ ^ 2
+      < gpCoerciveConst (I := I) g p * (expMapC2Radius (I := I) g p) ^ 2 :=
+    lt_of_le_of_lt hcoerc hsq
+  have hsq_lt : ‖x‖ ^ 2 < (expMapC2Radius (I := I) g p) ^ 2 :=
+    lt_of_mul_lt_mul_left hlt hc_pos.le
+  -- `‖x‖ < R` from `‖x‖² < R²` with `‖x‖ ≥ 0` and `R > 0`.
+  have hRpos : 0 < expMapC2Radius (I := I) g p := expMapC2Radius_pos (I := I) g p
+  nlinarith [norm_nonneg x, hsq_lt, hRpos]
+
 /-! ## The radial geodesic variation and its calculus core
 
 We package the variational core of Gauss's lemma as the named lemma
@@ -2004,10 +2123,15 @@ theorem normalBall_radial_unique_minimizer
         ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
     (hv : (show TangentSpace I p from v) ∈ expDomain (I := I) g p)
     (hball : v ∈ (NormalCoordinates.normalChartAt (I := I) g p).target)
-    (hsmall : ‖(v : E)‖ < expMapC2Radius (I := I) g p) :
+    (hsmall_g : Real.sqrt (g.inner p v v) < expRadiusGp (I := I) g p) :
     ENNReal.ofReal (Real.sqrt (g.inner p v v)) ≤
       riemannianEDist I p
         (expMap (I := I) g p (show TangentSpace I p from v)) := by
+  -- The `g_p`-smallness `√(g_p(v,v)) < expRadiusGp` is the correct domain
+  -- hypothesis: under an anisotropic `g_p` the Euclidean radius would allow
+  -- `√(g_p(v,v))` to exceed the realised radial distance.  It implies the
+  -- Euclidean `C²`-ball smallness `‖v‖ < expMapC2Radius` (coercivity), used
+  -- below to discharge the variational machinery's domain hypotheses.
   -- The classical Gauss-lemma length lower bound. We reduce to the
   -- forall-greater formulation of `riemannianEDist` as an infimum.
   -- For every `r` strictly larger than the distance, there is a smooth
@@ -2362,7 +2486,7 @@ theorem normalBall_radial_minimizer_equality
         ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
     (hv : (show TangentSpace I p from v) ∈ expDomain (I := I) g p)
     (hball : v ∈ (NormalCoordinates.normalChartAt (I := I) g p).target)
-    (hsmall : ‖(v : E)‖ < expMapC2Radius (I := I) g p)
+    (hsmall_g : Real.sqrt (g.inner p v v) < expRadiusGp (I := I) g p)
     {γ : ℝ → M} {a b : ℝ} (hab : a ≤ b)
     (hγ : CMDiff[Set.Icc a b] 1 γ)
     (hγa : γ a = p)
