@@ -700,6 +700,53 @@ theorem exists_parallel_orthonormal_perp_frame
         from rfl]
     exact hperp
 
+/-- **Parallel orthonormal frame perpendicular to the geodesic velocity field.**
+For a unit-speed geodesic `γ` on `[0, L]` with velocity `uPrime t = γ'(t)`
+(`huPrimeEq` pins `uPrime t = mfderiv γ t (1)` and `hUnit` records unit speed),
+there is a frame `e : Fin (finrank E - 1) → SectionAlongCurve I M γ` whose every
+member is differentiable (in its chart representation), parallel along `γ` (the
+intrinsic `covDerivAlong g γ (e i) t = 0`), pointwise `g`-orthonormal, and
+`g`-orthogonal to the velocity `uPrime t`.
+
+This is the velocity-field-indexed restatement of
+`exists_parallel_orthonormal_perp_frame`: the only difference is that the
+perpendicularity clause is phrased against the supplied `uPrime` rather than
+the bare `mfderiv γ t (1)`; the two coincide by `huPrimeEq`, so the result is a
+direct reduction to the underlying frame. -/
+theorem parallel_on_frame_perp_to_geodesic
+    (g : SmoothRiemannianMetric I M) (γ : ℝ → M) (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ)
+    (hgeo : IsGeodesic (I := I) g γ) {L : ℝ} (hL : 0 < L)
+    (uPrime : ℝ → E)
+    (huPrimeEq : ∀ t ∈ Set.Icc (0 : ℝ) L,
+      (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ) : E) = uPrime t)
+    (hUnit : ∀ t ∈ Set.Icc (0 : ℝ) L,
+      g.inner (γ t) (uPrime t) (uPrime t) = 1) :
+    ∃ e : Fin (Module.finrank ℝ E - 1) → SectionAlongCurve I M γ,
+      (∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L,
+        DifferentiableAt ℝ (chartRepAt (I := I) γ (e i).toFun t) t) ∧
+      (∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L,
+        covDerivAlong (I := I) g γ (e i).toFun t = 0) ∧
+      (∀ t ∈ Set.Icc (0 : ℝ) L, ∀ i j,
+        g.inner (γ t) ((e i).toFun t) ((e j).toFun t) =
+          if i = j then 1 else 0) ∧
+      (∀ t ∈ Set.Icc (0 : ℝ) L, ∀ i,
+        g.inner (γ t) ((e i).toFun t) (uPrime t) = 0) := by
+  -- Feed the proven frame's `hUnit` (phrased on `mfderiv γ t 1`) by rewriting
+  -- the supplied unit-speed hypothesis through `huPrimeEq`.
+  have hUnit' : ∀ t ∈ Set.Icc (0 : ℝ) L,
+      g.inner (γ t) (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ) : E)
+        (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ) : E) = 1 := by
+    intro t ht
+    rw [huPrimeEq t ht]; exact hUnit t ht
+  obtain ⟨e, hdiff, hpar, hON, hperp⟩ :=
+    exists_parallel_orthonormal_perp_frame (I := I) g γ hγ hgeo hL hUnit'
+  refine ⟨e, hdiff, hpar, hON, ?_⟩
+  -- Transfer the perpendicularity clause: the proven frame is `g`-orthogonal to
+  -- `mfderiv γ t 1`; rewrite to `uPrime t` via `huPrimeEq`.
+  intro t ht i
+  have := hperp t ht i
+  rwa [huPrimeEq t ht] at this
+
 /-- **Foot bridge: chart parallelism implies moving-foot covariant vanishing.**
 If a section's `E`-valued representation `X` is parallel along `γ` in the chart
 centred at the foot `γ t` (the predicate `IsParallelChart` for the foot-centred
