@@ -1,6 +1,7 @@
 import DifferentialGeometry.Analysis.ODE.FlowCkVariational
 import DifferentialGeometry.Analysis.ODE.FlowCk
 import DifferentialGeometry.Analysis.ODE.FlowC1
+import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.SmoothInSpace.VariationalODE
 
 noncomputable section
 open Set Function Filter Metric
@@ -45,7 +46,13 @@ theorem fderiv_spatialSlice_initial_eq_id
     {tmin tmax : ℝ} {Φ : E × ℝ → E}
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ) {x : E}
     (hx : x ∈ Metric.ball x₀ (r : ℝ)) :
-    fderiv ℝ (fun y => Φ (y, t₀)) x = ContinuousLinearMap.id ℝ E := sorry
+    fderiv ℝ (fun y => Φ (y, t₀)) x = ContinuousLinearMap.id ℝ E := by
+  have hball : Metric.ball x₀ (r : ℝ) ∈ 𝓝 x := Metric.isOpen_ball.mem_nhds hx
+  have heqon : Set.EqOn (fun y => Φ (y, t₀)) (fun y => y) (Metric.ball x₀ (r : ℝ)) :=
+    fun y hy => hΦ.apply_initial y (Metric.ball_subset_closedBall hy)
+  have heq : (fun y => Φ (y, t₀)) =ᶠ[𝓝 x] (fun y => y) :=
+    Filter.eventuallyEq_of_mem hball heqon
+  rw [heq.fderiv_eq, fderiv_id']
 
 theorem time_block_eq_comp_inr
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
@@ -55,6 +62,13 @@ theorem time_block_eq_comp_inr
     (hx : x ∈ Metric.closedBall x₀ (r : ℝ)) (ht : t ∈ Set.Ioo tmin tmax)
     (hΦdiff : DifferentiableAt ℝ Φ (x, t)) :
     (fderiv ℝ Φ (x, t)).comp (ContinuousLinearMap.inr ℝ E ℝ)
-      = timePieceFn f Φ (x, t) := sorry
+      = timePieceFn f Φ (x, t) := by
+  -- Both sides are CLMs `ℝ →L[ℝ] E`; reduce equality to agreement at the scalar `1`.
+  refine ContinuousLinearMap.ext_ring ?_
+  -- LHS at `1`: `fderiv ℝ Φ (x, t) (inr ℝ E ℝ 1)`; RHS at `1`: `(1 : ℝ) • f t (Φ (x, t))`.
+  simp only [ContinuousLinearMap.comp_apply, timePieceFn_apply,
+    ContinuousLinearMap.smulRight_apply, ContinuousLinearMap.id_apply, one_smul]
+  -- The remaining goal is the verified applied-at-1 flow-ODE identity.
+  exact flow_joint_fderiv_inr_eq hΦ hx ht hΦdiff
 
 end DifferentialGeometry.PDE.RicciFlow.ODE
