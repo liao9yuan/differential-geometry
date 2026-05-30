@@ -1,6 +1,7 @@
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.HilbertSpace
 import DifferentialGeometry.Integral.L2.Hilbert.Defs
 import DifferentialGeometry.Integral.L2.Hilbert.Inherited
+import DifferentialGeometry.Analysis.Sobolev.Tensor.PouWeightedHsNormReverseBase
 import Mathlib.Analysis.Normed.Operator.Extend
 
 /-!
@@ -226,6 +227,44 @@ noncomputable def TensorPouSobolevHilbert.toTensorL2_continuousLinearEquiv
         simpa using this
       rw [hT_norm]
       exact h_norm_ge T⟩
+
+/-! ## Discharging the reverse seminorm hypothesis
+
+The reverse comparison `(tensorPouSobolevHsNorm g 0 T).toReal ≤ C₂ · ‖T‖` is
+proved unconditionally (order-`0` base case of the reverse Sobolev bridge) by
+`tensorPouSobolevHsNorm_zero_toReal_le_norm`. We package it here so that only
+the forward comparison remains as an input to the continuous linear
+equivalence. -/
+
+/-- The reverse seminorm comparison hypothesis
+`h_norm_ge` of `TensorPouSobolevHilbert.toTensorL2_continuousLinearEquiv`,
+proved unconditionally as the order-`0` base case of the reverse Sobolev
+comparison. -/
+theorem exists_tensorPouSobolevHsNorm_zero_le_const_mul_norm
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) :
+    ∃ C₂ : ℝ, 0 ≤ C₂ ∧
+      ∀ T : SmoothCcTensor g r s,
+        (tensorPouSobolevHsNorm (I := I) (M := M) g 0 T).toReal ≤ C₂ * ‖T‖ :=
+  DifferentialGeometry.Analysis.Sobolev.Tensor.tensorPouSobolevHsNorm_zero_toReal_le_norm
+    (I := I) (M := M) g r s
+
+/-- The continuous linear equivalence
+`TensorPouSobolevHilbert g r s 0 ≃L[ℝ] TensorL2 r s g`, with the reverse
+seminorm comparison `h_norm_ge` discharged unconditionally; only the forward
+comparison `h_norm_le` remains as an input. -/
+noncomputable def TensorPouSobolevHilbert.toTensorL2_continuousLinearEquiv_of_forward
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (C₁ : ℝ)
+    (h_norm_le : ∀ T : SmoothCcTensor g r s,
+      ‖T‖ ≤ C₁ * (tensorPouSobolevHsNorm (I := I) (M := M) g 0 T).toReal) :
+    TensorPouSobolevHilbert g r s 0 ≃L[ℝ] TensorL2 r s g :=
+  TensorPouSobolevHilbert.toTensorL2_continuousLinearEquiv
+    (I := I) (M := M) g r s C₁
+    (exists_tensorPouSobolevHsNorm_zero_le_const_mul_norm
+      (I := I) (M := M) g r s).choose
+    h_norm_le
+    (exists_tensorPouSobolevHsNorm_zero_le_const_mul_norm
+      (I := I) (M := M) g r s).choose_spec.2
 
 #print axioms TensorPouSobolevHilbert.toTensorL2_continuousLinearEquiv
 
