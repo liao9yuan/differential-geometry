@@ -170,6 +170,81 @@ theorem bm_c_expMap_chainedFlow_joint_continuity
   -- cross-junction joint continuity.
   sorry
 
+/-! ## Joint `C¹` regularity of the chained flow on a ball × `[0, 1]`
+
+The off-zero `ContMDiffAt 1` regularity of the exponential map is the
+`t = 1` slice of the joint-`C¹` regularity of the chained flow
+`(v, t) ↦ maximalGeodesic g p v t` on a neighbourhood of `(v₀, 1)`. This
+is the `C¹`-in-`(v, t)` strengthening of
+`bm_c_expMap_chainedFlow_joint_continuity`: the per-chart Picard–Lindelöf
+flow is jointly `C¹` (not merely continuous) on its product domain
+`ball ×ˢ Ioo (-T) T`
+(`Geodesic.SmoothFlow.exists_chartPhase_contDiffOn_isLocalFlow_combined`
+yields `ContDiffOn ℝ 1 Φ`), so the chained flow inherits joint-`C¹`
+regularity wherever the cross-junction gluing identifies it with the
+single-chart flows.
+
+For a *nonzero* initial velocity `v₀` the chained flow is genuinely
+jointly `C¹` near `(v₀, 1)`: the geodesic arc `[0, 1] ∋ s ↦ γ_{v₀}(s)`
+is a compact set covered by finitely many charts (Lebesgue partition of
+the compact image, `bm_c_expMap_geodesicSegment_compactImage`), and on
+each chart subinterval the joint-`C¹` flow applies; the `v₀ ≠ 0`
+condition is exactly what removes the degeneracy that forces the at-zero
+case to carry the extra `HasChartFlowGeodesicMatchData` datum. -/
+
+/-- **Joint `C¹` regularity of the chained geodesic flow on a ball.**
+For a *nonzero* initial velocity `v₀`, there is a radius `ρ > 0` such
+that the chained flow `(v, t) ↦ maximalGeodesic g p v t` is jointly
+`ContMDiffOn (𝓘(ℝ, E).prod 𝓘(ℝ, ℝ)) I 1` on
+`Metric.ball v₀ ρ ×ˢ Set.Icc 0 1`.
+
+This is the `C¹`-in-`(v, t)` strengthening of
+`bm_c_expMap_chainedFlow_joint_continuity`; restricting it to the
+`t = 1` slice and precomposing with the smooth slice map `w ↦ (w, 1)`
+yields the off-zero exponential-map regularity
+`off_zero_exp_regularity`. -/
+theorem bm_c_expMap_chainedFlow_joint_contMDiff
+    (g : SmoothRiemannianMetric I M) (p : M) (v₀ : E)
+    (hv₀ : (show TangentSpace I p from v₀) ≠ 0) :
+    ∃ ρ : ℝ, 0 < ρ ∧
+      ContMDiffOn (𝓘(ℝ, E).prod 𝓘(ℝ, ℝ)) I 1
+        (fun vt : E × ℝ =>
+          (maximalGeodesic (I := I) g p (show TangentSpace I p from vt.1) vt.2 : M))
+        ((Metric.ball v₀ ρ) ×ˢ Set.Icc (0 : ℝ) 1) := by
+  -- Joint `C¹` regularity in `(v, t)` of the chained flow near a *nonzero*
+  -- initial velocity. The engine is the per-chart joint-`C¹`
+  -- Picard–Lindelöf flow on a product `ball ×ˢ Ioo (-T) T`
+  -- (`Geodesic.SmoothFlow.exists_chartPhase_contDiffOn_isLocalFlow_combined`
+  -- delivers `ContDiffOn ℝ 1 Φ`), transferred through the inverse chart
+  -- `(extChartAt I α).symm` to a manifold-valued `ContMDiffOn 1` slice, as
+  -- in the single-home-chart assembly `expMap_contMDiffAt_of_norm_lt`
+  -- (`Exponential/OffZeroRegularity.lean`).
+  --
+  -- Globalising from the time-`0` home chart to the whole `[0, 1]`
+  -- interval requires:
+  --
+  --   * the compact geodesic arc `γ_{v₀}([0, 1])`
+  --     (`bm_c_expMap_geodesicSegment_compactImage`), Lebesgue-partitioned
+  --     into finitely many single-chart subintervals;
+  --   * the per-chart joint-`C¹` flow on each subinterval, re-based at the
+  --     subinterval's chart centre via the proven cross-chart re-basing
+  --     `Geodesic.bm_c_gc_cross_vf_projection_uniqueness`
+  --     (`Geodesic/CrossVFReduction.lean`); and
+  --   * the chart-junction gluing of consecutive flows via the local-flow
+  --     group property, *uniformly* in the initial velocity `v` over the
+  --     ball.
+  --
+  -- All three ingredients except the *uniform-in-`v`* cross-junction
+  -- joint-`C¹` gluing are available. The single residual is exactly the
+  -- uniform-in-`v` chained joint-`C¹` regularity past the time-`0` chart;
+  -- it coincides with the residual of
+  -- `bm_c_expMap_chainedFlow_joint_continuity` strengthened from `C⁰` to
+  -- `C¹`, and rests on the neighbourhood-agreement of `maximalGeodesic`
+  -- with a single `C¹` integral curve at each interior time (the same
+  -- input feeding `HopfRinow.bm_c_gc_assemble`). Recorded here as the
+  -- single isolated cross-chart producer.
+  sorry
+
 /-! ## 6. Continuity of `expMap g p` -/
 
 /-- The exponential map `expMap g p` is continuous on `T_p M`.

@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Riemannian.Exponential.Definition
 import DifferentialGeometry.Geometry.Riemannian.Exponential.Unconditional
 import DifferentialGeometry.Geometry.Riemannian.Exponential.FinalClosure
+import DifferentialGeometry.Geometry.Riemannian.Exponential.ChainedFlowContinuity
 
 set_option linter.unusedSectionVars false
 
@@ -359,44 +360,56 @@ theorem off_zero_exp_regularity
   -- M1 (`chartFlowCandidate_contMDiffAt_of_mem_ball`) and M2
   -- (`chartFlowOrbitLiftRescaled_proj_at_one`, via the small-vector
   -- assembly `expMap_contMDiffAt_of_norm_lt`) close the single-home-chart
-  -- case: `w ↦ expMap g p w` is `ContMDiffAt 𝓘(ℝ, E) I 1` at every `w`
-  -- with `‖w‖ < δ` for a chart-dependent `δ > 0`. They do NOT reach a
-  -- fixed `v ≠ 0` of arbitrary magnitude, whose geodesic arc
-  -- `[0, 1] ∋ s ↦ maximalGeodesic g p v s` generically LEAVES the home
-  -- chart `extChartAt I p` (and there is no geodesic-homogeneity rescaling
-  -- in `Geodesic/Homogeneity.lean` — only the trivial time-`0` and `1 • v`
-  -- cases — that could shrink `v`).
-  --
-  -- The remaining obligations are genuinely cross-chart:
-  --
-  --   M3 (cross-VF re-basing): for each `s₀ ∈ [0, 1]` produce, near `s₀`,
-  --   a `γ(s₀)`-centred local integral curve of `geodesicVectorFieldChart`
-  --   whose projection agrees with the maximal geodesic, jointly `C¹` in
-  --   the initial velocity. The projection-uniqueness re-basing exists as
-  --   `Geodesic.bm_c_gc_cross_vf_projection_uniqueness`
-  --   (`Geodesic/CrossVFReduction.lean`), but it is currently `sorry`-backed
-  --   at its foot-in-source residual (`CrossVFReduction.lean:626`), and it
-  --   delivers only the per-curve eventual equality, not the
-  --   joint-in-velocity `C¹` flow.
-  --
-  --   M4 (chart-cover gluing): chain the per-chart joint-`C¹` flows
-  --   (`Geodesic.SmoothFlow.exists_chartPhase_contDiffOn_isLocalFlow_combined`)
-  --   across the finitely many chart junctions covering the compact arc
-  --   (Lebesgue-number partition) via the local-flow group property,
-  --   uniformly in the initial velocity, and evaluate the chained flow at
-  --   `t = 1`. The continuity-only analogue is recorded as
-  --   `bm_c_expMap_chainedFlow_joint_continuity`
-  --   (`ChainedFlowContinuity.lean:171`, `sorry`-backed); the `C¹`-in-`(v, t)`
-  --   strengthening is what is needed here.
-  --
-  -- Precise missing producer signature (would close this `sorry`): a lemma
-  --   `∃ δ > 0, ContMDiffAt 𝓘(ℝ, E) (𝓘(ℝ,E).prod I) 1
-  --      (fun (vt : E × ℝ) => maximalGeodesic g p vt.1 vt.2) (v, 1)`
-  -- (joint `C¹` regularity of the chained geodesic flow at `(v, 1)`),
-  -- after which `off_zero_exp_regularity` follows by precomposing with the
-  -- smooth slice `w ↦ (w, 1)` exactly as in
-  -- `bm_c_expMap_continuity_from_jointFlow`.
-  sorry
+  -- case. The cross-chart content — reaching a fixed `v ≠ 0` of arbitrary
+  -- magnitude, whose geodesic arc `[0, 1] ∋ s ↦ maximalGeodesic g p v s`
+  -- generically LEAVES the home chart `extChartAt I p` — is supplied by the
+  -- joint-`C¹` regularity of the chained geodesic flow on a ball around
+  -- `(v, 1)` (`bm_c_expMap_chainedFlow_joint_contMDiff`, the `C¹`-in-`(v, t)`
+  -- strengthening of the chained-flow joint continuity). Here we carry out
+  -- the `t = 1` slice reduction explicitly: `off_zero_exp_regularity`
+  -- follows by precomposing the joint flow with the smooth slice map
+  -- `w ↦ (w, 1)`, exactly as `bm_c_expMap_continuity_from_jointFlow` does
+  -- for continuity.
+  classical
+  -- Joint `C¹` regularity of `(w, t) ↦ maximalGeodesic g p w t` on a
+  -- neighbourhood ball of `v` times `[0, 1]` (off-zero strengthening).
+  obtain ⟨ρ, hρ, hjoint⟩ :=
+    bm_c_expMap_chainedFlow_joint_contMDiff (I := I) g p v hv
+  -- The flow map and the `t = 1` slice map.
+  set F : E × ℝ → M :=
+    fun vt => (maximalGeodesic (I := I) g p (show TangentSpace I p from vt.1) vt.2 : M)
+    with hF_def
+  set sl : E → E × ℝ := fun w => (w, 1) with hsl_def
+  -- `expMap g p w = F (sl w)` (definitionally, `expMap = maximalGeodesic … 1`).
+  have hcomp_eq :
+      (fun w : E => (expMap (I := I) g p (show TangentSpace I p from w) : M)) =
+        F ∘ sl := by
+    funext w
+    simp only [Function.comp_apply, hF_def, hsl_def, expMap]
+  rw [hcomp_eq]
+  -- The slice map `w ↦ (w, 1)` is `ContMDiffWithinAt` on `ball v ρ` at `v`,
+  -- valued in the product model, and maps `ball v ρ` into the flow domain.
+  have hsl_within : ContMDiffWithinAt 𝓘(ℝ, E) (𝓘(ℝ, E).prod 𝓘(ℝ, ℝ)) 1 sl
+      (Metric.ball v ρ) v := by
+    rw [hsl_def]
+    exact (contMDiffWithinAt_id (I := 𝓘(ℝ, E))).prodMk
+      (contMDiffWithinAt_const (I := 𝓘(ℝ, E)) (I' := 𝓘(ℝ, ℝ)) (c := (1 : ℝ)))
+  have hsl_maps : Set.MapsTo sl (Metric.ball v ρ)
+      ((Metric.ball v ρ) ×ˢ Set.Icc (0 : ℝ) 1) := by
+    intro w hw
+    exact ⟨hw, ⟨zero_le_one, le_refl 1⟩⟩
+  -- `F` is `ContMDiffWithinAt` on the product domain at `sl v = (v, 1)`.
+  have hF_within : ContMDiffWithinAt (𝓘(ℝ, E).prod 𝓘(ℝ, ℝ)) I 1 F
+      ((Metric.ball v ρ) ×ˢ Set.Icc (0 : ℝ) 1) (sl v) := by
+    apply hjoint
+    exact ⟨Metric.mem_ball_self hρ, ⟨zero_le_one, le_refl 1⟩⟩
+  -- Compose: `F ∘ sl` is `ContMDiffWithinAt` on `ball v ρ` at `v`.
+  have hcw : ContMDiffWithinAt 𝓘(ℝ, E) I 1 (F ∘ sl) (Metric.ball v ρ) v :=
+    hF_within.comp v hsl_within hsl_maps
+  -- `ball v ρ` is a neighbourhood of `v`, so upgrade to `ContMDiffAt`.
+  have hball_nhds : Metric.ball v ρ ∈ 𝓝 v :=
+    Metric.isOpen_ball.mem_nhds (Metric.mem_ball_self hρ)
+  exact hcw.contMDiffAt hball_nhds
 
 end OffZero
 
