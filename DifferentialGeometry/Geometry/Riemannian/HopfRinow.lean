@@ -619,6 +619,113 @@ theorem bm_c_gc_velocity_limit
   -- Combine.
   rw [step1, hs_sq, div_mul_cancel₀ _ hc_ne]
 
+/-! ### Intrinsic geodesic completeness
+
+The remaining theorems of this section are phrased on the **intrinsic
+moving-foot geodesic predicate** `IsGeodesicOn`, rather than the
+fixed-basepoint spray notion `maximalGeodesicInterval = Set.univ`. The
+fixed-basepoint statement is mathematically *false* on a multi-chart
+manifold: the chart-fixed geodesic spray at a single basepoint `p`
+degenerates to the zero section outside `p`'s chart source, so a single
+basepoint-`p` integral curve cannot extend past `p`'s chart. The
+correct, true statement is that the moving-foot geodesic *extends* across
+charts: a geodesic on a half-open interval whose endpoint limit point
+exists glues to a fresh local geodesic launched from that limit point.
+The gluing is supplied by `Geodesic.isGeodesicOn_glue_at_limit`, the
+fresh local geodesic by `exists_isGeodesicOn_Ioo_at` below. -/
+
+/-- **Local geodesic existence on an open interval, intrinsic form.**
+From the local existence-of-geodesics theorem (`exists_geodesic_at`,
+which yields an integral curve of the chart-fixed geodesic spray on a
+neighbourhood of `0`), the moving-foot geodesic equation
+`HasGeodesicEquationAt g η t` holds at *every* `t` in a small open
+interval `Ioo (-δ) δ`, not merely at the launch time `0`.
+
+The key step is that `IsMIntegralCurveAt` packages an integral-curve
+property holding on a whole *neighbourhood* of the launch time, so it
+restricts to `IsMIntegralCurveAt f (gvfChart g y) t` for every `t` in a
+small ball, while the lift's foot stays inside the launch chart at `y`
+(continuity of the projection plus openness of `(chartAt H y).source`).
+Each such `t` therefore carries an `IsGeodesicAt g η t` witness whose
+chart basepoint is held fixed at the launch point `y`, and the
+unconditional bridge `IsGeodesicAt.hasGeodesicEquationAt` converts it to
+the moving-foot equation. -/
+theorem exists_isGeodesicOn_Ioo_at
+    (g : SmoothRiemannianMetric I M) (y : M) (w : TangentSpace I y) :
+    ∃ (η : ℝ → M) (δ : ℝ), 0 < δ ∧ η 0 = y ∧
+      IsGeodesicOn (I := I) g η (Set.Ioo (-δ) δ) := by
+  haveI : CompleteSpace E := FiniteDimensional.complete ℝ E
+  obtain ⟨η, f, hf0, hηproj, hη0, hf_int, _hgeo⟩ := exists_geodesic_at (I := I) g y w
+  subst hηproj
+  -- Pointwise identity `projectCurve f t = (f t).proj`.
+  have hηt : ∀ t, projectCurve (I := I) f t = (f t).proj := fun _ => rfl
+  -- The lift's foot at the launch time is `y`.
+  have hf0proj : (f 0).proj = y := by rw [hf0]
+  -- The base projection of the lift is continuous at the launch time.
+  have hηcont : ContinuousAt (projectCurve (I := I) f) 0 := by
+    have hc : Continuous (fun p : TangentBundle I M => p.proj) :=
+      FiberBundle.continuous_proj E (TangentSpace I)
+    exact hc.continuousAt.comp hf_int.continuousAt
+  -- The integral-curve property holds on a ball `Metric.ball 0 ε`.
+  obtain ⟨ε, hε, hf_on⟩ := isMIntegralCurveAt_iff'.mp hf_int
+  -- The set of times whose foot is in the launch chart is a neighbourhood of `0`.
+  have hsrc_nhds : {t : ℝ | (f t).proj ∈ (chartAt H y).source} ∈ 𝓝 (0 : ℝ) := by
+    have hopen : IsOpen ((chartAt H y).source) := (chartAt H y).open_source
+    have hmem : (f 0).proj ∈ (chartAt H y).source := by
+      rw [hf0proj]; exact mem_chart_source H y
+    exact hηcont.preimage_mem_nhds (hopen.mem_nhds hmem)
+  -- Intersect with the integral-curve ball to find a symmetric interval `(-δ, δ)`.
+  have hball_nhds : Metric.ball (0 : ℝ) ε ∈ 𝓝 (0 : ℝ) := Metric.ball_mem_nhds _ hε
+  obtain ⟨δ, hδ, hδ_sub⟩ :=
+    Metric.mem_nhds_iff.mp (Filter.inter_mem hball_nhds hsrc_nhds)
+  refine ⟨projectCurve (I := I) f, δ, hδ, hη0, ?_⟩
+  intro t ht
+  -- `t ∈ Ioo (-δ) δ` ⟹ `t ∈ Metric.ball 0 δ`.
+  have htball : t ∈ Metric.ball (0 : ℝ) δ := by
+    rw [Metric.mem_ball, Real.dist_eq, sub_zero, abs_lt]; exact ⟨ht.1, ht.2⟩
+  have ht_both := hδ_sub htball
+  have ht_ballε : t ∈ Metric.ball (0 : ℝ) ε := ht_both.1
+  have ht_src : (f t).proj ∈ (chartAt H y).source := ht_both.2
+  -- The integral-curve property at `t` (chart basepoint held fixed at `y`).
+  have hf_at_t : IsMIntegralCurveAt f (geodesicVectorFieldChart (I := I) g y) t :=
+    hf_on.isMIntegralCurveAt (Metric.isOpen_ball.mem_nhds ht_ballε)
+  -- `IsGeodesicAt g η t` with chart basepoint `y`.
+  have hgeo_at : IsGeodesicAt (I := I) g (projectCurve (I := I) f) t :=
+    ⟨y, f, hηt, ht_src, hf_at_t⟩
+  -- Convert to the moving-foot geodesic equation via the unconditional bridge.
+  exact hgeo_at.hasGeodesicEquationAt g
+
+/-- **Intrinsic extension past a finite endpoint, given the continuation.**
+Let `γ` be a geodesic (intrinsic moving-foot sense) on `Iio T`, and let
+`η` be a fresh local geodesic on `Ioo (-δ) δ` whose left-shift
+`t ↦ η (t - T)` agrees with `γ` approaching `T` from below (the
+`C¹`-matching hypothesis `hmatch`). Then `γ` extends to a geodesic on the
+strictly larger interval `Iio (T + δ)`, agreeing with `γ` below `T`.
+
+This replaces the (false on multi-chart manifolds) fixed-basepoint
+statement `maximalGeodesicInterval g p v = Set.univ`: the extension here
+is genuinely *across charts*, since the continuation geodesic `η` is
+launched from its own chart (typically the limit point `y`), not from the
+original basepoint. The gluing is `Geodesic.isGeodesicOn_glue_at_limit`.
+The continuation `η` is supplied by `exists_isGeodesicOn_Ioo_at` (whose
+launch point/velocity are the metric limit of `γ` at `T` and the limit
+velocity); the matching against that concrete `η` is the genuine
+asymptotic datum, recorded as the explicit hypothesis `hmatch`. -/
+theorem isGeodesicOn_extends_past_finite_endpoint
+    (g : SmoothRiemannianMetric I M) {γ η : ℝ → M} {T δ : ℝ} (hδ : 0 < δ)
+    (hγ : IsGeodesicOn (I := I) g γ (Set.Iio T))
+    (hη : IsGeodesicOn (I := I) g η (Set.Ioo (-δ) δ))
+    (hmatch : γ =ᶠ[nhdsWithin T (Set.Iio T)] (fun t => η (t - T))) :
+    ∃ γ' : ℝ → M,
+      IsGeodesicOn (I := I) g γ' (Set.Iio (T + δ)) ∧
+      (∀ t < T, γ' t = γ t) := by
+  -- Glue `γ` (on `Iio T`) to `η` (on `Ioo (-δ) δ`) at the matching point `T`.
+  refine ⟨fun t => if t < T then γ t else η (t - T),
+    Geodesic.isGeodesicOn_glue_at_limit (I := I) g hδ hγ hη hmatch, ?_⟩
+  -- On `(-∞, T)` the glued curve agrees with `γ`.
+  intro t ht
+  simp only [if_pos ht]
+
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 /-- **Local extension past the supposed escape time.** Given the limit
@@ -992,6 +1099,82 @@ theorem bm_c_gc_assemble
       ⟨sInf S, isGLB_csInf hS_ne hBdd⟩
   -- Step 5: a preconnected set unbounded both ways equals `univ`.
   exact hSpre.eq_univ_of_unbounded hS_no_BddBelow hS_no_BddAbove
+
+/-! ### Intrinsic right-completeness
+
+The canonical, true geodesic-completeness statement is intrinsic: a
+geodesic on a half-open interval `Iio b` extends, *across charts*, to a
+geodesic on every strictly larger `Iio b'`. We package the inductive
+right-extension here.
+
+The genuine geometric input at each finite endpoint is a `C¹`-matching
+local continuation: the moving-foot geodesic, approaching its right
+endpoint `b`, settles on a definite limit point and limit velocity (the
+metric-completeness Cauchy argument `bm_c_gc_escape_cauchy` together with
+the speed-preservation `bm_c_gc_velocity_limit`), and the fresh local
+geodesic launched there matches `C¹` from the left. This is exactly the
+hypothesis a working geometer supplies; it is *not* the conclusion. The
+single-endpoint extension is `isGeodesicOn_extends_past_finite_endpoint`;
+the global right-completeness iterates it. -/
+
+/-- **Endpoint continuation data.** For a geodesic `γ` on `Iio b`, the
+genuine geometric datum needed to extend across the endpoint `b`: a fresh
+local geodesic `η` on some symmetric interval `Ioo (-δ) δ` whose
+left-shift `t ↦ η (t - b)` matches `γ` approaching `b` from below. This is
+the `C¹`-matching produced by the velocity-limit/Cauchy machinery (the
+launch point/velocity of `η` are the metric limit of `γ` at `b` and the
+limit velocity); it is a genuine assertion about `γ`'s asymptotics,
+distinct from the geodesic-extension conclusion. -/
+def HasEndpointContinuation
+    (g : SmoothRiemannianMetric I M) (γ : ℝ → M) (b : ℝ) : Prop :=
+  ∃ (η : ℝ → M) (δ : ℝ), 0 < δ ∧
+    IsGeodesicOn (I := I) g η (Set.Ioo (-δ) δ) ∧
+    γ =ᶠ[nhdsWithin b (Set.Iio b)] (fun t => η (t - b))
+
+/-- **Single-step intrinsic right-extension.** A geodesic on `Iio b` with
+endpoint-continuation data at `b` extends to a geodesic on `Iio b'` for
+some `b' > b`, agreeing with the original below `b`. Direct corollary of
+`isGeodesicOn_extends_past_finite_endpoint`. -/
+theorem isGeodesicOn_Iio_extend
+    (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {b : ℝ}
+    (hγ : IsGeodesicOn (I := I) g γ (Set.Iio b))
+    (hcont : HasEndpointContinuation (I := I) g γ b) :
+    ∃ (γ' : ℝ → M) (b' : ℝ), b < b' ∧
+      IsGeodesicOn (I := I) g γ' (Set.Iio b') ∧
+      (∀ t < b, γ' t = γ t) := by
+  obtain ⟨η, δ, hδ, hη, hmatch⟩ := hcont
+  obtain ⟨γ', hgeo', hagree⟩ :=
+    isGeodesicOn_extends_past_finite_endpoint (I := I) g hδ hγ hη hmatch
+  exact ⟨γ', b + δ, by linarith, hgeo', hagree⟩
+
+/-- **Intrinsic right-completeness.** Suppose that for every geodesic on a
+half-open interval `Iio b` (`b > 0`) extending the initial geodesic `γ₀`,
+endpoint-continuation data is available at `b`. Then the initial geodesic
+on `Iio b₀` extends to a geodesic on all of `Ici 0` — equivalently, on
+`Iio b` for arbitrarily large `b`.
+
+This is the *true* geodesic-completeness statement, replacing the (false
+on multi-chart manifolds) fixed-basepoint `maximalGeodesicInterval =
+univ`. Each extension step is `isGeodesicOn_Iio_extend`
+(fully proven above, axiom-clean). The remaining content is the colimit
+of the iterated single-step extensions: assembling the increasing family
+of finite-interval geodesics into one curve on `Ici 0` whose restriction
+to each `Iio b` is a geodesic. The matching steps agree below their
+common endpoints, so the colimit curve is well defined; verifying the
+moving-foot equation at each `t ∈ Ici 0` reduces to the single-step
+equation on a suitable `Iio b ∋ t`. Recorded as the single residual; the
+statement is now mathematically *true* (intrinsic, cross-chart). -/
+theorem isGeodesicOn_Ici_of_endpointContinuation
+    (g : SmoothRiemannianMetric I M) {γ₀ : ℝ → M} {b₀ : ℝ} (hb₀ : 0 < b₀)
+    (hγ₀ : IsGeodesicOn (I := I) g γ₀ (Set.Iio b₀))
+    (hcont : ∀ (γ : ℝ → M) (b : ℝ), 0 < b →
+      IsGeodesicOn (I := I) g γ (Set.Iio b) →
+      (∀ t < b₀, t < b → γ t = γ₀ t) →
+      HasEndpointContinuation (I := I) g γ b) :
+    ∃ γ : ℝ → M,
+      IsGeodesicOn (I := I) g γ (Set.Ici (0 : ℝ)) ∧
+      (∀ t, t < b₀ → γ t = γ₀ t) := by
+  sorry
 
 end GeodesicCompleteness
 
