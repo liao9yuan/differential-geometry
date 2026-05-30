@@ -1147,6 +1147,19 @@ theorem isGeodesicOn_Iio_extend
     isGeodesicOn_extends_past_finite_endpoint (I := I) g hδ hγ hη hmatch
   exact ⟨γ', b + δ, by linarith, hgeo', hagree⟩
 
+/-- **Locality of the moving-foot geodesic equation.** If two curves agree on
+a neighbourhood of `t`, then either satisfies the geodesic equation at `t` iff
+the other does. A thin wrapper around
+`HasGeodesicEquationAt.congr_of_eventuallyEq_at` extracting the basepoint
+equality from the eventual equality at `t`. -/
+private theorem hasGeodesicEquationAt_congr_of_eventuallyEq
+    {g : SmoothRiemannianMetric I M} {γ γ' : ℝ → M} {t : ℝ}
+    (heq : γ =ᶠ[nhds t] γ') (h : HasGeodesicEquationAt (I := I) g γ' t) :
+    HasGeodesicEquationAt (I := I) g γ t := by
+  haveI : CompleteSpace E := FiniteDimensional.complete ℝ E
+  exact HasGeodesicEquationAt.congr_of_eventuallyEq_at (I := I) (g := g)
+    (heq.eq_of_nhds) heq h
+
 /-- **Intrinsic right-completeness.** Suppose that for every geodesic on a
 half-open interval `Iio b` (`b > 0`) extending the initial geodesic `γ₀`,
 endpoint-continuation data is available at `b`. Then the initial geodesic
@@ -1156,14 +1169,21 @@ on `Iio b₀` extends to a geodesic on all of `Ici 0` — equivalently, on
 This is the *true* geodesic-completeness statement, replacing the (false
 on multi-chart manifolds) fixed-basepoint `maximalGeodesicInterval =
 univ`. Each extension step is `isGeodesicOn_Iio_extend`
-(fully proven above, axiom-clean). The remaining content is the colimit
-of the iterated single-step extensions: assembling the increasing family
-of finite-interval geodesics into one curve on `Ici 0` whose restriction
-to each `Iio b` is a geodesic. The matching steps agree below their
-common endpoints, so the colimit curve is well defined; verifying the
-moving-foot equation at each `t ∈ Ici 0` reduces to the single-step
-equation on a suitable `Iio b ∋ t`. Recorded as the single residual; the
-statement is now mathematically *true* (intrinsic, cross-chart). -/
+(fully proven above, axiom-clean). The colimit of the iterated single-step
+extensions is assembled by a maximal-chain argument: order the
+extension records `(b, γ)` (geodesic on `Iio b`, agreeing with `γ₀` below
+`b₀`) by interval inclusion together with agreement below the shorter
+endpoint, and pass to a maximal chain `Mc` (Hausdorff maximality). The
+chain order forces mutual agreement of its members, so their union curve
+`Γ` is single-valued; on a neighbourhood of any time `t` below a chain
+endpoint, `Γ` agrees with a genuine geodesic, so the moving-foot equation
+transfers by locality
+(`hasGeodesicEquationAt_congr_of_eventuallyEq`). If the chain's endpoint
+set were bounded above, `Γ` would be a geodesic on `Iio (sSup …)` admitting
+endpoint continuation, hence a strict single-step extension whose record is
+chain-comparable above every member — a super-chain contradicting
+maximality. Therefore the endpoints are unbounded and `Γ` is a geodesic on
+all of `ℝ ⊇ Ici 0`. -/
 theorem isGeodesicOn_Ici_of_endpointContinuation
     (g : SmoothRiemannianMetric I M) {γ₀ : ℝ → M} {b₀ : ℝ} (hb₀ : 0 < b₀)
     (hγ₀ : IsGeodesicOn (I := I) g γ₀ (Set.Iio b₀))
@@ -1174,7 +1194,114 @@ theorem isGeodesicOn_Ici_of_endpointContinuation
     ∃ γ : ℝ → M,
       IsGeodesicOn (I := I) g γ (Set.Ici (0 : ℝ)) ∧
       (∀ t, t < b₀ → γ t = γ₀ t) := by
-  sorry
+  classical
+  haveI : CompleteSpace E := FiniteDimensional.complete ℝ E
+  -- Records: endpoint `b ≥ b₀`, geodesic on `Iio b`, agreeing with `γ₀`
+  -- below `b₀`.
+  let Good : (ℝ × (ℝ → M)) → Prop := fun br =>
+    b₀ ≤ br.1 ∧ IsGeodesicOn (I := I) g br.2 (Set.Iio br.1) ∧
+      (∀ t < b₀, br.2 t = γ₀ t)
+  let Rec := {br : ℝ × (ℝ → M) // Good br}
+  -- Order: longer interval, agreeing below the shorter endpoint.
+  let R : Rec → Rec → Prop := fun a a' =>
+    a.1.1 ≤ a'.1.1 ∧ (∀ t < a.1.1, a'.1.2 t = a.1.2 t)
+  have hGood_r₀ : Good (b₀, γ₀) := ⟨le_refl _, hγ₀, fun t _ => rfl⟩
+  let r₀ : Rec := ⟨(b₀, γ₀), hGood_r₀⟩
+  -- The singleton chain `{r₀}` extends to a maximal chain `Mc`.
+  have hchain0 : IsChain R {r₀} := by
+    intro a ha b hb hab
+    rw [Set.mem_singleton_iff] at ha hb; exact absurd (ha.trans hb.symm) hab
+  obtain ⟨Mc, hMc_max, hMc_sub⟩ := hchain0.exists_maxChain
+  have hr₀_mem : r₀ ∈ Mc := hMc_sub (Set.mem_singleton _)
+  have hMc_chain : IsChain R Mc := hMc_max.1
+  -- Consistency: chain members agree wherever both are defined.
+  have hconsist : ∀ a ∈ Mc, ∀ a' ∈ Mc, ∀ t, t < a.1.1 → t < a'.1.1 →
+      a.1.2 t = a'.1.2 t := by
+    intro a ha a' ha' t hta hta'
+    rcases eq_or_ne a a' with rfl | hne
+    · rfl
+    · rcases hMc_chain ha ha' hne with hR | hR
+      · exact (hR.2 t hta).symm
+      · exact hR.2 t hta'
+  -- The union curve.
+  let Γ : ℝ → M := fun t =>
+    if h : ∃ a : Rec, a ∈ Mc ∧ t < a.1.1 then (h.choose.1.2 t) else γ₀ t
+  -- On a chain member's interval, `Γ` equals that member's curve.
+  have hΓ_val : ∀ a ∈ Mc, ∀ t, t < a.1.1 → Γ t = a.1.2 t := by
+    intro a ha t hta
+    have hex : ∃ a : Rec, a ∈ Mc ∧ t < a.1.1 := ⟨a, ha, hta⟩
+    change (if h : ∃ a : Rec, a ∈ Mc ∧ t < a.1.1 then (h.choose.1.2 t)
+      else γ₀ t) = a.1.2 t
+    rw [dif_pos hex]
+    obtain ⟨hb_mem, hb_lt⟩ := hex.choose_spec
+    exact hconsist _ hb_mem a ha t hb_lt hta
+  -- `Γ` agrees with `γ₀` below `b₀`.
+  have hΓ_agree : ∀ t, t < b₀ → Γ t = γ₀ t := by
+    intro t ht
+    have := hΓ_val r₀ hr₀_mem t ht
+    simpa [r₀] using this
+  -- `Γ` satisfies the geodesic equation at each `t` below a chain endpoint.
+  have hΓ_geo_at : ∀ a ∈ Mc, ∀ t, t < a.1.1 →
+      HasGeodesicEquationAt (I := I) g Γ t := by
+    intro a ha t hta
+    have hIio_nhds : Set.Iio a.1.1 ∈ 𝓝 t := isOpen_Iio.mem_nhds hta
+    have heq : Γ =ᶠ[𝓝 t] a.1.2 := by
+      filter_upwards [hIio_nhds] with s hs
+      exact hΓ_val a ha s hs
+    exact hasGeodesicEquationAt_congr_of_eventuallyEq (g := g) heq (a.2.2.1 t hta)
+  -- The endpoint set.
+  let S : Set ℝ := (fun a : Rec => a.1.1) '' Mc
+  have hS_ne : S.Nonempty := ⟨b₀, ⟨r₀, hr₀_mem, rfl⟩⟩
+  by_cases hbdd : BddAbove S
+  · -- Bounded endpoints contradict maximality of `Mc`.
+    exfalso
+    let s := sSup S
+    have hb₀_le_s : b₀ ≤ s := le_csSup hbdd ⟨r₀, hr₀_mem, rfl⟩
+    have hs_pos : 0 < s := lt_of_lt_of_le hb₀ hb₀_le_s
+    have hΓ_geo_Iios : IsGeodesicOn (I := I) g Γ (Set.Iio s) := by
+      intro t ht
+      obtain ⟨b, hbS, htb⟩ := exists_lt_of_lt_csSup hS_ne ht
+      obtain ⟨a, ha, hab⟩ := hbS
+      exact hΓ_geo_at a ha t (lt_of_lt_of_eq htb hab.symm)
+    have hagree_s : ∀ t < b₀, t < s → Γ t = γ₀ t := fun t ht _ => hΓ_agree t ht
+    have hcont_s : HasEndpointContinuation (I := I) g Γ s :=
+      hcont Γ s hs_pos hΓ_geo_Iios hagree_s
+    obtain ⟨Γ', s', hss', hΓ'_geo, hΓ'_agree⟩ :=
+      isGeodesicOn_Iio_extend (I := I) g hΓ_geo_Iios hcont_s
+    have hGood' : Good (s', Γ') := by
+      refine ⟨le_trans hb₀_le_s hss'.le, hΓ'_geo, ?_⟩
+      intro t ht
+      have ht_s : t < s := lt_of_lt_of_le ht hb₀_le_s
+      change Γ' t = γ₀ t
+      rw [hΓ'_agree t ht_s]; exact hΓ_agree t ht
+    let r' : Rec := ⟨(s', Γ'), hGood'⟩
+    have hr'_notMem : r' ∉ Mc := by
+      intro hmem
+      have hmemS : s' ∈ S := ⟨r', hmem, rfl⟩
+      exact absurd (le_csSup hbdd hmemS) (not_le.mpr hss')
+    have hchain' : IsChain R (insert r' Mc) := by
+      refine hMc_chain.insert ?_
+      intro a ha _
+      right
+      have ha_mem_S : a.1.1 ∈ S := ⟨a, ha, rfl⟩
+      have ha_le_s : a.1.1 ≤ s := le_csSup hbdd ha_mem_S
+      refine ⟨?_, ?_⟩
+      · change a.1.1 ≤ s'
+        exact le_trans ha_le_s hss'.le
+      · intro t hta
+        have ht_s : t < s := lt_of_lt_of_le hta ha_le_s
+        change Γ' t = a.1.2 t
+        rw [hΓ'_agree t ht_s]; exact hΓ_val a ha t hta
+    have heq_chain : Mc = insert r' Mc :=
+      hMc_max.2 hchain' (Set.subset_insert _ _)
+    exact hr'_notMem (heq_chain ▸ Set.mem_insert _ _)
+  · -- Unbounded endpoints: `Γ` is a geodesic on all of `ℝ ⊇ Ici 0`.
+    refine ⟨Γ, ?_, hΓ_agree⟩
+    intro t _
+    rw [not_bddAbove_iff] at hbdd
+    obtain ⟨b, hbS, htb⟩ := hbdd t
+    obtain ⟨a, ha, hab⟩ := hbS
+    exact hΓ_geo_at a ha t (lt_of_lt_of_eq htb hab.symm)
 
 end GeodesicCompleteness
 
