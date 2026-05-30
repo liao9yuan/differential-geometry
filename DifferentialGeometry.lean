@@ -467,6 +467,7 @@ import DifferentialGeometry.Geometry.Riemannian.Exponential.IntrinsicExp
 import DifferentialGeometry.Geometry.Riemannian.Exponential.IntrinsicExpContinuity
 import DifferentialGeometry.Geometry.Riemannian.Exponential.LocalDiffeomorphism
 import DifferentialGeometry.Geometry.Riemannian.Exponential.MfderivAtZero
+import DifferentialGeometry.Geometry.Riemannian.Exponential.MinimizingGeodesic
 import DifferentialGeometry.Geometry.Riemannian.Exponential.PreconnectedPropagation
 import DifferentialGeometry.Geometry.Riemannian.Exponential.RescaleSmallnessUniform
 import DifferentialGeometry.Geometry.Riemannian.Exponential.RescaledLift
@@ -490,6 +491,7 @@ import DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
 import DifferentialGeometry.Geometry.Riemannian.TangentNormDiamond
 import DifferentialGeometry.Geometry.Riemannian.RiemannianDistContinuity
 import DifferentialGeometry.Geometry.Riemannian.GaussLemma
+import DifferentialGeometry.Geometry.Riemannian.GeodesicConvexity
 import DifferentialGeometry.Geometry.Riemannian.HopfRinow
 import DifferentialGeometry.Geometry.Riemannian.RadialSurjectivity
 import DifferentialGeometry.Geometry.Riemannian.Variation.ParallelTransport
