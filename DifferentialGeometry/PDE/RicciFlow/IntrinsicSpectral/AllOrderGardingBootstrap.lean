@@ -1,6 +1,7 @@
 import DifferentialGeometry.PDE.RicciFlow.SobolevEmbeddingCm
 import DifferentialGeometry.Integral.Connection.CovGradRoughLapCurvL2Bound
 import DifferentialGeometry.Integral.Connection.TensorConnLapGradientL2Bound
+import DifferentialGeometry.Integral.Connection.IntegratedOrder2Garding
 import DifferentialGeometry.Integral.L2.Hilbert.DenseSubset
 
 /-!
@@ -163,6 +164,60 @@ def CommutatorDefectBound (g : SmoothRiemannianMetric I M) (Cc : ℝ) : Prop :=
         iteratedCovGrad g 0 2 p (rawTensorConnLapSmooth (I := I) g 0 2 U)‖ ≤
       Cc * ∑ i ∈ Finset.range (p + 2),
         ‖iteratedCovGrad g 0 2 i U‖
+
+/-- **The per-valence integrated curvature cross-term bound.** A nonnegative constant
+`Ccross` such that for every covariant rank `s` and every smooth compactly-supported
+`(0, s)`-tensor `S`, the one-sided `L²` pairing of the rough-Laplacian /
+covariant-gradient commutator defect `Curv := Δ_∇(∇S) − ∇(Δ_∇ S)` with `∇S` is
+bounded by `Ccross` times `‖∇S‖²_{L²} + ‖S‖_{L²} · ‖∇S‖_{L²}`:
+
+```
+− ⟨Curv, ∇S⟩_{L²} ≤ Ccross · (‖∇S‖²_{L²} + ‖S‖_{L²} · ‖∇S‖_{L²}).
+```
+
+This is the integrated Bochner curvature term of the order-`2` Weitzenböck identity:
+fibrewise, `Curv` is a Riemann-curvature contraction of `∇S` (the Ricci identity on
+the gradient field, both differentiation directions genuine frame fields), so its
+`L²` cross-pairing with `∇S` is controlled by the uniform curvature sup `‖R‖_∞` over
+the compact manifold. It is strictly weaker than — and structurally distinct from —
+the order-`2` Gårding conclusion, which it implies through the integrated Weitzenböck
+identity and the order-`1` control. -/
+def CurvatureCrossTermBound (g : SmoothRiemannianMetric I M) (Ccross : ℝ) : Prop :=
+  0 ≤ Ccross ∧ ∀ (s : ℕ) (S : SmoothCcTensor g 0 s),
+    - tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+          (rawTensorConnLapSmooth (I := I) g 0 (s + 1)
+              (covGrad (I := I) (M := M) g 0 s S) -
+            covGrad (I := I) (M := M) g 0 s
+              (rawTensorConnLapSmooth (I := I) g 0 s S)).toFun
+          (covGrad (I := I) (M := M) g 0 s S).toFun ≤
+      Ccross *
+        (tensorL2Norm (I := I) (M := M) g 0 (s + 1)
+            (covGrad (I := I) (M := M) g 0 s S).toFun ^ 2 +
+          tensorL2Norm (I := I) (M := M) g 0 s S.toFun *
+            tensorL2Norm (I := I) (M := M) g 0 (s + 1)
+              (covGrad (I := I) (M := M) g 0 s S).toFun)
+
+set_option linter.unusedSectionVars false in
+/-- **`Order2GardingFamily` from the integrated curvature cross-term bound.** Given a
+nonnegative `Ccross` for which `CurvatureCrossTermBound g Ccross` holds, the order-`2`
+Gårding family `Order2GardingFamily g (2 + 2 · Ccross)` holds. The constant
+`2 + 2 · Ccross` is uniform in the valence `s`. The proof is, at every `s`, the
+integrated-Weitzenböck order-`2` Gårding reduction
+`secondCovGrad_l2NormSq_le_of_cross_bound`: the integrated Weitzenböck identity
+`‖∇²S‖² = ‖Δ_∇ S‖² − ⟨Curv, ∇S⟩`, the cross-term hypothesis, the order-`1` control
+`‖∇S‖² ≤ ‖Δ_∇ S‖ · ‖S‖`, and Young's inequality. -/
+theorem order2GardingFamily_of_curvatureCrossTermBound
+    (g : SmoothRiemannianMetric I M) (Ccross : ℝ)
+    (hcross : CurvatureCrossTermBound (I := I) (M := M) g Ccross) :
+    Order2GardingFamily (I := I) (M := M) g (2 + 2 * Ccross) := by
+  obtain ⟨hCcross, hcrossS⟩ := hcross
+  refine ⟨by linarith, fun s S => ?_⟩
+  rw [SmoothCcTensor.norm_def (I := I) (M := M)
+      (covGrad (I := I) (M := M) g 0 (s + 1) (covGrad (I := I) (M := M) g 0 s S)),
+    SmoothCcTensor.norm_def (I := I) (M := M) (rawTensorConnLapSmooth (I := I) g 0 s S),
+    SmoothCcTensor.norm_def (I := I) (M := M) S]
+  exact secondCovGrad_l2NormSq_le_of_cross_bound (I := I) (M := M) g s S Ccross hCcross
+    (hcrossS s S)
 
 /-! ## Elementary norm facts -/
 
@@ -664,6 +719,22 @@ theorem order1Control_rank_two
     SmoothCcTensor.norm_def (I := I) (M := M) (rawTensorConnLapSmooth (I := I) g 0 2 S),
     SmoothCcTensor.norm_def (I := I) (M := M) S]
   exact covGrad_l2NormSq_le_rawConnLap_mul_self (I := I) (M := M) g S
+
+set_option linter.unusedSectionVars false in
+/-- **`Order1ControlFamily` is discharged unconditionally at every valence.** For
+every covariant rank `s` and every smooth compactly-supported `(0, s)`-tensor `S`,
+the squared `L²` norm of the covariant gradient is bounded by the product of the
+`L²` norms of the rough Laplacian and of `S`. This is the rank-generic order-`1`
+interior elliptic estimate `covGrad_l2NormSq_le_rawConnLap_mul_self_gen`, threaded at
+every valence — the integration-by-parts (Green-identity) form of the order-`1`
+control, with no curvature hypothesis. -/
+theorem order1ControlFamily_holds (g : SmoothRiemannianMetric I M) :
+    Order1ControlFamily (I := I) (M := M) g := by
+  intro s S
+  rw [SmoothCcTensor.norm_def (I := I) (M := M) (covGrad (I := I) (M := M) g 0 s S),
+    SmoothCcTensor.norm_def (I := I) (M := M) (rawTensorConnLapSmooth (I := I) g 0 s S),
+    SmoothCcTensor.norm_def (I := I) (M := M) S]
+  exact covGrad_l2NormSq_le_rawConnLap_mul_self_gen (I := I) (M := M) g s S
 
 set_option linter.unusedSectionVars false in
 /-- **The `(0, 2)` instance of `Order2GardingFamily`**, discharged from the
