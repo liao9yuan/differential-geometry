@@ -40,7 +40,19 @@ theorem stub_isVariationalFlowProjection_mono_box
     {T T' : ℝ} {ρ ρ' : ℝ≥0} {Y : E × ℝ → (E →L[ℝ] E)} {k : ℕ∞}
     (hY : IsVariationalFlowProjection hΦ T ρ Y k)
     (hT' : T' ≤ T) (hρ' : (ρ' : ℝ) ≤ (ρ : ℝ)) :
-    IsVariationalFlowProjection hΦ T' ρ' Y k := sorry
+    IsVariationalFlowProjection hΦ T' ρ' Y k := by
+  -- The smaller box `ball x₀ ρ' ×ˢ Ioo (t₀ - T') (t₀ + T')` is contained in the
+  -- larger box `ball x₀ ρ ×ˢ Ioo (t₀ - T) (t₀ + T)`: the radial factor shrinks via
+  -- `ball_subset_ball` (since `ρ' ≤ ρ`) and the time factor shrinks via
+  -- `Ioo_subset_Ioo` (since `t₀ - T ≤ t₀ - T'` and `t₀ + T' ≤ t₀ + T`, both from `T' ≤ T`).
+  have hbox :
+      (Metric.ball x₀ (ρ' : ℝ)) ×ˢ Set.Ioo (t₀ - T') (t₀ + T') ⊆
+        (Metric.ball x₀ (ρ : ℝ)) ×ˢ Set.Ioo (t₀ - T) (t₀ + T) :=
+    Set.prod_mono (Metric.ball_subset_ball hρ')
+      (Set.Ioo_subset_Ioo (by linarith) (by linarith))
+  exact
+    { contDiffOn := hY.contDiffOn.mono hbox
+      fderiv_eq := fun q hq => hY.fderiv_eq q (hbox hq) }
 
 /-! ## Pending grandchild (Stage C round-1 output; round-2 expansion target) -/
 
@@ -52,6 +64,16 @@ theorem linearizationNorm_continuousOn_box
     (horbit : ContinuousOn (fun q : E × ℝ => (q.2, Φ q))
       (Metric.closedBall x₀ (r : ℝ) ×ˢ Set.Icc (t₀ - ε) (t₀ + ε))) :
     ContinuousOn (fun q : E × ℝ => ‖fderiv ℝ (f q.2) (Φ q)‖)
-      (Metric.closedBall x₀ (r : ℝ) ×ˢ Set.Icc (t₀ - ε) (t₀ + ε)) := sorry
+      (Metric.closedBall x₀ (r : ℝ) ×ˢ Set.Icc (t₀ - ε) (t₀ + ε)) := by
+  -- Step 1: compose the partial Fréchet derivative (continuous on `univ`) with the
+  -- orbit map `q ↦ (q.2, Φ q)` (continuous on the box) to get continuity of the full
+  -- composite `q ↦ fderiv ℝ (f q.2) (Φ q)` on the box.  The `MapsTo … univ` side goal
+  -- is trivial.
+  have hfull :
+      ContinuousOn (fun q : E × ℝ => fderiv ℝ (f q.2) (Φ q))
+        (Metric.closedBall x₀ (r : ℝ) ×ˢ Set.Icc (t₀ - ε) (t₀ + ε)) :=
+    hpartial.comp horbit (fun _ _ => Set.mem_univ _)
+  -- Step 2: post-compose with the (globally) continuous norm map.
+  exact continuous_norm.comp_continuousOn hfull
 
 end DifferentialGeometry.PDE.RicciFlow.ODE
