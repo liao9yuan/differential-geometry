@@ -1,5 +1,6 @@
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.ManifoldIntegralFlow
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.BareFlowFromJointC1
+import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.ManifoldFlowFamily
 import DifferentialGeometry.Analysis.ODE.FlowC1
 import Mathlib.Geometry.Manifold.ContMDiff.Atlas
 import Mathlib.Geometry.Manifold.ContMDiffMFDeriv
@@ -392,26 +393,6 @@ theorem chart_field_smooth_to_intrinsic_section
     ContMDiff (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
       (fun q : ℝ × M => (TotalSpace.mk' E q.2 (X q.1 q.2) : TangentBundle I M)) := sorry
 
--- [H3 corrected decomposition: new pending child 7 — bare-velocity recovery via the pushforward chain rule]
-theorem chartflow_eq_bareflow_on_U
-    (X : ℝ → ∀ x : M, TangentSpace I x) (p₀ : M)
-    (F : ℝ → E → E) (ΦE : E × ℝ → E) (U : Set M) {a b : ℝ}
-    (hchartODE : ∀ (p : M), p ∈ U → ∀ t ∈ Set.Ioo a b,
-      HasDerivWithinAt (fun s => ΦE (extChartAt I p₀ p, s))
-        (F t (ΦE (extChartAt I p₀ p, t))) (Set.Ioo a b) t)
-    (hF : ∀ (s : ℝ) (c : E), F s c =
-        tangentCoordChange I ((extChartAt I p₀).symm c) p₀
-          ((extChartAt I p₀).symm c) (X s ((extChartAt I p₀).symm c)))
-    (hconf : ∀ (p : M), p ∈ U → ∀ t ∈ Set.Ioo a b,
-      ΦE (extChartAt I p₀ p, t) ∈ (extChartAt I p₀).target)
-    (hUsrc : U ⊆ (extChartAt I p₀).source) :
-    ∀ (p : M), p ∈ U → ∀ t ∈ Set.Ioo a b,
-      HasMFDerivWithinAt 𝓘(ℝ, ℝ) I
-        (fun s => (extChartAt I p₀).symm (ΦE (extChartAt I p₀ p, s)))
-        (Set.Ioo a b) t
-        ((1 : ℝ →L[ℝ] ℝ).smulRight
-          (X t ((extChartAt I p₀).symm (ΦE (extChartAt I p₀ p, t))))) := sorry
-
 -- [H3: pushforward→bare velocity cancellation (under chartflow-eq-bareflow-on-U)]
 -- (The cancellation is a purely chart-theoretic chain-rule identity; the section-level instances
 --  `[FiniteDimensional ℝ E] [BoundarylessManifold I M] [T2Space M]` are not consumed, so they are
@@ -487,6 +468,79 @@ theorem pushforward_velocity_cancellation (p₀ q : M)
   -- Apply the inverse identity to `v`: `(g'.comp tcc) v = id v`, i.e. `g' (tcc v) = v`.
   have hv := congrArg (fun L => L v) hid
   simpa only [ContinuousLinearMap.comp_apply, ContinuousLinearMap.id_apply] using hv
+
+-- [H3 corrected decomposition: new pending child 7 — bare-velocity recovery via the pushforward chain rule]
+-- (`hUsrc : U ⊆ (extChartAt I p₀).source` is a legitimate confinement hypothesis of the public
+--  signature; the bare-velocity recovery derives the chart-source membership it needs pointwise from
+--  `hconf` instead, so `hUsrc` is not consumed and the unused-variable linter is locally silenced
+--  without altering the signature.)
+set_option linter.unusedVariables false in
+theorem chartflow_eq_bareflow_on_U
+    (X : ℝ → ∀ x : M, TangentSpace I x) (p₀ : M)
+    (F : ℝ → E → E) (ΦE : E × ℝ → E) (U : Set M) {a b : ℝ}
+    (hchartODE : ∀ (p : M), p ∈ U → ∀ t ∈ Set.Ioo a b,
+      HasDerivWithinAt (fun s => ΦE (extChartAt I p₀ p, s))
+        (F t (ΦE (extChartAt I p₀ p, t))) (Set.Ioo a b) t)
+    (hF : ∀ (s : ℝ) (c : E), F s c =
+        tangentCoordChange I ((extChartAt I p₀).symm c) p₀
+          ((extChartAt I p₀).symm c) (X s ((extChartAt I p₀).symm c)))
+    (hconf : ∀ (p : M), p ∈ U → ∀ t ∈ Set.Ioo a b,
+      ΦE (extChartAt I p₀ p, t) ∈ (extChartAt I p₀).target)
+    (hUsrc : U ⊆ (extChartAt I p₀).source) :
+    ∀ (p : M), p ∈ U → ∀ t ∈ Set.Ioo a b,
+      HasMFDerivWithinAt 𝓘(ℝ, ℝ) I
+        (fun s => (extChartAt I p₀).symm (ΦE (extChartAt I p₀ p, s)))
+        (Set.Ioo a b) t
+        ((1 : ℝ →L[ℝ] ℝ).smulRight
+          (X t ((extChartAt I p₀).symm (ΦE (extChartAt I p₀ p, t))))) := by
+  intro p hp t ht
+  -- The chart-coordinate trajectory of `p` and its model-space evaluation at `t`.
+  set u : ℝ → E := fun s => ΦE (extChartAt I p₀ p, s) with hu
+  -- The current chart-coordinate position lies in the chart target (from `hconf`).
+  have htgt_t : u t ∈ (extChartAt I p₀).target := hconf p hp t ht
+  -- The pulled-back manifold point at time `t`.
+  set q : M := (extChartAt I p₀).symm (u t) with hq_def
+  -- `q` lies in the chart source, and `extChartAt I p₀ q = u t` (round-trip on the target).
+  have hq_src : q ∈ (extChartAt I p₀).source := (extChartAt I p₀).map_target htgt_t
+  have hq_round : extChartAt I p₀ q = u t := (extChartAt I p₀).right_inv htgt_t
+  -- Confinement: the chart-coordinate trajectory stays in `range I` for times near `t`
+  -- within `Ioo a b`, since on all of `Ioo a b` it lands in the chart target ⊆ range I.
+  have hconf_range : u ⁻¹' (Set.range I) ∈ 𝓝[Set.Ioo a b] t := by
+    refine Filter.mem_of_superset self_mem_nhdsWithin ?_
+    intro s hs
+    exact extChartAt_target_subset_range p₀ (hconf p hp s hs)
+  -- The chart-coordinate ODE for `p` at `t`, with chart velocity `F t (u t)`.
+  have hd : HasDerivWithinAt u (F t (u t)) (Set.Ioo a b) t := hchartODE p hp t ht
+  -- Transport the chart-coordinate ODE to the manifold via the project bridge: the manifold
+  -- derivative has the TRANSPORTED velocity (chart pull-back of `F t (u t)`).
+  have hbridge :
+      HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s => (extChartAt I p₀).symm (u s)) (Set.Ioo a b) t
+        ((mfderivWithin 𝓘(ℝ, E) I (extChartAt I p₀).symm (Set.range I) (u t)) ∘L
+          ((ContinuousLinearMap.id ℝ ℝ).smulRight (F t (u t)))) :=
+    chartCoord_hasDerivWithinAt_to_manifold_hasMFDerivWithinAt
+      (I := I) p₀ u (Set.Ioo a b) t (F t (u t)) htgt_t hconf_range hd
+  -- The transported velocity collapses to the bare `X`-velocity.  Pin `F t (u t)` to the
+  -- chart-`p₀` pushforward of `X t q` (the field-form identity `hF`), then cancel the
+  -- pushforward against `mfderivWithin (extChartAt p₀).symm` (the centre identity).
+  have hcancel :
+      (mfderivWithin 𝓘(ℝ, E) I (extChartAt I p₀).symm (Set.range I) (u t)) (F t (u t))
+        = X t q := by
+    rw [hF t (u t)]
+    -- `(extChartAt I p₀).symm (u t) = q`, so the field reduces to `tangentCoordChange I q p₀ q (X t q)`.
+    rw [← hq_def, ← hq_round]
+    exact pushforward_velocity_cancellation (I := I) p₀ q hq_src (X t q)
+  -- Assemble: the transported velocity CLM equals the bare `(1).smulRight (X t q)`.
+  have hvel :
+      (mfderivWithin 𝓘(ℝ, E) I (extChartAt I p₀).symm (Set.range I) (u t)) ∘L
+          ((ContinuousLinearMap.id ℝ ℝ).smulRight (F t (u t)))
+        = (1 : ℝ →L[ℝ] ℝ).smulRight (X t q) :=
+    ContinuousLinearMap.ext fun r => by
+      simp only [ContinuousLinearMap.comp_apply, ContinuousLinearMap.smulRight_apply,
+        ContinuousLinearMap.id_apply, ContinuousLinearMap.one_apply, map_smul, hcancel]
+  -- Conclude: rewrite the headline bare velocity back to the bridge's transported form
+  -- (`hvel.symm`); the function parts agree definitionally (`u s = ΦE (extChartAt I p₀ p, s)`).
+  rw [← hvel]
+  exact hbridge
 
 end Manifold
 
