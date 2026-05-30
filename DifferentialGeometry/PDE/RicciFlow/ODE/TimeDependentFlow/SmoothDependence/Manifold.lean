@@ -4,7 +4,7 @@ import DifferentialGeometry.Analysis.ODE.FlowC1
 import Mathlib.Geometry.Manifold.ContMDiff.Atlas
 import Mathlib.Geometry.Manifold.ContMDiffMFDeriv
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
-import Mathlib.Analysis.Calculus.BumpFunction.Basic
+import Mathlib.Analysis.Calculus.BumpFunction.FiniteDimension
 
 /-!
 ## H3 — manifold-global joint smooth dependence (headline + pending children)
@@ -46,7 +46,7 @@ theorem h3_local_flow_jointSmooth_and_integralCurve [CompleteSpace E] [I.Boundar
 -- [H3: chartcoord-jointContDiffOn-pushforward-to-contMDiffOn]
 theorem h3_manifoldFlow_contMDiffOn_of_jointContDiffOn
     (p₀ : M) (Φ_E : E × ℝ → E) {ρ T t₀ : ℝ}
-    (U : Set M) (hUopen : IsOpen U) (hUsub : U ⊆ (chartAt H p₀).source)
+    (U : Set M) (_hUopen : IsOpen U) (hUsub : U ⊆ (chartAt H p₀).source)
     (hUball : ∀ p ∈ U, I ((chartAt H p₀) p) ∈ Metric.ball (I ((chartAt H p₀) p₀)) ρ)
     (hΦE_smooth : ContDiffOn ℝ ∞ Φ_E
       (Metric.ball (I ((chartAt H p₀) p₀)) ρ ×ˢ Set.Ioo (t₀ - T) (t₀ + T)))
@@ -54,10 +54,53 @@ theorem h3_manifoldFlow_contMDiffOn_of_jointContDiffOn
       Φ_E (I ((chartAt H p₀) p), s) ∈ (extChartAt I p₀).target) :
     ContMDiffOn (𝓘(ℝ, ℝ).prod I) I ∞
       (fun q : ℝ × M => (extChartAt I p₀).symm (Φ_E (I ((chartAt H p₀) q.2), q.1)))
-      (Set.Ioo (t₀ - T) (t₀ + T) ×ˢ U) := sorry
+      (Set.Ioo (t₀ - T) (t₀ + T) ×ˢ U) := by
+  set s : Set (ℝ × M) := Set.Ioo (t₀ - T) (t₀ + T) ×ˢ U with hs
+  -- Step 1a: the chart coordinate of the second component is `C^∞` on `s`.
+  have hcoord : ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, E) ∞
+      (fun q : ℝ × M => I ((chartAt H p₀) q.2)) s := by
+    have hext : ContMDiffOn I 𝓘(ℝ, E) ∞ (extChartAt I p₀) (chartAt H p₀).source :=
+      contMDiffOn_extChartAt
+    have hcomp : ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, E) ∞
+        ((extChartAt I p₀) ∘ Prod.snd) s :=
+      hext.comp contMDiffOn_snd (fun q hq => hUsub hq.2)
+    -- `(extChartAt I p₀) ∘ Prod.snd = fun q => I ((chartAt H p₀) q.2)`.
+    refine hcomp.congr ?_
+    intro q _
+    simp only [Function.comp_apply, extChartAt_coe, Function.comp_apply]
+  -- Step 1b: assemble `h q = (I ((chartAt H p₀) q.2), q.1)` into the Euclidean model `E × ℝ`.
+  have hh : ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, E × ℝ) ∞
+      (fun q : ℝ × M => (I ((chartAt H p₀) q.2), q.1)) s :=
+    hcoord.prodMk_space contMDiffOn_fst
+  -- Step 2: the hypothesis `hΦE_smooth` as a manifold-smoothness statement between model spaces.
+  have hΦ : ContMDiffOn 𝓘(ℝ, E × ℝ) 𝓘(ℝ, E) ∞ Φ_E
+      (Metric.ball (I ((chartAt H p₀) p₀)) ρ ×ˢ Set.Ioo (t₀ - T) (t₀ + T)) :=
+    hΦE_smooth.contMDiffOn
+  -- Step 3: compose `Φ_E` with `h`; the domain landing is from `hUball` and `q.1 ∈ Ioo`.
+  have hΦh : ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, E) ∞
+      (fun q : ℝ × M => Φ_E (I ((chartAt H p₀) q.2), q.1)) s := by
+    have hsub : s ⊆ (fun q : ℝ × M => (I ((chartAt H p₀) q.2), q.1)) ⁻¹'
+        (Metric.ball (I ((chartAt H p₀) p₀)) ρ ×ˢ Set.Ioo (t₀ - T) (t₀ + T)) := by
+      intro q hq
+      rw [hs] at hq
+      exact Set.mk_mem_prod (hUball q.2 hq.2) hq.1
+    exact hΦ.comp hh hsub
+  -- Step 4: post-compose with `(extChartAt I p₀).symm`; the landing is exactly `htgt`.
+  have hsymm : ContMDiffOn 𝓘(ℝ, E) I ∞ (extChartAt I p₀).symm (extChartAt I p₀).target :=
+    contMDiffOn_extChartAt_symm p₀
+  have hsubtgt : s ⊆ (fun q : ℝ × M => Φ_E (I ((chartAt H p₀) q.2), q.1)) ⁻¹'
+      (extChartAt I p₀).target := by
+    intro q hq
+    rw [hs] at hq
+    exact htgt q.2 hq.2 q.1 hq.1
+  exact hsymm.comp hΦh hsubtgt
 
 -- C1 [H3 v3: chart-p₀ PUSHFORWARD field = X-section read in the FIXED trivialization at p₀, jointly C∞.
 --  No moving chart: source=target=p₀, so this is literally the fixed-triv fiber component of the C∞ X-section.]
+-- (`hρ : 0 < ρ` is a legitimate positivity hypothesis of the public signature; the B-route section
+--  criterion proof does not happen to consume it, so the unused-variable linter is locally silenced
+--  without altering the signature.)
+set_option linter.unusedVariables false in
 theorem chart_pushforward_field_jointContDiff
     (X : ℝ → ∀ x : M, TangentSpace I x)
     (hX : ContMDiff (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
@@ -68,20 +111,148 @@ theorem chart_pushforward_field_jointContDiff
       (Function.uncurry (fun (s : ℝ) (c : E) =>
         ((trivializationAt E (TangentSpace I) p₀)
           (TotalSpace.mk' E ((extChartAt I p₀).symm c) (X s ((extChartAt I p₀).symm c)))).2))
-      ((Set.univ : Set ℝ) ×ˢ Metric.ball (extChartAt I p₀ p₀) ρ) := sorry
+      ((Set.univ : Set ℝ) ×ˢ Metric.ball (extChartAt I p₀ p₀) ρ) := by
+  -- Abbreviations.
+  set x₀ : E := extChartAt I p₀ p₀ with hx₀
+  set e := trivializationAt E (TangentSpace I) p₀ with he
+  set f : ℝ × M → TangentBundle I M :=
+    fun q => (TotalSpace.mk' E q.2 (X q.1 q.2) : TangentBundle I M) with hf
+  -- The base set on the manifold side: the chart-symm image of the Euclidean ball.
+  set S : Set (ℝ × M) :=
+    (Set.univ : Set ℝ) ×ˢ ((extChartAt I p₀).symm '' Metric.ball x₀ ρ) with hS
+  -- (c1-fibre-input) restrict the globally-`ContMDiff` autonomised section `hX` to `S`.
+  have hX_on : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞ f S := hX.contMDiffOn
+  -- The `MapsTo` premise of the section criterion: every base point lies in the chart source,
+  -- which is exactly `e.baseSet`/`e.source` (via hρ_sub + map_target of the extended chart).
+  have hmaps : Set.MapsTo f S e.source := by
+    rintro ⟨s, p⟩ hq
+    obtain ⟨-, c, hc, rfl⟩ := hq
+    have hcsrc : (extChartAt I p₀).symm c ∈ (chartAt H p₀).source := by
+      have hmem : (extChartAt I p₀).symm c ∈ (extChartAt I p₀).source :=
+        (extChartAt I p₀).map_target (hρ_sub hc)
+      rwa [extChartAt_source] at hmem
+    -- `f q ∈ e.source ⟺ (f q).proj ∈ (chartAt H p₀).source` by `trivializationAt_source`.
+    rw [he, TangentBundle.trivializationAt_source]
+    exact hcsrc
+  -- (c1-section-reading-iff) `Bundle.Trivialization.contMDiffOn_iff` at the FIXED trivialization
+  -- `e`, source manifold `ℝ × M`, model `𝓘(ℝ,ℝ).prod I`.  The `.mp.2` conjunct is the p₀-frame
+  -- fibre reading, jointly `ContMDiffOn` into `𝓘(ℝ,E)` on `S`.
+  have hreading : ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, E) ∞
+      (fun q : ℝ × M => (e (f q)).2) S :=
+    ((e.contMDiffOn_iff hmaps).mp hX_on).2
+  -- (c1-assemble) reindex the SOURCE from `ℝ × M` to `ℝ × E` by precomposing
+  -- `Prod.map id (extChartAt I p₀).symm`, which is `ContMDiffOn` on `univ ×ˢ ball x₀ ρ`.
+  have hsymm : ContMDiffOn 𝓘(ℝ, E) I ∞ (extChartAt I p₀).symm (Metric.ball x₀ ρ) :=
+    (contMDiffOn_extChartAt_symm p₀).mono hρ_sub
+  have hreindex :
+      ContMDiffOn (𝓘(ℝ, ℝ).prod 𝓘(ℝ, E)) (𝓘(ℝ, ℝ).prod I) ∞
+        (Prod.map (id : ℝ → ℝ) (extChartAt I p₀).symm)
+        ((Set.univ : Set ℝ) ×ˢ Metric.ball x₀ ρ) :=
+    (contMDiffOn_id (I := 𝓘(ℝ, ℝ))).prodMap hsymm
+  -- `Prod.map id symm` maps `univ ×ˢ ball x₀ ρ` into `S = univ ×ˢ (symm '' ball x₀ ρ)`.
+  have hsub :
+      ((Set.univ : Set ℝ) ×ˢ Metric.ball x₀ ρ) ⊆
+        Prod.map (id : ℝ → ℝ) (extChartAt I p₀).symm ⁻¹' S := by
+    rintro ⟨s, c⟩ ⟨-, hc⟩
+    exact ⟨Set.mem_univ _, Set.mem_image_of_mem _ hc⟩
+  -- Compose: the reading, read through the reindex, over `univ ×ˢ ball x₀ ρ`.
+  have hcomp :
+      ContMDiffOn (𝓘(ℝ, ℝ).prod 𝓘(ℝ, E)) 𝓘(ℝ, E) ∞
+        ((fun q : ℝ × M => (e (f q)).2) ∘ Prod.map (id : ℝ → ℝ) (extChartAt I p₀).symm)
+        ((Set.univ : Set ℝ) ×ˢ Metric.ball x₀ ρ) :=
+    hreading.comp hreindex hsub
+  -- The composed function IS the target uncurried field (definitional), expressed via `e`.
+  have hfun :
+      ((fun q : ℝ × M => (e (f q)).2) ∘ Prod.map (id : ℝ → ℝ) (extChartAt I p₀).symm)
+        = Function.uncurry (fun (s : ℝ) (c : E) =>
+            (e (TotalSpace.mk' E ((extChartAt I p₀).symm c)
+                (X s ((extChartAt I p₀).symm c)))).2) := by
+    funext q
+    rfl
+  rw [hfun] at hcomp
+  -- Transfer manifold `ContMDiffOn` → Euclidean `ContDiffOn`.  The target `ContDiffOn` is the
+  -- Euclidean source-model image of a `ContMDiffOn` over `𝓘(ℝ, ℝ × E)`; reconcile the product
+  -- model and the charted-space instance on the source `ℝ × E` so it matches `hcomp`'s `.prod`
+  -- forms, then close.
+  rw [← contMDiffOn_iff_contDiffOn, modelWithCornersSelf_prod, ← chartedSpaceSelf_prod]
+  exact hcomp
 
 -- C2 [H3 v3: cutoff globalization — multiply C1's field by a ContDiffBump supported in the chart target
 --  to obtain a GLOBALLY-C∞ field on all of ℝ × E (the input exists_isLocalFlow_contDiffOn_top requires).]
-theorem chart_pushforward_field_cutoff_globalContDiff
+theorem chart_pushforward_field_cutoff_globalContDiff [I.Boundaryless]
     (X : ℝ → ∀ x : M, TangentSpace I x)
     (hX : ContMDiff (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
       (fun q : ℝ × M => (TotalSpace.mk' E q.2 (X q.1 q.2) : TangentBundle I M)))
-    (p₀ : M) {ρ : ℝ} (hρ : 0 < ρ) :
+    (p₀ : M) {ρ : ℝ} (hρ : 0 < ρ)
+    (hρ_sub : Metric.ball (extChartAt I p₀ p₀) ρ ⊆ (extChartAt I p₀).target) :
     ∃ (G : ℝ → E → E) (ρ' : ℝ), 0 < ρ' ∧ ρ' ≤ ρ ∧
       ContDiff ℝ ∞ (Function.uncurry G) ∧
       ∀ (s : ℝ), ∀ c ∈ Metric.ball (extChartAt I p₀ p₀) ρ',
         G s c = ((trivializationAt E (TangentSpace I) p₀)
-          (TotalSpace.mk' E ((extChartAt I p₀).symm c) (X s ((extChartAt I p₀).symm c)))).2 := sorry
+          (TotalSpace.mk' E ((extChartAt I p₀).symm c) (X s ((extChartAt I p₀).symm c)))).2 := by
+  -- Abbreviations: the chart centre `x₀` and the genuine trivialization-reading field `F`.
+  set x₀ : E := extChartAt I p₀ p₀ with hx₀
+  set F : ℝ → E → E := fun (s : ℝ) (c : E) =>
+    ((trivializationAt E (TangentSpace I) p₀)
+      (TotalSpace.mk' E ((extChartAt I p₀).symm c) (X s ((extChartAt I p₀).symm c)))).2 with hF
+  -- (c1) `uncurry F` is jointly `C^∞` on the open box `univ ×ˢ ball x₀ ρ` (proven sibling).
+  have hFsmooth : ContDiffOn ℝ ∞ (Function.uncurry F)
+      ((Set.univ : Set ℝ) ×ˢ Metric.ball x₀ ρ) :=
+    chart_pushforward_field_jointContDiff X hX p₀ hρ hρ_sub
+  -- (c2-exists-bump-target-ball) A `ContDiffBump` at `x₀` whose outer closed ball is inside `ball x₀ ρ`,
+  -- so the cutoff is supported in the region where `F` is smooth.
+  set b : ContDiffBump x₀ :=
+    { rIn := ρ / 4, rOut := ρ / 2, rIn_pos := by positivity, rIn_lt_rOut := by linarith } with hb
+  have hb_rIn : b.rIn = ρ / 4 := rfl
+  have hb_rOut : b.rOut = ρ / 2 := rfl
+  have hclosed_sub : Metric.closedBall x₀ b.rOut ⊆ Metric.ball x₀ ρ := by
+    rw [hb_rOut]; exact Metric.closedBall_subset_ball (by linarith)
+  -- The cutoff field `G s c = b c • F s c`, and its uncurried form `Gu`.
+  refine ⟨fun (s : ℝ) (c : E) => (b c) • F s c, b.rIn, b.rIn_pos, ?_, ?_, ?_⟩
+  · -- `ρ' = rIn = ρ/4 ≤ ρ`.
+    rw [hb_rIn]; linarith
+  · -- (c2-cutoffField-contDiff) Global `C^∞` of `uncurry G : ℝ × E → E`.
+    -- The uncurried field, rewritten as the explicit pointwise smul `fun q => b q.2 • F q.1 q.2`.
+    have huncurry : Function.uncurry (fun (s : ℝ) (c : E) => (b c) • F s c)
+        = fun q : ℝ × E => (b : E → ℝ) q.2 • F q.1 q.2 := by
+      funext q; rfl
+    rw [huncurry, contDiff_iff_contDiffAt]
+    rintro ⟨s, c⟩
+    by_cases hc : c ∈ Metric.closedBall x₀ b.rOut
+    · -- Inside the support ball: product of the smooth bump (in the spatial slot) and `F`.
+      have hc_ball : c ∈ Metric.ball x₀ ρ := hclosed_sub hc
+      have hmem : ((s, c) : ℝ × E) ∈ (Set.univ : Set ℝ) ×ˢ Metric.ball x₀ ρ :=
+        ⟨Set.mem_univ _, hc_ball⟩
+      have hopen : IsOpen ((Set.univ : Set ℝ) ×ˢ Metric.ball x₀ ρ) :=
+        isOpen_univ.prod Metric.isOpen_ball
+      have hF_at : ContDiffAt ℝ ∞ (Function.uncurry F) (s, c) :=
+        hFsmooth.contDiffAt (hopen.mem_nhds hmem)
+      have hb_at : ContDiffAt ℝ ∞ (fun q : ℝ × E => (b : E → ℝ) q.2) (s, c) :=
+        (b.contDiff.comp_contDiffAt (s, c) contDiffAt_snd)
+      exact hb_at.smul hF_at
+    · -- Outside the support ball: `b = 0` on a neighbourhood, so the field `≡ 0` there.
+      rw [Metric.mem_closedBall] at hc
+      have hdist : b.rOut < dist c x₀ := not_le.mp hc
+      have hopen : IsOpen {q : ℝ × E | b.rOut < dist q.2 x₀} := by
+        have hcont : Continuous (fun q : ℝ × E => dist q.2 x₀) :=
+          (continuous_snd.dist continuous_const)
+        exact hcont.isOpen_preimage _ isOpen_Ioi
+      have hmem : ((s, c) : ℝ × E) ∈ {q : ℝ × E | b.rOut < dist q.2 x₀} := hdist
+      refine ContDiffAt.congr_of_eventuallyEq (f := fun _ : ℝ × E => (0 : E))
+        contDiffAt_const ?_
+      refine Filter.eventuallyEq_of_mem (hopen.mem_nhds hmem) ?_
+      intro q hq
+      have hq' : b.rOut ≤ dist q.2 x₀ := le_of_lt hq
+      have hb0 : (b : E → ℝ) q.2 = 0 := b.zero_of_le_dist hq'
+      change (b : E → ℝ) q.2 • F q.1 q.2 = 0
+      rw [hb0, zero_smul]
+  · -- (c2-eq-on-inner-ball) On `ball x₀ rIn`, the bump equals `1`, so `G = F`.
+    intro s c hc
+    have hc_closed : c ∈ Metric.closedBall x₀ b.rIn :=
+      Metric.ball_subset_closedBall hc
+    have hb1 : (b : E → ℝ) c = 1 := b.one_of_mem_closedBall hc_closed
+    change (b c) • F s c = F s c
+    rw [hb1, one_smul]
 
 -- A1 [H3 v4: orbit confinement to the AGREEMENT ball ρ' (where the cutoff field G = the genuine field F),
 --  not merely the chart target — the round-3 fix. Tube argument; c4-* sub-nodes survive with target→ball ρ'.]
@@ -93,7 +264,79 @@ theorem chartflow_confined_to_agreementBall
     (hinit : ∀ c ∈ Metric.ball (extChartAt I p₀ p₀) ρ, Φ_E (c, t₀) = c) :
     ∃ (ρ'' T' : ℝ), 0 < ρ'' ∧ 0 < T' ∧ ρ'' ≤ ρ' ∧ T' ≤ T ∧
       ∀ c ∈ Metric.ball (extChartAt I p₀ p₀) ρ'', ∀ s ∈ Set.Ioo (t₀ - T') (t₀ + T'),
-        Φ_E (c, s) ∈ Metric.ball (extChartAt I p₀ p₀) ρ' := sorry
+        Φ_E (c, s) ∈ Metric.ball (extChartAt I p₀ p₀) ρ' := by
+  set x₀ : E := extChartAt I p₀ p₀ with hx₀
+  -- The ambient open domain on which `Φ_E` is continuous.
+  set D : Set (E × ℝ) := Metric.ball x₀ ρ ×ˢ Set.Ioo (t₀ - T) (t₀ + T) with hD
+  have hD_open : IsOpen D := (Metric.isOpen_ball).prod isOpen_Ioo
+  -- Seed radius for the compact slice: strictly below the agreement radius `ρ'`.
+  set ρseed : ℝ := ρ' / 2 with hρseed
+  have hρseed_pos : 0 < ρseed := by rw [hρseed]; linarith
+  have hρseed_lt : ρseed < ρ' := by rw [hρseed]; linarith
+  -- `closedBall x₀ ρseed ⊆ ball x₀ ρ'` (the agreement ball) and `⊆ ball x₀ ρ` (the domain ball).
+  have hseed_sub_ball' : Metric.closedBall x₀ ρseed ⊆ Metric.ball x₀ ρ' :=
+    Metric.closedBall_subset_ball hρseed_lt
+  have hseed_sub_ballρ : Metric.closedBall x₀ ρseed ⊆ Metric.ball x₀ ρ :=
+    Metric.closedBall_subset_ball (lt_of_lt_of_le hρseed_lt hρ'_le)
+  -- The open set: domain intersected with the preimage of the open agreement ball.
+  set O : Set (E × ℝ) := D ∩ Φ_E ⁻¹' Metric.ball x₀ ρ' with hO
+  have hO_open : IsOpen O :=
+    hΦE_cont.isOpen_inter_preimage hD_open Metric.isOpen_ball
+  -- `t₀` is interior to the time window.
+  have ht₀_mem : t₀ ∈ Set.Ioo (t₀ - T) (t₀ + T) := ⟨by linarith, by linarith⟩
+  -- The compact slice `closedBall x₀ ρseed ×ˢ {t₀}` lands inside `O`.
+  have hslice_sub : Metric.closedBall x₀ ρseed ×ˢ ({t₀} : Set ℝ) ⊆ O := by
+    rw [Set.prod_subset_iff]
+    intro c hc s hs
+    rw [Set.mem_singleton_iff] at hs
+    subst hs
+    have hc_ballρ : c ∈ Metric.ball x₀ ρ := hseed_sub_ballρ hc
+    have hc_ball' : c ∈ Metric.ball x₀ ρ' := hseed_sub_ball' hc
+    refine ⟨⟨hc_ballρ, ht₀_mem⟩, ?_⟩
+    -- `Φ_E (c, t₀) = c ∈ ball x₀ ρ'` by `hinit`.
+    rw [Set.mem_preimage, hinit c hc_ballρ]
+    exact hc_ball'
+  -- Generalized tube lemma: extract an open box `u ×ˢ v ⊆ O`.
+  obtain ⟨u, v, hu_open, hv_open, hseed_u, ht₀_v, huv_sub⟩ :=
+    generalized_tube_lemma (isCompact_closedBall x₀ ρseed) isCompact_singleton
+      hO_open hslice_sub
+  -- Read off a ball radius from the open `u` around `x₀`.
+  have hx₀_u : x₀ ∈ u := hseed_u (Metric.mem_closedBall_self hρseed_pos.le)
+  obtain ⟨ε, hε_pos, hε_sub⟩ := Metric.isOpen_iff.mp hu_open x₀ hx₀_u
+  -- Read off an `Ioo` window from the open `v` around `t₀`.
+  have ht₀_v' : t₀ ∈ v := ht₀_v (Set.mem_singleton t₀)
+  obtain ⟨l, w, ht₀_lw, hlw_sub⟩ :=
+    mem_nhds_iff_exists_Ioo_subset.mp (hv_open.mem_nhds ht₀_v')
+  -- Time half-width `δ` with `Ioo (t₀-δ) (t₀+δ) ⊆ Ioo l w ⊆ v`.
+  set δ : ℝ := min (t₀ - l) (w - t₀) with hδ
+  have hδ_pos : 0 < δ := lt_min (by linarith [ht₀_lw.1]) (by linarith [ht₀_lw.2])
+  have hIoo_δ_sub_v : Set.Ioo (t₀ - δ) (t₀ + δ) ⊆ v := by
+    refine subset_trans (fun t ht => ?_) hlw_sub
+    refine ⟨lt_of_le_of_lt ?_ ht.1, lt_of_lt_of_le ht.2 ?_⟩
+    · have hle : δ ≤ t₀ - l := min_le_left _ _
+      linarith
+    · have hle : δ ≤ w - t₀ := min_le_right _ _
+      linarith
+  -- Output radii.
+  refine ⟨min ε ρ', min δ T, ?_, ?_, min_le_right _ _, min_le_right _ _, ?_⟩
+  · exact lt_min hε_pos hρ'
+  · exact lt_min hδ_pos hT
+  -- Confinement on the shrunken box.
+  intro c hc s hs
+  have hc_u : c ∈ u := by
+    apply hε_sub
+    rw [Metric.mem_ball] at hc ⊢
+    exact lt_of_lt_of_le hc (min_le_left _ _)
+  have hs_v : s ∈ v := by
+    apply hIoo_δ_sub_v
+    refine ⟨?_, ?_⟩
+    · have hle : min δ T ≤ δ := min_le_left _ _
+      have := hs.1; linarith
+    · have hle : min δ T ≤ δ := min_le_left _ _
+      have := hs.2; linarith
+  -- `(c, s) ∈ u ×ˢ v ⊆ O`, whose preimage component is exactly the goal.
+  have hcs_O : (c, s) ∈ O := huv_sub (Set.mk_mem_prod hc_u hs_v)
+  exact hcs_O.2
 
 -- A2 [H3 v4: G→F velocity swap + Icc→Ioo — the chart ODE of ΦE (flow of the CUTOFF field G) carries the
 --  GENUINE field F on Ioo, since the orbit stays in the agreement ball ρ' (A1) where G=F. Template chartPhaseVFCutoff_eq_of_mem_closedBall (SmoothFlow.lean:236).]
@@ -107,7 +350,27 @@ theorem chartODE_genuineF_on_Ioo
     (hconf : ∀ c ∈ Metric.ball (extChartAt I p₀ p₀) ρ'', ∀ s ∈ Set.Ioo (t₀ - T') (t₀ + T'),
         Φ_E (c, s) ∈ Metric.ball (extChartAt I p₀ p₀) ρ') :
     ∀ c ∈ Metric.ball (extChartAt I p₀ p₀) ρ'', ∀ t ∈ Set.Ioo (t₀ - T') (t₀ + T'),
-      HasDerivWithinAt (fun s => Φ_E (c, s)) (F t (Φ_E (c, t))) (Set.Ioo (t₀ - T') (t₀ + T')) t := sorry
+      HasDerivWithinAt (fun s => Φ_E (c, s)) (F t (Φ_E (c, t))) (Set.Ioo (t₀ - T') (t₀ + T')) t := by
+  intro c hc t ht
+  -- The orbit start `c` lies in the Picard validity ball `closedBall r`:
+  -- `ball ρ'' ⊆ ball ρ' ⊆ closedBall r` via `hρ''_le` and `hball_sub`.
+  have hc_closed : c ∈ Metric.closedBall (extChartAt I p₀ p₀) (r : ℝ) :=
+    hball_sub (Metric.ball_subset_ball hρ''_le hc)
+  -- The flow `Φ_E (c, ·)` solves the CUTOFF ODE with velocity `G` on `Icc tmin tmax`.
+  have hderiv_Icc :
+      HasDerivWithinAt (fun s => Φ_E (c, s)) (G t (Φ_E (c, t)))
+        (Set.Icc tmin tmax) t :=
+    hflow.hasDerivWithinAt c hc_closed t (hIoo_sub ht)
+  -- Restrict the derivative statement from `Icc` to the smaller set `Ioo`.
+  have hderiv_Ioo :
+      HasDerivWithinAt (fun s => Φ_E (c, s)) (G t (Φ_E (c, t)))
+        (Set.Ioo (t₀ - T') (t₀ + T')) t :=
+    hderiv_Icc.mono hIoo_sub
+  -- The orbit stays in the agreement ball `ρ'` (by `hconf`), where `G = F`.
+  have hGF_pt : G t (Φ_E (c, t)) = F t (Φ_E (c, t)) :=
+    hGF t (Φ_E (c, t)) (hconf c hc t ht)
+  -- Swap the velocity `G → F` by the pointwise equality.
+  exact hGF_pt ▸ hderiv_Ioo
 
 -- field-form-identity [H3 v5: the fixed-p₀-trivialization fibre reading EQUALS the chart-p₀ coordinate velocity
 --  `tangentCoordChange I pt p₀ pt (X s pt)` (rfl-level via trivializationAt_apply + tangentCoordChange_def +
@@ -117,7 +380,7 @@ theorem field_form_identity_trivreading_eq_chartvelocity
     ((trivializationAt E (TangentSpace I) p₀)
         (TotalSpace.mk' E ((extChartAt I p₀).symm c) (X s ((extChartAt I p₀).symm c)))).2
       = tangentCoordChange I ((extChartAt I p₀).symm c) p₀ ((extChartAt I p₀).symm c)
-          (X s ((extChartAt I p₀).symm c)) := sorry
+          (X s ((extChartAt I p₀).symm c)) := rfl
 
 -- chart→intrinsic bridge [H3 v5: OFF the H3 critical path. Documents the chart-coordinate hSmoothX_chart ⇒ the
 --  intrinsic section hX gap — precisely the project TangentSpace:=E frame diamond. A user holding only chart data
@@ -150,10 +413,80 @@ theorem chartflow_eq_bareflow_on_U
           (X t ((extChartAt I p₀).symm (ΦE (extChartAt I p₀ p, t))))) := sorry
 
 -- [H3: pushforward→bare velocity cancellation (under chartflow-eq-bareflow-on-U)]
+-- (The cancellation is a purely chart-theoretic chain-rule identity; the section-level instances
+--  `[FiniteDimensional ℝ E] [BoundarylessManifold I M] [T2Space M]` are not consumed, so they are
+--  explicitly omitted to keep the build warning-free without altering the public signature.)
+omit [FiniteDimensional ℝ E] [BoundarylessManifold I M] [T2Space M] in
 theorem pushforward_velocity_cancellation (p₀ q : M)
     (hq : q ∈ (extChartAt I p₀).source) (v : E) :
     (mfderivWithin 𝓘(ℝ, E) I (extChartAt I p₀).symm (Set.range I) (extChartAt I p₀ q))
-        (tangentCoordChange I q p₀ q v) = v := sorry
+        (tangentCoordChange I q p₀ q v) = v := by
+  have hqq : q ∈ (extChartAt I q).source := mem_extChartAt_source q
+  -- The transition `T = extChartAt p₀ ∘ (extChartAt q).symm`; it sends the chart-`q` centre to
+  -- `extChartAt I p₀ q`.
+  have hTc₀ : (extChartAt I p₀ ∘ ⇑(extChartAt I q).symm) (extChartAt I q q) = extChartAt I p₀ q := by
+    simp only [Function.comp_apply, (extChartAt I q).left_inv hqq]
+  -- Differentiability data: chart-`p₀` inverse (manifold-valued) and the transition (model-valued).
+  have hg : MDifferentiableWithinAt 𝓘(ℝ, E) I (extChartAt I p₀).symm (Set.range I)
+      (extChartAt I p₀ q) := mdifferentiableWithinAt_extChartAt_symm ((extChartAt I p₀).map_source hq)
+  have hfd : HasFDerivWithinAt (extChartAt I p₀ ∘ ⇑(extChartAt I q).symm)
+      (tangentCoordChange I q p₀ q) (Set.range I) (extChartAt I q q) :=
+    hasFDerivWithinAt_tangentCoordChange (I := I) (x := q) (y := p₀) (z := q) ⟨hqq, hq⟩
+  have hf : MDifferentiableWithinAt 𝓘(ℝ, E) 𝓘(ℝ, E)
+      (extChartAt I p₀ ∘ ⇑(extChartAt I q).symm) (Set.range I) (extChartAt I q q) :=
+    hfd.differentiableWithinAt.mdifferentiableWithinAt
+  -- The transition lands in `range I` (its value is `I (chartAt H p₀ _)`).
+  have hpre : Set.range I ⊆ (extChartAt I p₀ ∘ ⇑(extChartAt I q).symm) ⁻¹' Set.range I := by
+    intro y _
+    simp only [Set.mem_preimage, Function.comp_apply, extChartAt_coe]
+    exact Set.mem_range_self _
+  have hU : UniqueMDiffWithinAt 𝓘(ℝ, E) (Set.range I) (extChartAt I q q) :=
+    (I.uniqueMDiffOn) _ (extChartAt_target_subset_range q (mem_extChartAt_target q))
+  -- (vc-chain-rule-comp) The manifold chain rule for `(extChartAt p₀).symm ∘ T` at the chart-`q`
+  -- centre, with the source point `T (centre) = extChartAt I p₀ q`.
+  have hchain := mfderivWithin_comp_of_eq (I := 𝓘(ℝ, E)) (I' := 𝓘(ℝ, E)) (I'' := I)
+    (g := (extChartAt I p₀).symm) (f := extChartAt I p₀ ∘ ⇑(extChartAt I q).symm)
+    (s := Set.range I) (u := Set.range I) (x := extChartAt I q q)
+    (y := extChartAt I p₀ q) hg hf hpre hU hTc₀
+  -- (vc-roundtrip-eqOn) Near the centre (within `range I`), the round-trip `(extChartAt p₀).symm ∘ T`
+  -- collapses to the chart-`q` inverse, so its within-derivative agrees with that of `(extChartAt q).symm`.
+  have hAmem : (extChartAt I q).target ∩ (extChartAt I q).symm ⁻¹' (extChartAt I p₀).source
+      ∈ 𝓝[Set.range I] (extChartAt I q q) := by
+    refine Filter.inter_mem (extChartAt_target_mem_nhdsWithin q) ?_
+    have hsrc : (extChartAt I p₀).source ∈ 𝓝 q :=
+      (isOpen_extChartAt_source p₀).mem_nhds hq
+    have hpre' := extChartAt_preimage_mem_nhdsWithin' (I := I) (x := q) (x' := q)
+      (s := Set.univ) (t := (extChartAt I p₀).source) (mem_extChartAt_source q)
+      (by simpa using hsrc)
+    simpa only [Set.preimage_univ, Set.univ_inter] using hpre'
+  have heqOn : ⇑(extChartAt I q).symm
+      =ᶠ[𝓝[Set.range I] (extChartAt I q q)]
+        ((extChartAt I p₀).symm ∘ (extChartAt I p₀ ∘ ⇑(extChartAt I q).symm)) := by
+    filter_upwards [hAmem] with y hy
+    obtain ⟨_, hy₂⟩ := hy
+    simp only [Set.mem_preimage] at hy₂
+    simp only [Function.comp_apply, (extChartAt I p₀).left_inv hy₂]
+  have heqDeriv :
+      mfderivWithin 𝓘(ℝ, E) I (extChartAt I q).symm (Set.range I) (extChartAt I q q)
+        = mfderivWithin 𝓘(ℝ, E) I
+            ((extChartAt I p₀).symm ∘ (extChartAt I p₀ ∘ ⇑(extChartAt I q).symm))
+            (Set.range I) (extChartAt I q q) :=
+    heqOn.mfderivWithin_eq
+      (by simp only [Function.comp_apply, (extChartAt I q).left_inv hqq,
+        (extChartAt I p₀).left_inv hq])
+  -- (vc-collapse-to-id) The chart-`q` inverse has within-derivative the identity at its centre.
+  have hid := mfderivWithin_range_extChartAt_symm (𝕜 := ℝ) (I := I) (x := q)
+  -- (vc-tangentCoordChange-def) The model within-derivative of `T` IS `tangentCoordChange I q p₀ q`.
+  have hTderiv :
+      mfderivWithin 𝓘(ℝ, E) 𝓘(ℝ, E) (extChartAt I p₀ ∘ ⇑(extChartAt I q).symm)
+        (Set.range I) (extChartAt I q q) = tangentCoordChange I q p₀ q := by
+    rw [mfderivWithin_eq_fderivWithin]
+    exact hfd.fderivWithin (hU.uniqueDiffWithinAt)
+  -- Combine: `id = g' ∘L tangentCoordChange`, where `g'` is the named within-derivative.
+  rw [heqDeriv, hchain, hTderiv] at hid
+  -- Apply the inverse identity to `v`: `(g'.comp tcc) v = id v`, i.e. `g' (tcc v) = v`.
+  have hv := congrArg (fun L => L v) hid
+  simpa only [ContinuousLinearMap.comp_apply, ContinuousLinearMap.id_apply] using hv
 
 end Manifold
 
