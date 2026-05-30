@@ -2912,6 +2912,169 @@ moving-foot predicate `IsGeodesicOn g Γ (Ici 0)`, whose extension steps are
 launched from each successive limit point's *own* chart (the genuine
 cross-chart continuation `hasEndpointContinuation_of_complete`). -/
 
+/-! ### `C¹`-in-time regularity of a moving-foot geodesic
+
+The analytic engine producing the `hreg` regularity datum of
+`isGeodesicOn_Ici_of_complete`: an intrinsic moving-foot geodesic is `C¹` in
+time.  At a base time `t` we work in the fixed chart `α = γ t`; the
+fixed-chart curve `u := chartCurve α γ = φ_α ∘ γ` satisfies, near `t`, the
+chart-coordinate geodesic system in first-order form
+`u' = (u', -Γ_α(u', u')(u))`.  The fixed-chart first-derivative companion
+`hasGeodesicEquationAt_fixedChart_eventually_hasDerivAt` certifies that `u` is
+differentiable on a neighbourhood of `t`, while the second-order velocity ODE
+`hasGeodesicEquationAt_fixedChart_hasDerivAt_velocity` certifies that `deriv u`
+is itself differentiable — hence continuous — near `t`.  Together these
+upgrade `u` to a `C¹` curve `ℝ → E` at `t` (`contDiffAt_one_iff`).  The
+manifold curve `γ` then equals `(extChartAt I α).symm ∘ u` near `t`, and
+`(extChartAt I α).symm` is `C^∞` on the chart target, so `γ` is `ContMDiffAt 1`
+at `t`.  Continuity of `γ` (used to keep `γ s` inside the chart source near
+`t`) is the genuine input hypothesis, not the conclusion. -/
+
+/-- **Chart-coordinate `C¹` regularity.**  If `γ` satisfies the moving-foot
+geodesic equation at every point of an open set `s ∋ t` and is continuous on
+`s`, then the fixed-chart curve `chartCurve (γ t) γ = φ_{γ t} ∘ γ` is
+`ContDiffAt ℝ 1` at `t`. -/
+theorem chartCurve_contDiffAt_one_of_isGeodesicOn
+    (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {s : Set ℝ} {t : ℝ}
+    (hs : IsOpen s) (ht : t ∈ s)
+    (hγ : IsGeodesicOn (I := I) g γ s) (hcont : ContinuousOn γ s) :
+    ContDiffAt ℝ 1 (chartCurve (I := I) (γ t) γ) t := by
+  classical
+  set α : M := γ t with hα_def
+  set u : ℝ → E := chartCurve (I := I) α γ with hu_def
+  -- `α = γ t` lies in its own chart source.
+  have hα_src : α ∈ (chartAt H α).source := mem_chart_source H α
+  -- `γ` is continuous at `t` (open subset of the manifold).
+  have hcontAt_t : ContinuousAt γ t :=
+    hcont.continuousAt (hs.mem_nhds ht)
+  -- A neighbourhood `V` of `t` on which `γ s' ∈ source`, `s' ∈ s`.
+  have hsrc_nhds : (fun s' => γ s') ⁻¹' (chartAt H α).source ∈ 𝓝 t := by
+    have : α ∈ (chartAt H α).source := hα_src
+    exact hcontAt_t.preimage_mem_nhds ((chartAt H α).open_source.mem_nhds (by rw [hα_def] at this ⊢; exact this))
+  obtain ⟨V, hV_nhds, hV_src⟩ := Filter.eventually_iff_exists_mem.mp
+    (Filter.eventually_of_mem hsrc_nhds (fun _ h => h))
+  -- Shrink to a neighbourhood `W ⊆ V ∩ s` of `t`.
+  set W : Set ℝ := V ∩ s with hW_def
+  have hW_nhds : W ∈ 𝓝 t := Filter.inter_mem hV_nhds (hs.mem_nhds ht)
+  have hW_src : ∀ s' ∈ W, γ s' ∈ (chartAt H α).source := fun s' hs' => hV_src s' hs'.1
+  have hW_geo : ∀ s' ∈ W, HasGeodesicEquationAt (I := I) g γ s' :=
+    fun s' hs' => hγ s' hs'.2
+  have hW_contAt : ∀ s' ∈ W, ContinuousAt γ s' :=
+    fun s' hs' => hcont.continuousAt (hs.mem_nhds hs'.2)
+  -- Second-order ODE: `deriv u` has a `HasDerivAt` at each `s' ∈ W`.
+  have hODE : ∀ s' ∈ W,
+      HasDerivAt (deriv u)
+        (- chartChristoffelContraction (I := I) g α (deriv u s') (deriv u s') (u s')) s' := by
+    intro s' hs'
+    simpa [hu_def] using
+      hasGeodesicEquationAt_fixedChart_hasDerivAt_velocity (I := I) g α
+        (γ := γ) (t := s') (hW_contAt s' hs') (hW_src s' hs') (hW_geo s' hs')
+  -- `deriv u` is differentiable, hence continuous, on (the interior of) `W`.
+  obtain ⟨W', hW'_sub, hW'_open, hW'_mem⟩ := mem_nhds_iff.mp hW_nhds
+  have hderiv_diffOn : ∀ s' ∈ W', DifferentiableAt ℝ (deriv u) s' :=
+    fun s' hs' => (hODE s' (hW'_sub hs')).differentiableAt
+  have hderiv_contOn : ContinuousOn (deriv u) W' :=
+    fun s' hs' => (hderiv_diffOn s' hs').continuousAt.continuousWithinAt
+  -- Assemble `ContDiffAt ℝ 1 u t` via `contDiffAt_one_iff` with
+  -- `f' s' = toSpanSingleton ℝ (deriv u s')`.
+  rw [contDiffAt_one_iff]
+  refine ⟨fun s' => ContinuousLinearMap.toSpanSingleton ℝ (deriv u s'), W',
+    hW'_open.mem_nhds hW'_mem, ?_, ?_⟩
+  · -- Continuity of `s' ↦ toSpanSingleton ℝ (deriv u s')` on `W'`.
+    have hCLE : Continuous
+        (fun w : E => (ContinuousLinearMap.toSpanSingleton ℝ w : ℝ →L[ℝ] E)) :=
+      ContinuousLinearMap.toSpanSingletonCLE.continuous
+    exact hCLE.comp_continuousOn hderiv_contOn
+  · -- `HasFDerivAt u (toSpanSingleton ℝ (deriv u s')) s'` for `s' ∈ W'`.
+    intro s' hs'
+    -- Reuse the eventual first-derivative companion at base time `s'`, then
+    -- read it off at `s'` itself.
+    have hcont_s' : ContinuousAt γ s' := hW_contAt s' (hW'_sub hs')
+    have hsrc_s' : γ s' ∈ (chartAt H (γ t)).source := hW_src s' (hW'_sub hs')
+    have hu_ev' : ∀ᶠ r in 𝓝 s', HasDerivAt u (deriv u r) r := by
+      simpa [hu_def] using
+        hasGeodesicEquationAt_fixedChart_eventually_hasDerivAt (I := I) g α
+          (γ := γ) (t := s') hcont_s' (by rw [hα_def]; exact hsrc_s')
+          (hW_geo s' (hW'_sub hs'))
+    exact hu_ev'.self_of_nhds.hasFDerivAt
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- **`C¹`-in-time regularity of a moving-foot geodesic (pointwise).**  An
+intrinsic moving-foot geodesic `γ` on an open set `s` that is continuous on `s`
+is `ContMDiffAt 𝓘(ℝ, ℝ) I 1` at every `t ∈ s`.
+
+This is the analytic engine supplying the `C¹` regularity conjunct of the
+`hreg` hypothesis of `isGeodesicOn_Ici_of_complete`.  The proof works in the
+fixed chart `α = γ t`: the fixed-chart curve `u = φ_α ∘ γ` is `ContDiffAt 1`
+in time (`chartCurve_contDiffAt_one_of_isGeodesicOn`), `(extChartAt I α).symm`
+is `C^∞` on the chart target, and `γ` agrees with `(extChartAt I α).symm ∘ u`
+on a neighbourhood of `t` (chart round-trip on the chart source), so `γ` is
+`ContMDiffAt 1` at `t`. -/
+theorem isGeodesicOn_contMDiffAt_one
+    (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {s : Set ℝ} {t : ℝ}
+    (hs : IsOpen s) (ht : t ∈ s)
+    (hγ : IsGeodesicOn (I := I) g γ s) (hcont : ContinuousOn γ s) :
+    ContMDiffAt 𝓘(ℝ, ℝ) I 1 γ t := by
+  classical
+  set α : M := γ t with hα_def
+  set u : ℝ → E := chartCurve (I := I) α γ with hu_def
+  -- `u` is `ContDiffAt 1` at `t` (chart-coordinate regularity).
+  have hu_cd : ContDiffAt ℝ 1 u t :=
+    chartCurve_contDiffAt_one_of_isGeodesicOn (I := I) g hs ht hγ hcont
+  -- View `u` as a map `ℝ → E` between normed spaces: `ContMDiffAt`.
+  have hu_cmd : ContMDiffAt 𝓘(ℝ, ℝ) 𝓘(ℝ, E) 1 u t := hu_cd.contMDiffAt
+  -- `α ∈ source`, `u t = extChartAt I α (γ t) = extChartAt I α α ∈ target`.
+  have hα_src : α ∈ (chartAt H α).source := mem_chart_source H α
+  have hα_ext_src : α ∈ (extChartAt I α).source := by
+    rw [extChartAt_source]; exact hα_src
+  have hut_eq : u t = extChartAt I α α := by
+    rw [hu_def, chartCurve_def, hα_def]
+  have hut_target : u t ∈ (extChartAt I α).target := by
+    rw [hut_eq]; exact (extChartAt I α).map_source hα_ext_src
+  -- `(extChartAt I α).symm` is `ContMDiffAt 1` at `u t`.
+  have htarget_nhds : (extChartAt I α).target ∈ 𝓝 (u t) := by
+    have hut_int : u t ∈ interior (extChartAt I α).target := by
+      rw [hut_eq]
+      exact extChartAt_target_subset_interior_of_boundaryless (I := I) α
+        ((extChartAt I α).map_source hα_ext_src)
+    exact mem_nhds_iff.mpr ⟨interior (extChartAt I α).target, interior_subset,
+      isOpen_interior, hut_int⟩
+  have hsymm_within : ContMDiffWithinAt 𝓘(ℝ, E) I 1
+      (extChartAt I α).symm (extChartAt I α).target (u t) :=
+    contMDiffWithinAt_extChartAt_symm_target (I := I) α hut_target
+  have hsymm_at : ContMDiffAt 𝓘(ℝ, E) I 1 (extChartAt I α).symm (u t) :=
+    hsymm_within.contMDiffAt htarget_nhds
+  -- Compose: `(extChartAt I α).symm ∘ u` is `ContMDiffAt 1` at `t`.
+  have hcomp : ContMDiffAt 𝓘(ℝ, ℝ) I 1 ((extChartAt I α).symm ∘ u) t :=
+    hsymm_at.comp t hu_cmd
+  -- `γ` agrees with `(extChartAt I α).symm ∘ u` on a neighbourhood of `t`.
+  have hcontAt_t : ContinuousAt γ t := hcont.continuousAt (hs.mem_nhds ht)
+  have hsrc_nhds : (fun s' => γ s') ⁻¹' (chartAt H α).source ∈ 𝓝 t :=
+    hcontAt_t.preimage_mem_nhds ((chartAt H α).open_source.mem_nhds hα_src)
+  have heq : ((extChartAt I α).symm ∘ u) =ᶠ[𝓝 t] γ := by
+    filter_upwards [hsrc_nhds] with s' hs'
+    have hs'_ext : γ s' ∈ (extChartAt I α).source := by
+      rw [extChartAt_source]; exact hs'
+    change (extChartAt I α).symm (u s') = γ s'
+    rw [hu_def, chartCurve_def]
+    exact (extChartAt I α).left_inv hs'_ext
+  exact hcomp.congr_of_eventuallyEq heq.symm
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- **`C¹`-in-time regularity of a moving-foot geodesic (on an open set).**  An
+intrinsic moving-foot geodesic `γ` on an open set `s`, continuous on `s`, is
+`ContMDiffOn 𝓘(ℝ, ℝ) I 1` on `s`.  This is the exact shape of the `C¹`
+regularity conjunct fed (with `s = Set.Iio b`) to the `hreg` hypothesis of
+`isGeodesicOn_Ici_of_complete`. -/
+theorem isGeodesicOn_contMDiffOn_one
+    (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {s : Set ℝ}
+    (hs : IsOpen s)
+    (hγ : IsGeodesicOn (I := I) g γ s) (hcont : ContinuousOn γ s) :
+    ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ s := fun _t ht =>
+  (isGeodesicOn_contMDiffAt_one (I := I) g hs ht hγ hcont).contMDiffWithinAt
+
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 /-- **Intrinsic right-completeness from metric completeness.**  A moving-foot

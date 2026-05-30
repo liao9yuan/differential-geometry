@@ -857,6 +857,70 @@ theorem hasGeodesicEquationAt_fixedChart_hasDerivAt_velocity
   rw [hDcollapse] at hUderiv
   exact hUderiv
 
+/-- **Moving-foot → fixed-chart velocity, eventual first-derivative form.**
+Under the same hypotheses as `hasGeodesicEquationAt_fixedChart_hasDerivAt_velocity`
+(continuity of `γ` at `t` and `γ t` in the chart at the fixed basepoint `y`,
+plus the moving-foot geodesic equation at `t`), the fixed-`y`-chart curve
+`u := chartCurve y γ` has a genuine `HasDerivAt` on a *neighbourhood* of `t`,
+with the textbook derivative `deriv u s` as right-hand side at each nearby `s`.
+
+This is the first-order companion of the second-order velocity ODE: it certifies
+that `u` is differentiable near `t` (so `deriv u` is the genuine derivative), which
+is the missing ingredient — alongside continuity of `deriv u` from the second-order
+ODE — for upgrading `u` to a `C¹` curve in time. The proof reuses the chart-transition
+transfer `u =ᶠ[𝓝 t] chartTransitionMap (γ t) y ∘ chartCurve (γ t) γ` from the
+moving-foot first clause and the differentiability of the chart-transition map. -/
+theorem hasGeodesicEquationAt_fixedChart_eventually_hasDerivAt
+    (g : SmoothRiemannianMetric I M) (y : M) {γ : ℝ → M} {t : ℝ}
+    (hγ_cont : ContinuousAt γ t)
+    (hy : γ t ∈ (chartAt H y).source)
+    (h : HasGeodesicEquationAt (I := I) g γ t) :
+    ∀ᶠ s in nhds t,
+      HasDerivAt (chartCurve (I := I) y γ) (deriv (chartCurve (I := I) y γ) s) s := by
+  classical
+  set α : M := γ t with hα_def
+  -- Unpack the moving-foot equation. `chartLocalCurve γ t = chartCurve (γ t) γ`.
+  obtain ⟨v, a, hv0, hev0, ha0, hgeo⟩ := h
+  have hwdef : chartLocalCurve (I := I) γ t = chartCurve (I := I) α γ := by
+    funext s; rw [chartLocalCurve_def, hα_def, chartCurve_def]
+  rw [hwdef] at hev0
+  -- `hev0 : ∀ᶠ s in 𝓝 t, HasDerivAt (chartCurve α γ) (deriv (chartCurve α γ) s) s`.
+  have hα_src : γ t ∈ (chartAt H α).source := by
+    rw [hα_def]; exact mem_chart_source H (γ t)
+  -- Eventually `γ s` is in both chart sources (continuity of `γ` at `t`).
+  have hboth_nhds : (fun s => γ s) ⁻¹'
+      ((chartAt H α).source ∩ (chartAt H y).source) ∈ 𝓝 t :=
+    hγ_cont.preimage_mem_nhds
+      (((chartAt H α).open_source.inter (chartAt H y).open_source).mem_nhds ⟨hα_src, hy⟩)
+  set u : ℝ → E := chartCurve (I := I) y γ with hu_def
+  set w : ℝ → E := chartCurve (I := I) α γ with hw_def
+  -- Near `t`, `u = chartTransitionMap α y ∘ w` (agree where `γ s` is in both sources).
+  have hcurve_eq : u =ᶠ[𝓝 t]
+      (fun s => chartTransitionMap (I := I) α y (w s)) := by
+    filter_upwards [hboth_nhds] with s hs
+    obtain ⟨hsα, _hsy⟩ := hs
+    rw [hu_def, hw_def, chartCurve_def, chartCurve_def]
+    exact (chartTransitionMap_apply_extChartAt (I := I) α y hsα).symm
+  have hTdiff : ∀ {z : E}, z ∈ chartTransitionSource (I := I) α y →
+      DifferentiableAt ℝ (chartTransitionMap (I := I) α y) z :=
+    fun hz => chartTransitionMap_differentiableAt (I := I) α y hz
+  -- For `s` near `t`, the composite has a `HasDerivAt`; transfer to `u`.
+  have hu_hasDerivAt_ev : ∀ᶠ s in 𝓝 t,
+      HasDerivAt u (chartTransitionAt (I := I) α y (w s) (deriv w s)) s := by
+    filter_upwards [hev0, hboth_nhds, hcurve_eq.eventually_nhds] with s hs hs_both hs_eq
+    have hws_src : w s ∈ chartTransitionSource (I := I) α y := by
+      rw [hw_def, chartCurve_def]
+      exact extChartAt_mem_chartTransitionSource (I := I) α y hs_both.1 hs_both.2
+    have hcomp : HasDerivAt
+        (fun r => chartTransitionMap (I := I) α y (w r))
+        (chartTransitionAt (I := I) α y (w s) (deriv w s)) s := by
+      have := (hTdiff hws_src).hasFDerivAt.comp_hasDerivAt s hs
+      simpa [chartTransitionAt_def] using this
+    exact hcomp.congr_of_eventuallyEq hs_eq
+  -- Replace the derivative value by `deriv u s` (it *is* the derivative).
+  filter_upwards [hu_hasDerivAt_ev] with s hs
+  rw [hs.deriv]; exact hs
+
 end MovingFootToFixedChart
 
 /-! ## Gluing two geodesic arcs at a matching limit point
