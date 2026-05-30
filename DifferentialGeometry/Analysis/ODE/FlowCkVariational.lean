@@ -1059,6 +1059,453 @@ theorem augFlow_snd_eq_variationalLinearMapAt
 
 end AugFlowVariationalIdentification
 
+/-! ## Orbit uniqueness: the augmented flow's first component is the original flow
+
+The first component of `augVF f` is just `f`: `(augVF f t p).1 = f t p.1`.  Hence the first
+component `t ↦ (aΦ ⟨(x, id), t⟩).1` of an augmented orbit solves the *original* ODE
+`y'(t) = f t (y(t))` with the same initial value `x` at `t₀` as the original orbit
+`t ↦ Φ ⟨x, t⟩`.  By ODE uniqueness (Picard–Lindelöf / Grönwall, here through
+`ODE_solution_unique_of_mem_Ioo`), the two orbits coincide on the common time interval.
+
+This identification is the analytic content needed to recognise the variational linear map
+of the *augmented* flow's central orbit as the variational linear map of the *original*
+flow's orbit, so that `augFlow_snd_eq_variationalLinearMapAt` identifies
+`(aΦ ⟨(x, id), t⟩).2` with the spatial piece of `fderiv ℝ Φ`. -/
+
+section OrbitUniqueness
+
+variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
+
+/-- **Orbit uniqueness for the original ODE.**
+
+Two curves `y₁ y₂ : ℝ → E` that both solve the ODE `y'(t) = f t (y(t))` on an open interval
+`Ioo a b ∋ t₀`, agree at `t₀`, and along which `f t` is uniformly `K`-Lipschitz (on the
+ambient `univ`), coincide on `Ioo a b`.  This is `ODE_solution_unique_of_mem_Ioo` specialised
+to the autonomous-in-form vector field `v t y := f t y`. -/
+theorem orbit_unique_Ioo
+    {a b : ℝ} {y₁ y₂ : ℝ → E} {K : ℝ≥0}
+    (ht₀ : t₀ ∈ Ioo a b)
+    (hLip : ∀ t ∈ Ioo a b, LipschitzOnWith K (f t) (univ : Set E))
+    (hy₁ : ∀ t ∈ Ioo a b, HasDerivAt y₁ (f t (y₁ t)) t)
+    (hy₂ : ∀ t ∈ Ioo a b, HasDerivAt y₂ (f t (y₂ t)) t)
+    (hinit : y₁ t₀ = y₂ t₀) :
+    EqOn y₁ y₂ (Ioo a b) := by
+  exact ODE_solution_unique_of_mem_Ioo (v := fun t y => f t y) (s := fun _ => univ) (K := K)
+    hLip ht₀
+    (fun t ht => ⟨hy₁ t ht, mem_univ _⟩)
+    (fun t ht => ⟨hy₂ t ht, mem_univ _⟩)
+    hinit
+
+/-- **The augmented flow's first component is the original flow's orbit.**
+
+Let `Φ` be a local flow of `f`, and `aΦ` a local flow of the augmented vector field
+`augVF f` started at `(x, id)`.  Suppose:
+* both flows are operative on a common open time interval `Ioo a b ∋ t₀`, contained in
+  the respective closed time domains;
+* `f t` is uniformly `K`-Lipschitz on `univ` for `t ∈ Ioo a b`;
+* the initial spatial values agree: the augmented orbit starts at `(x, id)` and `x` is in
+  the original flow's closed ball, and `(x, id)` is in the augmented flow's closed ball.
+
+Then for every `t ∈ Ioo a b`, the first component of the augmented orbit equals the
+original orbit: `(aΦ ⟨(x, id), t⟩).1 = Φ ⟨x, t⟩`. -/
+theorem augFlow_fst_eq_flow
+    {aΦ : (E × (E →L[ℝ] E)) × ℝ → E × (E →L[ℝ] E)}
+    {R : ℝ≥0} {tmin' tmax' : ℝ} {p₀ : E × (E →L[ℝ] E)}
+    (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
+    (haΦ : IsLocalFlow (augVF f) t₀ p₀ R tmin' tmax' aΦ)
+    {a b : ℝ} {K : ℝ≥0} (ht₀ : t₀ ∈ Ioo a b)
+    (ha_sub : Ioo a b ⊆ Icc tmin tmax) (ha_sub' : Ioo a b ⊆ Icc tmin' tmax')
+    (hLip : ∀ t ∈ Ioo a b, LipschitzOnWith K (f t) (univ : Set E))
+    {x : E} (hx : x ∈ closedBall x₀ (r : ℝ))
+    (hxp : (x, ContinuousLinearMap.id ℝ E) ∈ closedBall p₀ (R : ℝ)) :
+    ∀ t ∈ Ioo a b, (aΦ ⟨(x, ContinuousLinearMap.id ℝ E), t⟩).1 = Φ ⟨x, t⟩ := by
+  set p : E × (E →L[ℝ] E) := (x, ContinuousLinearMap.id ℝ E) with hp_def
+  -- The two candidate orbits for the original ODE.
+  set y₁ : ℝ → E := fun s => (aΦ ⟨p, s⟩).1 with hy₁_def
+  set y₂ : ℝ → E := fun s => Φ ⟨x, s⟩ with hy₂_def
+  -- `y₁` solves `y' = f t y`: it is the first component of the augmented orbit.
+  have hy₁_deriv : ∀ t ∈ Ioo a b, HasDerivAt y₁ (f t (y₁ t)) t := by
+    intro t ht
+    -- The augmented orbit has the augmented-ODE derivative on `Icc tmin' tmax'`.
+    have h_orbit := haΦ.hasDerivWithinAt p hxp t (ha_sub' ht)
+    -- Project to the first component via the CLM `fst`.
+    set fstCLM : (E × (E →L[ℝ] E)) →L[ℝ] E := ContinuousLinearMap.fst ℝ E (E →L[ℝ] E)
+    have h_fd := h_orbit.hasFDerivWithinAt
+    have h_fst_at := (fstCLM.hasFDerivAt).comp_hasFDerivWithinAt t h_fd
+    have heq : fstCLM.comp
+        (ContinuousLinearMap.toSpanSingleton ℝ (augVF f t (aΦ ⟨p, t⟩)))
+        = ContinuousLinearMap.toSpanSingleton ℝ ((augVF f t (aΦ ⟨p, t⟩)).1) := by
+      apply ContinuousLinearMap.ext
+      intro s
+      change fstCLM (s • augVF f t (aΦ ⟨p, t⟩)) = s • (augVF f t (aΦ ⟨p, t⟩)).1
+      change (s • augVF f t (aΦ ⟨p, t⟩)).1 = s • (augVF f t (aΦ ⟨p, t⟩)).1
+      rfl
+    rw [heq] at h_fst_at
+    have h_aug_fst : (augVF f t (aΦ ⟨p, t⟩)).1 = f t (y₁ t) := rfl
+    rw [h_aug_fst] at h_fst_at
+    -- `h_fst_at : HasFDerivWithinAt (fstCLM ∘ fun s => aΦ ⟨p, s⟩) (toSpanSingleton (f t (y₁ t))) …`.
+    -- The composed function is definitionally `y₁`, so this is `HasDerivWithinAt y₁ …`.
+    have h_within : HasDerivWithinAt y₁ (f t (y₁ t)) (Icc tmin' tmax') t := by
+      rw [hasDerivWithinAt_iff_hasFDerivWithinAt]
+      exact h_fst_at
+    exact (h_within.mono ha_sub').hasDerivAt (isOpen_Ioo.mem_nhds ht)
+  -- `y₂` solves `y' = f t y`: it is the original orbit.
+  have hy₂_deriv : ∀ t ∈ Ioo a b, HasDerivAt y₂ (f t (y₂ t)) t := by
+    intro t ht
+    have h_within := hΦ.hasDerivWithinAt x hx t (ha_sub ht)
+    exact (h_within.mono ha_sub).hasDerivAt (isOpen_Ioo.mem_nhds ht)
+  -- Initial values agree at `t₀`: both equal `x`.
+  have hinit : y₁ t₀ = y₂ t₀ := by
+    have h1 : y₁ t₀ = x := by
+      change (aΦ ⟨p, t₀⟩).1 = x
+      rw [haΦ.apply_initial p hxp]
+    have h2 : y₂ t₀ = x := by
+      change Φ ⟨x, t₀⟩ = x
+      exact hΦ.apply_initial x hx
+    rw [h1, h2]
+  exact orbit_unique_Ioo ht₀ hLip hy₁_deriv hy₂_deriv hinit
+
+end OrbitUniqueness
+
+/-! ## Invariance of the variational linear map under agreement of the central orbit
+
+`variationalLinearMapAt` along a central orbit `α` depends on `α` only through the values
+`α t` for `t ∈ Icc (t₀ - T) (t₀ + T)` (through the linearization `fderiv ℝ (f t) (α t)`).
+Two orbits that agree on the closed interval therefore give the *same* variational linear
+map at every interior time.  This is the bridge that lets `augFlow_fst_eq_flow` transport
+the augmented flow's variational identification onto the original flow's orbit. -/
+
+section VariationalLinearMapCongr
+
+variable {f : ℝ → E → E} {α₁ α₂ : ℝ → E} {t₀ : ℝ}
+
+/-- If two central orbits agree on `Icc (t₀ - T) (t₀ + T)`, an `IsVariationalSolutionOn`
+along the first is an `IsVariationalSolutionOn` along the second. -/
+theorem IsVariationalSolutionOn.congr_central
+    {T : ℝ} {δ : E} {y : ℝ → E}
+    (hαeq : EqOn α₁ α₂ (Icc (t₀ - T) (t₀ + T)))
+    (hy : IsVariationalSolutionOn f α₁ δ t₀ y (Icc (t₀ - T) (t₀ + T))) :
+    IsVariationalSolutionOn f α₂ δ t₀ y (Icc (t₀ - T) (t₀ + T)) := by
+  refine ⟨hy.1, ?_⟩
+  intro t ht
+  have hd := hy.2 t ht
+  rwa [hαeq ht] at hd
+
+/-- **Congruence of the variational linear map under agreement of the central orbit.**
+
+If `α₁ = α₂` on `Icc (t₀ - T) (t₀ + T)`, then the variational linear maps along the two
+orbits agree at every `t` in the interval (with the bound/continuity data transported
+across the agreement). -/
+theorem variationalLinearMapAt_congr_central
+    {T M : ℝ} (hT : 0 < T) (hM : 0 ≤ M) (hMT : M * T < 1)
+    (hαeq : EqOn α₁ α₂ (Icc (t₀ - T) (t₀ + T)))
+    (hA_cont₁ : ContinuousOn (fun t => fderiv ℝ (f t) (α₁ t)) (Icc (t₀ - T) (t₀ + T)))
+    (hA_bd₁ : ∀ t ∈ Icc (t₀ - T) (t₀ + T), ‖fderiv ℝ (f t) (α₁ t)‖ ≤ M)
+    (hA_cont₂ : ContinuousOn (fun t => fderiv ℝ (f t) (α₂ t)) (Icc (t₀ - T) (t₀ + T)))
+    (hA_bd₂ : ∀ t ∈ Icc (t₀ - T) (t₀ + T), ‖fderiv ℝ (f t) (α₂ t)‖ ≤ M)
+    {t : ℝ} (ht : t ∈ Icc (t₀ - T) (t₀ + T)) :
+    variationalLinearMapAt (f := f) (α := α₁) (t₀ := t₀) hT hM hMT hA_cont₁ hA_bd₁ ht
+      = variationalLinearMapAt (f := f) (α := α₂) (t₀ := t₀) hT hM hMT hA_cont₂ hA_bd₂ ht := by
+  -- Pointwise equality for every `δ`.
+  apply ContinuousLinearMap.ext
+  intro δ
+  -- The two variational solutions agree by uniqueness along `α₂` (after transporting the
+  -- `α₁`-solution).
+  have h₁ := variationalSolutionFun_isSolution hT hM hMT hA_cont₁ hA_bd₁ δ
+  have h₂ := variationalSolutionFun_isSolution hT hM hMT hA_cont₂ hA_bd₂ δ
+  -- Transport `h₁` (a solution along `α₁`) to a solution along `α₂`.
+  have h₁' : IsVariationalSolutionOn f α₂ δ t₀
+      (variationalSolutionFun hT hM hMT hA_cont₁ hA_bd₁ δ) (Icc (t₀ - T) (t₀ + T)) :=
+    IsVariationalSolutionOn.congr_central hαeq h₁
+  -- Both are solutions along `α₂`; uniqueness gives agreement.
+  have h_eq := IsVariationalSolutionOn.unique_Icc hT hA_cont₂ h₁' h₂
+  rw [variationalLinearMapAt_apply, variationalLinearMapAt_apply]
+  exact h_eq ht
+
+end VariationalLinearMapCongr
+
+/-! ## The spatial piece is the variational linear map along the orbit
+
+Refining `fderiv_flow_eq_coprod_spatialPiece`, we expose directly that, at every interior
+point `(x, t)`, the spatial piece of `fderiv ℝ Φ` *equals* the variational linear map along
+the orbit `Φ ⟨x, ·⟩`, evaluated at time `t`.  This is the half-step needed to match it with
+the augmented flow's second component. -/
+
+section SpatialPieceVariational
+
+variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
+
+/-- **The spatial piece is the variational linear map.**  Under the standard `C^1` flow
+hypotheses, at every interior point `(x, t)`, `spatialPieceFn Φ (x, t)` equals the
+variational linear map along the orbit `Φ ⟨x, ·⟩` evaluated at `t`. -/
+theorem spatialPieceFn_eq_variationalLinearMapAt
+    (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
+    (hf_C1 : ContDiffOn ℝ 1 (uncurry f) (Set.univ : Set (ℝ × E)))
+    {T M : ℝ} (hT : 0 < T) (hM : 0 ≤ M) (hMT : M * T < 1)
+    (hsub : Icc (t₀ - T) (t₀ + T) ⊆ Icc tmin tmax)
+    {ρ r' : ℝ≥0} (hr' : 0 < r')
+    (hρρ' : (ρ : ℝ) + (r' : ℝ) ≤ (r : ℝ))
+    (hA_bd : ∀ x ∈ closedBall x₀ (ρ : ℝ), ∀ τ ∈ Icc (t₀ - T) (t₀ + T),
+      ‖fderiv ℝ (f τ) (Φ ⟨x, τ⟩)‖ ≤ M)
+    {x : E} (hx : x ∈ closedBall x₀ (ρ : ℝ))
+    {t : ℝ} (ht : t ∈ Ioo (t₀ - T) (t₀ + T)) :
+    spatialPieceFn Φ (x, t)
+      = variationalLinearMapAt (f := f) (α := fun s => Φ ⟨x, s⟩) (t₀ := t₀) hT hM hMT
+          (((hΦ.restrict_center_of_norm_le (x₁ := x) (r' := r') (by
+              rw [mem_closedBall] at hx; linarith)).continuousOn_fderiv_along_orbit hf_C1 x
+            (Metric.mem_closedBall_self (by exact_mod_cast (le_of_lt hr')))).mono hsub)
+          (fun τ hτ => hA_bd x hx τ hτ) (Ioo_subset_Icc_self ht) := by
+  have hfd_at := hasFDerivAt_flow_jointly_at hΦ hf_C1 hT hM hMT hsub hr' hρρ' hA_bd hx ht
+  have hfd_eq := hfd_at.fderiv
+  rw [spatialPieceFn_apply, hfd_eq]
+  exact ContinuousLinearMap.coprod_comp_inl _ _
+
+end SpatialPieceVariational
+
+/-! ## Pointwise identification: spatial piece equals the augmented-flow projection
+
+Combining the four analytic pieces — the spatial-piece/variational-map equality, the
+augmented-flow second-component identification, the orbit-uniqueness, and the
+variational-map congruence — we obtain, at every interior point `(x, t)`,
+`spatialPieceFn Φ (x, t) = fromAugFlow aΦ (x, t)`, provided `aΦ` is a local flow of the
+augmented vector field `augVF f` whose closed domain covers the orbit data.
+
+The augmented flow `aΦ` is a *genuine* datum (constructed by Picard–Lindelöf via
+`exists_isLocalFlow_of_contDiffOn_univ` for the `C^k` field `augVF f`); supplying it is not
+a packaging of the conclusion — its type `IsLocalFlow (augVF f) …` is unrelated to the
+`ContDiffOn` conclusion. -/
+
+section SpatialPieceAugFlow
+
+variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
+
+/-- **Pointwise identification of the spatial piece with the augmented-flow projection.**
+
+Let `Φ` be a local flow of `f` and `aΦ` a local flow of `augVF f` centred at `(x₀, id)`.
+On a strictly-interior open time interval `Ioo (t₀ - T) (t₀ + T)` and spatial ball
+`closedBall x₀ ρ`, where:
+* `f` is `C^1`, `f t` is uniformly `K`-Lipschitz on a slightly larger open time interval;
+* the closed time interval is covered by both flow domains and the original `Icc tmin tmax`;
+* the spatial ball is inside both the flow's `closedBall x₀ r` (with the recentring slack
+  `r'`) and the augmented flow's `closedBall (x₀, id) R`;
+* a uniform linearization bound `M` holds along the orbits,
+
+then at every `(x, t)` with `x ∈ closedBall x₀ ρ` and `t ∈ Ioo (t₀ - T) (t₀ + T)`,
+`spatialPieceFn Φ (x, t) = fromAugFlow aΦ (x, t)`. -/
+theorem spatialPieceFn_eq_fromAugFlow
+    {aΦ : (E × (E →L[ℝ] E)) × ℝ → E × (E →L[ℝ] E)}
+    {R : ℝ≥0} {tmin' tmax' : ℝ}
+    (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
+    (haΦ : IsLocalFlow (augVF f) t₀ (x₀, ContinuousLinearMap.id ℝ E) R tmin' tmax' aΦ)
+    (hf_C1 : ContDiffOn ℝ 1 (uncurry f) (Set.univ : Set (ℝ × E)))
+    {T T' M : ℝ} (hT : 0 < T) (hM : 0 ≤ M) (hMT : M * T < 1) (hTT' : T < T')
+    (hsub : Icc (t₀ - T) (t₀ + T) ⊆ Icc tmin tmax)
+    (hsub' : Icc (t₀ - T) (t₀ + T) ⊆ Icc tmin' tmax')
+    (hsubO : Ioo (t₀ - T') (t₀ + T') ⊆ Icc tmin tmax)
+    (hsubO' : Ioo (t₀ - T') (t₀ + T') ⊆ Icc tmin' tmax')
+    {K : ℝ≥0} (hLip : ∀ t ∈ Ioo (t₀ - T') (t₀ + T'), LipschitzOnWith K (f t) (univ : Set E))
+    {ρ r' : ℝ≥0} (hr' : 0 < r')
+    (hρρ' : (ρ : ℝ) + (r' : ℝ) ≤ (r : ℝ)) (hρR : (ρ : ℝ) ≤ (R : ℝ))
+    (hA_bd : ∀ x ∈ closedBall x₀ (ρ : ℝ), ∀ τ ∈ Icc (t₀ - T) (t₀ + T),
+      ‖fderiv ℝ (f τ) (Φ ⟨x, τ⟩)‖ ≤ M)
+    {x : E} (hx : x ∈ closedBall x₀ (ρ : ℝ))
+    {t : ℝ} (ht : t ∈ Ioo (t₀ - T) (t₀ + T)) :
+    spatialPieceFn Φ (x, t) = fromAugFlow aΦ (x, t) := by
+  -- Auxiliary memberships.
+  have hx_le : dist x x₀ ≤ (ρ : ℝ) := by rw [mem_closedBall] at hx; exact hx
+  have hx_r : x ∈ closedBall x₀ (r : ℝ) :=
+    mem_closedBall.mpr (by linarith [r'.coe_nonneg])
+  -- `(x, id) ∈ closedBall (x₀, id) R`.
+  have hxp : (x, ContinuousLinearMap.id ℝ E) ∈ closedBall (x₀, ContinuousLinearMap.id ℝ E) (R : ℝ) := by
+    rw [mem_closedBall, Prod.dist_eq]
+    simp only [dist_self, max_eq_left (dist_nonneg)]
+    calc dist x x₀ ≤ (ρ : ℝ) := hx_le
+      _ ≤ (R : ℝ) := hρR
+  -- Central orbits.
+  set α₁ : ℝ → E := fun s => Φ ⟨x, s⟩ with hα₁_def
+  set α₂ : ℝ → E := fun s => (aΦ ⟨(x, ContinuousLinearMap.id ℝ E), s⟩).1 with hα₂_def
+  -- Orbit uniqueness on the larger open interval, restricted to the closed interval.
+  have ht₀_O : t₀ ∈ Ioo (t₀ - T') (t₀ + T') := ⟨by linarith, by linarith⟩
+  have h_orbit_eq : ∀ s ∈ Ioo (t₀ - T') (t₀ + T'), α₂ s = α₁ s :=
+    augFlow_fst_eq_flow hΦ haΦ ht₀_O hsubO hsubO' hLip hx_r hxp
+  have hαeq : EqOn α₂ α₁ (Icc (t₀ - T) (t₀ + T)) := by
+    intro s hs
+    have hs_O : s ∈ Ioo (t₀ - T') (t₀ + T') :=
+      ⟨by linarith [hs.1], by linarith [hs.2]⟩
+    exact h_orbit_eq s hs_O
+  -- Step 1: spatial piece equals variational map along `α₁`.
+  have h_sp := spatialPieceFn_eq_variationalLinearMapAt hΦ hf_C1 hT hM hMT hsub hr' hρρ' hA_bd hx ht
+  -- Continuity / bound data along `α₁` (= the recentred-orbit data).
+  set hA_cont₁ : ContinuousOn (fun s => fderiv ℝ (f s) (α₁ s)) (Icc (t₀ - T) (t₀ + T)) :=
+    (((hΦ.restrict_center_of_norm_le (x₁ := x) (r' := r') (by
+        rw [mem_closedBall] at hx; linarith)).continuousOn_fderiv_along_orbit hf_C1 x
+      (Metric.mem_closedBall_self (by exact_mod_cast (le_of_lt hr')))).mono hsub) with hA_cont₁_def
+  set hA_bd₁ : ∀ s ∈ Icc (t₀ - T) (t₀ + T), ‖fderiv ℝ (f s) (α₁ s)‖ ≤ M :=
+    (fun τ hτ => hA_bd x hx τ hτ) with hA_bd₁_def
+  -- Continuity / bound data along `α₂` (transported from `α₁` via `hαeq`).
+  have hA_cont₂ : ContinuousOn (fun s => fderiv ℝ (f s) (α₂ s)) (Icc (t₀ - T) (t₀ + T)) := by
+    apply hA_cont₁.congr
+    intro s hs
+    change fderiv ℝ (f s) (α₂ s) = fderiv ℝ (f s) (α₁ s)
+    rw [hαeq hs]
+  have hA_bd₂ : ∀ s ∈ Icc (t₀ - T) (t₀ + T), ‖fderiv ℝ (f s) (α₂ s)‖ ≤ M := by
+    intro s hs
+    change ‖fderiv ℝ (f s) (α₂ s)‖ ≤ M
+    rw [hαeq hs]
+    exact hA_bd₁ s hs
+  -- Step 2: augmented-flow second component equals variational map along `α₂`.
+  have h_aug := augFlow_snd_eq_variationalLinearMapAt haΦ hT hM hMT hsub'
+    hxp hA_cont₂ hA_bd₂ (Ioo_subset_Icc_self ht)
+  -- Step 3: the two variational maps agree (same orbit on the interval).
+  have h_congr := variationalLinearMapAt_congr_central hT hM hMT hαeq
+    hA_cont₂ hA_bd₂ hA_cont₁ hA_bd₁ (Ioo_subset_Icc_self ht)
+  -- Assemble.
+  rw [fromAugFlow_apply]
+  rw [h_sp]
+  -- `h_sp` rewrote `spatialPieceFn Φ (x, t)` to the variational map along `α₁`.
+  -- `h_aug` says `(aΦ ⟨(x, id), t⟩).2 = variationalLinearMapAt(α₂)`.
+  -- `h_congr` says `variationalLinearMapAt(α₂) = variationalLinearMapAt(α₁)`.
+  rw [h_aug, h_congr]
+
+end SpatialPieceAugFlow
+
+/-! ## Joint `C^k` smoothness of the variational linear map
+
+Putting the pointwise identification together with `contDiffOn_fromAugFlow`, we obtain the
+headline: the spatial piece `spatialPieceFn Φ` (the variational linear map) is jointly `C^k`
+on the strictly-interior open neighbourhood, provided a *jointly `C^k`* local flow `aΦ` of
+the augmented vector field `augVF f` is available on a neighbourhood covering the orbit data.
+
+The augmented flow `aΦ` and its `C^k` regularity are the genuine datum delivered by the
+strong induction: `augVF f` is `C^k` whenever `f` is `C^{k+1}` (`augVF_uncurry_contDiff`),
+and the inductive hypothesis — the flow of a `C^k` field is `C^k` — applied to `augVF f`
+produces a `C^k` flow `aΦ`. -/
+
+section VariationalLinearMapSmooth
+
+variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
+
+/-- **Joint `C^k` smoothness of the variational linear map (augmented-flow form).**
+
+Let `Φ` be a local flow of `f`, and `aΦ` a *jointly `C^k`* local flow of the augmented
+vector field `augVF f` centred at `(x₀, id)`, on an open neighbourhood `Ω` covering the
+embedded orbit data.  Then `spatialPieceFn Φ` — the spatial piece of `fderiv ℝ Φ`, i.e. the
+variational linear map — is jointly `C^k` on the strictly-interior open neighbourhood
+`ball x₀ ρ ×ˢ Ioo (t₀ - T) (t₀ + T)`. -/
+theorem contDiffOn_variationalLinearMap
+    {aΦ : (E × (E →L[ℝ] E)) × ℝ → E × (E →L[ℝ] E)}
+    {R : ℝ≥0} {tmin' tmax' : ℝ} {Ω : Set ((E × (E →L[ℝ] E)) × ℝ)}
+    (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
+    (haΦ : IsLocalFlow (augVF f) t₀ (x₀, ContinuousLinearMap.id ℝ E) R tmin' tmax' aΦ)
+    (hf_C1 : ContDiffOn ℝ 1 (uncurry f) (Set.univ : Set (ℝ × E)))
+    {k : ℕ∞} (haΦ_Ck : ContDiffOn ℝ k aΦ Ω)
+    {T T' M : ℝ} (hT : 0 < T) (hM : 0 ≤ M) (hMT : M * T < 1) (hTT' : T < T')
+    (hsub : Icc (t₀ - T) (t₀ + T) ⊆ Icc tmin tmax)
+    (hsub' : Icc (t₀ - T) (t₀ + T) ⊆ Icc tmin' tmax')
+    (hsubO : Ioo (t₀ - T') (t₀ + T') ⊆ Icc tmin tmax)
+    (hsubO' : Ioo (t₀ - T') (t₀ + T') ⊆ Icc tmin' tmax')
+    {K : ℝ≥0} (hLip : ∀ t ∈ Ioo (t₀ - T') (t₀ + T'), LipschitzOnWith K (f t) (univ : Set E))
+    {ρ r' : ℝ≥0} (hr' : 0 < r')
+    (hρρ' : (ρ : ℝ) + (r' : ℝ) ≤ (r : ℝ)) (hρR : (ρ : ℝ) ≤ (R : ℝ))
+    (hmap : MapsTo (fun q : E × ℝ => ((q.1, ContinuousLinearMap.id ℝ E), q.2))
+      ((ball x₀ (ρ : ℝ)) ×ˢ Ioo (t₀ - T) (t₀ + T)) Ω)
+    (hA_bd : ∀ x ∈ closedBall x₀ (ρ : ℝ), ∀ τ ∈ Icc (t₀ - T) (t₀ + T),
+      ‖fderiv ℝ (f τ) (Φ ⟨x, τ⟩)‖ ≤ M) :
+    ContDiffOn ℝ k (spatialPieceFn Φ) ((ball x₀ (ρ : ℝ)) ×ˢ Ioo (t₀ - T) (t₀ + T)) := by
+  -- `fromAugFlow aΦ` is `C^k` on the neighbourhood.
+  have h_fromAug_Ck : ContDiffOn ℝ k (fromAugFlow aΦ)
+      ((ball x₀ (ρ : ℝ)) ×ˢ Ioo (t₀ - T) (t₀ + T)) := contDiffOn_fromAugFlow haΦ_Ck hmap
+  -- `spatialPieceFn Φ` agrees with `fromAugFlow aΦ` on the neighbourhood.
+  have h_eq : ∀ q ∈ ((ball x₀ (ρ : ℝ)) ×ˢ Ioo (t₀ - T) (t₀ + T)),
+      spatialPieceFn Φ q = fromAugFlow aΦ q := by
+    intro q hq
+    rcases hq with ⟨hq_x, hq_t⟩
+    rw [mem_ball] at hq_x
+    obtain ⟨x, t⟩ := q
+    have hx_cb : x ∈ closedBall x₀ (ρ : ℝ) := mem_closedBall.mpr (le_of_lt hq_x)
+    exact spatialPieceFn_eq_fromAugFlow hΦ haΦ hf_C1 hT hM hMT hTT' hsub hsub' hsubO hsubO'
+      hLip hr' hρρ' hρR hA_bd hx_cb hq_t
+  exact h_fromAug_Ck.congr h_eq
+
+/-- **The inductive step, driven by a `C^k` augmented flow.**
+
+If `Φ` is the local flow of a `C^{k+1}` field `f`, is already jointly `C^k` on the
+strictly-interior neighbourhood, and a *jointly `C^k`* augmented flow `aΦ` of `augVF f`
+covering the orbit data is available, then `Φ` is jointly `C^{k+1}`.
+
+This is the `n → n + 1` step of the strong induction: it converts the inductive hypothesis
+applied to `augVF f` (giving the `C^k` augmented flow `aΦ`) into the next regularity level
+for `Φ`.  The variational-flow projection is built from `spatialPieceFn Φ`, whose
+smoothness is `contDiffOn_variationalLinearMap` and whose coproduct identity is
+`fderiv_flow_eq_coprod_spatialPiece`. -/
+theorem contDiffOn_flow_succ_via_augFlow
+    {aΦ : (E × (E →L[ℝ] E)) × ℝ → E × (E →L[ℝ] E)}
+    {R : ℝ≥0} {tmin' tmax' : ℝ} {Ω : Set ((E × (E →L[ℝ] E)) × ℝ)}
+    (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
+    (haΦ : IsLocalFlow (augVF f) t₀ (x₀, ContinuousLinearMap.id ℝ E) R tmin' tmax' aΦ)
+    {k : ℕ∞} (haΦ_Ck : ContDiffOn ℝ k aΦ Ω)
+    (hf_succ : ContDiffOn ℝ (k + 1) (uncurry f) (Set.univ : Set (ℝ × E)))
+    {T_out T_mid T T' M : ℝ} (hT : 0 < T) (hT_lt_mid : T < T_mid) (hT_mid_lt_out : T_mid < T_out)
+    (hM : 0 ≤ M) (hMT_mid : M * T_mid < 1) (hT_lt' : T < T') (hTT'_out : T' ≤ T_out)
+    (hsub : Icc (t₀ - T_out) (t₀ + T_out) ⊆ Icc tmin tmax)
+    (hsub' : Icc (t₀ - T) (t₀ + T) ⊆ Icc tmin' tmax')
+    (hsubO' : Ioo (t₀ - T') (t₀ + T') ⊆ Icc tmin' tmax')
+    {K : ℝ≥0} (hLip : ∀ t ∈ Ioo (t₀ - T') (t₀ + T'), LipschitzOnWith K (f t) (univ : Set E))
+    {ρ_out ρ_mid ρ : ℝ≥0} {r' : ℝ≥0} (hr' : 0 < r')
+    (hρ_lt_mid : (ρ : ℝ) < (ρ_mid : ℝ)) (hρ_mid_lt_out : (ρ_mid : ℝ) < (ρ_out : ℝ))
+    (hρρ' : (ρ_mid : ℝ) + (r' : ℝ) ≤ (r : ℝ))
+    (hρ_out_le_r : (ρ_out : ℝ) ≤ (r : ℝ)) (hρR : (ρ : ℝ) ≤ (R : ℝ))
+    (hmap : MapsTo (fun q : E × ℝ => ((q.1, ContinuousLinearMap.id ℝ E), q.2))
+      ((ball x₀ (ρ : ℝ)) ×ˢ Ioo (t₀ - T) (t₀ + T)) Ω)
+    (hA_bd : ∀ x ∈ closedBall x₀ (ρ_out : ℝ), ∀ τ ∈ Icc (t₀ - T_out) (t₀ + T_out),
+      ‖fderiv ℝ (f τ) (Φ ⟨x, τ⟩)‖ ≤ M)
+    (hΦ_Ck : ContDiffOn ℝ k Φ ((ball x₀ (ρ : ℝ)) ×ˢ Ioo (t₀ - T) (t₀ + T))) :
+    ContDiffOn ℝ (k + 1) Φ ((ball x₀ (ρ : ℝ)) ×ˢ Ioo (t₀ - T) (t₀ + T)) := by
+  -- `f` is `C^1`.
+  have hf_C1 : ContDiffOn ℝ 1 (uncurry f) (Set.univ : Set (ℝ × E)) := by
+    have h_le : ((1 : ℕ∞) : WithTop ℕ∞) ≤ ((k + 1 : ℕ∞) : WithTop ℕ∞) := by
+      have : (1 : ℕ∞) ≤ k + 1 := by
+        calc (1 : ℕ∞) = 0 + 1 := by simp
+          _ ≤ k + 1 := by gcongr; exact zero_le _
+      exact_mod_cast this
+    have h := hf_succ.of_le h_le
+    simpa using h
+  -- Inner-interval facts.
+  have hT_pos : 0 < T := hT
+  have hsub_T : Icc (t₀ - T) (t₀ + T) ⊆ Icc (t₀ - T_out) (t₀ + T_out) :=
+    Icc_subset_Icc (by linarith) (by linarith)
+  have hsub_T_tmax : Icc (t₀ - T) (t₀ + T) ⊆ Icc tmin tmax := hsub_T.trans hsub
+  have hsubO_tmax : Ioo (t₀ - T') (t₀ + T') ⊆ Icc tmin tmax := by
+    intro s hs
+    exact hsub (Icc_subset_Icc (by linarith [hs.1]) (by linarith [hs.2]) (Ioo_subset_Icc_self hs))
+  -- `M * T < 1`.
+  have hMT : M * T < 1 := lt_of_le_of_lt (by nlinarith [hM, le_of_lt hT_lt_mid]) hMT_mid
+  -- `hA_bd` restricted to the inner ball / inner interval (along orbits of `Φ`).
+  have hA_bd_inner : ∀ x ∈ closedBall x₀ (ρ : ℝ), ∀ τ ∈ Icc (t₀ - T) (t₀ + T),
+      ‖fderiv ℝ (f τ) (Φ ⟨x, τ⟩)‖ ≤ M := by
+    intro x hx τ hτ
+    refine hA_bd x ?_ τ (hsub_T hτ)
+    exact closedBall_subset_closedBall
+      (le_trans (le_of_lt hρ_lt_mid) (le_of_lt hρ_mid_lt_out)) hx
+  -- `ρ + r' ≤ r` (from `ρ < ρ_mid` and `ρ_mid + r' ≤ r`).
+  have hρρ'_inner : (ρ : ℝ) + (r' : ℝ) ≤ (r : ℝ) := by
+    have := hρ_lt_mid; linarith
+  -- Spatial-piece smoothness via the augmented flow.
+  have hLsp_Ck : ContDiffOn ℝ k (spatialPieceFn Φ)
+      ((ball x₀ (ρ : ℝ)) ×ˢ Ioo (t₀ - T) (t₀ + T)) :=
+    contDiffOn_variationalLinearMap hΦ haΦ hf_C1 haΦ_Ck hT hM hMT hT_lt' hsub_T_tmax hsub'
+      hsubO_tmax hsubO' hLip hr' hρρ'_inner hρR hmap hA_bd_inner
+  -- Coproduct identity for the spatial piece.
+  have hLsp_eq : ∀ q ∈ ((ball x₀ (ρ : ℝ)) ×ˢ Ioo (t₀ - T) (t₀ + T)),
+      fderiv ℝ Φ q = (spatialPieceFn Φ q).coprod (timePieceFn f Φ q) :=
+    fderiv_flow_eq_coprod_spatialPiece hΦ hf_C1 hT hT_lt_mid hT_mid_lt_out hM hMT_mid hsub hr'
+      hρ_lt_mid hρ_mid_lt_out hρρ' hρ_out_le_r hA_bd
+  -- Plug into the recursive flow step.
+  exact contDiffOn_flow_succ_of_spatial_smooth hΦ hT hT_lt_mid hT_mid_lt_out hM hMT_mid hsub hr'
+    hρ_lt_mid hρ_mid_lt_out hρρ' hρ_out_le_r hA_bd hf_succ hΦ_Ck hLsp_Ck hLsp_eq
+
+end VariationalLinearMapSmooth
+
 end Flow
 end ODE
 end Analysis
