@@ -78,30 +78,9 @@ requires `expMap g p` to be `C²` on a neighbourhood of the segment
 `{t • (v + s • w)}`.  The exponential map is only known to be `C²` on a
 small ball around the origin (`expMap_contMDiffAt2_of_norm_lt`), so the
 pullback statement is restricted to that ball.  The radius is recorded as
-`expMapC2Radius g p` below. -/
-
-/-- The radius of a ball around the origin on which `expMap g p` is `C²`,
-extracted from `expMap_contMDiffAt2_of_norm_lt`.  On `‖w‖ < expMapC2Radius g p`
-the map `u ↦ expMap g p u` is `ContMDiffAt 𝓘(ℝ, E) I 2`.  This is the
-genuine domain on which the second-order variational argument behind
-Gauss's lemma is available. -/
-def expMapC2Radius (g : SmoothRiemannianMetric I M) (p : M) : ℝ :=
-  Classical.choose (Exponential.expMap_contMDiffAt2_of_norm_lt (I := I) g p)
-
-/-- The `C²` radius is strictly positive. -/
-lemma expMapC2Radius_pos (g : SmoothRiemannianMetric I M) (p : M) :
-    0 < expMapC2Radius (I := I) g p :=
-  (Classical.choose_spec
-    (Exponential.expMap_contMDiffAt2_of_norm_lt (I := I) g p)).1
-
-/-- On the ball of radius `expMapC2Radius g p`, `expMap g p` is `C²`. -/
-lemma expMap_contMDiffAt2_of_norm_lt_radius
-    (g : SmoothRiemannianMetric I M) (p : M) {w : E}
-    (hw : ‖w‖ < expMapC2Radius (I := I) g p) :
-    ContMDiffAt 𝓘(ℝ, E) I 2
-      (fun u : E => (expMap (I := I) g p (show TangentSpace I p from u) : M)) w :=
-  (Classical.choose_spec
-    (Exponential.expMap_contMDiffAt2_of_norm_lt (I := I) g p)).2 w hw
+`expMapC2Radius g p` below (it is, more precisely, the *minimum* of the
+`C²` radius and the uniform radii on which the radial curve is a geodesic
+and the rescaling identity holds, all needed by the variational argument). -/
 
 /-! ## Radial geodesic property (Step 1)
 
@@ -128,7 +107,7 @@ theorem radial_maximalGeodesic_hasGeodesicEquationAt_of_small
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ ρ : ℝ, 0 < ρ ∧
       ∀ {v : TangentSpace I p}, ‖(v : E)‖ < ρ →
-        ∀ t ∈ Set.Icc (0 : ℝ) 1,
+        ∀ t ∈ Set.Ioo (-1 : ℝ) 2,
           DifferentialGeometry.Geometry.Riemannian.Geodesic.HasGeodesicEquationAt
             (I := I) g (fun s : ℝ => maximalGeodesic (I := I) g p v s) t := by
   classical
@@ -158,10 +137,10 @@ theorem radial_maximalGeodesic_hasGeodesicEquationAt_of_small
   set J : Set ℝ := Set.Ioo (-T / t') (T / t') with hJ_def
   have hJ_open : IsOpen J := isOpen_Ioo
   have hJ_eq : J = Set.Ioo (-2 : ℝ) 2 := by rw [hJ_def, neg_div, hT_div]
-  have hIcc_sub_J : Set.Icc (0 : ℝ) 1 ⊆ J := by
+  have hIcc_sub_J : Set.Ioo (-1 : ℝ) 2 ⊆ J := by
     rw [hJ_eq]; intro x hx; obtain ⟨hx0, hx1⟩ := hx; exact ⟨by linarith, by linarith⟩
   have ht_J : t ∈ J := hIcc_sub_J ht
-  have h0_J : (0 : ℝ) ∈ J := hIcc_sub_J ⟨le_rfl, zero_le_one⟩
+  have h0_J : (0 : ℝ) ∈ J := hIcc_sub_J ⟨by norm_num, by norm_num⟩
   -- The rescaled manifold lift `F := chartFlowOrbitLiftRescaled Φ p t' vb`.
   set F : ℝ → TangentBundle I M :=
     Exponential.chartFlowOrbitLiftRescaled (I := I) Φ p t' vb with hF_def
@@ -201,7 +180,9 @@ theorem radial_maximalGeodesic_hasGeodesicEquationAt_of_small
   have hF_src : (F t).proj ∈ (chartAt H p).source := by
     have hts_Icc : t' * t ∈ Set.Icc (-T) T := by
       obtain ⟨ht0, ht1⟩ := ht
-      exact ⟨by nlinarith [ht'_pos.le, hT_pos.le], by nlinarith [ht'_lt_T.le, ht'_pos.le]⟩
+      refine ⟨?_, ?_⟩
+      · nlinarith [ht'_pos.le, hT_pos.le, ht'_lt_T.le]
+      · nlinarith [ht'_lt_T.le, ht'_pos.le]
     have hΦ_target_tt := hΦ_target vb hvb_ball (t' * t) hts_Icc
     have hsrc' :=
       Exponential.chartFlowOrbitLiftRescaled_proj_mem_chartAt_source (I := I) p vb t' t
@@ -224,6 +205,73 @@ theorem radial_maximalGeodesic_hasGeodesicEquationAt_of_small
     (γ := fun s : ℝ => maximalGeodesic (I := I) g p v s)
     (γ' := fun s : ℝ => (F s).proj) (t₀ := t)
     (hF_proj t ht_J).symm hEvEq hgeoEqF
+
+/-! ## The combined `C²` / geodesic radius
+
+The variational argument behind Gauss's lemma needs three simultaneous
+small-velocity facts: that `expMap g p` is `C²` near `t • (v + s • w)`
+(`expMap_contMDiffAt2_of_norm_lt`), that the radial curve is a geodesic on
+`[0, 1]` (`radial_maximalGeodesic_hasGeodesicEquationAt_of_small`), and the
+rescaling identity `expMap g p (t • v) = maximalGeodesic g p v t`
+(`maximalGeodesic_rescale_at_one_of_small`).  Each comes with its own
+uniform radius; we record the *minimum* of the three so that
+`‖v‖ < expMapC2Radius g p` makes all three available at once. -/
+
+/-- The radius of the ball around the origin on which the second-order
+variational argument behind Gauss's lemma is available: the minimum of the
+`C²` radius of `expMap g p`, the radius on which the radial curve is a
+geodesic on `[0, 1]`, and the radius of the geodesic rescaling identity. -/
+def expMapC2Radius (g : SmoothRiemannianMetric I M) (p : M) : ℝ :=
+  min (Classical.choose (Exponential.expMap_contMDiffAt2_of_norm_lt (I := I) g p))
+    (min
+      (Classical.choose
+        (radial_maximalGeodesic_hasGeodesicEquationAt_of_small (I := I) g p))
+      (Classical.choose
+        (Exponential.maximalGeodesic_rescale_at_one_of_small (I := I) g p)))
+
+/-- The combined radius is strictly positive. -/
+lemma expMapC2Radius_pos (g : SmoothRiemannianMetric I M) (p : M) :
+    0 < expMapC2Radius (I := I) g p := by
+  rw [expMapC2Radius, lt_min_iff, lt_min_iff]
+  refine ⟨?_, ?_, ?_⟩
+  · exact (Classical.choose_spec
+      (Exponential.expMap_contMDiffAt2_of_norm_lt (I := I) g p)).1
+  · exact (Classical.choose_spec
+      (radial_maximalGeodesic_hasGeodesicEquationAt_of_small (I := I) g p)).1
+  · exact (Classical.choose_spec
+      (Exponential.maximalGeodesic_rescale_at_one_of_small (I := I) g p)).1
+
+/-- On the ball of radius `expMapC2Radius g p`, `expMap g p` is `C²`. -/
+lemma expMap_contMDiffAt2_of_norm_lt_radius
+    (g : SmoothRiemannianMetric I M) (p : M) {w : E}
+    (hw : ‖w‖ < expMapC2Radius (I := I) g p) :
+    ContMDiffAt 𝓘(ℝ, E) I 2
+      (fun u : E => (expMap (I := I) g p (show TangentSpace I p from u) : M)) w :=
+  (Classical.choose_spec
+    (Exponential.expMap_contMDiffAt2_of_norm_lt (I := I) g p)).2 w
+    (lt_of_lt_of_le hw (min_le_left _ _))
+
+/-- On the ball of radius `expMapC2Radius g p`, the radial curve is a
+geodesic at every `t ∈ (-1, 2)` (an open interval containing `[0, 1]`). -/
+lemma radial_hasGeodesicEquationAt_of_norm_lt_radius
+    (g : SmoothRiemannianMetric I M) (p : M) {v : TangentSpace I p}
+    (hv : ‖(v : E)‖ < expMapC2Radius (I := I) g p) (t : ℝ) (ht : t ∈ Set.Ioo (-1 : ℝ) 2) :
+    Geodesic.HasGeodesicEquationAt (I := I) g
+      (fun s : ℝ => maximalGeodesic (I := I) g p v s) t :=
+  (Classical.choose_spec
+    (radial_maximalGeodesic_hasGeodesicEquationAt_of_small (I := I) g p)).2
+    (lt_of_lt_of_le hv (le_trans (min_le_right _ _) (min_le_left _ _))) t ht
+
+/-- On the ball of radius `expMapC2Radius g p`, the geodesic rescaling
+identity `maximalGeodesic g p (t • v) 1 = maximalGeodesic g p v t` holds for
+`t ∈ [0, 1]`. -/
+lemma maximalGeodesic_rescale_of_norm_lt_radius
+    (g : SmoothRiemannianMetric I M) (p : M) {v : TangentSpace I p}
+    (hv : ‖(v : E)‖ < expMapC2Radius (I := I) g p) (t : ℝ) (ht : t ∈ Set.Icc (0 : ℝ) 1) :
+    maximalGeodesic (I := I) g p (t • v) 1 = maximalGeodesic (I := I) g p v t :=
+  (Classical.choose_spec
+    (Exponential.maximalGeodesic_rescale_at_one_of_small (I := I) g p)).2
+    (lt_of_lt_of_le hv (le_trans (min_le_right _ _) (min_le_right _ _))) t ht
 
 /-- **Gauss's lemma (pullback form).** At every radial direction
 `v ∈ expDomain g p` *inside the `C²` ball* (`‖v‖ < expMapC2Radius g p`),
@@ -283,62 +331,63 @@ theorem gauss_lemma_pullback
   -- Integrating from `φ 0 = 0` (since `∂_s f (0, 0) = 0` by orthogonality bookkeeping)
   -- gives `φ 1 = g_p (v, w) = 0`.
   --
-  -- STATUS (verified during dispatch):
-  --   * STEP 1 (radial geodesic property) is now CLOSED:
-  --     `radial_maximalGeodesic_hasGeodesicEquationAt_of_small` (above, this file)
-  --     proves, for every small `v` (`‖v‖ < (T/2)·ρ₀`) and every `t ∈ [0, 1]`,
-  --     `HasGeodesicEquationAt g (fun s => maximalGeodesic g p v s) t`.  It routes
-  --     the whole radial arc through the single uniform chart-pushed flow orbit of
-  --     `exists_uniform_existence_interval`: the rescaled manifold lift
-  --     `chartFlowOrbitLiftRescaled` is, on `Ioo (-2) 2 ⊇ [0, 1]`, a SINGLE
-  --     `IsGeodesicOnWithInitial` witness whose projection equals
-  --     `maximalGeodesic g p v`; the unconditional
-  --     `IsGeodesicOnWithInitial.isGeodesicAt → IsGeodesicAt.hasGeodesicEquationAt`
-  --     chain (foot-in-source from `chartFlowOrbitLiftRescaled_proj_mem_chartAt_source`)
-  --     then gives the geodesic equation at every interior `t`, transferred to
-  --     `maximalGeodesic` by `HasGeodesicEquationAt.congr_of_eventuallyEq_at`.
-  --     This replaces the former blocker (a): no normal-chart / `expMapDiffeo`
-  --     identification and no import cycle is needed.
-  --   * STEP 2 (the variational assembly itself) is the remaining residual.  All of
-  --     the `C²`-relaxed structural keystones are now PUBLIC and axiom-clean:
-  --       - `commute_ds_dt_fixed_chart_C2` (FixedChartIdentities.lean) — the
-  --         fixed-chart mixed-derivative commutation at `ContDiffAt 2`;
-  --       - `metric_compat_hasDerivAt_inner_of_chartCurveDeriv` (SecondVariation.lean)
-  --         — the INTRINSIC metric-compatibility product rule converting a
-  --         `t`-derivative of `g.inner (γ t) (V t) (W t)` into
-  --         `⟨∇_t V, W⟩ + ⟨V, ∇_t W⟩`, now de-privatised and with the unused
-  --         `[T2Space M] [SigmaCompactSpace M]` typeclasses omitted so it applies in
-  --         this section's context;
-  --       - `commute_ds_dt_intrinsic_C2` (SecondVariation.lean) — the intrinsic
-  --         `∇_s ∂_t f|_{s=0} = ∇_t ∂_s f|_{s=0}` mixed commutation, `C²` hypotheses;
-  --       - `covDerivAlong_velocity_eq_zero_of_hasGeodesicEquationAt_C2`
-  --         (CovariantDerivativeAlong.lean) — the `C²`-form
-  --         `HasGeodesicEquationAt → covDerivAlong velocity = 0` (the backward
-  --         direction needs only `ContMDiffAt 𝓘(ℝ,ℝ) I 2 γ t`).
-  --     The radial variation `f s t := expMap g p (t • (v + s • w))` is jointly `C²`
-  --     near `[0,1] × {0}` (compose the smooth `(s,t) ↦ t • (v + s • w)` with
-  --     `expMap_contMDiffAt2_of_norm_lt_radius`), and its central curve
-  --     `t ↦ f 0 t = expMap g p (t • v) = maximalGeodesic g p v t`
-  --     (`maximalGeodesic_rescale_at_one_of_small`) is a geodesic at every
-  --     `t ∈ [0,1]` (`radial_maximalGeodesic_hasGeodesicEquationAt_of_small`).
-  --     What remains is the variation-specific FTC plumbing, none of which needs new
-  --     structural infrastructure:
-  --       (i)   the per-variation regularity bookkeeping (chart-pulled
-  --             `ContDiffAt 2`; slice `ContMDiffAt 2`; `DifferentiableAt` of the
-  --             velocity / variation-field chart-reps) feeding the keystones;
+  -- STATUS (current):
+  --   * The combined small-velocity radius `expMapC2Radius g p` is now the *minimum*
+  --     of the `C²` radius, the radial-geodesic radius, and the rescaling-identity
+  --     radius (see the definition above).  Hence `‖v‖ < expMapC2Radius g p`
+  --     simultaneously delivers: `expMap g p` is `C²` near `t • (v + s • w)`
+  --     (`expMap_contMDiffAt2_of_norm_lt_radius`); the radial curve is a geodesic on
+  --     the OPEN interval `Ioo (-1) 2 ⊇ [0, 1]`
+  --     (`radial_hasGeodesicEquationAt_of_norm_lt_radius`,
+  --     `radial_maximalGeodesic_hasGeodesicEquationAt_of_small` now stated on the open
+  --     interval); and the rescaling identity
+  --     `maximalGeodesic g p (t • v) 1 = maximalGeodesic g p v t`
+  --     (`maximalGeodesic_rescale_of_norm_lt_radius`) on `[0, 1]`.  This closes the
+  --     genuine soundness gap that the bare `C²` radius did not relate to the
+  --     geodesic / rescaling radii.
+  --   * The following structural pieces of the variational assembly have been
+  --     individually verified to type-check against the keystones (joint-`C²` of `f`,
+  --     the slice `ContMDiffAt 2`, the radial chain rule
+  --     `mfderiv (u ↦ exp_p (u • a)) t₀ 1 = mfderiv exp_p (t₀ • a) a`, the launch-velocity
+  --     identity `mfderiv (u ↦ exp_p (u • a)) 0 1 = a` via `mfderiv_expMap_at_zero`, the
+  --     `C²`-relaxed velocity / variation-field chart-rep `DifferentiableAt` via
+  --     `ContDiffAt.fderiv` + `chartCoord_mfderiv_along_curve_eq_fderiv_of_mdifferentiableAt`,
+  --     and `T2Space M` from `T2Space (TangentBundle I M)` via the zero-section
+  --     embedding).
+  --   * REMAINING RESIDUAL (the FTC assembly):
   --       (ii)  the FTC over `[0,1]` for `φ t := g.inner (f 0 t) (∂_t f) (∂_s f)`
-  --             with `φ' = ⟨∇_t ∂_t f, ∂_s f⟩ + ⟨∂_t f, ∇_t ∂_s f⟩` (metric-compat),
-  --             first term `= 0` (geodesic + the `C²` covDeriv bridge), second term
-  --             `= ⟨∂_t f, ∇_s ∂_t f⟩` (`commute_ds_dt_intrinsic_C2`);
-  --       (iii) the endpoint constant-speed computation
-  --             `⟨∂_t f, ∇_s ∂_t f⟩ = ½ ∂_s g.inner_p (v + s•w, v + s•w)|₀
-  --             = g.inner_p (v, w)`, plus `φ 0 = 0` (since `∂_s f (0,0) = 0`) and the
-  --             radial chain-rule identification `∂_s f (0,t) = t · d exp_{tv}(w)`
-  --             connecting the variation field to the goal's
-  --             `mfderiv (fun u => expMap g p u) v w`.
-  --     This is the remaining residual: the assembly is now a matter of `C²`
-  --     regularity bookkeeping plus the integration/endpoint computation, with every
-  --     structural lemma it consumes already proven and public.
+  --             with `φ' = ⟨∇_t ∂_t f, ∂_s f⟩ + ⟨∂_t f, ∇_t ∂_s f⟩`
+  --             (`metric_compat_hasDerivAt_inner_of_chartCurveDeriv`), first term `= 0`
+  --             (geodesic + `covDerivAlong_velocity_eq_zero_of_hasGeodesicEquationAt_C2`),
+  --             second term `= ⟨∂_t f, ∇_s ∂_t f⟩` (`commute_ds_dt_intrinsic_C2`);
+  --       (iii) the constant-speed-in-`s` value
+  --             `⟨∂_t f, ∇_s ∂_t f⟩ = ½ ∂_s g.inner_p (v + s•w, v + s•w)|₀ = g.inner_p (v, w)`,
+  --             plus `φ 0 = 0` (since `∂_s f (0,0) = 0`) and the endpoint
+  --             identifications `∂_t f (0,1) = mfderiv exp_p v v`,
+  --             `∂_s f (0,1) = mfderiv exp_p v w`.
+  --     ARCHITECTURAL NOTE for (iii): the constant-speed identity
+  --     `g.inner (f s t) (∂_t f) (∂_t f) = g.inner_p (v + s•w, v + s•w)` should NOT be
+  --     routed through `HopfRinow.isGeodesicOn_speedSq_const` — `HopfRinow` IMPORTS this
+  --     file, so it is a forbidden cycle.  Instead derive it cycle-free from the SAME
+  --     metric-compatibility keystone used in (ii): for the geodesic slice
+  --     `γ_s := t ↦ exp_p (t • (v + r s • w))` (with `r` a smooth identity-near-`0`,
+  --     globally bounded clamp, e.g. `r s := δ • Real.arctan (s / δ)`, keeping the
+  --     launch magnitude inside `expMapC2Radius`),
+  --     `metric_compat_hasDerivAt_inner_of_chartCurveDeriv` with `V = W = ∂_t γ_s` and
+  --     the geodesic `covDerivAlong_velocity_eq_zero_of_hasGeodesicEquationAt_C2` gives
+  --     `∂_t (speed²) = 0` on the OPEN `Ioo (0,1)`; constancy there +
+  --     `Set.EqOn.of_subset_closure` to `[0,1]` (the speed² function is continuous on
+  --     `[0,1]` since `γ_s` is `C²` near `[0,1]`) yields
+  --     `speed²(t) = speed²(0) = g.inner_p (v + r s • w, v + r s • w)`.  The central
+  --     curve `t ↦ exp_p (t • a)` is `C²` near `[0,1]` directly, unlike
+  --     `maximalGeodesic g p a` whose function-level `C¹` regularity is an open project
+  --     residual (`HopfRinow.lean`); transfer the geodesic equation from
+  --     `maximalGeodesic g p a` to `exp_p (·•a)` on `Ioo (0,1)` via the `[0,1]`
+  --     rescaling identity and `HasGeodesicEquationAt.congr_of_eventuallyEq_at`.
+  --     All keystones (`metric_compat_*`, `commute_ds_dt_intrinsic_C2`,
+  --     `covDerivAlong_velocity_eq_zero_of_hasGeodesicEquationAt_C2`) live in
+  --     `SecondVariation` / `CovariantDerivativeAlong`, which do NOT import this file,
+  --     so importing them here is cycle-free.
   sorry
 
 end GaussLemma
