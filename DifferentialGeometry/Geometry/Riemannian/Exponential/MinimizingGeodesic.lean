@@ -64,18 +64,31 @@ r·√(g_p(u,u)) = r` by homogeneity and `√(g_p(u,u)) = 1`).
   reduction `riemannianEDist I p q = 0 → p = q`).
 * `riemannianEDist_ne_top` — finiteness of the Riemannian distance (so that
   `(riemannianEDist I p q).toReal` is informative).
+* `radial_riemannianEDist_eq_of_small'` — the arbitrary-small-vector radial
+  Riemannian distance (`riemannianEDist p (expMapIntrinsic p w) = ofReal
+  √(g_p(w, w))`), generalising the `δ • u` form by unit-direction rescaling.
+* `expMapIntrinsic_local_surjective` — the **local radial surjectivity** of
+  `expMapIntrinsic` (the easy local case `normal ball = metric ball` within the
+  injectivity radius): every point in the normal chart with `g`-small chart
+  coordinate is reached by a radial geodesic whose `g`-speed equals the
+  Riemannian distance, via the normal-chart round-trip plus the agreement bridge.
+
+Inside the headline body, the nonemptiness `0 ∈ A`, the supremum attainment
+`t₀ := sup A ∈ A` (`IsClosed.csSup_mem`), and the
+`t₀ = r ⟹ γ r = q ⟹ v := r • u` conclusion are also all proved unconditionally.
 
 ## Residual (single isolated analytic input)
 
-The remaining input is the ray/sphere **propagation** `sup A = r`, which requires
-the Gauss-lemma radial local minimality *re-based at the moving foot point*
-`γ(t₀)` (the equality case of `normalBall_radial_unique_minimizer`, together with
-the cross-chart geodesic-continuation identifying `expMap g (γ t₀) w` with the
-continuation of `intrinsicGeodesic g hEnorm p (t₀ • u)`).  These are exactly the
-still-pending geometric inputs flagged in `RadialSurjectivity.lean` /
-`HopfRinow.unit_speed_minimising_geodesic_from_points`.  The single remaining
-`sorry` is the headline `expMapIntrinsic_surjective_dist`; its sub-lemma
-decomposition is in its docstring.
+The single remaining `sorry` is the strict-supremum step `t₀ < r → False` inside
+the headline `expMapIntrinsic_surjective_dist` (the "no-corner" moving-foot
+extension of `A` past `t₀`).  It consumes the already-proven equality case
+`normalBall_radial_minimizer_equality` re-based at the moving foot `γ(t₀)` (via
+the bridge there), fed by the "a length-minimising curve is `C¹`/geodesic"
+producer `arclength_reparam_is_smooth_geodesic` and the
+path-crosses-the-metric-sphere intermediate-value identification — the
+still-pending geometric inputs flagged in `GaussLemma.lean` /
+`RadialSurjectivity.lean`.  Its full sub-lemma decomposition is in the headline
+docstring.
 -/
 
 noncomputable section
@@ -822,6 +835,137 @@ theorem radial_riemannianEDist_eq_of_small
     rw [hagree_vδ]; exact hlower
   exact le_antisymm hupper hlower'
 
+/-! ## 7d. General-vector radial distance and local radial surjectivity
+
+`radial_riemannianEDist_eq_of_small` is stated for the explicit radial form
+`δ • u` with `u` a `g`-unit vector.  Rescaling to the unit direction
+`u := s⁻¹ • w` (where `s := √(g_p(w, w))`, with the degenerate `s = 0` case being
+`w = 0`) upgrades it to an arbitrary small tangent vector `w`.  Combined with the
+side-condition-free agreement bridge and the normal-chart round-trip, this yields
+the *local radial surjectivity* of `expMapIntrinsic`: every point in the normal
+chart whose chart coordinate is `g`-small is reached by a radial geodesic whose
+`g`-speed equals the Riemannian distance.  This is the easy local case of the
+Hopf–Rinow surjectivity (within the injectivity radius), used both at the base
+point and at the moving foot of the ray/sphere argument. -/
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- **Arbitrary-small-vector radial Riemannian distance.** There is an explicit
+`ρ > 0` such that for every `w : T_p M` with `√(g_p(w, w)) < ρ`, the Riemannian
+distance from `p` to the radial point `expMapIntrinsic g hEnorm p w` equals
+`ofReal (√(g_p(w, w)))`.  This generalises `radial_riemannianEDist_eq_of_small`
+(which is stated for the explicit radial form `δ • u`, `u` a `g`-unit vector) to
+an arbitrary small launch vector by rescaling `w = √(g_p(w, w)) • (√(g_p(w, w))⁻¹
+• w)` into unit-direction form; the degenerate `√(g_p(w, w)) = 0` case is
+`w = 0`, where both sides are `0` (`expMapIntrinsic_zero`, `riemannianEDist_self`). -/
+theorem radial_riemannianEDist_eq_of_small'
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (p : M) :
+    ∃ ρ : ℝ, 0 < ρ ∧ ∀ {w : TangentSpace I p},
+      Real.sqrt (g.inner p (w : E) (w : E)) < ρ →
+        riemannianEDist I p (expMapIntrinsic (I := I) g hEnorm p w)
+          = ENNReal.ofReal (Real.sqrt (g.inner p (w : E) (w : E))) := by
+  obtain ⟨ρ, hρ_pos, hradial⟩ := radial_riemannianEDist_eq_of_small (I := I) g hEnorm p
+  refine ⟨ρ, hρ_pos, ?_⟩
+  intro w hw
+  set s : ℝ := Real.sqrt (g.inner p (w : E) (w : E)) with hs_def
+  have hs_nn : 0 ≤ s := Real.sqrt_nonneg _
+  rcases eq_or_lt_of_le hs_nn with hs0 | hspos
+  · -- `s = 0`: `w = 0`, both sides are `0`.
+    have hs_eq : s = 0 := hs0.symm
+    have hww0 : g.inner p (w : E) (w : E) = 0 := by
+      have hsq : Real.sqrt (g.inner p (w : E) (w : E)) = 0 := hs_eq
+      nlinarith [Real.sq_sqrt (gInner_self_nonneg (I := I) g p w), hsq,
+        gInner_self_nonneg (I := I) g p w]
+    have hw0 : w = 0 := by
+      by_contra hne
+      exact absurd hww0 (ne_of_gt (g.pos p w hne))
+    rw [hw0, expMapIntrinsic_zero (I := I) g hEnorm p, riemannianEDist_self, hs_eq,
+      ENNReal.ofReal_zero]
+  · -- `s > 0`: `w = s • u` with `u := s⁻¹ • w` a `g`-unit vector.
+    set u : TangentSpace I p := s⁻¹ • w with hu_def
+    have hu_unit : g.inner p u u = 1 := by
+      rw [hu_def, gInner_smul_self (I := I) g p s⁻¹ w]
+      rw [show (s⁻¹) ^ 2 = (s ^ 2)⁻¹ by rw [inv_pow]]
+      rw [show g.inner p (w : E) (w : E) = s ^ 2 from
+        (Real.sq_sqrt (gInner_self_nonneg (I := I) g p w)).symm]
+      exact inv_mul_cancel₀ (by positivity)
+    have hw_eq : w = s • u := by
+      rw [hu_def, smul_smul, mul_inv_cancel₀ (ne_of_gt hspos), one_smul]
+    rw [hw_eq, hradial hu_unit hs_nn hw]
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- **Local radial surjectivity of `expMapIntrinsic` (within the injectivity
+radius).** There is an explicit `ρ > 0` such that every point `q` in the normal
+chart's source at `p` whose chart coordinate `ψ q := normalChartAt g p q` has
+`g`-norm `√(g_p(ψ q, ψ q)) < ρ` is reached by a radial geodesic: there is a
+launch vector `w` (namely the chart coordinate `ψ q`) with
+`expMapIntrinsic g hEnorm p w = q` and `g`-speed `√(g_p(w, w))` equal to the
+Riemannian distance `(riemannianEDist I p q).toReal`.
+
+The witness is the normal-chart coordinate `w := ψ q`.  Then `expMap g p w =
+ψ.symm (ψ q) = q` (normal-chart round-trip `normalChartAt_left_inv` together with
+`normalChartAt_symm_apply`), so `expMapIntrinsic g hEnorm p w = q` by the
+side-condition-free agreement bridge `exists_expMapIntrinsic_eq_expMap_radius`;
+the `g`-speed identity is `radial_riemannianEDist_eq_of_small'` followed by
+`ENNReal.toReal_ofReal`.  This is the easy local case of Hopf–Rinow surjectivity
+(`normal ball = metric ball`), distinct from the global closed-ball route. -/
+theorem expMapIntrinsic_local_surjective
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (p : M) :
+    ∃ ρ : ℝ, 0 < ρ ∧ ∀ {q : M},
+      q ∈ (NormalCoordinates.normalChartAt (I := I) g p).source →
+      Real.sqrt (g.inner p
+        ((NormalCoordinates.normalChartAt (I := I) g p q : E))
+        ((NormalCoordinates.normalChartAt (I := I) g p q : E))) < ρ →
+      ∃ w : TangentSpace I p, expMapIntrinsic (I := I) g hEnorm p w = q ∧
+        Real.sqrt (g.inner p (w : E) (w : E)) = (riemannianEDist I p q).toReal := by
+  -- The two radii: small-vector agreement (bridge) and general radial distance.
+  obtain ⟨ρ₁, hρ₁_pos, hagree⟩ :=
+    exists_expMapIntrinsic_eq_expMap_radius (I := I) g hEnorm p
+  obtain ⟨ρ₂, hρ₂_pos, hdist⟩ :=
+    radial_riemannianEDist_eq_of_small' (I := I) g hEnorm p
+  refine ⟨min ρ₁ ρ₂, lt_min hρ₁_pos hρ₂_pos, ?_⟩
+  intro q hq_src hsmall
+  set ψ := NormalCoordinates.normalChartAt (I := I) g p with hψ_def
+  -- The chart coordinate of `q`.
+  set w : E := ψ q with hw_def
+  have hw_lt1 : Real.sqrt (g.inner p (w : E) (w : E)) < ρ₁ :=
+    lt_of_lt_of_le hsmall (min_le_left _ _)
+  have hw_lt2 : Real.sqrt (g.inner p (w : E) (w : E)) < ρ₂ :=
+    lt_of_lt_of_le hsmall (min_le_right _ _)
+  -- `w ∈ ψ.target` so the round-trip recovers `q`.
+  have hw_target : w ∈ ψ.target := by
+    rw [hw_def]; exact ψ.map_source hq_src
+  -- `expMap p w = q` via left-inverse and `normalChartAt_symm_apply`.
+  have hexp_eq_q : expMap (I := I) g p (show TangentSpace I p from w) = q := by
+    have hround : ψ.symm (ψ q) = q :=
+      NormalCoordinates.normalChartAt_left_inv (I := I) g p hq_src
+    have hsymm : ψ.symm w = expMap (I := I) g p (show TangentSpace I p from w) :=
+      NormalCoordinates.normalChartAt_symm_apply (I := I) g p
+        (show w ∈ ψ.symm.source from hw_target)
+    rw [← hsymm, hw_def, hround]
+  -- The intrinsic exponential agrees with `expMap` (bridge), so equals `q`.
+  have hintr_eq_q :
+      expMapIntrinsic (I := I) g hEnorm p (show TangentSpace I p from w) = q := by
+    rw [hagree hw_lt1, hexp_eq_q]
+  refine ⟨(show TangentSpace I p from w), hintr_eq_q, ?_⟩
+  -- The `g`-speed equals the Riemannian distance.
+  have hd : riemannianEDist I p
+      (expMapIntrinsic (I := I) g hEnorm p (show TangentSpace I p from w))
+      = ENNReal.ofReal (Real.sqrt (g.inner p (w : E) (w : E))) := hdist hw_lt2
+  rw [hintr_eq_q] at hd
+  rw [hd, ENNReal.toReal_ofReal (Real.sqrt_nonneg _)]
+
 /-! ## 8. The velocity-identified Hopf–Rinow surjectivity (headline)
 
 The headline assembles the pieces: the `r = 0` base case is discharged outright;
@@ -872,24 +1016,34 @@ DECOMPOSITION (ray/sphere argument):
 
   2.  **Propagation `sup A = r`.** The set `A := { t ∈ [0, r] |
       (riemannianEDist I (γ t) q).toReal = r - t }` is closed
-      (`propagationSet_isClosed`) and contains `δ` (step 1, with the homogeneity
-      `√(g_p(δ•u, δ•u)) = δ`).  If `t₀ := sup A < r`, the sphere argument
-      *re-based at `γ(t₀)`* (the Gauss-lemma radial local minimality at the
-      moving foot point `γ(t₀)`, i.e. the equality case of
-      `normalBall_radial_unique_minimizer` together with the cross-chart
-      geodesic-continuation identifying `expMap g (γ t₀) w` with the continuation
-      of `intrinsicGeodesic g hEnorm p (t₀ • u)`) extends `A` strictly past
-      `t₀`, contradicting the supremum.  Hence `r ∈ A`, i.e.
-      `riemannianEDist (γ r) q = 0`, so `γ r = q`.
+      (`propagationSet_isClosed`), nonempty (`0 ∈ A`, since `γ 0 = p` by
+      `expMapIntrinsic_zero` and `(riemannianEDist p q).toReal = r`), and bounded
+      above by `r`, so the supremum `t₀ := sup A` is *attained*
+      (`IsClosed.csSup_mem`): `t₀ ∈ A`, i.e. `0 ≤ t₀ ≤ r` and
+      `(riemannianEDist (γ t₀) q).toReal = r - t₀`.  The remaining input is that
+      `t₀ = r`: if `t₀ < r`, the sphere argument re-based at the moving foot
+      `γ(t₀)` extends `A` strictly past `t₀`, contradicting the supremum.
 
-  Then `v := r • u` satisfies `expMapIntrinsic g hEnorm p v = γ r = q` and
-  `√(g_p(r•u, r•u)) = r · √(g_p(u,u)) = r · 1 = r` (`sqrt_gInner_smul_self` and
-  `g.inner p u u = 1`).
+  Then (`t₀ = r`) `(riemannianEDist (γ r) q).toReal = 0`, so
+  `riemannianEDist (γ r) q = 0` (finiteness `riemannianEDist_ne_top`) and `γ r = q`
+  (point separation `riemannianEDist_eq_zero_imp_eq`).  The witness `v := r • u`
+  satisfies `expMapIntrinsic g hEnorm p v = γ r = q` and `√(g_p(r•u, r•u)) =
+  r · √(g_p(u,u)) = r · 1 = r` (`sqrt_gInner_smul_self`, `g.inner p u u = 1`).
 
-The only `sorry` is the re-based local-minimality / continuation in step (2.); it
-is exactly the pending geometric content flagged in `RadialSurjectivity.lean` /
-`HopfRinow.unit_speed_minimising_geodesic_from_points`.  Everything else in this
-file is proved unconditionally. -/
+The only `sorry` is the strict-supremum step `t₀ < r → False` (the "no-corner"
+moving-foot extension): the minimising broken path
+[radial `p → γ(t₀)`] ++ [radial `γ(t₀) → y₀`] (with `y₀` the sphere-minimiser at
+base `γ(t₀)`) is itself length-minimising, hence — across the junction — an
+unbroken geodesic, so the forward radial direction aligns with `γ'(t₀)` and
+`y₀ = γ(t₀ + δ')`, i.e. `t₀ + δ' ∈ A`.  This consumes the already-proven equality
+case `normalBall_radial_minimizer_equality` (re-based at `γ(t₀)` via the bridge
+there), fed by the "a length-minimising curve is `C¹`/geodesic" producer
+`arclength_reparam_is_smooth_geodesic`, plus the path-crosses-the-metric-sphere
+intermediate-value identification of the metric `δ'`-sphere with the intrinsic
+exponential sphere.  Everything else in this file — including the local radial
+surjectivity `expMapIntrinsic_local_surjective` (the easy local case `normal ball
+= metric ball`), the nonemptiness `0 ∈ A`, the supremum attainment `t₀ ∈ A`, and
+the `t₀ = r ⟹ γ r = q ⟹ v := r • u` conclusion — is proved unconditionally. -/
 theorem expMapIntrinsic_surjective_dist
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -939,39 +1093,64 @@ theorem expMapIntrinsic_surjective_dist
         inv_mul_cancel₀ (ne_of_gt hc_pos)]
     -- The radial ray `γ(t) := expMapIntrinsic g hEnorm p (t • u)`.
     set γ : ℝ → M := fun t => expMapIntrinsic (I := I) g hEnorm p (t • u) with hγ_def
-    -- The radial Riemannian distance equality for small radii (Gauss + bridge).
-    obtain ⟨ρ, hρ_pos, hradialDist⟩ :=
-      radial_riemannianEDist_eq_of_small (I := I) g hEnorm p
-    -- The propagation set `A`.
+    -- The propagation set `A := { t ∈ [0, r] | (riemannianEDist (γ t) q).toReal = r - t }`.
     set A : Set ℝ := {t : ℝ | t ∈ Set.Icc (0 : ℝ) r ∧
       (riemannianEDist I (γ t) q).toReal = r - t} with hA_def
     -- `A` is closed (the proven scaffold lemma).
     have hA_closed : IsClosed A := by
       rw [hA_def, hγ_def]
       exact propagationSet_isClosed (I := I) g hEnorm p q u r
-    -- The remaining geometric content: the ray/sphere propagation `sup A = r`.
-    --
-    -- With the side-condition-free small-vector agreement bridge
-    -- `exists_expMapIntrinsic_eq_expMap_radius` (whose cross-chart confinement is
-    -- discharged by `intrinsicGeodesic_foot_in_source_of_small`) and the radial
-    -- Riemannian-distance equality `radial_riemannianEDist_eq_of_small` now in
-    -- hand, the base step `δ ∈ A` for a small `δ ∈ (0, ρ)` reduces to:
-    --   (i)  `riemannianEDist p (γ δ) = ofReal δ` — PROVEN (`hradialDist`);
-    --   (ii) `riemannianEDist (γ δ) q = ofReal (r - δ)` — the "ray jumps onto the
-    --        sphere" step, whose `≥` half is the triangle inequality with (i) and
-    --        whose `≤` half is the path-crosses-the-metric-sphere intermediate-
-    --        value argument identifying the metric `δ`-sphere with the intrinsic
-    --        exponential `δ`-sphere `S_δ` (a Gauss-lemma normal-ball
-    --        diffeomorphism fact not yet isolated in this layer).
-    -- The inductive step re-runs (i)–(ii) at the moving foot `γ(t₀)`, with the
-    -- "no corner" alignment supplied by `normalBall_radial_minimizer_equality`
-    -- re-based at `γ(t₀)` via the bridge there, identifying the minimising
-    -- concatenation [radial `p→γ(t₀)`] ++ [radial `γ(t₀)→y₀`] with the single
-    -- radial geodesic `t ↦ γ(t₀ + ·)`.  The endpoint `t₀ = r` then gives
-    -- `riemannianEDist (γ r) q = 0`, hence `γ r = q` by
-    -- `riemannianEDist_eq_zero_imp_eq`, and `v := r • u` realises the conclusion
-    -- with `√(g_p(r•u, r•u)) = r` (`sqrt_gInner_smul_self`, `hu_unit`).
-    sorry
+    -- `0 ∈ A`: `γ 0 = expMapIntrinsic p 0 = p`, distance `r`, `r - 0 = r`.
+    have hγ0 : γ 0 = p := by
+      rw [hγ_def]; simp only [zero_smul]
+      exact expMapIntrinsic_zero (I := I) g hEnorm p
+    have h0A : (0 : ℝ) ∈ A := by
+      rw [hA_def]
+      refine ⟨⟨le_refl 0, hr_pos.le⟩, ?_⟩
+      rw [hγ0, sub_zero, hr_def]
+    have hA_ne : A.Nonempty := ⟨0, h0A⟩
+    -- `A ⊆ Icc 0 r`, hence bounded above by `r`.
+    have hA_sub : A ⊆ Set.Icc (0 : ℝ) r := fun t ht => ht.1
+    have hA_bdd : BddAbove A := ⟨r, fun t ht => (hA_sub ht).2⟩
+    -- The supremum `t₀ := sSup A` is attained (`A` closed, nonempty, bounded above),
+    -- so `t₀ ∈ A`: `0 ≤ t₀ ≤ r` and `(riemannianEDist (γ t₀) q).toReal = r - t₀`.
+    set t₀ : ℝ := sSup A with ht₀_def
+    have ht₀_mem : t₀ ∈ A := hA_closed.csSup_mem hA_ne hA_bdd
+    have ht₀_Icc : t₀ ∈ Set.Icc (0 : ℝ) r := hA_sub ht₀_mem
+    have ht₀_nn : 0 ≤ t₀ := ht₀_Icc.1
+    have ht₀_le : t₀ ≤ r := ht₀_Icc.2
+    have ht₀_dist : (riemannianEDist I (γ t₀) q).toReal = r - t₀ := ht₀_mem.2
+    -- The single remaining geometric input: the ray/sphere propagation forces
+    -- `t₀ = r`.  Concretely, if `t₀ < r`, the sphere argument re-based at the
+    -- moving foot `γ(t₀)` extends `A` strictly past `t₀`, contradicting the
+    -- supremum.  That extension is the "no-corner" moving-foot step: the
+    -- minimising broken path [radial `p → γ(t₀)`] ++ [radial `γ(t₀) → y₀`] (with
+    -- `y₀` the sphere-minimiser at base `γ(t₀)`) is itself length-minimising,
+    -- hence — across the junction — an unbroken geodesic, so `y₀ = γ(t₀ + δ')`,
+    -- i.e. `t₀ + δ' ∈ A`.  Both halves of this step (the path-crosses-the-metric-
+    -- sphere intermediate-value identification of the metric sphere with the
+    -- intrinsic exponential sphere, and the minimising-broken-path-is-a-geodesic
+    -- regularity that aligns the forward radial direction with `γ'(t₀)`) rest on
+    -- the "a length-minimising curve is `C¹`/geodesic" producer
+    -- (`arclength_reparam_is_smooth_geodesic`), which feeds the already-proven
+    -- equality case `normalBall_radial_minimizer_equality` re-based at `γ(t₀)`.
+    have ht₀_eq_r : t₀ = r := by
+      by_contra hne
+      have ht₀_lt : t₀ < r := lt_of_le_of_ne ht₀_le hne
+      sorry
+    -- `t₀ = r ⟹ (riemannianEDist (γ r) q).toReal = 0 ⟹ riemannianEDist (γ r) q = 0
+    --  ⟹ γ r = q` (point separation `riemannianEDist_eq_zero_imp_eq`).
+    have hr_dist : (riemannianEDist I (γ r) q).toReal = 0 := by
+      have hd := ht₀_dist; rw [ht₀_eq_r] at hd; rw [hd, sub_self]
+    have hr_dist0 : riemannianEDist I (γ r) q = 0 := by
+      have hne_top : riemannianEDist I (γ r) q ≠ ⊤ := riemannianEDist_ne_top (I := I) _ q
+      exact ((ENNReal.toReal_eq_zero_iff _).mp hr_dist).resolve_right hne_top
+    have hγr_eq_q : γ r = q := riemannianEDist_eq_zero_imp_eq (I := I) (γ r) q hr_dist0
+    -- `v := r • u`: `expMapIntrinsic p (r • u) = γ r = q`, and `√(g_p(r•u, r•u)) =
+    -- r · √(g_p(u, u)) = r` (`sqrt_gInner_smul_self`, `hu_unit`).
+    refine ⟨r • u, ?_, ?_⟩
+    · rw [hγ_def] at hγr_eq_q; exact hγr_eq_q
+    · rw [sqrt_gInner_smul_self (I := I) g p hr_pos.le u, hu_unit, Real.sqrt_one, mul_one]
 
 end Exponential
 end Riemannian
