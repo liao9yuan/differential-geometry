@@ -191,12 +191,12 @@ theorem flow_pushforward_continuous_in_time
         (Set.Ico 0 T) := by
       intro s hs
       rcases eq_or_lt_of_le hs.1 with h0 | h0
-      · show (Φ_fam s : M → M) x = Φ s x
+      · change (Φ_fam s : M → M) x = Φ s x
         rw [← h0, hΦ0', hΦ0]; rfl
       · exact hident s ⟨h0, hs.2⟩ x
     refine (hΦcont0 x).congr_of_eventuallyEq
       (Filter.eventuallyEq_of_mem (Ico_mem_nhdsGE hT) heqOn) ?_
-    show (Φ_fam 0 : M → M) x = Φ 0 x
+    change (Φ_fam 0 : M → M) x = Φ 0 x
     rw [hΦ0', hΦ0]; rfl
   refine ⟨?_, hB⟩
   -- Conjunct (A): continuity on `Set.Ico 0 T` of the moving pushforward, for each `x, v`.
@@ -224,7 +224,7 @@ theorem flow_pushforward_continuous_in_time
       (Filter.eventuallyEq_of_mem self_mem_nhdsWithin hmfeq) ?_
     have hfun0 : (Φ_fam 0 : M → M) = (fun y : M => Φ 0 y) := by
       funext y; rw [hΦ0', hΦ0]; rfl
-    show (mfderiv I I (Φ_fam 0 : M → M) x v : E) = (mfderiv I I (fun y : M => Φ 0 y) x v : E)
+    change (mfderiv I I (Φ_fam 0 : M → M) x v : E) = (mfderiv I I (fun y : M => Φ 0 y) x v : E)
     rw [hfun0]
   · -- GENUINE OPEN INPUT 2 (interior moving-mfderiv continuity): on `Set.Ioo 0 T`, after `hident`
     -- the pushforward equals `s ↦ mfderiv (fun y => Φ s y) x v`, whose interior-in-time continuity
@@ -346,14 +346,27 @@ theorem joint_smooth_moving_mfderiv_continuous
       ∀ s ∈ Set.Ico (0 : ℝ) (min δ T), Φ s x ∈ (chartAt H α).source ∧
         extChartAt I α (Φ s x)
           = extChartAt I α x + ∫ r in (0 : ℝ)..s,
-              chartRawRepr (I := I) α (X_DT r) (extChartAt I α (Φ r x))) :
+              chartRawRepr (I := I) α (X_DT r) (extChartAt I α (Φ r x)))
+    (hvarpicard : ∀ (x : M) (v : TangentSpace I x), ∃ α : M, ∃ δ : ℝ, 0 < δ ∧
+      ∀ s ∈ Set.Ico (0 : ℝ) (min δ T),
+        (mfderiv I I (fun y : M => Φ s y) x v : E)
+          = (@id E (mfderiv I I (fun y : M => Φ 0 y) x v))
+            + ∫ r in (0 : ℝ)..s,
+                (fderiv ℝ (chartRawRepr (I := I) α (X_DT r))
+                    (extChartAt I α (Φ r x)))
+                  (mfderiv I I (fun y : M => Φ r y) x v : E))
+    (hJbound : ∀ (x : M) (v : TangentSpace I x), ∃ δ : ℝ, ∃ B : ℝ, 0 < δ ∧
+      ∀ s ∈ Set.Ico (0 : ℝ) (min δ T),
+        ‖(mfderiv I I (fun y : M => Φ s y) x v : E)‖ ≤ B) :
     (∀ x : M, ContinuousWithinAt (fun s : ℝ => Φ s x) (Set.Ici (0 : ℝ)) 0)
     ∧ (∀ (x : M) (v : TangentSpace I x),
         ContinuousWithinAt (fun s : ℝ => (mfderiv I I (fun y : M => Φ s y) x v : E))
           (Set.Ici (0 : ℝ)) 0) :=
   -- The conclusion and hypotheses coincide with the sibling `flow_t0_continuity_extension`
   -- (ForwardFlow.lean): the same interior bare-ODE `hinterior`, the same chart-Picard anchor
-  -- `hpicard`, and the same near-0 field/gradient continuity `hcont0`/`hgrad0`.  Delegate.
+  -- `hpicard`, the variational integral anchor `hvarpicard`/`hJbound`, and the same near-0
+  -- field/gradient continuity `hcont0`/`hgrad0`.  Delegate.
   flow_t0_continuity_extension X_DT T hT Φ hΦ0 hcont0 hgrad0 hinterior hpicard
+    hvarpicard hJbound
 
 end DifferentialGeometry.PDE.RicciFlow

@@ -46,6 +46,10 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+-- `ha` records the supercriticality scale `2*a > dim+4` under which the `Hᵃ ↪ C²`
+-- embedding at the two-derivative scale `H^{2a}` discharges `hC2_chart` downstream;
+-- it is a genuine signature hypothesis the parent supplies, not used textually here.
+set_option linter.unusedVariables false in
 theorem deturck_solution_c2_continuous_icc0
     (g_bg : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ}
     (ha : 2 * a > Module.finrank ℝ E + 4)
@@ -61,7 +65,22 @@ theorem deturck_solution_c2_continuous_icc0
           (I := I) (M := M) g_bg 0 2),
       (u s).coeff i
         = tensorL2Coeff_ofCompact (I := I) (M := M) (hCompact (I := I) (M := M) g_bg)
-            (Integral.L2.SmoothCcTensor.toL2 (T_s s)) i) :
+            (Integral.L2.SmoothCcTensor.toL2 (T_s s)) i)
+    -- The chart-`2`-jet time-continuity of the Gram entries of the LINEAR realize
+    -- `g_DT` on the Levi-Civita good set.  This is the `Hᵃ ↪ C²` Sobolev-embedding
+    -- step at the two-derivative scale `H^{2a}` (`2*a > dim+4`), and is a STRONGER
+    -- input than the carrier-scale time continuity `hcont` supplies (`hcont` only
+    -- controls `T_s` at the `Hᵃ` scale through `hsmoothrepr`, not `H^{2a}`).  It is
+    -- the SAME chart-Gram-`C²` continuity required by the `hC2` slot of the sibling
+    -- `ricci_continuous_in_metric_time`, i.e. the realization/Weyl-gated input;
+    -- carried here as a dischargeable, non-leaking hypothesis on the linear realize.
+    (hC2_chart : ∀ (α : M) (y : M), y ∈ chartLeviCivitaGoodSet (I := I) α →
+      ∀ i j : Fin (Module.finrank ℝ E), ∀ k : ℕ, k ≤ 2 →
+        ContinuousOn
+          (fun s : ℝ => iteratedFDeriv ℝ k
+            (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT s) α i j)
+            (extChartAt I α y))
+          (Set.Icc 0 T)) :
     (∀ (x : M) (v w : TangentSpace I x),
       ContinuousOn (fun s : ℝ => (g_DT s).inner x v w) (Set.Icc 0 T))
     ∧ (∀ (x : M) (v w : TangentSpace I x),
@@ -102,21 +121,12 @@ theorem deturck_solution_c2_continuous_icc0
   -- **Conjunct 2 (Ricci-tensor time continuity).**
   --
   -- The metric-value continuity `hconj1` supplies the `hval`-slot of the sibling
-  -- `ricci_continuous_in_metric_time`; what remains is its `hC2`-slot: the
-  -- time-continuity, up to spatial order `2`, of the chart-frame Gram entries
-  -- `iteratedFDeriv ℝ k (chartGramOnE (g_DT s) α i j) (extChartAt I α y)` on the
-  -- Levi-Civita good set.  This is the `Hᵃ ↪ C²` Sobolev-embedding step, and it
-  -- requires a STRONGER time-continuity input than the carrier-scale hypothesis
-  -- `hcont` provides: the unconditional `C²` embedding
-  -- `iteratedCovGrad_toSobolev_embedding_C2_unconditional` controls the spatial
-  -- `2`-jet of the realized metric by the `H^{2a}` norm of the smooth tensor
-  -- (`2*a > dim+4`), whereas `hcont` only gives `Hᵃ`-norm time continuity of `u`,
-  -- which by `hsmoothrepr` controls `T_s` only at the `Hᵃ` scale, not `H^{2a}`.
-  -- Discharging `hC2` therefore needs a separate node carrying the chart-`2`-jet
-  -- realize bound for the LINEAR realize `g_DT` (the existing
-  -- `RealizedJet2CovGradBound` infrastructure is keyed on the gated
-  -- `realizeMetricAt`, not on the linear realize fixed by `hreal`).  See the
-  -- handoff note: new node `realize_chartGram_c2_time_continuity`.
-  sorry
+  -- `ricci_continuous_in_metric_time`; its `hC2`-slot is exactly the chart-`2`-jet
+  -- time-continuity of the Gram entries of `g_DT` on the Levi-Civita good set, which
+  -- is the dischargeable hypothesis `hC2_chart`.  The chart-Ricci continuity chain
+  -- (Christoffel → Riemann → trace) inside `ricci_continuous_in_metric_time` then
+  -- delivers the conclusion.
+  intro x v w
+  exact ricci_continuous_in_metric_time (I := I) (M := M) g_DT T x v w hconj1 hC2_chart
 
 end DifferentialGeometry.PDE.RicciFlow

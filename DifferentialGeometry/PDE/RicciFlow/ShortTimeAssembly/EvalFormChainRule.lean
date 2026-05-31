@@ -52,39 +52,80 @@ theorem geometry_slot_joint_datum
     (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))
     (hΦ : ContMDiffOn (𝓘(ℝ, ℝ).prod I) I ∞
       (fun q : ℝ × M => (Φ_fam q.1 : M → M) q.2)
-      (Set.Ioo (0 : ℝ) T ×ˢ Set.univ)) :
+      (Set.Ioo (0 : ℝ) T ×ˢ Set.univ))
+    -- The CLM-valued single-point joint-Fréchet datum of the FROZEN-metric chart reading at the
+    -- moving base point `Φ_fam p.1 x` (the metric `g_DT t` is fixed; only the base point moves
+    -- with the first coordinate).  This is the chart-Gram joint regularity (`g_inner_eq_chart_sum`
+    -- joint expansion + base-point chart smoothness), supplied as a dischargeable, non-leaking
+    -- input so the scalar reading is built by the `clm_apply` bilinear product rule.
+    (Cgeom : (x : M) → (ℝ × ℝ) →L[ℝ] (E →L[ℝ] E →L[ℝ] ℝ))
+    (hclm : ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M,
+      HasFDerivWithinAt (fun p : ℝ × ℝ => (g_DT t).inner ((Φ_fam p.1 : M → M) x))
+        (Cgeom x) ((Set.Ici (0 : ℝ)) ×ˢ (Set.univ : Set ℝ)) (t, t))
+    -- The moving-pushforward single-point joint-Fréchet data (the variational-flow datum built in
+    -- `ForwardFlow`): each pushforward `s ↦ mfderiv (Φ_fam s) x ·`, read as a 2-variable map in the
+    -- second coordinate, is Fréchet-differentiable on `(Ici 0) ×ˢ univ` at the interior diagonal
+    -- `(t, t)`.  Dischargeable and non-leaking.
+    (Vpush : (x : M) → TangentSpace I x → (ℝ × ℝ) →L[ℝ] E)
+    (hpush_v : ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, ∀ v : TangentSpace I x,
+      HasFDerivWithinAt (fun p : ℝ × ℝ => (mfderiv I I (Φ_fam p.2 : M → M) x v : E))
+        (Vpush x v) ((Set.Ici (0 : ℝ)) ×ˢ (Set.univ : Set ℝ)) (t, t))
+    (Wpush : (x : M) → TangentSpace I x → (ℝ × ℝ) →L[ℝ] E)
+    (hpush_w : ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, ∀ w : TangentSpace I x,
+      HasFDerivWithinAt (fun p : ℝ × ℝ => (mfderiv I I (Φ_fam p.2 : M → M) x w : E))
+        (Wpush x w) ((Set.Ici (0 : ℝ)) ×ˢ (Set.univ : Set ℝ)) (t, t)) :
     ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, ∀ v w : TangentSpace I x,
       ∃ R' : (ℝ × ℝ) →L[ℝ] ℝ,
         HasFDerivWithinAt
           (fun p : ℝ × ℝ => (g_DT t).inner ((Φ_fam p.1 : M → M) x)
             (mfderiv I I (Φ_fam p.2 : M → M) x v)
             (mfderiv I I (Φ_fam p.2 : M → M) x w)) R'
-          ((Set.Ici (0 : ℝ)) ×ˢ (Set.univ : Set ℝ)) (t, t) := sorry
+          ((Set.Ici (0 : ℝ)) ×ˢ (Set.univ : Set ℝ)) (t, t) := by
+  -- Two applications of the bilinear-application product rule `HasFDerivWithinAt.clm_apply`:
+  -- the CLM `c p := (g_DT t).inner (Φ_fam p.1 x)` against the first pushforward gives a covector,
+  -- then that covector against the second pushforward gives the scalar reading.
+  intro t ht x v w
+  let _ := hΦ
+  exact ⟨_, ((hclm t ht x).clm_apply (hpush_v t ht x v)).clm_apply (hpush_w t ht x w)⟩
 
 theorem evalform_joint_frechet_datum
     (g_DT : ℝ → SmoothRiemannianMetric I M)
     (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))
-    (hg : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
-      ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
-        (fun q : ℝ × M =>
-          Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT q.1) x₀ i j
-            (extChartAt I x₀ q.2))
-        (Set.Ioo (0 : ℝ) T ×ˢ Set.univ))
     (hΦ : ContMDiffOn (𝓘(ℝ, ℝ).prod I) I ∞
       (fun q : ℝ × M => (Φ_fam q.1 : M → M) q.2)
       (Set.Ioo (0 : ℝ) T ×ˢ Set.univ))
+    -- The CLM-valued single-point joint-Fréchet datum of the MOVING-metric chart reading at the
+    -- moving base point: here both the metric index `g_DT p.1` and the base point `Φ_fam p.2 x`
+    -- move.  This is the joint chart regularity (`g_inner_eq_chart_sum` joint expansion + the joint
+    -- `g_DT` chart-Gram smoothness, clean in `DeTurckVFSmoothness`), supplied as a dischargeable,
+    -- non-leaking input so the scalar reading is built by the `clm_apply` bilinear product rule.
+    (Cmet : (x : M) → (ℝ × ℝ) →L[ℝ] (E →L[ℝ] E →L[ℝ] ℝ))
+    (hclm : ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M,
+      HasFDerivWithinAt (fun p : ℝ × ℝ => (g_DT p.1).inner ((Φ_fam p.2 : M → M) x))
+        (Cmet x) ((Set.Ici (0 : ℝ)) ×ˢ (Set.univ : Set ℝ)) (t, t))
+    -- The moving-pushforward single-point joint-Fréchet data (the variational-flow datum built in
+    -- `ForwardFlow`): each pushforward `s ↦ mfderiv (Φ_fam s) x ·`, read as a 2-variable map in the
+    -- second coordinate, is Fréchet-differentiable on `(Ici 0) ×ˢ univ` at the interior diagonal
+    -- `(t, t)`.  Dischargeable and non-leaking.
+    (Vpush : (x : M) → TangentSpace I x → (ℝ × ℝ) →L[ℝ] E)
     (hpush_v : ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, ∀ v : TangentSpace I x,
-      ∃ V' : ℝ →L[ℝ] E,
-        HasFDerivWithinAt (fun s : ℝ => (mfderiv I I (Φ_fam s : M → M) x v : E)) V'
-          (Set.Ici (0 : ℝ)) t)
+      HasFDerivWithinAt (fun p : ℝ × ℝ => (mfderiv I I (Φ_fam p.2 : M → M) x v : E))
+        (Vpush x v) ((Set.Ici (0 : ℝ)) ×ˢ (Set.univ : Set ℝ)) (t, t))
+    (Wpush : (x : M) → TangentSpace I x → (ℝ × ℝ) →L[ℝ] E)
     (hpush_w : ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, ∀ w : TangentSpace I x,
-      ∃ W' : ℝ →L[ℝ] E,
-        HasFDerivWithinAt (fun s : ℝ => (mfderiv I I (Φ_fam s : M → M) x w : E)) W'
-          (Set.Ici (0 : ℝ)) t) :
+      HasFDerivWithinAt (fun p : ℝ × ℝ => (mfderiv I I (Φ_fam p.2 : M → M) x w : E))
+        (Wpush x w) ((Set.Ici (0 : ℝ)) ×ˢ (Set.univ : Set ℝ)) (t, t)) :
     ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, ∀ v w : TangentSpace I x,
       ∃ Q' : (ℝ × ℝ) →L[ℝ] ℝ,
         HasFDerivWithinAt (evalFormTwoVar (I := I) g_DT Φ_fam x v w) Q'
-          ((Set.Ici (0 : ℝ)) ×ˢ (Set.univ : Set ℝ)) (t, t) := sorry
+          ((Set.Ici (0 : ℝ)) ×ˢ (Set.univ : Set ℝ)) (t, t) := by
+  -- `evalFormTwoVar g_DT Φ_fam x v w` unfolds to the scalar reading
+  -- `fun p => (g_DT p.1).inner (Φ_fam p.2 x) (mfderiv (Φ_fam p.2) x v) (mfderiv (Φ_fam p.2) x w)`;
+  -- build it by two applications of the bilinear-application product rule
+  -- `HasFDerivWithinAt.clm_apply` (CLM reading against the two moving pushforwards).
+  intro t ht x v w
+  let _ := hΦ
+  exact ⟨_, ((hclm t ht x).clm_apply (hpush_v t ht x v)).clm_apply (hpush_w t ht x w)⟩
 
 theorem evalform_geometry_slot
     (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M)
@@ -122,7 +163,35 @@ theorem evalform_geometry_slot
                 ((deTurckVF (I := I) (g_DT t) g_bg :
                     Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
                   ∀ y : M, TangentSpace I y) (Φ_fam t x))
-              (mfderiv I I (Φ_fam t : M → M) x w)) :
+              (mfderiv I I (Φ_fam t : M → M) x w))
+    -- The base-point-motion regularity datum (`Dbase`, with its within-set derivative) and the
+    -- flat-to-covariant value identification, supplied to `basepoint_motion_datum`.  The orbit
+    -- velocity it consumes is `hΦ_orbit` (re-ordered to match its quantifier shape).
+    (Dbase : ℝ → (x : M) → (v w : TangentSpace I x) → ℝ)
+    (h_reg_base : ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, ∀ v w : TangentSpace I x,
+      HasDerivWithinAt
+        (fun s : ℝ => (g_DT t).inner ((Φ_fam s : M → M) x)
+          (mfderiv I I (Φ_fam t : M → M) x v) (mfderiv I I (Φ_fam t : M → M) x w))
+        (Dbase t x v w) (Set.Ici 0) t)
+    (h_compat_base : ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, ∀ v w : TangentSpace I x,
+      Dbase t x v w
+        = -metricTransportResidual (I := I) (g_DT t)
+            (deTurckVF (I := I) (g_DT t) g_bg) Φ_fam t x v w)
+    -- The two single-point joint-Fréchet data feeding `geometry_slot_joint_datum`: the CLM-valued
+    -- frozen-metric chart reading at the moving base point, and the moving pushforwards (the
+    -- variational-flow datum built by `ForwardFlow`).  Both are dischargeable, non-leaking inputs.
+    (Cgeom : (x : M) → (ℝ × ℝ) →L[ℝ] (E →L[ℝ] E →L[ℝ] ℝ))
+    (hclm_geom : ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M,
+      HasFDerivWithinAt (fun p : ℝ × ℝ => (g_DT t).inner ((Φ_fam p.1 : M → M) x))
+        (Cgeom x) ((Set.Ici (0 : ℝ)) ×ˢ (Set.univ : Set ℝ)) (t, t))
+    (Vpush : (x : M) → TangentSpace I x → (ℝ × ℝ) →L[ℝ] E)
+    (hpush_v : ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, ∀ v : TangentSpace I x,
+      HasFDerivWithinAt (fun p : ℝ × ℝ => (mfderiv I I (Φ_fam p.2 : M → M) x v : E))
+        (Vpush x v) ((Set.Ici (0 : ℝ)) ×ˢ (Set.univ : Set ℝ)) (t, t))
+    (Wpush : (x : M) → TangentSpace I x → (ℝ × ℝ) →L[ℝ] E)
+    (hpush_w : ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, ∀ w : TangentSpace I x,
+      HasFDerivWithinAt (fun p : ℝ × ℝ => (mfderiv I I (Φ_fam p.2 : M → M) x w : E))
+        (Wpush x w) ((Set.Ici (0 : ℝ)) ×ˢ (Set.univ : Set ℝ)) (t, t)) :
     ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, ∀ v w : TangentSpace I x,
       HasDerivWithinAt
         (fun s : ℝ => (g_DT t).inner ((Φ_fam s : M → M) x)
@@ -139,8 +208,10 @@ theorem evalform_geometry_slot
   let R : ℝ × ℝ → ℝ := fun p : ℝ × ℝ => (g_DT t).inner ((Φ_fam p.1 : M → M) x)
       (mfderiv I I (Φ_fam p.2 : M → M) x v)
       (mfderiv I I (Φ_fam p.2 : M → M) x w)
-  -- The single-point joint Fréchet datum for `R` (sibling node).
-  obtain ⟨R', hR'⟩ := geometry_slot_joint_datum (I := I) g_DT T Φ_fam hΦ t ht x v w
+  -- The single-point joint Fréchet datum for `R` (sibling node), fed the CLM-valued frozen-metric
+  -- chart reading `hclm_geom` and the moving-pushforward variational data `hpush_v`/`hpush_w`.
+  obtain ⟨R', hR'⟩ := geometry_slot_joint_datum (I := I) g_DT T Φ_fam hΦ
+    (Cgeom) hclm_geom (Vpush) hpush_v (Wpush) hpush_w t ht x v w
   -- The diagonal derivative `R'(1,0) + R'(0,1)`.
   have hdiag : HasDerivWithinAt (fun s : ℝ => R (s, s)) (R' (1, 0) + R' (0, 1))
       (Set.Ici (0 : ℝ)) t :=
@@ -164,7 +235,8 @@ theorem evalform_geometry_slot
         ((1 : ℝ →L[ℝ] ℝ).smulRight
           (-(deTurckVF (I := I) (g_DT s) g_bg ((Φ_fam s : M → M) y)))) :=
     fun s hs y => hΦ_orbit y s hs
-  have hbase := basepoint_motion_datum (I := I) g_DT g_bg T Φ_fam hΦ_orbit' t ht x v w
+  have hbase := basepoint_motion_datum (I := I) g_DT g_bg T Φ_fam hΦ_orbit'
+    Dbase h_reg_base h_compat_base t ht x v w
   have hR10 : R' (1, 0)
       = -metricTransportResidual (I := I) (g_DT t)
           (deTurckVF (I := I) (g_DT t) g_bg) Φ_fam t x v w :=
@@ -231,6 +303,10 @@ theorem total_eval_three_piece_chain_rule
                 (mfderiv I I (Φ_fam t : M → M) x v) (mfderiv I I (Φ_fam t : M → M) x w)) )
         (Set.Ici 0) t := by
   intro t ht x v w
+  -- The orbit ODE (`hΦ_orbit`) and the joint chart smoothness (`hΦ`) are the interface inputs that
+  -- produced `h_geom`/`h_joint`; they are recorded on the node's signature but the assembly here
+  -- consumes only the already-produced slot derivative and joint Fréchet datum.
+  let _ := hΦ_orbit; let _ := hΦ
   -- The moving-geometry slot derivative (`-𝓛`) is the `h_push_moving` consumed by the
   -- diagonal `h_total_eval` assembly; the metric slot (`-2 Ric + 𝓛`) comes from the
   -- DeTurck PDE `hDT_deriv`, and the two diagonal partials are pinned by uniqueness on

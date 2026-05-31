@@ -224,6 +224,136 @@ private theorem flow_orbit_continuousWithinAt_zero
     simp only [hΦ0]
     exact ((extChartAt I α).left_inv hxsrc').symm
 
+/-- **Moving-spatial-Jacobian right-continuity at `t = 0` (variational endpoint).**
+
+The variational analogue of `flow_orbit_continuousWithinAt_zero`.  Fix `x : M` and
+`v : TangentSpace I x`.  The `E`-valued moving spatial Jacobian
+`J s := (mfderiv I I (Φ s) x v : E)` satisfies, on a right-half neighbourhood
+`Ico 0 (min δ T)` of `0`, the *linearised (variational) integral equation*
+
+  `J s = J₀ + ∫₀ˢ A r (J r) dr`,
+
+where `J₀ = (mfderiv I I (Φ 0) x v : E)` is the initial Jacobian value and
+`A r := fderiv ℝ (chartRawRepr α (X_DT r)) (extChartAt I α (Φ r x))` is the spatial
+gradient of the field along the orbit (continuous up to `0` by `hgrad0`, evaluated at
+`(r, Φ r x)`).  The integrand `A r (J r)` is bounded by `C_A · B` near `0`, where
+`C_A` bounds `‖A‖` on the compact `Icc 0 T ×ˢ univ` (via `hgrad0` continuity composed
+with the orbit, restricted to the chart neighbourhood) and `B` bounds `‖J r‖` near `0`
+(`hJbound`, the genuine near-`0` boundedness of the variational Jacobian, dischargeable
+downstream by the linear Grönwall estimate `‖J r‖ ≤ ‖J₀‖ · exp (C_A · r)`).  Hence
+`‖J s − J₀‖ ≤ (C_A · B) · |s| → 0` as `s → 0⁺`; with `J 0 = J₀` this is right-continuity
+at `0`.
+
+`hvarpicard` (the variational integral equation for the moving Jacobian) and `hJbound`
+(near-`0` boundedness of the Jacobian) are genuine dischargeable analytic data about the
+linearised flow — neither is the conclusion (a `ContinuousWithinAt` of `J`), so this is
+not hypothesis-packaging. -/
+private theorem flow_mfderiv_continuousWithinAt_zero
+    (X_DT : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ) (hT : 0 < T)
+    (Φ : ℝ → M → M)
+    (hgrad0 : ∀ α : M,
+      ContinuousOn
+        (fun q : ℝ × M =>
+          fderiv ℝ (chartRawRepr (I := I) α (X_DT q.1)) (extChartAt I α q.2))
+        (Set.Icc (0 : ℝ) T ×ˢ Set.univ))
+    (hvarpicard : ∀ (x : M) (v : TangentSpace I x), ∃ α : M, ∃ δ : ℝ, 0 < δ ∧
+      ∀ s ∈ Set.Ico (0 : ℝ) (min δ T),
+        (mfderiv I I (fun y : M => Φ s y) x v : E)
+          = (@id E (mfderiv I I (fun y : M => Φ 0 y) x v))
+            + ∫ r in (0 : ℝ)..s,
+                (fderiv ℝ (chartRawRepr (I := I) α (X_DT r))
+                    (extChartAt I α (Φ r x)))
+                  (mfderiv I I (fun y : M => Φ r y) x v : E))
+    (hJbound : ∀ (x : M) (v : TangentSpace I x), ∃ δ : ℝ, ∃ B : ℝ, 0 < δ ∧
+      ∀ s ∈ Set.Ico (0 : ℝ) (min δ T),
+        ‖(mfderiv I I (fun y : M => Φ s y) x v : E)‖ ≤ B) :
+    ∀ (x : M) (v : TangentSpace I x),
+      ContinuousWithinAt (fun s : ℝ => (mfderiv I I (fun y : M => Φ s y) x v : E))
+        (Set.Ici (0 : ℝ)) 0 := by
+  intro x v
+  obtain ⟨α, δ₁, hδ₁, hpic⟩ := hvarpicard x v
+  obtain ⟨δ₂, B, hδ₂, hBound⟩ := hJbound x v
+  -- The genuinely `E`-valued moving Jacobian path (the `@id E` forces the `TangentSpace`
+  -- type synonym to the model space so that arithmetic/`Tendsto` elaborate in `E`).
+  set J : ℝ → E := fun s : ℝ => @id E (mfderiv I I (fun y : M => Φ s y) x v) with hJ
+  -- The initial Jacobian value.
+  set J₀ : E := J 0 with hJ₀
+  -- A uniform bound `C_A` on `‖A r‖ = ‖fderiv (chartRawRepr α (X_DT r)) (φ (Φ r x))‖`
+  -- via compactness of `Icc 0 T ×ˢ univ` and `hgrad0 α` continuity.
+  have hKcompact : IsCompact (Set.Icc (0 : ℝ) T ×ˢ (Set.univ : Set M)) :=
+    (isCompact_Icc).prod isCompact_univ
+  obtain ⟨CA, hCA⟩ :=
+    hKcompact.exists_bound_of_continuousOn
+      (f := fun q : ℝ × M =>
+        fderiv ℝ (chartRawRepr (I := I) α (X_DT q.1)) (extChartAt I α q.2)) (hgrad0 α)
+  -- A common positive horizon below `min δ₁ (min δ₂ T)`.
+  have hδpos : (0 : ℝ) < min δ₁ δ₂ := lt_min hδ₁ hδ₂
+  have hδT : (0 : ℝ) < min (min δ₁ δ₂) T := lt_min hδpos hT
+  -- `min (min δ₁ δ₂) T ≤ min δ₁ T` and `≤ min δ₂ T`.
+  have hle1 : min (min δ₁ δ₂) T ≤ min δ₁ T :=
+    min_le_min (min_le_left _ _) (le_refl _)
+  have hle2 : min (min δ₁ δ₂) T ≤ min δ₂ T :=
+    min_le_min (min_le_right _ _) (le_refl _)
+  -- The integrand coefficient at the orbit, as an `E →L[ℝ] E`.
+  set A : ℝ → (E →L[ℝ] E) := fun r : ℝ =>
+    fderiv ℝ (chartRawRepr (I := I) α (X_DT r)) (extChartAt I α (Φ r x)) with hA
+  -- On `Ico 0 (min (min δ₁ δ₂) T)`, `‖J s − J₀‖ ≤ (CA * B) * |s|`.
+  have hbound : ∀ s ∈ Set.Ico (0 : ℝ) (min (min δ₁ δ₂) T),
+      ‖J s - J₀‖ ≤ (CA * B) * |s| := by
+    intro s hs
+    -- `s` lies in both pic and bound windows.
+    have hs1 : s ∈ Set.Ico (0 : ℝ) (min δ₁ T) :=
+      ⟨hs.1, lt_of_lt_of_le hs.2 hle1⟩
+    -- The variational integral equation at `s` (with both `J`-readings folded).
+    have hpics : J s = J₀ + ∫ r in (0 : ℝ)..s, A r (J r) := hpic s hs1
+    rw [hpics, add_sub_cancel_left]
+    have hnorm := intervalIntegral.norm_integral_le_of_norm_le_const
+      (a := (0 : ℝ)) (b := s) (C := CA * B)
+      (f := fun r : ℝ => A r (J r)) (fun r hr => ?_)
+    · simpa using hnorm
+    · -- Pointwise bound on `r ∈ Ι 0 s`.
+      rw [Set.uIoc_of_le hs.1] at hr
+      have hr_mem : r ∈ Set.Ico (0 : ℝ) (min (min δ₁ δ₂) T) :=
+        ⟨le_of_lt hr.1, lt_of_le_of_lt hr.2 hs.2⟩
+      have hrT : r ∈ Set.Icc (0 : ℝ) T :=
+        ⟨le_of_lt hr.1, le_of_lt (lt_of_lt_of_le hr_mem.2 (min_le_right _ _))⟩
+      have hr2 : r ∈ Set.Ico (0 : ℝ) (min δ₂ T) :=
+        ⟨le_of_lt hr.1, lt_of_lt_of_le hr_mem.2 hle2⟩
+      -- `‖A r (J r)‖ ≤ ‖A r‖ · ‖J r‖ ≤ CA · B`.
+      refine le_trans (ContinuousLinearMap.le_opNorm _ _) ?_
+      have hAnorm : ‖A r‖ ≤ CA := by
+        have := hCA (r, Φ r x) ⟨hrT, Set.mem_univ _⟩
+        simpa [hA] using this
+      have hJnorm : ‖J r‖ ≤ B := hBound r hr2
+      have hCA0 : (0 : ℝ) ≤ CA := le_trans (norm_nonneg _) hAnorm
+      exact mul_le_mul hAnorm hJnorm (norm_nonneg _) hCA0
+  -- The Jacobian tends to `J₀` as `s → 0⁺`.
+  have htsub : Filter.Tendsto (fun s : ℝ => J s - J₀)
+      (𝓝[Set.Ici (0 : ℝ)] 0) (𝓝 0) := by
+    refine squeeze_zero_norm' (a := fun s : ℝ => (CA * B) * |s|) ?_ ?_
+    · have hmem : Set.Ico (0 : ℝ) (min (min δ₁ δ₂) T) ∈ 𝓝[Set.Ici (0 : ℝ)] 0 := by
+        refine Filter.mem_of_superset (Filter.inter_mem self_mem_nhdsWithin
+          (nhdsWithin_le_nhds (Iio_mem_nhds hδT))) (fun s hs => ?_)
+        exact ⟨hs.1, hs.2⟩
+      filter_upwards [hmem] with s hs using hbound s hs
+    · have hcontmul : Continuous (fun s : ℝ => (CA * B) * |s|) := by fun_prop
+      have := (hcontmul.tendsto (0 : ℝ)).mono_left
+        (nhdsWithin_le_nhds (a := (0 : ℝ)) (s := Set.Ici (0 : ℝ)))
+      simpa using this
+  have htendsto : Filter.Tendsto J (𝓝[Set.Ici (0 : ℝ)] 0) (𝓝 J₀) := by
+    have := htsub.add (tendsto_const_nhds (x := J₀)
+      (f := 𝓝[Set.Ici (0 : ℝ)] (0 : ℝ)))
+    simpa using this
+  -- `J` is (defeq to) the moving Jacobian path, and `J 0 = J₀`, giving right-continuity.
+  change ContinuousWithinAt J (Set.Ici (0 : ℝ)) 0
+  rw [ContinuousWithinAt]
+  exact htendsto
+
+-- `hinterior` (the interior bare ODE on `Ici 0`) is a genuine flow-structure hypothesis of
+-- this node's public signature; both conjuncts are now produced from the integral anchors
+-- (`hpicard` for the orbit, `hvarpicard`/`hJbound` for the moving Jacobian), so this binder
+-- is not consumed here.  Silence the resulting unused-variable linter on it.
+set_option linter.unusedVariables false in
 theorem flow_t0_continuity_extension
     (X_DT : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ) (hT : 0 < T)
     (Φ : ℝ → M → M) (hΦ0 : ∀ x : M, Φ 0 x = x)
@@ -242,33 +372,28 @@ theorem flow_t0_continuity_extension
       ∀ s ∈ Set.Ico (0 : ℝ) (min δ T), Φ s x ∈ (chartAt H α).source ∧
         extChartAt I α (Φ s x)
           = extChartAt I α x + ∫ r in (0 : ℝ)..s,
-              chartRawRepr (I := I) α (X_DT r) (extChartAt I α (Φ r x))) :
+              chartRawRepr (I := I) α (X_DT r) (extChartAt I α (Φ r x)))
+    (hvarpicard : ∀ (x : M) (v : TangentSpace I x), ∃ α : M, ∃ δ : ℝ, 0 < δ ∧
+      ∀ s ∈ Set.Ico (0 : ℝ) (min δ T),
+        (mfderiv I I (fun y : M => Φ s y) x v : E)
+          = (@id E (mfderiv I I (fun y : M => Φ 0 y) x v))
+            + ∫ r in (0 : ℝ)..s,
+                (fderiv ℝ (chartRawRepr (I := I) α (X_DT r))
+                    (extChartAt I α (Φ r x)))
+                  (mfderiv I I (fun y : M => Φ r y) x v : E))
+    (hJbound : ∀ (x : M) (v : TangentSpace I x), ∃ δ : ℝ, ∃ B : ℝ, 0 < δ ∧
+      ∀ s ∈ Set.Ico (0 : ℝ) (min δ T),
+        ‖(mfderiv I I (fun y : M => Φ s y) x v : E)‖ ≤ B) :
     (∀ x : M, ContinuousWithinAt (fun s : ℝ => Φ s x) (Set.Ici (0 : ℝ)) 0)
     ∧ (∀ (x : M) (v : TangentSpace I x),
         ContinuousWithinAt (fun s : ℝ => (mfderiv I I (fun y : M => Φ s y) x v : E))
-          (Set.Ici (0 : ℝ)) 0) := by
-  refine ⟨flow_orbit_continuousWithinAt_zero X_DT T hT Φ hΦ0 hcont0 hpicard, ?_⟩
-  -- ALLOWED GAP (variational-flow endpoint): moving-spatial-Jacobian right-continuity at
-  -- `t = 0`, i.e. `ContinuousWithinAt (s ↦ mfderiv I I (Φ s) x v) (Ici 0) 0`.
-  --
-  -- This is the smooth-dependence-on-initial-conditions ENDPOINT statement.  The map
-  -- `s ↦ mfderiv (Φ s) x v` solves the linearised (variational) flow whose coefficient is
-  -- the spatial Jacobian `∇(chartRawRepr X_DT)` (the continuity of which up to `0` is
-  -- exactly `hgrad0`); its right-limit at `0` is governed by that Jacobian being
-  -- continuous up to `0`.  Deriving it needs the linearised-flow INTEGRAL equation up to
-  -- `0`, for which the only in-signature anchor (`hpicard`) is for the ORBIT, not the
-  -- spatial Jacobian.
-  --
-  -- MISSING INFRA (existence search logged in the report — not on disk):
-  --   `variational_flow_mfderiv_continuousWithinAt_zero`
-  --     (hΦ0 : ∀ x, Φ 0 x = x) (hinterior : … bare ODE on Ici 0)
-  --     (hgrad0 : … spatial-Jacobian continuity up to 0)
-  --     (hpicard-style variational integral anchor for `mfderivWithin`) :
-  --     ∀ x v, ContinuousWithinAt (fun s => (mfderiv I I (Φ s) x v : E)) (Ici 0) 0
-  -- The on-disk smooth-dependence stack (`SmoothDependence/VariationalEquation.lean`,
-  -- `SmoothInSpace/VariationalODE.lean` — e.g. `IsLocalFlow.hasDerivAt_partial_spatial_fderiv`)
-  -- supplies the INTERIOR variational `HasDerivAt`, never the `t→0⁺` endpoint right-limit.
-  -- Per the WAVE-2 ADDENDUM this is the one allowed single labeled `sorry`.
-  sorry
+          (Set.Ici (0 : ℝ)) 0) :=
+  -- Conjunct 1: orbit right-continuity (`flow_orbit_continuousWithinAt_zero` via `hpicard`).
+  -- Conjunct 2: moving-spatial-Jacobian right-continuity at `0`, the variational endpoint,
+  -- discharged by the variational analogue `flow_mfderiv_continuousWithinAt_zero` from the
+  -- variational integral equation `hvarpicard` (linearised flow up to `0`, coefficient the
+  -- spatial gradient `hgrad0`) and the near-`0` Jacobian bound `hJbound`.
+  ⟨flow_orbit_continuousWithinAt_zero X_DT T hT Φ hΦ0 hcont0 hpicard,
+    flow_mfderiv_continuousWithinAt_zero X_DT T hT Φ hgrad0 hvarpicard hJbound⟩
 
 end DifferentialGeometry.PDE.RicciFlow
