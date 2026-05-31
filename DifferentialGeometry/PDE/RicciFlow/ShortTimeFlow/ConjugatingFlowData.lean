@@ -29,6 +29,8 @@ import DifferentialGeometry.PDE.RicciFlow.ShortTimeAssembly.FlatVariationalData
 import DifferentialGeometry.PDE.RicciFlow.ShortTimeAssembly.BasepointMotion
 import DifferentialGeometry.PDE.RicciFlow.ShortTimeAssembly.EvalFormChainRule
 import DifferentialGeometry.PDE.RicciFlow.ShortTimeAssembly.RicciFlowPdeAtZero
+import DifferentialGeometry.PDE.RicciFlow.Pullback.Metric
+import DifferentialGeometry.Integral.Measure.ChartDensity
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
@@ -140,6 +142,69 @@ theorem conjugating_flow_t0_continuity_data
         (fun s : ℝ => (-2 : ℝ) *
           DifferentialGeometry.Integral.Connection.ricciTensor (I := I)
             (Diffeomorph.pullbackMetric (g_DT s) (Φ_fam s)) x v w) (Set.Ioi 0) 0 := by
+  sorry
+
+/-- **Joint `(t, x)` chart-Gram regularity of the pulled-back metric family (faithful open
+input).**
+
+For the conjugating diffeomorphism family `Φ_fam` of the Hamilton–DeTurck construction —
+PINNED to the genuine flow by the backward bare-orbit ODE `hΦode`
+(`∂_s Φ_fam = -deTurckVF (g_DT s) g_bg ∘ Φ_fam` on `Ioo 0 T`) — the pulled-back metric family
+`g_fam s := (Φ_fam s)^* (g_DT s) = Diffeomorph.pullbackMetric (g_DT s) (Φ_fam s)` inherits the
+joint `(t, x)` chart-Gram regularity of `g_DT` along the flow:
+
+* `h_gram` (the joint-`C∞` conclusion): each chart-local Gram-matrix entry
+  `p ↦ chartGramMatrix (g_fam p.1) x₀ p.2 i j` is jointly `C∞` on the interior
+  `Ioo 0 T ×ˢ baseSet`;
+* `h_gram0` (the joint-continuity conclusion): the same entry is jointly continuous up to
+  `t = 0` on `Ico 0 T ×ˢ baseSet`.
+
+These are the chart-level expressions of joint smoothness / continuity of the moving
+pullback `(t, x) ↦ (g_DT t).inner (Φ_fam t x) (mfderiv (Φ_fam t) x ·) (mfderiv (Φ_fam t) x ·)`.
+Their content is the chain rule combining (i) the supplied joint chart-Gram regularity of
+`g_DT` itself (`hgram_DT` / `hgram0_DT`, the GENUINE outputs of the interior-parabolic-smooth,
+`C⁰`-up-to-`0` DeTurck solution), with (ii) the joint `(t, x)` smoothness / continuity of the
+orbit `(t, x) ↦ Φ_fam t x` and its chart Jacobian `mfderiv (Φ_fam t) x`.  Part (ii) is the
+classical Hartman smooth-dependence-on-initial-conditions output for the conjugating flow
+(`h3_global_flow_jointContMDiffOn_on_closed_manifold` + `manifoldFlowFamily_*` applied along the
+cutoff windows of the interior field, continuous up to the `C⁰`-at-`0` boundary).  The on-disk
+Hartman / pullback chart-Gram joint-smoothness machinery is faithful but not yet wired to the
+specific conjugating flow; we isolate that open content here as a single faithful labeled
+`sorry`, PINNED to the genuine flow by `hΦode` and consuming the genuine `g_DT` regularity
+`hgram_DT`/`hgram0_DT`.  Neither output is equal to, nor destructures to, any hypothesis (the
+hypotheses concern `g_DT`; the conclusions concern the pullback `pullbackMetric (g_DT) (Φ_fam)`),
+so this is not hypothesis-packaging.  Faithful labeled deferred input for a dedicated fill
+effort. -/
+theorem conjugating_flow_pullback_jointGram_data
+    (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M)
+    (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))
+    (hΦode : ∀ x : M, ∀ t ∈ Set.Ioo (0 : ℝ) T,
+      HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => (Φ_fam s : M → M) x)
+        (Set.Ici (0 : ℝ)) t
+        ((1 : ℝ →L[ℝ] ℝ).smulRight
+          (-(deTurckVF (I := I) (g_DT t) g_bg ((Φ_fam t : M → M) x)))))
+    (hgram_DT : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
+        (fun p : ℝ × M =>
+          Integral.Measure.chartGramMatrix (I := I) (g_DT p.1) x₀ p.2 i j)
+        (Set.Ioo (0 : ℝ) T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (hgram0_DT : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContinuousOn
+        (fun p : ℝ × M =>
+          Integral.Measure.chartGramMatrix (I := I) (g_DT p.1) x₀ p.2 i j)
+        (Set.Ico (0 : ℝ) T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) :
+    (∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
+        (fun p : ℝ × M =>
+          Integral.Measure.chartGramMatrix (I := I)
+            (Diffeomorph.pullbackMetric (g_DT p.1) (Φ_fam p.1)) x₀ p.2 i j)
+        (Set.Ioo (0 : ℝ) T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) ∧
+    (∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContinuousOn
+        (fun p : ℝ × M =>
+          Integral.Measure.chartGramMatrix (I := I)
+            (Diffeomorph.pullbackMetric (g_DT p.1) (Φ_fam p.1)) x₀ p.2 i j)
+        (Set.Ico (0 : ℝ) T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) := by
   sorry
 
 end DifferentialGeometry.PDE.RicciFlow

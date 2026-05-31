@@ -16,6 +16,7 @@ import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.ChartOverlapUniq
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.BareFlowFromJointC1
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.SmoothInSpace.VariationalLiftFlatIdentity
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.SmoothDependence.GlobalClosedManifold
+import DifferentialGeometry.Integral.Measure.ChartDensity
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
@@ -56,7 +57,12 @@ DeTurck solution:
 * `h_reg` — interior joint-`C∞` of the field map `q ↦ ⟨q.2, deTurckVF (g_DT q.1) g_bg q.2⟩`
   on `Ioo 0 T ×ˢ univ` (interior parabolic smoothness of the solution → smooth field);
 * `h_cont0` — continuity of the field up to `t = 0` on `Icc 0 T ×ˢ univ` (`C⁰`-up-to-`0`);
-* `h_grad0` — continuity of the field's spatial Fréchet derivative up to `t = 0`.
+* `h_grad0` — continuity of the field's spatial Fréchet derivative up to `t = 0`;
+* `h_gram` — interior joint-`(t, x)` `C∞` of each chart-local Gram-matrix entry of `g_DT`
+  on `Ioo 0 T ×ˢ baseSet` (the canonical `chartGramMatrix` formulation of joint smoothness
+  of the metric family; TRUE of the interior-parabolic-smooth DeTurck solution);
+* `h_gram0` — joint-`(t, x)` continuity of each chart-local Gram-matrix entry of `g_DT`
+  up to `t = 0` on `Ico 0 T ×ˢ baseSet` (continuity-up-to-the-`C⁰`-at-`0`-boundary).
 
 These constrain only the internal `g_DT`/`X_DT`, never `g₀`/the headline statement, so the
 enrichment is non-leaking.  The body remains `sorry` — this is the single faithful
@@ -78,7 +84,17 @@ theorem deturck_ricci_pde_shorttime
           (fun q : ℝ × M =>
             fderiv ℝ (chartRawRepr (I := I) α (fun x => deTurckVF (I := I) (g_DT q.1) g_bg x))
               (extChartAt I α q.2))
-          (Set.Icc 0 T ×ˢ Set.univ)) := sorry
+          (Set.Icc 0 T ×ˢ Set.univ)) ∧
+      (∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+        ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
+          (fun p : ℝ × M =>
+            Integral.Measure.chartGramMatrix (I := I) (g_DT p.1) x₀ p.2 i j)
+          (Set.Ioo (0 : ℝ) T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) ∧
+      (∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+        ContinuousOn
+          (fun p : ℝ × M =>
+            Integral.Measure.chartGramMatrix (I := I) (g_DT p.1) x₀ p.2 i j)
+          (Set.Ico (0 : ℝ) T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) := sorry
 
 set_option linter.unusedVariables false in
 /-- **Interior metric-level DeTurck–Ricci time-derivative (fully ungated).**

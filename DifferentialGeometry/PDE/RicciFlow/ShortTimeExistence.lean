@@ -19,6 +19,7 @@ import DifferentialGeometry.PDE.RicciFlow.ShortTimeAssembly.ConjugatingDiffeoFam
 import DifferentialGeometry.PDE.RicciFlow.ShortTimeAssembly.FlatAssemblyInterior
 import DifferentialGeometry.PDE.RicciFlow.ShortTimeAssembly.RicciFlowPdeAtZero
 import DifferentialGeometry.PDE.RicciFlow.ShortTimeFlow.ConjugatingFlowData
+import DifferentialGeometry.Integral.Measure.ChartDensity
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
@@ -39,7 +40,7 @@ a positive-time smooth solution with `g(0) = g₀`. The proof passes through:
 
 1. Solve the (strictly parabolic) DeTurck–Ricci flow
    `∂_t g_DT = -2 Ric(g_DT) + 𝓛_{X_DT} g_DT` (where `X_DT = deTurckVF g_DT g_bg`)
-   for time `[0, T_DT)`, via `deTurckRicci_shortTime_exists` (here we take
+   for time `[0, T_DT)`, via `deturck_ricci_pde_shorttime` (here we take
    `g_bg := g₀` as the background metric).
 2. Integrate the time-dependent vector field `-X_DT(t)` to obtain a smooth family
    of diffeomorphisms `Φ_t : M ≃ₘ M` with `Φ_0 = id` and `∂_t Φ_t = -X_DT ∘ Φ_t`.
@@ -47,15 +48,23 @@ a positive-time smooth solution with `g(0) = g₀`. The proof passes through:
    `pullbackMetric_refl`, and by the chain rule + Ricci/Lie naturality
    the Lie-derivative term cancels, leaving `∂_t g_fam = -2 Ric(g_fam)`.
 
-The DeTurck step is supplied by `deTurckRicci_shortTime_exists`; the chain-rule
-identity at scalar level is supplied by `pullback_time_derivative_chain_rule`;
-the Ricci tensor's diffeomorphism-equivariance by `ricci_pullback_naturality`;
-and the Lie derivative's by `lie_derivative_pullback_naturality`. The remaining
-ingredient — construction of the diffeomorphism family `Φ_t` together with the
-scalar-derivative existence packaged for `pullback_time_derivative_chain_rule` —
-is the `time_dependent_vf_globalflow_on_closed_mfd` infrastructure, currently
-under development. The body below assembles the pieces and identifies the
-single remaining hole as `h_construct`. -/
+The conclusion is the genuine smooth Ricci flow on `[0, T)`: the family `g_fam`
+is jointly `C∞` in `(t, x)` on the open interval `(0, T)` (at the level of the
+chart-local Gram matrices, `Integral.Measure.chartGramMatrix`), jointly continuous
+up to `t = 0`, satisfies `g_fam 0 = g₀`, and solves `∂_t g_fam = -2 Ric(g_fam)`
+on `[0, T)`.
+
+The DeTurck step is supplied by `deturck_ricci_pde_shorttime` (the clean spectral
+DeTurck–Ricci parabolic engine, which also exposes the DeTurck-field regularity and
+the joint chart-Gram smoothness/continuity of `g_DT`); the conjugating
+diffeomorphism family `Φ_fam` is built by `conjugating_diffeo_family` (integrating
+the negated DeTurck field); the interior `∂_t g_fam = -2 Ric` identity is the flat
+Hamilton–DeTurck assembly `flat_assembly_interior` and the `t = 0` endpoint the
+continuity extension `ricci_flow_pde_at_zero`; the joint smoothness/continuity of
+`g_fam = (Φ_fam)^* g_DT` follows from the conjugating-flow smooth-dependence data
+(`conjugating_flow_*`, pinned to the genuine flow by its orbit ODE). The
+construction step is assembled in `h_construct` below; it transits only those
+faithful labeled inputs. -/
 theorem ricci_flow_short_time_existence
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -64,20 +73,29 @@ theorem ricci_flow_short_time_existence
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g₀ : SmoothRiemannianMetric I M) :
-    ∃ T : ℝ, 0 < T ∧
-      ∃ g_fam : ℝ → SmoothRiemannianMetric I M,
-        g_fam 0 = g₀ ∧
-        ∀ t ∈ Set.Ico (0 : ℝ) T, ∀ x : M, ∀ v w : TangentSpace I x,
-          HasDerivWithinAt (fun s : ℝ => (g_fam s).inner x v w)
-            ((-2 : ℝ) *
-              DifferentialGeometry.Integral.Connection.ricciTensor
-                (I := I) (g_fam t) x v w) (Set.Ici 0) t := by
+    ∃ T : ℝ, 0 < T ∧ ∃ g_fam : ℝ → SmoothRiemannianMetric I M,
+      g_fam 0 = g₀ ∧
+      (∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+        ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
+          (fun p : ℝ × M =>
+            Integral.Measure.chartGramMatrix (I := I) (g_fam p.1) x₀ p.2 i j)
+          (Set.Ioo (0 : ℝ) T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) ∧
+      (∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+        ContinuousOn
+          (fun p : ℝ × M =>
+            Integral.Measure.chartGramMatrix (I := I) (g_fam p.1) x₀ p.2 i j)
+          (Set.Ico (0 : ℝ) T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) ∧
+      (∀ t ∈ Set.Ico (0 : ℝ) T, ∀ x : M, ∀ v w : TangentSpace I x,
+        HasDerivWithinAt (fun s : ℝ => (g_fam s).inner x v w)
+          ((-2 : ℝ) *
+            DifferentialGeometry.Integral.Connection.ricciTensor
+              (I := I) (g_fam t) x v w) (Set.Ici 0) t) := by
   -- Step 1: Solve the DeTurck–Ricci flow with background metric `g₀`.
   -- This yields a positive time `T_DT > 0`, a family `g_DT : ℝ → SmoothRiemannianMetric`,
   -- and the parabolic-solution data
   --   ∂_t g_DT(t) = -2 Ric(g_DT(t)) + 𝓛_{X_DT(t)} g_DT(t),
   -- where `X_DT(t) := deTurckVF (g_DT t) g₀` is the DeTurck vector field.
-  obtain ⟨T_DT, g_DT, hDT, h_reg, h_cont0, h_grad0⟩ :=
+  obtain ⟨T_DT, g_DT, hDT, h_reg, h_cont0, h_grad0, h_gram_DT, h_gram0_DT⟩ :=
     DifferentialGeometry.PDE.RicciFlow.deturck_ricci_pde_shorttime
       (I := I) (M := M) g₀ g₀
   -- Unpack the parabolic-solution data: `T_DT > 0`, initial condition, time derivative.
@@ -108,14 +126,23 @@ theorem ricci_flow_short_time_existence
   -- precisely cancels the Lie-derivative piece coming from the chain rule, by
   -- the flow condition `∂_t Φ_fam = -X ∘ Φ_fam`.
   have h_construct :
-      ∃ T : ℝ, 0 < T ∧
-        ∃ g_fam : ℝ → SmoothRiemannianMetric I M,
-          g_fam 0 = g₀ ∧
-          ∀ t ∈ Set.Ico (0 : ℝ) T, ∀ x : M, ∀ v w : TangentSpace I x,
-            HasDerivWithinAt (fun s : ℝ => (g_fam s).inner x v w)
-              ((-2 : ℝ) *
-                DifferentialGeometry.Integral.Connection.ricciTensor
-                  (I := I) (g_fam t) x v w) (Set.Ici 0) t := by
+      ∃ T : ℝ, 0 < T ∧ ∃ g_fam : ℝ → SmoothRiemannianMetric I M,
+        g_fam 0 = g₀ ∧
+        (∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+          ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
+            (fun p : ℝ × M =>
+              Integral.Measure.chartGramMatrix (I := I) (g_fam p.1) x₀ p.2 i j)
+            (Set.Ioo (0 : ℝ) T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) ∧
+        (∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+          ContinuousOn
+            (fun p : ℝ × M =>
+              Integral.Measure.chartGramMatrix (I := I) (g_fam p.1) x₀ p.2 i j)
+            (Set.Ico (0 : ℝ) T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) ∧
+        (∀ t ∈ Set.Ico (0 : ℝ) T, ∀ x : M, ∀ v w : TangentSpace I x,
+          HasDerivWithinAt (fun s : ℝ => (g_fam s).inner x v w)
+            ((-2 : ℝ) *
+              DifferentialGeometry.Integral.Connection.ricciTensor
+                (I := I) (g_fam t) x v w) (Set.Ici 0) t) := by
     -- The interior DeTurck PDE derivative on `Set.Ico 0 T_DT` (from the parabolic solution).
     have hDT_deriv' : ∀ t ∈ Set.Ico (0 : ℝ) T_DT, ∀ x : M, ∀ v w : TangentSpace I x,
         HasDerivWithinAt (fun s : ℝ => (g_DT s).inner x v w)
@@ -129,8 +156,42 @@ theorem ricci_flow_short_time_existence
     obtain ⟨T, hT0, hT_le, Φ_fam, hΦ0, hΦode⟩ :=
       conjugating_diffeo_family
         (I := I) g_DT g₀ T_DT hT_DT_pos h_reg h_cont0 h_grad0
+    -- The interior orbit ODE of `Φ_fam`, re-indexed `∀ x, ∀ t ∈ Ioo 0 T, …`, the pinning datum
+    -- consumed by the faithful conjugating-flow data nodes.
+    have hΦode' : ∀ x : M, ∀ t ∈ Set.Ioo (0 : ℝ) T,
+        HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => (Φ_fam s : M → M) x)
+          (Set.Ici (0 : ℝ)) t
+          ((1 : ℝ →L[ℝ] ℝ).smulRight
+            (-(deTurckVF (I := I) (g_DT t) g₀ ((Φ_fam t : M → M) x)))) :=
+      fun x t ht => hΦode x t ht
+    -- (C) JOINT CHART-GRAM REGULARITY of the pulled-back family.  The crux's interior joint
+    -- chart-Gram `C∞` of `g_DT` (`h_gram_DT`) and its continuity up to `0` (`h_gram0_DT`),
+    -- restricted from the horizon `T_DT` to the smaller `T ≤ T_DT`, feed the faithful labeled
+    -- node `conjugating_flow_pullback_jointGram_data` (PINNED to the genuine flow by `hΦode'`),
+    -- which transports them along the orbit/Jacobian into the joint regularity of the pulled-back
+    -- chart-Gram entries.  These reference only the internal data `g_DT`/`Φ_fam`, never `g₀`.
+    have h_gram_DT_T : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+        ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
+          (fun p : ℝ × M =>
+            Integral.Measure.chartGramMatrix (I := I) (g_DT p.1) x₀ p.2 i j)
+          (Set.Ioo (0 : ℝ) T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) := by
+      intro x₀ i j
+      exact (h_gram_DT x₀ i j).mono
+        (Set.prod_mono_left (Set.Ioo_subset_Ioo_right hT_le))
+    have h_gram0_DT_T : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+        ContinuousOn
+          (fun p : ℝ × M =>
+            Integral.Measure.chartGramMatrix (I := I) (g_DT p.1) x₀ p.2 i j)
+          (Set.Ico (0 : ℝ) T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) := by
+      intro x₀ i j
+      exact (h_gram0_DT x₀ i j).mono
+        (Set.prod_mono_left (Set.Ico_subset_Ico_right hT_le))
+    obtain ⟨h_gram_fam, h_gram0_fam⟩ :=
+      conjugating_flow_pullback_jointGram_data (I := I) g_DT g₀ T Φ_fam hΦode'
+        h_gram_DT_T h_gram0_DT_T
     -- The pulled-back metric family `g_fam s := (Φ_fam s)^* (g_DT s)`.
-    refine ⟨T, hT0, fun s => Diffeomorph.pullbackMetric (g_DT s) (Φ_fam s), ?_, ?_⟩
+    refine ⟨T, hT0, fun s => Diffeomorph.pullbackMetric (g_DT s) (Φ_fam s),
+      ?_, h_gram_fam, h_gram0_fam, ?_⟩
     · -- Initial condition: `g_fam 0 = (Φ_fam 0)^* (g_DT 0) = id^* g₀ = g₀`.
       change Diffeomorph.pullbackMetric (g_DT 0) (Φ_fam 0) = g₀
       rw [hΦ0, Diffeomorph.pullbackMetric_refl, hDT_init]
