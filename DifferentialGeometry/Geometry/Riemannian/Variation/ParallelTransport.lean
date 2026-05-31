@@ -1233,14 +1233,19 @@ next step solves a chart-piece centred at `c n` on `[c n - step, c n + 2 step]`
 `[c n - step/2, c n]` by `parallel_transport_unique_of_agree`, and glues with an
 `if t ≤ c n` cut; the locality of `chartRepAt` / `covDerivAlong` then transfers
 differentiability and parallelism to the extended window. Termination is reached
-once `n · step ≥ L`, where the window covers `Icc 0 L`. -/
-theorem exists_global_parallel_transport_on_Icc [I.Boundaryless]
+once `n · step ≥ L`, where the window covers `Icc 0 L`.
+
+This open-window form exposes the genuine domain of the construction: the section
+is parallel and chart-differentiable not merely on the closed interval `Icc 0 L`
+but on an *open neighbourhood* `Ioo (-δ) (L + δ)` of it (`δ > 0`). The closed-form
+`exists_global_parallel_transport_on_Icc` is the immediate corollary. -/
+theorem exists_global_parallel_transport_on_Ioo [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (hγ : ContMDiff 𝓘(ℝ,ℝ) I ∞ γ) {L : ℝ} (hL : 0 < L) (v₀ : TangentSpace I (γ 0)) :
-    ∃ V : ∀ t, TangentSpace I (γ t),
+    ∃ (δ : ℝ) (_ : 0 < δ) (V : ∀ t, TangentSpace I (γ t)),
       V 0 = v₀ ∧
-      (∀ t ∈ Set.Icc (0:ℝ) L, DifferentiableAt ℝ (chartRepAt (I := I) γ V t) t) ∧
-      (∀ t ∈ Set.Icc (0:ℝ) L, covDerivAlong (I := I) g γ V t = 0) := by
+      (∀ t ∈ Set.Ioo (-δ) (L + δ), DifferentiableAt ℝ (chartRepAt (I := I) γ V t) t) ∧
+      (∀ t ∈ Set.Ioo (-δ) (L + δ), covDerivAlong (I := I) g γ V t = 0) := by
   classical
   -- Uniform chart radius `r`; step `= r / 4`.
   obtain ⟨r, hr_pos, hr⟩ := exists_uniform_chart_radius (H := H) γ hγ.continuous L
@@ -1420,11 +1425,29 @@ theorem exists_global_parallel_transport_on_Icc [I.Boundaryless]
     rw [hc_def]; exact min_eq_left hN_ge
   obtain ⟨V, hV_init, hV_diff, hV_par⟩ := hQall N
   rw [hcN] at hV_diff hV_par
-  refine ⟨V, hV_init, ?_, ?_⟩
+  -- The window is `Ioo (-step) (L + step)`; expose `δ := step`.
+  refine ⟨step, hstep_pos, V, hV_init, ?_, ?_⟩
   · intro t ht
-    exact hV_diff t ⟨by linarith [ht.1, hstep_pos], by linarith [ht.2, hstep_pos]⟩
+    exact hV_diff t ⟨ht.1, ht.2⟩
   · intro t ht
-    exact hV_par t ⟨by linarith [ht.1, hstep_pos], by linarith [ht.2, hstep_pos]⟩
+    exact hV_par t ⟨ht.1, ht.2⟩
+
+/-- **Global parallel transport on `Icc 0 L`.** The closed-interval corollary of
+`exists_global_parallel_transport_on_Ioo`: a parallel, chart-differentiable
+section along `γ` with prescribed initial value `v₀ = V 0`, on `Icc 0 L`. -/
+theorem exists_global_parallel_transport_on_Icc [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
+    (hγ : ContMDiff 𝓘(ℝ,ℝ) I ∞ γ) {L : ℝ} (hL : 0 < L) (v₀ : TangentSpace I (γ 0)) :
+    ∃ V : ∀ t, TangentSpace I (γ t),
+      V 0 = v₀ ∧
+      (∀ t ∈ Set.Icc (0:ℝ) L, DifferentiableAt ℝ (chartRepAt (I := I) γ V t) t) ∧
+      (∀ t ∈ Set.Icc (0:ℝ) L, covDerivAlong (I := I) g γ V t = 0) := by
+  obtain ⟨δ, hδ_pos, V, hV0, hVdiff, hVpar⟩ :=
+    exists_global_parallel_transport_on_Ioo (I := I) g γ hγ hL v₀
+  have hsub : Set.Icc (0 : ℝ) L ⊆ Set.Ioo (-δ) (L + δ) := by
+    intro t ht
+    exact ⟨by linarith [ht.1, hδ_pos], by linarith [ht.2, hδ_pos]⟩
+  exact ⟨V, hV0, fun t ht => hVdiff t (hsub ht), fun t ht => hVpar t (hsub ht)⟩
 
 end Variation
 end Riemannian

@@ -1,6 +1,9 @@
 import DifferentialGeometry.Geometry.Riemannian.AlongCurve
 import DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
 import DifferentialGeometry.Geometry.Riemannian.Variation.ParallelTransport
+import DifferentialGeometry.Geometry.Riemannian.Variation.ParallelTransportSmooth
+import Mathlib.Geometry.Manifold.PartitionOfUnity
+import Mathlib.Geometry.Manifold.Riemannian.Basic
 
 /-!
 # Parallel orthonormal perpendicular frame along a geodesic
@@ -767,6 +770,618 @@ theorem chartCovDerivAlong_movingFoot_eq_zero_of_isParallelChart_centered
   abel
 
 end PerpFrame
+
+/-! ## Globally-smooth parallel orthonormal perpendicular frame
+
+The previous `exists_parallel_orthonormal_perp_frame` produces a frame whose
+members are *chart-differentiable* and parallel on `Icc 0 L`; it makes no claim
+about bundle-`C^∞` regularity, and indeed the bare parallel-transport sections
+are constructed by chart-gluing and are not even defined as bundle-smooth fields.
+
+The Bonnet–Myers length-bound contradiction additionally needs each frame vector
+`e i` to be a **globally bundle-`C^∞`** section `t ↦ ⟨γ t, (e i) t⟩` on all of
+`ℝ` (so that the sinusoidal test field `sin(πt/L) • e i` — supported on `[0, L]`
+but extended by `0` — is itself globally smooth).  This is achieved by:
+
+* transporting each orthonormal seed vector along `γ` with the *smooth* transport
+  `parallelTransport_section_contMDiffOn_Ioo`, which yields a section that is
+  bundle-`C^∞` on an open neighbourhood `Ioo (-δ) (L + δ)` of `Icc 0 L`; then
+* multiplying by a smooth cut-off `χ` equal to `1` on `Icc 0 L` and supported in
+  `Ioo (-δ) (L + δ)`, giving a globally-defined section that equals the transport
+  on `Icc 0 L` (so all four frame identities survive) and is globally `C^∞`
+  (`0` off the cut-off support, `χ • V` on the open smooth window). -/
+
+section SmoothPerpFrame
+
+variable [I.Boundaryless]
+
+/-- **Scalar cut-off of a bundle-smooth field is bundle-smooth.**  If
+`t ↦ ⟨γ t, V t⟩` is a `C^n` section of `TM` along `γ` and `χ : ℝ → ℝ` is `C^n`,
+then `t ↦ ⟨γ t, χ t • V t⟩` is `C^n`.  The fibre coordinate of the cut-off
+section, read in the trivialisation at `γ t₀`, is `χ t` times the fibre
+coordinate of the original (fibrewise linearity), hence smooth as a product of
+smooth scalar functions. -/
+theorem contMDiff_smul_bundleField_perp
+    {γ : ℝ → M} {V : ℝ → E} {χ : ℝ → ℝ} {n : WithTop ℕ∞}
+    (hγ : ContMDiff (𝓘(ℝ, ℝ)) I n γ) (hχ : ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) n χ)
+    (hVbundle : ContMDiff 𝓘(ℝ, ℝ) I.tangent n
+      (fun t : ℝ => (TotalSpace.mk' E (E := (TangentSpace I : M → Type _)) (γ t) (V t)))) :
+    ContMDiff 𝓘(ℝ, ℝ) I.tangent n
+      (fun t : ℝ => (TotalSpace.mk' E (E := (TangentSpace I : M → Type _))
+        (γ t) (χ t • V t))) := by
+  intro t₀
+  rw [contMDiffAt_totalSpace]
+  refine ⟨hγ t₀, ?_⟩
+  have hVfib := ((contMDiffAt_totalSpace (f := fun t : ℝ =>
+    (TotalSpace.mk' E (E := (TangentSpace I : M → Type _)) (γ t) (V t)))).1 (hVbundle t₀)).2
+  have hsmul := (hχ t₀).smul hVfib
+  refine hsmul.congr_of_eventuallyEq ?_
+  have hbase : ∀ᶠ t in 𝓝 t₀, γ t ∈ (trivializationAt E (TangentSpace I) (γ t₀)).baseSet := by
+    have hmem : (γ t₀) ∈ (trivializationAt E (TangentSpace I) (γ t₀)).baseSet :=
+      FiberBundle.mem_baseSet_trivializationAt' (γ t₀)
+    exact (hγ t₀).continuousAt.preimage_mem_nhds
+      ((trivializationAt E (TangentSpace I) (γ t₀)).open_baseSet.mem_nhds hmem)
+  filter_upwards [hbase] with t ht
+  simp only [TotalSpace.mk']
+  rw [(trivializationAt E (TangentSpace I) (γ t₀)).apply_eq_prod_continuousLinearEquivAt ℝ
+        (γ t) ht,
+      (trivializationAt E (TangentSpace I) (γ t₀)).apply_eq_prod_continuousLinearEquivAt ℝ
+        (γ t) ht]
+  exact map_smul _ _ _
+
+/-- A smooth compactly-supported cut-off `χ : ℝ → ℝ` equal to `1` on `Icc 0 L`,
+whose topological support is *compactly contained* in the open neighbourhood
+`Ioo (-δ) (L + δ)`, and valued in `[0, 1]`.  This is the `δ`-parametrised
+refinement of the unit cut-off: the support closure is forced strictly inside the
+prescribed open window (by building the cut-off vanishing already outside the
+half-window `Ioo (-δ/2) (L + δ/2)`), so a product with a field that is only
+smooth on `Ioo (-δ) (L + δ)` remains globally smooth — vanishing on the open
+complement of the support. -/
+theorem exists_cutoff_one_on_Icc_supported_Ioo {L δ : ℝ} (hδ : 0 < δ) :
+    ∃ χ : ℝ → ℝ, ContDiff ℝ (∞ : WithTop ℕ∞) χ ∧ Set.EqOn χ 1 (Set.Icc 0 L) ∧
+      tsupport χ ⊆ Set.Ioo (-δ : ℝ) (L + δ) ∧ ∀ x, χ x ∈ Set.Icc (0 : ℝ) 1 := by
+  -- Vanish already outside the half-window `Ioo (-δ/2) (L + δ/2)`.
+  have hδ2 : (0 : ℝ) < δ / 2 := by linarith
+  have hclosed_t : IsClosed (Set.Icc (0 : ℝ) L) := isClosed_Icc
+  have hclosed_s : IsClosed ((Set.Ioo (-(δ / 2) : ℝ) (L + δ / 2))ᶜ) :=
+    isOpen_Ioo.isClosed_compl
+  have hdisj : Disjoint ((Set.Ioo (-(δ / 2) : ℝ) (L + δ / 2))ᶜ) (Set.Icc 0 L) := by
+    rw [Set.disjoint_compl_left_iff_subset]
+    intro x hx
+    obtain ⟨h1, h2⟩ := hx
+    exact ⟨by linarith, by linarith⟩
+  obtain ⟨f, hf0, hf1, hfIcc⟩ :=
+    exists_contMDiffMap_zero_one_of_isClosed 𝓘(ℝ, ℝ) (n := (⊤ : ℕ∞)) hclosed_s hclosed_t hdisj
+  refine ⟨f, ?_, hf1, ?_, hfIcc⟩
+  · have hcd : ContDiff ℝ ((⊤ : ℕ∞) : WithTop ℕ∞) (f : ℝ → ℝ) := by
+      rw [← contMDiff_iff_contDiff]; exact f.contMDiff
+    exact hcd
+  · -- `tsupport f = closure (support f) ⊆ closure (Ioo (-δ/2) (L+δ/2))
+    --   = Icc (-δ/2) (L+δ/2) ⊆ Ioo (-δ) (L+δ)`.
+    have hsupp : Function.support (f : ℝ → ℝ) ⊆ Set.Ioo (-(δ / 2) : ℝ) (L + δ / 2) := by
+      intro x hx
+      by_contra hxc
+      exact hx (hf0 hxc)
+    have hclosure : tsupport (f : ℝ → ℝ) ⊆ Set.Icc (-(δ / 2) : ℝ) (L + δ / 2) := by
+      rw [tsupport]
+      exact closure_minimal (hsupp.trans Set.Ioo_subset_Icc_self) isClosed_Icc
+    refine hclosure.trans ?_
+    intro x hx
+    exact ⟨by linarith [hx.1], by linarith [hx.2]⟩
+
+set_option linter.unusedVariables false in
+/-- **Perpendicularity to the velocity is preserved (geodesic-on-a-set form).**
+The set-relativised analogue of `perp_to_velocity_preserved`: it only requires
+`γ` to be a geodesic *on* `Icc 0 L` (not globally), which is exactly the
+hypothesis available in the Bonnet–Myers length bound, and it carries no
+`T2Space (TangentBundle I M)` assumption.  The proof is the same constancy
+argument for `t ↦ g(γ t)(V t, dγ_t(1))`: its derivative vanishes at every foot
+because both covariant corrections vanish (the `V`-term by parallelism, the
+velocity-term because the geodesic velocity field is parallel on `Icc 0 L`). -/
+theorem perp_to_velocity_preserved_on
+    (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
+    (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) {L : ℝ} (hL : 0 < L)
+    (hgeo : IsGeodesicOn (I := I) g γ (Set.Icc 0 L))
+    (V : ∀ t, TangentSpace I (γ t))
+    (hVdiff : ∀ t ∈ Set.Icc (0 : ℝ) L,
+      DifferentiableAt ℝ (chartRepAt (I := I) γ V t) t)
+    (hVpar : ∀ t ∈ Set.Icc (0 : ℝ) L, covDerivAlong (I := I) g γ V t = 0)
+    (hPerp0 : g.inner (γ 0) (V 0) (mfderiv 𝓘(ℝ, ℝ) I γ 0 (1 : ℝ) : E) = 0) :
+    ∀ t ∈ Set.Icc (0 : ℝ) L,
+      g.inner (γ t) (V t) (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ) : E) = 0 := by
+  classical
+  set f : ℝ → ℝ := fun t => g.inner (γ t) (V t)
+    (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ) : E) with hf_def
+  have hlocal : ∀ t₀ ∈ Set.Icc (0 : ℝ) L, HasDerivAt f 0 t₀ := by
+    intro t₀ ht₀
+    set α : M := γ t₀ with hα_def
+    set Vrep : ℝ → E := chartRepAt (I := I) γ V t₀ with hVrep_def
+    set urep : ℝ → E :=
+      chartRepAt (I := I) γ (fun s => (mfderiv 𝓘(ℝ, ℝ) I γ s (1 : ℝ) : E)) t₀ with hurep_def
+    have hbase_t₀ : γ t₀ ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
+      rw [TangentBundle.trivializationAt_baseSet]
+      exact mem_chart_source H (γ t₀)
+    have hbaseSet_open : IsOpen (trivializationAt E (TangentSpace I) α).baseSet :=
+      (trivializationAt E (TangentSpace I) α).open_baseSet
+    have hsrc_open : IsOpen {s : ℝ | γ s ∈ (trivializationAt E (TangentSpace I) α).baseSet} :=
+      hbaseSet_open.preimage hγ.continuous
+    have hsrc_mem : {s : ℝ | γ s ∈ (trivializationAt E (TangentSpace I) α).baseSet} ∈ 𝓝 t₀ :=
+      hsrc_open.mem_nhds hbase_t₀
+    have hVround : ∀ s ∈ {s : ℝ | γ s ∈ (trivializationAt E (TangentSpace I) α).baseSet},
+        (trivializationAt E (TangentSpace I) α).symmL ℝ (γ s) (Vrep s) = V s := by
+      intro s hs
+      simpa [hVrep_def, chartRepAt_apply] using
+        (trivializationAt E (TangentSpace I) α).symmL_continuousLinearMapAt
+          (R := ℝ) hs (V s)
+    have huround : ∀ s ∈ {s : ℝ | γ s ∈ (trivializationAt E (TangentSpace I) α).baseSet},
+        (trivializationAt E (TangentSpace I) α).symmL ℝ (γ s) (urep s) =
+          (mfderiv 𝓘(ℝ, ℝ) I γ s (1 : ℝ) : E) := by
+      intro s hs
+      simpa [hurep_def, chartRepAt_apply] using
+        (trivializationAt E (TangentSpace I) α).symmL_continuousLinearMapAt
+          (R := ℝ) hs ((mfderiv 𝓘(ℝ, ℝ) I γ s (1 : ℝ) : E))
+    have hf_eq : f =ᶠ[𝓝 t₀]
+        fun s => AlongCurve.chartGramAlongCurve (I := I) g α γ Vrep urep s := by
+      filter_upwards [hsrc_mem] with s hs
+      have hVs := hVround s hs
+      have hus := huround s hs
+      have : f s = g.inner (γ s)
+          ((trivializationAt E (TangentSpace I) α).symmL ℝ (γ s) (Vrep s))
+          ((trivializationAt E (TangentSpace I) α).symmL ℝ (γ s) (urep s)) := by
+        rw [hf_def]; rw [hVs, hus]
+      rw [this, inner_eq_chartGramOnE_bilinear_on_baseSet (I := I) g α (Vrep s) (urep s)]
+      rw [AlongCurve.chartGramAlongCurve_def]
+      refine Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun j _ => ?_))
+      have hinv : (extChartAt I α).symm (chartCurve (I := I) α γ s) = γ s := by
+        rw [chartCurve_def]
+        refine (extChartAt I α).left_inv ?_
+        rw [extChartAt_source_eq_chartAt_source (I := I)]
+        rw [TangentBundle.trivializationAt_baseSet] at hs
+        exact hs
+      rw [DifferentialGeometry.Integral.DivergenceTheorem.chartGramOnE_def, hinv]
+    have hu_hasDerivAt :
+        HasDerivAt (chartCurve (I := I) α γ)
+          (deriv (chartCurve (I := I) α γ) t₀) t₀ := by
+      have hcd : ContDiffAt ℝ ∞ (chartCurve (I := I) α γ) t₀ := by
+        have hmdiff : ContMDiffAt 𝓘(ℝ, ℝ) 𝓘(ℝ, E) ∞
+            ((extChartAt I α) ∘ γ) t₀ := by
+          have hφ : ContMDiffAt I 𝓘(ℝ, E) ∞ (extChartAt I α) (γ t₀) :=
+            contMDiffAt_extChartAt (I := I) (x := α) (n := ∞)
+          exact hφ.comp t₀ (hγ.contMDiffAt)
+        exact contMDiffAt_iff_contDiffAt.mp hmdiff
+      exact (hcd.differentiableAt (by simp)).hasDerivAt
+    have hmem_int : chartCurve (I := I) α γ t₀ ∈ interior (extChartAt I α).target := by
+      have hxsrc : γ t₀ ∈ (extChartAt I α).source := by
+        rw [extChartAt_source]; exact mem_chart_source H (γ t₀)
+      exact DifferentialGeometry.Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
+        (I := I) α ((extChartAt I α).map_source hxsrc)
+    have hVrep_hasDerivAt : HasDerivAt Vrep (deriv Vrep t₀) t₀ :=
+      ((hVdiff t₀ ht₀).hasDerivAt)
+    set U : Set ℝ := γ ⁻¹' (chartAt H α).source with hU_def
+    have hU_open : IsOpen U := (chartAt H α).open_source.preimage hγ.continuous
+    have ht₀_U : t₀ ∈ U := by
+      rw [hU_def, Set.mem_preimage]; exact mem_chart_source H (γ t₀)
+    have hU_nhds : U ∈ 𝓝 t₀ := hU_open.mem_nhds ht₀_U
+    have hu_cdiffOn : ContDiffOn ℝ ∞ (chartCurve (I := I) α γ) U := by
+      have h_comp_mdiff :
+          ContMDiffOn 𝓘(ℝ, ℝ) 𝓘(ℝ, E) ∞ ((extChartAt I α) ∘ γ) U := by
+        have hφ : ContMDiffOn I 𝓘(ℝ, E) ∞ (extChartAt I α) (chartAt H α).source :=
+          contMDiffOn_extChartAt (I := I) (n := ∞) (x := α)
+        have hγU : ContMDiffOn 𝓘(ℝ, ℝ) I ∞ γ U := hγ.contMDiffOn
+        have hmaps : Set.MapsTo γ U (chartAt H α).source := fun s hs => hs
+        exact hφ.comp hγU hmaps
+      have hfun : (chartCurve (I := I) α γ) = ((extChartAt I α) ∘ γ) := rfl
+      rw [hfun]
+      exact contMDiffOn_iff_contDiffOn.mp h_comp_mdiff
+    have hurep_eqOn : Set.EqOn urep (deriv (chartCurve (I := I) α γ)) U := by
+      intro s hs
+      have hs' : γ s ∈ (chartAt H α).source := hs
+      rw [hurep_def, chartRepAt_apply]
+      rw [MFDerivAlongCurve.chartCoord_mfderiv_along_curve_eq_fderiv
+        (I := I) (M := M) (γ := γ) hγ α (t := s) hs']
+      rfl
+    have hurep_eq : urep =ᶠ[𝓝 t₀] deriv (chartCurve (I := I) α γ) :=
+      hurep_eqOn.eventuallyEq_of_mem hU_nhds
+    have hu_deriv_hasDerivAt :
+        HasDerivAt (deriv (chartCurve (I := I) α γ))
+          (deriv (deriv (chartCurve (I := I) α γ)) t₀) t₀ := by
+      have hderiv_u_cdiffOn :
+          ContDiffOn ℝ ∞ (deriv (chartCurve (I := I) α γ)) U :=
+        hu_cdiffOn.deriv_of_isOpen hU_open (by exact_mod_cast (le_refl (∞ : WithTop ℕ∞)))
+      exact ((hderiv_u_cdiffOn.differentiableOn (by simp) t₀ ht₀_U).differentiableAt
+        hU_nhds).hasDerivAt
+    have hurep_hasDerivAt : HasDerivAt urep (deriv (deriv (chartCurve (I := I) α γ)) t₀) t₀ :=
+      hu_deriv_hasDerivAt.congr_of_eventuallyEq hurep_eq
+    have hgram :=
+      AlongCurve.chartGramAlongCurve_hasDerivAt_covariant (I := I) g α γ Vrep urep
+        (uPrime := fun _ => deriv (chartCurve (I := I) α γ) t₀)
+        (Vprime := fun _ => deriv Vrep t₀)
+        (Wprime := fun _ => deriv (deriv (chartCurve (I := I) α γ)) t₀)
+        hu_hasDerivAt hmem_int hVrep_hasDerivAt hurep_hasDerivAt
+    have hcorrV :
+        deriv Vrep t₀ +
+          chartChristoffelContraction (I := I) g α
+            (deriv (chartCurve (I := I) α γ) t₀) (Vrep t₀)
+            (chartCurve (I := I) α γ t₀) = 0 := by
+      have : chartCovDerivAlong (I := I) g α γ Vrep t₀ = 0 := by
+        rw [hα_def, hVrep_def]
+        exact (covDerivAlong_eq_zero_iff (I := I) g γ V t₀).mp (hVpar t₀ ht₀)
+      rw [chartCovDerivAlong_def] at this
+      exact this
+    have hcorru :
+        deriv (deriv (chartCurve (I := I) α γ)) t₀ +
+          chartChristoffelContraction (I := I) g α
+            (deriv (chartCurve (I := I) α γ) t₀) (urep t₀)
+            (chartCurve (I := I) α γ t₀) = 0 := by
+      have hgeoeq := hgeo.hasGeodesicEquationAt ht₀
+      have hvel0 :
+          covDerivAlong (I := I) g γ
+            (fun s => (mfderiv 𝓘(ℝ, ℝ) I γ s (1 : ℝ) : E)) t₀ = 0 :=
+        (covDerivAlong_velocity_eq_zero_iff_hasGeodesicEquationAt (I := I) g γ t₀ hγ).mpr hgeoeq
+      have hchart0 : chartCovDerivAlong (I := I) g α γ urep t₀ = 0 := by
+        rw [hα_def, hurep_def]
+        exact (covDerivAlong_eq_zero_iff (I := I) g γ
+          (fun s => (mfderiv 𝓘(ℝ, ℝ) I γ s (1 : ℝ) : E)) t₀).mp hvel0
+      rw [chartCovDerivAlong_def] at hchart0
+      rw [hurep_eq.deriv_eq] at hchart0
+      exact hchart0
+    have hderiv0 : HasDerivAt
+        (fun s => AlongCurve.chartGramAlongCurve (I := I) g α γ Vrep urep s) 0 t₀ := by
+      convert hgram using 1
+      simp only [hcorrV, hcorru]
+      simp
+    exact hderiv0.congr_of_eventuallyEq hf_eq
+  have hcont : ContinuousOn f (Set.Icc 0 L) :=
+    fun t ht => ((hlocal t ht).continuousAt).continuousWithinAt
+  have hderivWithin : ∀ x ∈ Set.Ico (0 : ℝ) L, HasDerivWithinAt f 0 (Set.Ici x) x := by
+    intro x hx
+    exact (hlocal x (Set.mem_Icc_of_Ico hx)).hasDerivWithinAt
+  have hconst : ∀ x ∈ Set.Icc (0 : ℝ) L, f x = f 0 :=
+    constant_of_has_deriv_right_zero hcont hderivWithin
+  intro t ht
+  have hft := hconst t ht
+  rw [hf_def] at hft
+  simp only at hft
+  rw [hft]
+  exact hPerp0
+
+/-- The velocity field's chart representation is differentiable at every time.
+For a `C^∞` curve `γ`, the chart-`(γ t)`-coordinate representation of the
+velocity field `s ↦ dγ_s(1)` agrees, near `t`, with `deriv (chartCurve (γ t) γ)`
+(chain rule), which is `C^∞` near `t` (the chart trajectory is `C^∞` on the chart
+source and the derivative of a `C^∞` function on an open set is `C^∞`); hence the
+representation is differentiable at `t`. -/
+theorem velocity_chartRepAt_differentiableAt
+    (γ : ℝ → M) (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) (t : ℝ) :
+    DifferentiableAt ℝ
+      (chartRepAt (I := I) γ (fun s => (mfderiv 𝓘(ℝ, ℝ) I γ s (1 : ℝ) : E)) t) t := by
+  classical
+  set α : M := γ t with hα_def
+  set urep : ℝ → E :=
+    chartRepAt (I := I) γ (fun s => (mfderiv 𝓘(ℝ, ℝ) I γ s (1 : ℝ) : E)) t with hurep_def
+  set U : Set ℝ := γ ⁻¹' (chartAt H α).source with hU_def
+  have hU_open : IsOpen U := (chartAt H α).open_source.preimage hγ.continuous
+  have ht_U : t ∈ U := by
+    rw [hU_def, Set.mem_preimage]; exact mem_chart_source H (γ t)
+  have hU_nhds : U ∈ 𝓝 t := hU_open.mem_nhds ht_U
+  have hu_cdiffOn : ContDiffOn ℝ ∞ (chartCurve (I := I) α γ) U := by
+    have h_comp_mdiff :
+        ContMDiffOn 𝓘(ℝ, ℝ) 𝓘(ℝ, E) ∞ ((extChartAt I α) ∘ γ) U := by
+      have hφ : ContMDiffOn I 𝓘(ℝ, E) ∞ (extChartAt I α) (chartAt H α).source :=
+        contMDiffOn_extChartAt (I := I) (n := ∞) (x := α)
+      have hγU : ContMDiffOn 𝓘(ℝ, ℝ) I ∞ γ U := hγ.contMDiffOn
+      have hmaps : Set.MapsTo γ U (chartAt H α).source := fun s hs => hs
+      exact hφ.comp hγU hmaps
+    have hfun : (chartCurve (I := I) α γ) = ((extChartAt I α) ∘ γ) := rfl
+    rw [hfun]
+    exact contMDiffOn_iff_contDiffOn.mp h_comp_mdiff
+  -- `urep` agrees with `deriv (chartCurve α γ)` on `U`, hence near `t`.
+  have hurep_eqOn : Set.EqOn urep (deriv (chartCurve (I := I) α γ)) U := by
+    intro s hs
+    have hs' : γ s ∈ (chartAt H α).source := hs
+    rw [hurep_def, chartRepAt_apply]
+    rw [MFDerivAlongCurve.chartCoord_mfderiv_along_curve_eq_fderiv
+      (I := I) (M := M) (γ := γ) hγ α (t := s) hs']
+    rfl
+  have hurep_eq : urep =ᶠ[𝓝 t] deriv (chartCurve (I := I) α γ) :=
+    hurep_eqOn.eventuallyEq_of_mem hU_nhds
+  -- `deriv (chartCurve α γ)` is `C^∞` on `U`, hence differentiable at `t`.
+  have hderiv_u_cdiffOn :
+      ContDiffOn ℝ ∞ (deriv (chartCurve (I := I) α γ)) U :=
+    hu_cdiffOn.deriv_of_isOpen hU_open (by exact_mod_cast (le_refl (∞ : WithTop ℕ∞)))
+  have hderiv_u_diff : DifferentiableAt ℝ (deriv (chartCurve (I := I) α γ)) t :=
+    (hderiv_u_cdiffOn.differentiableOn (by simp) t ht_U).differentiableAt hU_nhds
+  exact hderiv_u_diff.congr_of_eventuallyEq hurep_eq
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- **Globally-smooth parallel orthonormal perpendicular frame along a geodesic.**
+For a `C^∞` unit-speed geodesic `γ` on `Icc 0 L` (`L > 0`, unit-speed pinned at
+`t = 0` by `hUnit0`), there is a frame
+`e : Fin (finrank E - 1) → SectionAlongCurve I M γ` of the `g`-orthogonal
+complement of the velocity such that each `e i` is:
+
+* chart-differentiable on `Icc 0 L`;
+* parallel along `γ` (the intrinsic `covDerivAlong g γ (e i) t = 0`) on `Icc 0 L`;
+* part of a pointwise `g`-orthonormal frame on `Icc 0 L`;
+* `g`-orthogonal to the velocity `dγ_t(1)` on `Icc 0 L`; and
+* a **globally bundle-`C^∞`** section `t ↦ ⟨γ t, (e i) t⟩` on all of `ℝ`.
+
+This is the complete frame package consumed by the Bonnet–Myers length-bound
+contradiction (the fifth, global-smoothness clause is what makes the sinusoidal
+test field globally smooth).  Construction: an orthonormal seed basis of the
+`g`-orthogonal complement of `dγ_0(1)` at `γ 0`, smoothly parallel-transported
+along `γ` on an open neighbourhood of `Icc 0 L`
+(`parallelTransport_section_contMDiffOn_Ioo`), then cut off by a smooth bump
+equal to `1` on `Icc 0 L` and supported in that neighbourhood. -/
+theorem exists_parallel_perp_frame [RiemannianBundle (fun x : M => TangentSpace I x)]
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M]
+    (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
+    (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) {L : ℝ} (hL : 0 < L)
+    (hgeo : IsGeodesicOn (I := I) g γ (Set.Icc 0 L))
+    (hUnit0 : g.inner (γ 0) (mfderiv 𝓘(ℝ, ℝ) I γ 0 (1 : ℝ))
+      (mfderiv 𝓘(ℝ, ℝ) I γ 0 (1 : ℝ)) = 1) :
+    ∃ e : Fin (Module.finrank ℝ E - 1) → SectionAlongCurve I M γ,
+      (∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L,
+        DifferentiableAt ℝ (chartRepAt (I := I) γ (e i).toFun t) t) ∧
+      (∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L,
+        covDerivAlong (I := I) g γ (e i).toFun t = 0) ∧
+      (∀ t ∈ Set.Icc (0 : ℝ) L, ∀ i j,
+        g.inner (γ t) ((e i).toFun t) ((e j).toFun t) =
+          if i = j then 1 else 0) ∧
+      (∀ t ∈ Set.Icc (0 : ℝ) L, ∀ i,
+        g.inner (γ t) ((e i).toFun t) (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ)) = 0) ∧
+      (∀ i, ContMDiff 𝓘(ℝ, ℝ) I.tangent ∞
+        (fun t => TotalSpace.mk' E (E := (TangentSpace I : M → Type _))
+          (γ t) ((e i).toFun t))) := by
+  classical
+  haveI : CompleteSpace E := FiniteDimensional.complete ℝ E
+  -- The base point, velocity, and the bilinear form `B := g.inner (γ 0)`.
+  set u₀ : E := (mfderiv 𝓘(ℝ, ℝ) I γ 0 (1 : ℝ) : E) with hu₀_def
+  set B : E →L[ℝ] E →L[ℝ] ℝ := g.inner (γ 0) with hB_def
+  have hBsymm : ∀ x y : E, B x y = B y x := fun x y => g.symm (γ 0) x y
+  have hBpos : ∀ x : E, x ≠ 0 → 0 < B x x := fun x hx => g.pos (γ 0) x hx
+  have h0mem : (0 : ℝ) ∈ Set.Icc (0 : ℝ) L := ⟨le_refl _, hL.le⟩
+  -- `u₀` is `B`-unit, hence nonzero.
+  have hu₀_unit : B u₀ u₀ = 1 := hUnit0
+  have hu₀_ne : u₀ ≠ 0 := by
+    intro h; rw [h] at hu₀_unit; simp at hu₀_unit
+  -- The `g`-orthogonal complement of `u₀`: the kernel of the functional `B u₀`.
+  set φ : E →ₗ[ℝ] ℝ := (B u₀).toLinearMap with hφ_def
+  set W : Submodule ℝ E := LinearMap.ker φ with hW_def
+  have hφ_u₀ : φ u₀ = 1 := hu₀_unit
+  have hφ_surj : Function.Surjective φ := by
+    intro c
+    refine ⟨c • u₀, ?_⟩
+    rw [map_smul, hφ_u₀, smul_eq_mul, mul_one]
+  have hrange : LinearMap.range φ = ⊤ := LinearMap.range_eq_top.mpr hφ_surj
+  have hfr_range : Module.finrank ℝ ↥(LinearMap.range φ) = 1 := by
+    rw [hrange]; simp
+  have hfinrankW : Module.finrank ℝ ↥W = Module.finrank ℝ E - 1 := by
+    have hsum := LinearMap.finrank_range_add_finrank_ker φ
+    rw [hfr_range] at hsum
+    have : Module.finrank ℝ ↥W = Module.finrank ℝ ↥(LinearMap.ker φ) := rfl
+    rw [this]; omega
+  -- A basis of `W`, indexed by `Fin (finrank E - 1)`.
+  letI : Module.Finite ℝ ↥W := inferInstance
+  set bW : Module.Basis (Fin (Module.finrank ℝ E - 1)) ℝ ↥W :=
+    Module.finBasisOfFinrankEq ℝ ↥W hfinrankW with hbW_def
+  set vfam : Fin (Module.finrank ℝ E - 1) → E := fun i => (bW i : E) with hvfam_def
+  have hvfam_mem : ∀ i, vfam i ∈ W := fun i => (bW i).2
+  have hvfam_LI : LinearIndependent ℝ vfam := by
+    have hbWLI : LinearIndependent ℝ (fun i => bW i) := bW.linearIndependent
+    have := hbWLI.map' (W.subtype) (Submodule.ker_subtype W)
+    exact this
+  -- The `B`-orthonormal Gram–Schmidt seed of the perpendicular subspace.
+  set seed : Fin (Module.finrank ℝ E - 1) → E :=
+    fun i => PerpFrameAux.bGramSchmidt B vfam i with hseed_def
+  have hseed_ON : ∀ i j, B (seed i) (seed j) = if i = j then 1 else 0 :=
+    fun i j => PerpFrameAux.bGramSchmidt_orthonormal B hBsymm hBpos vfam hvfam_LI i j
+  have hseed_mem : ∀ i, seed i ∈ W :=
+    fun i => PerpFrameAux.bGramSchmidt_mem B vfam W hvfam_mem i
+  have hseed_perp : ∀ i, B (seed i) u₀ = 0 := by
+    intro i
+    have hker : φ (seed i) = 0 := (LinearMap.mem_ker).mp (hseed_mem i)
+    have : B u₀ (seed i) = 0 := hker
+    rw [hBsymm (seed i) u₀]; exact this
+  -- Smoothly parallel-transport each seed vector along `γ` on an open
+  -- neighbourhood of `Icc 0 L`, producing a bundle-smooth section there.
+  have htransport : ∀ i, ∃ (δ : ℝ) (_ : 0 < δ) (V : ∀ t, TangentSpace I (γ t)),
+      V 0 = seed i ∧
+      (∀ t ∈ Set.Ioo (-δ) (L + δ), DifferentiableAt ℝ (chartRepAt (I := I) γ V t) t) ∧
+      (∀ t ∈ Set.Ioo (-δ) (L + δ), covDerivAlong (I := I) g γ V t = 0) ∧
+      ContMDiffOn 𝓘(ℝ, ℝ) I.tangent ∞
+        (fun t => TotalSpace.mk' E (E := (TangentSpace I : M → Type _)) (γ t) (V t))
+        (Set.Ioo (-δ) (L + δ)) :=
+    fun i => parallelTransport_section_contMDiffOn_Ioo (I := I) g γ hγ hL (seed i)
+  choose δ hδ_pos Vfun hV0 hVdiff_Ioo hVpar_Ioo hVbundle_Ioo using htransport
+  -- For each `i`, a smooth cut-off `χ i` equal to `1` on `Icc 0 L` and supported
+  -- in `Ioo (-δ i) (L + δ i)`; the cut-off section `e i := χ i • V i`.
+  have hcutoff : ∀ i, ∃ χ : ℝ → ℝ, ContDiff ℝ (∞ : WithTop ℕ∞) χ ∧
+      Set.EqOn χ 1 (Set.Icc 0 L) ∧
+      tsupport χ ⊆ Set.Ioo (-(δ i)) (L + δ i) ∧ ∀ x, χ x ∈ Set.Icc (0 : ℝ) 1 :=
+    fun i => exists_cutoff_one_on_Icc_supported_Ioo (hδ_pos i)
+  choose χ hχ_cd hχ_one hχ_tsupp hχ_Icc using hcutoff
+  -- On `Icc 0 L`, `χ i = 1`, so `(e i).toFun = Vfun i`.
+  have he_eq_on : ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L, χ i t • Vfun i t = Vfun i t := by
+    intro i t ht
+    rw [hχ_one i ht]; simp
+  -- The diff/parallelism hypotheses on `Icc 0 L` (from the open-neighbourhood data).
+  have hsub : ∀ i, Set.Icc (0 : ℝ) L ⊆ Set.Ioo (-(δ i)) (L + δ i) := by
+    intro i t ht
+    exact ⟨by linarith [ht.1, hδ_pos i], by linarith [ht.2, hδ_pos i]⟩
+  have hVdiff : ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L,
+      DifferentiableAt ℝ (chartRepAt (I := I) γ (Vfun i) t) t :=
+    fun i t ht => hVdiff_Ioo i t (hsub i ht)
+  have hVpar : ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L,
+      covDerivAlong (I := I) g γ (Vfun i) t = 0 :=
+    fun i t ht => hVpar_Ioo i t (hsub i ht)
+  -- The cut-off section's chart representation is the `χ`-scaling of the
+  -- transport's: `chartRepAt γ (χ•V) t = (fun s => χ i s • chartRepAt γ V t s)`,
+  -- because the chart coordinate is fibrewise-linear.
+  have hchartRep_smul : ∀ i (t : ℝ),
+      chartRepAt (I := I) γ (fun s => χ i s • Vfun i s) t =
+        fun s => χ i s • chartRepAt (I := I) γ (Vfun i) t s := by
+    intro i t
+    funext s
+    rw [chartRepAt_apply, chartRepAt_apply, map_smul]
+  -- On `Icc 0 L`, `χ i` attains its global maximum (it equals `1` there and is
+  -- `≤ 1` everywhere), so its derivative vanishes on `Icc 0 L`.
+  have hχ_deriv_zero : ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L, deriv (χ i) t = 0 := by
+    intro i t ht
+    have hmax : IsLocalMax (χ i) t := by
+      have hle : ∀ s, χ i s ≤ χ i t := by
+        intro s
+        rw [hχ_one i ht]
+        exact (hχ_Icc i s).2
+      exact Filter.Eventually.of_forall hle
+    exact hmax.deriv_eq_zero
+  -- Unit-speed propagation: the velocity field is parallel on `Icc 0 L`
+  -- (geodesic), and its chart representation is differentiable, so its `g`-norm
+  -- is constant; pinned to `1` at `t = 0` by `hUnit0`.
+  have hvel_par : ∀ t ∈ Set.Icc (0 : ℝ) L,
+      covDerivAlong (I := I) g γ
+        (fun s => (mfderiv 𝓘(ℝ, ℝ) I γ s (1 : ℝ) : E)) t = 0 := by
+    intro t ht
+    exact (covDerivAlong_velocity_eq_zero_iff_hasGeodesicEquationAt (I := I) g γ t hγ).mpr
+      (hgeo.hasGeodesicEquationAt ht)
+  have hvel_diff : ∀ t ∈ Set.Icc (0 : ℝ) L,
+      DifferentiableAt ℝ
+        (chartRepAt (I := I) γ (fun s => (mfderiv 𝓘(ℝ, ℝ) I γ s (1 : ℝ) : E)) t) t :=
+    fun t _ => velocity_chartRepAt_differentiableAt (I := I) γ hγ t
+  have hUnit : ∀ t ∈ Set.Icc (0 : ℝ) L,
+      g.inner (γ t) (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ) : E)
+        (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ) : E) = 1 := by
+    intro t ht
+    have hconst :=
+      global_parallel_transport_preserves_inner (I := I) g γ hγ hL.le
+        (fun s => (mfderiv 𝓘(ℝ, ℝ) I γ s (1 : ℝ) : E))
+        (fun s => (mfderiv 𝓘(ℝ, ℝ) I γ s (1 : ℝ) : E))
+        hvel_diff hvel_diff hvel_par hvel_par t ht
+    rw [hconst]; exact hUnit0
+  -- The frame.
+  refine ⟨fun i => ⟨fun t => χ i t • Vfun i t⟩, ?_, ?_, ?_, ?_, ?_⟩
+  · -- Chart-representation differentiability on `Icc 0 L`.
+    intro i t ht
+    change DifferentiableAt ℝ (chartRepAt (I := I) γ (fun s => χ i s • Vfun i s) t) t
+    rw [hchartRep_smul i t]
+    exact (((hχ_cd i).differentiable (by simp)).differentiableAt).smul (hVdiff i t ht)
+  · -- Parallelism on `Icc 0 L`.  By the Leibniz rule
+    -- `covDerivAlong (χ • V) t = (deriv χ t) • V t + χ t • covDerivAlong V t`;
+    -- here `deriv χ t = 0`, `χ t = 1`, `covDerivAlong V t = 0`, so the result is `0`.
+    intro i t ht
+    change covDerivAlong (I := I) g γ (fun s => χ i s • Vfun i s) t = 0
+    rw [covDerivAlong_smulFun (I := I) g γ (χ i) (Vfun i) t
+      (((hχ_cd i).differentiable (by simp)).differentiableAt) (hVdiff i t ht)]
+    rw [hχ_deriv_zero i t ht, hχ_one i ht, hVpar i t ht]
+    simp
+  · -- `g`-orthonormality on `Icc 0 L`: on `Icc 0 L`, `e i = Vfun i`, and parallel
+    -- transport preserves the `g`-inner product, so it equals the seed's
+    -- `B`-orthonormality.
+    intro t ht i j
+    change g.inner (γ t) (χ i t • Vfun i t) (χ j t • Vfun j t) = if i = j then 1 else 0
+    have hχi : χ i t = 1 := by have := hχ_one i ht; simpa using this
+    have hχj : χ j t = 1 := by have := hχ_one j ht; simpa using this
+    rw [hχi, hχj, one_smul, one_smul]
+    have hconst :=
+      global_parallel_transport_preserves_inner (I := I) g γ hγ hL.le
+        (Vfun i) (Vfun j) (hVdiff i) (hVdiff j) (hVpar i) (hVpar j) t ht
+    rw [hconst, hV0 i, hV0 j]
+    exact hseed_ON i j
+  · -- `g`-perpendicularity to the velocity on `Icc 0 L`: on `Icc 0 L`, `e i =
+    -- Vfun i`, and perpendicularity to the (parallel) velocity is preserved.
+    intro t ht i
+    change g.inner (γ t) (χ i t • Vfun i t) (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ) : E) = 0
+    have hχi : χ i t = 1 := by have := hχ_one i ht; simpa using this
+    rw [hχi, one_smul]
+    have hperp :=
+      perp_to_velocity_preserved_on (I := I) g γ hγ hL hgeo (Vfun i)
+        (hVdiff i) (hVpar i)
+        (by rw [hV0 i]; exact hseed_perp i)
+        t ht
+    exact hperp
+  · -- Global bundle-`C^∞` of `t ↦ ⟨γ t, χ i t • Vfun i t⟩`.
+    intro i
+    -- The transport is bundle-`C^∞` on the open window `Ioo (-δ i) (L + δ i)`.
+    -- The cut-off `χ i` is globally `C^∞`, supported in that window.  The product
+    -- is globally `C^∞`: `0` off the support (closed in the window's complement),
+    -- and `χ i • Vfun i` on the window.
+    set Ω : Set ℝ := Set.Ioo (-(δ i)) (L + δ i) with hΩ_def
+    have hΩ_open : IsOpen Ω := isOpen_Ioo
+    -- The (closed) support of `χ i` is compactly contained in the (open) window `Ω`.
+    have hsupp_sub : tsupport (χ i) ⊆ Ω := hχ_tsupp i
+    -- Bundle-smoothness, proved pointwise via the two-region split.
+    intro t₀
+    by_cases ht₀ : t₀ ∈ Ω
+    · -- Interior of the window: the product equals `χ i • (transport)`, which is
+      -- bundle-smooth by the cut-off-of-bundle-field lemma, restricted to `Ω`.
+      have hχ_smooth : ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (∞ : WithTop ℕ∞) (χ i) := by
+        rw [contMDiff_iff_contDiff]; exact hχ_cd i
+      -- On `Ω`, the bundle field `t ↦ ⟨γ t, χ i t • Vfun i t⟩` is smooth at `t₀`.
+      have hbundleAt : ContMDiffWithinAt 𝓘(ℝ, ℝ) I.tangent ∞
+          (fun t => TotalSpace.mk' E (E := (TangentSpace I : M → Type _))
+            (γ t) (χ i t • Vfun i t)) Ω t₀ := by
+        -- Apply the cut-off lemma to the `Ω`-restricted smooth transport.  Since
+        -- `Ω` is open and `t₀ ∈ Ω`, we transfer to `ContMDiffWithinAt`.
+        have htransportAt : ContMDiffWithinAt 𝓘(ℝ, ℝ) I.tangent ∞
+            (fun t => TotalSpace.mk' E (E := (TangentSpace I : M → Type _))
+              (γ t) (Vfun i t)) Ω t₀ := hVbundle_Ioo i t₀ ht₀
+        -- Fibrewise-linear cut-off, at the level of `ContMDiffWithinAt`.
+        rw [Bundle.contMDiffWithinAt_totalSpace] at htransportAt ⊢
+        refine ⟨htransportAt.1, ?_⟩
+        have hVfib := htransportAt.2
+        have hsmul := (hχ_smooth t₀).contMDiffWithinAt.smul hVfib
+        refine hsmul.congr_of_eventuallyEq ?_ ?_
+        · have hbase : ∀ᶠ t in 𝓝[Ω] t₀,
+              γ t ∈ (trivializationAt E (TangentSpace I) (γ t₀)).baseSet := by
+            have hmem : (γ t₀) ∈ (trivializationAt E (TangentSpace I) (γ t₀)).baseSet :=
+              FiberBundle.mem_baseSet_trivializationAt' (γ t₀)
+            have hfull : γ ⁻¹' (trivializationAt E (TangentSpace I) (γ t₀)).baseSet ∈ 𝓝 t₀ :=
+              (hγ t₀).continuousAt.preimage_mem_nhds
+                ((trivializationAt E (TangentSpace I) (γ t₀)).open_baseSet.mem_nhds hmem)
+            exact mem_nhdsWithin_of_mem_nhds hfull
+          filter_upwards [hbase] with t ht
+          simp only [TotalSpace.mk']
+          rw [(trivializationAt E (TangentSpace I) (γ t₀)).apply_eq_prod_continuousLinearEquivAt
+                ℝ (γ t) ht,
+              (trivializationAt E (TangentSpace I) (γ t₀)).apply_eq_prod_continuousLinearEquivAt
+                ℝ (γ t) ht]
+          exact map_smul _ _ _
+        · have hmem : (γ t₀) ∈ (trivializationAt E (TangentSpace I) (γ t₀)).baseSet :=
+            FiberBundle.mem_baseSet_trivializationAt' (γ t₀)
+          simp only [TotalSpace.mk']
+          rw [(trivializationAt E (TangentSpace I) (γ t₀)).apply_eq_prod_continuousLinearEquivAt
+                ℝ (γ t₀) hmem,
+              (trivializationAt E (TangentSpace I) (γ t₀)).apply_eq_prod_continuousLinearEquivAt
+                ℝ (γ t₀) hmem]
+          exact map_smul _ _ _
+      -- Since `Ω` is open and `t₀ ∈ Ω`, `ContMDiffWithinAt Ω` upgrades to
+      -- `ContMDiffAt`.
+      exact (hbundleAt.contMDiffAt (hΩ_open.mem_nhds ht₀))
+    · -- Outside the window: `χ i = 0` on a neighbourhood of `t₀` (the open
+      -- complement of `tsupport (χ i)`), so the product section is `⟨γ t, 0⟩`
+      -- there, hence smooth (the zero section is smooth).
+      have ht₀_notsupp : t₀ ∉ tsupport (χ i) := fun h => ht₀ (hsupp_sub h)
+      have hcompl_open : IsOpen (tsupport (χ i))ᶜ := (isClosed_tsupport (χ i)).isOpen_compl
+      have hcompl_nhds : (tsupport (χ i))ᶜ ∈ 𝓝 t₀ := hcompl_open.mem_nhds ht₀_notsupp
+      -- On this neighbourhood, `χ i t = 0`, so the section is the zero section.
+      have hzero_eq : (fun t => TotalSpace.mk' E (E := (TangentSpace I : M → Type _))
+            (γ t) (χ i t • Vfun i t))
+          =ᶠ[𝓝 t₀]
+          (fun t => TotalSpace.mk' E (E := (TangentSpace I : M → Type _)) (γ t) 0) := by
+        filter_upwards [hcompl_nhds] with t ht
+        have hχt : χ i t = 0 := image_eq_zero_of_notMem_tsupport ht
+        rw [hχt, zero_smul]
+      refine ContMDiffAt.congr_of_eventuallyEq ?_ hzero_eq
+      -- The zero section is bundle-smooth: `t ↦ ⟨γ t, 0⟩ = zeroSection ∘ γ`.
+      have hzs : ContMDiffAt 𝓘(ℝ, ℝ) I.tangent ∞
+          (fun t => TotalSpace.mk' E (E := (TangentSpace I : M → Type _)) (γ t) 0) t₀ := by
+        have := (Bundle.contMDiffAt_zeroSection (F := E) ℝ
+          (E := (TangentSpace I : M → Type _)) (n := ∞) (x := γ t₀)).comp t₀ (hγ t₀)
+        exact this
+      exact hzs
+
+end SmoothPerpFrame
 
 end DifferentialGeometry.Geometry.Riemannian
 

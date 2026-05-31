@@ -949,6 +949,96 @@ theorem covDerivAlong_chart_foot_invariance [I.Boundaryless]
   -- The two `D²T` corrections cancel; the remaining terms match.
   abel
 
+set_option linter.unusedVariables false in
+/-- **Differentiability of a fixed-basepoint chart representation.** For a `C^∞` curve
+`γ`, a section `V` along `γ` whose canonical *moving*-foot chart representation
+`chartRepAt γ V t` is differentiable at `t`, and *any* basepoint `β` whose chart source
+contains the foot `γ t`, the *fixed*-basepoint chart representation
+`chartRepAtBase β γ V` is differentiable at `t`.
+
+This is the same transition-push computation that underlies
+`covDerivAlong_chart_foot_invariance`: near `t`, the fixed-`β` representation equals the
+chart-transition push `s ↦ chartTransitionAt (γ t) β (uₐ s) (repα s)` of the canonical
+moving-foot representation, which is a composition of the smooth transition Jacobian with
+the differentiable curve and representation, hence differentiable at `t`. The hypothesis
+`hV` is the genuine moving-foot differentiability assumption (the same one under which
+`covDerivAlong_add` and friends are stated); the conclusion is about the genuinely
+*different* fixed-foot function `chartRepAtBase β γ V`. -/
+theorem chartRepAtBase_differentiableAt [I.Boundaryless]
+    {n : WithTop ℕ∞} [ENat.LEInfty n] (hn : n ≠ 0)
+    (g : SmoothRiemannianMetric I M) (γ : ℝ → M) (V : ∀ t, TangentSpace I (γ t))
+    (t : ℝ) (β : M)
+    (hγ : ContMDiff 𝓘(ℝ, ℝ) I n γ)
+    (hβ : γ t ∈ (chartAt H β).source)
+    (hV : DifferentiableAt ℝ (chartRepAt (I := I) γ V t) t) :
+    DifferentiableAt ℝ (chartRepAtBase (I := I) β γ V) t := by
+  classical
+  -- The canonical foot chart `α := γ t`; the foot lies in its own chart source.
+  set α : M := γ t with hα_def
+  have hα : γ t ∈ (chartAt H α).source := mem_chart_source H (γ t)
+  set uα : ℝ → E := chartCurve (I := I) α γ with huα_def
+  set x : E := extChartAt I α (γ t) with hx_def
+  set repα : ℝ → E := chartRepAt (I := I) γ V t with hrepα_def
+  set repβ : ℝ → E := chartRepAtBase (I := I) β γ V with hrepβ_def
+  -- The foot is in `chartTransitionSource α β`.
+  have hsrc : x ∈ chartTransitionSource (I := I) α β :=
+    extChartAt_mem_chartTransitionSource (I := I) α β hα hβ
+  -- `HasDerivAt` for the chart-α trajectory and the foot-chart representation.
+  have huα_hd : HasDerivAt uα (deriv uα t) t :=
+    ((contDiffAt_chartCurve (I := I) hγ t).differentiableAt hn).hasDerivAt
+  have hrepα_hd : HasDerivAt repα (deriv repα t) t := hV.hasDerivAt
+  -- An open neighbourhood `U ∋ t` on which `γ` stays in both chart sources.
+  set U : Set ℝ := γ ⁻¹' ((chartAt H α).source ∩ (chartAt H β).source) with hU_def
+  have hU_open : IsOpen U :=
+    ((chartAt H α).open_source.inter (chartAt H β).open_source).preimage hγ.continuous
+  have htU : t ∈ U := ⟨hα, hβ⟩
+  have hU_nhds : U ∈ 𝓝 t := hU_open.mem_nhds htU
+  -- On `U`, `repβ s = chartTransitionAt α β (uα s) (repα s)`.
+  have hrepβ_eq : repβ =ᶠ[𝓝 t]
+      (fun s => chartTransitionAt (I := I) α β (uα s) (repα s)) := by
+    filter_upwards [hU_nhds] with s hs
+    obtain ⟨hsα, hsβ⟩ := hs
+    have hbridge :
+        (trivializationAt E (TangentSpace I) β).continuousLinearMapAt ℝ (γ s)
+            ((trivializationAt E (TangentSpace I) α).symmL ℝ (γ s)
+              ((trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ (γ s) (V s))) =
+          chartTransitionAt (I := I) α β (extChartAt I α (γ s))
+            ((trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ (γ s) (V s)) :=
+      trivCoord_comp_symmL_eq_transition (I := I) α β hsα hsβ _
+    have hround :
+        (trivializationAt E (TangentSpace I) α).symmL ℝ (γ s)
+            ((trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ (γ s) (V s)) =
+          V s := by
+      have hmem : γ s ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
+        rw [TangentBundle.trivializationAt_baseSet]; exact hsα
+      exact (trivializationAt E (TangentSpace I) α).symmL_continuousLinearMapAt
+        (R := ℝ) hmem (V s)
+    rw [hround] at hbridge
+    rw [hrepβ_def, chartRepAtBase_apply]
+    rw [hrepα_def, chartRepAt_apply]
+    rw [huα_def, chartCurve_def]
+    exact hbridge
+  -- The transition Jacobian is differentiable at `x`.
+  have hAdiff : DifferentiableAt ℝ
+      (fun z => (chartTransitionAt (I := I) α β z : E →L[ℝ] E)) x := by
+    have h_open : IsOpen (chartTransitionSource (I := I) α β) :=
+      chartTransitionSource_isOpen (I := I) α β
+    exact ((chartTransitionAt_smooth (I := I) α β).contDiffAt
+      (h_open.mem_nhds hsrc)).differentiableAt (by simp)
+  -- The CLM-valued composite `s ↦ chartTransitionAt α β (uα s)` is differentiable at `t`.
+  have hxut : uα t = x := by rw [huα_def, chartCurve_def, hx_def]
+  have hAdiff' : DifferentiableAt ℝ
+      (fun z => (chartTransitionAt (I := I) α β z : E →L[ℝ] E)) (uα t) := by
+    rw [hxut]; exact hAdiff
+  have hAcomp_diff : DifferentiableAt ℝ
+      (fun s => (chartTransitionAt (I := I) α β (uα s) : E →L[ℝ] E)) t :=
+    hAdiff'.comp t huα_hd.differentiableAt
+  -- Apply the bilinear CLM-application differentiability rule.
+  have hdiff : DifferentiableAt ℝ
+      (fun s => chartTransitionAt (I := I) α β (uα s) (repα s)) t :=
+    hAcomp_diff.clm_apply hrepα_hd.differentiableAt
+  exact hdiff.congr_of_eventuallyEq hrepβ_eq
+
 end CovariantDerivativeAlong
 
 end Riemannian
