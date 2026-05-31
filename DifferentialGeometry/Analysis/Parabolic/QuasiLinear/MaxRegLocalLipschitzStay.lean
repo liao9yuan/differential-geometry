@@ -33,7 +33,7 @@ with the two summands measured against `ι u₀` separately.
     `‖(homogeneous part) − const (ι u₀)‖_{L²([0,T];H^{a+1})} ≤ √T · ‖ι u₀‖`.
 
 * **Duhamel part.**  Bounded by the committed one-derivative-gain `√T`-decay
-  estimate `maximalRegularitySolFieldHa1_norm_le_ofCompact`:
+  estimate `maximalRegularitySolFieldHa1_norm_le`:
 
     `‖(Duhamel part)‖_{L²([0,T];H^{a+1})} ≤ 2√T · ‖gforce‖`.
 
@@ -269,7 +269,7 @@ theorem maxRegHomogeneousSolFieldHa1_sub_const_norm_le
   -- mode by mode, with comparison constant `C = 1`.
   rw [show Real.sqrt T * ‖ιu₀‖ = 1 * ‖TimeSobolev.const T ιu₀‖ by
     rw [TimeSobolev.norm_const, one_mul]]
-  refine norm_le_of_weighted_perMode_le_ofCompact (I := I) (M := M)
+  refine norm_le_of_weighted_perMode_le (I := I) (M := M)
     (a := a + 1) (b := a + 1)
     (h_compact := h_compact) (C := 1) (by norm_num) _ _ (fun i => ?_)
   -- `(1+λᵢ)^{a+1} ‖defect i‖² ≤ 1² · (1+λᵢ)^{a+1} ‖const cᵢ‖²`.
@@ -297,7 +297,7 @@ field differs from the constant-in-time field `t ↦ ι u₀` by at most
 the sum of the homogeneous-part defect `√T · ‖ι u₀‖`
 (`maxRegHomogeneousSolFieldHa1_sub_const_norm_le`) and the Duhamel-part bound
 `2√T · ‖gforce‖` (the one-derivative-gain `√T`-decay
-`maximalRegularitySolFieldHa1_norm_le_ofCompact`).  Both contributions vanish as
+`maximalRegularitySolFieldHa1_norm_le`).  Both contributions vanish as
 `T → 0`. -/
 theorem maxRegDuhamelSolFieldHa1_sub_const_norm_le_ofCompact (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact : IsCompactOperator (tensorResolventL2
@@ -325,7 +325,7 @@ theorem maxRegDuhamelSolFieldHa1_sub_const_norm_le_ofCompact (hT : 0 < T) (hT1 :
   refine le_trans (norm_add_le _ _) ?_
   have hhom := maxRegHomogeneousSolFieldHa1_sub_const_norm_le (I := I) (M := M)
     (h_compact := h_compact) u₀ hT.le
-  have hduh := maximalRegularitySolFieldHa1_norm_le_ofCompact (I := I) (M := M)
+  have hduh := maximalRegularitySolFieldHa1_norm_le (I := I) (M := M)
     (h_compact := h_compact) (a := a) hT hT1 gforce
   exact add_le_add hhom hduh
 

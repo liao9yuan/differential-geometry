@@ -16,7 +16,7 @@ the `g`-Riemannian fibre norm — assembles `g + h` into a genuine
 `PosDefPerturbation.lean`.
 
 The input is a `SmoothCcTensor g 0 2` (the type produced, on finitely-supported
-spectral data, by `tensorHsSmoothRepr_unconditional` in the chart-locality-free
+spectral data, by `tensorHsSmoothRepr` in the chart-locality-free
 eigenbasis twin). Its underlying section is a smooth section of the mixed
 `(0,2)`-tensor bundle. We extract from it a genuine smooth bilinear form
 `h x : TₓM →L[ℝ] TₓM →L[ℝ] ℝ`, symmetrize it, and add it to the background
@@ -397,7 +397,7 @@ theorem gFibreOpBound_ccTensorBilinSymm_smul (g : SmoothRiemannianMetric I M)
 
 /-! ## Realization directly from a finitely-supported spectral Sobolev element
 
-The chart-locality-free smooth representative `tensorHsSmoothRepr_unconditional`
+The chart-locality-free smooth representative `tensorHsSmoothRepr`
 of a finitely-supported element `u : tensorHs g 0 2 σ` is a
 `SmoothCcTensor g 0 2`; feeding it to the extraction above realizes the metric
 perturbation directly from the spectral data. -/
@@ -410,7 +410,7 @@ def tensorHsBilinSymm (g : SmoothRiemannianMetric I M) {σ : ℝ}
     (hu_fs : (Function.support u.coeff).Finite) (x : M) :
     TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
   ccTensorBilinSymm (I := I) g
-    (Analysis.Parabolic.TensorSpectral.tensorHsSmoothRepr_unconditional
+    (Analysis.Parabolic.TensorSpectral.tensorHsSmoothRepr
       (I := I) (M := M) u hu_fs) x
 
 /-- **Realization of a finitely-supported spectral `(0,2)` element as a smooth
@@ -435,7 +435,7 @@ theorem exists_smooth_metric_of_tensorHs_small
         g'.inner x v w =
           g_bg.inner x v w + tensorHsBilinSymm (I := I) g_bg u hu_fs x v w :=
   exists_smooth_metric_of_smooth_tensor_small (I := I) g_bg
-    (Analysis.Parabolic.TensorSpectral.tensorHsSmoothRepr_unconditional
+    (Analysis.Parabolic.TensorSpectral.tensorHsSmoothRepr
       (I := I) (M := M) u hu_fs) hδ'_lt hδ'
 
 /-! ## The substantive realization map
@@ -461,7 +461,7 @@ noncomputable def realizeMetricMap (g_bg : SmoothRiemannianMetric I M) (a : ℕ)
       gFibreOpBound (I := I) (M := M) g_bg
         (tensorHsBilinSymm (I := I) g_bg u hu_fs) δ' then
     tensorSectionRealizeMetric (I := I) g_bg
-      (Analysis.Parabolic.TensorSpectral.tensorHsSmoothRepr_unconditional
+      (Analysis.Parabolic.TensorSpectral.tensorHsSmoothRepr
         (I := I) (M := M) u h.choose)
       h.choose_spec.choose_spec.1 h.choose_spec.choose_spec.2
   else

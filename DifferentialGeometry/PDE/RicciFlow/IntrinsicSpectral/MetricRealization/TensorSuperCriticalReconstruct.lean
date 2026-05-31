@@ -35,7 +35,7 @@ of the canonical Euclidean chart `P₀`-component `tensorL2ChartComponent g r s 
 single-chart frame constructor `tensorBundleSectionOfChartComponents`
 (`TensorChartFrameSection.lean`) consumes, and it is the abstract-`w` analogue of
 the per-eigenvector existence theorem
-`eigenvectorChartComponent_exists_smooth_representative_unconditional`
+`eigenvectorChartComponent_exists_smooth_representative`
 (`EigenvectorChartComponentSmooth.lean`).
 
 ## What is proved here (fully, unconditionally)
@@ -212,7 +212,7 @@ the chart component and the localised representative are a.e. zero. -/
 strictly inside the chart target, almost everywhere equal to it.
 
 This is the abstract-`w` analogue of
-`eigenvectorChartComponent_exists_smooth_representative_unconditional`. -/
+`eigenvectorChartComponent_exists_smooth_representative`. -/
 theorem superCriticalChartComponent_exists_smooth_representative
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (w : TensorL2 r s g) (α : M)
@@ -333,7 +333,7 @@ For an `L²` tensor `w`, ranks `(r, s)`, a chart centre `α` and a component
 multi-index `P`, the **source chart-component function** is the underlying
 function of the canonical Euclidean chart `P`-component
 `tensorL2ChartComponent g r s w α P`. This plays, for the abstract source `w`,
-exactly the rôle that `eigenvectorChartComponentFun_ofCompact` plays for the
+exactly the rôle that `eigenvectorChartComponentFun` plays for the
 intrinsic eigenbasis vector in the eigenvector route: it is the chart-`α`
 `P`-component that the chosen smooth representative approximates almost
 everywhere, and that the abstract partition-of-unity transport law
@@ -354,7 +354,7 @@ For a chart centre `α` and component multi-index `P`, the per-chart existence
 theorem `superCriticalChartComponent_exists_smooth_representative` produces a
 smooth, compactly-supported chart-`α` `P`-component function. We pick one with
 `Classical.choose` and record its four defining properties. The construction
-mirrors `chosenComp_unconditional` from the eigenvector route. -/
+mirrors `chosenComp` from the eigenvector route. -/
 
 /-- The chosen smooth chart-`α` `P`-component representative of the abstract
 source `w`. -/
@@ -458,7 +458,7 @@ private lemma chosenComp_w_hsupp (w : TensorL2 r s g)
 For a chart centre `α`, feeding the chosen chart-`α` component family to the
 chart-frame section constructor yields a smooth compactly-supported tensor
 section whose raw chart-`α` frame is that family. This mirrors
-`eigenvectorSmoothChart_unconditional`. -/
+`eigenvectorSmoothChart`. -/
 
 /-- The per-chart smooth section at `α`: the chart-frame tensor section assembled
 from the chosen chart-`α` smooth component family of the abstract source `w`. -/
@@ -937,7 +937,7 @@ open Classical in
 per-`γ` term of the smooth-section side equals, almost everywhere on the
 chart-`β` `L²` measure and after the common pushed partition-of-unity weight of
 `β`, the per-`γ` term of the source's chart-transition transport sum. This is
-the abstract-`w` twin of `eigenvectorSmoothChart_transport_term_aeEq_unconditional`. -/
+the abstract-`w` twin of `eigenvectorSmoothChart_transport_term_aeEq`. -/
 private lemma wSmoothChart_transport_term_aeEq (w : TensorL2 r s g)
     (h_all : ∀ k : ℕ, ∀ (α : M) (P₀ : TensorCompIdx (E := E) r s),
       MemWkp (d := Module.finrank ℝ E) (2 * k) 2

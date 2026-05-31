@@ -4,7 +4,7 @@ import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.BallRetraction
 /-!
 # Small-time strong existence for a locally Lipschitz nonlinearity
 
-The small-time engine `quasilinear_strong_existence_smallTime_ofCompact`
+The small-time engine `quasilinear_strong_existence_smallTime`
 (`MaxRegSmallTime`) produces, for **any** global Lipschitz constant `L`, a
 positive horizon `T_L` and a strong solution of `∂_t u = Δ_∇ u + N(u)` on
 `(0, T_L]`.  It requires `N : H^{a+1} → Hᵃ` to be *globally* `LipschitzWith L`.
@@ -269,7 +269,7 @@ theorem quasilinear_strong_existence_truncated_smallTime_ofCompact
                 (truncatedNonlin_lipschitzWith (I := I) (M := M) hR hN)
                 (maxRegDuhamelSolFieldHa1 (I := I) (M := M) a hT hT1 u₀
                   gforce) :=
-  quasilinear_strong_existence_smallTime_ofCompact (I := I) (M := M)
+  quasilinear_strong_existence_smallTime (I := I) (M := M)
     (h_compact := h_compact) u₀
     (truncatedNonlin_lipschitzWith (I := I) (M := M) hR hN)
 
@@ -381,7 +381,7 @@ theorem quasilinear_strong_existence_locallyLipschitz_smallTime_ofCompact
       hT hT1 u₀ gforce
   · -- The equation `∂_t u = Δ_∇ (field_{a+2}) + Ñ_R(field_{a+1})`, where the
     -- forcing along the field is reproduced by the fixed-point equation `hfix`.
-    rw [maxRegDuhamelMap_timeDeriv_eq_ofCompact (I := I) (M := M)
+    rw [maxRegDuhamelMap_timeDeriv_eq (I := I) (M := M)
       (h_compact := h_compact) (a := a) (T := T) hT hT1 u₀ gforce]
     exact congrArg₂ (· + ·) rfl hfix
 

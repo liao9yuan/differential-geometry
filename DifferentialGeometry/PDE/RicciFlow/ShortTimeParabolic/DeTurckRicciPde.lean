@@ -170,8 +170,8 @@ theorem deturck_metric_pde_interior
         (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
           (I := I) (M := M) g_bg 0 2),
       (N_cont u).coeff i =
-        tensorL2Coeff_ofCompact (I := I) (M := M)
-          (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g_bg 0 2)
+        tensorL2Coeff (I := I) (M := M)
+          (tensorResolventL2_isCompactOperator (I := I) (M := M) g_bg 0 2)
           (Integral.L2.SmoothCcTensor.toL2 (Nsec u)) i)
     (hNsec_realize : ∀ (u : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 1))
         (x : M) (v w : TangentSpace I x),
@@ -196,7 +196,7 @@ theorem deturck_metric_pde_interior
         (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
           (I := I) (M := M) g_bg 0 2),
       (u₂ s).coeff i
-        = tensorL2Coeff_ofCompact (I := I) (M := M) (hCompact (I := I) (M := M) g_bg)
+        = tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g_bg)
             (Integral.L2.SmoothCcTensor.toL2 (T_s s)) i)
     -- The spectral→geometric principal-part reconciliation: the smooth rough
     -- Laplacian of the realized representative plus the realized lower-order
@@ -238,7 +238,7 @@ theorem deturck_metric_pde_interior
     intro s
     refine (hℓ (T_s s) (u_car s) ?_).symm
     intro i
-    -- `(u_car s).coeff i = (u₂ s).coeff i = tensorL2Coeff_ofCompact … (T_s s) i`.
+    -- `(u_car s).coeff i = (u₂ s).coeff i = tensorL2Coeff … (T_s s) i`.
     rw [hu_car_def]
     simp only [tensorHsInclusion_coeff_apply]
     exact hsmoothrepr s i

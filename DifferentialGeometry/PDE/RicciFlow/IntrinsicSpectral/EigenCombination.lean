@@ -8,7 +8,7 @@ import DifferentialGeometry.Analysis.Laplacian.TensorRegularity.TensorAllOrdersR
 For a closed Riemannian manifold `(M, g)` and rank `(0, 2)`, this file builds the
 *finite eigen-combination*
 `finiteEigenCombo F c := ∑_{i ∈ F} c i • eᵢ`,
-where `eᵢ = eigenvectorSmooth_unconditional g 0 2 i` is the chart-locality-free
+where `eᵢ = eigenvectorSmooth g 0 2 i` is the chart-locality-free
 smooth representative of the connection-Laplacian resolvent eigenbasis vector at
 index `i`, `F` a finite set of eigen-indices and `c` a real coefficient family.
 This is a genuine smooth compactly-supported `(0, 2)`-tensor section.
@@ -92,7 +92,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 /-! ## The chart-locality-free smooth eigenvector abbreviation
 
-For brevity, `eigenSmooth g i := eigenvectorSmooth_unconditional g 0 2 i` is the
+For brevity, `eigenSmooth g i := eigenvectorSmooth g 0 2 i` is the
 chart-locality-free smooth representative of the resolvent eigenbasis vector at
 eigen-index `i`. -/
 
@@ -102,7 +102,7 @@ variable (g : SmoothRiemannianMetric I M)
 vector at eigen-index `i`, as a smooth compactly-supported `(0, 2)`-tensor. -/
 abbrev eigenSmooth
     (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2) : SmoothCcTensor g 0 2 :=
-  eigenvectorSmooth_unconditional (I := I) (M := M) g 0 2 i
+  eigenvectorSmooth (I := I) (M := M) g 0 2 i
 
 /-! ## The finite eigen-combination -/
 
@@ -148,22 +148,22 @@ combination of the resolvent eigenbasis vectors. -/
 /-- The compactness witness used throughout: the chart-locality-free compactness
 of the L²-side tensor resolvent at rank `(0, 2)`. -/
 abbrev hCompact : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g 0 2) :=
-  tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g 0 2
+  tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 2
 
 /-- **The `L²` image of the finite eigen-combination.** It is the finite
 combination `∑_{i ∈ F} c i • bᵢ` of the chart-locality-free resolvent eigenbasis
-vectors `bᵢ = tensorResolventEigenbasisVec_ofCompact i`. -/
+vectors `bᵢ = tensorResolventEigenbasisVec i`. -/
 theorem finiteEigenCombo_toL2
     (F : Finset (Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2))
     (c : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ) :
     (finiteEigenCombo (I := I) (M := M) g F c : TensorL2 0 2 g) =
       ∑ i ∈ F, c i •
-        tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+        tensorResolventEigenbasisVec (I := I) (M := M)
           (hCompact (I := I) (M := M) g) i := by
   rw [← SmoothCcTensor.toL2_apply, finiteEigenCombo_eq, map_sum]
   refine Finset.sum_congr rfl (fun i _ => ?_)
   rw [map_smul, SmoothCcTensor.toL2_apply,
-    eigenvectorSmooth_toL2_unconditional (I := I) (M := M) g 0 2 i]
+    eigenvectorSmooth_toL2 (I := I) (M := M) g 0 2 i]
 
 /-! ## The eigenbasis-coordinate of the finite eigen-combination
 
@@ -180,20 +180,20 @@ Hilbert eigenbasis `b`; since `(eⱼ : L²) = b j` and `b` is orthonormal, this 
 Kronecker delta. -/
 theorem tensorL2Coeff_ofCompact_eigenSmooth
     (i j : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2) :
-    tensorL2Coeff_ofCompact (I := I) (M := M) (hCompact (I := I) (M := M) g)
+    tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g)
         ((eigenSmooth (I := I) (M := M) g j : TensorL2 0 2 g)) i =
       (if i = j then (1 : ℝ) else 0) := by
   classical
   -- The Hilbert eigenbasis abbreviation.
-  set b := tensorResolventHilbertEigenbasisSigma_ofCompact (I := I) (M := M)
+  set b := tensorResolventHilbertEigenbasisSigma (I := I) (M := M)
     (hCompact (I := I) (M := M) g) with hb_def
   -- `(eⱼ : L²) = b j`: the smooth eigenvector's `L²` image is the eigenbasis vector.
   have hbj : (eigenSmooth (I := I) (M := M) g j : TensorL2 0 2 g) = b j := by
-    rw [hb_def, tensorResolventHilbertEigenbasisSigma_ofCompact_apply
+    rw [hb_def, tensorResolventHilbertEigenbasisSigma_apply
       (I := I) (M := M) (hCompact (I := I) (M := M) g) j,
-      eigenvectorSmooth_toL2_unconditional (I := I) (M := M) g 0 2 j]
+      eigenvectorSmooth_toL2 (I := I) (M := M) g 0 2 j]
   -- The coordinate is `⟪b i, b j⟫`; apply orthonormality.
-  rw [tensorL2Coeff_ofCompact_eq_inner, hbj]
+  rw [tensorL2Coeff_eq_inner, hbj]
   have horth := b.orthonormal
   rw [orthonormal_iff_ite] at horth
   exact horth i j
@@ -206,32 +206,32 @@ theorem finiteEigenCombo_tensorL2Coeff
     (F : Finset (Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2))
     (c : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ)
     (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2) :
-    tensorL2Coeff_ofCompact (I := I) (M := M) (hCompact (I := I) (M := M) g)
+    tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g)
         ((finiteEigenCombo (I := I) (M := M) g F c : TensorL2 0 2 g)) i =
       (if i ∈ F then c i else 0) := by
   classical
   -- The coordinate is the inner product against the eigenbasis vector `b i`; it
   -- distributes over the finite combination of `L²` images.
-  rw [tensorL2Coeff_ofCompact_eq_inner, finiteEigenCombo_toL2,
+  rw [tensorL2Coeff_eq_inner, finiteEigenCombo_toL2,
     inner_sum]
   -- each inner term: `⟪b i, c j • bⱼ⟫ = c j · (if i = j then 1 else 0)`.
   have h_term : ∀ j ∈ F,
       (inner ℝ
-          (tensorResolventHilbertEigenbasisSigma_ofCompact (I := I) (M := M)
+          (tensorResolventHilbertEigenbasisSigma (I := I) (M := M)
             (hCompact (I := I) (M := M) g) i)
-          (c j • tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+          (c j • tensorResolventEigenbasisVec (I := I) (M := M)
             (hCompact (I := I) (M := M) g) j) : ℝ) =
         (if i = j then c j else 0) := by
     intro j _
     rw [inner_smul_right]
     -- `⟪b i, bⱼ⟫ = if i = j then 1 else 0` (orthonormality), since `bⱼ = b j`.
-    rw [show tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+    rw [show tensorResolventEigenbasisVec (I := I) (M := M)
             (hCompact (I := I) (M := M) g) j =
-          tensorResolventHilbertEigenbasisSigma_ofCompact (I := I) (M := M)
+          tensorResolventHilbertEigenbasisSigma (I := I) (M := M)
             (hCompact (I := I) (M := M) g) j from
-        (tensorResolventHilbertEigenbasisSigma_ofCompact_apply
+        (tensorResolventHilbertEigenbasisSigma_apply
           (I := I) (M := M) (hCompact (I := I) (M := M) g) j).symm]
-    have horth := (tensorResolventHilbertEigenbasisSigma_ofCompact
+    have horth := (tensorResolventHilbertEigenbasisSigma
         (I := I) (M := M) (hCompact (I := I) (M := M) g)).orthonormal
     rw [orthonormal_iff_ite] at horth
     rw [horth i j]
@@ -313,10 +313,10 @@ yields `cᵢ(Δ_∇ T) = cᵢ(T) - (1 + λᵢ) cᵢ(T) = -λᵢ · cᵢ(T)`. -/
 theorem rawConnLapSmooth_tensorL2Coeff
     (T : SmoothCcTensor g 0 2)
     (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2) :
-    tensorL2Coeff_ofCompact (I := I) (M := M) (hCompact (I := I) (M := M) g)
+    tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g)
         (SmoothCcTensor.toL2 (rawTensorConnLapSmooth (I := I) g 0 2 T)) i =
       (- TensorEigenIdx.lambda (I := I) (M := M) i) *
-        tensorL2Coeff_ofCompact (I := I) (M := M) (hCompact (I := I) (M := M) g)
+        tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g)
           (SmoothCcTensor.toL2 T) i := by
   -- `Δ_∇ T = T - (1 - Δ_∇) T`, so `toL2 (Δ_∇ T) = toL2 T - toL2 ((1 - Δ_∇) T)`.
   have h_split :
@@ -326,8 +326,8 @@ theorem rawConnLapSmooth_tensorL2Coeff
           T - rawTensorConnLapSmooth (I := I) g 0 2 T from rfl]
     abel
   -- The coordinate functional is `⟪b i, ·⟫`; it distributes over the difference.
-  rw [h_split, map_sub, tensorL2Coeff_ofCompact_eq_inner, inner_sub_right,
-    ← tensorL2Coeff_ofCompact_eq_inner, ← tensorL2Coeff_ofCompact_eq_inner,
+  rw [h_split, map_sub, tensorL2Coeff_eq_inner, inner_sub_right,
+    ← tensorL2Coeff_eq_inner, ← tensorL2Coeff_eq_inner,
     tensorL2Coeff_ofCompact_oneMinusConnLapSmooth
       (I := I) (M := M) g (hCompact (I := I) (M := M) g) T i]
   ring
@@ -339,10 +339,10 @@ coordinate of `Δ_∇^j T` is `(-λᵢ)^j · cᵢ(T)`. -/
 theorem rawConnLapIter_tensorL2Coeff
     (T : SmoothCcTensor g 0 2)
     (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2) (j : ℕ) :
-    tensorL2Coeff_ofCompact (I := I) (M := M) (hCompact (I := I) (M := M) g)
+    tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g)
         (SmoothCcTensor.toL2 (rawTensorConnLapIter (I := I) g 0 2 j T)) i =
       (- TensorEigenIdx.lambda (I := I) (M := M) i) ^ j *
-        tensorL2Coeff_ofCompact (I := I) (M := M) (hCompact (I := I) (M := M) g)
+        tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g)
           (SmoothCcTensor.toL2 T) i := by
   induction j with
   | zero => simp
@@ -366,7 +366,7 @@ private lemma finiteEigenCombo_iterRawConnLap_tensorL2Coeff
     (F : Finset (Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2))
     (c : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ) (j : ℕ)
     (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2) :
-    tensorL2Coeff_ofCompact (I := I) (M := M) (hCompact (I := I) (M := M) g)
+    tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g)
         (SmoothCcTensor.toL2
           (rawTensorConnLapIter (I := I) g 0 2 j
             (finiteEigenCombo (I := I) (M := M) g F c))) i =
@@ -401,7 +401,7 @@ theorem finiteEigenCombo_iterRawConnLap_l2NormSq
     (hCompact (I := I) (M := M) g)]
   -- The coordinate family is supported on `F`; collapse the tsum to `∑_{i ∈ F}`.
   rw [tsum_eq_sum (s := F) (f := fun i =>
-      (tensorL2Coeff_ofCompact (I := I) (M := M) (hCompact (I := I) (M := M) g)
+      (tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g)
         (SmoothCcTensor.toL2
           (rawTensorConnLapIter (I := I) g 0 2 j
             (finiteEigenCombo (I := I) (M := M) g F c))) i) ^ 2) ?_]
@@ -470,7 +470,7 @@ lemma finiteEigenComboHs_coeff_eq
     (c : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ) (σ : ℝ)
     (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2) :
     (finiteEigenComboHs (I := I) (M := M) g F c σ).coeff i =
-      tensorL2Coeff_ofCompact (I := I) (M := M) (hCompact (I := I) (M := M) g)
+      tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g)
         ((finiteEigenCombo (I := I) (M := M) g F c : TensorL2 0 2 g)) i := by
   rw [finiteEigenCombo_tensorL2Coeff (I := I) (M := M) g F c i]
   rfl

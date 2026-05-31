@@ -70,7 +70,7 @@ content of the on-diagonal heat trace, none of which is available in Mathlib:
 
 2. **Supercritical weighted summability of the realize values.** At a
    supercritical Sobolev order `2a > finrank ℝ E + 4`, the per-eigenmode realize
-   values `eᵢ(x,v,w) = ccTensorBilinSymm g (eigenvectorSmooth_unconditional g 0 2 i) x v w`
+   values `eᵢ(x,v,w) = ccTensorBilinSymm g (eigenvectorSmooth g 0 2 i) x v w`
    for the bidegree `(0, 2)` spectrum decay so that the `Hᵃ`-Riesz weight
    `tensorSobolevWeight i a · (eᵢ(x,v,w) · (tensorSobolevWeight i a)⁻¹)²` is
    summable over `i`. (Via the fibre Cauchy–Schwarz `eᵢ(x,v,w)² ≲ ‖bᵢ(x)‖²_g` this
@@ -79,7 +79,7 @@ content of the on-diagonal heat trace, none of which is available in Mathlib:
 3. **The realize eigen-expansion.** At the same supercritical order, the
    realize-evaluation `ccTensorBilinSymm g T x v w` of a smooth compactly-supported
    `(0, 2)`-tensor `T` is the `HasSum` of the eigen-series of its `L²`-coordinates
-   `tensorL2Coeff_ofCompact (SmoothCcTensor.toL2 T) i` weighted by the per-eigenmode
+   `tensorL2Coeff (SmoothCcTensor.toL2 T) i` weighted by the per-eigenmode
    realize values.
 
 Every other consumer (the integrated counting bound, the realize transport
@@ -101,16 +101,16 @@ theorem weyl_pointwise_diagonalKernel_bound_of_closed
             (I := I) (M := M) g 0 2 =>
           tensorSobolevWeight (I := I) (M := M) i (a : ℝ) *
             (ccTensorBilinSymm (I := I) g
-                (eigenvectorSmooth_unconditional (I := I) (M := M) g 0 2 i) x v w *
+                (eigenvectorSmooth (I := I) (M := M) g 0 2 i) x v w *
               (tensorSobolevWeight (I := I) (M := M) i (a : ℝ))⁻¹) ^ 2)) ∧
       (∀ (T : SmoothCcTensor g 0 2) (x : M) (v w : TangentSpace I x),
         HasSum
           (fun i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
               (I := I) (M := M) g 0 2 =>
-            tensorL2Coeff_ofCompact (I := I) (M := M)
+            tensorL2Coeff (I := I) (M := M)
                 (hCompact (I := I) (M := M) g) (SmoothCcTensor.toL2 T) i *
               ccTensorBilinSymm (I := I) g
-                (eigenvectorSmooth_unconditional (I := I) (M := M) g 0 2 i) x v w)
+                (eigenvectorSmooth (I := I) (M := M) g 0 2 i) x v w)
           (ccTensorBilinSymm (I := I) g T x v w))) := sorry
 
 /-- The integrated polynomial eigenvalue-counting bound `EigenvalueCountingBound g r s`

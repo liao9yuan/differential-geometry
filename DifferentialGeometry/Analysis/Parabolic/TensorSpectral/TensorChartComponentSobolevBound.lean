@@ -6,8 +6,7 @@ import DifferentialGeometry.Geometry.LocalChartConsistency
 import Mathlib.Topology.Compactness.LocallyFinite
 
 /-!
-# `α`-uniform `L²` and chart-Sobolev `W^{1,2}` bounds for chart-frame scalar
-components
+# `α`-uniform `L²` bound for chart-frame scalar components
 
 Consolidated `α`-uniform bounds on the chart-frame scalar components of
 smooth compactly-supported `H¹` tensor sections on a closed Riemannian
@@ -16,14 +15,8 @@ manifold `(M, g)`:
 1. **`α`-uniform `L²` bound for `tensorChartComponentScalar`** —
    `tensorChartComponentScalar_eLpNorm_le` (and the equivalent functional
    packaging `tensorChartComponentScalar_eLpNorm_le_forall`).
-2. **`α`-uniform `L²` bound on the metric self-inner square-root of the
-   gradient of `tensorChartComponentScalar`** —
-   `tensorChartComponentScalar_grad_eLpNorm_le`.
-3. **Unconditional uniform chart-Sobolev `W^{1,2}` bound** —
-   `tensorChartComponent_wkpNormChart_le`, combining the previous two via
-   the per-`α` chart-Sobolev headline.
 
-The constant in each headline is independent of the chart base point `α`,
+The constant in the headline is independent of the chart base point `α`,
 the multi-index pair `(Idx, Jdx)`, and the section `S`. The strategy uses
 local finiteness of the chart-atlas partition of unity, packaged via the
 **active finset** `chartAtlasPOU_activeFinset I M`, on which the
@@ -427,144 +420,6 @@ private lemma eLpNorm_sqrt_g_inner_gradFun_eq_zero_of_inactive
   rw [h_integrand_zero]
   exact eLpNorm_zero
 
-/-! ### Per-`α` gradient constants and their sum over the active finset -/
-
-private noncomputable def perAlphaGradConstant
-    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
-    (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) : ℝ :=
-  Classical.choose
-    (exists_eLpNorm_sqrt_g_inner_gradFun_tensorChartComponentScalar_le_const_mul_h1Norm
-      (I := I) (M := M) h_atlas g r s α)
-
-private lemma perAlphaGradConstant_nonneg
-    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
-    (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
-    0 ≤ perAlphaGradConstant (I := I) (M := M) h_atlas g r s α :=
-  (Classical.choose_spec
-    (exists_eLpNorm_sqrt_g_inner_gradFun_tensorChartComponentScalar_le_const_mul_h1Norm
-      (I := I) (M := M) h_atlas g r s α)).1
-
-private lemma perAlphaGradConstant_bound
-    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
-    (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
-    (S : SmoothCcTensorH1 g r s)
-    (Idx : Fin r → Fin (Module.finrank ℝ E))
-    (Jdx : Fin s → Fin (Module.finrank ℝ E)) :
-    eLpNorm (fun b : M => Real.sqrt
-        (g.inner b
-          (gradFun (I := I) g
-            (tensorChartComponentScalar (I := I) (M := M)
-              g r s S.toCcTensor α Idx Jdx) b)
-          (gradFun (I := I) g
-            (tensorChartComponentScalar (I := I) (M := M)
-              g r s S.toCcTensor α Idx Jdx) b))) 2
-        (riemannianVolumeMeasure (I := I) (M := M) g) ≤
-      ENNReal.ofReal (perAlphaGradConstant (I := I) (M := M) h_atlas g r s α) *
-        (‖S‖₊ : ℝ≥0∞) :=
-  (Classical.choose_spec
-    (exists_eLpNorm_sqrt_g_inner_gradFun_tensorChartComponentScalar_le_const_mul_h1Norm
-      (I := I) (M := M) h_atlas g r s α)).2 S Idx Jdx
-
-private noncomputable def totalActiveGradConstant
-    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
-    (g : SmoothRiemannianMetric I M) (r s : ℕ) : ℝ :=
-  ∑ α ∈ chartAtlasPOU_activeFinset I M,
-    perAlphaGradConstant (I := I) (M := M) h_atlas g r s α
-
-private lemma totalActiveGradConstant_nonneg
-    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
-    (g : SmoothRiemannianMetric I M) (r s : ℕ) :
-    0 ≤ totalActiveGradConstant (I := I) (M := M) h_atlas g r s := by
-  classical
-  unfold totalActiveGradConstant
-  exact Finset.sum_nonneg (fun α _ =>
-    perAlphaGradConstant_nonneg (I := I) (M := M) h_atlas g r s α)
-
-private lemma perAlphaGradConstant_le_totalActiveGradConstant
-    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
-    (g : SmoothRiemannianMetric I M) (r s : ℕ) {α : M}
-    (hα : α ∈ chartAtlasPOU_activeFinset I M) :
-    perAlphaGradConstant (I := I) (M := M) h_atlas g r s α ≤
-      totalActiveGradConstant (I := I) (M := M) h_atlas g r s := by
-  classical
-  unfold totalActiveGradConstant
-  have h_split :
-      ∑ β ∈ chartAtlasPOU_activeFinset I M,
-        perAlphaGradConstant (I := I) (M := M) h_atlas g r s β =
-        perAlphaGradConstant (I := I) (M := M) h_atlas g r s α +
-        ∑ β ∈ (chartAtlasPOU_activeFinset I M).erase α,
-          perAlphaGradConstant (I := I) (M := M) h_atlas g r s β := by
-    rw [← Finset.sum_erase_add _ _ hα, add_comm]
-  rw [h_split]
-  have h_rest_nn :
-      0 ≤ ∑ β ∈ (chartAtlasPOU_activeFinset I M).erase α,
-            perAlphaGradConstant (I := I) (M := M) h_atlas g r s β :=
-    Finset.sum_nonneg (fun β _ =>
-      perAlphaGradConstant_nonneg (I := I) (M := M) h_atlas g r s β)
-  linarith
-
-/-! ### Headline `α`-uniform `L²` bound for the gradient self-inner
-square-root integrand -/
-
-/-- **Headline theorem (α-uniform L² bound for the metric self-inner
-square-root of the gradient of chart-frame scalar components).** -/
-theorem tensorChartComponentScalar_grad_eLpNorm_le
-    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
-    (g : SmoothRiemannianMetric I M) (r s : ℕ) :
-    ∃ C_grad : ℝ, 0 ≤ C_grad ∧
-      ∀ (S : SmoothCcTensorH1 g r s) (α : M)
-        (Idx : Fin r → Fin (Module.finrank ℝ E))
-        (Jdx : Fin s → Fin (Module.finrank ℝ E)),
-        eLpNorm (fun b : M => Real.sqrt
-            (g.inner b
-              (gradFun (I := I) g
-                (tensorChartComponentScalar (I := I) (M := M)
-                  g r s S.toCcTensor α Idx Jdx) b)
-              (gradFun (I := I) g
-                (tensorChartComponentScalar (I := I) (M := M)
-                  g r s S.toCcTensor α Idx Jdx) b))) 2
-            (riemannianVolumeMeasure (I := I) (M := M) g) ≤
-          ENNReal.ofReal C_grad * (‖S‖₊ : ℝ≥0∞) := by
-  classical
-  refine ⟨totalActiveGradConstant (I := I) (M := M) h_atlas g r s,
-    totalActiveGradConstant_nonneg (I := I) (M := M) h_atlas g r s, ?_⟩
-  intro S α Idx Jdx
-  by_cases hα : α ∈ chartAtlasPOU_activeFinset I M
-  · have h_per :
-        eLpNorm (fun b : M => Real.sqrt
-            (g.inner b
-              (gradFun (I := I) g
-                (tensorChartComponentScalar (I := I) (M := M)
-                  g r s S.toCcTensor α Idx Jdx) b)
-              (gradFun (I := I) g
-                (tensorChartComponentScalar (I := I) (M := M)
-                  g r s S.toCcTensor α Idx Jdx) b))) 2
-            (riemannianVolumeMeasure (I := I) (M := M) g) ≤
-          ENNReal.ofReal
-              (perAlphaGradConstant (I := I) (M := M) h_atlas g r s α) *
-            (‖S‖₊ : ℝ≥0∞) :=
-      perAlphaGradConstant_bound (I := I) (M := M) h_atlas g r s α S Idx Jdx
-    have h_const_le :
-        ENNReal.ofReal
-            (perAlphaGradConstant (I := I) (M := M) h_atlas g r s α) ≤
-          ENNReal.ofReal
-            (totalActiveGradConstant (I := I) (M := M) h_atlas g r s) :=
-      ENNReal.ofReal_le_ofReal
-        (perAlphaGradConstant_le_totalActiveGradConstant
-          (I := I) (M := M) h_atlas g r s hα)
-    have h_envelope_le :
-        ENNReal.ofReal
-              (perAlphaGradConstant (I := I) (M := M) h_atlas g r s α) *
-              (‖S‖₊ : ℝ≥0∞) ≤
-          ENNReal.ofReal
-              (totalActiveGradConstant (I := I) (M := M) h_atlas g r s) *
-              (‖S‖₊ : ℝ≥0∞) :=
-      mul_le_mul_of_nonneg_right h_const_le (by exact zero_le _)
-    exact h_per.trans h_envelope_le
-  · rw [eLpNorm_sqrt_g_inner_gradFun_eq_zero_of_inactive
-      (I := I) (M := M) g r s hα S.toCcTensor Idx Jdx]
-    exact zero_le _
-
 end GradUniform
 
 /-! ## Unconditional uniform chart-Sobolev `W^{1,2}` bound -/
@@ -581,58 +436,6 @@ private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ### Per-`α` `wkpNormChart` existence statement -/
-
-private lemma exists_perAlphaSobolevConstant
-    (h_atlas : HasLocallyConstantChartAt H M)
-    (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
-    ∃ C : ℝ, 0 ≤ C ∧
-      ∀ (S : SmoothCcTensorH1 g r s)
-        (Idx : Fin r → Fin (Module.finrank ℝ E))
-        (Jdx : Fin s → Fin (Module.finrank ℝ E)),
-        wkpNormChart (I := I) (M := M) g 1 2
-            (tensorChartComponentScalar (I := I) (M := M)
-              g r s S.toCcTensor α Idx Jdx) ≤
-          ENNReal.ofReal C * (‖S‖₊ : ℝ≥0∞) := by
-  classical
-  haveI : CompleteSpace E := FiniteDimensional.complete ℝ E
-  obtain ⟨C_grad, hC_grad_nn, hC_grad_bound⟩ :=
-    tensorChartComponentScalar_grad_eLpNorm_le
-      (I := I) (M := M) h_atlas g r s
-  exact tensorChartComponentScalar_wkpNormChart_le_const_mul_h1Norm
-    (I := I) (M := M) g r s α hC_grad_nn
-    (fun S Idx Jdx => hC_grad_bound S α Idx Jdx)
-
-private noncomputable def perAlphaSobolevConstant
-    (h_atlas : HasLocallyConstantChartAt H M)
-    (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) : ℝ :=
-  Classical.choose
-    (exists_perAlphaSobolevConstant (I := I) (M := M) h_atlas g r s α)
-
-private lemma perAlphaSobolevConstant_nonneg
-    (h_atlas : HasLocallyConstantChartAt H M)
-    (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
-    0 ≤ perAlphaSobolevConstant (I := I) (M := M) h_atlas g r s α :=
-  (Classical.choose_spec
-    (exists_perAlphaSobolevConstant
-      (I := I) (M := M) h_atlas g r s α)).1
-
-private lemma perAlphaSobolevConstant_bound
-    (h_atlas : HasLocallyConstantChartAt H M)
-    (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
-    (S : SmoothCcTensorH1 g r s)
-    (Idx : Fin r → Fin (Module.finrank ℝ E))
-    (Jdx : Fin s → Fin (Module.finrank ℝ E)) :
-    wkpNormChart (I := I) (M := M) g 1 2
-        (tensorChartComponentScalar (I := I) (M := M)
-          g r s S.toCcTensor α Idx Jdx) ≤
-      ENNReal.ofReal
-          (perAlphaSobolevConstant (I := I) (M := M) h_atlas g r s α) *
-        (‖S‖₊ : ℝ≥0∞) :=
-  (Classical.choose_spec
-    (exists_perAlphaSobolevConstant
-      (I := I) (M := M) h_atlas g r s α)).2 S Idx Jdx
 
 /-! ### Vanishing of `wkpNormChart` on inactive centres -/
 
@@ -655,95 +458,6 @@ private lemma wkpNormChart_tensorChartComponentScalar_eq_zero_of_inactive
   rw [h_scalar_zero]
   exact wkpNormChart_zero_fun (I := I) (M := M) g (by norm_num : (1 : ℝ≥0∞) ≤ 2)
 
-/-! ### Total active constant -/
-
-private noncomputable def totalActiveSobolevConstant
-    (h_atlas : HasLocallyConstantChartAt H M)
-    (g : SmoothRiemannianMetric I M) (r s : ℕ) : ℝ :=
-  ∑ α ∈ chartAtlasPOU_activeFinset I M,
-    perAlphaSobolevConstant (I := I) (M := M) h_atlas g r s α
-
-private lemma totalActiveSobolevConstant_nonneg
-    (h_atlas : HasLocallyConstantChartAt H M)
-    (g : SmoothRiemannianMetric I M) (r s : ℕ) :
-    0 ≤ totalActiveSobolevConstant (I := I) (M := M) h_atlas g r s := by
-  classical
-  unfold totalActiveSobolevConstant
-  exact Finset.sum_nonneg (fun α _ =>
-    perAlphaSobolevConstant_nonneg (I := I) (M := M) h_atlas g r s α)
-
-private lemma perAlphaSobolevConstant_le_totalActiveSobolevConstant
-    (h_atlas : HasLocallyConstantChartAt H M)
-    (g : SmoothRiemannianMetric I M) (r s : ℕ) {α : M}
-    (hα : α ∈ chartAtlasPOU_activeFinset I M) :
-    perAlphaSobolevConstant (I := I) (M := M) h_atlas g r s α ≤
-      totalActiveSobolevConstant (I := I) (M := M) h_atlas g r s := by
-  classical
-  unfold totalActiveSobolevConstant
-  have h_split :
-      ∑ β ∈ chartAtlasPOU_activeFinset I M,
-        perAlphaSobolevConstant (I := I) (M := M) h_atlas g r s β =
-        perAlphaSobolevConstant (I := I) (M := M) h_atlas g r s α +
-        ∑ β ∈ (chartAtlasPOU_activeFinset I M).erase α,
-          perAlphaSobolevConstant (I := I) (M := M) h_atlas g r s β := by
-    rw [← Finset.sum_erase_add _ _ hα, add_comm]
-  rw [h_split]
-  have h_rest_nn :
-      0 ≤ ∑ β ∈ (chartAtlasPOU_activeFinset I M).erase α,
-            perAlphaSobolevConstant (I := I) (M := M) h_atlas g r s β :=
-    Finset.sum_nonneg (fun β _ =>
-      perAlphaSobolevConstant_nonneg (I := I) (M := M) h_atlas g r s β)
-  linarith
-
-/-! ### Headline -/
-
-/-- **Headline (unconditional uniform chart-Sobolev `W^{1,2}` bound).** -/
-theorem tensorChartComponent_wkpNormChart_le
-    (h_atlas : HasLocallyConstantChartAt H M)
-    (g : SmoothRiemannianMetric I M) (r s : ℕ) :
-    ∃ C : ℝ, 0 ≤ C ∧
-      ∀ (S : SmoothCcTensorH1 g r s) (α : M)
-        (Idx : Fin r → Fin (Module.finrank ℝ E))
-        (Jdx : Fin s → Fin (Module.finrank ℝ E)),
-        wkpNormChart (I := I) (M := M) g 1 2
-            (tensorChartComponentScalar (I := I) (M := M)
-              g r s S.toCcTensor α Idx Jdx) ≤
-          ENNReal.ofReal C * (‖S‖₊ : ℝ≥0∞) := by
-  classical
-  refine ⟨totalActiveSobolevConstant (I := I) (M := M) h_atlas g r s,
-    totalActiveSobolevConstant_nonneg (I := I) (M := M) h_atlas g r s, ?_⟩
-  intro S α Idx Jdx
-  by_cases hα : α ∈ chartAtlasPOU_activeFinset I M
-  · have h_per :
-        wkpNormChart (I := I) (M := M) g 1 2
-            (tensorChartComponentScalar (I := I) (M := M)
-              g r s S.toCcTensor α Idx Jdx) ≤
-          ENNReal.ofReal
-              (perAlphaSobolevConstant (I := I) (M := M) h_atlas g r s α) *
-            (‖S‖₊ : ℝ≥0∞) :=
-      perAlphaSobolevConstant_bound
-        (I := I) (M := M) h_atlas g r s α S Idx Jdx
-    have h_const_le :
-        ENNReal.ofReal
-            (perAlphaSobolevConstant (I := I) (M := M) h_atlas g r s α) ≤
-          ENNReal.ofReal
-            (totalActiveSobolevConstant (I := I) (M := M) h_atlas g r s) :=
-      ENNReal.ofReal_le_ofReal
-        (perAlphaSobolevConstant_le_totalActiveSobolevConstant
-          (I := I) (M := M) h_atlas g r s hα)
-    have h_envelope_le :
-        ENNReal.ofReal
-              (perAlphaSobolevConstant (I := I) (M := M) h_atlas g r s α) *
-              (‖S‖₊ : ℝ≥0∞) ≤
-          ENNReal.ofReal
-              (totalActiveSobolevConstant (I := I) (M := M) h_atlas g r s) *
-              (‖S‖₊ : ℝ≥0∞) :=
-      mul_le_mul_of_nonneg_right h_const_le (by exact zero_le _)
-    exact h_per.trans h_envelope_le
-  · rw [wkpNormChart_tensorChartComponentScalar_eq_zero_of_inactive
-      (I := I) (M := M) g r s hα S.toCcTensor Idx Jdx]
-    exact zero_le _
-
 end ChartSobolev
 
 end TensorSpectral
@@ -752,14 +466,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-section Sanity
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorChartComponentScalar_eLpNorm_le
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorChartComponentScalar_eLpNorm_le_forall
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorChartComponentScalar_grad_eLpNorm_le
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorChartComponent_wkpNormChart_le
-end Sanity

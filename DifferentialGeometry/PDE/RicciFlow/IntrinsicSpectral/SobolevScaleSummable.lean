@@ -32,8 +32,8 @@ convention `Δ_∇ = -∇*∇`, so the resolvent is `(1 - Δ_∇)⁻¹`).
   embedding into the `H¹` completion. This is integration by parts:
   `⟪T, v⟫_{L²} - ⟪Δ_∇ T, v⟫_{L²} = ⟪T, v⟫_{L²} + ⟪∇T, ∇v⟫_{L²}`.
 * `tensorParseval_l2Coeff_ofCompact_sq` — the Parseval norm identity restated for
-  the eigenbasis coordinate functional `tensorL2Coeff_ofCompact`:
-  `∑ᵢ (tensorL2Coeff_ofCompact h_compact u i)² = ‖u‖²_{L²}`.
+  the eigenbasis coordinate functional `tensorL2Coeff`:
+  `∑ᵢ (tensorL2Coeff h_compact u i)² = ‖u‖²_{L²}`.
 * `summable_tensorSobolevWeight_of_even` — the **even-order domination /
   monotonicity reduction** (Step 1): for any `a ≤ 2k`, weighted summability at the
   even integer weight `2k` implies weighted summability at `a`.
@@ -43,10 +43,10 @@ convention `Δ_∇ = -∇*∇`, so the resolvent is `(1 - Δ_∇)⁻¹`).
 This file provides the complete, unconditional spectral-side scaffolding for the
 weighted-summability headline. The remaining ingredient — the per-step
 eigen-coordinate identity
-`tensorL2Coeff_ofCompact h_compact ((1 - Δ_∇) T) i =
-  (1 + λᵢ) · tensorL2Coeff_ofCompact h_compact T i` —
+`tensorL2Coeff h_compact ((1 - Δ_∇) T) i =
+  (1 + λᵢ) · tensorL2Coeff h_compact T i` —
 requires identifying the smooth eigenvector's `H¹`-completion embedding with the
-resolvent eigenvector `eigenvectorResolvent_unconditional i` up to the scalar
+resolvent eigenvector `eigenvectorResolvent i` up to the scalar
 `μ = i.fst.val`, which in turn requires injectivity of the `H¹`-to-`L²`
 completion inclusion `TensorH1ComplToTensorL2` (only its dense range is currently
 on disk). See the module note at the end for the precise missing signature.
@@ -251,12 +251,12 @@ theorem oneMinusConnLapSmooth_toL2_inner_eq_h1
 
 /-! ## Parseval restated for the `_ofCompact` coordinate functional
 
-The Parseval identity `tensorParseval_norm_sq_ofCompact` is restated in terms of
-the coordinate functional `tensorL2Coeff_ofCompact`, which is the exact
+The Parseval identity `tensorParseval_norm_sq` is restated in terms of
+the coordinate functional `tensorL2Coeff`, which is the exact
 coordinate the spectral Sobolev scale `tensorHs` and the weighted-summability
 headline consume. -/
 
-/-- **Parseval for `tensorL2Coeff_ofCompact`.** For any `L²` tensor field `u`,
+/-- **Parseval for `tensorL2Coeff`.** For any `L²` tensor field `u`,
 the sum of the squared chart-locality-free eigenbasis coordinates equals the
 squared `L²` norm of `u`. -/
 theorem tensorParseval_l2Coeff_ofCompact_sq
@@ -265,16 +265,16 @@ theorem tensorParseval_l2Coeff_ofCompact_sq
       (I := I) (M := M) g r s))
     (u : TensorL2 r s g) :
     ∑' i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g r s,
-        (tensorL2Coeff_ofCompact (I := I) (M := M) h_compact u i) ^ 2 =
+        (tensorL2Coeff (I := I) (M := M) h_compact u i) ^ 2 =
       ‖u‖ ^ 2 := by
-  rw [tensorParseval_norm_sq_ofCompact (I := I) (M := M) h_compact u]
+  rw [tensorParseval_norm_sq (I := I) (M := M) h_compact u]
   refine tsum_congr (fun i => ?_)
-  rw [tensorL2Coeff_ofCompact_eq_inner (I := I) (M := M) h_compact u i,
+  rw [tensorL2Coeff_eq_inner (I := I) (M := M) h_compact u i,
     Real.norm_eq_abs, sq_abs]
 
 /-- **Weighted square-summability of the `_ofCompact` coordinates.** For any
 `L²` tensor field `u`, the eigenbasis-coordinate family is square-summable; this
-is `tensorL2Coeff_ofCompact_summable_sq`, re-exported here for use in the
+is `tensorL2Coeff_summable_sq`, re-exported here for use in the
 domination argument. -/
 theorem tensorL2Coeff_ofCompact_summable_sq'
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
@@ -282,8 +282,8 @@ theorem tensorL2Coeff_ofCompact_summable_sq'
       (I := I) (M := M) g r s))
     (u : TensorL2 r s g) :
     Summable (fun i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g r s =>
-      (tensorL2Coeff_ofCompact (I := I) (M := M) h_compact u i) ^ 2) :=
-  tensorL2Coeff_ofCompact_summable_sq (I := I) (M := M) h_compact u
+      (tensorL2Coeff (I := I) (M := M) h_compact u i) ^ 2) :=
+  tensorL2Coeff_summable_sq (I := I) (M := M) h_compact u
 
 /-! ## Step 1: even-order domination / monotonicity reduction
 
@@ -328,7 +328,7 @@ theorem smoothCcTensor_tensorL2Coeff_weighted_summable
     (h_compact : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g 0 2)) :
     Summable (fun i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2 =>
       tensorSobolevWeight (I := I) (M := M) i a *
-        (tensorL2Coeff_ofCompact (I := I) (M := M) h_compact
+        (tensorL2Coeff (I := I) (M := M) h_compact
           (SmoothCcTensor.toL2 T) i) ^ 2)
 ```
 
@@ -338,26 +338,26 @@ reduces — via `summable_tensorSobolevWeight_of_even` (Step 1) and
 **per-step eigen-coordinate identity**
 
 ```
-tensorL2Coeff_ofCompact h_compact
+tensorL2Coeff h_compact
     (SmoothCcTensor.toL2 (oneMinusConnLapSmooth g 0 2 T)) i
   = (1 + TensorEigenIdx.lambda i) *
-      tensorL2Coeff_ofCompact h_compact (SmoothCcTensor.toL2 T) i,
+      tensorL2Coeff h_compact (SmoothCcTensor.toL2 T) i,
 ```
 
 equivalently `⟪⟦T⟧, ⟦eᵢ⟧⟫_{H¹} = (1 + λᵢ) · ⟪T, eᵢ⟫_{L²}` for the smooth
-eigenvector `eᵢ = eigenvectorSmooth_unconditional i`, which is provided here as
+eigenvector `eᵢ = eigenvectorSmooth i`, which is provided here as
 the Green / `H¹` bridge `oneMinusConnLapSmooth_toL2_inner_eq_h1` together with the
 eigenvector identification
 
 ```
-smoothToTensorH1Compl g 0 2 ⟨eigenvectorSmooth_unconditional i⟩
-  = (i.fst.val)⁻¹ • eigenvectorResolvent_unconditional i.
+smoothToTensorH1Compl g 0 2 ⟨eigenvectorSmooth i⟩
+  = (i.fst.val)⁻¹ • eigenvectorResolvent i.
 ```
 
 That eigenvector identification is the one fact not yet on disk. Both sides have
-the same image under `TensorH1ComplToTensorL2` (namely `eigenvectorSmooth_unconditional i`
-in `L²`, by `eigenvectorSmooth_toL2_unconditional` and
-`eigenvector_eq_resolvent_smul_unconditional`), so it follows once
+the same image under `TensorH1ComplToTensorL2` (namely `eigenvectorSmooth i`
+in `L²`, by `eigenvectorSmooth_toL2` and
+`eigenvector_eq_resolvent_smul`), so it follows once
 `TensorH1ComplToTensorL2 g 0 2` is known to be **injective** — currently only its
 dense range (`denseRange_TensorH1ComplToTensorL2`) is established. The required
 missing lemma is therefore:

@@ -32,19 +32,20 @@ The **maximal-regularity bounds** (the deliverables), with `C(T) = 1 + T`:
 
 ## Main definitions
 
-* `maximalRegularityDerivField h_atlas a hT f` — the time derivative `∂_t u`,
+* `maximalRegularityDerivField a hT f` — the time derivative `∂_t u`,
   an element of `L²([0,T]; Hᵃ)`, with `i`-th mode `fᵢ − λᵢ·φᵢ`.
-* `maximalRegularitySolField h_atlas a hT hT1 f` — the solution `u`, viewed as
+* `maximalRegularitySolField a hT f` — the solution `u`, viewed as
   an element of `L²([0,T]; H^{a+2})` (the two-derivative-gain regularity).
-* `maximalRegularityOp h_atlas a hT hT1 f` — the solution operator, landing in
+* `maximalRegularityOp a hT hT1 f` — the solution operator, landing in
   the strong-solution space `H¹([0,T]; Hᵃ)` (initial value `0`, `L²` time
   derivative `∂_t u`).
 
 ## Main results
 
-* `maximalRegularityOp_timeModeCoeff` — the `i`-th mode of the solution is
-  `perModeConvL2 λᵢ (timeModeCoeff f i)`.
-* `maximalRegularityOp_norm_Ha2_le` — the `H^{a+2}` maximal-regularity bound.
+* `maximalRegularitySolField_timeModeCoeff` — the `i`-th mode of the
+  solution is `perModeConvL2 λᵢ (timeModeCoeff f i)`.
+* `maximalRegularityOp_norm_Ha2_le` — the `H^{a+2}`
+  maximal-regularity bound.
 * `maximalRegularityOp_norm_deriv_le` — the `∂_t` bound.
 * `maximalRegularityOp_trace0` — the initial condition `u(0) = 0`.
 * `maximalRegularityOp_norm_le` — the combined `H¹`-graph-norm bound.
@@ -79,7 +80,6 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
-  {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M}
 variable {a : ℝ} {T : ℝ}
 
 /-! ## The per-mode building blocks
@@ -418,27 +418,11 @@ theorem weighted_solModeCoeff_Ha1_le (hT : 0 < T) (hT1 : T ≤ 1)
     _ = (2 * Real.sqrt T) ^ 2 * (tensorSobolevWeight (I := I) (M := M) i a *
           ‖timeModeCoeff (I := I) (M := M) f i‖ ^ 2) := by ring
 
-/-- The mode family `i ↦ φᵢ` of solution coordinates is weighted-summable at the
-`H^{a+1}` scale (`0 < T ≤ 1`), the precondition for synthesising the
-`H^{a+1}`-valued solution field. -/
+/-- Chart-locality-free version, parameterized on
+resolvent compactness `h_compact`: the mode family `i ↦ φᵢ` of solution
+coordinates is weighted-summable at the `H^{a+1}` scale (`0 < T ≤ 1`), the
+precondition for synthesising the `H^{a+1}`-valued solution field. -/
 theorem summable_solModeCoeff_Ha1 (hT : 0 < T) (hT1 : T ≤ 1)
-    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
-    (f : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
-    Summable (fun i => tensorSobolevWeight (I := I) (M := M) i (a + 1) *
-      ‖solModeCoeff (I := I) (M := M) (a := a) hT.le f i‖ ^ 2) := by
-  have hdom : Summable (fun i => (2 * Real.sqrt T) ^ 2 *
-      (tensorSobolevWeight (I := I) (M := M) i a *
-        ‖timeModeCoeff (I := I) (M := M) f i‖ ^ 2)) :=
-    (summable_weight_mul_norm_timeModeCoeff_sq
-      (I := I) (M := M) h_atlas (f := f)).mul_left _
-  refine Summable.of_nonneg_of_le (fun i => ?_) (fun i => ?_) hdom
-  · exact mul_nonneg (tensorSobolevWeight_nonneg (I := I) (M := M) i (a + 1))
-      (sq_nonneg _)
-  · exact weighted_solModeCoeff_Ha1_le (I := I) (M := M) (a := a) hT hT1 f i
-
-/-- Chart-locality-free version of `summable_solModeCoeff_Ha1`, parameterized on
-resolvent compactness `h_compact`. -/
-theorem summable_solModeCoeff_Ha1_ofCompact (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
     (f : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
@@ -447,34 +431,17 @@ theorem summable_solModeCoeff_Ha1_ofCompact (hT : 0 < T) (hT1 : T ≤ 1)
   have hdom : Summable (fun i => (2 * Real.sqrt T) ^ 2 *
       (tensorSobolevWeight (I := I) (M := M) i a *
         ‖timeModeCoeff (I := I) (M := M) f i‖ ^ 2)) :=
-    (summable_weight_mul_norm_timeModeCoeff_sq_ofCompact
+    (summable_weight_mul_norm_timeModeCoeff_sq
       (I := I) (M := M) h_compact (f := f)).mul_left _
   refine Summable.of_nonneg_of_le (fun i => ?_) (fun i => ?_) hdom
   · exact mul_nonneg (tensorSobolevWeight_nonneg (I := I) (M := M) i (a + 1))
       (sq_nonneg _)
   · exact weighted_solModeCoeff_Ha1_le (I := I) (M := M) (a := a) hT hT1 f i
 
-/-- The mode family `i ↦ φᵢ` of solution coordinates is weighted-summable at the
-`H^{a+2}` scale. -/
+/-- Chart-locality-free version, parameterized on
+resolvent compactness `h_compact`: the mode family `i ↦ φᵢ` of solution
+coordinates is weighted-summable at the `H^{a+2}` scale. -/
 theorem summable_solModeCoeff (hT : 0 ≤ T)
-    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
-    (f : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
-    Summable (fun i => tensorSobolevWeight (I := I) (M := M) i (a + 2) *
-      ‖solModeCoeff (I := I) (M := M) (a := a) hT f i‖ ^ 2) := by
-  -- Dominated by `(1 + T)²` times the (summable) weighted forcing family.
-  have hdom : Summable (fun i => (1 + T) ^ 2 *
-      (tensorSobolevWeight (I := I) (M := M) i a *
-        ‖timeModeCoeff (I := I) (M := M) f i‖ ^ 2)) :=
-    (summable_weight_mul_norm_timeModeCoeff_sq
-      (I := I) (M := M) h_atlas (f := f)).mul_left _
-  refine Summable.of_nonneg_of_le (fun i => ?_) (fun i => ?_) hdom
-  · exact mul_nonneg (tensorSobolevWeight_nonneg (I := I) (M := M) i (a + 2))
-      (sq_nonneg _)
-  · exact weighted_solModeCoeff_le (I := I) (M := M) (a := a) hT f i
-
-/-- Chart-locality-free version of `summable_solModeCoeff`, parameterized on
-resolvent compactness `h_compact`. -/
-theorem summable_solModeCoeff_ofCompact (hT : 0 ≤ T)
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
     (f : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
@@ -483,7 +450,7 @@ theorem summable_solModeCoeff_ofCompact (hT : 0 ≤ T)
   have hdom : Summable (fun i => (1 + T) ^ 2 *
       (tensorSobolevWeight (I := I) (M := M) i a *
         ‖timeModeCoeff (I := I) (M := M) f i‖ ^ 2)) :=
-    (summable_weight_mul_norm_timeModeCoeff_sq_ofCompact
+    (summable_weight_mul_norm_timeModeCoeff_sq
       (I := I) (M := M) h_compact (f := f)).mul_left _
   refine Summable.of_nonneg_of_le (fun i => ?_) (fun i => ?_) hdom
   · exact mul_nonneg (tensorSobolevWeight_nonneg (I := I) (M := M) i (a + 2))
@@ -515,26 +482,10 @@ theorem weighted_derivModeCoeff_le (hT : 0 ≤ T)
     _ = 2 ^ 2 * (tensorSobolevWeight (I := I) (M := M) i a *
           ‖timeModeCoeff (I := I) (M := M) f i‖ ^ 2) := by ring
 
-/-- The mode family `i ↦ fᵢ − λᵢ·φᵢ` of time-derivative coordinates is
-weighted-summable at the `Hᵃ` scale. -/
+/-- Chart-locality-free version, parameterized on
+resolvent compactness `h_compact`: the mode family `i ↦ fᵢ − λᵢ·φᵢ` of
+time-derivative coordinates is weighted-summable at the `Hᵃ` scale. -/
 theorem summable_derivModeCoeff (hT : 0 ≤ T)
-    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
-    (f : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
-    Summable (fun i => tensorSobolevWeight (I := I) (M := M) i a *
-      ‖derivModeCoeff (I := I) (M := M) (a := a) hT f i‖ ^ 2) := by
-  have hdom : Summable (fun i => 2 ^ 2 *
-      (tensorSobolevWeight (I := I) (M := M) i a *
-        ‖timeModeCoeff (I := I) (M := M) f i‖ ^ 2)) :=
-    (summable_weight_mul_norm_timeModeCoeff_sq
-      (I := I) (M := M) h_atlas (f := f)).mul_left _
-  refine Summable.of_nonneg_of_le (fun i => ?_) (fun i => ?_) hdom
-  · exact mul_nonneg (tensorSobolevWeight_nonneg (I := I) (M := M) i a)
-      (sq_nonneg _)
-  · exact weighted_derivModeCoeff_le (I := I) (M := M) (a := a) hT f i
-
-/-- Chart-locality-free version of `summable_derivModeCoeff`, parameterized on
-resolvent compactness `h_compact`. -/
-theorem summable_derivModeCoeff_ofCompact (hT : 0 ≤ T)
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
     (f : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
@@ -543,7 +494,7 @@ theorem summable_derivModeCoeff_ofCompact (hT : 0 ≤ T)
   have hdom : Summable (fun i => 2 ^ 2 *
       (tensorSobolevWeight (I := I) (M := M) i a *
         ‖timeModeCoeff (I := I) (M := M) f i‖ ^ 2)) :=
-    (summable_weight_mul_norm_timeModeCoeff_sq_ofCompact
+    (summable_weight_mul_norm_timeModeCoeff_sq
       (I := I) (M := M) h_compact (f := f)).mul_left _
   refine Summable.of_nonneg_of_le (fun i => ?_) (fun i => ?_) hdom
   · exact mul_nonneg (tensorSobolevWeight_nonneg (I := I) (M := M) i a)
@@ -565,20 +516,10 @@ def maximalRegularityDerivField (a : ℝ) {T : ℝ} (hT : 0 ≤ T)
   timeL2OfModes (I := I) (M := M)
     (fun i => derivModeCoeff (I := I) (M := M) (a := a) hT f i)
 
-include h_atlas in
-/-- The `i`-th eigen-coordinate of the time-derivative field is `fᵢ − λᵢ·φᵢ`. -/
+/-- Chart-locality-free version,
+parameterized on resolvent compactness `h_compact`: the `i`-th eigen-coordinate
+of the time-derivative field is `fᵢ − λᵢ·φᵢ`. -/
 theorem maximalRegularityDerivField_timeModeCoeff (hT : 0 ≤ T)
-    (f : timeL2 (tensorHs (I := I) (M := M) g r s a) T)
-    (i : TensorEigenIdx (I := I) (M := M) g r s) :
-    timeModeCoeff (I := I) (M := M)
-        (maximalRegularityDerivField (I := I) (M := M) a hT f) i =
-      derivModeCoeff (I := I) (M := M) (a := a) hT f i :=
-  timeL2OfModes_timeModeCoeff (I := I) (M := M) _
-    (summable_derivModeCoeff (I := I) (M := M) (a := a) hT h_atlas f) i
-
-/-- Chart-locality-free version of `maximalRegularityDerivField_timeModeCoeff`,
-parameterized on resolvent compactness `h_compact`. -/
-theorem maximalRegularityDerivField_timeModeCoeff_ofCompact (hT : 0 ≤ T)
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
     (f : timeL2 (tensorHs (I := I) (M := M) g r s a) T)
@@ -587,7 +528,7 @@ theorem maximalRegularityDerivField_timeModeCoeff_ofCompact (hT : 0 ≤ T)
         (maximalRegularityDerivField (I := I) (M := M) a hT f) i =
       derivModeCoeff (I := I) (M := M) (a := a) hT f i :=
   timeL2OfModes_timeModeCoeff (I := I) (M := M) _
-    (summable_derivModeCoeff_ofCompact (I := I) (M := M) (a := a) hT h_compact f) i
+    (summable_derivModeCoeff (I := I) (M := M) (a := a) hT h_compact f) i
 
 /-- **The solution field `u`, viewed in `L²([0,T]; H^{a+2})`.**  For a forcing
 term `f ∈ L²([0,T]; Hᵃ)`, this is the element of `L²([0,T]; H^{a+2})` whose
@@ -600,21 +541,10 @@ def maximalRegularitySolField (a : ℝ) {T : ℝ} (hT : 0 ≤ T)
   timeL2OfModes (I := I) (M := M)
     (fun i => solModeCoeff (I := I) (M := M) (a := a) hT f i)
 
-include h_atlas in
-/-- The `i`-th eigen-coordinate of the solution field is `φᵢ = perModeConvL2 λᵢ
-(timeModeCoeff f i)`. -/
+/-- Chart-locality-free version,
+parameterized on resolvent compactness `h_compact`: the `i`-th eigen-coordinate
+of the solution field is `φᵢ = perModeConvL2 λᵢ (timeModeCoeff f i)`. -/
 theorem maximalRegularitySolField_timeModeCoeff (hT : 0 ≤ T)
-    (f : timeL2 (tensorHs (I := I) (M := M) g r s a) T)
-    (i : TensorEigenIdx (I := I) (M := M) g r s) :
-    timeModeCoeff (I := I) (M := M)
-        (maximalRegularitySolField (I := I) (M := M) a hT f) i =
-      solModeCoeff (I := I) (M := M) (a := a) hT f i :=
-  timeL2OfModes_timeModeCoeff (I := I) (M := M) _
-    (summable_solModeCoeff (I := I) (M := M) (a := a) hT h_atlas f) i
-
-/-- Chart-locality-free version of `maximalRegularitySolField_timeModeCoeff`,
-parameterized on resolvent compactness `h_compact`. -/
-theorem maximalRegularitySolField_timeModeCoeff_ofCompact (hT : 0 ≤ T)
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
     (f : timeL2 (tensorHs (I := I) (M := M) g r s a) T)
@@ -623,7 +553,7 @@ theorem maximalRegularitySolField_timeModeCoeff_ofCompact (hT : 0 ≤ T)
         (maximalRegularitySolField (I := I) (M := M) a hT f) i =
       solModeCoeff (I := I) (M := M) (a := a) hT f i :=
   timeL2OfModes_timeModeCoeff (I := I) (M := M) _
-    (summable_solModeCoeff_ofCompact (I := I) (M := M) (a := a) hT h_compact f) i
+    (summable_solModeCoeff (I := I) (M := M) (a := a) hT h_compact f) i
 
 /-! ## The solution field viewed at the intermediate `H^{a+1}` scale
 
@@ -648,21 +578,11 @@ def maximalRegularitySolFieldHa1 (a : ℝ) {T : ℝ} (hT : 0 < T) (_hT1 : T ≤ 
   timeL2OfModes (I := I) (M := M) (σ := a + 1)
     (fun i => solModeCoeff (I := I) (M := M) (a := a) hT.le f i)
 
-include h_atlas in
-/-- The `i`-th eigen-coordinate of the `H^{a+1}`-view solution field is
-`φᵢ = perModeConvL2 λᵢ (timeModeCoeff f i)`. -/
-theorem maximalRegularitySolFieldHa1_timeModeCoeff (hT : 0 < T) (hT1 : T ≤ 1)
-    (f : timeL2 (tensorHs (I := I) (M := M) g r s a) T)
-    (i : TensorEigenIdx (I := I) (M := M) g r s) :
-    timeModeCoeff (I := I) (M := M)
-        (maximalRegularitySolFieldHa1 (I := I) (M := M) a hT hT1 f) i =
-      solModeCoeff (I := I) (M := M) (a := a) hT.le f i :=
-  timeL2OfModes_timeModeCoeff (I := I) (M := M) (σ := a + 1) _
-    (summable_solModeCoeff_Ha1 (I := I) (M := M) (a := a) hT hT1 h_atlas f) i
-
-/-- Chart-locality-free version of `maximalRegularitySolFieldHa1_timeModeCoeff`,
-parameterized on resolvent compactness `h_compact`. -/
-theorem maximalRegularitySolFieldHa1_timeModeCoeff_ofCompact (hT : 0 < T)
+/-- Chart-locality-free version,
+parameterized on resolvent compactness `h_compact`: the `i`-th eigen-coordinate
+of the `H^{a+1}`-view solution field is `φᵢ = perModeConvL2 λᵢ
+(timeModeCoeff f i)`. -/
+theorem maximalRegularitySolFieldHa1_timeModeCoeff (hT : 0 < T)
     (hT1 : T ≤ 1)
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
@@ -672,108 +592,59 @@ theorem maximalRegularitySolFieldHa1_timeModeCoeff_ofCompact (hT : 0 < T)
         (maximalRegularitySolFieldHa1 (I := I) (M := M) a hT hT1 f) i =
       solModeCoeff (I := I) (M := M) (a := a) hT.le f i :=
   timeL2OfModes_timeModeCoeff (I := I) (M := M) (σ := a + 1) _
-    (summable_solModeCoeff_Ha1_ofCompact (I := I) (M := M) (a := a) hT hT1
+    (summable_solModeCoeff_Ha1 (I := I) (M := M) (a := a) hT hT1
       h_compact f) i
-
-include h_atlas in
-/-- **The `H^{a+1}` maximal-regularity bound (one-derivative gain, `√T`-decay).**
-For `0 < T ≤ 1` the `H^{a+1}`-view solution field satisfies
-
-  `‖u‖_{L²([0,T];H^{a+1})} ≤ 2√T · ‖f‖_{L²([0,T];Hᵃ)}`.
-
-Unlike the two-derivative-gain bound `(1 + T)·‖f‖`, the constant `2√T` here
-**vanishes as `T → 0`**.  This is the genuine parabolic smoothing that, for a
-subcritical (one-derivative-loss) nonlinearity, makes the Duhamel fixed-point map
-a contraction at small time for *any* Lipschitz constant. -/
-theorem maximalRegularitySolFieldHa1_norm_le (hT : 0 < T) (hT1 : T ≤ 1)
-    (f : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
-    ‖maximalRegularitySolFieldHa1 (I := I) (M := M) a hT hT1 f‖ ≤
-      2 * Real.sqrt T * ‖f‖ := by
-  refine norm_le_of_weighted_perMode_le (I := I) (M := M) (b := a + 1)
-    h_atlas (C := 2 * Real.sqrt T)
-    (by positivity) _ f (fun i => ?_)
-  rw [maximalRegularitySolFieldHa1_timeModeCoeff (I := I) (M := M)
-    (h_atlas := h_atlas) (a := a) hT hT1 f i]
-  exact weighted_solModeCoeff_Ha1_le (I := I) (M := M) (a := a) hT hT1 f i
 
 /-- Chart-locality-free version of `maximalRegularitySolFieldHa1_norm_le`
 (the `H^{a+1}` one-derivative-gain bound with `√T`-decay), parameterized on
 resolvent compactness `h_compact`:
 `‖u‖_{L²([0,T];H^{a+1})} ≤ 2√T · ‖f‖_{L²([0,T];Hᵃ)}`. -/
-theorem maximalRegularitySolFieldHa1_norm_le_ofCompact
+theorem maximalRegularitySolFieldHa1_norm_le
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
     (hT : 0 < T) (hT1 : T ≤ 1)
     (f : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
     ‖maximalRegularitySolFieldHa1 (I := I) (M := M) a hT hT1 f‖ ≤
       2 * Real.sqrt T * ‖f‖ := by
-  refine norm_le_of_weighted_perMode_le_ofCompact (I := I) (M := M) (b := a + 1)
+  refine norm_le_of_weighted_perMode_le (I := I) (M := M) (b := a + 1)
     h_compact (C := 2 * Real.sqrt T)
     (by positivity) _ f (fun i => ?_)
-  rw [maximalRegularitySolFieldHa1_timeModeCoeff_ofCompact (I := I) (M := M)
+  rw [maximalRegularitySolFieldHa1_timeModeCoeff (I := I) (M := M)
     (h_compact := h_compact) (a := a) hT hT1 f i]
   exact weighted_solModeCoeff_Ha1_le (I := I) (M := M) (a := a) hT hT1 f i
 
-include h_atlas in
-/-- The `H^{a+1}`-view solution field is additive in the forcing term. -/
+/-- Chart-locality-free version: the `H^{a+1}`-view solution field is additive in
+the forcing term. -/
 theorem maximalRegularitySolFieldHa1_add (hT : 0 < T) (hT1 : T ≤ 1)
-    (f f' : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
-    maximalRegularitySolFieldHa1 (I := I) (M := M) a hT hT1 (f + f') =
-      maximalRegularitySolFieldHa1 (I := I) (M := M) a hT hT1 f +
-        maximalRegularitySolFieldHa1 (I := I) (M := M) a hT hT1 f' := by
-  refine timeModeCoeff_injective (I := I) (M := M) h_atlas (fun i => ?_)
-  rw [maximalRegularitySolFieldHa1_timeModeCoeff (I := I) (M := M)
-      (h_atlas := h_atlas) (a := a) hT hT1 (f + f') i,
-    timeModeCoeff_add (I := I) (M := M),
-    maximalRegularitySolFieldHa1_timeModeCoeff (I := I) (M := M)
-      (h_atlas := h_atlas) (a := a) hT hT1 f i,
-    maximalRegularitySolFieldHa1_timeModeCoeff (I := I) (M := M)
-      (h_atlas := h_atlas) (a := a) hT hT1 f' i]
-  rw [solModeCoeff, solModeCoeff, solModeCoeff,
-    timeModeCoeff_add (I := I) (M := M), map_add]
-
-/-- Chart-locality-free version of `maximalRegularitySolFieldHa1_add`. -/
-theorem maximalRegularitySolFieldHa1_add_ofCompact (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
     (f f' : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
     maximalRegularitySolFieldHa1 (I := I) (M := M) a hT hT1 (f + f') =
       maximalRegularitySolFieldHa1 (I := I) (M := M) a hT hT1 f +
         maximalRegularitySolFieldHa1 (I := I) (M := M) a hT hT1 f' := by
-  refine timeModeCoeff_injective_ofCompact (I := I) (M := M) h_compact
+  refine timeModeCoeff_injective (I := I) (M := M) h_compact
     (fun i => ?_)
-  rw [maximalRegularitySolFieldHa1_timeModeCoeff_ofCompact (I := I) (M := M)
+  rw [maximalRegularitySolFieldHa1_timeModeCoeff (I := I) (M := M)
       (h_compact := h_compact) (a := a) hT hT1 (f + f') i,
     timeModeCoeff_add (I := I) (M := M),
-    maximalRegularitySolFieldHa1_timeModeCoeff_ofCompact (I := I) (M := M)
+    maximalRegularitySolFieldHa1_timeModeCoeff (I := I) (M := M)
       (h_compact := h_compact) (a := a) hT hT1 f i,
-    maximalRegularitySolFieldHa1_timeModeCoeff_ofCompact (I := I) (M := M)
+    maximalRegularitySolFieldHa1_timeModeCoeff (I := I) (M := M)
       (h_compact := h_compact) (a := a) hT hT1 f' i]
   rw [solModeCoeff, solModeCoeff, solModeCoeff,
     timeModeCoeff_add (I := I) (M := M), map_add]
 
-include h_atlas in
-/-- The `H^{a+1}`-view solution field commutes with subtraction of forcing
-terms — the form consumed by the small-time contraction estimate. -/
+/-- Chart-locality-free version: the `H^{a+1}`-view solution field commutes with
+subtraction of forcing terms — the form consumed by the small-time contraction
+estimate. -/
 theorem maximalRegularitySolFieldHa1_sub (hT : 0 < T) (hT1 : T ≤ 1)
+    (h_compact : IsCompactOperator (tensorResolventL2
+      (I := I) (M := M) g r s))
     (f f' : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
     maximalRegularitySolFieldHa1 (I := I) (M := M) a hT hT1 (f - f') =
       maximalRegularitySolFieldHa1 (I := I) (M := M) a hT hT1 f -
         maximalRegularitySolFieldHa1 (I := I) (M := M) a hT hT1 f' := by
   have hadd := maximalRegularitySolFieldHa1_add (I := I) (M := M)
-    (h_atlas := h_atlas) (a := a) hT hT1 (f - f') f'
-  rw [sub_add_cancel] at hadd
-  rw [hadd, add_sub_cancel_right]
-
-/-- Chart-locality-free version of `maximalRegularitySolFieldHa1_sub`. -/
-theorem maximalRegularitySolFieldHa1_sub_ofCompact (hT : 0 < T) (hT1 : T ≤ 1)
-    (h_compact : IsCompactOperator (tensorResolventL2
-      (I := I) (M := M) g r s))
-    (f f' : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
-    maximalRegularitySolFieldHa1 (I := I) (M := M) a hT hT1 (f - f') =
-      maximalRegularitySolFieldHa1 (I := I) (M := M) a hT hT1 f -
-        maximalRegularitySolFieldHa1 (I := I) (M := M) a hT hT1 f' := by
-  have hadd := maximalRegularitySolFieldHa1_add_ofCompact (I := I) (M := M)
     (h_compact := h_compact) (a := a) hT hT1 (f - f') f'
   rw [sub_add_cancel] at hadd
   rw [hadd, add_sub_cancel_right]
@@ -821,109 +692,43 @@ theorem maximalRegularityOp_trace0 (hT : 0 < T) (hT1 : T ≤ 1)
 
 /-! ## The maximal-regularity bounds -/
 
-include h_atlas in
-/-- **The `H^{a+2}` maximal-regularity bound (two-derivative gain).**  The
-solution field lies in `L²([0,T]; H^{a+2})` with
-
-  `‖u‖_{L²([0,T];H^{a+2})} ≤ (1 + T) · ‖f‖_{L²([0,T];Hᵃ)}`.
-
-The output gains *two* Sobolev derivatives over the forcing; the constant
-`C(T) = 1 + T` depends only on the (bounded) time horizon. -/
-theorem maximalRegularityOp_norm_Ha2_le (hT : 0 < T) (_hT1 : T ≤ 1)
-    (f : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
-    ‖maximalRegularitySolField (I := I) (M := M) a hT.le f‖ ≤
-      (1 + T) * ‖f‖ := by
-  refine norm_le_of_weighted_perMode_le (I := I) (M := M) (b := a + 2)
-    h_atlas (C := 1 + T) (by linarith [hT.le]) _ f (fun i => ?_)
-  -- The weighted per-mode `H^{a+2}` bound, with the solution-field modes
-  -- rewritten through `maximalRegularitySolField_timeModeCoeff`.
-  rw [maximalRegularitySolField_timeModeCoeff (I := I) (M := M) (h_atlas := h_atlas)
-    (a := a) hT.le f i]
-  exact weighted_solModeCoeff_le (I := I) (M := M) (a := a) hT.le f i
-
 /-- Chart-locality-free version of `maximalRegularityOp_norm_Ha2_le`
 (the `H^{a+2}` two-derivative-gain bound), parameterized on resolvent
 compactness `h_compact`:
 `‖u‖_{L²([0,T];H^{a+2})} ≤ (1 + T) · ‖f‖_{L²([0,T];Hᵃ)}`. -/
-theorem maximalRegularityOp_norm_Ha2_le_ofCompact
+theorem maximalRegularityOp_norm_Ha2_le
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
     (hT : 0 < T) (_hT1 : T ≤ 1)
     (f : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
     ‖maximalRegularitySolField (I := I) (M := M) a hT.le f‖ ≤
       (1 + T) * ‖f‖ := by
-  refine norm_le_of_weighted_perMode_le_ofCompact (I := I) (M := M) (b := a + 2)
+  refine norm_le_of_weighted_perMode_le (I := I) (M := M) (b := a + 2)
     h_compact (C := 1 + T) (by linarith [hT.le]) _ f (fun i => ?_)
-  rw [maximalRegularitySolField_timeModeCoeff_ofCompact (I := I) (M := M)
+  rw [maximalRegularitySolField_timeModeCoeff (I := I) (M := M)
     (h_compact := h_compact) (a := a) hT.le f i]
   exact weighted_solModeCoeff_le (I := I) (M := M) (a := a) hT.le f i
-
-include h_atlas in
-/-- **The `∂_t` bound.**  The time derivative lies in `L²([0,T]; Hᵃ)` with
-
-  `‖∂_t u‖_{L²([0,T];Hᵃ)} ≤ 2 · ‖f‖_{L²([0,T];Hᵃ)}`.
-
-The constant `2` is absolute. -/
-theorem maximalRegularityOp_norm_deriv_le (hT : 0 < T) (_hT1 : T ≤ 1)
-    (f : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
-    ‖maximalRegularityDerivField (I := I) (M := M) a hT.le f‖ ≤
-      2 * ‖f‖ := by
-  refine norm_le_of_weighted_perMode_le (I := I) (M := M) (b := a)
-    h_atlas (C := 2) (by norm_num) _ f (fun i => ?_)
-  rw [maximalRegularityDerivField_timeModeCoeff (I := I) (M := M) (h_atlas := h_atlas)
-    (a := a) hT.le f i]
-  exact weighted_derivModeCoeff_le (I := I) (M := M) (a := a) hT.le f i
 
 /-- Chart-locality-free version of `maximalRegularityOp_norm_deriv_le`
 (the `∂_t` bound), parameterized on resolvent compactness `h_compact`:
 `‖∂_t u‖_{L²([0,T];Hᵃ)} ≤ 2 · ‖f‖_{L²([0,T];Hᵃ)}`. -/
-theorem maximalRegularityOp_norm_deriv_le_ofCompact
+theorem maximalRegularityOp_norm_deriv_le
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
     (hT : 0 < T) (_hT1 : T ≤ 1)
     (f : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
     ‖maximalRegularityDerivField (I := I) (M := M) a hT.le f‖ ≤
       2 * ‖f‖ := by
-  refine norm_le_of_weighted_perMode_le_ofCompact (I := I) (M := M) (b := a)
+  refine norm_le_of_weighted_perMode_le (I := I) (M := M) (b := a)
     h_compact (C := 2) (by norm_num) _ f (fun i => ?_)
-  rw [maximalRegularityDerivField_timeModeCoeff_ofCompact (I := I) (M := M)
+  rw [maximalRegularityDerivField_timeModeCoeff (I := I) (M := M)
     (h_compact := h_compact) (a := a) hT.le f i]
   exact weighted_derivModeCoeff_le (I := I) (M := M) (a := a) hT.le f i
-
-include h_atlas in
-/-- **The combined `H¹`-graph-norm bound.**  The maximal-regularity operator is
-bounded from `L²([0,T]; Hᵃ)` into the strong-solution space `H¹([0,T]; Hᵃ)`:
-
-  `‖maximalRegularityOp f‖_{H¹([0,T];Hᵃ)} ≤ 2 · ‖f‖_{L²([0,T];Hᵃ)}`.
-
-The `H¹`-graph norm `‖u‖² = ‖u(0)‖² + ‖∂_t u‖²` combines the (vanishing) initial
-condition and the `∂_t` bound. -/
-theorem maximalRegularityOp_norm_le (hT : 0 < T) (hT1 : T ≤ 1)
-    (f : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
-    ‖maximalRegularityOp (I := I) (M := M) a hT hT1 f‖ ≤ 2 * ‖f‖ := by
-  -- `‖u‖² = ‖u(0)‖² + ‖∂_t u‖² = 0 + ‖∂_t u‖² ≤ (2‖f‖)²`.
-  have hnormsq := TimeSobolev.timeH1.norm_sq_eq
-    (maximalRegularityOp (I := I) (M := M) a hT hT1 f)
-  have hinit : (maximalRegularityOp (I := I) (M := M) a hT hT1 f).init = 0 :=
-    rfl
-  have hderiv : (maximalRegularityOp (I := I) (M := M) a hT hT1 f).deriv =
-      maximalRegularityDerivField (I := I) (M := M) a hT.le f := rfl
-  have hderiv_le := maximalRegularityOp_norm_deriv_le (I := I) (M := M)
-    (h_atlas := h_atlas) (a := a) hT hT1 f
-  have hsq : ‖maximalRegularityOp (I := I) (M := M) a hT hT1 f‖ ^ 2 ≤
-      (2 * ‖f‖) ^ 2 := by
-    rw [hnormsq, hinit, hderiv, norm_zero]
-    have h2f_nonneg : 0 ≤ 2 * ‖f‖ := mul_nonneg (by norm_num) (norm_nonneg _)
-    nlinarith [hderiv_le, norm_nonneg
-      (maximalRegularityDerivField (I := I) (M := M) a hT.le f)]
-  have h := Real.sqrt_le_sqrt hsq
-  rwa [Real.sqrt_sq (norm_nonneg _),
-    Real.sqrt_sq (mul_nonneg (by norm_num) (norm_nonneg _))] at h
 
 /-- Chart-locality-free version of `maximalRegularityOp_norm_le` (the combined
 `H¹`-graph-norm bound), parameterized on resolvent compactness `h_compact`:
 `‖maximalRegularityOp f‖_{H¹([0,T];Hᵃ)} ≤ 2 · ‖f‖_{L²([0,T];Hᵃ)}`. -/
-theorem maximalRegularityOp_norm_le_ofCompact
+theorem maximalRegularityOp_norm_le
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
     (hT : 0 < T) (hT1 : T ≤ 1)
@@ -935,7 +740,7 @@ theorem maximalRegularityOp_norm_le_ofCompact
     rfl
   have hderiv : (maximalRegularityOp (I := I) (M := M) a hT hT1 f).deriv =
       maximalRegularityDerivField (I := I) (M := M) a hT.le f := rfl
-  have hderiv_le := maximalRegularityOp_norm_deriv_le_ofCompact (I := I) (M := M)
+  have hderiv_le := maximalRegularityOp_norm_deriv_le (I := I) (M := M)
     (h_compact := h_compact) (a := a) hT hT1 f
   have hsq : ‖maximalRegularityOp (I := I) (M := M) a hT hT1 f‖ ^ 2 ≤
       (2 * ‖f‖) ^ 2 := by

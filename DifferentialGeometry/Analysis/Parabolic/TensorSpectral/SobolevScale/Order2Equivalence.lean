@@ -42,9 +42,9 @@ isomorphism `tensorHs g r s 2 ≃L TensorPouSobolevHilbert g r s 2`.
    isometrically isomorphic to `TensorL2 r s g`. This factors through the
    scale-isometry of the spectral tower
    (`tensorHsEquivOfFractionalPower 2 0`) and the chart-locality-free order-`0`
-   identification `tensorHsZeroEquivL2_ofCompact`, whose only input is the
+   identification `tensorHsZeroEquivL2`, whose only input is the
    resolvent's compactness, supplied unconditionally by
-   `tensorResolventL2_isCompactOperator_intrinsic`.
+   `tensorResolventL2_isCompactOperator`.
 
 ## The remaining elliptic-regularity gap (documented, not assumed)
 
@@ -171,14 +171,14 @@ space is isometrically isomorphic to the metric `L²` Hilbert space of
 `(1 − Δ_∇)^{1}` from `H²` to `H⁰`, followed by the chart-locality-free order-`0`
 identification `H⁰ ≃ₗᵢ L²`; the latter's only input, compactness of the tensor
 resolvent, is supplied unconditionally by
-`tensorResolventL2_isCompactOperator_intrinsic`. -/
+`tensorResolventL2_isCompactOperator`. -/
 def tensorHs_order2_isometryEquiv_tensorL2
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     tensorHs (I := I) (M := M) g r s 2 ≃ₗᵢ[ℝ] TensorL2 r s g :=
   (tensorHsEquivOfFractionalPower (I := I) (M := M)
       (g := g) (r := r) (s := s) 2 0).trans
-    (tensorHsZeroEquivL2_ofCompact (I := I) (M := M)
-      (DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.tensorResolventL2_isCompactOperator_intrinsic
+    (tensorHsZeroEquivL2 (I := I) (M := M)
+      (DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.tensorResolventL2_isCompactOperator
         (I := I) (M := M) g r s))
 
 /-! ## 3. The remaining elliptic-regularity gap, and the genuine reduction

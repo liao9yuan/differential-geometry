@@ -22,8 +22,8 @@ depends on the value `X b` at the point `b`, via the formula
 
 The proof factors through the Christoffel-correction op-norm bound and the
 two trivialization op-norm bounds (`chartJ`, `chartJinv`), all of which are
-uniformly bounded on the partition-of-unity tsupport under the locality
-hypothesis `HasLocallyConstantChartAt H M`.
+uniformly bounded on the partition-of-unity tsupport under a uniform
+compactness hypothesis on the chart sources.
 -/
 
 noncomputable section
@@ -126,79 +126,9 @@ private lemma chartLeviCivitaParallelCLM_general_opNorm_le_factors
       C_Jinv * (C_χ * (C_J * ‖X b‖)) = C_Jinv * C_χ * C_J * ‖X b‖ := by ring
   linarith
 
-/-! ## Headline: uniform op-norm bound on `tsupport (chartAtlasPOU I M α)`
-
-The compact base set is the closed support of the canonical chart-atlas
-partition-of-unity weight at `α`, expressed as
-`tsupport (fun x => (chartAtlasPOU I M α : M → ℝ) x)`. It is the same
-compact-in-chart-source set used by the basis-vector bound
-`chartLeviCivitaParallelCLM_chartBasisVec_opNorm_isBounded_on_pouTsupport`. -/
-
-/-- **Uniform operator-norm bound for `chartLeviCivitaParallelCLM g α b X` on
-`tsupport (chartAtlasPOU I M α)`, for a general tangent vector argument.**
-
-For a closed Riemannian manifold `(M, g)` with a locally constant chart
-selection at the model, there exists a non-negative constant `C` depending
-only on `g`, the chart at `α`, and the locality hypothesis, such that for
-every `b` in the closed support of the canonical chart-atlas
-partition-of-unity weight at `α` and every vector-field section
-`X : Π b', TangentSpace I b'`, the chart Levi-Civita parallel CLM satisfies
-
-  `‖chartLeviCivitaParallelCLM g α b X‖ ≤ C * ‖X b‖`.
-
-The constant `C` is independent of `b` and `X`. The CLM only depends on the
-section `X` through its value `X b` at the point `b`, so the right-hand side
-`C * ‖X b‖` is the natural quantity. -/
-theorem chartLeviCivitaParallelCLM_general_X_opNorm_isBounded_on_pouTsupport
-    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
-    (g : SmoothRiemannianMetric I M) (α : M) :
-    ∃ C : ℝ, 0 ≤ C ∧
-      ∀ {b : M}, b ∈ tsupport (fun x : M =>
-          ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) →
-        ∀ X : Π b' : M, TangentSpace I b',
-          ‖chartLeviCivitaParallelCLM (I := I) g α b X‖ ≤ C * ‖X b‖ := by
-  classical
-  -- Set up the compact base set.
-  set K : Set M := tsupport (fun x : M =>
-      ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) with hK_def
-  have hK_compact : IsCompact K := pouTsupport_isCompact (I := I) (M := M) α
-  have hK_sub : K ⊆ (chartAt H α).source :=
-    (chartAtlasPOU_isSubordinate I M) α
-  -- Step 1: uniform bound on ‖chartJ α b‖ on K.
-  obtain ⟨C_J, hCJ_pos, hCJ_bound⟩ :=
-    chartJ_opNorm_isBounded_on_compact (I := I) (M := M) h_atlas α hK_compact hK_sub
-  have hCJ_nn : 0 ≤ C_J := le_of_lt hCJ_pos
-  -- Step 2: uniform bound on ‖chartJinv α b‖ on K.
-  obtain ⟨C_Jinv, hCJinv_pos, hCJinv_bound⟩ :=
-    chartJinv_opNorm_isBounded_on_compact (I := I) (M := M)
-      h_atlas α hK_compact hK_sub
-  have hCJinv_nn : 0 ≤ C_Jinv := le_of_lt hCJinv_pos
-  -- Step 3: uniform bound on ‖christoffelCorrection g α b‖ on the POU tsupport.
-  obtain ⟨C_χ, hCχ_nn, hCχ_bound⟩ :=
-    christoffelCorrection_opNorm_isBounded_on_pouTsupport
-      (I := I) (M := M) h_atlas g α
-  -- Set the headline constant.
-  set C : ℝ := C_Jinv * C_χ * C_J with hC_def
-  have hC_nn : 0 ≤ C := by positivity
-  refine ⟨C, hC_nn, ?_⟩
-  intro b hb X
-  have h_CJ : ‖chartJ (I := I) (M := M) α b‖ ≤ C_J := hCJ_bound b hb
-  have h_CJinv : ‖chartJinv (I := I) (M := M) α b‖ ≤ C_Jinv := hCJinv_bound b hb
-  have h_Cχ : ∀ Y : E, ‖christoffelCorrection (I := I) g α b Y‖ ≤ C_χ * ‖Y‖ :=
-    fun Y => hCχ_bound (b := b) hb Y
-  exact
-    chartLeviCivitaParallelCLM_general_opNorm_le_factors (I := I) (M := M)
-      g α b X C_J C_Jinv C_χ
-      h_CJ hCJ_nn h_CJinv hCJinv_nn h_Cχ hCχ_nn
-
 end TensorSpectral
 end Parabolic
 end Analysis
 end DifferentialGeometry
 
 end
-
-section Sanity
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.chartLeviCivitaParallelCLM_general_X_opNorm_isBounded_on_pouTsupport
-end Sanity

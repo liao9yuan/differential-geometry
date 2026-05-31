@@ -171,7 +171,7 @@ private theorem coeffFun_u_eq
     rw [hu_def, maxRegDuhamelMap_init]; rfl
   rw [hinit]
   have hsplit_ae := maxRegDuhamelMap_deriv_coeff_ae (I := I) (M := M)
-    (h_compact := tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g_bg 0 2)
+    (h_compact := tensorResolventL2_isCompactOperator (I := I) (M := M) g_bg 0 2)
     (a := a) hT hT1 u₀ gforce i
   have hint_split : (∫ τ in (0:ℝ)..s, (u.deriv τ).coeff i)
       = (∫ τ in (0:ℝ)..s, (homDerivModeCoeff (I := I) (M := M) (a := a) (T := T) u₀ i) τ)

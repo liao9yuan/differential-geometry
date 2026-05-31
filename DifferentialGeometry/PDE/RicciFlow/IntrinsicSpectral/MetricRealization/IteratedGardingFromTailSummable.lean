@@ -22,7 +22,7 @@ eigenvalue tail.
 ## The reduction
 
 For a fixed order `k`, the on-disk per-eigenvector quantitative bound
-`tensorHsSmoothRepr_wtwokTwoNorm_le_uniform_unconditional` controls the smooth
+`tensorHsSmoothRepr_wtwokTwoNorm_le_uniform` controls the smooth
 representative's tensor `W^{2k,2}` norm by the explicit finite `ℓ¹` sum
 
   `wtwokTwoNorm g k (smoothRepr T) ≤ C₀ · ∑_{i ∈ supp T} |T.coeff i| · (1 + λᵢ)^{2k+1}`,
@@ -228,7 +228,7 @@ eigenvalues is summable), the iterated spectral→intrinsic Gårding norm bound
 For each order `k` the witness exponent is `σ = 2 · (2k+1) + p` and the constant
 is `C = C₀ · √(∑'ᵢ (1 + λᵢ)^{−p})`, where `C₀ ≥ 0` is the order-`k` constant of
 the on-disk per-eigenvector quantitative chart-Sobolev bound
-`tensorHsSmoothRepr_wtwokTwoNorm_le_uniform_unconditional`. The bound is the
+`tensorHsSmoothRepr_wtwokTwoNorm_le_uniform`. The bound is the
 Cauchy–Schwarz `ℓ² → ℓ¹` combination of that per-eigenvector bound with the
 eigenvalue tail, isolated in `garding_l1_sum_le`.
 
@@ -261,7 +261,7 @@ theorem iteratedGardingExtensionBound_of_eigenvalueTailSummable
   intro k
   -- The order-`k` per-eigenvector constant `C₀ ≥ 0`.
   obtain ⟨C₀, hC₀_nn, hC₀_bound⟩ :=
-    tensorHsSmoothRepr_wtwokTwoNorm_le_uniform_unconditional
+    tensorHsSmoothRepr_wtwokTwoNorm_le_uniform
       (I := I) (M := M) g r s k
   -- The witness exponent and constant.
   refine ⟨2 * (2 * k + 1 : ℕ) + p, by positivity, C₀ * Real.sqrt Stail,
@@ -269,8 +269,8 @@ theorem iteratedGardingExtensionBound_of_eigenvalueTailSummable
   intro T hT_fs
   -- The smooth representative lies in `W^{2k,2}`, so its tensor norm is finite.
   have h_mem : MemWtwokTwo (I := I) (M := M) g k
-      (tensorHsSmoothRepr_unconditional (I := I) (M := M) T hT_fs) :=
-    tensorHsSmoothRepr_memWtwokTwo_unconditional (I := I) (M := M) T hT_fs k
+      (tensorHsSmoothRepr (I := I) (M := M) T hT_fs) :=
+    tensorHsSmoothRepr_memWtwokTwo (I := I) (M := M) T hT_fs k
   -- The per-eigenvector ENNReal bound.
   have hbd := hC₀_bound T hT_fs
   -- Both sides of the ENNReal bound are finite; take `.toReal`.
@@ -290,7 +290,7 @@ theorem iteratedGardingExtensionBound_of_eigenvalueTailSummable
   -- Convert the ENNReal bound to a real bound on `.toReal`.
   have htoReal :
       (wtwokTwoNorm (I := I) (M := M) g k
-        (tensorHsSmoothRepr_unconditional (I := I) (M := M) T hT_fs)).toReal ≤
+        (tensorHsSmoothRepr (I := I) (M := M) T hT_fs)).toReal ≤
       C₀ * (∑ i ∈ hT_fs.toFinset,
         |T.coeff i| * (i.fst.val)⁻¹ ^ (2 * k + 1)) := by
     have h := ENNReal.toReal_mono hrhs_ne_top hbd
@@ -301,7 +301,7 @@ theorem iteratedGardingExtensionBound_of_eigenvalueTailSummable
     (σ := 2 * (2 * k + 1 : ℕ) + p) rfl T hT_fs
   -- Chain the two bounds.
   calc (wtwokTwoNorm (I := I) (M := M) g k
-          (tensorHsSmoothRepr_unconditional (I := I) (M := M) T hT_fs)).toReal
+          (tensorHsSmoothRepr (I := I) (M := M) T hT_fs)).toReal
       ≤ C₀ * (∑ i ∈ hT_fs.toFinset,
           |T.coeff i| * (i.fst.val)⁻¹ ^ (2 * k + 1)) := htoReal
     _ ≤ C₀ * (Real.sqrt Stail * ‖T‖) :=

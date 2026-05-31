@@ -7,7 +7,7 @@ import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.TensorChartCompone
 For a closed Riemannian manifold `(M, g)` and ranks `(r, s)`, this file packages
 the per-chart-base-point gradient `L²` constants extracted from the intrinsic
 per-`α` headline
-`exists_eLpNorm_sqrt_g_inner_gradFun_tensorChartComponentScalar_le_const_mul_h1Norm_intrinsic`
+`exists_eLpNorm_sqrt_g_inner_gradFun_tensorChartComponentScalar_le_const_mul_h1Norm`
 and sums them over the chart-atlas **active finset** to obtain a single
 `α`-uniform constant.
 
@@ -22,7 +22,7 @@ handled directly via the public active-finset machinery
 
 ## Public theorem
 
-* `tensorChartComponentScalar_grad_eLpNorm_le_intrinsic`
+* `tensorChartComponentScalar_grad_eLpNorm_le`
 -/
 
 noncomputable section
@@ -120,17 +120,17 @@ private lemma eLpNorm_sqrt_g_inner_gradFun_eq_zero_of_inactive_intrinsic
 
 /-! ## Per-`α` gradient constants and their sum over the active finset -/
 
-private noncomputable def perAlphaGradConstant_intrinsic
+private noncomputable def perAlphaGradConstant
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) : ℝ :=
   Classical.choose
-    (exists_eLpNorm_sqrt_g_inner_gradFun_tensorChartComponentScalar_le_const_mul_h1Norm_intrinsic
+    (exists_eLpNorm_sqrt_g_inner_gradFun_tensorChartComponentScalar_le_const_mul_h1Norm
       (I := I) (M := M) g r s α)
 
 private lemma perAlphaGradConstant_intrinsic_nonneg
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
-    0 ≤ perAlphaGradConstant_intrinsic (I := I) (M := M) g r s α :=
+    0 ≤ perAlphaGradConstant (I := I) (M := M) g r s α :=
   (Classical.choose_spec
-    (exists_eLpNorm_sqrt_g_inner_gradFun_tensorChartComponentScalar_le_const_mul_h1Norm_intrinsic
+    (exists_eLpNorm_sqrt_g_inner_gradFun_tensorChartComponentScalar_le_const_mul_h1Norm
       (I := I) (M := M) g r s α)).1
 
 private lemma perAlphaGradConstant_intrinsic_bound
@@ -147,43 +147,43 @@ private lemma perAlphaGradConstant_intrinsic_bound
             (tensorChartComponentScalar (I := I) (M := M)
               g r s S.toCcTensor α Idx Jdx) b))) 2
         (riemannianVolumeMeasure (I := I) (M := M) g) ≤
-      ENNReal.ofReal (perAlphaGradConstant_intrinsic (I := I) (M := M) g r s α) *
+      ENNReal.ofReal (perAlphaGradConstant (I := I) (M := M) g r s α) *
         (‖S‖₊ : ℝ≥0∞) :=
   (Classical.choose_spec
-    (exists_eLpNorm_sqrt_g_inner_gradFun_tensorChartComponentScalar_le_const_mul_h1Norm_intrinsic
+    (exists_eLpNorm_sqrt_g_inner_gradFun_tensorChartComponentScalar_le_const_mul_h1Norm
       (I := I) (M := M) g r s α)).2 S Idx Jdx
 
-private noncomputable def totalActiveGradConstant_intrinsic
+private noncomputable def totalActiveGradConstant
     (g : SmoothRiemannianMetric I M) (r s : ℕ) : ℝ :=
   ∑ α ∈ chartAtlasPOU_activeFinset I M,
-    perAlphaGradConstant_intrinsic (I := I) (M := M) g r s α
+    perAlphaGradConstant (I := I) (M := M) g r s α
 
 private lemma totalActiveGradConstant_intrinsic_nonneg
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
-    0 ≤ totalActiveGradConstant_intrinsic (I := I) (M := M) g r s := by
+    0 ≤ totalActiveGradConstant (I := I) (M := M) g r s := by
   classical
-  unfold totalActiveGradConstant_intrinsic
+  unfold totalActiveGradConstant
   exact Finset.sum_nonneg (fun α _ =>
     perAlphaGradConstant_intrinsic_nonneg (I := I) (M := M) g r s α)
 
-private lemma perAlphaGradConstant_le_totalActiveGradConstant_intrinsic
+private lemma perAlphaGradConstant_le_totalActiveGradConstant
     (g : SmoothRiemannianMetric I M) (r s : ℕ) {α : M}
     (hα : α ∈ chartAtlasPOU_activeFinset I M) :
-    perAlphaGradConstant_intrinsic (I := I) (M := M) g r s α ≤
-      totalActiveGradConstant_intrinsic (I := I) (M := M) g r s := by
+    perAlphaGradConstant (I := I) (M := M) g r s α ≤
+      totalActiveGradConstant (I := I) (M := M) g r s := by
   classical
-  unfold totalActiveGradConstant_intrinsic
+  unfold totalActiveGradConstant
   have h_split :
       ∑ β ∈ chartAtlasPOU_activeFinset I M,
-        perAlphaGradConstant_intrinsic (I := I) (M := M) g r s β =
-        perAlphaGradConstant_intrinsic (I := I) (M := M) g r s α +
+        perAlphaGradConstant (I := I) (M := M) g r s β =
+        perAlphaGradConstant (I := I) (M := M) g r s α +
         ∑ β ∈ (chartAtlasPOU_activeFinset I M).erase α,
-          perAlphaGradConstant_intrinsic (I := I) (M := M) g r s β := by
+          perAlphaGradConstant (I := I) (M := M) g r s β := by
     rw [← Finset.sum_erase_add _ _ hα, add_comm]
   rw [h_split]
   have h_rest_nn :
       0 ≤ ∑ β ∈ (chartAtlasPOU_activeFinset I M).erase α,
-            perAlphaGradConstant_intrinsic (I := I) (M := M) g r s β :=
+            perAlphaGradConstant (I := I) (M := M) g r s β :=
     Finset.sum_nonneg (fun β _ =>
       perAlphaGradConstant_intrinsic_nonneg (I := I) (M := M) g r s β)
   linarith
@@ -198,7 +198,7 @@ constant `C_grad` (independent of the chart base point `α`, the section `S`, an
 the multi-indices) bounding the gradient self-inner square-root `L²` norm of
 every chart-frame scalar component. Chart-locality-free counterpart of
 `tensorChartComponentScalar_grad_eLpNorm_le`. -/
-theorem tensorChartComponentScalar_grad_eLpNorm_le_intrinsic
+theorem tensorChartComponentScalar_grad_eLpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ C_grad : ℝ, 0 ≤ C_grad ∧
       ∀ (S : SmoothCcTensorH1 g r s) (α : M)
@@ -215,7 +215,7 @@ theorem tensorChartComponentScalar_grad_eLpNorm_le_intrinsic
             (riemannianVolumeMeasure (I := I) (M := M) g) ≤
           ENNReal.ofReal C_grad * (‖S‖₊ : ℝ≥0∞) := by
   classical
-  refine ⟨totalActiveGradConstant_intrinsic (I := I) (M := M) g r s,
+  refine ⟨totalActiveGradConstant (I := I) (M := M) g r s,
     totalActiveGradConstant_intrinsic_nonneg (I := I) (M := M) g r s, ?_⟩
   intro S α Idx Jdx
   by_cases hα : α ∈ chartAtlasPOU_activeFinset I M
@@ -230,23 +230,23 @@ theorem tensorChartComponentScalar_grad_eLpNorm_le_intrinsic
                   g r s S.toCcTensor α Idx Jdx) b))) 2
             (riemannianVolumeMeasure (I := I) (M := M) g) ≤
           ENNReal.ofReal
-              (perAlphaGradConstant_intrinsic (I := I) (M := M) g r s α) *
+              (perAlphaGradConstant (I := I) (M := M) g r s α) *
             (‖S‖₊ : ℝ≥0∞) :=
       perAlphaGradConstant_intrinsic_bound (I := I) (M := M) g r s α S Idx Jdx
     have h_const_le :
         ENNReal.ofReal
-            (perAlphaGradConstant_intrinsic (I := I) (M := M) g r s α) ≤
+            (perAlphaGradConstant (I := I) (M := M) g r s α) ≤
           ENNReal.ofReal
-            (totalActiveGradConstant_intrinsic (I := I) (M := M) g r s) :=
+            (totalActiveGradConstant (I := I) (M := M) g r s) :=
       ENNReal.ofReal_le_ofReal
-        (perAlphaGradConstant_le_totalActiveGradConstant_intrinsic
+        (perAlphaGradConstant_le_totalActiveGradConstant
           (I := I) (M := M) g r s hα)
     have h_envelope_le :
         ENNReal.ofReal
-              (perAlphaGradConstant_intrinsic (I := I) (M := M) g r s α) *
+              (perAlphaGradConstant (I := I) (M := M) g r s α) *
               (‖S‖₊ : ℝ≥0∞) ≤
           ENNReal.ofReal
-              (totalActiveGradConstant_intrinsic (I := I) (M := M) g r s) *
+              (totalActiveGradConstant (I := I) (M := M) g r s) *
               (‖S‖₊ : ℝ≥0∞) :=
       mul_le_mul_of_nonneg_right h_const_le (by exact zero_le _)
     exact h_per.trans h_envelope_le

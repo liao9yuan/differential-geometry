@@ -91,7 +91,6 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
-  {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M}
 
 /-! ## Countability of the eigen-index type
 
@@ -102,27 +101,12 @@ eigenvalue with a finite eigenspace index; the base is countable under the
 uniform chart-Sobolev hypothesis and the fibres are `Fin _`, so the total space
 is countable. -/
 
-/-- Under the uniform chart-Sobolev hypothesis, the eigen-index type
-`TensorEigenIdx g r s` is countable: a sigma-type over the countable type
-`TensorNonzeroResolventEigenvalue g r s` with finite (`Fin _`) fibres.
-
-Stated as a lemma (consuming the explicit `HasLocallyConstantChartAt`
-hypothesis) rather than as an instance; downstream proofs install it with
-`haveI` where the Tonelli interchange or a countable a.e.-intersection needs
-it. -/
-lemma countable_tensorEigenIdx
-    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M) :
-    Countable (TensorEigenIdx (I := I) (M := M) g r s) := by
-  haveI : Countable (TensorNonzeroResolventEigenvalue (I := I) (M := M) g r s) :=
-    TensorNonzeroResolventEigenvalue.countable (I := I) (M := M) g r s h_atlas
-  infer_instance
-
 /-- Chart-locality-free countability of the eigen-index type
 `TensorEigenIdx g r s`, parameterized only on the resolvent compactness
 witness `h_compact : IsCompactOperator (tensorResolventL2 g r s)`. Same
 sigma-type-with-finite-fibres argument as `countable_tensorEigenIdx`, but
 re-based on `TensorNonzeroResolventEigenvalue.countable_ofCompact`. -/
-lemma countable_tensorEigenIdx_ofCompact
+lemma countable_tensorEigenIdx
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s)) :
     Countable (TensorEigenIdx (I := I) (M := M) g r s) := by
@@ -402,60 +386,16 @@ private theorem lintegral_planIntegrand
   filter_upwards [timeModeCoeff_coeFn (I := I) (M := M) f i] with t ht
   rw [ht]
 
-/-- The weighted-square family `i ↦ (1 + λᵢ)ᵃ · ‖timeModeCoeff f i‖²` has, after
-`ENNReal.ofReal`, a finite `ℝ≥0∞`-sum: it equals the finite Lebesgue integral
-`∫⁻ t, ENNReal.ofReal ‖f t‖²`.  This is the key finiteness fact behind both the
-norm identity and its `Summable` companion. -/
-private theorem ennreal_tsum_weight_mul_norm_sq_ne_top
-    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M) :
-    (∑' i, ENNReal.ofReal (tensorSobolevWeight (I := I) (M := M) i a *
-      ‖timeModeCoeff (I := I) (M := M) f i‖ ^ 2)) ≠ (⊤ : ℝ≥0∞) := by
-  haveI := countable_tensorEigenIdx (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas
-  -- The pointwise spatial Plancherel expansion, lifted to `ℝ≥0∞`.
-  have hpoint : ∀ t : ℝ,
-      ENNReal.ofReal (‖f t‖ ^ 2) =
-        ∑' i, planIntegrand (I := I) (M := M) f i t := by
-    intro t
-    rw [tensorHs.norm_sq_eq_tsum (I := I) (M := M) (f t)]
-    have hnn : ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
-        0 ≤ tensorSobolevWeight (I := I) (M := M) i a *
-          ((f t).coeff i) ^ 2 :=
-      fun i => mul_nonneg (tensorSobolevWeight_nonneg (I := I) (M := M) i a)
-        (sq_nonneg _)
-    rw [ENNReal.ofReal_tsum_of_nonneg hnn (f t).weighted_summable]
-    rfl
-  -- Tonelli: `∫⁻ t ∑'ᵢ = ∑'ᵢ ∫⁻ t`.
-  have hlintegral_eq :
-      ∫⁻ t, ENNReal.ofReal (‖f t‖ ^ 2) ∂(timeMeasure T) =
-        ∑' i, ∫⁻ t, planIntegrand (I := I) (M := M) f i t
-          ∂(timeMeasure T) := by
-    rw [show (∫⁻ t, ENNReal.ofReal (‖f t‖ ^ 2) ∂(timeMeasure T))
-          = ∫⁻ t, (∑' i, planIntegrand (I := I) (M := M) f i t)
-              ∂(timeMeasure T)
-        from lintegral_congr (fun t => hpoint t)]
-    exact lintegral_tsum
-      (fun i => aemeasurable_planIntegrand (I := I) (M := M) f i)
-  -- `t ↦ ‖f t‖²` is integrable; its `lintegral` is therefore finite.
-  have hf_norm_sq_int : Integrable (fun t => ‖f t‖ ^ 2) (timeMeasure T) :=
-    (memLp_two_iff_integrable_sq_norm (Lp.aestronglyMeasurable f)).mp
-      (Lp.memLp f)
-  have hf_nn : 0 ≤ᵐ[timeMeasure T] fun t => ‖f t‖ ^ 2 :=
-    Eventually.of_forall fun t => sq_nonneg _
-  -- Identify the per-mode `lintegral` terms and conclude finiteness.
-  rw [← tsum_congr (fun i => lintegral_planIntegrand (I := I) (M := M) f i),
-    ← hlintegral_eq, ← ofReal_integral_eq_lintegral_ofReal hf_norm_sq_int hf_nn]
-  exact ENNReal.ofReal_ne_top
-
 /-- Chart-locality-free version of `ennreal_tsum_weight_mul_norm_sq_ne_top`,
 parameterized on resolvent compactness `h_compact`. Identical Tonelli proof,
-but the eigen-index countability comes from `countable_tensorEigenIdx_ofCompact`.
+but the eigen-index countability comes from `countable_tensorEigenIdx`.
 The `planIntegrand` building blocks are already HLCC-free. -/
-private theorem ennreal_tsum_weight_mul_norm_sq_ne_top_ofCompact
+private theorem ennreal_tsum_weight_mul_norm_sq_ne_top
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s)) :
     (∑' i, ENNReal.ofReal (tensorSobolevWeight (I := I) (M := M) i a *
       ‖timeModeCoeff (I := I) (M := M) f i‖ ^ 2)) ≠ (⊤ : ℝ≥0∞) := by
-  haveI := countable_tensorEigenIdx_ofCompact
+  haveI := countable_tensorEigenIdx
     (I := I) (M := M) (g := g) (r := r) (s := s) h_compact
   have hpoint : ∀ t : ℝ,
       ENNReal.ofReal (‖f t‖ ^ 2) =
@@ -495,109 +435,30 @@ private theorem weight_mul_norm_timeModeCoeff_sq_nonneg
       ‖timeModeCoeff (I := I) (M := M) f i‖ ^ 2 :=
   mul_nonneg (tensorSobolevWeight_nonneg (I := I) (M := M) i a) (sq_nonneg _)
 
-/-- The weighted family `i ↦ (1 + λᵢ)ᵃ · ‖timeModeCoeff f i‖²` is summable:
-the `Summable` companion of the Plancherel–Fubini identity.  It follows from
-the finiteness of the corresponding `ℝ≥0∞`-sum. -/
-theorem summable_weight_mul_norm_timeModeCoeff_sq
-    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M) :
-    Summable (fun i => tensorSobolevWeight (I := I) (M := M) i a *
-      ‖timeModeCoeff (I := I) (M := M) f i‖ ^ 2) := by
-  refine (ENNReal.summable_toReal
-    (ennreal_tsum_weight_mul_norm_sq_ne_top
-      (I := I) (M := M) h_atlas (f := f))).congr
-    (fun i => ?_)
-  exact ENNReal.toReal_ofReal
-    (weight_mul_norm_timeModeCoeff_sq_nonneg (I := I) (M := M) f i)
-
 /-- Chart-locality-free version of `summable_weight_mul_norm_timeModeCoeff_sq`,
 parameterized on resolvent compactness `h_compact`. -/
-theorem summable_weight_mul_norm_timeModeCoeff_sq_ofCompact
+theorem summable_weight_mul_norm_timeModeCoeff_sq
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s)) :
     Summable (fun i => tensorSobolevWeight (I := I) (M := M) i a *
       ‖timeModeCoeff (I := I) (M := M) f i‖ ^ 2) := by
   refine (ENNReal.summable_toReal
-    (ennreal_tsum_weight_mul_norm_sq_ne_top_ofCompact
+    (ennreal_tsum_weight_mul_norm_sq_ne_top
       (I := I) (M := M) h_compact (f := f))).congr
     (fun i => ?_)
   exact ENNReal.toReal_ofReal
     (weight_mul_norm_timeModeCoeff_sq_nonneg (I := I) (M := M) f i)
 
-/-- **The Plancherel–Fubini norm identity.**  For a time-`L²` tensor field
-`f ∈ L²([0,T]; Hᵃ)`, the squared time-`L²` norm decomposes mode by mode:
-
-  `‖f‖²_{L²([0,T];Hᵃ)} = ∑ᵢ (1 + λᵢ)ᵃ · ‖timeModeCoeff f i‖²_{L²(0,T)}`.
-
-The proof combines the spatial Plancherel identity
-`‖T‖² = ∑ᵢ (1+λᵢ)ᵃ(T.coeff i)²` with the Tonelli interchange of the nonnegative
-`i`-sum and the `t`-integral, carried out in `ℝ≥0∞` via `lintegral_tsum`. -/
-theorem norm_sq_eq_tsum_timeModeCoeff
-    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M) :
-    ‖f‖ ^ 2 =
-      ∑' i, tensorSobolevWeight (I := I) (M := M) i a *
-        ‖timeModeCoeff (I := I) (M := M) f i‖ ^ 2 := by
-  haveI := countable_tensorEigenIdx (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas
-  -- The pointwise spatial Plancherel expansion, lifted to `ℝ≥0∞`.
-  have hpoint : ∀ t : ℝ,
-      ENNReal.ofReal (‖f t‖ ^ 2) =
-        ∑' i, planIntegrand (I := I) (M := M) f i t := by
-    intro t
-    rw [tensorHs.norm_sq_eq_tsum (I := I) (M := M) (f t)]
-    have hnn : ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
-        0 ≤ tensorSobolevWeight (I := I) (M := M) i a *
-          ((f t).coeff i) ^ 2 :=
-      fun i => mul_nonneg (tensorSobolevWeight_nonneg (I := I) (M := M) i a)
-        (sq_nonneg _)
-    rw [ENNReal.ofReal_tsum_of_nonneg hnn (f t).weighted_summable]
-    rfl
-  have hlintegral_eq :
-      ∫⁻ t, ENNReal.ofReal (‖f t‖ ^ 2) ∂(timeMeasure T) =
-        ∑' i, ∫⁻ t, planIntegrand (I := I) (M := M) f i t
-          ∂(timeMeasure T) := by
-    rw [show (∫⁻ t, ENNReal.ofReal (‖f t‖ ^ 2) ∂(timeMeasure T))
-          = ∫⁻ t, (∑' i, planIntegrand (I := I) (M := M) f i t)
-              ∂(timeMeasure T)
-        from lintegral_congr (fun t => hpoint t)]
-    exact lintegral_tsum
-      (fun i => aemeasurable_planIntegrand (I := I) (M := M) f i)
-  have hf_norm_sq_int : Integrable (fun t => ‖f t‖ ^ 2) (timeMeasure T) :=
-    (memLp_two_iff_integrable_sq_norm (Lp.aestronglyMeasurable f)).mp
-      (Lp.memLp f)
-  have hf_nn : 0 ≤ᵐ[timeMeasure T] fun t => ‖f t‖ ^ 2 :=
-    Eventually.of_forall fun t => sq_nonneg _
-  -- Assemble: pass from the Bochner integral, through `ℝ≥0∞`, back to `ℝ`.
-  calc ‖f‖ ^ 2
-      = ∫ t in Set.Icc (0 : ℝ) T, ‖f t‖ ^ 2 :=
-        TimeSobolev.norm_sq_eq_integral f
-    _ = (∫⁻ t, ENNReal.ofReal (‖f t‖ ^ 2) ∂(timeMeasure T)).toReal := by
-        rw [show (∫ t in Set.Icc (0 : ℝ) T, ‖f t‖ ^ 2)
-              = ∫ t, ‖f t‖ ^ 2 ∂(timeMeasure T) from rfl]
-        exact integral_eq_lintegral_of_nonneg_ae hf_nn
-          ((Lp.aestronglyMeasurable f).norm.pow 2)
-    _ = (∑' i, ∫⁻ t, planIntegrand (I := I) (M := M) f i t
-            ∂(timeMeasure T)).toReal := by rw [hlintegral_eq]
-    _ = (∑' i, ENNReal.ofReal (tensorSobolevWeight (I := I) (M := M) i a *
-            ‖timeModeCoeff (I := I) (M := M) f i‖ ^ 2)).toReal := by
-        rw [tsum_congr (fun i => lintegral_planIntegrand (I := I) (M := M) f i)]
-    _ = ∑' i, (ENNReal.ofReal (tensorSobolevWeight (I := I) (M := M) i a *
-            ‖timeModeCoeff (I := I) (M := M) f i‖ ^ 2)).toReal := by
-        rw [ENNReal.tsum_toReal_eq (fun i => ENNReal.ofReal_ne_top)]
-    _ = ∑' i, tensorSobolevWeight (I := I) (M := M) i a *
-            ‖timeModeCoeff (I := I) (M := M) f i‖ ^ 2 := by
-        refine tsum_congr (fun i => ?_)
-        rw [ENNReal.toReal_ofReal
-          (weight_mul_norm_timeModeCoeff_sq_nonneg (I := I) (M := M) f i)]
-
 /-- Chart-locality-free version of `norm_sq_eq_tsum_timeModeCoeff`,
 parameterized on resolvent compactness `h_compact`. Identical Tonelli proof
-with `countable_tensorEigenIdx_ofCompact`. -/
-theorem norm_sq_eq_tsum_timeModeCoeff_ofCompact
+with `countable_tensorEigenIdx`. -/
+theorem norm_sq_eq_tsum_timeModeCoeff
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s)) :
     ‖f‖ ^ 2 =
       ∑' i, tensorSobolevWeight (I := I) (M := M) i a *
         ‖timeModeCoeff (I := I) (M := M) f i‖ ^ 2 := by
-  haveI := countable_tensorEigenIdx_ofCompact
+  haveI := countable_tensorEigenIdx
     (I := I) (M := M) (g := g) (r := r) (s := s) h_compact
   have hpoint : ∀ t : ℝ,
       ENNReal.ofReal (‖f t‖ ^ 2) =
@@ -660,40 +521,9 @@ the hypothesis with the weights already attached makes the assembly a direct
 `tsum`-monotonicity argument and keeps the two Sobolev scales `a`, `b`
 independent. -/
 
-/-- **The assembly corollary.**  Let `g ∈ L²([0,T]; Hᵇ)` and
-`f ∈ L²([0,T]; Hᵃ)`.  If the eigen-coordinates satisfy the weighted per-mode
-bound
-
-  `(1 + λᵢ)ᵇ · ‖timeModeCoeff g i‖² ≤ C² · (1 + λᵢ)ᵃ · ‖timeModeCoeff f i‖²`
-
-for every eigen-index `i`, then the time-`L²` norms satisfy
-
-  `‖g‖²_{L²([0,T];Hᵇ)} ≤ C² · ‖f‖²_{L²([0,T];Hᵃ)}`.
-
-The proof sums the per-mode bound over `i` and applies the Plancherel–Fubini
-identity at the two Sobolev scales. -/
-theorem norm_sq_le_of_weighted_perMode_le {a b : ℝ} {T : ℝ} {C : ℝ}
-    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
-    (gT : timeL2 (tensorHs (I := I) (M := M) g r s b) T)
-    (fT : timeL2 (tensorHs (I := I) (M := M) g r s a) T)
-    (hbound : ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
-      tensorSobolevWeight (I := I) (M := M) i b *
-          ‖timeModeCoeff (I := I) (M := M) gT i‖ ^ 2 ≤
-        C ^ 2 * (tensorSobolevWeight (I := I) (M := M) i a *
-          ‖timeModeCoeff (I := I) (M := M) fT i‖ ^ 2)) :
-    ‖gT‖ ^ 2 ≤ C ^ 2 * ‖fT‖ ^ 2 := by
-  have hg := norm_sq_eq_tsum_timeModeCoeff (I := I) (M := M) h_atlas (f := gT)
-  have hf := norm_sq_eq_tsum_timeModeCoeff (I := I) (M := M) h_atlas (f := fT)
-  have hg_summ :=
-    summable_weight_mul_norm_timeModeCoeff_sq (I := I) (M := M) h_atlas (f := gT)
-  have hf_summ :=
-    summable_weight_mul_norm_timeModeCoeff_sq (I := I) (M := M) h_atlas (f := fT)
-  rw [hg, hf, ← tsum_mul_left]
-  exact Summable.tsum_le_tsum hbound hg_summ (hf_summ.mul_left _)
-
 /-- Chart-locality-free version of `norm_sq_le_of_weighted_perMode_le`,
 parameterized on resolvent compactness `h_compact`. -/
-theorem norm_sq_le_of_weighted_perMode_le_ofCompact {a b : ℝ} {T : ℝ} {C : ℝ}
+theorem norm_sq_le_of_weighted_perMode_le {a b : ℝ} {T : ℝ} {C : ℝ}
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
     (gT : timeL2 (tensorHs (I := I) (M := M) g r s b) T)
@@ -704,25 +534,24 @@ theorem norm_sq_le_of_weighted_perMode_le_ofCompact {a b : ℝ} {T : ℝ} {C : �
         C ^ 2 * (tensorSobolevWeight (I := I) (M := M) i a *
           ‖timeModeCoeff (I := I) (M := M) fT i‖ ^ 2)) :
     ‖gT‖ ^ 2 ≤ C ^ 2 * ‖fT‖ ^ 2 := by
-  have hg := norm_sq_eq_tsum_timeModeCoeff_ofCompact
+  have hg := norm_sq_eq_tsum_timeModeCoeff
     (I := I) (M := M) h_compact (f := gT)
-  have hf := norm_sq_eq_tsum_timeModeCoeff_ofCompact
+  have hf := norm_sq_eq_tsum_timeModeCoeff
     (I := I) (M := M) h_compact (f := fT)
   have hg_summ :=
-    summable_weight_mul_norm_timeModeCoeff_sq_ofCompact
+    summable_weight_mul_norm_timeModeCoeff_sq
       (I := I) (M := M) h_compact (f := gT)
   have hf_summ :=
-    summable_weight_mul_norm_timeModeCoeff_sq_ofCompact
+    summable_weight_mul_norm_timeModeCoeff_sq
       (I := I) (M := M) h_compact (f := fT)
   rw [hg, hf, ← tsum_mul_left]
   exact Summable.tsum_le_tsum hbound hg_summ (hf_summ.mul_left _)
 
-/-- A convenience form of the assembly corollary phrased with the per-mode
-**operator-norm** constant: if every eigen-coordinate satisfies
-`(1 + λᵢ)ᵇ · ‖gᵢ‖² ≤ C² · (1 + λᵢ)ᵃ · ‖fᵢ‖²` with `0 ≤ C`, then
-`‖g‖_{L²([0,T];Hᵇ)} ≤ C · ‖f‖_{L²([0,T];Hᵃ)}`. -/
+/-- Chart-locality-free version of `norm_le_of_weighted_perMode_le`,
+parameterized on resolvent compactness `h_compact`. -/
 theorem norm_le_of_weighted_perMode_le {a b : ℝ} {T : ℝ} {C : ℝ}
-    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
+    (h_compact : IsCompactOperator (tensorResolventL2
+      (I := I) (M := M) g r s))
     (hC : 0 ≤ C)
     (gT : timeL2 (tensorHs (I := I) (M := M) g r s b) T)
     (fT : timeL2 (tensorHs (I := I) (M := M) g r s a) T)
@@ -735,28 +564,6 @@ theorem norm_le_of_weighted_perMode_le {a b : ℝ} {T : ℝ} {C : ℝ}
   have hsq : ‖gT‖ ^ 2 ≤ (C * ‖fT‖) ^ 2 := by
     rw [mul_pow]
     exact norm_sq_le_of_weighted_perMode_le
-      (I := I) (M := M) h_atlas gT fT hbound
-  have hrhs_nonneg : 0 ≤ C * ‖fT‖ := mul_nonneg hC (norm_nonneg fT)
-  have h := Real.sqrt_le_sqrt hsq
-  rwa [Real.sqrt_sq (norm_nonneg gT), Real.sqrt_sq hrhs_nonneg] at h
-
-/-- Chart-locality-free version of `norm_le_of_weighted_perMode_le`,
-parameterized on resolvent compactness `h_compact`. -/
-theorem norm_le_of_weighted_perMode_le_ofCompact {a b : ℝ} {T : ℝ} {C : ℝ}
-    (h_compact : IsCompactOperator (tensorResolventL2
-      (I := I) (M := M) g r s))
-    (hC : 0 ≤ C)
-    (gT : timeL2 (tensorHs (I := I) (M := M) g r s b) T)
-    (fT : timeL2 (tensorHs (I := I) (M := M) g r s a) T)
-    (hbound : ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
-      tensorSobolevWeight (I := I) (M := M) i b *
-          ‖timeModeCoeff (I := I) (M := M) gT i‖ ^ 2 ≤
-        C ^ 2 * (tensorSobolevWeight (I := I) (M := M) i a *
-          ‖timeModeCoeff (I := I) (M := M) fT i‖ ^ 2)) :
-    ‖gT‖ ≤ C * ‖fT‖ := by
-  have hsq : ‖gT‖ ^ 2 ≤ (C * ‖fT‖) ^ 2 := by
-    rw [mul_pow]
-    exact norm_sq_le_of_weighted_perMode_le_ofCompact
       (I := I) (M := M) h_compact gT fT hbound
   have hrhs_nonneg : 0 ≤ C * ‖fT‖ := mul_nonneg hC (norm_nonneg fT)
   have h := Real.sqrt_le_sqrt hsq
@@ -803,45 +610,16 @@ def timeModeSynthesisPointwise {b : ℝ}
     (timeModeSynthesisPointwise (I := I) (M := M) cFam hsum).coeff i =
       cFam i := rfl
 
-/-- **Uniqueness of synthesis.**  Two time-`L²` tensor fields with identical
-eigen-coordinate families — `timeModeCoeff f₁ i = timeModeCoeff f₂ i` for every
-eigen-index `i` — are equal.  Equivalently, the coordinate family
-`i ↦ timeModeCoeff · i` determines an element of `L²([0,T]; Hᵇ)` uniquely.
-
-The proof uses that the eigen-index type is countable, so the per-mode
-a.e.-coordinate agreement can be intersected over all `i` at once. -/
-theorem timeModeCoeff_injective {b : ℝ} {T : ℝ}
-    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
-    {f₁ f₂ : timeL2 (tensorHs (I := I) (M := M) g r s b) T}
-    (h : ∀ i, timeModeCoeff (I := I) (M := M) f₁ i =
-      timeModeCoeff (I := I) (M := M) f₂ i) :
-    f₁ = f₂ := by
-  haveI := countable_tensorEigenIdx (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas
-  refine MeasureTheory.Lp.ext ?_
-  -- For each `i`, the `i`-coordinates of `⇑f₁` and `⇑f₂` agree a.e.
-  have hcoord : ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
-      (fun t => (f₁ t).coeff i) =ᵐ[timeMeasure T]
-        fun t => (f₂ t).coeff i := by
-    intro i
-    have h1 := timeModeCoeff_coeFn (I := I) (M := M) f₁ i
-    have h2 := timeModeCoeff_coeFn (I := I) (M := M) f₂ i
-    have heq : timeModeCoeff (I := I) (M := M) f₁ i =ᵐ[timeMeasure T]
-        timeModeCoeff (I := I) (M := M) f₂ i := by rw [h i]
-    exact (h1.symm.trans heq).trans h2
-  -- Intersect the a.e. coordinatewise agreement over the countable index type.
-  filter_upwards [ae_all_iff.mpr hcoord] with t ht
-  exact tensorHs.ext (funext ht)
-
 /-- Chart-locality-free version of `timeModeCoeff_injective`, parameterized on
 resolvent compactness `h_compact`. -/
-theorem timeModeCoeff_injective_ofCompact {b : ℝ} {T : ℝ}
+theorem timeModeCoeff_injective {b : ℝ} {T : ℝ}
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
     {f₁ f₂ : timeL2 (tensorHs (I := I) (M := M) g r s b) T}
     (h : ∀ i, timeModeCoeff (I := I) (M := M) f₁ i =
       timeModeCoeff (I := I) (M := M) f₂ i) :
     f₁ = f₂ := by
-  haveI := countable_tensorEigenIdx_ofCompact
+  haveI := countable_tensorEigenIdx
     (I := I) (M := M) (g := g) (r := r) (s := s) h_compact
   refine MeasureTheory.Lp.ext ?_
   have hcoord : ∀ i : TensorEigenIdx (I := I) (M := M) g r s,

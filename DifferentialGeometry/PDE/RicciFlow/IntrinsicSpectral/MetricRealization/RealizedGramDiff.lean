@@ -136,7 +136,7 @@ def realizableRepr (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
     {u : tensorHs (I := I) (M := M) g_bg 0 2 σ}
     (hu : realizableAt (I := I) g_bg u) :
     SmoothCcTensor g_bg 0 2 :=
-  Analysis.Parabolic.TensorSpectral.tensorHsSmoothRepr_unconditional
+  Analysis.Parabolic.TensorSpectral.tensorHsSmoothRepr
     (I := I) (M := M) u hu.choose
 
 /-- On the validity domain, the realized metric's inner product is `g_bg` plus the

@@ -6,7 +6,7 @@ import DifferentialGeometry.PDE.RicciFlow.SobolevEmbeddingCm
 # Parabolic smoothing of the intrinsic tensor heat semigroup into every `Hˢ`
 
 For a closed Riemannian manifold `(M, g)` and ranks `(r, s)`, the
-intrinsic tensor heat semigroup `tensorHeatSemigroup_intrinsic g r s t`
+intrinsic tensor heat semigroup `tensorHeatSemigroup g r s t`
 (built in `HeatSemigroupIntrinsic.lean` from the chart-locality-free
 resolvent eigenbasis) acts diagonally on that eigenbasis, multiplying the
 `i`-th Fourier coefficient by `exp(-λᵢ t)` with `λᵢ ≥ 0` the
@@ -27,7 +27,7 @@ whose weighted-`ℓ²` summability at every exponent is the spectral lemma
   coordinate of `u₀`.
 * `heat_semigroup_into_tensorHs` — for `0 < t`, `u₀ : L²`, and any
   `σ ≥ 0`, there is an element `v : tensorHs g r s σ` whose
-  chart-locality-free `L²` realization `tensorHsToL2_ofCompact` is exactly
+  chart-locality-free `L²` realization `tensorHsToL2` is exactly
   `e^{tΔ} u₀`. Equivalently: `e^{tΔ} u₀ ∈ Hˢ`.
 * `heat_semigroup_into_all_tensorHs` — the simultaneous-in-`σ` packaging:
   a single `u₀`-dependent family `σ ↦ vσ` of `Hˢ` witnesses, all
@@ -89,25 +89,25 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 The single fact that turns the diagonal eigenbasis action
 (`tensorHeatSemigroup_intrinsic_inner_eigenbasis`) into a statement about
-the chart-locality-free coordinate functional `tensorL2Coeff_ofCompact`. -/
+the chart-locality-free coordinate functional `tensorL2Coeff`. -/
 
 /-- **Heat-output coordinate formula.** For `t ≥ 0`, the intrinsic
 eigenbasis coordinate of `e^{tΔ} u₀` is `exp(-λᵢ t)` times the coordinate
-of `u₀`. Here the coordinate functional `tensorL2Coeff_ofCompact` is taken
+of `u₀`. Here the coordinate functional `tensorL2Coeff` is taken
 against the intrinsic compactness witness
-`tensorResolventL2_isCompactOperator_intrinsic g r s`. -/
+`tensorResolventL2_isCompactOperator g r s`. -/
 theorem tensorHeatSemigroup_intrinsic_tensorL2Coeff_ofCompact
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {t : ℝ} (ht : 0 ≤ t) (u₀ : TensorL2 r s g)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
-    tensorL2Coeff_ofCompact (I := I) (M := M)
-        (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s)
-        (tensorHeatSemigroup_intrinsic (I := I) (M := M) g r s t u₀) i =
+    tensorL2Coeff (I := I) (M := M)
+        (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s)
+        (tensorHeatSemigroup (I := I) (M := M) g r s t u₀) i =
       Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) *
-        tensorL2Coeff_ofCompact (I := I) (M := M)
-          (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s)
+        tensorL2Coeff (I := I) (M := M)
+          (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s)
           u₀ i := by
-  rw [tensorL2Coeff_ofCompact_eq_inner, tensorL2Coeff_ofCompact_eq_inner]
+  rw [tensorL2Coeff_eq_inner, tensorL2Coeff_eq_inner]
   exact tensorHeatSemigroup_intrinsic_inner_eigenbasis
     (I := I) (M := M) g r s ht u₀ i
 
@@ -115,25 +115,25 @@ theorem tensorHeatSemigroup_intrinsic_tensorL2Coeff_ofCompact
 
 For a fixed `u₀ : L²`, its intrinsic eigenbasis coordinate family is the
 coordinate family of an `H⁰` element, via the chart-locality-free
-identification `tensorHsZeroEquivL2_ofCompact`. Applying the spectral
+identification `tensorHsZeroEquivL2`. Applying the spectral
 heat rescaling `heatHsFun σ ht` to this `H⁰` element produces, for `0 < t`,
 an `Hˢ` element with coordinate `exp(-λᵢ t) · ⟪bᵢ, u₀⟫`. -/
 
 /-- The `H⁰` element carrying the intrinsic eigenbasis coordinate family of
-`u₀`: its `i`-th coordinate is `tensorL2Coeff_ofCompact … u₀ i`. -/
+`u₀`: its `i`-th coordinate is `tensorL2Coeff … u₀ i`. -/
 private def baseHZero (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (u₀ : TensorL2 r s g) :
     tensorHs (I := I) (M := M) g r s 0 :=
-  (tensorHsZeroEquivL2_ofCompact (I := I) (M := M)
-    (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s)).symm u₀
+  (tensorHsZeroEquivL2 (I := I) (M := M)
+    (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s)).symm u₀
 
 private lemma baseHZero_coeff (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (u₀ : TensorL2 r s g) (i : TensorEigenIdx (I := I) (M := M) g r s) :
     (baseHZero (I := I) (M := M) g r s u₀).coeff i =
-      tensorL2Coeff_ofCompact (I := I) (M := M)
-        (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s)
+      tensorL2Coeff (I := I) (M := M)
+        (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s)
         u₀ i :=
-  tensorHsZeroEquivL2_ofCompact_symm_coeff (I := I) (M := M) _ u₀ i
+  tensorHsZeroEquivL2_symm_coeff (I := I) (M := M) _ u₀ i
 
 /-- The `Hˢ` witness for the heat output: the heat-rescaling
 `heatHsFun σ ht` applied to the `H⁰` base coordinate family of `u₀`.
@@ -152,8 +152,8 @@ intrinsic eigenbasis coordinate of `u₀`. -/
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
     (heatHsWitness (I := I) (M := M) g r s σ ht u₀).coeff i =
       Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) *
-        tensorL2Coeff_ofCompact (I := I) (M := M)
-          (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s)
+        tensorL2Coeff (I := I) (M := M)
+          (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s)
           u₀ i := by
   unfold heatHsWitness
   rw [tensorHs.heatHsFun_coeff, baseHZero_coeff]
@@ -165,52 +165,52 @@ intrinsic eigenbasis coordinate of `u₀`. -/
 chart-locality-free `L²` realization of the `Hˢ` element
 `heatHsWitness g r s σ ht u₀`:
 
-  `tensorHsToL2_ofCompact h_compact hσ (heatHsWitness … σ ht u₀)
-      = tensorHeatSemigroup_intrinsic g r s t u₀`.
+  `tensorHsToL2 h_compact hσ (heatHsWitness … σ ht u₀)
+      = tensorHeatSemigroup g r s t u₀`.
 
 Thus `e^{tΔ} u₀` lies in the image of `Hˢ` in `L²` — it is `σ`-smooth —
 for *every* `σ ≥ 0`. The proof matches the two `L²` tensors on their
 intrinsic eigenbasis coordinates: the witness side equals
 `exp(-λᵢ t) · ⟪bᵢ, u₀⟫` by `heatHsWitness_coeff` (after the inclusion's
-coordinate-faithfulness `tensorHsToL2_ofCompact_tensorL2Coeff_ofCompact`),
+coordinate-faithfulness `tensorHsToL2_tensorL2Coeff`),
 and the heat-output side equals the same by
 `tensorHeatSemigroup_intrinsic_tensorL2Coeff_ofCompact`. -/
 theorem heat_semigroup_into_tensorHs (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {σ : ℝ} (hσ : 0 ≤ σ) {t : ℝ} (ht : 0 < t) (u₀ : TensorL2 r s g) :
-    tensorHsToL2_ofCompact (I := I) (M := M) (g := g) (r := r) (s := s)
-        (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s)
+    tensorHsToL2 (I := I) (M := M) (g := g) (r := r) (s := s)
+        (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s)
         hσ (heatHsWitness (I := I) (M := M) g r s σ ht u₀) =
-      tensorHeatSemigroup_intrinsic (I := I) (M := M) g r s t u₀ := by
+      tensorHeatSemigroup (I := I) (M := M) g r s t u₀ := by
   set h_compact :=
-    tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s
+    tensorResolventL2_isCompactOperator (I := I) (M := M) g r s
     with hcompact_def
   -- The chart-locality-free eigenbasis representation is injective, so it
-  -- suffices to match `tensorL2Coeff_ofCompact` on both sides.
-  refine (tensorResolventHilbertEigenbasisSigma_ofCompact
+  -- suffices to match `tensorL2Coeff` on both sides.
+  refine (tensorResolventHilbertEigenbasisSigma
     (I := I) (M := M) h_compact).repr.injective ?_
   ext i
   -- The two coordinates are both `exp(-λᵢ t) · ⟪bᵢ, u₀⟫`.
   have hlhs :
-      ((tensorResolventHilbertEigenbasisSigma_ofCompact
+      ((tensorResolventHilbertEigenbasisSigma
           (I := I) (M := M) h_compact).repr
-        (tensorHsToL2_ofCompact (I := I) (M := M) (g := g) (r := r) (s := s)
+        (tensorHsToL2 (I := I) (M := M) (g := g) (r := r) (s := s)
           h_compact hσ (heatHsWitness (I := I) (M := M) g r s σ ht u₀))) i =
         Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) *
-          tensorL2Coeff_ofCompact (I := I) (M := M) h_compact u₀ i := by
-    have h := tensorHsToL2_ofCompact_tensorL2Coeff_ofCompact
+          tensorL2Coeff (I := I) (M := M) h_compact u₀ i := by
+    have h := tensorHsToL2_tensorL2Coeff
       (I := I) (M := M) (h_compact := h_compact) hσ
       (heatHsWitness (I := I) (M := M) g r s σ ht u₀) i
     rw [heatHsWitness_coeff] at h
-    simpa only [tensorL2Coeff_ofCompact] using h
+    simpa only [tensorL2Coeff] using h
   have hrhs :
-      ((tensorResolventHilbertEigenbasisSigma_ofCompact
+      ((tensorResolventHilbertEigenbasisSigma
           (I := I) (M := M) h_compact).repr
-        (tensorHeatSemigroup_intrinsic (I := I) (M := M) g r s t u₀)) i =
+        (tensorHeatSemigroup (I := I) (M := M) g r s t u₀)) i =
         Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) *
-          tensorL2Coeff_ofCompact (I := I) (M := M) h_compact u₀ i := by
+          tensorL2Coeff (I := I) (M := M) h_compact u₀ i := by
     have h := tensorHeatSemigroup_intrinsic_tensorL2Coeff_ofCompact
       (I := I) (M := M) g r s ht.le u₀ i
-    simpa only [tensorL2Coeff_ofCompact] using h
+    simpa only [tensorL2Coeff] using h
   rw [hlhs, hrhs]
 
 /-- **Simultaneous parabolic smoothing into every `Hˢ`.** For `0 < t` and
@@ -223,10 +223,10 @@ theorem heat_semigroup_into_all_tensorHs (g : SmoothRiemannianMetric I M)
     (r s : ℕ) {t : ℝ} (ht : 0 < t) (u₀ : TensorL2 r s g) :
     ∀ σ : ℝ, ∀ hσ : 0 ≤ σ,
       ∃ v : tensorHs (I := I) (M := M) g r s σ,
-        tensorHsToL2_ofCompact (I := I) (M := M) (g := g) (r := r) (s := s)
-            (tensorResolventL2_isCompactOperator_intrinsic
+        tensorHsToL2 (I := I) (M := M) (g := g) (r := r) (s := s)
+            (tensorResolventL2_isCompactOperator
               (I := I) (M := M) g r s) hσ v =
-          tensorHeatSemigroup_intrinsic (I := I) (M := M) g r s t u₀ :=
+          tensorHeatSemigroup (I := I) (M := M) g r s t u₀ :=
   fun σ hσ =>
     ⟨heatHsWitness (I := I) (M := M) g r s σ ht u₀,
       heat_semigroup_into_tensorHs (I := I) (M := M) g r s hσ ht u₀⟩
@@ -296,7 +296,7 @@ exponent `σ ≥ 0` admits a genuine `C^∞` representative: a
 `u`.
 
 The hypothesis "`u ∈ Hˢ for every σ`" is phrased as: for each `σ ≥ 0`
-there is an `Hˢ` element whose `tensorHsToL2_ofCompact` realization is `u`
+there is an `Hˢ` element whose `tensorHsToL2` realization is `u`
 (the same shape produced by `heat_semigroup_into_all_tensorHs`). This is
 the spectral smooth subspace `⋂_σ Hˢ`.
 
@@ -309,8 +309,8 @@ def SpectralSmoothRealizesAsSmooth (g : SmoothRiemannianMetric I M)
   ∀ u : TensorL2 r s g,
     (∀ σ : ℝ, ∀ hσ : 0 ≤ σ,
       ∃ v : tensorHs (I := I) (M := M) g r s σ,
-        tensorHsToL2_ofCompact (I := I) (M := M) (g := g) (r := r) (s := s)
-            (tensorResolventL2_isCompactOperator_intrinsic
+        tensorHsToL2 (I := I) (M := M) (g := g) (r := r) (s := s)
+            (tensorResolventL2_isCompactOperator
               (I := I) (M := M) g r s) hσ v = u) →
     ∃ T : SmoothCcTensor g r s, (T : TensorL2 r s g) = u
 
@@ -333,7 +333,7 @@ theorem spectral_smooth_realization_reduction
     {t : ℝ} (ht : 0 < t) (u₀ : TensorL2 r s g) :
     ∃ T : SmoothCcTensor g r s,
       (T : TensorL2 r s g) =
-        tensorHeatSemigroup_intrinsic (I := I) (M := M) g r s t u₀ :=
+        tensorHeatSemigroup (I := I) (M := M) g r s t u₀ :=
   h_gate _ (fun σ hσ =>
     ⟨heatHsWitness (I := I) (M := M) g r s σ ht u₀,
       heat_semigroup_into_tensorHs (I := I) (M := M) g r s hσ ht u₀⟩)

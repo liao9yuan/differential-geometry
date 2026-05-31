@@ -110,9 +110,9 @@ parabolic energy identity. -/
 intrinsic resolvent-compactness witness. -/
 private lemma countable_eigenIdx :
     Countable (TensorEigenIdx (I := I) (M := M) g r s) :=
-  DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.countable_tensorEigenIdx_ofCompact
+  DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.countable_tensorEigenIdx
     (I := I) (M := M) (g := g) (r := r) (s := s)
-    (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s)
+    (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s)
 
 /-- The per-mode energy integrand, as a function of `(mode, time)`:
 

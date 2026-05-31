@@ -7,13 +7,14 @@ import Mathlib.Topology.Order.Compact
 import Mathlib.Topology.Separation.Basic
 
 /-!
-# Uniform operator-norm bounds on `chartJ α` and `chartJinv α` over a compact base set
+# Locality identities and continuity for `chartJ α` and `chartJinv α`
 
-For a smooth manifold `M` modelled on `(E, H)` with model `I`, and a fixed base
-point `α : M`, this file proves uniform operator-norm bounds on the chart
-Jacobian `chartJ α b` and its inverse `chartJinv α b` for `b` ranging over an
-arbitrary compact subset `K ⊆ (chartAt H α).source`, under the locality
-hypothesis `HasLocallyConstantChartAt H M` on the chart-selection function.
+For a smooth manifold `M` modelled on `(E, H)` with model `I`, and base points
+`α, b₀ : M`, this file collects the predicate-free building blocks that identify
+the chart Jacobian `chartJ α b` and its inverse `chartJinv α b` with a continuous
+`coordChangeL` CLM family on a neighbourhood of `b₀` where the chart selection is
+constant (`chartAt H b = chartAt H b₀`), together with a generic operator-norm
+bound on a compact set from continuity.
 
 ## Strategy
 
@@ -21,11 +22,10 @@ The chart-Jacobian `chartJ α b = (trivializationAt E (TangentSpace I) α)
 .continuousLinearMapAt ℝ b` and its inverse
 `chartJinv α b = (trivializationAt E (TangentSpace I) α).symmL ℝ b` are not, by
 themselves, continuous in `b` because the chart-selection function jumps
-between chart sources. The locality hypothesis remedies this: on a
-neighbourhood `U_{b₀}` of any base point `b₀` where `chartAt H b = chartAt H b₀`
-(equivalently `achart H b = achart H b₀`), the trivialisation at `b₀`
-satisfies `(triv b₀).symmL b = id` and `(triv b₀).clmAt b = id`. Combining
-this with Mathlib's identity
+between chart sources. On a neighbourhood `U_{b₀}` of any base point `b₀` where
+`chartAt H b = chartAt H b₀` (equivalently `achart H b = achart H b₀`), the
+trivialisation at `b₀` satisfies `(triv b₀).symmL b = id` and
+`(triv b₀).clmAt b = id`. Combining this with Mathlib's identity
 `(triv α).coordChangeL ℝ (triv β) b v = (triv β).clmAt b ((triv α).symmL b v)`
 (coming from the bundle's smooth coord-change structure) yields:
 
@@ -39,24 +39,21 @@ this with Mathlib's identity
 
 The `coordChangeL` CLM family is `ContMDiffOn` — hence continuous — on the
 intersection of base sets, by the `ContMDiffVectorBundle ∞ E (TangentSpace I)`
-Mathlib instance applied via `contMDiffOn_coordChangeL`.
-
-A compact subset `K ⊆ (chartAt H α).source` is covered by finitely many
-locality neighbourhoods, refined to lie inside `(chartAt H α).source`. The
-finite-compact-cover lemma `IsCompact.finite_compact_cover` (available because
-`M` is `T2`, hence `R1`) extracts compact pieces `K_i` on which the
-operator-norm function is continuous and therefore bounded. The maximum of
-these bounds plus `1` is a strictly positive uniform bound.
+Mathlib instance applied via `contMDiffOn_coordChangeL`. This gives continuity of
+`b ↦ chartJ α b` and `b ↦ chartJinv α b` on any such locality neighbourhood, and
+the generic lemma turns continuity on a compact set into a uniform op-norm bound.
 
 ## Main results
 
-* `chartJ_opNorm_isBounded_on_compact` — uniform op-norm bound on `chartJ α`
-  over any compact `K ⊆ (chartAt H α).source`.
-* `chartJinv_opNorm_isBounded_on_compact` — uniform op-norm bound on
-  `chartJinv α` over any compact `K ⊆ (chartAt H α).source`.
+* `coordChangeL_eq_chartJ_of_locality` / `coordChangeL_eq_chartJinv_of_locality`
+  — identify the `coordChangeL` CLM with `chartJ α b` / `chartJinv α b` on the
+  locality neighbourhood.
+* `chartJ_continuousOn_loc` / `chartJinv_continuousOn_loc` — continuity of
+  `b ↦ chartJ α b` / `b ↦ chartJinv α b` on a locality neighbourhood.
+* `exists_opNorm_bound_on_compact_of_continuousOn` — a uniform op-norm bound on
+  a compact set from continuity there.
 
-Both headlines carry the locality hypothesis `HasLocallyConstantChartAt H M`
-on the chart selection of `M` and require no Riemannian-metric structure.
+These results require no Riemannian-metric structure.
 -/
 
 noncomputable section
@@ -243,30 +240,6 @@ private lemma coordChangeL_eq_chartJinv_of_locality
   rw [h_eq]
   rfl
 
-/-! ## Step 4: refining the locality neighbourhood to lie inside `(chartAt H α).source` -/
-
-/-- Given the locality hypothesis, every `b₀ ∈ (chartAt H α).source` admits an
-open neighbourhood `U` with `U ⊆ (chartAt H b₀).source` and `U ⊆ (chartAt H α).source`,
-on which `chartAt H` is constant. -/
-private lemma exists_loc_nhds_in_chart_source
-    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
-    (α b₀ : M) (hb₀_α : b₀ ∈ (chartAt H α).source) :
-    ∃ U : Set M, IsOpen U ∧ b₀ ∈ U ∧
-      U ⊆ (chartAt H b₀).source ∧
-      U ⊆ (chartAt H α).source ∧
-      ∀ b ∈ U, chartAt H b = chartAt H b₀ := by
-  rcases h_atlas.exists_isOpen_nhds b₀ with ⟨U₀, hU₀_open, hU₀_mem, hU₀_const⟩
-  refine ⟨U₀ ∩ (chartAt H α).source,
-    hU₀_open.inter (chartAt H α).open_source,
-    ⟨hU₀_mem, hb₀_α⟩, ?_, ?_, ?_⟩
-  · intro b hb
-    have h_eq : chartAt H b = chartAt H b₀ := hU₀_const b hb.1
-    have h_mem_b : b ∈ (chartAt H b).source := mem_chart_source H b
-    rw [h_eq] at h_mem_b
-    exact h_mem_b
-  · intro b hb; exact hb.2
-  · intro b hb; exact hU₀_const b hb.1
-
 /-! ## Step 5: continuity of `b ↦ chartJ α b` and `b ↦ chartJinv α b` on the
 refined locality neighbourhood -/
 
@@ -336,159 +309,6 @@ private lemma exists_opNorm_bound_on_compact_of_continuousOn
   refine ⟨max C 0, le_max_right _ _, ?_⟩
   intro b hb
   exact (hC ⟨b, hb, rfl⟩).trans (le_max_left _ _)
-
-/-! ## Step 7: the generic compact-cover assembly -/
-
-/-- Under the locality hypothesis, any function `f : M → E →L[ℝ] E` that is
-continuous on every refined locality neighbourhood admits a uniform
-operator-norm bound on any compact `K ⊆ (chartAt H α).source`. -/
-private lemma exists_uniform_opNorm_bound_via_locality
-    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
-    (α : M) (f : M → E →L[ℝ] E)
-    (h_cont_loc :
-      ∀ b₀ : M, b₀ ∈ (chartAt H α).source →
-        ∀ U : Set M, b₀ ∈ U →
-          U ⊆ (chartAt H b₀).source → U ⊆ (chartAt H α).source →
-          (∀ b ∈ U, chartAt H b = chartAt H b₀) →
-          ContinuousOn f U)
-    {K : Set M} (hK : IsCompact K) (hKsub : K ⊆ (chartAt H α).source) :
-    ∃ C : ℝ, 0 < C ∧ ∀ b ∈ K, ‖f b‖ ≤ C := by
-  classical
-  -- Choose, for each `b₀ : M`, a refined locality neighbourhood when
-  -- `b₀ ∈ (chartAt H α).source`, and the empty set otherwise.
-  let loc : M → Set M := fun b₀ =>
-    if hb₀ : b₀ ∈ (chartAt H α).source then
-      (exists_loc_nhds_in_chart_source (H := H) (M := M) h_atlas α b₀ hb₀).choose
-    else ∅
-  have h_loc_open : ∀ b₀ : M, IsOpen (loc b₀) := by
-    intro b₀
-    simp only [loc]
-    split_ifs with hb₀
-    · exact (exists_loc_nhds_in_chart_source (H := H) (M := M)
-        h_atlas α b₀ hb₀).choose_spec.1
-    · exact isOpen_empty
-  have h_loc_mem : ∀ b₀ ∈ K, b₀ ∈ loc b₀ := by
-    intro b₀ hb₀
-    have hb₀_α : b₀ ∈ (chartAt H α).source := hKsub hb₀
-    simp only [loc, dif_pos hb₀_α]
-    exact (exists_loc_nhds_in_chart_source (H := H) (M := M)
-      h_atlas α b₀ hb₀_α).choose_spec.2.1
-  have h_loc_sub_b₀ : ∀ b₀ ∈ K, loc b₀ ⊆ (chartAt H b₀).source := by
-    intro b₀ hb₀
-    have hb₀_α : b₀ ∈ (chartAt H α).source := hKsub hb₀
-    simp only [loc, dif_pos hb₀_α]
-    exact (exists_loc_nhds_in_chart_source (H := H) (M := M)
-      h_atlas α b₀ hb₀_α).choose_spec.2.2.1
-  have h_loc_sub_α : ∀ b₀ ∈ K, loc b₀ ⊆ (chartAt H α).source := by
-    intro b₀ hb₀
-    have hb₀_α : b₀ ∈ (chartAt H α).source := hKsub hb₀
-    simp only [loc, dif_pos hb₀_α]
-    exact (exists_loc_nhds_in_chart_source (H := H) (M := M)
-      h_atlas α b₀ hb₀_α).choose_spec.2.2.2.1
-  have h_loc_const : ∀ b₀ ∈ K, ∀ b ∈ loc b₀, chartAt H b = chartAt H b₀ := by
-    intro b₀ hb₀
-    have hb₀_α : b₀ ∈ (chartAt H α).source := hKsub hb₀
-    simp only [loc, dif_pos hb₀_α]
-    exact (exists_loc_nhds_in_chart_source (H := H) (M := M)
-      h_atlas α b₀ hb₀_α).choose_spec.2.2.2.2
-  -- Open cover of `K` by `loc b₀` for `b₀ ∈ K`.
-  have h_cover : K ⊆ ⋃ b₀ ∈ K, loc b₀ := by
-    intro b hb
-    exact Set.mem_iUnion₂.mpr ⟨b, hb, h_loc_mem b hb⟩
-  -- Finite subcover.
-  rcases hK.elim_finite_subcover_image (b := K) (c := loc)
-    (fun b₀ _ => h_loc_open b₀) h_cover with
-    ⟨S, hS_sub, hS_finite, hS_cover⟩
-  set S' : Finset M := hS_finite.toFinset with hS'_def
-  have hS_cover' : K ⊆ ⋃ b₀ ∈ S', loc b₀ := by
-    intro b hb
-    rcases Set.mem_iUnion.mp (hS_cover hb) with ⟨b₀, hb₀⟩
-    rcases Set.mem_iUnion.mp hb₀ with ⟨hb₀_S, hb_in⟩
-    refine Set.mem_iUnion.mpr ⟨b₀, ?_⟩
-    refine Set.mem_iUnion.mpr ⟨?_, hb_in⟩
-    rw [hS'_def]
-    exact hS_finite.mem_toFinset.mpr hb₀_S
-  have hS_sub_K : ∀ b₀ ∈ S', b₀ ∈ K := by
-    intro b₀ hb₀
-    rw [hS'_def] at hb₀
-    exact hS_sub (hS_finite.mem_toFinset.mp hb₀)
-  -- Compact cover.
-  rcases hK.finite_compact_cover (t := S') (U := loc)
-    (fun b₀ _ => h_loc_open b₀) hS_cover' with
-    ⟨KK, hKK_compact, hKK_sub, hKK_eq⟩
-  -- For each `b₀ ∈ S'`, get a bound on `KK b₀`.
-  have h_each_bound : ∀ b₀ ∈ S',
-      ∃ C : ℝ, 0 ≤ C ∧ ∀ b ∈ KK b₀, ‖f b‖ ≤ C := by
-    intro b₀ hb₀_S
-    have hb₀_K : b₀ ∈ K := hS_sub_K b₀ hb₀_S
-    have hb₀_α : b₀ ∈ (chartAt H α).source := hKsub hb₀_K
-    have h_mem : b₀ ∈ loc b₀ := h_loc_mem b₀ hb₀_K
-    have h_sub_b₀ : loc b₀ ⊆ (chartAt H b₀).source := h_loc_sub_b₀ b₀ hb₀_K
-    have h_sub_α : loc b₀ ⊆ (chartAt H α).source := h_loc_sub_α b₀ hb₀_K
-    have h_const : ∀ b ∈ loc b₀, chartAt H b = chartAt H b₀ :=
-      h_loc_const b₀ hb₀_K
-    have h_cont : ContinuousOn f (loc b₀) :=
-      h_cont_loc b₀ hb₀_α (loc b₀) h_mem h_sub_b₀ h_sub_α h_const
-    have h_cont_KK : ContinuousOn f (KK b₀) := h_cont.mono (hKK_sub b₀)
-    exact exists_opNorm_bound_on_compact_of_continuousOn
-      (f := f) (hK := hKK_compact b₀) (h_cont := h_cont_KK)
-  -- Take maximum of bounds.
-  by_cases hS_empty : S' = ∅
-  · -- `S' = ∅` ⟹ `K = ∅`; take `C = 1`.
-    refine ⟨1, one_pos, ?_⟩
-    intro b hb
-    rw [hKK_eq, hS_empty] at hb
-    simp at hb
-  have hS_nonempty : S'.Nonempty := Finset.nonempty_iff_ne_empty.mpr hS_empty
-  let C : M → ℝ := fun b₀ =>
-    if hb₀ : b₀ ∈ S' then (h_each_bound b₀ hb₀).choose else 0
-  have h_C_nn : ∀ b₀ ∈ S', 0 ≤ C b₀ := by
-    intro b₀ hb₀
-    simp only [C, dif_pos hb₀]
-    exact (h_each_bound b₀ hb₀).choose_spec.1
-  have h_C_bound : ∀ b₀ ∈ S', ∀ b ∈ KK b₀, ‖f b‖ ≤ C b₀ := by
-    intro b₀ hb₀
-    simp only [C, dif_pos hb₀]
-    exact (h_each_bound b₀ hb₀).choose_spec.2
-  set C_max : ℝ := S'.sup' hS_nonempty C with hCmax_def
-  have h_C_max_nn : 0 ≤ C_max := by
-    rcases hS_nonempty with ⟨b₀, hb₀⟩
-    have h_le : C b₀ ≤ C_max := Finset.le_sup' (f := C) hb₀
-    exact (h_C_nn b₀ hb₀).trans h_le
-  refine ⟨C_max + 1, by linarith, ?_⟩
-  intro b hb
-  rw [hKK_eq] at hb
-  rcases Set.mem_iUnion.mp hb with ⟨b₀, hb₀⟩
-  rcases Set.mem_iUnion.mp hb₀ with ⟨hb₀_S, hb_in⟩
-  have h_bound : ‖f b‖ ≤ C b₀ := h_C_bound b₀ hb₀_S b hb_in
-  have h_le : C b₀ ≤ C_max := Finset.le_sup' (f := C) hb₀_S
-  linarith
-
-/-! ## Step 8: the two headlines -/
-
-/-- Uniform operator-norm bound on `chartJ α b` over any compact subset of
-`(chartAt H α).source`. -/
-theorem chartJ_opNorm_isBounded_on_compact
-    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
-    (α : M) {K : Set M} (hK : IsCompact K) (hKsub : K ⊆ (chartAt H α).source) :
-    ∃ C : ℝ, 0 < C ∧ ∀ b ∈ K, ‖chartJ (I := I) (M := M) α b‖ ≤ C :=
-  exists_uniform_opNorm_bound_via_locality
-    h_atlas α (fun b : M => chartJ (I := I) (M := M) α b)
-    (fun b₀ _hb₀_α _U _hU_mem hU_sub_b₀ hU_sub_α hU_const =>
-      chartJ_continuousOn_loc (I := I) α b₀ hU_sub_b₀ hU_sub_α hU_const)
-    hK hKsub
-
-/-- Uniform operator-norm bound on `chartJinv α b` over any compact subset of
-`(chartAt H α).source`. -/
-theorem chartJinv_opNorm_isBounded_on_compact
-    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
-    (α : M) {K : Set M} (hK : IsCompact K) (hKsub : K ⊆ (chartAt H α).source) :
-    ∃ C : ℝ, 0 < C ∧ ∀ b ∈ K, ‖chartJinv (I := I) (M := M) α b‖ ≤ C :=
-  exists_uniform_opNorm_bound_via_locality
-    h_atlas α (fun b : M => chartJinv (I := I) (M := M) α b)
-    (fun b₀ _hb₀_α _U _hU_mem hU_sub_b₀ hU_sub_α hU_const =>
-      chartJinv_continuousOn_loc (I := I) α b₀ hU_sub_b₀ hU_sub_α hU_const)
-    hK hKsub
 
 end TensorSpectral
 end Parabolic

@@ -46,10 +46,10 @@ theorem bare_laplacian_spectral_match
     (g_bg : SmoothRiemannianMetric I M)
     (Tsm : Integral.L2.SmoothCcTensor g_bg 0 2)
     (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g_bg 0 2) :
-    tensorL2Coeff_ofCompact (I := I) (M := M) (hCompact (I := I) (M := M) g_bg)
+    tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g_bg)
         (Integral.L2.SmoothCcTensor.toL2 (rawTensorConnLapSmooth (I := I) g_bg 0 2 Tsm)) i =
       (- Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx.lambda (I := I) (M := M) i) *
-        tensorL2Coeff_ofCompact (I := I) (M := M) (hCompact (I := I) (M := M) g_bg)
+        tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g_bg)
           (Integral.L2.SmoothCcTensor.toL2 Tsm) i := by
   -- `Δ_∇ T = T - (1 - Δ_∇) T`, since `(1 - Δ_∇) T = T - Δ_∇ T` by definition.
   have hraw : rawTensorConnLapSmooth (I := I) g_bg 0 2 Tsm
@@ -58,16 +58,16 @@ theorem bare_laplacian_spectral_match
   -- The eigenbasis-coordinate functional is the basis `repr`, a continuous linear
   -- map, so it respects subtraction.
   have hsub :
-      tensorL2Coeff_ofCompact (I := I) (M := M) (hCompact (I := I) (M := M) g_bg)
+      tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g_bg)
           (Integral.L2.SmoothCcTensor.toL2 Tsm -
             Integral.L2.SmoothCcTensor.toL2
               (oneMinusConnLapSmooth (I := I) g_bg 0 2 Tsm)) i =
-        tensorL2Coeff_ofCompact (I := I) (M := M) (hCompact (I := I) (M := M) g_bg)
+        tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g_bg)
             (Integral.L2.SmoothCcTensor.toL2 Tsm) i -
-          tensorL2Coeff_ofCompact (I := I) (M := M) (hCompact (I := I) (M := M) g_bg)
+          tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g_bg)
             (Integral.L2.SmoothCcTensor.toL2
               (oneMinusConnLapSmooth (I := I) g_bg 0 2 Tsm)) i := by
-    unfold tensorL2Coeff_ofCompact
+    unfold tensorL2Coeff
     rw [map_sub]
     rfl
   -- Split the coordinate of `Δ_∇ T` and feed the per-step identity

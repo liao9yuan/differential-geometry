@@ -57,8 +57,6 @@ downstream short-time existence theory consumes.
   for `b ≥ a`, `0 < t ≤ 1`.
 * `tensorHeatSemigroupHs_opNorm_le_one` — the contraction
   `‖e^{tΔ}‖_{Hᵃ → Hᵃ} ≤ 1`.
-* `tensorHeatSemigroupHs_zeroEquivL2` — at `a = b = 0` the operator
-  agrees, under `tensorHsZeroEquivL2`, with the `L²` heat semigroup.
 * `tensorHeatSemigroupHs_add` — the semigroup law
   `e^{(t+s)Δ} = e^{tΔ} ∘ e^{sΔ}` on the scale.
 
@@ -435,7 +433,6 @@ content of "positive time gains derivatives". -/
 namespace tensorHs
 
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
-  {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M}
 
 /-- For `T ∈ Hᵃ` and `0 < t`, the heat-rescaled coordinate family
 `i ↦ exp(-λᵢ t) · T.coeff i` is weighted-square-summable at the target
@@ -891,131 +888,6 @@ theorem tensorHeatSemigroupHs_opNorm_le_one {g : SmoothRiemannianMetric I M}
   refine ContinuousLinearMap.opNorm_le_bound _ zero_le_one (fun T => ?_)
   rw [tensorHeatSemigroupHs_apply, one_mul]
   exact tensorHs.norm_heatHsFun_le_self (I := I) (M := M) ht T
-
-/-! ## Consistency with the `L²` heat semigroup
-
-At `a = b = 0`, the spectral Sobolev space `H⁰` is isometrically the
-`L²` Hilbert space `TensorL2 r s g` (`tensorHsZeroEquivL2`), and
-`tensorHeatSemigroupHs` agrees there with the `L²` heat semigroup
-`tensorHeatSemigroup`. The bridge is the diagonal action of both
-operators on the eigenbasis. -/
-
-/-- The `L²` eigenbasis coordinate of `tensorHeatSemigroup g r s h_atlas
-t U` at `i` is `exp(-λᵢ t)` times the `i`-th coordinate of `U`, for
-`t ≥ 0`. -/
-theorem tensorL2Coeff_tensorHeatSemigroup {g : SmoothRiemannianMetric I M}
-    {r s : ℕ} (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
-    {t : ℝ} (ht : 0 ≤ t) (U : TensorL2 r s g)
-    (i : TensorEigenIdx (I := I) (M := M) g r s) :
-    tensorL2Coeff (I := I) (M := M) h_atlas
-        (tensorHeatSemigroup (I := I) (M := M) g r s h_atlas t U) i =
-      Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) *
-        tensorL2Coeff (I := I) (M := M) h_atlas U i := by
-  classical
-  set b := tensorResolventHilbertEigenbasisSigma
-    (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas with hb
-  -- Expand the heat semigroup as its eigenbasis series.
-  rw [tensorL2Coeff_eq_inner, tensorL2Coeff_eq_inner,
-    tensorHeatSemigroup_apply_of_nonneg (I := I) (M := M) h_atlas ht U]
-  -- The inner product against `b i` of the series is the `i`-th term.
-  have h_summable := tensorSummable_heatTerm (I := I) (M := M) h_atlas ht U
-  have h_hsum := h_summable.hasSum
-  -- Apply the continuous functional `⟪b i, ·⟫`.
-  have h_inner_hsum := h_hsum.mapL (innerSL ℝ (b i))
-  have h_orthonormal : Orthonormal ℝ b := b.orthonormal
-  have h_inner_eq : ∀ j : TensorEigenIdx (I := I) (M := M) g r s,
-      ⟪b i, b j⟫_ℝ = if j = i then (1 : ℝ) else 0 := by
-    intro j
-    rw [show ⟪b i, b j⟫_ℝ = ⟪b j, b i⟫_ℝ from real_inner_comm _ _]
-    exact (orthonormal_iff_ite (𝕜 := ℝ) (v := b)).mp h_orthonormal j i
-  -- Each mapped term collapses to a Kronecker delta.
-  have h_summand_eq : ∀ j : TensorEigenIdx (I := I) (M := M) g r s,
-      (innerSL ℝ (b i))
-          (Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) j) * t) •
-            ⟪b j, U⟫_ℝ • b j) =
-        if j = i then
-          Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) j) * t) *
-            ⟪b j, U⟫_ℝ
-        else 0 := by
-    intro j
-    change ⟪b i,
-        Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) j) * t) •
-          ⟪b j, U⟫_ℝ • b j⟫_ℝ = _
-    rw [real_inner_smul_right, real_inner_smul_right, h_inner_eq]
-    by_cases hji : j = i
-    · subst hji; simp
-    · simp [hji]
-  have h_inner_hsum' : HasSum (fun j =>
-      if j = i then
-        Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) j) * t) *
-          ⟪b j, U⟫_ℝ
-      else 0)
-      ((innerSL ℝ (b i))
-        (∑' j, Real.exp
-            (-(TensorEigenIdx.lambda (I := I) (M := M) j) * t) •
-          ⟪b j, U⟫_ℝ • b j)) := by
-    convert h_inner_hsum using 1
-    funext j
-    exact (h_summand_eq j).symm
-  -- The Kronecker-delta series sums to the `i`-th term.
-  have h_tsum_ite :
-      ∑' j : TensorEigenIdx (I := I) (M := M) g r s,
-        (if j = i then
-          Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) j) * t) *
-            ⟪b j, U⟫_ℝ
-        else 0) =
-      Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) *
-        ⟪b i, U⟫_ℝ := by
-    rw [tsum_ite_eq i]
-  -- Identify.
-  have h_eq := h_inner_hsum'.tsum_eq
-  rw [h_tsum_ite] at h_eq
-  exact h_eq.symm
-
-/-- **Consistency with the `L²` heat semigroup.** At `a = b = 0`, the
-spectral-scale heat semigroup `tensorHeatSemigroupHs` agrees, under the
-isometric identification `tensorHsZeroEquivL2 : H⁰ ≃ₗᵢ TensorL2`, with
-the `L²` heat semigroup `tensorHeatSemigroup`. -/
-theorem tensorHeatSemigroupHs_zeroEquivL2 {g : SmoothRiemannianMetric I M}
-    {r s : ℕ} (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
-    {t : ℝ} (ht : 0 < t)
-    (T : tensorHs (I := I) (M := M) g r s 0) :
-    tensorHsZeroEquivL2 (I := I) (M := M) h_atlas
-        (tensorHeatSemigroupHs (I := I) (M := M) (g := g) (r := r) (s := s) ht (a := 0) (b := 0)
-          T) =
-      tensorHeatSemigroup (I := I) (M := M) g r s h_atlas t
-        (tensorHsZeroEquivL2 (I := I) (M := M) h_atlas T) := by
-  classical
-  -- Compare `L²` eigenbasis coordinates; the eigenbasis representation
-  -- is injective.
-  refine (tensorResolventHilbertEigenbasisSigma
-    (I := I) (M := M) h_atlas).repr.injective ?_
-  ext i
-  -- LHS coordinate.
-  have hlhs : ((tensorResolventHilbertEigenbasisSigma
-        (I := I) (M := M) h_atlas).repr
-      (tensorHsZeroEquivL2 (I := I) (M := M) h_atlas
-        (tensorHeatSemigroupHs (I := I) (M := M) (g := g) (r := r) (s := s) ht
-          (a := 0) (b := 0) T))) i =
-      Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) *
-        T.coeff i := by
-    have h := tensorHsZeroEquivL2_tensorL2Coeff (I := I) (M := M) h_atlas
-      (tensorHeatSemigroupHs (I := I) (M := M) (g := g) (r := r) (s := s) ht
-        (a := 0) (b := 0) T) i
-    rw [tensorHeatSemigroupHs_coeff] at h
-    simpa only [tensorL2Coeff] using h
-  -- RHS coordinate.
-  have hrhs : ((tensorResolventHilbertEigenbasisSigma
-        (I := I) (M := M) h_atlas).repr
-      (tensorHeatSemigroup (I := I) (M := M) g r s h_atlas t
-        (tensorHsZeroEquivL2 (I := I) (M := M) h_atlas T))) i =
-      Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) *
-        T.coeff i := by
-    have h := tensorL2Coeff_tensorHeatSemigroup (I := I) (M := M) h_atlas
-      ht.le (tensorHsZeroEquivL2 (I := I) (M := M) h_atlas T) i
-    rw [tensorHsZeroEquivL2_tensorL2Coeff] at h
-    simpa only [tensorL2Coeff] using h
-  rw [hlhs, hrhs]
 
 /-! ## The semigroup law on the scale
 

@@ -515,7 +515,7 @@ end Analysis
 /-! ## Concrete corollary: the intrinsic tensor heat semigroup is `C¹` in time
 
 Specialising the abstract result to the intrinsic tensor heat semigroup
-`tensorHeatSemigroup_intrinsic g r s` of the connection Laplacian on a closed
+`tensorHeatSemigroup g r s` of the connection Laplacian on a closed
 Riemannian manifold yields the time-regularity half of parabolic interior
 smoothing for the geometric heat flow: for `t > 0` the `TensorL2`-valued map
 `t ↦ e^{tΔ_∇} u₀` is differentiable in time, with derivative the
@@ -547,7 +547,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 /-- **The intrinsic tensor heat output is differentiable in time for `t > 0`.**
 For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an `L²` initial datum
 `u₀`, and an interior time `t > 0`, the `TensorL2`-valued map
-`t ↦ tensorHeatSemigroup_intrinsic g r s t u₀ = e^{tΔ_∇} u₀` is differentiable
+`t ↦ tensorHeatSemigroup g r s t u₀ = e^{tΔ_∇} u₀` is differentiable
 at `t`, with derivative the spectrally-differentiated heat series
 `abstractSpectralSemigroupDeriv (intrinsic eigenbasis) (lambda) t u₀`.
 
@@ -560,14 +560,14 @@ theorem tensorHeatSemigroup_intrinsic_hasDerivAt
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {t : ℝ} (ht : 0 < t) (u₀ : TensorL2 r s g) :
     HasDerivAt
-      (fun u : ℝ => tensorHeatSemigroup_intrinsic (I := I) (M := M) g r s u u₀)
+      (fun u : ℝ => tensorHeatSemigroup (I := I) (M := M) g r s u u₀)
       (DifferentialGeometry.Analysis.Parabolic.abstractSpectralSemigroupDeriv
-        (tensorResolventHilbertEigenbasisSigma_ofCompact (I := I) (M := M)
-          (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s))
+        (tensorResolventHilbertEigenbasisSigma (I := I) (M := M)
+          (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s))
         (TensorEigenIdx.lambda (I := I) (M := M)) t u₀) t :=
   DifferentialGeometry.Analysis.Parabolic.abstractSpectralSemigroup_hasDerivAt
-    (tensorResolventHilbertEigenbasisSigma_ofCompact (I := I) (M := M)
-      (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s))
+    (tensorResolventHilbertEigenbasisSigma (I := I) (M := M)
+      (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s))
     (fun i => tensor_lambda_nonneg (I := I) (M := M) i) ht u₀
 
 end IntrinsicSpectral

@@ -7,18 +7,18 @@ import DifferentialGeometry.Geometry.LocalChartConsistency
 
 For a closed Riemannian manifold `(M, g)` and ranks `(r, s)`, fix an eigenbasis
 index `i : TensorEigenIdx g r s` with nonzero resolvent eigenvalue
-`μ := i.fst.val`. The eigenvector `φ := tensorResolventEigenbasisVec h_atlas i`
-is an abstract element of the `L²` Hilbert space `TensorL2 r s g`. The companion
-file `EigenvectorChartComponentL2.lean` realised its canonical Euclidean chart
-component `tensorL2ChartComponent g r s φ α P₀` as the `L²`-limit of the chart
-components `tensorChartComponent g r s (eigenvectorSmoothApprox … n).toCcTensor α
-P₀.1 P₀.2` of the canonical smooth approximating sequence
-`eigenvectorSmoothApprox g r s h_atlas i : ℕ → SmoothCcTensorH1 g r s`.
+`μ := i.fst.val`. The eigenvector `φ` is an abstract element of the `L²` Hilbert
+space `TensorL2 r s g`. The companion file `EigenvectorChartComponentL2.lean`
+realised its canonical Euclidean chart component `tensorL2ChartComponent g r s φ
+α P₀` as the `L²`-limit of the chart components `tensorChartComponent g r s
+(eigenvectorSmoothApprox … n).toCcTensor α P₀.1 P₀.2` of the
+canonical smooth approximating sequence
+`eigenvectorSmoothApprox g r s i : ℕ → SmoothCcTensorH1 g r s`.
 
 This file produces the corresponding limit of the chart **partial derivatives**.
 The smooth approximants have classical chart partials whose chosen-weak-partial
 representatives form an `L²`-Cauchy sequence; this file canonicalises the limit
-as `eigenvectorChartPartialLp g r s h_atlas i α P₀ k`, the candidate weak
+as `eigenvectorChartPartialLp g r s i α P₀ k`, the candidate weak
 `k`-th chart partial of the eigenvector chart component. (That it actually *is*
 a weak chart partial is established downstream.)
 
@@ -47,11 +47,11 @@ completion.
 
 ## The proof chain
 
-Threading the chosen sequence `w := eigenvectorSmoothApprox g r s h_atlas i`:
+Threading the chosen sequence `w := eigenvectorSmoothApprox g r s i`:
 
-1. `eigenvectorSmoothApprox_tendsto` gives convergence of the completion
-   embeddings `smoothToTensorH1Compl (w n) → eigenvectorResolvent …` in
-   `TensorH1Compl g r s`.
+1. `eigenvectorSmoothApprox_tendsto` gives convergence of the
+   completion embeddings `smoothToTensorH1Compl (w n) → eigenvectorResolvent …`
+   in `TensorH1Compl g r s`.
 2. Applying the continuous linear map `eigenvectorChartPartialCLM g r s α P₀ k`
    transports this to convergence of `eigenvectorChartPartialCLM …
    (smoothToTensorH1Compl (w n))` to `eigenvectorChartPartialCLM …
@@ -61,26 +61,27 @@ Threading the chosen sequence `w := eigenvectorSmoothApprox g r s h_atlas i`:
    `smoothChartPartialLp g r s (w n) α P₀ k`.
 4. Rescaling by the continuous map `μ⁻¹ • ·` (matching the `μ⁻¹`-rescaling
    convention of `EigenvectorChartComponentL2.lean`) defines the headline limit
-   `eigenvectorChartPartialLp g r s h_atlas i α P₀ k`.
+   `eigenvectorChartPartialLp g r s i α P₀ k`.
 
 ## Main definitions
 
 * `eigenvectorChartPartialCLM g r s α P₀ k` — the continuous linear map on the
   `H¹` completion `TensorH1Compl g r s` sending a class to the `L²` class of the
   chosen weak `k`-th chart partial of its `(α, P₀)`-chart component.
-* `eigenvectorChartPartialLp g r s h_atlas i α P₀ k` — the candidate weak
+* `eigenvectorChartPartialLp g r s i α P₀ k` — the candidate weak
   `k`-th chart partial of the eigenvector chart component: `μ⁻¹` times the value
   of `eigenvectorChartPartialCLM` on the eigenvector resolvent.
 
 ## Main results
 
-* `eigenvectorChartPartialLp_approx_eq` — the `n`-th approximant chart partial is
-  `μ⁻¹` times the `L²` class of the concrete chosen weak `k`-th chart partial
-  `chosenWeakPartial' 2 k (tensorChartComponent g r s (eigenvectorSmoothApprox …
-  n).toCcTensor α P₀.1 P₀.2) (chartTargetEuclid α)`.
-* `eigenvectorChartPartialLp_tendsto` — **the headline**: those approximant chart
-  partials converge, in `Lp ℝ 2 (chartL2Measure α)`, to
-  `eigenvectorChartPartialLp g r s h_atlas i α P₀ k`.
+* `eigenvectorChartPartialLp_approx_eq` — the `n`-th approximant
+  chart partial is `μ⁻¹` times the `L²` class of the concrete chosen weak `k`-th
+  chart partial `chosenWeakPartial' 2 k (tensorChartComponent g r s
+  (eigenvectorSmoothApprox … n).toCcTensor α P₀.1 P₀.2)
+  (chartTargetEuclid α)`.
+* `eigenvectorChartPartialLp_tendsto` — **the headline**: those
+  approximant chart partials converge, in `Lp ℝ 2 (chartL2Measure α)`, to
+  `eigenvectorChartPartialLp g r s i α P₀ k`.
 
 ## Sign convention
 
@@ -568,85 +569,68 @@ theorem eigenvectorChartPartialCLM_smoothToTensorH1Compl
 
 The candidate weak `k`-th chart partial of the eigenvector chart component is
 `μ⁻¹` times the value of `eigenvectorChartPartialCLM` on the eigenvector
-resolvent `eigenvectorResolvent g r s h_atlas i`, where `μ := i.fst.val` is the
-associated nonzero resolvent eigenvalue. The `μ⁻¹`-rescaling matches the
+resolvent `eigenvectorResolvent g r s i`, where `μ := i.fst.val`
+is the associated nonzero resolvent eigenvalue. The `μ⁻¹`-rescaling matches the
 convention of `EigenvectorChartComponentL2.lean`, where the eigenvector chart
 component itself is `μ⁻¹` times the chart component of the `L²`-coercion of the
-eigenvector resolvent. -/
+eigenvector resolvent. The canonical chart-partial map
+`eigenvectorChartPartialCLM` is built from the dense smooth-section embedding and
+needs no further input; the eigenvector resolvent and its smooth approximating
+sequence are supplied by `eigenvectorResolvent` and
+`eigenvectorSmoothApprox`. -/
 
 /-- **The candidate weak `k`-th chart partial of an eigenvector chart
 component.** For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an
 eigenbasis index `i` with nonzero resolvent eigenvalue `μ := i.fst.val`, a chart
 center `α : M`, a component multi-index `P₀`, and a chart-coordinate direction
 `k`, this is `μ⁻¹` times the value of the canonical chart-partial continuous
-linear map on the eigenvector resolvent `eigenvectorResolvent g r s h_atlas i`.
+linear map on the eigenvector resolvent `eigenvectorResolvent g r s
+i`.
 
 It is the `L²`-limit of the chosen weak `k`-th chart partials of the
-`μ⁻¹`-rescaled smooth approximants `eigenvectorSmoothApprox g r s h_atlas i n`
-(`eigenvectorChartPartialLp_tendsto`), and is the candidate weak `k`-th chart
-partial of the eigenvector chart component `tensorL2ChartComponent g r s
-(tensorResolventEigenbasisVec h_atlas i) α P₀`. -/
+`μ⁻¹`-rescaled smooth approximants `eigenvectorSmoothApprox g r s i
+n` (`eigenvectorChartPartialLp_tendsto`), and is the candidate weak
+`k`-th chart partial of the eigenvector chart component. -/
 def eigenvectorChartPartialLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
     (k : Fin (Module.finrank ℝ E)) :
     Lp ℝ 2 (chartL2Measure (I := I) (M := M) α) :=
   (i.fst.val)⁻¹ •
     eigenvectorChartPartialCLM (I := I) (M := M) g r s α P₀ k
-      (eigenvectorResolvent (I := I) (M := M) g r s h_atlas i)
-
-/-! ## The concrete characterisation of the approximant chart partial
-
-For each `n`, the value of the canonical chart-partial map on the completion
-embedding of the smooth section `eigenvectorSmoothApprox g r s h_atlas i n`,
-rescaled by `μ⁻¹`, is by `eigenvectorChartPartialCLM_smoothToTensorH1Compl`
-exactly `μ⁻¹` times the `L²` class of the concrete chosen weak `k`-th chart
-partial of `tensorChartComponent g r s (eigenvectorSmoothApprox … n).toCcTensor α
-P₀.1 P₀.2`. -/
+      (eigenvectorResolvent (I := I) (M := M) g r s i)
 
 /-- **The concrete characterisation of the approximant chart partial.** For each
 `n`, the `μ⁻¹`-rescaled value of the canonical chart-partial continuous linear
 map on the completion embedding of the smooth section
-`eigenvectorSmoothApprox g r s h_atlas i n` equals `μ⁻¹` times the `L²` class
-of the concrete chosen weak `k`-th chart partial of the Euclidean chart component
-`tensorChartComponent g r s (eigenvectorSmoothApprox … n).toCcTensor α P₀.1 P₀.2`,
-where `μ := i.fst.val` is the associated nonzero resolvent eigenvalue. -/
+`eigenvectorSmoothApprox g r s i n` equals `μ⁻¹` times the `L²`
+class of the concrete chosen weak `k`-th chart partial of the Euclidean chart
+component `tensorChartComponent g r s (eigenvectorSmoothApprox …
+n).toCcTensor α P₀.1 P₀.2`, where `μ := i.fst.val` is the associated nonzero
+resolvent eigenvalue. -/
 theorem eigenvectorChartPartialLp_approx_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
     (k : Fin (Module.finrank ℝ E)) (n : ℕ) :
     (i.fst.val)⁻¹ •
         eigenvectorChartPartialCLM (I := I) (M := M) g r s α P₀ k
           (smoothToTensorH1Compl (I := I) (M := M) g r s
-            (eigenvectorSmoothApprox (I := I) (M := M) g r s h_atlas i n)) =
+            (eigenvectorSmoothApprox (I := I) (M := M) g r s i n)) =
       (i.fst.val)⁻¹ •
         (chosenWeakPartial'_tensorChartComponent_memLp (I := I) (M := M) g r s
-          (eigenvectorSmoothApprox (I := I) (M := M) g r s h_atlas i n)
+          (eigenvectorSmoothApprox (I := I) (M := M) g r s i n)
           α P₀.1 P₀.2 k).toLp
           (chosenWeakPartial' (d := Module.finrank ℝ E) 2 k
             (tensorChartComponent (I := I) (M := M) g r s
               (eigenvectorSmoothApprox (I := I) (M := M)
-                g r s h_atlas i n).toCcTensor α P₀.1 P₀.2)
+                g r s i n).toCcTensor α P₀.1 P₀.2)
             (chartTargetEuclid (I := I) (M := M) α)) := by
-  -- Identify the value on the smooth section, then unfold the `L²` class.
   rw [eigenvectorChartPartialCLM_smoothToTensorH1Compl
     (I := I) (M := M) g r s
-    (eigenvectorSmoothApprox (I := I) (M := M) g r s h_atlas i n) α P₀ k]
+    (eigenvectorSmoothApprox (I := I) (M := M) g r s i n) α P₀ k]
   rfl
-
-/-! ## The headline `L²`-convergence
-
-Applying the continuous linear map `eigenvectorChartPartialCLM g r s α P₀ k` to
-the `H¹`-convergence `smoothToTensorH1Compl (eigenvectorSmoothApprox … n) →
-eigenvectorResolvent …` of `eigenvectorSmoothApprox_tendsto`, then rescaling by
-the continuous map `μ⁻¹ • ·`, produces the headline: the chosen weak `k`-th chart
-partials of the `μ⁻¹`-rescaled smooth approximants converge, in
-`Lp ℝ 2 (chartL2Measure α)`, to the candidate weak chart partial
-`eigenvectorChartPartialLp g r s h_atlas i α P₀ k`. -/
 
 /-- **The chart partials of an eigenvector chart component as an `L²`-limit of
 smooth chart partials.** For a closed Riemannian manifold `(M, g)`, ranks
@@ -654,18 +638,11 @@ smooth chart partials.** For a closed Riemannian manifold `(M, g)`, ranks
 `μ := i.fst.val`, a chart center `α : M`, a component multi-index `P₀`, and a
 chart-coordinate direction `k`, the `μ⁻¹`-rescaled values of the canonical
 chart-partial continuous linear map on the completion embeddings of the smooth
-approximants `eigenvectorSmoothApprox g r s h_atlas i n` converge, as `n → ∞`
-and in `Lp ℝ 2 (chartL2Measure α)`, to the candidate weak `k`-th chart partial
-`eigenvectorChartPartialLp g r s h_atlas i α P₀ k`.
-
-The `n`-th term is identified concretely by `eigenvectorChartPartialLp_approx_eq`:
-it is `μ⁻¹` times the `L²` class of the concrete chosen weak `k`-th chart partial
-`chosenWeakPartial' 2 k (tensorChartComponent g r s (eigenvectorSmoothApprox …
-n).toCcTensor α P₀.1 P₀.2) (chartTargetEuclid α)` of the smooth section
-`(eigenvectorSmoothApprox g r s h_atlas i n).toCcTensor`. -/
+approximants `eigenvectorSmoothApprox g r s i n` converge, as
+`n → ∞` and in `Lp ℝ 2 (chartL2Measure α)`, to the candidate weak `k`-th chart
+partial `eigenvectorChartPartialLp g r s i α P₀ k`. -/
 theorem eigenvectorChartPartialLp_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
     (k : Fin (Module.finrank ℝ E)) :
@@ -673,116 +650,17 @@ theorem eigenvectorChartPartialLp_tendsto
       (fun n => (i.fst.val)⁻¹ •
         eigenvectorChartPartialCLM (I := I) (M := M) g r s α P₀ k
           (smoothToTensorH1Compl (I := I) (M := M) g r s
-            (eigenvectorSmoothApprox (I := I) (M := M) g r s h_atlas i n)))
+            (eigenvectorSmoothApprox (I := I) (M := M) g r s i n)))
       atTop
       (𝓝 (eigenvectorChartPartialLp (I := I) (M := M)
-        g r s h_atlas i α P₀ k)) := by
-  -- Apply the canonical chart-partial CLM to the `H¹`-convergence.
-  have h_clm :=
-    ((eigenvectorChartPartialCLM (I := I) (M := M) g r s α P₀ k).continuous.tendsto
-      _).comp
-      (eigenvectorSmoothApprox_tendsto (I := I) (M := M) g r s h_atlas i)
-  -- Rescale by the continuous map `μ⁻¹ • ·`.
-  have h_smul := h_clm.const_smul (i.fst.val)⁻¹
-  -- Unfold the composition and the headline definition.
-  simp only [Function.comp_def] at h_smul
-  exact h_smul
-
-/-! ## Chart-locality-free twins
-
-`h_atlas` enters only through the eigenvector resolvent and its canonical smooth
-approximating sequence; both have chart-locality-free twins in
-`SmoothApprox.lean` / `EigenvectorChartComponentL2.lean`. The canonical
-chart-partial map `eigenvectorChartPartialCLM` already carries no `h_atlas`, so
-the twins below simply re-key the resolvent. -/
-
-/-- **The candidate weak `k`-th chart partial of an eigenvector chart component
-(chart-locality-free).** Chart-locality-free twin of `eigenvectorChartPartialLp`,
-built from `eigenvectorResolvent_unconditional`. -/
-def eigenvectorChartPartialLp_unconditional
-    (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (i : TensorEigenIdx (I := I) (M := M) g r s)
-    (α : M) (P₀ : TensorCompIdx (E := E) r s)
-    (k : Fin (Module.finrank ℝ E)) :
-    Lp ℝ 2 (chartL2Measure (I := I) (M := M) α) :=
-  (i.fst.val)⁻¹ •
-    eigenvectorChartPartialCLM (I := I) (M := M) g r s α P₀ k
-      (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i)
-
-/-- **The concrete characterisation of the approximant chart partial
-(chart-locality-free).** Chart-locality-free twin of
-`eigenvectorChartPartialLp_approx_eq`. -/
-theorem eigenvectorChartPartialLp_approx_eq_unconditional
-    (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (i : TensorEigenIdx (I := I) (M := M) g r s)
-    (α : M) (P₀ : TensorCompIdx (E := E) r s)
-    (k : Fin (Module.finrank ℝ E)) (n : ℕ) :
-    (i.fst.val)⁻¹ •
-        eigenvectorChartPartialCLM (I := I) (M := M) g r s α P₀ k
-          (smoothToTensorH1Compl (I := I) (M := M) g r s
-            (eigenvectorSmoothApprox_unconditional (I := I) (M := M) g r s i n)) =
-      (i.fst.val)⁻¹ •
-        (chosenWeakPartial'_tensorChartComponent_memLp (I := I) (M := M) g r s
-          (eigenvectorSmoothApprox_unconditional (I := I) (M := M) g r s i n)
-          α P₀.1 P₀.2 k).toLp
-          (chosenWeakPartial' (d := Module.finrank ℝ E) 2 k
-            (tensorChartComponent (I := I) (M := M) g r s
-              (eigenvectorSmoothApprox_unconditional (I := I) (M := M)
-                g r s i n).toCcTensor α P₀.1 P₀.2)
-            (chartTargetEuclid (I := I) (M := M) α)) := by
-  rw [eigenvectorChartPartialCLM_smoothToTensorH1Compl
-    (I := I) (M := M) g r s
-    (eigenvectorSmoothApprox_unconditional (I := I) (M := M) g r s i n) α P₀ k]
-  rfl
-
-/-- **The chart partials of an eigenvector chart component as an `L²`-limit of
-smooth chart partials (chart-locality-free).** Chart-locality-free twin of
-`eigenvectorChartPartialLp_tendsto`. -/
-theorem eigenvectorChartPartialLp_tendsto_unconditional
-    (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (i : TensorEigenIdx (I := I) (M := M) g r s)
-    (α : M) (P₀ : TensorCompIdx (E := E) r s)
-    (k : Fin (Module.finrank ℝ E)) :
-    Filter.Tendsto
-      (fun n => (i.fst.val)⁻¹ •
-        eigenvectorChartPartialCLM (I := I) (M := M) g r s α P₀ k
-          (smoothToTensorH1Compl (I := I) (M := M) g r s
-            (eigenvectorSmoothApprox_unconditional (I := I) (M := M) g r s i n)))
-      atTop
-      (𝓝 (eigenvectorChartPartialLp_unconditional (I := I) (M := M)
         g r s i α P₀ k)) := by
   have h_clm :=
     ((eigenvectorChartPartialCLM (I := I) (M := M) g r s α P₀ k).continuous.tendsto
       _).comp
-      (eigenvectorSmoothApprox_tendsto_unconditional (I := I) (M := M) g r s i)
+      (eigenvectorSmoothApprox_tendsto (I := I) (M := M) g r s i)
   have h_smul := h_clm.const_smul (i.fst.val)⁻¹
   simp only [Function.comp_def] at h_smul
   exact h_smul
-
-/-! ## Sanity tests -/
-
-example (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
-    (i : TensorEigenIdx (I := I) (M := M) g r s)
-    (α : M) (P₀ : TensorCompIdx (E := E) r s)
-    (k : Fin (Module.finrank ℝ E)) :
-    Lp ℝ 2 (chartL2Measure (I := I) (M := M) α) :=
-  eigenvectorChartPartialLp (I := I) (M := M) g r s h_atlas i α P₀ k
-
-example (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
-    (i : TensorEigenIdx (I := I) (M := M) g r s)
-    (α : M) (P₀ : TensorCompIdx (E := E) r s)
-    (k : Fin (Module.finrank ℝ E)) :
-    Filter.Tendsto
-      (fun n => (i.fst.val)⁻¹ •
-        eigenvectorChartPartialCLM (I := I) (M := M) g r s α P₀ k
-          (smoothToTensorH1Compl (I := I) (M := M) g r s
-            (eigenvectorSmoothApprox (I := I) (M := M) g r s h_atlas i n)))
-      atTop
-      (𝓝 (eigenvectorChartPartialLp (I := I) (M := M)
-        g r s h_atlas i α P₀ k)) :=
-  eigenvectorChartPartialLp_tendsto (I := I) (M := M) g r s h_atlas i α P₀ k
 
 end TensorSpectral
 end Parabolic

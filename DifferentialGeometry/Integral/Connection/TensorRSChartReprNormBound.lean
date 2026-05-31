@@ -48,63 +48,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M]
 
-/-- **Reverse uniform pointwise bound** for the chart-`(r, s)` fibre forward
-trivialisation: the source-side fibre norm `‖T‖` is uniformly controlled by the
-norm of the chart-`α` model image
-`((triv α).continuousLinearMapAt ℝ b T : TensorRSModel r s ℝ E)` over any
-compact subset of the chart-`α` source. -/
-theorem tensorRSSpace_norm_le_chartRepr_norm_on_compact
-    (h_atlas : HasLocallyConstantChartAt H M)
-    (r s : ℕ) (α : M) {K : Set M} (hK : IsCompact K)
-    (hKsub : K ⊆ (chartAt H α).source) :
-    ∃ C : ℝ, 0 < C ∧ ∀ b ∈ K, ∀ T : TensorRSSpace r s I b,
-      ‖T‖ ≤ C * ‖((trivializationAt (TensorRSModel r s ℝ E)
-          (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b T :
-          TensorRSModel r s ℝ E)‖ := by
-  -- The right-inverse `(triv α).symmL ℝ b = tensorRSChartFiberFromModel r s α b`
-  -- has uniform op-norm bound on `K`; apply this bound to
-  -- `D := (triv α).clmAt ℝ b T` and use `symmL ∘ clmAt = id` on the base set.
-  obtain ⟨C, hC_pos, hC⟩ :=
-    tensorRSChartFiberFromModel_opNorm_isBounded_on_compact
-      (I := I) (M := M) (h_atlas := h_atlas) (r := r) (s := s) (α := α)
-      (hK := hK) (hKsub := hKsub)
-  refine ⟨C, hC_pos, ?_⟩
-  intro b hb T
-  -- Translate `b ∈ chart source` into membership in the tensor-RS bundle's
-  -- base set at `α`, using the `(r, s)`-bundle's base set computation from
-  -- the forward file's pattern.
-  have hb_α : b ∈ (chartAt H α).source := hKsub hb
-  have hb_tan_α : b ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
-    rw [TangentBundle.trivializationAt_baseSet (𝕜 := ℝ) (I := I) α]; exact hb_α
-  have hb_α' : b ∈ (trivializationAt (TensorRSModel r s ℝ E)
-      (fun y : M => TensorRSSpace r s I y) α).baseSet := ⟨hb_tan_α, hb_tan_α⟩
-  -- The fundamental inverse identity: `symmL ∘ clmAt = id` on the base set.
-  have h_inv :
-      (trivializationAt (TensorRSModel r s ℝ E)
-          (fun y : M => TensorRSSpace r s I y) α).symmL ℝ b
-        ((trivializationAt (TensorRSModel r s ℝ E)
-          (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b T) = T :=
-    Trivialization.symmL_continuousLinearMapAt (R := ℝ)
-      (trivializationAt (TensorRSModel r s ℝ E)
-        (fun y : M => TensorRSSpace r s I y) α) hb_α' T
-  -- Apply the right-inverse bound to `D := (triv α).clmAt ℝ b T`.
-  have h_bound := hC b hb
-    (((trivializationAt (TensorRSModel r s ℝ E)
-        (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b T :
-        TensorRSModel r s ℝ E))
-  -- `tensorRSChartFiberFromModel r s α b` is definitionally `(triv α).symmL ℝ b`.
-  have h_unfold :
-      tensorRSChartFiberFromModel (I := I) r s α b
-        ((trivializationAt (TensorRSModel r s ℝ E)
-          (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b T) =
-        (trivializationAt (TensorRSModel r s ℝ E)
-          (fun y : M => TensorRSSpace r s I y) α).symmL ℝ b
-          ((trivializationAt (TensorRSModel r s ℝ E)
-            (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b T) :=
-    rfl
-  rw [h_unfold, h_inv] at h_bound
-  exact h_bound
-
 end DifferentialGeometry.Integral.Connection
 
 end

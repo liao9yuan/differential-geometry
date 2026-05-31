@@ -49,7 +49,7 @@ shape the engine consumes.
   a closed ball about the initial datum, the unconditional intrinsic engine
   produces the abstract strong solution of `∂_t u = Δ_∇ u + N(u)`, `u(0) = u₀`.
   The resolvent-compactness witness is supplied unconditionally by
-  `tensorResolventL2_isCompactOperator_intrinsic`.  `N` and its local-Lipschitz
+  `tensorResolventL2_isCompactOperator`.  `N` and its local-Lipschitz
   bound are honest analytic *inputs* (the output of the realization program); the
   conclusion is the existence of a PDE solution, structurally distinct from the
   Lipschitz hypothesis (no hypothesis-packaging).
@@ -99,7 +99,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 For a genuine first-order remainder `N : H^{a+1} → Hᵃ` Lipschitz on a closed ball
 about the initial datum, we feed the intrinsic resolvent-compactness witness
-`tensorResolventL2_isCompactOperator_intrinsic` to the unconditional locally-
+`tensorResolventL2_isCompactOperator` to the unconditional locally-
 Lipschitz small-time engine. -/
 
 /-- **Strong short-time existence for a Ricci–DeTurck first-order remainder.**
@@ -133,7 +133,7 @@ Concretely the data `u, gforce` satisfy:
   truncated forcing reproduces `N` on the (proven) stays-in-ball event.
 
 The resolvent-compactness hypothesis demanded by the engine is supplied
-**unconditionally** by `tensorResolventL2_isCompactOperator_intrinsic` (no
+**unconditionally** by `tensorResolventL2_isCompactOperator` (no
 chart-selection / parallelizability witness).  The construction is exactly
 `quasilinear_strong_existence_locallyLipschitz_smallTime_stayDischarged_ofCompact`
 specialised to `(r, s) = (0, 2)`, `g = g_bg`, with the intrinsic compactness
@@ -169,7 +169,7 @@ theorem deTurckRemainder_strong_shortTime_exists
   quasilinear_strong_existence_locallyLipschitz_smallTime_stayDischarged_ofCompact
     (I := I) (M := M) (g := g_bg) (r := 0) (s := 2) (a := a)
     (N := N) (L_R := L_R) (R := R) hR
-    (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g_bg 0 2)
+    (tensorResolventL2_isCompactOperator (I := I) (M := M) g_bg 0 2)
     u₀ hN
 
 /-! ## The fully unconditional continuous-linear case

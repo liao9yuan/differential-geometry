@@ -13,7 +13,7 @@ is a compact operator. This is the chart-locality-free counterpart of
 `TensorH1ComplToTensorL2_isCompactOperator`: no auxiliary chart-selection
 hypothesis appears. The uniform component-wise chart-Sobolev bound, which the
 chart-locality version assumes, is instead supplied unconditionally by the
-intrinsic headline `tensorChartComponent_wkpNormChart_le_intrinsic`.
+intrinsic headline `tensorChartComponent_wkpNormChart_le`.
 
 The argument:
 
@@ -100,7 +100,7 @@ operator
 `TensorH1ComplToTensorL2 g r s : TensorH1Compl g r s →L[ℝ] TensorL2 r s g`
 is a compact operator. No chart-selection hypothesis is required: the uniform
 component-wise chart-Sobolev bound is supplied unconditionally by
-`tensorChartComponent_wkpNormChart_le_intrinsic`.
+`tensorChartComponent_wkpNormChart_le`.
 
 Argument: any bounded sequence in `TensorH1Compl g r s` can be approximated in
 H¹ norm by smooth compactly-supported sections whose own H¹ norms are uniformly
@@ -116,7 +116,7 @@ theorem tensorH1ComplToTensorL2_isCompactOperator_intrinsic
     IsCompactOperator (TensorH1ComplToTensorL2 (I := I) (M := M) g r s) := by
   classical
   have h_uniform :=
-    tensorChartComponent_wkpNormChart_le_intrinsic (I := I) (M := M) g r s
+    tensorChartComponent_wkpNormChart_le (I := I) (M := M) g r s
   -- Reduce to: the closure of the image of the closed unit ball is compact.
   have h_iff := isCompactOperator_iff_isCompact_closure_image_closedBall
       (TensorH1ComplToTensorL2 (I := I) (M := M) g r s :

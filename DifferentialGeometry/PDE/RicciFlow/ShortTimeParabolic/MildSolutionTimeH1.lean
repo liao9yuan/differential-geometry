@@ -73,8 +73,8 @@ theorem deturck_mildsolution_timeh1
         (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
           (I := I) (M := M) g_bg 0 2),
       (N_cont u).coeff i =
-        tensorL2Coeff_ofCompact (I := I) (M := M)
-          (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g_bg 0 2)
+        tensorL2Coeff (I := I) (M := M)
+          (tensorResolventL2_isCompactOperator (I := I) (M := M) g_bg 0 2)
           (DifferentialGeometry.Integral.L2.SmoothCcTensor.toL2 (Nsec u)) i)
     (hNsec_realize : ∀ (u : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 1))
         (x : M) (v w : TangentSpace I x),
@@ -88,15 +88,15 @@ theorem deturck_mildsolution_timeh1
       Summable (fun i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
             (I := I) (M := M) g_bg 0 2 =>
           tensorSobolevWeight (I := I) (M := M) i (a : ℝ) *
-            (tensorL2Coeff_ofCompact (I := I) (M := M)
-                (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g_bg 0 2)
+            (tensorL2Coeff (I := I) (M := M)
+                (tensorResolventL2_isCompactOperator (I := I) (M := M) g_bg 0 2)
                 (DifferentialGeometry.Integral.L2.SmoothCcTensor.toL2 (Nsec u)
                   - DifferentialGeometry.Integral.L2.SmoothCcTensor.toL2 (Nsec u')) i) ^ 2)
         ∧ (∑' i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
               (I := I) (M := M) g_bg 0 2,
             tensorSobolevWeight (I := I) (M := M) i (a : ℝ) *
-              (tensorL2Coeff_ofCompact (I := I) (M := M)
-                  (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g_bg 0 2)
+              (tensorL2Coeff (I := I) (M := M)
+                  (tensorResolventL2_isCompactOperator (I := I) (M := M) g_bg 0 2)
                   (DifferentialGeometry.Integral.L2.SmoothCcTensor.toL2 (Nsec u)
                     - DifferentialGeometry.Integral.L2.SmoothCcTensor.toL2 (Nsec u')) i) ^ 2)
             ≤ ((K : ℝ) * dist u u') ^ 2) :

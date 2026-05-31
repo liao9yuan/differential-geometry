@@ -29,7 +29,7 @@ the `L²` pairing against the symmetric operator `(1 - Δ_∇)`.
   injectivity at ranks `(0, 2)` and `(0, 3)`, discharging the witness with
   `loweringIntertwiner_two` / `loweringIntertwiner_three`.
 * `smoothToTensorH1Compl_eigenvectorSmooth_eq` — the eigenvector identification
-  `⟦eᵢ⟧ = μ⁻¹ • eigenvectorResolvent_unconditional i` in the `H¹` completion,
+  `⟦eᵢ⟧ = μ⁻¹ • eigenvectorResolvent i` in the `H¹` completion,
   obtained from the `(0, 2)` injectivity.
 * `tensorL2Coeff_ofCompact_oneMinusConnLapSmooth` — the per-step eigen-coordinate
   identity `cᵢ((1 - Δ_∇) T) = (1 + λᵢ) · cᵢ(T)`.
@@ -327,33 +327,33 @@ embedding is the rescaled eigenvector resolvent: both sides have the same image
 under `TensorH1ComplToTensorL2`, so they are equal. -/
 
 /-- **The smooth eigenvector's `H¹` embedding is the rescaled resolvent
-eigenvector.** For the smooth representative `eᵢ = eigenvectorSmooth_unconditional i`
+eigenvector.** For the smooth representative `eᵢ = eigenvectorSmooth i`
 of the resolvent eigenbasis vector at index `i`,
-`⟦eᵢ⟧ = (i.fst.val)⁻¹ • eigenvectorResolvent_unconditional i`
+`⟦eᵢ⟧ = (i.fst.val)⁻¹ • eigenvectorResolvent i`
 in the `H¹` completion. Both sides have the same image
-`tensorResolventEigenbasisVec_ofCompact i` under the injective `H¹ → L²` map. -/
+`tensorResolventEigenbasisVec i` under the injective `H¹ → L²` map. -/
 theorem smoothToTensorH1Compl_eigenvectorSmooth_eq
     (g : SmoothRiemannianMetric I M)
     (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
       (I := I) (M := M) g 0 2) :
     smoothToTensorH1Compl (I := I) (M := M) g 0 2
-        ⟨eigenvectorSmooth_unconditional (I := I) (M := M) g 0 2 i⟩ =
+        ⟨eigenvectorSmooth (I := I) (M := M) g 0 2 i⟩ =
       (i.fst.val)⁻¹ •
-        eigenvectorResolvent_unconditional (I := I) (M := M) g 0 2 i := by
+        eigenvectorResolvent (I := I) (M := M) g 0 2 i := by
   apply TensorH1ComplToTensorL2_injective_two (I := I) (M := M) g
-  -- LHS image: `F ⟦eᵢ⟧ = (eᵢ : L²) = tensorResolventEigenbasisVec_ofCompact i`.
+  -- LHS image: `F ⟦eᵢ⟧ = (eᵢ : L²) = tensorResolventEigenbasisVec i`.
   rw [TensorH1ComplToTensorL2_smoothToTensorH1Compl_eq_coe]
   -- `(⟨eᵢ⟩ : SmoothCcTensorH1).toCcTensor = eᵢ`.
-  change (eigenvectorSmooth_unconditional (I := I) (M := M) g 0 2 i :
+  change (eigenvectorSmooth (I := I) (M := M) g 0 2 i :
         TensorL2 0 2 g) =
       TensorH1ComplToTensorL2 (I := I) (M := M) g 0 2
         ((i.fst.val)⁻¹ •
-          eigenvectorResolvent_unconditional (I := I) (M := M) g 0 2 i)
-  rw [eigenvectorSmooth_toL2_unconditional (I := I) (M := M) g 0 2 i,
+          eigenvectorResolvent (I := I) (M := M) g 0 2 i)
+  rw [eigenvectorSmooth_toL2 (I := I) (M := M) g 0 2 i,
     map_smul]
-  -- RHS image: `(i.fst.val)⁻¹ • F (eigenvectorResolvent_unconditional i)`, which
-  -- by `eigenvector_eq_resolvent_smul_unconditional` equals the eigenvector.
-  exact eigenvector_eq_resolvent_smul_unconditional (I := I) (M := M) g 0 2 i
+  -- RHS image: `(i.fst.val)⁻¹ • F (eigenvectorResolvent i)`, which
+  -- by `eigenvector_eq_resolvent_smul` equals the eigenvector.
+  exact eigenvector_eq_resolvent_smul (I := I) (M := M) g 0 2 i
 
 /-! ## The resolvent-to-Laplacian eigenvalue translation
 
@@ -399,46 +399,46 @@ theorem tensorL2Coeff_ofCompact_oneMinusConnLapSmooth
     (T : SmoothCcTensor g 0 2)
     (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
       (I := I) (M := M) g 0 2) :
-    tensorL2Coeff_ofCompact (I := I) (M := M) h_compact
+    tensorL2Coeff (I := I) (M := M) h_compact
         (SmoothCcTensor.toL2 (oneMinusConnLapSmooth (I := I) g 0 2 T)) i =
       (1 + Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx.lambda
           (I := I) (M := M) i) *
-        tensorL2Coeff_ofCompact (I := I) (M := M) h_compact
+        tensorL2Coeff (I := I) (M := M) h_compact
           (SmoothCcTensor.toL2 T) i := by
   classical
   -- The eigenbasis coordinate is `⟪bᵢ, ·⟫` with `bᵢ = (eᵢ : L²)` the smooth
   -- eigenvector's `L²` image.
   have hb :
-      tensorResolventHilbertEigenbasisSigma_ofCompact (I := I) (M := M) h_compact i =
-        (eigenvectorSmooth_unconditional (I := I) (M := M) g 0 2 i :
+      tensorResolventHilbertEigenbasisSigma (I := I) (M := M) h_compact i =
+        (eigenvectorSmooth (I := I) (M := M) g 0 2 i :
           TensorL2 0 2 g) := by
-    rw [tensorResolventHilbertEigenbasisSigma_ofCompact_apply,
-      eigenvectorSmooth_toL2_unconditional (I := I) (M := M) g 0 2 i]
+    rw [tensorResolventHilbertEigenbasisSigma_apply,
+      eigenvectorSmooth_toL2 (I := I) (M := M) g 0 2 i]
   -- Rewrite both coordinates as inner products against `bᵢ = (eᵢ : L²)`.
-  rw [tensorL2Coeff_ofCompact_eq_inner, tensorL2Coeff_ofCompact_eq_inner, hb,
+  rw [tensorL2Coeff_eq_inner, tensorL2Coeff_eq_inner, hb,
     SmoothCcTensor.toL2_apply, SmoothCcTensor.toL2_apply]
   -- Step 1: commute the `L²` pairing (the LHS occurrence) and apply the
   -- Green / `H¹` bridge.
   rw [real_inner_comm
     ((oneMinusConnLapSmooth (I := I) g 0 2 T : SmoothCcTensor g 0 2) :
       TensorL2 0 2 g)
-    (eigenvectorSmooth_unconditional (I := I) (M := M) g 0 2 i : TensorL2 0 2 g),
+    (eigenvectorSmooth (I := I) (M := M) g 0 2 i : TensorL2 0 2 g),
     oneMinusConnLapSmooth_toL2_inner_eq_h1_general (I := I) (M := M) g 2
       (loweringIntertwiner_two (I := I) (M := M) g) T
-      (eigenvectorSmooth_unconditional (I := I) (M := M) g 0 2 i)]
+      (eigenvectorSmooth (I := I) (M := M) g 0 2 i)]
   -- Step 2: the eigenvector identification and `inner_smul_right`.
   rw [smoothToTensorH1Compl_eigenvectorSmooth_eq (I := I) (M := M) g i,
     inner_smul_right]
   -- Step 3: commute the `H¹` pairing and apply the weak eigen-equation.
   rw [real_inner_comm
-    (eigenvectorResolvent_unconditional (I := I) (M := M) g 0 2 i)
+    (eigenvectorResolvent (I := I) (M := M) g 0 2 i)
     (smoothToTensorH1Compl (I := I) (M := M) g 0 2 ⟨T⟩),
-    eigenvectorSmooth_weak_eigen_unconditional (I := I) (M := M) g 0 2 i ⟨T⟩]
+    eigenvectorSmooth_weak_eigen (I := I) (M := M) g 0 2 i ⟨T⟩]
   -- Step 4: `⟨T⟩.toCcTensor = T`, real symmetry, and `1 + λ = μ⁻¹`.
   rw [show ((⟨T⟩ : SmoothCcTensorH1 g 0 2).toCcTensor : TensorL2 0 2 g) =
         (T : TensorL2 0 2 g) from rfl,
     real_inner_comm
-      (eigenvectorSmooth_unconditional (I := I) (M := M) g 0 2 i : TensorL2 0 2 g)
+      (eigenvectorSmooth (I := I) (M := M) g 0 2 i : TensorL2 0 2 g)
       (T : TensorL2 0 2 g),
     one_add_lambda_eq_inv_val (I := I) (M := M) i]
 
@@ -456,11 +456,11 @@ theorem tensorL2Coeff_ofCompact_oneMinusConnLapSmoothIter
     (T : SmoothCcTensor g 0 2)
     (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
       (I := I) (M := M) g 0 2) (k : ℕ) :
-    tensorL2Coeff_ofCompact (I := I) (M := M) h_compact
+    tensorL2Coeff (I := I) (M := M) h_compact
         (SmoothCcTensor.toL2 (oneMinusConnLapSmoothIter (I := I) g 0 2 k T)) i =
       (1 + Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx.lambda
           (I := I) (M := M) i) ^ k *
-        tensorL2Coeff_ofCompact (I := I) (M := M) h_compact
+        tensorL2Coeff (I := I) (M := M) h_compact
           (SmoothCcTensor.toL2 T) i := by
   induction k with
   | zero => simp
@@ -481,7 +481,7 @@ theorem smoothCcTensor_tensorL2Coeff_weighted_summable_even
     Summable (fun i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
         (I := I) (M := M) g 0 2 =>
       tensorSobolevWeight (I := I) (M := M) i (2 * k : ℕ) *
-        (tensorL2Coeff_ofCompact (I := I) (M := M) h_compact
+        (tensorL2Coeff (I := I) (M := M) h_compact
           (SmoothCcTensor.toL2 T) i) ^ 2) := by
   classical
   -- The weighted term equals the squared coordinate of `(1 - Δ_∇)^k T`.
@@ -489,9 +489,9 @@ theorem smoothCcTensor_tensorL2Coeff_weighted_summable_even
       (fun i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
           (I := I) (M := M) g 0 2 =>
         tensorSobolevWeight (I := I) (M := M) i (2 * k : ℕ) *
-          (tensorL2Coeff_ofCompact (I := I) (M := M) h_compact
+          (tensorL2Coeff (I := I) (M := M) h_compact
             (SmoothCcTensor.toL2 T) i) ^ 2) =
-        fun i => (tensorL2Coeff_ofCompact (I := I) (M := M) h_compact
+        fun i => (tensorL2Coeff (I := I) (M := M) h_compact
           (SmoothCcTensor.toL2
             (oneMinusConnLapSmoothIter (I := I) g 0 2 k T)) i) ^ 2 := by
     funext i
@@ -527,7 +527,7 @@ theorem smoothCcTensor_tensorL2Coeff_weighted_summable
     Summable (fun i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
         (I := I) (M := M) g 0 2 =>
       tensorSobolevWeight (I := I) (M := M) i a *
-        (tensorL2Coeff_ofCompact (I := I) (M := M) h_compact
+        (tensorL2Coeff (I := I) (M := M) h_compact
           (SmoothCcTensor.toL2 T) i) ^ 2) := by
   -- Choose an even integer `2k ≥ a`.
   obtain ⟨k, hk⟩ := exists_nat_ge (a / 2)
@@ -537,7 +537,7 @@ theorem smoothCcTensor_tensorL2Coeff_weighted_summable
     linarith
   exact summable_tensorSobolevWeight_of_even
     (I := I) (M := M)
-    (fun i => tensorL2Coeff_ofCompact (I := I) (M := M) h_compact
+    (fun i => tensorL2Coeff (I := I) (M := M) h_compact
       (SmoothCcTensor.toL2 T) i)
     hak
     (smoothCcTensor_tensorL2Coeff_weighted_summable_even

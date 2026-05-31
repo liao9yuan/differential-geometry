@@ -8,7 +8,7 @@ the chart-locality-free counterpart of the uniform chart-Sobolev `W^{1,2}` bound
 `tensorChartComponent_wkpNormChart_le`. None of these declarations carries a
 `HasLocallyConstantChartAt` hypothesis: the per-`α` gradient `L²` input is sourced
 from the already-proven intrinsic headline
-`tensorChartComponentScalar_grad_eLpNorm_le_intrinsic`, fed into the
+`tensorChartComponentScalar_grad_eLpNorm_le`, fed into the
 chart-locality-free per-`α` chart-Sobolev lemma
 `tensorChartComponentScalar_wkpNormChart_le_const_mul_h1Norm` (which takes the
 gradient `L²` bound as an explicit hypothesis). The inactive-`α` branch is handled
@@ -18,7 +18,7 @@ directly via the public active-finset machinery
 
 ## Public theorem
 
-* `tensorChartComponent_wkpNormChart_le_intrinsic`
+* `tensorChartComponent_wkpNormChart_le`
 -/
 
 noncomputable section
@@ -61,10 +61,10 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 /-- Chart-locality-free per-`α` existence of a chart-Sobolev `W^{1,2}` constant.
 The gradient `L²` input is sourced from the intrinsic `α`-uniform gradient
-headline `tensorChartComponentScalar_grad_eLpNorm_le_intrinsic` and fed into the
+headline `tensorChartComponentScalar_grad_eLpNorm_le` and fed into the
 chart-locality-free per-`α` chart-Sobolev lemma. Counterpart of
 `exists_perAlphaSobolevConstant`. -/
-private lemma exists_perAlphaSobolevConstant_intrinsic
+private lemma exists_perAlphaSobolevConstant
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (S : SmoothCcTensorH1 g r s)
@@ -76,22 +76,22 @@ private lemma exists_perAlphaSobolevConstant_intrinsic
           ENNReal.ofReal C * (‖S‖₊ : ℝ≥0∞) := by
   classical
   obtain ⟨C_grad, hC_grad_nn, hC_grad_bound⟩ :=
-    tensorChartComponentScalar_grad_eLpNorm_le_intrinsic
+    tensorChartComponentScalar_grad_eLpNorm_le
       (I := I) (M := M) g r s
   exact tensorChartComponentScalar_wkpNormChart_le_const_mul_h1Norm
     (I := I) (M := M) g r s α hC_grad_nn
     (fun S Idx Jdx => hC_grad_bound S α Idx Jdx)
 
-private noncomputable def perAlphaSobolevConstant_intrinsic
+private noncomputable def perAlphaSobolevConstant
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) : ℝ :=
   Classical.choose
-    (exists_perAlphaSobolevConstant_intrinsic (I := I) (M := M) g r s α)
+    (exists_perAlphaSobolevConstant (I := I) (M := M) g r s α)
 
 private lemma perAlphaSobolevConstant_intrinsic_nonneg
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
-    0 ≤ perAlphaSobolevConstant_intrinsic (I := I) (M := M) g r s α :=
+    0 ≤ perAlphaSobolevConstant (I := I) (M := M) g r s α :=
   (Classical.choose_spec
-    (exists_perAlphaSobolevConstant_intrinsic
+    (exists_perAlphaSobolevConstant
       (I := I) (M := M) g r s α)).1
 
 private lemma perAlphaSobolevConstant_intrinsic_bound
@@ -103,10 +103,10 @@ private lemma perAlphaSobolevConstant_intrinsic_bound
         (tensorChartComponentScalar (I := I) (M := M)
           g r s S.toCcTensor α Idx Jdx) ≤
       ENNReal.ofReal
-          (perAlphaSobolevConstant_intrinsic (I := I) (M := M) g r s α) *
+          (perAlphaSobolevConstant (I := I) (M := M) g r s α) *
         (‖S‖₊ : ℝ≥0∞) :=
   (Classical.choose_spec
-    (exists_perAlphaSobolevConstant_intrinsic
+    (exists_perAlphaSobolevConstant
       (I := I) (M := M) g r s α)).2 S Idx Jdx
 
 /-! ## Vanishing of `wkpNormChart` on inactive centres (chart-locality-free) -/
@@ -137,37 +137,37 @@ private lemma wkpNormChart_tensorChartComponentScalar_eq_zero_of_inactive_intrin
 
 /-! ## Total active constant (chart-locality-free) -/
 
-private noncomputable def totalActiveSobolevConstant_intrinsic
+private noncomputable def totalActiveSobolevConstant
     (g : SmoothRiemannianMetric I M) (r s : ℕ) : ℝ :=
   ∑ α ∈ chartAtlasPOU_activeFinset I M,
-    perAlphaSobolevConstant_intrinsic (I := I) (M := M) g r s α
+    perAlphaSobolevConstant (I := I) (M := M) g r s α
 
 private lemma totalActiveSobolevConstant_intrinsic_nonneg
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
-    0 ≤ totalActiveSobolevConstant_intrinsic (I := I) (M := M) g r s := by
+    0 ≤ totalActiveSobolevConstant (I := I) (M := M) g r s := by
   classical
-  unfold totalActiveSobolevConstant_intrinsic
+  unfold totalActiveSobolevConstant
   exact Finset.sum_nonneg (fun α _ =>
     perAlphaSobolevConstant_intrinsic_nonneg (I := I) (M := M) g r s α)
 
-private lemma perAlphaSobolevConstant_le_totalActiveSobolevConstant_intrinsic
+private lemma perAlphaSobolevConstant_le_totalActiveSobolevConstant
     (g : SmoothRiemannianMetric I M) (r s : ℕ) {α : M}
     (hα : α ∈ chartAtlasPOU_activeFinset I M) :
-    perAlphaSobolevConstant_intrinsic (I := I) (M := M) g r s α ≤
-      totalActiveSobolevConstant_intrinsic (I := I) (M := M) g r s := by
+    perAlphaSobolevConstant (I := I) (M := M) g r s α ≤
+      totalActiveSobolevConstant (I := I) (M := M) g r s := by
   classical
-  unfold totalActiveSobolevConstant_intrinsic
+  unfold totalActiveSobolevConstant
   have h_split :
       ∑ β ∈ chartAtlasPOU_activeFinset I M,
-        perAlphaSobolevConstant_intrinsic (I := I) (M := M) g r s β =
-        perAlphaSobolevConstant_intrinsic (I := I) (M := M) g r s α +
+        perAlphaSobolevConstant (I := I) (M := M) g r s β =
+        perAlphaSobolevConstant (I := I) (M := M) g r s α +
         ∑ β ∈ (chartAtlasPOU_activeFinset I M).erase α,
-          perAlphaSobolevConstant_intrinsic (I := I) (M := M) g r s β := by
+          perAlphaSobolevConstant (I := I) (M := M) g r s β := by
     rw [← Finset.sum_erase_add _ _ hα, add_comm]
   rw [h_split]
   have h_rest_nn :
       0 ≤ ∑ β ∈ (chartAtlasPOU_activeFinset I M).erase α,
-            perAlphaSobolevConstant_intrinsic (I := I) (M := M) g r s β :=
+            perAlphaSobolevConstant (I := I) (M := M) g r s β :=
     Finset.sum_nonneg (fun β _ =>
       perAlphaSobolevConstant_intrinsic_nonneg (I := I) (M := M) g r s β)
   linarith
@@ -180,7 +180,7 @@ non-negative real constant `C` (independent of the chart base point `α`, the
 section `S`, and the multi-indices) bounding the chart-Sobolev `W^{1,2}` norm of
 every chart-frame scalar component. Chart-locality-free counterpart of
 `tensorChartComponent_wkpNormChart_le`. -/
-theorem tensorChartComponent_wkpNormChart_le_intrinsic
+theorem tensorChartComponent_wkpNormChart_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (S : SmoothCcTensorH1 g r s) (α : M)
@@ -191,7 +191,7 @@ theorem tensorChartComponent_wkpNormChart_le_intrinsic
               g r s S.toCcTensor α Idx Jdx) ≤
           ENNReal.ofReal C * (‖S‖₊ : ℝ≥0∞) := by
   classical
-  refine ⟨totalActiveSobolevConstant_intrinsic (I := I) (M := M) g r s,
+  refine ⟨totalActiveSobolevConstant (I := I) (M := M) g r s,
     totalActiveSobolevConstant_intrinsic_nonneg (I := I) (M := M) g r s, ?_⟩
   intro S α Idx Jdx
   by_cases hα : α ∈ chartAtlasPOU_activeFinset I M
@@ -200,24 +200,24 @@ theorem tensorChartComponent_wkpNormChart_le_intrinsic
             (tensorChartComponentScalar (I := I) (M := M)
               g r s S.toCcTensor α Idx Jdx) ≤
           ENNReal.ofReal
-              (perAlphaSobolevConstant_intrinsic (I := I) (M := M) g r s α) *
+              (perAlphaSobolevConstant (I := I) (M := M) g r s α) *
             (‖S‖₊ : ℝ≥0∞) :=
       perAlphaSobolevConstant_intrinsic_bound
         (I := I) (M := M) g r s α S Idx Jdx
     have h_const_le :
         ENNReal.ofReal
-            (perAlphaSobolevConstant_intrinsic (I := I) (M := M) g r s α) ≤
+            (perAlphaSobolevConstant (I := I) (M := M) g r s α) ≤
           ENNReal.ofReal
-            (totalActiveSobolevConstant_intrinsic (I := I) (M := M) g r s) :=
+            (totalActiveSobolevConstant (I := I) (M := M) g r s) :=
       ENNReal.ofReal_le_ofReal
-        (perAlphaSobolevConstant_le_totalActiveSobolevConstant_intrinsic
+        (perAlphaSobolevConstant_le_totalActiveSobolevConstant
           (I := I) (M := M) g r s hα)
     have h_envelope_le :
         ENNReal.ofReal
-              (perAlphaSobolevConstant_intrinsic (I := I) (M := M) g r s α) *
+              (perAlphaSobolevConstant (I := I) (M := M) g r s α) *
               (‖S‖₊ : ℝ≥0∞) ≤
           ENNReal.ofReal
-              (totalActiveSobolevConstant_intrinsic (I := I) (M := M) g r s) *
+              (totalActiveSobolevConstant (I := I) (M := M) g r s) *
               (‖S‖₊ : ℝ≥0∞) :=
       mul_le_mul_of_nonneg_right h_const_le (by exact zero_le _)
     exact h_per.trans h_envelope_le
@@ -234,5 +234,5 @@ end
 
 section Sanity
 #print axioms
-  DifferentialGeometry.PDE.RicciFlow.HebeyBlock.tensorChartComponent_wkpNormChart_le_intrinsic
+  DifferentialGeometry.PDE.RicciFlow.HebeyBlock.tensorChartComponent_wkpNormChart_le
 end Sanity

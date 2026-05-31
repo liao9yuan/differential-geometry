@@ -7,7 +7,7 @@ import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.Existence
 For a closed Riemannian manifold `(M, g)` and ranks `(r, s)`, the
 **intrinsic** tensor heat semigroup `e^{t Δ_∇}` on `TensorL2 r s g` is a
 bounded strongly continuous one-parameter contraction semigroup, packaged
-as `tensorBoundedC0Semigroup_intrinsic g r s`. Feeding it into the
+as `tensorBoundedC0Semigroup g r s`. Feeding it into the
 abstract semilinear existence/uniqueness machinery yields a short-time
 mild solution of the **quasi-linear** tensor heat equation
 
@@ -20,7 +20,7 @@ for a globally Lipschitz lower-order nonlinearity `N : TensorL2 → TensorL2`,
 
 * `tensor_quasilinear_heat_mild_solution_existence_intrinsic` — short-time
   existence of a continuous mild solution.
-* `tensor_quasilinear_parabolic_unique_intrinsic` — uniqueness of the
+* `tensor_quasilinear_parabolic_unique` — uniqueness of the
   mild solution on a short time interval.
 -/
 
@@ -53,7 +53,7 @@ Instantiating the abstract semilinear existence theorem
 and a globally Lipschitz nonlinearity yields a continuous short-time mild
 solution of the quasi-linear tensor heat equation. The abstract Duhamel
 terms `S t u₀` and `S (t - τ) (N (u τ))` unfold definitionally — the
-`toFun` field of `tensorBoundedC0Semigroup_intrinsic` *is* the intrinsic
+`toFun` field of `tensorBoundedC0Semigroup` *is* the intrinsic
 tensor heat semigroup — to the concrete heat-semigroup applications. -/
 
 /-- **Short-time existence of a mild solution of the quasi-linear tensor
@@ -75,17 +75,17 @@ theorem tensor_quasilinear_heat_mild_solution_existence_intrinsic
       ContinuousOn u (Set.Icc 0 T) ∧
       u 0 = T_0 ∧
       ∀ t ∈ Set.Icc (0:ℝ) T,
-        u t = tensorHeatSemigroup_intrinsic g r s t T_0 +
+        u t = tensorHeatSemigroup g r s t T_0 +
           ∫ τ in (0:ℝ)..t,
-            tensorHeatSemigroup_intrinsic g r s (t - τ) (N (u τ)) := by
+            tensorHeatSemigroup g r s (t - τ) (N (u τ)) := by
   -- Apply the abstract semilinear existence theorem to the intrinsic
   -- tensor heat semigroup.
   obtain ⟨T, hT_pos, u, hu_cont, hu_zero, hu_eq⟩ :=
     semilinear_parabolic_existence
-      (tensorBoundedC0Semigroup_intrinsic (I := I) (M := M) g r s) T_0 hN
+      (tensorBoundedC0Semigroup (I := I) (M := M) g r s) T_0 hN
   refine ⟨T, hT_pos, u, hu_cont, hu_zero, ?_⟩
   -- The abstract Duhamel terms coincide with the concrete heat-semigroup
-  -- applications by definition of `tensorBoundedC0Semigroup_intrinsic`.
+  -- applications by definition of `tensorBoundedC0Semigroup`.
   intro t ht
   have h := hu_eq t ht
   simpa only [tensorBoundedC0Semigroup_intrinsic_apply] using h
@@ -103,7 +103,7 @@ equation (chart-selection-free).**
 Any two continuous paths `u, v : [0, T] → TensorL2 r s g` solving the
 quasi-linear tensor heat Duhamel integral equation with the same initial
 datum `T_0` coincide on `[0, T]`, provided `(L : ℝ) * T < 1`. -/
-theorem tensor_quasilinear_parabolic_unique_intrinsic
+theorem tensor_quasilinear_parabolic_unique
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T_0 : TensorL2 r s g)
     {N : TensorL2 r s g → TensorL2 r s g} {L : ℝ≥0} (hN : LipschitzWith L N)
@@ -111,18 +111,18 @@ theorem tensor_quasilinear_parabolic_unique_intrinsic
     {u v : ℝ → TensorL2 r s g}
     (hu : ContinuousOn u (Set.Icc 0 T)) (hv : ContinuousOn v (Set.Icc 0 T))
     (hu_eq : ∀ t ∈ Set.Icc (0:ℝ) T,
-      u t = tensorHeatSemigroup_intrinsic g r s t T_0 +
+      u t = tensorHeatSemigroup g r s t T_0 +
         ∫ τ in (0:ℝ)..t,
-          tensorHeatSemigroup_intrinsic g r s (t - τ) (N (u τ)))
+          tensorHeatSemigroup g r s (t - τ) (N (u τ)))
     (hv_eq : ∀ t ∈ Set.Icc (0:ℝ) T,
-      v t = tensorHeatSemigroup_intrinsic g r s t T_0 +
+      v t = tensorHeatSemigroup g r s t T_0 +
         ∫ τ in (0:ℝ)..t,
-          tensorHeatSemigroup_intrinsic g r s (t - τ) (N (v τ))) :
+          tensorHeatSemigroup g r s (t - τ) (N (v τ))) :
     Set.EqOn u v (Set.Icc 0 T) := by
   -- Translate the concrete Duhamel equations into the abstract form
   -- expected by `semilinear_parabolic_unique`, then apply it.
   refine semilinear_parabolic_unique
-    (tensorBoundedC0Semigroup_intrinsic (I := I) (M := M) g r s) T_0 hN
+    (tensorBoundedC0Semigroup (I := I) (M := M) g r s) T_0 hN
     hT hTL hu hv ?_ ?_
   · intro t ht
     simpa only [tensorBoundedC0Semigroup_intrinsic_apply] using hu_eq t ht

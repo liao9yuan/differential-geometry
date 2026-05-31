@@ -18,7 +18,7 @@ the heat output, and then assembles the realized `(0,2)`-tensor into an honest
 
 The construction is *chart-locality-free* (no `HasLocallyConstantChartAt`): it
 runs through the unconditional eigenbasis machinery
-`tensorHsSmoothRepr_unconditional` / `tensorSectionRealizeMetric`, which already
+`tensorHsSmoothRepr` / `tensorSectionRealizeMetric`, which already
 ship a genuine smooth representative for every finitely-supported spectral
 element. The single mathematical input that makes the heat-output case fall into
 that already-closed regime is the elementary observation that the heat rescaling
@@ -40,7 +40,7 @@ representative.
   spectral support.
 
 * `heatOutputSmoothRepr_toL2` — the `L²` class of `heatOutputSmoothRepr`
-  coincides with the heat output `tensorHeatSemigroup_intrinsic g r s t u₀`.
+  coincides with the heat output `tensorHeatSemigroup g r s t u₀`.
 
 * `heatOutputSmoothRepr_contMDiff` — the underlying section of
   `heatOutputSmoothRepr` is `C^∞`.
@@ -88,25 +88,25 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 /-! ## Spectral support of an `L²` initial datum
 
 The intrinsic eigenbasis coordinate family of `u₀ : TensorL2 r s g` is
-`tensorL2Coeff_ofCompact h_compact u₀`. We say `u₀` has *finite spectral
+`tensorL2Coeff h_compact u₀`. We say `u₀` has *finite spectral
 support* when this family is finitely supported. This is the genuine analytic
 hypothesis under which the spectral smoothing machinery produces a genuine
 smooth representative. -/
 
 /-- The intrinsic eigenbasis coordinate family of an `L²` tensor element, taken
 against the unconditional compactness witness
-`tensorResolventL2_isCompactOperator_intrinsic`. -/
+`tensorResolventL2_isCompactOperator`. -/
 def spectralCoeff (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (u₀ : TensorL2 r s g) :
     TensorSpectral.TensorEigenIdx (I := I) (M := M) g r s → ℝ :=
-  tensorL2Coeff_ofCompact (I := I) (M := M)
-    (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s) u₀
+  tensorL2Coeff (I := I) (M := M)
+    (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s) u₀
 
 @[simp] lemma spectralCoeff_apply (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (u₀ : TensorL2 r s g) (i : TensorSpectral.TensorEigenIdx (I := I) (M := M) g r s) :
     spectralCoeff (I := I) (M := M) g r s u₀ i =
-      tensorL2Coeff_ofCompact (I := I) (M := M)
-        (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s)
+      tensorL2Coeff (I := I) (M := M)
+        (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s)
         u₀ i := rfl
 
 /-! ## The spectral support is preserved by the heat rescaling
@@ -149,7 +149,7 @@ theorem heatHsWitness_finite_support_of_finite
 For an initial datum with finite spectral support, the heat witness (at the
 fixed exponent `0`, which is the convenient `Hˢ`-scale carrying the heat output)
 is finitely supported, so the chart-locality-free spectral smooth representative
-`tensorHsSmoothRepr_unconditional` produces a genuine `SmoothCcTensor`. -/
+`tensorHsSmoothRepr` produces a genuine `SmoothCcTensor`. -/
 
 /-- **The genuine smooth representative of the heat output.** For a closed
 Riemannian manifold `(M, g)`, ranks `(r, s)`, an initial datum `u₀` with finite
@@ -161,16 +161,16 @@ def heatOutputSmoothRepr (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {t : ℝ} (ht : 0 < t) (u₀ : TensorL2 r s g)
     (hu₀_fs : (Function.support (spectralCoeff (I := I) (M := M) g r s u₀)).Finite) :
     SmoothCcTensor g r s :=
-  tensorHsSmoothRepr_unconditional (I := I) (M := M)
+  tensorHsSmoothRepr (I := I) (M := M)
     (heatHsWitness (I := I) (M := M) g r s 0 ht u₀)
     (heatHsWitness_finite_support_of_finite (I := I) (M := M) g r s 0 ht u₀ hu₀_fs)
 
 /-- **The smooth representative realizes the heat output.** The `L²` class of the
 smooth representative `heatOutputSmoothRepr` coincides with the spectral heat
-output `e^{tΔ} u₀ = tensorHeatSemigroup_intrinsic g r s t u₀`.
+output `e^{tΔ} u₀ = tensorHeatSemigroup g r s t u₀`.
 
 The proof composes the chart-locality-free identification
-`tensorHsSmoothRepr_toL2_unconditional` (the `L²` class of the smooth
+`tensorHsSmoothRepr_toL2` (the `L²` class of the smooth
 representative is the canonical inclusion of the heat witness) with
 `heat_semigroup_into_tensorHs` (that inclusion *is* the heat output). -/
 theorem heatOutputSmoothRepr_toL2 (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -178,9 +178,9 @@ theorem heatOutputSmoothRepr_toL2 (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (hu₀_fs : (Function.support (spectralCoeff (I := I) (M := M) g r s u₀)).Finite) :
     (heatOutputSmoothRepr (I := I) (M := M) g r s ht u₀ hu₀_fs :
         TensorL2 r s g) =
-      tensorHeatSemigroup_intrinsic (I := I) (M := M) g r s t u₀ := by
+      tensorHeatSemigroup (I := I) (M := M) g r s t u₀ := by
   unfold heatOutputSmoothRepr
-  rw [tensorHsSmoothRepr_toL2_unconditional (I := I) (M := M) (le_refl (0 : ℝ))
+  rw [tensorHsSmoothRepr_toL2 (I := I) (M := M) (le_refl (0 : ℝ))
     (heatHsWitness (I := I) (M := M) g r s 0 ht u₀)
     (heatHsWitness_finite_support_of_finite (I := I) (M := M) g r s 0 ht u₀ hu₀_fs)]
   exact heat_semigroup_into_tensorHs (I := I) (M := M) g r s (le_refl (0 : ℝ)) ht u₀
@@ -188,14 +188,14 @@ theorem heatOutputSmoothRepr_toL2 (g : SmoothRiemannianMetric I M) (r s : ℕ)
 /-- **The smooth representative lies in every Sobolev order.** For every `k : ℕ`,
 the smooth representative `heatOutputSmoothRepr` lies in `W^{2k,2}`. This is the
 all-orders Sobolev regularity of the genuine `C^∞` heat output, inherited from
-`tensorHsSmoothRepr_memWtwokTwo_unconditional`. -/
+`tensorHsSmoothRepr_memWtwokTwo`. -/
 theorem heatOutputSmoothRepr_memWtwokTwo (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {t : ℝ} (ht : 0 < t) (u₀ : TensorL2 r s g)
     (hu₀_fs : (Function.support (spectralCoeff (I := I) (M := M) g r s u₀)).Finite)
     (k : ℕ) :
     MemWtwokTwo (I := I) (M := M) g k
       (heatOutputSmoothRepr (I := I) (M := M) g r s ht u₀ hu₀_fs) :=
-  tensorHsSmoothRepr_memWtwokTwo_unconditional (I := I) (M := M)
+  tensorHsSmoothRepr_memWtwokTwo (I := I) (M := M)
     (heatHsWitness (I := I) (M := M) g r s 0 ht u₀)
     (heatHsWitness_finite_support_of_finite (I := I) (M := M) g r s 0 ht u₀ hu₀_fs) k
 
@@ -215,7 +215,7 @@ theorem exists_smooth_heatOutput_representative (g : SmoothRiemannianMetric I M)
     (hu₀_fs : (Function.support (spectralCoeff (I := I) (M := M) g r s u₀)).Finite) :
     ∃ T : SmoothCcTensor g r s,
       (T : TensorL2 r s g) =
-          tensorHeatSemigroup_intrinsic (I := I) (M := M) g r s t u₀ ∧
+          tensorHeatSemigroup (I := I) (M := M) g r s t u₀ ∧
         ∀ k : ℕ, MemWtwokTwo (I := I) (M := M) g k T :=
   ⟨heatOutputSmoothRepr (I := I) (M := M) g r s ht u₀ hu₀_fs,
     heatOutputSmoothRepr_toL2 (I := I) (M := M) g r s ht u₀ hu₀_fs,
@@ -228,7 +228,7 @@ asserts that every `L²` tensor lying in `⋂_σ Hˢ` has a genuine `SmoothCcTen
 representative. We discharge it *for finitely-supported spectral data* directly
 from the unconditional spectral smooth representative: a finitely-supported
 `⋂_σ Hˢ` element is, in particular, an `H⁰` element with finite coordinate
-support, so `tensorHsSmoothRepr_unconditional` produces its smooth
+support, so `tensorHsSmoothRepr` produces its smooth
 representative, whose `L²` class is the element. -/
 
 /-- **Smooth realization of a finitely-supported member of `⋂_σ Hˢ`.** Let
@@ -245,12 +245,12 @@ theorem spectralSmooth_realizesAsSmooth_of_finite_support
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (u : TensorL2 r s g)
     (h_mem : ∀ σ : ℝ, ∀ hσ : 0 ≤ σ,
       ∃ v : tensorHs (I := I) (M := M) g r s σ,
-        tensorHsToL2_ofCompact (I := I) (M := M) (g := g) (r := r) (s := s)
-            (tensorResolventL2_isCompactOperator_intrinsic
+        tensorHsToL2 (I := I) (M := M) (g := g) (r := r) (s := s)
+            (tensorResolventL2_isCompactOperator
               (I := I) (M := M) g r s) hσ v = u)
     (hu_fs : ∀ v : tensorHs (I := I) (M := M) g r s 0,
-        tensorHsToL2_ofCompact (I := I) (M := M) (g := g) (r := r) (s := s)
-            (tensorResolventL2_isCompactOperator_intrinsic
+        tensorHsToL2 (I := I) (M := M) (g := g) (r := r) (s := s)
+            (tensorResolventL2_isCompactOperator
               (I := I) (M := M) g r s) (le_refl (0 : ℝ)) v = u →
           (Function.support v.coeff).Finite) :
     ∃ T : SmoothCcTensor g r s, (T : TensorL2 r s g) = u := by
@@ -259,8 +259,8 @@ theorem spectralSmooth_realizesAsSmooth_of_finite_support
   -- It has finite coordinate support by hypothesis.
   have hv₀_fs : (Function.support v₀.coeff).Finite := hu_fs v₀ hv₀
   -- Its unconditional spectral smooth representative realizes it.
-  refine ⟨tensorHsSmoothRepr_unconditional (I := I) (M := M) v₀ hv₀_fs, ?_⟩
-  rw [tensorHsSmoothRepr_toL2_unconditional (I := I) (M := M)
+  refine ⟨tensorHsSmoothRepr (I := I) (M := M) v₀ hv₀_fs, ?_⟩
+  rw [tensorHsSmoothRepr_toL2 (I := I) (M := M)
     (le_refl (0 : ℝ)) v₀ hv₀_fs]
   exact hv₀
 

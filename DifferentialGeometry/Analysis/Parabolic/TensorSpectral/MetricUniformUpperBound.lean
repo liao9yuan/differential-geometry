@@ -12,47 +12,42 @@ import Mathlib.Topology.Separation.Basic
 import Mathlib.Topology.Algebra.Module.FiniteDimension
 
 /-!
-# Uniform upper bound on the metric quadratic form over a compact base set
+# Uniform upper bound on the chart-Gram quadratic form over a compact base set
 
 For a smooth manifold `M` modelled on `(E, H)` carrying a smooth Riemannian
 metric `g : SmoothRiemannianMetric I M`, this file proves a uniform
-pointwise upper bound on the metric quadratic form `g.inner b v v` for `b`
-ranging over a compact subset of `M` and `v` ranging over the model fibre
-`E`, under the locality hypothesis `HasLocallyConstantChartAt H M` on the
-chart-selection function.
+pointwise upper bound on the chart-Gram quadratic form
+`chartGramBilin g α b v v` for `b` ranging over a compact subset of one chart
+source and `v` ranging over the model fibre `E`. Through the always-true bridge
+identity `chartGramBilin_eq_innerJinv`, this equivalently bounds the
+`chartJinv α b`-pullback `g.inner b (chartJinv α b v) (chartJinv α b v)` of the
+bundle metric.
 
 ## Strategy
 
 The bundle metric `g.inner b v v` (for `v : E ≡ TangentSpace I b`) is, by
 itself, not jointly continuous in `(b, v)` because the chart trivialisation
-of the tangent bundle jumps between chart sources. The locality hypothesis
-remedies this: on a neighbourhood `U_{b₀}` of any base point `b₀` where
-`chartAt H b = chartAt H b₀`, the inverse chart-Jacobian `chartJinv b₀ b`
-is the identity (because `achart H b = achart H b₀`, and the core-
-coordinate change with equal endpoints is the identity). The identity
-`chartGramBilin g α b u w = g.inner b (chartJinv α b u) (chartJinv α b w)`
-therefore reduces to `chartGramBilin g b₀ b v v = g.inner b v v` on
-`U_{b₀}`. The function `b ↦ chartGramBilin g b₀ b` is continuous on the
-chart base set (a finite sum of `(b ↦ chartGramMatrix g b₀ b j k)` times
-constant CLMs, each entry being smooth on the chart base set by
-`chartGramMatrix_entry_contMDiffOn`). Consequently
-`b ↦ ‖chartGramBilin g b₀ b‖` is continuous on `U_{b₀}` and, on any
-compact subset of `U_{b₀}`, bounded above.
+of the tangent bundle jumps between chart sources. We therefore work with the
+chart-Gram form centred at a single chart base point `α`. The function
+`b ↦ chartGramBilin g α b` is continuous on the chart source `(chartAt H α).source`
+(a finite sum of `(b ↦ chartGramMatrix g α b j k)` times constant CLMs, each
+entry being smooth on the chart base set by `chartGramMatrix_entry_contMDiffOn`).
+Consequently `b ↦ ‖chartGramBilin g α b‖` is continuous on the chart source
+and, on any compact subset of it, bounded above by the extreme-value theorem.
 
-To convert a compact-in-open inclusion into bounds on compact pieces, we
-use `IsCompact.finite_compact_cover` (available because `M` is `T2`, hence
-`R1`): from an open cover of `K_base` by locality neighbourhoods we
-extract finitely many compact `K_i ⊆ U_{b₀_i}` whose union is `K_base`.
-On each `K_i`, the function `b ↦ ‖chartGramBilin g b₀_i b‖` is bounded by
-some `C_i`. The maximum `C := max_i C_i` gives `g.inner b v v ≤ C · ‖v‖²`
-on `K_base × E`. Taking `K := √(C + 1) + 1` (strictly positive) yields the
-bound `√(g.inner b v v) ≤ K · ‖v‖`.
+On a compact `K_base ⊆ (chartAt H α).source` the operator-norm bound gives
+`chartGramBilin g α b v v ≤ C · ‖v‖²`, and taking `K := √C + 1` (strictly
+positive) yields the bound `√(chartGramBilin g α b v v) ≤ K · ‖v‖`.
 
-## Main result
+## Main results
 
-* `g_inner_sqrt_uniform_upper_bound_on_compact` — for any compact
-  `K_base : Set M`, there is `K > 0` with
-  `√(g.inner b v v) ≤ K · ‖v‖` for all `b ∈ K_base` and all `v : E`.
+* `g_inner_sqrt_uniform_upper_bound_on_compact` — for any chart
+  base point `α` and any compact `K_base ⊆ (chartAt H α).source`, there is
+  `K > 0` with `√(chartGramBilin g α b v v) ≤ K · ‖v‖` for all `b ∈ K_base`
+  and all `v : E`.
+* `g_inner_chartJinv_sqrt_uniform_upper_bound_on_compact_unconditional` — the
+  same bound transported through `chartGramBilin_eq_innerJinv` onto the
+  `chartJinv α b`-pullback of the bundle metric.
 -/
 
 noncomputable section
@@ -96,9 +91,9 @@ private lemma achart_eq_of_chartAt_eq {b b₀ : M}
   apply Subtype.ext
   exact h_chart
 
-/-- Under the locality hypothesis, on the open neighbourhood produced by
-`HasLocallyConstantChartAt.exists_isOpen_nhds b₀`, the inverse chart-Jacobian
-`chartJinv b₀ b : E →L[ℝ] E` is the identity. -/
+/-- When the chart at `b` agrees with the chart at `b₀`, the inverse
+chart-Jacobian `chartJinv b₀ b : E →L[ℝ] E` is the identity (the core
+coordinate change with equal endpoints is the identity). -/
 private lemma chartJinv_eq_id_of_chartAt_eq
     {b b₀ : M} (h_chart : chartAt H b = chartAt H b₀)
     (hb : b ∈ (chartAt H b₀).source) :
@@ -217,177 +212,19 @@ private lemma exists_norm_bound_on_compact_subset_of_chartSource
     hC ⟨b, hb, rfl⟩
   exact h1.trans (le_max_left _ _)
 
-/-! ## Step 7: refining the locality neighbourhood to inside the chart source -/
-
-private lemma exists_open_chart_loc
-    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
-    (b₀ : M) :
-    ∃ U : Set M, IsOpen U ∧ b₀ ∈ U ∧
-      U ⊆ (chartAt H b₀).source ∧
-      ∀ b ∈ U, chartAt H b = chartAt H b₀ := by
-  rcases h_atlas.exists_isOpen_nhds b₀ with ⟨U, hU_open, hU_mem, hU_const⟩
-  refine ⟨U, hU_open, hU_mem, ?_, hU_const⟩
-  intro b hb
-  have h_eq : chartAt H b = chartAt H b₀ := hU_const b hb
-  have h_mem_b : b ∈ (chartAt H b).source := mem_chart_source H b
-  rw [h_eq] at h_mem_b
-  exact h_mem_b
-
-/-! ## Step 8: uniform `g.inner` upper bound on the compact base set -/
-
-private lemma exists_uniform_g_inner_upper_bound_on_compact
-    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
-    (g : SmoothRiemannianMetric I M)
-    {K_base : Set M} (hK_base : IsCompact K_base) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ b ∈ K_base, ∀ v : E,
-      g.inner b v v ≤ C * ‖v‖ ^ 2 := by
-  classical
-  -- For each `b₀ : M`, choose a locality neighbourhood `loc b₀ ⊆ (chartAt H b₀).source`.
-  let loc : M → Set M := fun b₀ =>
-    (exists_open_chart_loc (H := H) (M := M) h_atlas b₀).choose
-  have h_loc_open : ∀ b₀ : M, IsOpen (loc b₀) :=
-    fun b₀ => (exists_open_chart_loc (H := H) (M := M) h_atlas b₀).choose_spec.1
-  have h_loc_mem : ∀ b₀ : M, b₀ ∈ loc b₀ :=
-    fun b₀ => (exists_open_chart_loc (H := H) (M := M) h_atlas b₀).choose_spec.2.1
-  have h_loc_sub : ∀ b₀ : M, loc b₀ ⊆ (chartAt H b₀).source :=
-    fun b₀ => (exists_open_chart_loc (H := H) (M := M) h_atlas b₀).choose_spec.2.2.1
-  have h_loc_const : ∀ b₀ : M, ∀ b ∈ loc b₀, chartAt H b = chartAt H b₀ :=
-    fun b₀ => (exists_open_chart_loc (H := H) (M := M) h_atlas b₀).choose_spec.2.2.2
-  -- Cover `K_base` by `loc b₀` for `b₀ ∈ K_base`.
-  have h_cover : K_base ⊆ ⋃ b₀ ∈ K_base, loc b₀ := by
-    intro b hb
-    exact Set.mem_iUnion₂.mpr ⟨b, hb, h_loc_mem b⟩
-  -- Finite subcover.
-  rcases hK_base.elim_finite_subcover_image (b := K_base) (c := loc)
-    (fun b₀ _ => h_loc_open b₀) h_cover with ⟨S, hS_sub, hS_finite, hS_cover⟩
-  -- Recast as a `Finset M` cover.
-  set S' : Finset M := hS_finite.toFinset with hS'_def
-  have hS_cover' : K_base ⊆ ⋃ b₀ ∈ S', loc b₀ := by
-    intro b hb
-    have h := hS_cover hb
-    rcases Set.mem_iUnion.mp h with ⟨b₀, hb₀⟩
-    rcases Set.mem_iUnion.mp hb₀ with ⟨hb₀_S, hb_in⟩
-    refine Set.mem_iUnion.mpr ⟨b₀, ?_⟩
-    refine Set.mem_iUnion.mpr ⟨?_, hb_in⟩
-    rw [hS'_def]
-    exact hS_finite.mem_toFinset.mpr hb₀_S
-  -- Compact subcover by `IsCompact.finite_compact_cover` (requires `R1Space`,
-  -- which follows from `T2Space M`).
-  rcases hK_base.finite_compact_cover (t := S') (U := loc)
-    (fun b₀ _ => h_loc_open b₀) hS_cover'
-    with ⟨KK, hKK_compact, hKK_sub, hKK_eq⟩
-  -- For each `b₀ ∈ S'`, get a bound on `KK b₀ ⊆ loc b₀ ⊆ (chartAt H b₀).source`.
-  have h_each_bound : ∀ b₀ : M,
-      ∃ C : ℝ, 0 ≤ C ∧ ∀ b ∈ KK b₀,
-        ‖chartGramBilin (I := I) (M := M) g b₀ b‖ ≤ C := by
-    intro b₀
-    exact exists_norm_bound_on_compact_subset_of_chartSource
-      (I := I) (M := M) g b₀ (hKK_compact b₀)
-      ((hKK_sub b₀).trans (h_loc_sub b₀))
-  -- Extract `C : M → ℝ` from the existence statement (non-finset version).
-  choose C h_C_nn h_C_bound using h_each_bound
-  -- Take the maximum of the bounds over the finset `S'`. If `S' = ∅`, then
-  -- `K_base = ⋃ ∅ = ∅` and the conclusion is vacuous.
-  by_cases hS_empty : S' = ∅
-  · refine ⟨0, le_refl 0, ?_⟩
-    intro b hb v
-    -- K_base = ⋃ b₀ ∈ ∅, KK b₀ = ∅, so hb is impossible.
-    rw [hKK_eq, hS_empty] at hb
-    simp at hb
-  have hS_nonempty : S'.Nonempty := Finset.nonempty_iff_ne_empty.mpr hS_empty
-  set C_max : ℝ := S'.sup' hS_nonempty C with hCmax_def
-  -- The maximum is non-negative: each `C b₀ ≥ 0`.
-  have h_C_max_nn : 0 ≤ C_max := by
-    rcases hS_nonempty with ⟨b₀, hb₀⟩
-    have h_le : C b₀ ≤ C_max := Finset.le_sup' (f := C) hb₀
-    exact (h_C_nn b₀).trans h_le
-  refine ⟨C_max, h_C_max_nn, ?_⟩
-  intro b hb v
-  -- Pick `b₀ ∈ S'` with `b ∈ KK b₀`.
-  rw [hKK_eq] at hb
-  rcases Set.mem_iUnion.mp hb with ⟨b₀, hb₀⟩
-  rcases Set.mem_iUnion.mp hb₀ with ⟨hb₀_S, hb_in⟩
-  -- Bound at `b`: use Step 5 with `b₀` as the centre.
-  have h_b_in_loc : b ∈ loc b₀ := hKK_sub b₀ hb_in
-  have h_chart : chartAt H b = chartAt H b₀ := h_loc_const b₀ b h_b_in_loc
-  have h_b_in_source : b ∈ (chartAt H b₀).source := h_loc_sub b₀ h_b_in_loc
-  have h_b_in_KK : b ∈ KK b₀ := hb_in
-  have h_norm_le : ‖chartGramBilin (I := I) (M := M) g b₀ b‖ ≤ C b₀ :=
-    h_C_bound b₀ b h_b_in_KK
-  have h_inner_le :
-      g.inner b v v ≤ ‖chartGramBilin (I := I) (M := M) g b₀ b‖ * ‖v‖ ^ 2 :=
-    g_inner_le_chartGramBilin_norm_sq (I := I) (M := M) g h_chart h_b_in_source v
-  have h_C_le : C b₀ ≤ C_max := Finset.le_sup' (f := C) hb₀_S
-  have h_norm_sq_nn : 0 ≤ ‖v‖ ^ 2 := sq_nonneg _
-  calc g.inner b v v
-      ≤ ‖chartGramBilin (I := I) (M := M) g b₀ b‖ * ‖v‖ ^ 2 := h_inner_le
-    _ ≤ C b₀ * ‖v‖ ^ 2 := by
-        exact mul_le_mul_of_nonneg_right h_norm_le h_norm_sq_nn
-    _ ≤ C_max * ‖v‖ ^ 2 := by
-        exact mul_le_mul_of_nonneg_right h_C_le h_norm_sq_nn
-
-/-! ## Step 9: the headline -/
-
-/-- Headline: a uniform upper bound on `√(g.inner b v v)` for `(b, v)`
-ranging over `K_base × E`, under the locality hypothesis on the chart
-selection. -/
-theorem g_inner_sqrt_uniform_upper_bound_on_compact
-    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
-    (g : SmoothRiemannianMetric I M)
-    {K_base : Set M} (hK_base : IsCompact K_base) :
-    ∃ K : ℝ, 0 < K ∧ ∀ b ∈ K_base, ∀ v : E,
-      Real.sqrt (g.inner b v v) ≤ K * ‖v‖ := by
-  rcases exists_uniform_g_inner_upper_bound_on_compact (I := I) (M := M)
-    h_atlas g hK_base with ⟨C, hC_nn, h_bound⟩
-  -- Take `K := √C + 1`; this is strictly positive and majorises `√(g.inner b v v)`.
-  refine ⟨Real.sqrt C + 1, ?_, ?_⟩
-  · have h_sqrt_nn : 0 ≤ Real.sqrt C := Real.sqrt_nonneg _
-    linarith
-  intro b hb v
-  -- The metric quadratic form is non-negative.
-  have h_inner_nn : 0 ≤ g.inner b v v :=
-    metric_inner_self_nonneg (I := I) (M := M) g b v
-  have h_sq_bound : g.inner b v v ≤ C * ‖v‖ ^ 2 := h_bound b hb v
-  -- Take square roots on both sides.
-  have h_norm_nn : 0 ≤ ‖v‖ := norm_nonneg _
-  have h_C_nn := hC_nn
-  -- `√(g.inner b v v) ≤ √(C * ‖v‖²) = √C * ‖v‖`.
-  have h_sqrt_le : Real.sqrt (g.inner b v v) ≤ Real.sqrt (C * ‖v‖ ^ 2) :=
-    Real.sqrt_le_sqrt h_sq_bound
-  have h_sqrt_prod : Real.sqrt (C * ‖v‖ ^ 2) = Real.sqrt C * ‖v‖ := by
-    have h1 : Real.sqrt (C * ‖v‖ ^ 2) = Real.sqrt C * Real.sqrt (‖v‖ ^ 2) :=
-      Real.sqrt_mul h_C_nn _
-    have h2 : Real.sqrt (‖v‖ ^ 2) = ‖v‖ := Real.sqrt_sq h_norm_nn
-    rw [h1, h2]
-  rw [h_sqrt_prod] at h_sqrt_le
-  -- `√C * ‖v‖ ≤ (√C + 1) * ‖v‖`.
-  have h_step : Real.sqrt C * ‖v‖ ≤ (Real.sqrt C + 1) * ‖v‖ := by
-    have h_sqrt_nn : 0 ≤ Real.sqrt C := Real.sqrt_nonneg _
-    nlinarith [h_norm_nn]
-  linarith
-
-/-! ## Unconditional twin
-
-The headline `g_inner_sqrt_uniform_upper_bound_on_compact` reduces the bundle
-metric quadratic form `g.inner b v v` to the chart-Gram quadratic form
-`chartGramBilin g α b v v` via the locality hypothesis `h_atlas`, which forces
-the inverse chart-Jacobian to be the identity on a neighbourhood and hence
-`g.inner b v v = chartGramBilin g α b v v` there. That reduction (Steps 1–2)
-is the *only* place the locality hypothesis enters; the continuity and
-compactness machinery (Steps 3–8) is already unconditional.
+/-! ## Unconditional chart-Gram bound
 
 The chart-Gram quadratic form is, by the always-true bridge identity
 `chartGramBilin_eq_innerJinv`, the `chartJinv α b`-pullback of the bundle
 metric:
 `chartGramBilin g α b v v = g.inner b (chartJinv α b v) (chartJinv α b v)`,
-so it is non-negative everywhere and coincides with `g.inner b v v` exactly on
-the locality neighbourhood (where `chartJinv α b = id`). We therefore obtain a
-*locality-free* uniform upper bound by stating the conclusion directly for the
-chart-Gram quadratic form and re-using the unconditional continuity of
-`b ↦ chartGramBilin g α b` on the chart source. No `HasLocallyConstantChartAt`
-hypothesis, no finite-atlas hypothesis, and no compactness/boundaryless
-typeclass on `M` is required: the argument is a single application of the
-extreme-value theorem on a compact subset of one chart source. -/
+so it is non-negative everywhere and coincides with `g.inner b v v` exactly
+where `chartJinv α b = id`. We obtain an unconditional uniform upper bound by
+stating the conclusion directly for the chart-Gram quadratic form and using the
+continuity of `b ↦ chartGramBilin g α b` on the chart source. No finite-atlas
+hypothesis and no compactness/boundaryless typeclass on `M` is required: the
+argument is a single application of the extreme-value theorem on a compact
+subset of one chart source. -/
 
 /-- The chart-Gram quadratic form is non-negative: it is the
 `chartJinv α b`-pullback of the bundle metric, which is non-negative by
@@ -423,14 +260,11 @@ For any chart base point `α` and any compact `K_base ⊆ (chartAt H α).source`
 there is `K > 0` with
 `√(chartGramBilin g α b v v) ≤ K · ‖v‖` for all `b ∈ K_base` and all `v : E`.
 
-This is the unconditional twin of `g_inner_sqrt_uniform_upper_bound_on_compact`:
-on the locality neighbourhood (where `chartJinv α b = id`) the chart-Gram
-quadratic form coincides with `g.inner b v v`, so this recovers the headline
-bound whenever the locality hypothesis would have applied — but it requires no
-`HasLocallyConstantChartAt` hypothesis. The chart-Gram form is, by
-`chartGramBilin_eq_innerJinv`, the `chartJinv α b`-pullback of the bundle
-metric `g.inner b`. -/
-theorem g_inner_sqrt_uniform_upper_bound_on_compact_unconditional
+Where `chartJinv α b = id`, the chart-Gram quadratic form coincides with
+`g.inner b v v`, so this recovers a bound `√(g.inner b v v) ≤ K · ‖v‖` there.
+The chart-Gram form is, by `chartGramBilin_eq_innerJinv`, the
+`chartJinv α b`-pullback of the bundle metric `g.inner b`. -/
+theorem g_inner_sqrt_uniform_upper_bound_on_compact
     (g : SmoothRiemannianMetric I M) (α : M)
     {K_base : Set M} (hK_base : IsCompact K_base)
     (hK_sub : K_base ⊆ (chartAt H α).source) :
@@ -476,14 +310,13 @@ theorem g_inner_sqrt_uniform_upper_bound_on_compact_unconditional
 /-- **Locality-free uniform upper bound on the bundle metric quadratic form
 over a compact base set, in the chart frame.**
 
-Reformulation of `g_inner_sqrt_uniform_upper_bound_on_compact_unconditional`
+Reformulation of `g_inner_sqrt_uniform_upper_bound_on_compact`
 through the always-true bridge identity `chartGramBilin_eq_innerJinv`:
 for any chart base point `α` and any compact `K_base ⊆ (chartAt H α).source`,
 there is `K > 0` with
 `√(g.inner b (chartJinv α b v) (chartJinv α b v)) ≤ K · ‖v‖`
-for all `b ∈ K_base` and all `v : E`. On the locality neighbourhood
-(`chartJinv α b = id`) this is exactly the headline bound
-`√(g.inner b v v) ≤ K · ‖v‖`, but it carries no locality hypothesis. -/
+for all `b ∈ K_base` and all `v : E`. Where `chartJinv α b = id` this is
+exactly the bound `√(g.inner b v v) ≤ K · ‖v‖`. -/
 theorem g_inner_chartJinv_sqrt_uniform_upper_bound_on_compact_unconditional
     (g : SmoothRiemannianMetric I M) (α : M)
     {K_base : Set M} (hK_base : IsCompact K_base)
@@ -493,7 +326,7 @@ theorem g_inner_chartJinv_sqrt_uniform_upper_bound_on_compact_unconditional
           (chartJinv (I := I) (M := M) α b v)
           (chartJinv (I := I) (M := M) α b v)) ≤ K * ‖v‖ := by
   obtain ⟨K, hK_pos, h⟩ :=
-    g_inner_sqrt_uniform_upper_bound_on_compact_unconditional
+    g_inner_sqrt_uniform_upper_bound_on_compact
       (I := I) (M := M) g α hK_base hK_sub
   refine ⟨K, hK_pos, ?_⟩
   intro b hb v

@@ -15,7 +15,7 @@ local-Weyl reproducing-kernel route to the polynomial eigenvalue-counting bound
 
 The `L²`-orthonormal tensor eigenbasis `{bᵢ}` of the connection (rough) Laplacian
 resolvent has, for each index `i`, a genuine `C^∞` representative
-`eigenvectorSmooth_unconditional g r s i : SmoothCcTensor g r s` whose `L²`-class
+`eigenvectorSmooth g r s i : SmoothCcTensor g r s` whose `L²`-class
 is `bᵢ`. The **on-diagonal reproducing kernel** at a point `x : M` over a finite
 index set `F` is the pointwise sum of squared Riemannian fibre norms
 ```
@@ -115,21 +115,21 @@ smooth sections into `L²` is norm-preserving on representatives. -/
 theorem eigenvectorSmooth_norm_eq_one
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorSpectral.TensorEigenIdx (I := I) (M := M) g r s) :
-    ‖eigenvectorSmooth_unconditional (I := I) (M := M) g r s i‖ = 1 := by
+    ‖eigenvectorSmooth (I := I) (M := M) g r s i‖ = 1 := by
   -- The `L²`-class of the representative is the orthonormal basis vector `bᵢ`.
-  have h_class : (eigenvectorSmooth_unconditional (I := I) (M := M) g r s i :
+  have h_class : (eigenvectorSmooth (I := I) (M := M) g r s i :
         TensorL2 r s g) =
-      tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
-        (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s) i :=
-    eigenvectorSmooth_toL2_unconditional (I := I) (M := M) g r s i
+      tensorResolventEigenbasisVec (I := I) (M := M)
+        (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s) i :=
+    eigenvectorSmooth_toL2 (I := I) (M := M) g r s i
   -- `‖bᵢ‖ = 1` by orthonormality of the eigenbasis vectors.
-  have h_one := (tensorResolventEigenbasisVec_ofCompact_orthonormal (I := I) (M := M)
+  have h_one := (tensorResolventEigenbasisVec_orthonormal (I := I) (M := M)
     (g := g) (r := r) (s := s)
-    (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s)).norm_eq_one i
+    (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s)).norm_eq_one i
   -- The completion coercion is norm-preserving.
-  have h_coe : ‖(eigenvectorSmooth_unconditional (I := I) (M := M) g r s i :
+  have h_coe : ‖(eigenvectorSmooth (I := I) (M := M) g r s i :
         TensorL2 r s g)‖ =
-      ‖eigenvectorSmooth_unconditional (I := I) (M := M) g r s i‖ :=
+      ‖eigenvectorSmooth (I := I) (M := M) g r s i‖ :=
     UniformSpace.Completion.norm_coe _
   rw [h_class, h_one] at h_coe
   exact h_coe.symm
@@ -141,11 +141,11 @@ theorem eigenvectorSmooth_integral_normSq_eq_one
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorSpectral.TensorEigenIdx (I := I) (M := M) g r s) :
     ∫ x, tensorInnerPointwise (I := I) (M := M) g r s x
-        ((eigenvectorSmooth_unconditional (I := I) (M := M) g r s i).toFun x)
-        ((eigenvectorSmooth_unconditional (I := I) (M := M) g r s i).toFun x)
+        ((eigenvectorSmooth (I := I) (M := M) g r s i).toFun x)
+        ((eigenvectorSmooth (I := I) (M := M) g r s i).toFun x)
       ∂(riemannianVolumeMeasure (I := I) (M := M) g) = 1 := by
   have h := smoothCcTensor_normSq_eq_integral (I := I) (M := M) g r s
-    (eigenvectorSmooth_unconditional (I := I) (M := M) g r s i)
+    (eigenvectorSmooth (I := I) (M := M) g r s i)
   rw [eigenvectorSmooth_norm_eq_one (I := I) (M := M) g r s i] at h
   rw [← h]; norm_num
 
@@ -159,8 +159,8 @@ def diagonalKernel (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (F : Finset (TensorSpectral.TensorEigenIdx (I := I) (M := M) g r s)) (x : M) : ℝ :=
   ∑ i ∈ F,
     tensorInnerPointwise (I := I) (M := M) g r s x
-      ((eigenvectorSmooth_unconditional (I := I) (M := M) g r s i).toFun x)
-      ((eigenvectorSmooth_unconditional (I := I) (M := M) g r s i).toFun x)
+      ((eigenvectorSmooth (I := I) (M := M) g r s i).toFun x)
+      ((eigenvectorSmooth (I := I) (M := M) g r s i).toFun x)
 
 /-- Each summand of the diagonal kernel is integrable: it is the diagonal pairing
 of a smooth compactly-supported eigenvector representative, hence in `L²`. -/
@@ -169,11 +169,11 @@ private lemma diagonalKernel_summand_integrable
     (i : TensorSpectral.TensorEigenIdx (I := I) (M := M) g r s) :
     Integrable
       (fun x => tensorInnerPointwise (I := I) (M := M) g r s x
-        ((eigenvectorSmooth_unconditional (I := I) (M := M) g r s i).toFun x)
-        ((eigenvectorSmooth_unconditional (I := I) (M := M) g r s i).toFun x))
+        ((eigenvectorSmooth (I := I) (M := M) g r s i).toFun x)
+        ((eigenvectorSmooth (I := I) (M := M) g r s i).toFun x))
       (riemannianVolumeMeasure (I := I) (M := M) g) :=
   (SmoothCcTensor.memL2_toFun (I := I) (M := M)
-    (eigenvectorSmooth_unconditional (I := I) (M := M) g r s i)).integrable_inner_self
+    (eigenvectorSmooth (I := I) (M := M) g r s i)).integrable_inner_self
 
 /-- **Cardinality as the integral of the diagonal kernel.** For any finite index
 set `F`, the cardinality of `F` equals the Bochner integral over `M` of the
@@ -205,8 +205,8 @@ private lemma diagonalKernel_integrable
   have h : diagonalKernel (I := I) (M := M) g r s F =
       fun x => ∑ i ∈ F,
         tensorInnerPointwise (I := I) (M := M) g r s x
-          ((eigenvectorSmooth_unconditional (I := I) (M := M) g r s i).toFun x)
-          ((eigenvectorSmooth_unconditional (I := I) (M := M) g r s i).toFun x) := rfl
+          ((eigenvectorSmooth (I := I) (M := M) g r s i).toFun x)
+          ((eigenvectorSmooth (I := I) (M := M) g r s i).toFun x) := rfl
   rw [h]
   exact MeasureTheory.integrable_finset_sum F
     (fun i _ => diagonalKernel_summand_integrable (I := I) (M := M) g r s i)

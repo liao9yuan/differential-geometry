@@ -19,7 +19,7 @@ chart-Sobolev regularity bounds into the all-orders predicate
 
 Let `u : TensorL2 r s g` be a gate element (`MemAllTensorHs g r s u`). Expanding
 `u` in the chart-locality-free resolvent eigenbasis
-`b = tensorResolventHilbertEigenbasisSigma_ofCompact`,
+`b = tensorResolventHilbertEigenbasisSigma`,
 `u = ∑ᵢ cᵢ • bᵢ` with `cᵢ = spectralCoeff g r s u i`. Since the canonical chart
 component `tensorL2ChartComponentCLM g r s α P₀` is a continuous linear map into
 the Banach space `Lp ℝ 2 (chartL2Measure α)`, it commutes with the `L²`-convergent
@@ -119,30 +119,30 @@ theorem resolvent_eigenvalue_inv_eq_one_add_lambda
 
 /-! ## The per-eigenvector chart component, repackaged
 
-The canonical eigenvector chart component `eigenvectorChartComponentFun_ofCompact`
+The canonical eigenvector chart component `eigenvectorChartComponentFun`
 and `eigenvectorChartComponentFun_unconditional` are, by definition, the
 coercion-to-function of the same `Lp` element
-`tensorL2ChartComponent g r s (tensorResolventEigenbasisVec_ofCompact …) α P₀`.
+`tensorL2ChartComponent g r s (tensorResolventEigenbasisVec …) α P₀`.
 We record the defining identification and the two consequences we need: the
 qualitative `W^{2k,2}` membership and the quantitative `W^{2k,2}` bound by the
 spectral Sobolev weight (using `‖bᵢ‖ = 1`). -/
 
 /-- The chart-locality-free eigenbasis vector at index `i`: the resolvent
 eigenbasis vector against the intrinsic compactness witness. It is, by definition,
-the value of the Hilbert eigenbasis `tensorResolventHilbertEigenbasisSigma_ofCompact`. -/
+the value of the Hilbert eigenbasis `tensorResolventHilbertEigenbasisSigma`. -/
 private def eigenbasisVec (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorSpectral.TensorEigenIdx (I := I) (M := M) g r s) :
     TensorL2 r s g :=
-  tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
-    (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s) i
+  tensorResolventEigenbasisVec (I := I) (M := M)
+    (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s) i
 
 /-- The eigenbasis vector has unit norm (orthonormality). -/
 private lemma eigenbasisVec_norm_eq_one (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorSpectral.TensorEigenIdx (I := I) (M := M) g r s) :
     ‖eigenbasisVec (I := I) (M := M) g r s i‖ = 1 :=
-  (tensorResolventEigenbasisVec_ofCompact_orthonormal (I := I) (M := M)
+  (tensorResolventEigenbasisVec_orthonormal (I := I) (M := M)
     (g := g) (r := r) (s := s)
-    (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s)).norm_eq_one i
+    (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s)).norm_eq_one i
 
 /-- The canonical eigenvector chart component, as a function on the Euclidean
 chart target: the coercion of `tensorL2ChartComponent g r s (bᵢ) α P₀`. -/
@@ -155,12 +155,12 @@ private def eigenvectorComp (g : SmoothRiemannianMetric I M) (r s : ℕ)
       Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
 
 /-- `eigenvectorComp` is the chart-locality-free qualitative eigenvector chart
-component `eigenvectorChartComponentFun_ofCompact`. -/
+component `eigenvectorChartComponentFun`. -/
 private lemma eigenvectorComp_eq_ofCompact (g : SmoothRiemannianMetric I M)
     (r s : ℕ) (i : TensorSpectral.TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) :
     eigenvectorComp (I := I) (M := M) g r s i α P₀ =
-      eigenvectorChartComponentFun_ofCompact (I := I) (M := M) g r s i α P₀ := rfl
+      eigenvectorChartComponentFun (I := I) (M := M) g r s i α P₀ := rfl
 
 /-- `eigenvectorComp` is the chart-locality-free quantitative eigenvector chart
 component `eigenvectorChartComponentFun_unconditional`. -/
@@ -180,7 +180,7 @@ private lemma eigenvectorComp_memWkp (g : SmoothRiemannianMetric I M) (r s : ℕ
       (eigenvectorComp (I := I) (M := M) g r s i α P₀)
       (chartTargetEuclid (I := I) (M := M) α) := by
   rw [eigenvectorComp_eq_ofCompact]
-  exact eigenvector_chartComponent_memWkp_arbitrary_unconditional
+  exact eigenvector_chartComponent_memWkp_arbitrary
     (I := I) (M := M) g r s i (2 * k) α P₀
 
 /-- **Per-eigenvector `W^{2k,2}` bound by the spectral Sobolev weight.** For each
@@ -199,15 +199,15 @@ private lemma eigenvectorComp_wkpNorm_le_weight (g : SmoothRiemannianMetric I M)
             (C * tensorSobolevWeight (I := I) (M := M) i ((2 * k + 1 : ℕ) : ℝ)) := by
   classical
   obtain ⟨C, hC_nn, hC_bd⟩ :=
-    eigenvector_chartComponent_wkpNorm_arbitrary_unconditional
+    eigenvector_chartComponent_wkpNorm_arbitrary
       (I := I) (M := M) g r s (2 * k) α P₀
   refine ⟨C, hC_nn, fun i => ?_⟩
   -- Specialize the quantitative bound; identify `(i.fst.val)⁻¹^(2k+1)` and `‖bᵢ‖`.
   have h := hC_bd i
   rw [eigenvectorComp_eq_unconditional]
   -- `‖bᵢ‖ = 1`, so `ENNReal.ofReal ‖bᵢ‖ = 1`.
-  have h_norm_one : ‖tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
-      (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s) i‖ = 1 :=
+  have h_norm_one : ‖tensorResolventEigenbasisVec (I := I) (M := M)
+      (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s) i‖ = 1 :=
     eigenbasisVec_norm_eq_one (I := I) (M := M) g r s i
   rw [h_norm_one, ENNReal.ofReal_one, mul_one] at h
   refine h.trans (le_of_eq ?_)
@@ -530,9 +530,9 @@ private lemma partialSumLp_tendsto (g : SmoothRiemannianMetric I M) (r s' : ℕ)
       Filter.atTop
       (𝓝 (tensorL2ChartComponent (I := I) (M := M) g r s' u α P₀)) := by
   classical
-  set b := tensorResolventHilbertEigenbasisSigma_ofCompact (I := I) (M := M)
+  set b := tensorResolventHilbertEigenbasisSigma (I := I) (M := M)
     (g := g) (r := r) (s := s')
-    (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s')
+    (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s')
     with hb_def
   -- The Hilbert-basis expansion of `u`, mapped through the chart-component CLM.
   have h_repr : HasSum (fun i => b.repr u i • b i) u := b.hasSum_repr u
@@ -550,7 +550,7 @@ private lemma partialSumLp_tendsto (g : SmoothRiemannianMetric I M) (r s' : ℕ)
     -- `b.repr u i = spectralCoeff u i` and `b i = eigenbasisVec i`.
     have h_coeff : b.repr u i = spectralCoeff (I := I) (M := M) g r s' u i := rfl
     have h_vec : b i = eigenbasisVec (I := I) (M := M) g r s' i := by
-      rw [hb_def, tensorResolventHilbertEigenbasisSigma_ofCompact_apply]
+      rw [hb_def, tensorResolventHilbertEigenbasisSigma_apply]
       rfl
     rw [h_coeff, h_vec]
   have h_limit_eq :
@@ -791,7 +791,7 @@ in `MemWkp (2k) 2` for every order `k`.
 
 This is the general-element (infinite spectral support) extension of the
 per-eigenvector unconditional bound
-`eigenvector_chartComponent_memWkp_arbitrary_unconditional`, assembled through the
+`eigenvector_chartComponent_memWkp_arbitrary`, assembled through the
 `Lp 2`-convergent eigenbasis expansion and the completeness of the iterated
 Euclidean Sobolev space `W^{2k,2}`. The eigenvalue-tail summability is the single
 analytic fact converting the spectral `ℓ²` decay of a gate element into the `ℓ¹`
@@ -802,9 +802,9 @@ theorem spectralChartRegularity_of_eigenvalueTailSummable
     SpectralChartRegularity (I := I) (M := M) g r s := by
   intro u h_mem k α P₀
   haveI : Countable (TensorSpectral.TensorEigenIdx (I := I) (M := M) g r s) :=
-    DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.countable_tensorEigenIdx_ofCompact
+    DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.countable_tensorEigenIdx
       (I := I) (M := M) (g := g) (r := r) (s := s)
-      (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s)
+      (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s)
   letI : Encodable (TensorSpectral.TensorEigenIdx (I := I) (M := M) g r s) :=
     Encodable.ofCountable _
   exact gateElement_chartComponent_memWkp_of_tail (I := I) (M := M) g r s u h_mem

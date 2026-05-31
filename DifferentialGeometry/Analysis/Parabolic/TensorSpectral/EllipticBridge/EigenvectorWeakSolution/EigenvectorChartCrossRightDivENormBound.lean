@@ -5,16 +5,16 @@ import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.Eig
 # Explicit-norm bound for the cross-right gradient-divergence limit
 
 The cross-right gradient-term divergence has, as its `n → ∞` `L²`-limit, the
-explicit finite-sum object `crossRightGradCoeffDivLimit g r s h_atlas i α P₀`.
+explicit finite-sum object `crossRightGradCoeffDivLimit g r s i α P₀`.
 By definition it is a sum of two three-fold finite sums, indexed by a chart
 direction `l` and a pair of component multi-indices `(P, Q)`:
 
 * a **component-atom** group: the kernel-indicator-cut chart-Euclidean partial of
   the test-independent `C^∞` factor `crossRightDivFactor`, times the cutoff
-  chart-component limit object `crossRightLimitComponent g r s h_atlas i α P`;
+  chart-component limit object `crossRightLimitComponent g r s i α P`;
 * a **chart-partial-atom** group: the kernel-indicator-cut `C^∞` factor
   `crossRightDivFactor`, times the cutoff chart-partial limit object
-  `cutoffPartialLpLimit g r s h_atlas i α P l`.
+  `cutoffPartialLpLimit g r s i α P l`.
 
 Each three-fold-sum summand is a product `Set.indicator (chartPouKernel α) c · w`
 of an indicator-cut coefficient with an `L²` chart-component / chart-partial atom.
@@ -44,9 +44,10 @@ distinct atoms `crossRightLimitComponent` (indexed by `P`) and
 
 ## Main result
 
-* `eLpNorm_crossRightGradCoeffDivLimit_le` — the quantitative weighted-`eLpNorm`
-  bound for the cross-right gradient-divergence limit, in terms of the weighted
-  `eLpNorm`s of its two atom families.
+* `eLpNorm_crossRightGradCoeffDivLimit_le_uniform` — the
+  quantitative uniform-constant weighted-`eLpNorm` bound for the cross-right
+  gradient-divergence limit, in terms of the weighted `eLpNorm`s of its two atom
+  families.
 
 ## Sign convention
 
@@ -339,573 +340,14 @@ end UniformConstant
 
 section MainBound
 
-/-- **Explicit weighted-`eLpNorm` bound for the cross-right gradient-divergence
-limit.** For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an eigenbasis
-index `i`, a chart center `α : M`, and a base component multi-index `P₀`, there
-is a nonnegative constant `C` such that the weighted `eLpNorm` of the cross-right
-gradient-divergence limit `crossRightGradCoeffDivLimit g r s h_atlas i α P₀` is
-bounded by `ENNReal.ofReal C` times the sum of the weighted `eLpNorm`s of the two
-atom families: the cutoff chart-component limit objects
-`crossRightLimitComponent g r s h_atlas i α P` (indexed by the component
-multi-index `P`), and the cutoff chart-partial limit objects
-`cutoffPartialLpLimit g r s h_atlas i α P l` (indexed by `P` and the chart
-direction `l`).
-
-`crossRightGradCoeffDivLimit` is, by definition, a sum of two three-fold finite
-sums over `(l, P, Q)`. Each summand is a product
-`Set.indicator (chartPouKernel α) c · w` of a kernel-indicator-cut `C^∞`
-coefficient `c` (the test-independent factor `crossRightDivFactor`, or its
-chart-Euclidean partial) with an `L²` atom `w` (`crossRightLimitComponent` for
-the component-atom group, `cutoffPartialLpLimit` for the chart-partial-atom
-group). The coefficient `c` vanishes off the compact partition-of-unity kernel,
-so the per-summand bound `eLpNorm_indicatorPou_mul_le` controls each summand's
-weighted `eLpNorm` by a constant times the atom's. The atom in the
-component-atom group depends only on `P`, the atom in the chart-partial-atom
-group only on `(P, l)`; bounding each atom's `eLpNorm` by the full atom-family
-sum, summing the resulting constant over the (finitely many) triples — folding
-the triple-index cardinality and the coefficient sup constants into the single
-`C` — and applying the triangle inequality across the two groups gives the
-estimate. -/
-theorem eLpNorm_crossRightGradCoeffDivLimit_le
-    (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
-    (i : TensorEigenIdx (I := I) (M := M) g r s)
-    (α : M) (P₀ : TensorCompIdx (E := E) r s) :
-    ∃ C : ℝ, 0 ≤ C ∧
-      eLpNorm (crossRightGradCoeffDivLimit (I := I) (M := M)
-          g r s h_atlas i α P₀) 2
-          ((chartPulledWeightedMeasure (I := I) g α).restrict
-            (chartTargetEuclid (I := I) (M := M) α))
-        ≤ ENNReal.ofReal C *
-          ((∑ P : TensorCompIdx (E := E) r s,
-              eLpNorm ((crossRightLimitComponent (I := I) (M := M)
-                  g r s h_atlas i α P :
-                  Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) 2
-                ((chartPulledWeightedMeasure (I := I) g α).restrict
-                  (chartTargetEuclid (I := I) (M := M) α)))
-            + (∑ P : TensorCompIdx (E := E) r s,
-                ∑ l : Fin (Module.finrank ℝ E),
-                  eLpNorm ((cutoffPartialLpLimit (I := I) (M := M)
-                      g r s h_atlas i α P l :
-                      Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) 2
-                    ((chartPulledWeightedMeasure (I := I) g α).restrict
-                      (chartTargetEuclid (I := I) (M := M) α)))) := by
-  classical
-  set μw : Measure EuclN :=
-    (chartPulledWeightedMeasure (I := I) g α).restrict
-      (chartTargetEuclid (I := I) (M := M) α) with hμw_def
-  -- Abbreviations for the two atom families and the two `eLpNorm`-sum targets.
-  set Acomp : TensorCompIdx (E := E) r s → EuclN → ℝ :=
-    fun P => ((crossRightLimitComponent (I := I) (M := M)
-      g r s h_atlas i α P :
-      Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) with hAcomp_def
-  set Apart : TensorCompIdx (E := E) r s → Fin (Module.finrank ℝ E) → EuclN → ℝ :=
-    fun P l => ((cutoffPartialLpLimit (I := I) (M := M)
-      g r s h_atlas i α P l :
-      Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) with hApart_def
-  set Sumcomp : ℝ≥0∞ :=
-    ∑ P : TensorCompIdx (E := E) r s, eLpNorm (Acomp P) 2 μw with hSumcomp_def
-  set Sumpart : ℝ≥0∞ :=
-    ∑ P : TensorCompIdx (E := E) r s,
-      ∑ l : Fin (Module.finrank ℝ E), eLpNorm (Apart P l) 2 μw with hSumpart_def
-  -- The triple-index type for the two three-fold sums.
-  set ι : Type _ :=
-    Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s ×
-      TensorCompIdx (E := E) r s with hι_def
-  -- The component-atom-group summand, as a function indexed by `(l, P, Q)`.
-  set summandComp : ι → EuclN → ℝ :=
-    fun j y => Set.indicator (chartPouKernel (I := I) (M := M) α)
-        (euclidPartial (E := E) j.1
-          (crossRightDivFactor (I := I) (M := M) g r s α P₀ j.1 j.2.1 j.2.2)) y *
-      Acomp j.2.1 y with hsummandComp_def
-  -- The chart-partial-atom-group summand, as a function indexed by `(l, P, Q)`.
-  set summandPart : ι → EuclN → ℝ :=
-    fun j y => Set.indicator (chartPouKernel (I := I) (M := M) α)
-        (crossRightDivFactor (I := I) (M := M) g r s α P₀ j.1 j.2.1 j.2.2) y *
-      Apart j.2.1 j.1 y with hsummandPart_def
-  -- A uniform constant `Ccomp` controlling every component-atom-group summand.
-  obtain ⟨Ccomp, hCcomp_nn, hCcomp⟩ :
-      ∃ C : ℝ, 0 ≤ C ∧
-        ∀ j : ι,
-          eLpNorm (summandComp j) 2 μw ≤
-            ENNReal.ofReal C * eLpNorm (Acomp j.2.1) 2 μw := by
-    refine exists_uniform_eLpNorm_bound (fun j => ?_)
-    rw [hμw_def, hsummandComp_def]
-    exact eLpNorm_indicatorPou_mul_le g α
-      (euclidPartial_crossRightDivFactor_contDiffOn (I := I) (M := M)
-        g r s α P₀ j.1 j.2.1 j.2.2)
-      (Acomp j.2.1)
-  -- A uniform constant `Cpart` controlling every chart-partial-atom-group
-  -- summand.
-  obtain ⟨Cpart, hCpart_nn, hCpart⟩ :
-      ∃ C : ℝ, 0 ≤ C ∧
-        ∀ j : ι,
-          eLpNorm (summandPart j) 2 μw ≤
-            ENNReal.ofReal C * eLpNorm (Apart j.2.1 j.1) 2 μw := by
-    refine exists_uniform_eLpNorm_bound (fun j => ?_)
-    rw [hμw_def, hsummandPart_def]
-    exact eLpNorm_indicatorPou_mul_le g α
-      (crossRightDivFactor_contDiffOn (I := I) (M := M)
-        g r s α P₀ j.1 j.2.1 j.2.2)
-      (Apart j.2.1 j.1)
-  -- The atoms are `AEStronglyMeasurable` for `μw`, hence so is every summand.
-  have hAcomp_meas : ∀ P : TensorCompIdx (E := E) r s,
-      AEStronglyMeasurable (Acomp P) μw := by
-    intro P
-    rw [hAcomp_def, hμw_def]
-    exact aestronglyMeasurable_weighted_of_chartL2 (I := I) (M := M) g α
-      (Lp.aestronglyMeasurable _)
-  have hApart_meas : ∀ (P : TensorCompIdx (E := E) r s)
-      (l : Fin (Module.finrank ℝ E)),
-      AEStronglyMeasurable (Apart P l) μw := by
-    intro P l
-    rw [hApart_def, hμw_def]
-    exact aestronglyMeasurable_weighted_of_chartL2 (I := I) (M := M) g α
-      (Lp.aestronglyMeasurable _)
-  have hsummandComp_meas : ∀ j, AEStronglyMeasurable (summandComp j) μw := by
-    intro j
-    rw [hsummandComp_def]
-    refine AEStronglyMeasurable.mul ?_ (hAcomp_meas j.2.1)
-    rw [hμw_def]
-    exact aestronglyMeasurable_weighted_of_chartL2 (I := I) (M := M) g α
-      (aestronglyMeasurable_indicator_mul (I := I) (M := M) α
-        (euclidPartial_crossRightDivFactor_contDiffOn (I := I) (M := M)
-          g r s α P₀ j.1 j.2.1 j.2.2))
-  have hsummandPart_meas : ∀ j, AEStronglyMeasurable (summandPart j) μw := by
-    intro j
-    rw [hsummandPart_def]
-    refine AEStronglyMeasurable.mul ?_ (hApart_meas j.2.1 j.1)
-    rw [hμw_def]
-    exact aestronglyMeasurable_weighted_of_chartL2 (I := I) (M := M) g α
-      (aestronglyMeasurable_indicator_mul (I := I) (M := M) α
-        (crossRightDivFactor_contDiffOn (I := I) (M := M)
-          g r s α P₀ j.1 j.2.1 j.2.2))
-  -- `crossRightGradCoeffDivLimit` is the sum of the two three-fold sums of
-  -- functions; rewrite the pointwise nested sums as single `Finset.sum`s of
-  -- functions over the triple-index `ι`.
-  have h_funcA :
-      (fun y => ∑ l : Fin (Module.finrank ℝ E),
-          ∑ P : TensorCompIdx (E := E) r s,
-            ∑ Q : TensorCompIdx (E := E) r s,
-              Set.indicator (chartPouKernel (I := I) (M := M) α)
-                  (euclidPartial (E := E) l
-                    (crossRightDivFactor (I := I) (M := M)
-                      g r s α P₀ l P Q)) y *
-                (crossRightLimitComponent (I := I) (M := M)
-                  g r s h_atlas i α P :
-                  EuclN → ℝ) y)
-        = ∑ j : ι, summandComp j := by
-    funext y
-    rw [Finset.sum_apply]
-    rw [show (Finset.univ : Finset ι) =
-        (Finset.univ : Finset (Fin (Module.finrank ℝ E))) ×ˢ
-          (Finset.univ : Finset (TensorCompIdx (E := E) r s ×
-            TensorCompIdx (E := E) r s)) from
-      (Finset.univ_product_univ).symm]
-    rw [Finset.sum_product]
-    refine Finset.sum_congr rfl (fun l _ => ?_)
-    rw [show (Finset.univ : Finset (TensorCompIdx (E := E) r s ×
-          TensorCompIdx (E := E) r s)) =
-        (Finset.univ : Finset (TensorCompIdx (E := E) r s)) ×ˢ
-          (Finset.univ : Finset (TensorCompIdx (E := E) r s)) from
-      (Finset.univ_product_univ).symm]
-    rw [Finset.sum_product]
-  have h_funcB :
-      (fun y => ∑ l : Fin (Module.finrank ℝ E),
-          ∑ P : TensorCompIdx (E := E) r s,
-            ∑ Q : TensorCompIdx (E := E) r s,
-              Set.indicator (chartPouKernel (I := I) (M := M) α)
-                  (crossRightDivFactor (I := I) (M := M)
-                    g r s α P₀ l P Q) y *
-                (cutoffPartialLpLimit (I := I) (M := M)
-                  g r s h_atlas i α P l :
-                  EuclN → ℝ) y)
-        = ∑ j : ι, summandPart j := by
-    funext y
-    rw [Finset.sum_apply]
-    rw [show (Finset.univ : Finset ι) =
-        (Finset.univ : Finset (Fin (Module.finrank ℝ E))) ×ˢ
-          (Finset.univ : Finset (TensorCompIdx (E := E) r s ×
-            TensorCompIdx (E := E) r s)) from
-      (Finset.univ_product_univ).symm]
-    rw [Finset.sum_product]
-    refine Finset.sum_congr rfl (fun l _ => ?_)
-    rw [show (Finset.univ : Finset (TensorCompIdx (E := E) r s ×
-          TensorCompIdx (E := E) r s)) =
-        (Finset.univ : Finset (TensorCompIdx (E := E) r s)) ×ˢ
-          (Finset.univ : Finset (TensorCompIdx (E := E) r s)) from
-      (Finset.univ_product_univ).symm]
-    rw [Finset.sum_product]
-  -- The triangle inequality: across the two three-fold sums, then within each.
-  have h_triangle :
-      eLpNorm (crossRightGradCoeffDivLimit (I := I) (M := M)
-          g r s h_atlas i α P₀) 2 μw
-        ≤ (∑ j : ι, eLpNorm (summandComp j) 2 μw)
-          + (∑ j : ι, eLpNorm (summandPart j) 2 μw) := by
-    have h_split : crossRightGradCoeffDivLimit (I := I) (M := M)
-        g r s h_atlas i α P₀ =
-        (∑ j : ι, summandComp j) + (∑ j : ι, summandPart j) := by
-      rw [← h_funcA, ← h_funcB]
-      rfl
-    rw [h_split]
-    refine le_trans (eLpNorm_add_le ?_ ?_ (by norm_num)) (add_le_add ?_ ?_)
-    · exact Finset.aestronglyMeasurable_sum _ (fun j _ => hsummandComp_meas j)
-    · exact Finset.aestronglyMeasurable_sum _ (fun j _ => hsummandPart_meas j)
-    · exact eLpNorm_sum_le (fun j _ => hsummandComp_meas j) (by norm_num)
-    · exact eLpNorm_sum_le (fun j _ => hsummandPart_meas j) (by norm_num)
-  -- The component-atom-group sum: each summand's atom `eLpNorm` is bounded by the
-  -- full component-atom sum `Sumcomp`, so every summand is `≤ ofReal Ccomp *
-  -- Sumcomp`; the triple-sum of that constant is `card ι • (ofReal Ccomp *
-  -- Sumcomp)`.
-  have h_groupA :
-      (∑ j : ι, eLpNorm (summandComp j) 2 μw)
-        ≤ ENNReal.ofReal ((Fintype.card ι : ℝ) * Ccomp) * Sumcomp := by
-    have h_each : ∀ j : ι,
-        eLpNorm (summandComp j) 2 μw ≤ ENNReal.ofReal Ccomp * Sumcomp := by
-      intro j
-      refine (hCcomp j).trans (mul_le_mul_right ?_ (ENNReal.ofReal Ccomp))
-      rw [hSumcomp_def]
-      exact Finset.single_le_sum (f := fun P => eLpNorm (Acomp P) 2 μw)
-        (fun P _ => zero_le _) (Finset.mem_univ j.2.1)
-    refine le_trans (Finset.sum_le_sum (fun j _ => h_each j)) ?_
-    rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul]
-    rw [ENNReal.ofReal_mul (by positivity), ENNReal.ofReal_natCast, mul_assoc]
-  -- The chart-partial-atom-group sum: each summand's atom `eLpNorm` is bounded by
-  -- the full chart-partial-atom sum `Sumpart`.
-  have h_groupB :
-      (∑ j : ι, eLpNorm (summandPart j) 2 μw)
-        ≤ ENNReal.ofReal ((Fintype.card ι : ℝ) * Cpart) * Sumpart := by
-    have h_each : ∀ j : ι,
-        eLpNorm (summandPart j) 2 μw ≤ ENNReal.ofReal Cpart * Sumpart := by
-      intro j
-      refine (hCpart j).trans (mul_le_mul_right ?_ (ENNReal.ofReal Cpart))
-      rw [hSumpart_def]
-      refine le_trans ?_
-        (Finset.single_le_sum (f := fun P => ∑ l : Fin (Module.finrank ℝ E),
-          eLpNorm (Apart P l) 2 μw)
-          (fun P _ => zero_le _) (Finset.mem_univ j.2.1))
-      exact Finset.single_le_sum (f := fun l => eLpNorm (Apart j.2.1 l) 2 μw)
-        (fun l _ => zero_le _) (Finset.mem_univ j.1)
-    refine le_trans (Finset.sum_le_sum (fun j _ => h_each j)) ?_
-    rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul]
-    rw [ENNReal.ofReal_mul (by positivity), ENNReal.ofReal_natCast, mul_assoc]
-  -- Assemble: the headline constant is the larger of the two group constants.
-  refine ⟨max ((Fintype.card ι : ℝ) * Ccomp) ((Fintype.card ι : ℝ) * Cpart),
-    le_max_of_le_left (by positivity), ?_⟩
-  -- The two group constants are dominated by their max.
-  have hCcomp_le :
-      ENNReal.ofReal ((Fintype.card ι : ℝ) * Ccomp) ≤
-        ENNReal.ofReal
-          (max ((Fintype.card ι : ℝ) * Ccomp) ((Fintype.card ι : ℝ) * Cpart)) :=
-    ENNReal.ofReal_le_ofReal (le_max_left _ _)
-  have hCpart_le :
-      ENNReal.ofReal ((Fintype.card ι : ℝ) * Cpart) ≤
-        ENNReal.ofReal
-          (max ((Fintype.card ι : ℝ) * Ccomp) ((Fintype.card ι : ℝ) * Cpart)) :=
-    ENNReal.ofReal_le_ofReal (le_max_right _ _)
-  calc
-    eLpNorm (crossRightGradCoeffDivLimit (I := I) (M := M)
-        g r s h_atlas i α P₀) 2 μw
-        ≤ (∑ j : ι, eLpNorm (summandComp j) 2 μw)
-          + (∑ j : ι, eLpNorm (summandPart j) 2 μw) := h_triangle
-    _ ≤ ENNReal.ofReal ((Fintype.card ι : ℝ) * Ccomp) * Sumcomp
-          + ENNReal.ofReal ((Fintype.card ι : ℝ) * Cpart) * Sumpart :=
-        add_le_add h_groupA h_groupB
-    _ ≤ ENNReal.ofReal
-            (max ((Fintype.card ι : ℝ) * Ccomp)
-              ((Fintype.card ι : ℝ) * Cpart)) * Sumcomp
-          + ENNReal.ofReal
-              (max ((Fintype.card ι : ℝ) * Ccomp)
-                ((Fintype.card ι : ℝ) * Cpart)) * Sumpart :=
-        add_le_add (mul_le_mul_left hCcomp_le _)
-          (mul_le_mul_left hCpart_le _)
-    _ = ENNReal.ofReal
-            (max ((Fintype.card ι : ℝ) * Ccomp)
-              ((Fintype.card ι : ℝ) * Cpart)) * (Sumcomp + Sumpart) :=
-        (mul_add _ _ _).symm
-
-/-- **Uniform-constant explicit weighted-`eLpNorm` bound for the cross-right
-gradient-divergence limit.** The constant-uniform form of
-`eLpNorm_crossRightGradCoeffDivLimit_le`: a single nonnegative constant `C`
-serves every eigenbasis index `i`. The per-`i` bound's constant is the larger of
-two finite sums, over the triple summation index, of the per-summand sup
-constants of the `i`-free `C^∞` factor `crossRightDivFactor` (or its
-chart-Euclidean partial) over the compact partition-of-unity kernel; that
-constant does not depend on `i` and is hoisted before the `∀ i`. -/
-theorem eLpNorm_crossRightGradCoeffDivLimit_le_uniform
-    (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
-    (α : M) (P₀ : TensorCompIdx (E := E) r s) :
-    ∃ C : ℝ, 0 ≤ C ∧
-      ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
-        eLpNorm (crossRightGradCoeffDivLimit (I := I) (M := M)
-            g r s h_atlas i α P₀) 2
-            ((chartPulledWeightedMeasure (I := I) g α).restrict
-              (chartTargetEuclid (I := I) (M := M) α))
-          ≤ ENNReal.ofReal C *
-            ((∑ P : TensorCompIdx (E := E) r s,
-                eLpNorm ((crossRightLimitComponent (I := I) (M := M)
-                    g r s h_atlas i α P :
-                    Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) 2
-                  ((chartPulledWeightedMeasure (I := I) g α).restrict
-                    (chartTargetEuclid (I := I) (M := M) α)))
-              + (∑ P : TensorCompIdx (E := E) r s,
-                  ∑ l : Fin (Module.finrank ℝ E),
-                    eLpNorm ((cutoffPartialLpLimit (I := I) (M := M)
-                        g r s h_atlas i α P l :
-                        Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
-                        EuclN → ℝ) 2
-                      ((chartPulledWeightedMeasure (I := I) g α).restrict
-                        (chartTargetEuclid (I := I) (M := M) α)))) := by
-  classical
-  -- The triple-index type for the two three-fold sums.
-  set ι : Type _ :=
-    Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s ×
-      TensorCompIdx (E := E) r s with hι_def
-  -- Per-triple uniform constants — `i`-free: the per-summand `C^∞` factors
-  -- (`crossRightDivFactor` and its chart-Euclidean partial) do not depend on
-  -- `i`, so their kernel-sup constants do not either.
-  choose CcompF hCcompF_nn hCcompF using
-    (fun j : ι => eLpNorm_indicatorPou_mul_le_uniform (I := I) (M := M) g α
-      (euclidPartial_crossRightDivFactor_contDiffOn (I := I) (M := M)
-        g r s α P₀ j.1 j.2.1 j.2.2))
-  choose CpartF hCpartF_nn hCpartF using
-    (fun j : ι => eLpNorm_indicatorPou_mul_le_uniform (I := I) (M := M) g α
-      (crossRightDivFactor_contDiffOn (I := I) (M := M)
-        g r s α P₀ j.1 j.2.1 j.2.2))
-  -- The uniform headline constant — `i`-free.
-  refine ⟨max ((Fintype.card ι : ℝ) * ∑ j : ι, CcompF j)
-      ((Fintype.card ι : ℝ) * ∑ j : ι, CpartF j),
-    le_max_of_le_left (mul_nonneg (by positivity)
-      (Finset.sum_nonneg (fun j _ => hCcompF_nn j))), fun i => ?_⟩
-  set μw : Measure EuclN :=
-    (chartPulledWeightedMeasure (I := I) g α).restrict
-      (chartTargetEuclid (I := I) (M := M) α) with hμw_def
-  -- Abbreviations for the two atom families and the two `eLpNorm`-sum targets.
-  set Acomp : TensorCompIdx (E := E) r s → EuclN → ℝ :=
-    fun P => ((crossRightLimitComponent (I := I) (M := M)
-      g r s h_atlas i α P :
-      Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) with hAcomp_def
-  set Apart : TensorCompIdx (E := E) r s → Fin (Module.finrank ℝ E) → EuclN → ℝ :=
-    fun P l => ((cutoffPartialLpLimit (I := I) (M := M)
-      g r s h_atlas i α P l :
-      Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) with hApart_def
-  set Sumcomp : ℝ≥0∞ :=
-    ∑ P : TensorCompIdx (E := E) r s, eLpNorm (Acomp P) 2 μw with hSumcomp_def
-  set Sumpart : ℝ≥0∞ :=
-    ∑ P : TensorCompIdx (E := E) r s,
-      ∑ l : Fin (Module.finrank ℝ E), eLpNorm (Apart P l) 2 μw with hSumpart_def
-  -- The component-atom-group summand, as a function indexed by `(l, P, Q)`.
-  set summandComp : ι → EuclN → ℝ :=
-    fun j y => Set.indicator (chartPouKernel (I := I) (M := M) α)
-        (euclidPartial (E := E) j.1
-          (crossRightDivFactor (I := I) (M := M) g r s α P₀ j.1 j.2.1 j.2.2)) y *
-      Acomp j.2.1 y with hsummandComp_def
-  -- The chart-partial-atom-group summand, as a function indexed by `(l, P, Q)`.
-  set summandPart : ι → EuclN → ℝ :=
-    fun j y => Set.indicator (chartPouKernel (I := I) (M := M) α)
-        (crossRightDivFactor (I := I) (M := M) g r s α P₀ j.1 j.2.1 j.2.2) y *
-      Apart j.2.1 j.1 y with hsummandPart_def
-  -- The uniform constants `Ccomp`, `Cpart` and the per-triple bounds for this
-  -- `i`: every per-triple constant is dominated by the corresponding sum.
-  set Ccomp : ℝ := ∑ j : ι, CcompF j with hCcomp_def
-  set Cpart : ℝ := ∑ j : ι, CpartF j with hCpart_def
-  have hCcomp_nn : 0 ≤ Ccomp :=
-    Finset.sum_nonneg (fun j _ => hCcompF_nn j)
-  have hCpart_nn : 0 ≤ Cpart :=
-    Finset.sum_nonneg (fun j _ => hCpartF_nn j)
-  have hCcomp : ∀ j : ι,
-      eLpNorm (summandComp j) 2 μw ≤
-        ENNReal.ofReal Ccomp * eLpNorm (Acomp j.2.1) 2 μw := by
-    intro j
-    refine le_trans (hCcompF j (Acomp j.2.1)) ?_
-    gcongr
-    rw [hCcomp_def]
-    exact Finset.single_le_sum (fun k _ => hCcompF_nn k) (Finset.mem_univ j)
-  have hCpart : ∀ j : ι,
-      eLpNorm (summandPart j) 2 μw ≤
-        ENNReal.ofReal Cpart * eLpNorm (Apart j.2.1 j.1) 2 μw := by
-    intro j
-    refine le_trans (hCpartF j (Apart j.2.1 j.1)) ?_
-    gcongr
-    rw [hCpart_def]
-    exact Finset.single_le_sum (fun k _ => hCpartF_nn k) (Finset.mem_univ j)
-  -- The atoms are `AEStronglyMeasurable` for `μw`, hence so is every summand.
-  have hAcomp_meas : ∀ P : TensorCompIdx (E := E) r s,
-      AEStronglyMeasurable (Acomp P) μw := by
-    intro P
-    rw [hAcomp_def, hμw_def]
-    exact aestronglyMeasurable_weighted_of_chartL2 (I := I) (M := M) g α
-      (Lp.aestronglyMeasurable _)
-  have hApart_meas : ∀ (P : TensorCompIdx (E := E) r s)
-      (l : Fin (Module.finrank ℝ E)),
-      AEStronglyMeasurable (Apart P l) μw := by
-    intro P l
-    rw [hApart_def, hμw_def]
-    exact aestronglyMeasurable_weighted_of_chartL2 (I := I) (M := M) g α
-      (Lp.aestronglyMeasurable _)
-  have hsummandComp_meas : ∀ j, AEStronglyMeasurable (summandComp j) μw := by
-    intro j
-    rw [hsummandComp_def]
-    refine AEStronglyMeasurable.mul ?_ (hAcomp_meas j.2.1)
-    rw [hμw_def]
-    exact aestronglyMeasurable_weighted_of_chartL2 (I := I) (M := M) g α
-      (aestronglyMeasurable_indicator_mul (I := I) (M := M) α
-        (euclidPartial_crossRightDivFactor_contDiffOn (I := I) (M := M)
-          g r s α P₀ j.1 j.2.1 j.2.2))
-  have hsummandPart_meas : ∀ j, AEStronglyMeasurable (summandPart j) μw := by
-    intro j
-    rw [hsummandPart_def]
-    refine AEStronglyMeasurable.mul ?_ (hApart_meas j.2.1 j.1)
-    rw [hμw_def]
-    exact aestronglyMeasurable_weighted_of_chartL2 (I := I) (M := M) g α
-      (aestronglyMeasurable_indicator_mul (I := I) (M := M) α
-        (crossRightDivFactor_contDiffOn (I := I) (M := M)
-          g r s α P₀ j.1 j.2.1 j.2.2))
-  -- `crossRightGradCoeffDivLimit` is the sum of the two three-fold sums of
-  -- functions; rewrite the pointwise nested sums as single `Finset.sum`s.
-  have h_funcA :
-      (fun y => ∑ l : Fin (Module.finrank ℝ E),
-          ∑ P : TensorCompIdx (E := E) r s,
-            ∑ Q : TensorCompIdx (E := E) r s,
-              Set.indicator (chartPouKernel (I := I) (M := M) α)
-                  (euclidPartial (E := E) l
-                    (crossRightDivFactor (I := I) (M := M)
-                      g r s α P₀ l P Q)) y *
-                (crossRightLimitComponent (I := I) (M := M)
-                  g r s h_atlas i α P :
-                  EuclN → ℝ) y)
-        = ∑ j : ι, summandComp j := by
-    funext y
-    rw [Finset.sum_apply]
-    rw [show (Finset.univ : Finset ι) =
-        (Finset.univ : Finset (Fin (Module.finrank ℝ E))) ×ˢ
-          (Finset.univ : Finset (TensorCompIdx (E := E) r s ×
-            TensorCompIdx (E := E) r s)) from
-      (Finset.univ_product_univ).symm]
-    rw [Finset.sum_product]
-    refine Finset.sum_congr rfl (fun l _ => ?_)
-    rw [show (Finset.univ : Finset (TensorCompIdx (E := E) r s ×
-          TensorCompIdx (E := E) r s)) =
-        (Finset.univ : Finset (TensorCompIdx (E := E) r s)) ×ˢ
-          (Finset.univ : Finset (TensorCompIdx (E := E) r s)) from
-      (Finset.univ_product_univ).symm]
-    rw [Finset.sum_product]
-  have h_funcB :
-      (fun y => ∑ l : Fin (Module.finrank ℝ E),
-          ∑ P : TensorCompIdx (E := E) r s,
-            ∑ Q : TensorCompIdx (E := E) r s,
-              Set.indicator (chartPouKernel (I := I) (M := M) α)
-                  (crossRightDivFactor (I := I) (M := M)
-                    g r s α P₀ l P Q) y *
-                (cutoffPartialLpLimit (I := I) (M := M)
-                  g r s h_atlas i α P l :
-                  EuclN → ℝ) y)
-        = ∑ j : ι, summandPart j := by
-    funext y
-    rw [Finset.sum_apply]
-    rw [show (Finset.univ : Finset ι) =
-        (Finset.univ : Finset (Fin (Module.finrank ℝ E))) ×ˢ
-          (Finset.univ : Finset (TensorCompIdx (E := E) r s ×
-            TensorCompIdx (E := E) r s)) from
-      (Finset.univ_product_univ).symm]
-    rw [Finset.sum_product]
-    refine Finset.sum_congr rfl (fun l _ => ?_)
-    rw [show (Finset.univ : Finset (TensorCompIdx (E := E) r s ×
-          TensorCompIdx (E := E) r s)) =
-        (Finset.univ : Finset (TensorCompIdx (E := E) r s)) ×ˢ
-          (Finset.univ : Finset (TensorCompIdx (E := E) r s)) from
-      (Finset.univ_product_univ).symm]
-    rw [Finset.sum_product]
-  -- The triangle inequality: across the two three-fold sums, then within each.
-  have h_triangle :
-      eLpNorm (crossRightGradCoeffDivLimit (I := I) (M := M)
-          g r s h_atlas i α P₀) 2 μw
-        ≤ (∑ j : ι, eLpNorm (summandComp j) 2 μw)
-          + (∑ j : ι, eLpNorm (summandPart j) 2 μw) := by
-    have h_split : crossRightGradCoeffDivLimit (I := I) (M := M)
-        g r s h_atlas i α P₀ =
-        (∑ j : ι, summandComp j) + (∑ j : ι, summandPart j) := by
-      rw [← h_funcA, ← h_funcB]
-      rfl
-    rw [h_split]
-    refine le_trans (eLpNorm_add_le ?_ ?_ (by norm_num)) (add_le_add ?_ ?_)
-    · exact Finset.aestronglyMeasurable_sum _ (fun j _ => hsummandComp_meas j)
-    · exact Finset.aestronglyMeasurable_sum _ (fun j _ => hsummandPart_meas j)
-    · exact eLpNorm_sum_le (fun j _ => hsummandComp_meas j) (by norm_num)
-    · exact eLpNorm_sum_le (fun j _ => hsummandPart_meas j) (by norm_num)
-  -- The component-atom-group sum.
-  have h_groupA :
-      (∑ j : ι, eLpNorm (summandComp j) 2 μw)
-        ≤ ENNReal.ofReal ((Fintype.card ι : ℝ) * Ccomp) * Sumcomp := by
-    have h_each : ∀ j : ι,
-        eLpNorm (summandComp j) 2 μw ≤ ENNReal.ofReal Ccomp * Sumcomp := by
-      intro j
-      refine (hCcomp j).trans (mul_le_mul_right ?_ (ENNReal.ofReal Ccomp))
-      rw [hSumcomp_def]
-      exact Finset.single_le_sum (f := fun P => eLpNorm (Acomp P) 2 μw)
-        (fun P _ => zero_le _) (Finset.mem_univ j.2.1)
-    refine le_trans (Finset.sum_le_sum (fun j _ => h_each j)) ?_
-    rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul]
-    rw [ENNReal.ofReal_mul (by positivity), ENNReal.ofReal_natCast, mul_assoc]
-  -- The chart-partial-atom-group sum.
-  have h_groupB :
-      (∑ j : ι, eLpNorm (summandPart j) 2 μw)
-        ≤ ENNReal.ofReal ((Fintype.card ι : ℝ) * Cpart) * Sumpart := by
-    have h_each : ∀ j : ι,
-        eLpNorm (summandPart j) 2 μw ≤ ENNReal.ofReal Cpart * Sumpart := by
-      intro j
-      refine (hCpart j).trans (mul_le_mul_right ?_ (ENNReal.ofReal Cpart))
-      rw [hSumpart_def]
-      refine le_trans ?_
-        (Finset.single_le_sum (f := fun P => ∑ l : Fin (Module.finrank ℝ E),
-          eLpNorm (Apart P l) 2 μw)
-          (fun P _ => zero_le _) (Finset.mem_univ j.2.1))
-      exact Finset.single_le_sum (f := fun l => eLpNorm (Apart j.2.1 l) 2 μw)
-        (fun l _ => zero_le _) (Finset.mem_univ j.1)
-    refine le_trans (Finset.sum_le_sum (fun j _ => h_each j)) ?_
-    rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul]
-    rw [ENNReal.ofReal_mul (by positivity), ENNReal.ofReal_natCast, mul_assoc]
-  -- The two group constants are dominated by their max.
-  have hCcomp_le :
-      ENNReal.ofReal ((Fintype.card ι : ℝ) * Ccomp) ≤
-        ENNReal.ofReal
-          (max ((Fintype.card ι : ℝ) * Ccomp) ((Fintype.card ι : ℝ) * Cpart)) :=
-    ENNReal.ofReal_le_ofReal (le_max_left _ _)
-  have hCpart_le :
-      ENNReal.ofReal ((Fintype.card ι : ℝ) * Cpart) ≤
-        ENNReal.ofReal
-          (max ((Fintype.card ι : ℝ) * Ccomp) ((Fintype.card ι : ℝ) * Cpart)) :=
-    ENNReal.ofReal_le_ofReal (le_max_right _ _)
-  calc
-    eLpNorm (crossRightGradCoeffDivLimit (I := I) (M := M)
-        g r s h_atlas i α P₀) 2 μw
-        ≤ (∑ j : ι, eLpNorm (summandComp j) 2 μw)
-          + (∑ j : ι, eLpNorm (summandPart j) 2 μw) := h_triangle
-    _ ≤ ENNReal.ofReal ((Fintype.card ι : ℝ) * Ccomp) * Sumcomp
-          + ENNReal.ofReal ((Fintype.card ι : ℝ) * Cpart) * Sumpart :=
-        add_le_add h_groupA h_groupB
-    _ ≤ ENNReal.ofReal
-            (max ((Fintype.card ι : ℝ) * Ccomp)
-              ((Fintype.card ι : ℝ) * Cpart)) * Sumcomp
-          + ENNReal.ofReal
-              (max ((Fintype.card ι : ℝ) * Ccomp)
-                ((Fintype.card ι : ℝ) * Cpart)) * Sumpart :=
-        add_le_add (mul_le_mul_left hCcomp_le _)
-          (mul_le_mul_left hCpart_le _)
-    _ = ENNReal.ofReal
-            (max ((Fintype.card ι : ℝ) * Ccomp)
-              ((Fintype.card ι : ℝ) * Cpart)) * (Sumcomp + Sumpart) :=
-        (mul_add _ _ _).symm
-
 /-- **Uniform-constant explicit weighted-`eLpNorm` bound for the cross-right
 gradient-divergence limit (chart-locality-free).** Chart-locality-free twin of
 `eLpNorm_crossRightGradCoeffDivLimit_le_uniform`, re-keyed onto the unconditional
-cross-right gradient-divergence limit `crossRightGradCoeffDivLimit_unconditional`
-and its two atom families `crossRightLimitComponent_unconditional` /
-`cutoffPartialLpLimit_unconditional` (all built from
-`tensorResolventEigenbasisVec_ofCompact` at the unconditional compactness witness
-`tensorResolventL2_isCompactOperator_intrinsic g r s`, hence carrying no
+cross-right gradient-divergence limit `crossRightGradCoeffDivLimit`
+and its two atom families `crossRightLimitComponent` /
+`cutoffPartialLpLimit` (all built from
+`tensorResolventEigenbasisVec` at the unconditional compactness witness
+`tensorResolventL2_isCompactOperator g r s`, hence carrying no
 chart-selection hypothesis).
 
 A single nonnegative constant `C` serves every eigenbasis index `i`. The
@@ -914,25 +356,25 @@ summation index, of the per-summand sup constants of the `i`-free `C^∞` factor
 `crossRightDivFactor` (or its chart-Euclidean partial) over the compact
 partition-of-unity kernel; that constant does not depend on `i` and is hoisted
 before the `∀ i`. -/
-theorem eLpNorm_crossRightGradCoeffDivLimit_le_uniform_unconditional
+theorem eLpNorm_crossRightGradCoeffDivLimit_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
-        eLpNorm (crossRightGradCoeffDivLimit_unconditional (I := I) (M := M)
+        eLpNorm (crossRightGradCoeffDivLimit (I := I) (M := M)
             g r s i α P₀) 2
             ((chartPulledWeightedMeasure (I := I) g α).restrict
               (chartTargetEuclid (I := I) (M := M) α))
           ≤ ENNReal.ofReal C *
             ((∑ P : TensorCompIdx (E := E) r s,
-                eLpNorm ((crossRightLimitComponent_unconditional (I := I) (M := M)
+                eLpNorm ((crossRightLimitComponent (I := I) (M := M)
                     g r s i α P :
                     Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) 2
                   ((chartPulledWeightedMeasure (I := I) g α).restrict
                     (chartTargetEuclid (I := I) (M := M) α)))
               + (∑ P : TensorCompIdx (E := E) r s,
                   ∑ l : Fin (Module.finrank ℝ E),
-                    eLpNorm ((cutoffPartialLpLimit_unconditional (I := I) (M := M)
+                    eLpNorm ((cutoffPartialLpLimit (I := I) (M := M)
                         g r s i α P l :
                         Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
                         EuclN → ℝ) 2
@@ -964,11 +406,11 @@ theorem eLpNorm_crossRightGradCoeffDivLimit_le_uniform_unconditional
       (chartTargetEuclid (I := I) (M := M) α) with hμw_def
   -- Abbreviations for the two atom families and the two `eLpNorm`-sum targets.
   set Acomp : TensorCompIdx (E := E) r s → EuclN → ℝ :=
-    fun P => ((crossRightLimitComponent_unconditional (I := I) (M := M)
+    fun P => ((crossRightLimitComponent (I := I) (M := M)
       g r s i α P :
       Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) with hAcomp_def
   set Apart : TensorCompIdx (E := E) r s → Fin (Module.finrank ℝ E) → EuclN → ℝ :=
-    fun P l => ((cutoffPartialLpLimit_unconditional (I := I) (M := M)
+    fun P l => ((cutoffPartialLpLimit (I := I) (M := M)
       g r s i α P l :
       Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) with hApart_def
   set Sumcomp : ℝ≥0∞ :=
@@ -1043,7 +485,7 @@ theorem eLpNorm_crossRightGradCoeffDivLimit_le_uniform_unconditional
       (aestronglyMeasurable_indicator_mul (I := I) (M := M) α
         (crossRightDivFactor_contDiffOn (I := I) (M := M)
           g r s α P₀ j.1 j.2.1 j.2.2))
-  -- `crossRightGradCoeffDivLimit_unconditional` is the sum of the two three-fold
+  -- `crossRightGradCoeffDivLimit` is the sum of the two three-fold
   -- sums of functions; rewrite the pointwise nested sums as single `Finset.sum`s.
   have h_funcA :
       (fun y => ∑ l : Fin (Module.finrank ℝ E),
@@ -1053,7 +495,7 @@ theorem eLpNorm_crossRightGradCoeffDivLimit_le_uniform_unconditional
                   (euclidPartial (E := E) l
                     (crossRightDivFactor (I := I) (M := M)
                       g r s α P₀ l P Q)) y *
-                (crossRightLimitComponent_unconditional (I := I) (M := M)
+                (crossRightLimitComponent (I := I) (M := M)
                   g r s i α P :
                   EuclN → ℝ) y)
         = ∑ j : ι, summandComp j := by
@@ -1079,7 +521,7 @@ theorem eLpNorm_crossRightGradCoeffDivLimit_le_uniform_unconditional
               Set.indicator (chartPouKernel (I := I) (M := M) α)
                   (crossRightDivFactor (I := I) (M := M)
                     g r s α P₀ l P Q) y *
-                (cutoffPartialLpLimit_unconditional (I := I) (M := M)
+                (cutoffPartialLpLimit (I := I) (M := M)
                   g r s i α P l :
                   EuclN → ℝ) y)
         = ∑ j : ι, summandPart j := by
@@ -1100,11 +542,11 @@ theorem eLpNorm_crossRightGradCoeffDivLimit_le_uniform_unconditional
     rw [Finset.sum_product]
   -- The triangle inequality: across the two three-fold sums, then within each.
   have h_triangle :
-      eLpNorm (crossRightGradCoeffDivLimit_unconditional (I := I) (M := M)
+      eLpNorm (crossRightGradCoeffDivLimit (I := I) (M := M)
           g r s i α P₀) 2 μw
         ≤ (∑ j : ι, eLpNorm (summandComp j) 2 μw)
           + (∑ j : ι, eLpNorm (summandPart j) 2 μw) := by
-    have h_split : crossRightGradCoeffDivLimit_unconditional (I := I) (M := M)
+    have h_split : crossRightGradCoeffDivLimit (I := I) (M := M)
         g r s i α P₀ =
         (∑ j : ι, summandComp j) + (∑ j : ι, summandPart j) := by
       rw [← h_funcA, ← h_funcB]
@@ -1159,7 +601,7 @@ theorem eLpNorm_crossRightGradCoeffDivLimit_le_uniform_unconditional
           (max ((Fintype.card ι : ℝ) * Ccomp) ((Fintype.card ι : ℝ) * Cpart)) :=
     ENNReal.ofReal_le_ofReal (le_max_right _ _)
   calc
-    eLpNorm (crossRightGradCoeffDivLimit_unconditional (I := I) (M := M)
+    eLpNorm (crossRightGradCoeffDivLimit (I := I) (M := M)
         g r s i α P₀) 2 μw
         ≤ (∑ j : ι, eLpNorm (summandComp j) 2 μw)
           + (∑ j : ι, eLpNorm (summandPart j) 2 μw) := h_triangle

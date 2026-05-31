@@ -7,36 +7,27 @@ import Mathlib.Topology.Order.Compact
 import Mathlib.Topology.Separation.Basic
 
 /-!
-# Uniform op-norm bound on the chart-`(r, s)` fibre right-inverse over compact base sets
+# Predicate-free building blocks for the chart-`(r, s)` fibre right-inverse op-norm bound
 
 For a chart centre `α : M` and ranks `r s : ℕ`, the chart-`(r, s)` fibre
 right-inverse CLM family
 `tensorRSChartFiberFromModel r s α b : TensorRSModel r s ℝ E →L[ℝ]
-TensorRSSpace r s I b` admits a uniform pointwise operator-norm bound on any
-compact `K ⊆ (chartAt H α).source` under the locally-constant-chart hypothesis
-`HasLocallyConstantChartAt H M`. Concretely there is `C > 0` such that
-`‖tensorRSChartFiberFromModel α b D‖ ≤ C * ‖D‖` for every `b ∈ K` and every
-`D : TensorRSModel r s ℝ E`. The bound is stated in the pointwise (per-input)
-form, which avoids the propositional-but-not-definitional topology mismatch
-between the `(r, s)`-Hom-bundle topology and the induced norm topology.
+TensorRSSpace r s I b` is compared, on the locality neighbourhood of any base
+point `b₀`, with the `(r, s)`-Hom-bundle coordinate change `coordChangeL α b₀ b`.
 
-Strategy: on the locality neighbourhood of any `b₀ ∈ K`, the locality
-identity for the `(r, s)`-Hom-bundle gives `(triv b₀).clmAt ℝ b` equal to the
-canonical `TensorRSSpace b ≃L TensorRSModel` identification, pulled back as a
-CLM. The standard `coordChangeL` formula then identifies `coordChangeL α b₀ b`
-with `tensorRSChartFiberFromModel α b` post-composed with this identification.
-The induced norm on `TensorRSSpace b` is the pullback of the model-fibre
-norm, so the pointwise inequality `‖tensorRSChartFiberFromModel α b D‖ ≤
-‖coordChangeL α b₀ b D‖` holds on the locality neighbourhood. The right-hand
-side admits a continuous operator-norm bound in `b` on the intersection of
-chart sources via the `ContMDiffVectorBundle ∞` instance, and a finite compact
-cover yields the uniform constant.
+This file collects the predicate-free supporting lemmas for that comparison:
 
-## Main result
+* the pullback identity for the norm on `TensorRSSpace r s I b`;
+* the CLM-level locality identity for the `(r, s)`-Hom-bundle's forward
+  trivialisation;
+* the pointwise inequality `‖tensorRSChartFiberFromModel α b D‖ ≤
+  ‖coordChangeL α b₀ b D‖` on the locality neighbourhood;
+* continuity of `b ↦ coordChangeL α b₀ b` on the intersection of chart sources,
+  via the `ContMDiffVectorBundle ∞` instance;
+* a generic op-norm bound on a compact set from operator-norm continuity.
 
-* `tensorRSChartFiberFromModel_opNorm_isBounded_on_compact` — uniform pointwise
-  op-norm bound on `tensorRSChartFiberFromModel r s α b` over any compact
-  `K ⊆ (chartAt H α).source`.
+The uniform pointwise op-norm bound itself is assembled, without any
+chart-locality predicate, in `TensorRSChartFiberFromModelOpNormUnconditional`.
 -/
 
 noncomputable section
@@ -205,25 +196,6 @@ private lemma continuousOn_RS_coordChangeL_α_b₀ (r s : ℕ) (α b₀ : M) :
   rw [h_base_α, h_base_b₀] at h_smooth
   exact h_smooth.continuousOn
 
-/-- Refined locality neighbourhood of `b₀` inside `(chartAt H α).source`. -/
-private lemma exists_loc_nhds_in_chart_source
-    (h_atlas : HasLocallyConstantChartAt H M)
-    (α b₀ : M) (hb₀_α : b₀ ∈ (chartAt H α).source) :
-    ∃ U : Set M, IsOpen U ∧ b₀ ∈ U ∧
-      U ⊆ (chartAt H b₀).source ∧ U ⊆ (chartAt H α).source ∧
-      ∀ b ∈ U, chartAt H b = chartAt H b₀ := by
-  rcases h_atlas.exists_isOpen_nhds b₀ with ⟨U₀, hU₀_open, hU₀_mem, hU₀_const⟩
-  refine ⟨U₀ ∩ (chartAt H α).source,
-    hU₀_open.inter (chartAt H α).open_source,
-    ⟨hU₀_mem, hb₀_α⟩, ?_, ?_, ?_⟩
-  · intro b hb
-    have h_eq : chartAt H b = chartAt H b₀ := hU₀_const b hb.1
-    have h_mem_b : b ∈ (chartAt H b).source := mem_chart_source H b
-    rw [h_eq] at h_mem_b
-    exact h_mem_b
-  · intro b hb; exact hb.2
-  · intro b hb; exact hU₀_const b hb.1
-
 /-- Op-norm bound on a compact subset from operator-norm continuity. -/
 private lemma exists_opNorm_bound_on_compact_of_continuousOn
     {r s : ℕ} (f : M → TensorRSModel r s ℝ E →L[ℝ] TensorRSModel r s ℝ E)
@@ -240,152 +212,6 @@ private lemma exists_opNorm_bound_on_compact_of_continuousOn
   refine ⟨max C 0, le_max_right _ _, ?_⟩
   intro b hb
   exact (hC ⟨b, hb, rfl⟩).trans (le_max_left _ _)
-
-/-- **Uniform pointwise operator-norm bound** on the chart-`(r, s)` fibre
-right-inverse over any compact subset of the chart-`α` source. -/
-theorem tensorRSChartFiberFromModel_opNorm_isBounded_on_compact
-    (h_atlas : HasLocallyConstantChartAt H M)
-    (r s : ℕ) (α : M) {K : Set M} (hK : IsCompact K)
-    (hKsub : K ⊆ (chartAt H α).source) :
-    ∃ C : ℝ, 0 < C ∧ ∀ b ∈ K, ∀ D : TensorRSModel r s ℝ E,
-      ‖tensorRSChartFiberFromModel (I := I) r s α b D‖ ≤ C * ‖D‖ := by
-  classical
-  let loc : M → Set M := fun b₀ =>
-    if hb₀ : b₀ ∈ (chartAt H α).source then
-      (exists_loc_nhds_in_chart_source (H := H) (M := M) h_atlas α b₀ hb₀).choose
-    else ∅
-  have h_loc_open : ∀ b₀ : M, IsOpen (loc b₀) := by
-    intro b₀; simp only [loc]
-    split_ifs with hb₀
-    · exact (exists_loc_nhds_in_chart_source (H := H) (M := M)
-        h_atlas α b₀ hb₀).choose_spec.1
-    · exact isOpen_empty
-  have h_loc_mem : ∀ b₀ ∈ K, b₀ ∈ loc b₀ := by
-    intro b₀ hb₀
-    have hb₀_α : b₀ ∈ (chartAt H α).source := hKsub hb₀
-    simp only [loc, dif_pos hb₀_α]
-    exact (exists_loc_nhds_in_chart_source (H := H) (M := M)
-      h_atlas α b₀ hb₀_α).choose_spec.2.1
-  have h_loc_sub_b₀ : ∀ b₀ ∈ K, loc b₀ ⊆ (chartAt H b₀).source := by
-    intro b₀ hb₀
-    have hb₀_α : b₀ ∈ (chartAt H α).source := hKsub hb₀
-    simp only [loc, dif_pos hb₀_α]
-    exact (exists_loc_nhds_in_chart_source (H := H) (M := M)
-      h_atlas α b₀ hb₀_α).choose_spec.2.2.1
-  have h_loc_sub_α : ∀ b₀ ∈ K, loc b₀ ⊆ (chartAt H α).source := by
-    intro b₀ hb₀
-    have hb₀_α : b₀ ∈ (chartAt H α).source := hKsub hb₀
-    simp only [loc, dif_pos hb₀_α]
-    exact (exists_loc_nhds_in_chart_source (H := H) (M := M)
-      h_atlas α b₀ hb₀_α).choose_spec.2.2.2.1
-  have h_loc_const : ∀ b₀ ∈ K, ∀ b ∈ loc b₀, chartAt H b = chartAt H b₀ := by
-    intro b₀ hb₀
-    have hb₀_α : b₀ ∈ (chartAt H α).source := hKsub hb₀
-    simp only [loc, dif_pos hb₀_α]
-    exact (exists_loc_nhds_in_chart_source (H := H) (M := M)
-      h_atlas α b₀ hb₀_α).choose_spec.2.2.2.2
-  have h_cover : K ⊆ ⋃ b₀ ∈ K, loc b₀ := fun b hb =>
-    Set.mem_iUnion₂.mpr ⟨b, hb, h_loc_mem b hb⟩
-  rcases hK.elim_finite_subcover_image (b := K) (c := loc)
-    (fun b₀ _ => h_loc_open b₀) h_cover with ⟨S, hS_sub, hS_finite, hS_cover⟩
-  set S' : Finset M := hS_finite.toFinset with hS'_def
-  have hS_cover' : K ⊆ ⋃ b₀ ∈ S', loc b₀ := by
-    intro b hb
-    rcases Set.mem_iUnion.mp (hS_cover hb) with ⟨b₀, hb₀⟩
-    rcases Set.mem_iUnion.mp hb₀ with ⟨hb₀_S, hb_in⟩
-    refine Set.mem_iUnion.mpr ⟨b₀, ?_⟩
-    refine Set.mem_iUnion.mpr ⟨?_, hb_in⟩
-    rw [hS'_def]; exact hS_finite.mem_toFinset.mpr hb₀_S
-  have hS_sub_K : ∀ b₀ ∈ S', b₀ ∈ K := by
-    intro b₀ hb₀; rw [hS'_def] at hb₀
-    exact hS_sub (hS_finite.mem_toFinset.mp hb₀)
-  rcases hK.finite_compact_cover (t := S') (U := loc)
-    (fun b₀ _ => h_loc_open b₀) hS_cover' with
-    ⟨KK, hKK_compact, hKK_sub, hKK_eq⟩
-  have h_each_bound : ∀ b₀ ∈ S',
-      ∃ C : ℝ, 0 ≤ C ∧ ∀ b ∈ KK b₀,
-        ‖((trivializationAt (TensorRSModel r s ℝ E)
-            (fun y : M => TensorRSSpace r s I y) α).coordChangeL ℝ
-          (trivializationAt (TensorRSModel r s ℝ E)
-            (fun y : M => TensorRSSpace r s I y) b₀) b
-              : TensorRSModel r s ℝ E →L[ℝ] TensorRSModel r s ℝ E)‖ ≤ C := by
-    intro b₀ hb₀_S
-    have hb₀_K : b₀ ∈ K := hS_sub_K b₀ hb₀_S
-    have h_sub_b₀ : loc b₀ ⊆ (chartAt H b₀).source := h_loc_sub_b₀ b₀ hb₀_K
-    have h_sub_α : loc b₀ ⊆ (chartAt H α).source := h_loc_sub_α b₀ hb₀_K
-    have h_cc_cont :
-        ContinuousOn
-          (fun b : M => ((trivializationAt (TensorRSModel r s ℝ E)
-            (fun y : M => TensorRSSpace r s I y) α).coordChangeL ℝ
-              (trivializationAt (TensorRSModel r s ℝ E)
-                (fun y : M => TensorRSSpace r s I y) b₀) b
-                  : TensorRSModel r s ℝ E →L[ℝ] TensorRSModel r s ℝ E))
-          (loc b₀) := by
-      refine (continuousOn_RS_coordChangeL_α_b₀ (I := I) (M := M)
-        (r := r) (s := s) α b₀).mono ?_
-      intro b hb; exact ⟨h_sub_α hb, h_sub_b₀ hb⟩
-    exact exists_opNorm_bound_on_compact_of_continuousOn (M := M) (E := E)
-      (r := r) (s := s) (f := fun b : M =>
-        ((trivializationAt (TensorRSModel r s ℝ E)
-          (fun y : M => TensorRSSpace r s I y) α).coordChangeL ℝ
-            (trivializationAt (TensorRSModel r s ℝ E)
-              (fun y : M => TensorRSSpace r s I y) b₀) b))
-      (hK := hKK_compact b₀) (h_cont := h_cc_cont.mono (hKK_sub b₀))
-  by_cases hS_empty : S' = ∅
-  · refine ⟨1, one_pos, ?_⟩
-    intro b hb _
-    rw [hKK_eq, hS_empty] at hb; simp at hb
-  have hS_nonempty : S'.Nonempty := Finset.nonempty_iff_ne_empty.mpr hS_empty
-  let C : M → ℝ := fun b₀ =>
-    if hb₀ : b₀ ∈ S' then (h_each_bound b₀ hb₀).choose else 0
-  have h_C_nn : ∀ b₀ ∈ S', 0 ≤ C b₀ := by
-    intro b₀ hb₀; simp only [C, dif_pos hb₀]
-    exact (h_each_bound b₀ hb₀).choose_spec.1
-  have h_C_bound : ∀ b₀ ∈ S', ∀ b ∈ KK b₀,
-      ‖((trivializationAt (TensorRSModel r s ℝ E)
-          (fun y : M => TensorRSSpace r s I y) α).coordChangeL ℝ
-        (trivializationAt (TensorRSModel r s ℝ E)
-          (fun y : M => TensorRSSpace r s I y) b₀) b
-            : TensorRSModel r s ℝ E →L[ℝ] TensorRSModel r s ℝ E)‖ ≤ C b₀ := by
-    intro b₀ hb₀; simp only [C, dif_pos hb₀]
-    exact (h_each_bound b₀ hb₀).choose_spec.2
-  set C_max : ℝ := S'.sup' hS_nonempty C with hCmax_def
-  have h_C_max_nn : 0 ≤ C_max := by
-    rcases hS_nonempty with ⟨b₀, hb₀⟩
-    exact (h_C_nn b₀ hb₀).trans (Finset.le_sup' (f := C) hb₀)
-  refine ⟨C_max + 1, by linarith, ?_⟩
-  intro b hb D
-  rw [hKK_eq] at hb
-  rcases Set.mem_iUnion.mp hb with ⟨b₀, hb₀⟩
-  rcases Set.mem_iUnion.mp hb₀ with ⟨hb₀_S, hb_in⟩
-  have hb₀_K : b₀ ∈ K := hS_sub_K b₀ hb₀_S
-  have hb_loc : b ∈ loc b₀ := hKK_sub b₀ hb_in
-  have hb_α : b ∈ (chartAt H α).source := h_loc_sub_α b₀ hb₀_K hb_loc
-  have hb_b₀ : b ∈ (chartAt H b₀).source := h_loc_sub_b₀ b₀ hb₀_K hb_loc
-  have h_chart : chartAt H b = chartAt H b₀ := h_loc_const b₀ hb₀_K b hb_loc
-  have h_le_norm := chartFiberFromModel_norm_le_coordChangeL_norm_on_locality
-    (I := I) (M := M) (r := r) (s := s) (α := α) (b₀ := b₀) (b := b)
-    hb_α hb_b₀ h_chart D
-  have h_cc_bound : ‖((trivializationAt (TensorRSModel r s ℝ E)
-        (fun y : M => TensorRSSpace r s I y) α).coordChangeL ℝ
-      (trivializationAt (TensorRSModel r s ℝ E)
-        (fun y : M => TensorRSSpace r s I y) b₀) b
-          : TensorRSModel r s ℝ E →L[ℝ] TensorRSModel r s ℝ E)‖ ≤ C b₀ :=
-    h_C_bound b₀ hb₀_S b hb_in
-  have h_norm_nn : 0 ≤ ‖D‖ := norm_nonneg _
-  have h_le_Cmax : C b₀ ≤ C_max := Finset.le_sup' (f := C) hb₀_S
-  calc ‖tensorRSChartFiberFromModel (I := I) r s α b D‖
-      ≤ _ := h_le_norm
-    _ ≤ C b₀ * ‖D‖ := by
-        have h_le_op := ContinuousLinearMap.le_opNorm
-          ((trivializationAt (TensorRSModel r s ℝ E)
-              (fun y : M => TensorRSSpace r s I y) α).coordChangeL ℝ
-            (trivializationAt (TensorRSModel r s ℝ E)
-              (fun y : M => TensorRSSpace r s I y) b₀) b
-                : TensorRSModel r s ℝ E →L[ℝ] TensorRSModel r s ℝ E) D
-        exact h_le_op.trans (mul_le_mul_of_nonneg_right h_cc_bound h_norm_nn)
-    _ ≤ C_max * ‖D‖ := mul_le_mul_of_nonneg_right h_le_Cmax h_norm_nn
-    _ ≤ (C_max + 1) * ‖D‖ := mul_le_mul_of_nonneg_right (by linarith) h_norm_nn
 
 end Connection
 end Integral

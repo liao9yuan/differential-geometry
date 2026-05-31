@@ -125,7 +125,7 @@ private theorem ccTensorBilinSymm_hasSum_eigenRealizeEval
     HasSum
       (fun i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
           (I := I) (M := M) g_bg 0 2 =>
-        tensorL2Coeff_ofCompact (I := I) (M := M) (hCompact (I := I) (M := M) g_bg)
+        tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g_bg)
             (Integral.L2.SmoothCcTensor.toL2 T) i *
           eigenRealizeEval (I := I) (M := M) g_bg i x v w)
       (ccTensorBilinSymm (I := I) g_bg T x v w) :=
@@ -146,7 +146,7 @@ theorem realize_eval_carrier_factorization
         (∀ i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
             (I := I) (M := M) g_bg 0 2,
           z.coeff i
-            = tensorL2Coeff_ofCompact (I := I) (M := M) (hCompact (I := I) (M := M) g_bg)
+            = tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g_bg)
                 (Integral.L2.SmoothCcTensor.toL2 T_z) i) →
           ℓ_a z = ccTensorBilinSymm (I := I) g_bg T_z x v w := by
   classical
@@ -182,7 +182,7 @@ theorem realize_eval_carrier_factorization
   -- The pinning: with `z.coeff i = L²coeff(T_z) i`, the coordinate `tsum`
   -- becomes the realize eigen-series, which sums to the realize value.
   have hcoeff : (fun i => e i * z.coeff i)
-      = (fun i => tensorL2Coeff_ofCompact (I := I) (M := M)
+      = (fun i => tensorL2Coeff (I := I) (M := M)
             (hCompact (I := I) (M := M) g_bg)
             (Integral.L2.SmoothCcTensor.toL2 T_z) i * e i) := by
     funext i; rw [hz i]; ring
@@ -278,8 +278,8 @@ theorem rhs_matches_deturck_at_solution
         (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
           (I := I) (M := M) g_bg 0 2),
       (N_cont u).coeff i =
-        tensorL2Coeff_ofCompact (I := I) (M := M)
-          (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g_bg 0 2)
+        tensorL2Coeff (I := I) (M := M)
+          (tensorResolventL2_isCompactOperator (I := I) (M := M) g_bg 0 2)
           (Integral.L2.SmoothCcTensor.toL2 (Nsec u)) i)
     (hNsec_realize : ∀ (u : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 1))
         (x' : M) (v' w' : TangentSpace I x'),
@@ -292,14 +292,14 @@ theorem rhs_matches_deturck_at_solution
     (hsmoothrepr : ∀ (s : ℝ)
         (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g_bg 0 2),
       (u₂ s).coeff i
-        = tensorL2Coeff_ofCompact (I := I) (M := M) (hCompact (I := I) (M := M) g_bg)
+        = tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g_bg)
             (Integral.L2.SmoothCcTensor.toL2 (T_s s)) i)
     (hℓ : ∀ (T_z : Integral.L2.SmoothCcTensor g_bg 0 2)
         (z : tensorHs (I := I) (M := M) g_bg 0 2 (a : ℝ)),
         (∀ i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
             (I := I) (M := M) g_bg 0 2,
           z.coeff i
-            = tensorL2Coeff_ofCompact (I := I) (M := M) (hCompact (I := I) (M := M) g_bg)
+            = tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g_bg)
                 (Integral.L2.SmoothCcTensor.toL2 T_z) i) →
           ℓ_a z = ccTensorBilinSymm (I := I) g_bg T_z x v w)
     (hNsec_geom : ∀ (s : ℝ) (x' : M) (v' w' : TangentSpace I x'),
@@ -326,7 +326,7 @@ theorem rhs_matches_deturck_at_solution
   have hcoeff_lap : ∀ i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
         (I := I) (M := M) g_bg 0 2,
       (scaleLaplacianFun (I := I) (M := M) (u₂ t)).coeff i =
-        tensorL2Coeff_ofCompact (I := I) (M := M) (hCompact (I := I) (M := M) g_bg)
+        tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g_bg)
           (Integral.L2.SmoothCcTensor.toL2
             (rawTensorConnLapSmooth (I := I) g_bg 0 2 (T_s t))) i := by
     intro i
@@ -345,7 +345,7 @@ theorem rhs_matches_deturck_at_solution
   have hcoeff_N : ∀ i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
         (I := I) (M := M) g_bg 0 2,
       (N_cont uincl).coeff i =
-        tensorL2Coeff_ofCompact (I := I) (M := M) (hCompact (I := I) (M := M) g_bg)
+        tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g_bg)
           (Integral.L2.SmoothCcTensor.toL2 (Nsec uincl)) i := fun i => hN_coeff uincl i
   have hN : ℓ_a (N_cont uincl) =
       ccTensorBilinSymm (I := I) g_bg (repr uincl) x v w := by

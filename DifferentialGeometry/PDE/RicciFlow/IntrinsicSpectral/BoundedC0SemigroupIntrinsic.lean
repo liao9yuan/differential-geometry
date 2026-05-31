@@ -25,7 +25,7 @@ properties of the intrinsic heat semigroup:
 
 ## Main definition
 
-* `tensorBoundedC0Semigroup_intrinsic g r s` — the intrinsic tensor heat
+* `tensorBoundedC0Semigroup g r s` — the intrinsic tensor heat
   semigroup as a `BoundedC0Semigroup (TensorL2 r s g)`.
 -/
 
@@ -54,10 +54,10 @@ open DifferentialGeometry.Analysis.Parabolic.QuasiLinear
 /-- The intrinsic tensor heat semigroup `e^{t Δ_∇}` on `TensorL2 r s g`
 packaged as a bounded strongly continuous one-parameter contraction
 semigroup, **without any chart-selection hypothesis**. -/
-noncomputable def tensorBoundedC0Semigroup_intrinsic
+noncomputable def tensorBoundedC0Semigroup
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     BoundedC0Semigroup (TensorL2 r s g) where
-  toFun := fun t => tensorHeatSemigroup_intrinsic (I := I) (M := M) g r s t
+  toFun := fun t => tensorHeatSemigroup (I := I) (M := M) g r s t
   apply_zero :=
     tensorHeatSemigroup_intrinsic_apply_zero (I := I) (M := M) g r s
   apply_add := fun _ _ ht hs =>
@@ -67,13 +67,13 @@ noncomputable def tensorBoundedC0Semigroup_intrinsic
   continuousOn_apply := fun T =>
     tensorHeatSemigroup_intrinsic_continuousOn (I := I) (M := M) g r s T
 
-/-- The underlying one-parameter family of `tensorBoundedC0Semigroup_intrinsic`
+/-- The underlying one-parameter family of `tensorBoundedC0Semigroup`
 is the intrinsic tensor heat semigroup. -/
 @[simp]
 theorem tensorBoundedC0Semigroup_intrinsic_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (t : ℝ) :
-    tensorBoundedC0Semigroup_intrinsic (I := I) (M := M) g r s t =
-      tensorHeatSemigroup_intrinsic (I := I) (M := M) g r s t :=
+    tensorBoundedC0Semigroup (I := I) (M := M) g r s t =
+      tensorHeatSemigroup (I := I) (M := M) g r s t :=
   rfl
 
 end IntrinsicSpectral

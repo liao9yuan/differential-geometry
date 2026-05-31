@@ -84,7 +84,6 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
-  {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M}
 variable {a : ℝ} {T : ℝ}
 
 /-! ## The subcritical Nemytskii operator `L²([0,T]; H^{a+1}) → L²([0,T]; Hᵃ)`
@@ -205,24 +204,8 @@ solution field of the difference of the forcings.  The one-derivative-gain bound
 `maximalRegularitySolFieldHa1_norm_le` (`‖·‖ ≤ 2√T‖·‖`) then controls it by the
 `L²([0,T]; Hᵃ)` distance — with a constant that **vanishes as `T → 0`**. -/
 
-include h_atlas in
-/-- The `H^{a+1}`-field difference of the affine Duhamel map equals the
-`H^{a+1}`-view maximal-regularity solution field of the difference of the
-forcings: the homogeneous-flow field cancels. -/
-theorem maxRegDuhamelSolFieldHa1_sub (hT : 0 < T) (hT1 : T ≤ 1)
-    (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
-    (gforce gforce' : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
-    maxRegDuhamelSolFieldHa1 (I := I) (M := M) a hT hT1 u₀ gforce -
-        maxRegDuhamelSolFieldHa1 (I := I) (M := M) a hT hT1 u₀ gforce' =
-      maximalRegularitySolFieldHa1 (I := I) (M := M) a hT hT1
-        (gforce - gforce') := by
-  rw [maximalRegularitySolFieldHa1_sub (I := I) (M := M) (h_atlas := h_atlas)
-    (a := a) hT hT1 gforce gforce']
-  rw [maxRegDuhamelSolFieldHa1, maxRegDuhamelSolFieldHa1]
-  abel
-
 /-- Chart-locality-free version of `maxRegDuhamelSolFieldHa1_sub`. -/
-theorem maxRegDuhamelSolFieldHa1_sub_ofCompact (hT : 0 < T) (hT1 : T ≤ 1)
+theorem maxRegDuhamelSolFieldHa1_sub (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
     (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
@@ -231,32 +214,13 @@ theorem maxRegDuhamelSolFieldHa1_sub_ofCompact (hT : 0 < T) (hT1 : T ≤ 1)
         maxRegDuhamelSolFieldHa1 (I := I) (M := M) a hT hT1 u₀ gforce' =
       maximalRegularitySolFieldHa1 (I := I) (M := M) a hT hT1
         (gforce - gforce') := by
-  rw [maximalRegularitySolFieldHa1_sub_ofCompact (I := I) (M := M)
+  rw [maximalRegularitySolFieldHa1_sub (I := I) (M := M)
     (h_compact := h_compact) (a := a) hT hT1 gforce gforce']
   rw [maxRegDuhamelSolFieldHa1, maxRegDuhamelSolFieldHa1]
   abel
 
-include h_atlas in
-/-- **The `H^{a+1}`-field contraction estimate of the affine Duhamel map, with
-`√T`-decay.**  For a fixed initial datum `u₀` and two forcings `g, g'`,
-
-  `‖field(g) − field(g')‖_{L²(H^{a+1})} ≤ 2√T · ‖g − g'‖_{L²(Hᵃ)}`.
-
-The factor `2√T` **vanishes as `T → 0`** — the source of the small-time
-contraction for an arbitrary Lipschitz constant. -/
-theorem maxRegDuhamelSolFieldHa1_dist_le (hT : 0 < T) (hT1 : T ≤ 1)
-    (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
-    (gforce gforce' : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
-    ‖maxRegDuhamelSolFieldHa1 (I := I) (M := M) a hT hT1 u₀ gforce -
-        maxRegDuhamelSolFieldHa1 (I := I) (M := M) a hT hT1 u₀ gforce'‖ ≤
-      2 * Real.sqrt T * ‖gforce - gforce'‖ := by
-  rw [maxRegDuhamelSolFieldHa1_sub (I := I) (M := M) (h_atlas := h_atlas)
-    (a := a) hT hT1 u₀ gforce gforce']
-  exact maximalRegularitySolFieldHa1_norm_le (I := I) (M := M)
-    (h_atlas := h_atlas) (a := a) hT hT1 (gforce - gforce')
-
 /-- Chart-locality-free version of `maxRegDuhamelSolFieldHa1_dist_le`. -/
-theorem maxRegDuhamelSolFieldHa1_dist_le_ofCompact (hT : 0 < T) (hT1 : T ≤ 1)
+theorem maxRegDuhamelSolFieldHa1_dist_le (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
     (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
@@ -264,9 +228,9 @@ theorem maxRegDuhamelSolFieldHa1_dist_le_ofCompact (hT : 0 < T) (hT1 : T ≤ 1)
     ‖maxRegDuhamelSolFieldHa1 (I := I) (M := M) a hT hT1 u₀ gforce -
         maxRegDuhamelSolFieldHa1 (I := I) (M := M) a hT hT1 u₀ gforce'‖ ≤
       2 * Real.sqrt T * ‖gforce - gforce'‖ := by
-  rw [maxRegDuhamelSolFieldHa1_sub_ofCompact (I := I) (M := M)
+  rw [maxRegDuhamelSolFieldHa1_sub (I := I) (M := M)
     (h_compact := h_compact) (a := a) hT hT1 u₀ gforce gforce']
-  exact maximalRegularitySolFieldHa1_norm_le_ofCompact (I := I) (M := M)
+  exact maximalRegularitySolFieldHa1_norm_le (I := I) (M := M)
     (h_compact := h_compact) (a := a) hT hT1 (gforce - gforce')
 
 /-! ## The subcritical forcing-space fixed-point map -/
@@ -303,47 +267,8 @@ def quasilinearDuhamelMapHa1 (a : ℝ) {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
         (maxRegDuhamelSolFieldHa1 (I := I) (M := M) a hT hT1 u₀ gforce) :=
   rfl
 
-include h_atlas in
-/-- **The Lipschitz bound of the subcritical fixed-point map.**  For a fixed
-initial datum `u₀` and two forcings `g, g'`,
-
-  `‖Φ(g) − Φ(g')‖ ≤ L·2√T · ‖g − g'‖`.
-
-The Nemytskii operator contributes `L`; the `H^{a+1}`-field contraction estimate
-`maxRegDuhamelSolFieldHa1_dist_le` contributes `2√T → 0`. -/
-theorem quasilinearDuhamelMapHa1_dist_le (hT : 0 < T) (hT1 : T ≤ 1)
-    (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
-    {L : ℝ≥0}
-    {N : tensorHs (I := I) (M := M) g r s (a + 1) →
-      tensorHs (I := I) (M := M) g r s a}
-    (hN : LipschitzWith L N)
-    (gforce gforce' : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
-    dist (quasilinearDuhamelMapHa1 (I := I) (M := M) a hT hT1 u₀ hN gforce)
-        (quasilinearDuhamelMapHa1 (I := I) (M := M) a hT hT1 u₀ hN gforce') ≤
-      (L : ℝ) * (2 * Real.sqrt T) * dist gforce gforce' := by
-  have hnem := (nemytskiiHa1_lipschitzWith (I := I) (M := M) hN).dist_le_mul
-    (maxRegDuhamelSolFieldHa1 (I := I) (M := M) a hT hT1 u₀ gforce)
-    (maxRegDuhamelSolFieldHa1 (I := I) (M := M) a hT hT1 u₀ gforce')
-  have hfield : dist
-      (maxRegDuhamelSolFieldHa1 (I := I) (M := M) a hT hT1 u₀ gforce)
-      (maxRegDuhamelSolFieldHa1 (I := I) (M := M) a hT hT1 u₀ gforce') ≤
-        (2 * Real.sqrt T) * dist gforce gforce' := by
-    rw [dist_eq_norm, dist_eq_norm]
-    exact maxRegDuhamelSolFieldHa1_dist_le (I := I) (M := M)
-      (h_atlas := h_atlas) (a := a) hT hT1 u₀ gforce gforce'
-  calc dist
-        (quasilinearDuhamelMapHa1 (I := I) (M := M) a hT hT1 u₀ hN gforce)
-        (quasilinearDuhamelMapHa1 (I := I) (M := M) a hT hT1 u₀ hN gforce')
-      ≤ (L : ℝ) * dist
-          (maxRegDuhamelSolFieldHa1 (I := I) (M := M) a hT hT1 u₀ gforce)
-          (maxRegDuhamelSolFieldHa1 (I := I) (M := M) a hT hT1 u₀
-            gforce') := hnem
-    _ ≤ (L : ℝ) * ((2 * Real.sqrt T) * dist gforce gforce') :=
-        mul_le_mul_of_nonneg_left hfield L.coe_nonneg
-    _ = (L : ℝ) * (2 * Real.sqrt T) * dist gforce gforce' := by ring
-
 /-- Chart-locality-free version of `quasilinearDuhamelMapHa1_dist_le`. -/
-theorem quasilinearDuhamelMapHa1_dist_le_ofCompact (hT : 0 < T) (hT1 : T ≤ 1)
+theorem quasilinearDuhamelMapHa1_dist_le (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
     (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
@@ -363,7 +288,7 @@ theorem quasilinearDuhamelMapHa1_dist_le_ofCompact (hT : 0 < T) (hT1 : T ≤ 1)
       (maxRegDuhamelSolFieldHa1 (I := I) (M := M) a hT hT1 u₀ gforce') ≤
         (2 * Real.sqrt T) * dist gforce gforce' := by
     rw [dist_eq_norm, dist_eq_norm]
-    exact maxRegDuhamelSolFieldHa1_dist_le_ofCompact (I := I) (M := M)
+    exact maxRegDuhamelSolFieldHa1_dist_le (I := I) (M := M)
       (h_compact := h_compact) (a := a) hT hT1 u₀ gforce gforce'
   calc dist
         (quasilinearDuhamelMapHa1 (I := I) (M := M) a hT hT1 u₀ hN gforce)
@@ -429,16 +354,11 @@ theorem smallTime_contraction_const_lt_one {L : ℝ≥0} {T : ℝ}
     _ < 1 := by
         rw [div_lt_one hLp1_pos]; linarith
 
-include h_atlas in
-/-- **The subcritical forcing-space map is a contraction on `(0, T_L]`.**  For
-initial datum `u₀`, Lipschitz `N : H^{a+1} → Hᵃ` with constant `L`, and
-`0 < T ≤ smallTimeHorizon L`, the map `Φ` is a `ContractingWith` self-map of
-`L²([0,T]; Hᵃ)` with contraction constant `L·2√T < 1`.
-
-No smallness of `L` is assumed: the contraction comes entirely from the
-parabolic decay `2√T → 0` of the subcritical Duhamel smoothing. -/
+/-- Chart-locality-free version of `quasilinearDuhamelMapHa1_contracting`. -/
 theorem quasilinearDuhamelMapHa1_contracting (hT : 0 < T)
     {L : ℝ≥0} (hTL : T ≤ smallTimeHorizon L)
+    (h_compact : IsCompactOperator (tensorResolventL2
+      (I := I) (M := M) g r s))
     (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
     {N : tensorHs (I := I) (M := M) g r s (a + 1) →
       tensorHs (I := I) (M := M) g r s a}
@@ -453,29 +373,6 @@ theorem quasilinearDuhamelMapHa1_contracting (hT : 0 < T)
     simpa using smallTime_contraction_const_lt_one (L := L) (T := T) hT hTL
   · refine LipschitzWith.of_dist_le_mul (fun gforce gforce' => ?_)
     have h := quasilinearDuhamelMapHa1_dist_le (I := I) (M := M)
-      (h_atlas := h_atlas) (a := a) hT (le_trans hTL (smallTimeHorizon_le_one L))
-      u₀ hN gforce gforce'
-    simpa only [NNReal.coe_mk] using h
-
-/-- Chart-locality-free version of `quasilinearDuhamelMapHa1_contracting`. -/
-theorem quasilinearDuhamelMapHa1_contracting_ofCompact (hT : 0 < T)
-    {L : ℝ≥0} (hTL : T ≤ smallTimeHorizon L)
-    (h_compact : IsCompactOperator (tensorResolventL2
-      (I := I) (M := M) g r s))
-    (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
-    {N : tensorHs (I := I) (M := M) g r s (a + 1) →
-      tensorHs (I := I) (M := M) g r s a}
-    (hN : LipschitzWith L N) :
-    ContractingWith
-      ⟨(L : ℝ) * (2 * Real.sqrt T),
-        mul_nonneg L.coe_nonneg (by positivity)⟩
-      (quasilinearDuhamelMapHa1 (I := I) (M := M) a hT
-        (le_trans hTL (smallTimeHorizon_le_one L)) u₀ hN) := by
-  refine ⟨?_, ?_⟩
-  · rw [← NNReal.coe_lt_coe]
-    simpa using smallTime_contraction_const_lt_one (L := L) (T := T) hT hTL
-  · refine LipschitzWith.of_dist_le_mul (fun gforce gforce' => ?_)
-    have h := quasilinearDuhamelMapHa1_dist_le_ofCompact (I := I) (M := M)
       (h_compact := h_compact) (a := a) hT
       (le_trans hTL (smallTimeHorizon_le_one L)) u₀ hN gforce gforce'
     simpa only [NNReal.coe_mk] using h
@@ -484,89 +381,13 @@ end FixedPoint
 
 /-! ## Small-time strong existence -/
 
-include h_atlas in
-/-- **Small-time strong existence for the subcritical quasi-linear tensor heat
-equation.**
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, a Sobolev exponent
-`a ≥ 0`, an initial datum `u₀ ∈ H^{a+2}`, and a **subcritical** nonlinearity
-`N : H^{a+1} → Hᵃ` (one-derivative loss) Lipschitz with **any** constant `L`,
-there is a positive small time horizon `T_L > 0` and, for every `0 < T ≤ T_L`, a
-**strong solution** `u ∈ H¹([0,T]; Hᵃ)` of the quasi-linear tensor heat equation
-
-  `∂_t u = Δ_∇ u + N(u)`,  `u(0) = u₀`,
-
-with **no** smallness restriction on `L`.  The horizon is the explicit
-`smallTimeHorizon L`; the construction is the Banach fixed point of the
-subcritical Duhamel map `quasilinearDuhamelMapHa1`, which contracts because the
-one-derivative-gain Duhamel smoothing carries the parabolic decay factor
-`2√T → 0`.
-
-The data `u, gforce` satisfy:
-
-* `u = maxRegDuhamelMap … u₀ gforce` — `u` is the affine Duhamel image of
-  `gforce`;
-* `gforce = nemytskiiHa1 hN (maxRegDuhamelSolFieldHa1 … u₀ gforce)` — the
-  fixed-point equation: the forcing reproduces `N` applied along the
-  `H^{a+1}`-view solution field;
-* `u(0) = u₀` (in `Hᵃ` via the spectral inclusion `H^{a+2} ↪ Hᵃ`);
-* `∂_t u = Δ_∇ (field_{a+2}) + N(field_{a+1})` — the equation, where
-  `field_{a+1}` is the `H^{a+1}`-view of the same Duhamel solution field
-  `field_{a+2}`. -/
-theorem quasilinear_strong_existence_smallTime {L : ℝ≥0}
-    {N : tensorHs (I := I) (M := M) g r s (a + 1) →
-      tensorHs (I := I) (M := M) g r s a}
-    (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
-    (hN : LipschitzWith L N) :
-    ∃ T_L : ℝ, 0 < T_L ∧ ∀ {T : ℝ} (hT : 0 < T) (_hTL : T ≤ T_L) (hT1 : T ≤ 1),
-      ∃ (u : MaxRegSolutionSpace (I := I) (M := M) a T)
-        (gforce : timeL2 (tensorHs (I := I) (M := M) g r s a) T),
-        u = maxRegDuhamelMap (I := I) (M := M) a hT hT1 u₀ gforce ∧
-          gforce = nemytskiiHa1 (I := I) (M := M) hN
-              (maxRegDuhamelSolFieldHa1 (I := I) (M := M) a hT hT1 u₀ gforce) ∧
-          TimeSobolev.timeH1.trace0 _ T u =
-              tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
-                (show a ≤ a + 2 by linarith) u₀ ∧
-          TimeSobolev.timeH1.timeDeriv _ T u =
-            timeScaleLaplacian (I := I) (M := M) a
-                (maxRegDuhamelSolField (I := I) (M := M) a hT hT1 u₀ gforce) +
-              nemytskiiHa1 (I := I) (M := M) hN
-                (maxRegDuhamelSolFieldHa1 (I := I) (M := M) a hT hT1 u₀
-                  gforce) := by
-  refine ⟨smallTimeHorizon L, smallTimeHorizon_pos L, ?_⟩
-  intro T hT hTL hT1
-  -- The subcritical forcing-space map is a contraction; take its fixed point.
-  -- (`T ≤ 1` arguments are proof-irrelevant, so the contraction is about the
-  -- map with the supplied `hT1`.)
-  have hcontr := quasilinearDuhamelMapHa1_contracting (I := I) (M := M)
-    (h_atlas := h_atlas) (a := a) hT hTL u₀ hN
-  set gStar := ContractingWith.fixedPoint
-    (quasilinearDuhamelMapHa1 (I := I) (M := M) a hT hT1 u₀ hN) hcontr
-    with hgStar_def
-  have hgStar_fix :
-      quasilinearDuhamelMapHa1 (I := I) (M := M) a hT hT1 u₀ hN gStar =
-        gStar :=
-    ContractingWith.fixedPoint_isFixedPt hcontr
-  have hgStar_eq : gStar = nemytskiiHa1 (I := I) (M := M) hN
-      (maxRegDuhamelSolFieldHa1 (I := I) (M := M) a hT hT1 u₀ gStar) := by
-    rw [← quasilinearDuhamelMapHa1_apply (I := I) (M := M) (a := a) hT hT1 u₀ hN
-      gStar, hgStar_fix]
-  refine ⟨maxRegDuhamelMap (I := I) (M := M) a hT hT1 u₀ gStar,
-    gStar, rfl, hgStar_eq, ?_, ?_⟩
-  · exact maxRegDuhamelMap_trace0 (I := I) (M := M) (a := a) (T := T)
-      hT hT1 u₀ gStar
-  · -- `∂_t u = Δ_∇ (field_{a+2}) + gStar`, and `gStar = N(field_{a+1})`.
-    rw [maxRegDuhamelMap_timeDeriv_eq (I := I) (M := M) (h_atlas := h_atlas)
-      (a := a) (T := T) hT hT1 u₀ gStar]
-    exact congrArg₂ (· + ·) rfl hgStar_eq
-
 /-- **Chart-locality-free small-time strong existence**, parameterized on
 resolvent compactness `h_compact`.  Identical to
 `quasilinear_strong_existence_smallTime` but with the compactness hypothesis in
 place of any chart-locality assumption: for any subcritical nonlinearity
 `N : H^{a+1} → Hᵃ` Lipschitz with any constant `L`, there is `T_L > 0` and a
 strong solution of `∂_t u = Δ_∇ u + N(u)`, `u(0) = u₀`, on `(0, T_L]`. -/
-theorem quasilinear_strong_existence_smallTime_ofCompact {L : ℝ≥0}
+theorem quasilinear_strong_existence_smallTime {L : ℝ≥0}
     {N : tensorHs (I := I) (M := M) g r s (a + 1) →
       tensorHs (I := I) (M := M) g r s a}
     (h_compact : IsCompactOperator (tensorResolventL2
@@ -590,7 +411,7 @@ theorem quasilinear_strong_existence_smallTime_ofCompact {L : ℝ≥0}
                   gforce) := by
   refine ⟨smallTimeHorizon L, smallTimeHorizon_pos L, ?_⟩
   intro T hT hTL hT1
-  have hcontr := quasilinearDuhamelMapHa1_contracting_ofCompact (I := I) (M := M)
+  have hcontr := quasilinearDuhamelMapHa1_contracting (I := I) (M := M)
     (h_compact := h_compact) (a := a) hT hTL u₀ hN
   set gStar := ContractingWith.fixedPoint
     (quasilinearDuhamelMapHa1 (I := I) (M := M) a hT hT1 u₀ hN) hcontr
@@ -607,7 +428,7 @@ theorem quasilinear_strong_existence_smallTime_ofCompact {L : ℝ≥0}
     gStar, rfl, hgStar_eq, ?_, ?_⟩
   · exact maxRegDuhamelMap_trace0 (I := I) (M := M) (a := a) (T := T)
       hT hT1 u₀ gStar
-  · rw [maxRegDuhamelMap_timeDeriv_eq_ofCompact (I := I) (M := M)
+  · rw [maxRegDuhamelMap_timeDeriv_eq (I := I) (M := M)
       (h_compact := h_compact) (a := a) (T := T) hT hT1 u₀ gStar]
     exact congrArg₂ (· + ·) rfl hgStar_eq
 

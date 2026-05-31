@@ -12,17 +12,18 @@ objects. Three of them are finite sums of `chartPouKernel α`-indicator-cut `C^�
 coefficients against the chart-component / chart-partial atoms `componentLpLimit`
 and `partialLpLimit`:
 
-* `covPrincipalRotationCoeffLimit g r s h_atlas i α P₀` — a four-fold sum over
-  `(P, Q, k, l)` of the kernel-cut `C^∞` factor `principalRotationFactor` against
-  the chart-partial atom `partialLpLimit P k`;
-* `covLowerOrderRotationValueCoeffLimit g r s h_atlas i α P₀` — a four-fold sum
-  over `(P, Q, k, l)` of the kernel-cut `C^∞` factor `valuePartialFactor` against
-  `partialLpLimit P k`, plus a five-fold sum over `(P, Q, k, l, p)` of the
-  kernel-cut `C^∞` factor `valueComponentFactor` against `componentLpLimit p`;
-* `weightedGradCoeffDivLimit g r s h_atlas i α P₀ l` — a four-fold sum over
+* `covPrincipalRotationCoeffLimit g r s i α P₀` — a four-fold sum
+  over `(P, Q, k, l)` of the kernel-cut `C^∞` factor `principalRotationFactor`
+  against the chart-partial atom `partialLpLimit P k`;
+* `covLowerOrderRotationValueCoeffLimit g r s i α P₀` — a four-fold
+  sum over `(P, Q, k, l)` of the kernel-cut `C^∞` factor `valuePartialFactor`
+  against `partialLpLimit P k`, plus a five-fold sum over
+  `(P, Q, k, l, p)` of the kernel-cut `C^∞` factor `valueComponentFactor` against
+  `componentLpLimit p`;
+* `weightedGradCoeffDivLimit g r s i α P₀ l` — a four-fold sum over
   `(P, Q, k, p)` of the kernel-cut chart-Euclidean partial of the `C^∞` factor
-  `weightedGradFactor` against `componentLpLimit p`, plus a four-fold sum over
-  `(P, Q, k, p)` of the kernel-cut `weightedGradFactor` against
+  `weightedGradFactor` against `componentLpLimit p`, plus a
+  four-fold sum over `(P, Q, k, p)` of the kernel-cut `weightedGradFactor` against
   `partialLpLimit p l`.
 
 The order-`0` companions `eLpNorm_covPrincipalRotationCoeffLimit_le`,
@@ -65,9 +66,12 @@ single nonnegative `C`.
 
 ## Main results
 
-* `wkpNorm_covPrincipalRotationCoeffLimit_le`
-* `wkpNorm_covLowerOrderRotationValueCoeffLimit_le`
-* `wkpNorm_weightedGradCoeffDivLimit_le`
+* `wkpNorm_covPrincipalRotationCoeffLimit_le_unconditional`
+* `wkpNorm_covLowerOrderRotationValueCoeffLimit_le_unconditional`
+* `wkpNorm_weightedGradCoeffDivLimit_le_unconditional`
+* `wkpNorm_covPrincipalRotationCoeffLimit_le_uniform_unconditional`
+* `wkpNorm_covLowerOrderRotationValueCoeffLimit_le_uniform_unconditional`
+* `wkpNorm_weightedGradCoeffDivLimit_le_uniform_unconditional`
 
 ## Sign convention
 
@@ -118,7 +122,6 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 section LowerOrderWkpNormBounds
 
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
-  (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
   (i : TensorEigenIdx (I := I) (M := M) g r s)
 
 /-! ## The quantitative smooth-coefficient `wkpNorm` bound with ae-vanishing
@@ -457,103 +460,6 @@ component atom is `μ` times the canonical eigenvector chart component, which is
 weak chart partial; the chart component is `W^{K+1,2}`, so its weak partial is
 `W^{K,2}`. -/
 
-omit [CompleteSpace E] in
-/-- The partition-of-unity Euclidean chart components of the eigenvector vector
-`tensorResolventEigenbasisVec h_atlas i` are `MemWkp N 2` on every chart target,
-given that those of the `L²`-coercion of the eigenvector resolvent are
-`MemWkp N 2`. The two chart components differ by the nonzero scalar `μ⁻¹`, and
-`MemWkp` is scalar-invariant; the iteration order is preserved. -/
-private lemma eigenvectorVec_pou_memWkp
-    (N : ℕ)
-    (h_pou : ∀ (β : M) (Q : TensorCompIdx (E := E) r s),
-      MemWkp (d := Module.finrank ℝ E) N 2
-        (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
-            (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
-              (eigenvectorResolvent (I := I) (M := M) g r s h_atlas i))
-            β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
-        (chartTargetEuclid (I := I) (M := M) β))
-    (β : M) (Q : TensorCompIdx (E := E) r s) :
-    MemWkp (d := Module.finrank ℝ E) N 2
-      (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
-          (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i) β Q :
-          Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
-      (chartTargetEuclid (I := I) (M := M) β) := by
-  classical
-  set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) β with hΩ_def
-  have hΩ_open : IsOpen Ω := chartTargetEuclid_isOpen (I := I) (M := M) β
-  -- `MemWkp N 2` of the resolvent-coercion chart component.
-  have h_res : MemWkp (d := Module.finrank ℝ E) N 2
-      (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
-          (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
-            (eigenvectorResolvent (I := I) (M := M) g r s h_atlas i))
-          β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y) Ω :=
-    h_pou β Q
-  -- The eigenvector chart component is `μ⁻¹` times the resolvent-coercion chart
-  -- component (`eigenvector_chartComponent_eq`). Pass to `coeFn` and rescale.
-  have h_chart_eq := eigenvector_chartComponent_eq (I := I) (M := M)
-    g r s h_atlas i β Q
-  have h_ae : (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
-        (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i) β Q :
-        Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
-      =ᵐ[(volume : Measure EuclN).restrict Ω]
-      (fun y => (i.fst.val)⁻¹ *
-        ((tensorL2ChartComponent (I := I) (M := M) g r s
-          (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
-            (eigenvectorResolvent (I := I) (M := M) g r s h_atlas i))
-          β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y) := by
-    have h_smul := Lp.coeFn_smul (i.fst.val)⁻¹
-      (tensorL2ChartComponent (I := I) (M := M) g r s
-        (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
-          (eigenvectorResolvent (I := I) (M := M) g r s h_atlas i)) β Q)
-    have h_smul' : (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
-          (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i) β Q :
-          Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
-        =ᵐ[chartL2Measure (I := I) (M := M) β]
-        (fun y => (i.fst.val)⁻¹ •
-          ((tensorL2ChartComponent (I := I) (M := M) g r s
-            (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
-              (eigenvectorResolvent (I := I) (M := M) g r s h_atlas i))
-            β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) :
-            EuclN → ℝ) y) := by
-      rw [h_chart_eq]
-      exact h_smul
-    filter_upwards [h_smul'] with y hy
-    rw [hy, smul_eq_mul]
-  -- `MemWkp N 2` is scalar-invariant.
-  exact (MemWkp_congr_ae (d := Module.finrank ℝ E)
-    (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_ae).mpr
-    (MemWkp.const_smul (d := Module.finrank ℝ E)
-      (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_res (i.fst.val)⁻¹)
-
-/-- The component atom `componentLpLimit g r s h_atlas i α P` vanishes almost
-everywhere off the compact partition-of-unity kernel `chartPouKernel α`. It is
-`μ` times the canonical eigenvector chart component, which is a.e. supported in
-`chartPouKernel α` (`tensorL2ChartComponent_ae_zero_off_chartPouKernel`). -/
-private lemma componentLpLimit_ae_zero_off_chartPouKernel
-    (α : M) (P : TensorCompIdx (E := E) r s) :
-    ∀ᵐ y ∂(chartL2Measure (I := I) (M := M) α),
-      y ∉ chartPouKernel (I := I) (M := M) α →
-        ((componentLpLimit (I := I) (M := M) g r s h_atlas i α P :
-          Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y = 0 := by
-  classical
-  -- `componentLpLimit = μ • tensorL2ChartComponent (eigenvector)`.
-  have h_smul : (fun y => ((componentLpLimit (I := I) (M := M)
-        g r s h_atlas i α P :
-        Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
-      =ᵐ[chartL2Measure (I := I) (M := M) α]
-      (fun y => i.fst.val •
-        ((tensorL2ChartComponent (I := I) (M := M) g r s
-          (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i) α P :
-          Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y) := by
-    rw [componentLpLimit]
-    exact Lp.coeFn_smul i.fst.val _
-  -- The canonical eigenvector chart component vanishes a.e. off the kernel.
-  have h_comp_zero := tensorL2ChartComponent_ae_zero_off_chartPouKernel
-    (I := I) (M := M) g r s
-    (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i) α P
-  filter_upwards [h_smul, h_comp_zero] with y hy hy_zero hyK
-  rw [hy, smul_eq_mul, hy_zero hyK, mul_zero]
-
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 /-- **A weak chart partial of a `W^{K+1,2}` function is `W^{K,2}`.** For an open
 set `Ω`, a weak `k`-th partial `gpart` of a function `u` that is `W^{K+1,2}` on
@@ -684,87 +590,6 @@ private lemma hasWeakPartialDeriv_ae_zero_off_of_ae_zero_off
   filter_upwards [hgp_zero_V'] with y hy hy_mem hy_notKc
   exact hy ⟨hy_mem, hy_notKc⟩
 
-omit [CompleteSpace E] in
-/-- The chart-partial atom `partialLpLimit g r s h_atlas i α P k` vanishes almost
-everywhere off the compact partition-of-unity kernel `chartPouKernel α`, given
-the order-`(K + 1)` partition-of-unity regularity input `h_pou`.
-
-It is `μ` times the eigenvector weak chart partial. The canonical eigenvector
-chart component is `W^{K+1,2}` — in particular `W^{1,2}` — and vanishes almost
-everywhere off `chartPouKernel α`; the eigenvector weak chart partial is a
-genuine weak partial of it, so by the locality of weak partials
-(`hasWeakPartialDeriv_ae_zero_off_of_ae_zero_off`) it too vanishes almost
-everywhere off the compact (hence closed) kernel. -/
-private lemma partialLpLimit_ae_zero_off_chartPouKernel
-    (α : M) (P : TensorCompIdx (E := E) r s)
-    (k : Fin (Module.finrank ℝ E)) (K : ℕ)
-    (h_pou : ∀ (β : M) (Q : TensorCompIdx (E := E) r s),
-      MemWkp (d := Module.finrank ℝ E) (K + 1) 2
-        (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
-            (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
-              (eigenvectorResolvent (I := I) (M := M) g r s h_atlas i))
-            β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
-        (chartTargetEuclid (I := I) (M := M) β)) :
-    ∀ᵐ y ∂(chartL2Measure (I := I) (M := M) α),
-      y ∉ chartPouKernel (I := I) (M := M) α →
-        ((partialLpLimit (I := I) (M := M) g r s h_atlas i α P k :
-          Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y = 0 := by
-  classical
-  set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hΩ_def
-  have hΩ_open : IsOpen Ω := chartTargetEuclid_isOpen (I := I) (M := M) α
-  -- The canonical eigenvector chart component is `W^{1,2}` (from `W^{K+1,2}`).
-  have h_comp_w1p : DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2
-      (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
-          (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i) α P :
-          Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y) Ω :=
-    (eigenvectorVec_pou_memWkp (I := I) (M := M) g r s h_atlas i (K + 1)
-      h_pou α P).memW1p
-  -- The eigenvector weak chart partial is a genuine weak partial of it.
-  have h_weak : DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) k
-      (eigenvectorChartWeakPartial (I := I) (M := M) g r s h_atlas i α P k)
-      (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
-          (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i) α P :
-          Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y) Ω :=
-    eigenvectorChartWeakPartial_hasWeakPartialDeriv (I := I) (M := M)
-      g r s h_atlas i α P k
-  -- The eigenvector weak chart partial is `L²`.
-  have h_weak_memLp : MemLp
-      (eigenvectorChartWeakPartial (I := I) (M := M) g r s h_atlas i α P k) 2
-      ((volume : Measure EuclN).restrict Ω) := by
-    rw [eigenvectorChartWeakPartial]
-    exact Lp.memLp _
-  -- The canonical chart component vanishes a.e. off the kernel.
-  have h_comp_zero := tensorL2ChartComponent_ae_zero_off_chartPouKernel
-    (I := I) (M := M) g r s
-    (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i) α P
-  -- Locality of weak partials propagates the off-kernel vanishing.
-  have h_weak_zero : ∀ᵐ y ∂((volume : Measure EuclN).restrict Ω),
-      y ∉ chartPouKernel (I := I) (M := M) α →
-        eigenvectorChartWeakPartial (I := I) (M := M)
-          g r s h_atlas i α P k y = 0 :=
-    hasWeakPartialDeriv_ae_zero_off_of_ae_zero_off hΩ_open k
-      (chartPouKernel_isCompact (I := I) (M := M) α).isClosed
-      h_weak_memLp h_weak h_comp_w1p
-      (by rw [← chartL2Measure]; exact h_comp_zero)
-  -- `partialLpLimit = μ • eigenvectorChartWeakPartial`; the `μ` scaling is
-  -- harmless for the off-kernel vanishing.
-  have h_smul : (fun y => ((partialLpLimit (I := I) (M := M)
-        g r s h_atlas i α P k :
-        Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
-      =ᵐ[chartL2Measure (I := I) (M := M) α]
-      (fun y => i.fst.val •
-        eigenvectorChartWeakPartial (I := I) (M := M)
-          g r s h_atlas i α P k y) := by
-    rw [partialLpLimit, eigenvectorChartWeakPartial]
-    exact Lp.coeFn_smul i.fst.val _
-  have h_weak_zero' : ∀ᵐ y ∂(chartL2Measure (I := I) (M := M) α),
-      y ∉ chartPouKernel (I := I) (M := M) α →
-        eigenvectorChartWeakPartial (I := I) (M := M)
-          g r s h_atlas i α P k y = 0 := by
-    rw [chartL2Measure]; exact h_weak_zero
-  filter_upwards [h_smul, h_weak_zero'] with y hy hy_zero hyK
-  rw [hy, smul_eq_mul, hy_zero hyK, mul_zero]
-
 /-! ## A uniform per-summand constant from a finite family
 
 A finite family of per-summand `wkpNorm` bounds against atoms selected by a
@@ -805,951 +630,16 @@ private lemma exists_uniform_const_of_finite_wkpNorm_bounds
       (f := fun j' => (h_data j').choose)
       (fun j' _ => (h_data j').choose_spec.1) (Finset.mem_univ j)
 
-/-! ## Headline 1 — the principal rotation coefficient limit
-
-`covPrincipalRotationCoeffLimit g r s h_atlas i α P₀` is a four-fold finite sum
-over `(P, Q, k, l)` of the `chartPouKernel α`-indicator cut of the `C^∞` factor
-`principalRotationFactor` against the chart-partial atom `partialLpLimit P k`
-(the atom depends only on `(P, k)`, not on `(Q, l)`). -/
-
-/-- **Order-`K` `wkpNorm` bound for the principal rotation coefficient limit.**
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an eigenbasis index
-`i`, an order `K`, a chart center `α : M`, a component multi-index `P₀`, and the
-order-`(K + 1)` partition-of-unity regularity input `h_pou`, there is a
-nonnegative constant `C` with
-
-```
-wkpNorm K 2 (covPrincipalRotationCoeffLimit g r s h_atlas i α P₀)
-    (chartTargetEuclid α)
-  ≤ ENNReal.ofReal C
-      * (∑ P, ∑ k, wkpNorm K 2 (partialLpLimit … P k) (chartTargetEuclid α)),
-```
-
-the order-`K` analogue of the order-`0` companion
-`eLpNorm_covPrincipalRotationCoeffLimit_le`, with the sum on the right ranging
-over the distinct chart-partial atoms.
-
-The limit object is a four-fold finite sum whose summands carry an
-`indicator (chartPouKernel α)` cut of `principalRotationFactor`; the chart-partial
-atom is `W^{K,2}` (`partialLpLimit_memWkp`) and vanishes almost everywhere off
-the compact partition-of-unity kernel, so the indicator-cut summand agrees almost
-everywhere with the uncut `C^∞`-factor product, and `wkpNorm_coef_mul_factor_le`
-controls its order-`K` `wkpNorm`. The triangle inequality `wkpNorm_sum_le`
-assembles the per-summand bounds; the `(Q, l)`-summation multiplicity and every
-per-coefficient constant fold into the single constant `C`. -/
-theorem wkpNorm_covPrincipalRotationCoeffLimit_le
-    (K : ℕ) (α : M) (P₀ : TensorCompIdx (E := E) r s)
-    (h_pou : ∀ (β : M) (Q : TensorCompIdx (E := E) r s),
-      MemWkp (d := Module.finrank ℝ E) (K + 1) 2
-        (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
-            (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
-              (eigenvectorResolvent (I := I) (M := M) g r s h_atlas i))
-            β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
-        (chartTargetEuclid (I := I) (M := M) β)) :
-    ∃ C : ℝ, 0 ≤ C ∧
-      wkpNorm (d := Module.finrank ℝ E) K 2
-          (covPrincipalRotationCoeffLimit (I := I) (M := M)
-            g r s h_atlas i α P₀ : EuclN → ℝ)
-          (chartTargetEuclid (I := I) (M := M) α)
-        ≤ ENNReal.ofReal C *
-          (∑ P : TensorCompIdx (E := E) r s,
-            ∑ k : Fin (Module.finrank ℝ E),
-              wkpNorm (d := Module.finrank ℝ E) K 2
-                (fun y => ((partialLpLimit (I := I) (M := M)
-                    g r s h_atlas i α P k :
-                  Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
-                (chartTargetEuclid (I := I) (M := M) α)) := by
-  classical
-  set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hΩ_def
-  -- Abbreviation for the chart-partial atom family, indexed by `(P, k)`.
-  set partAtom : (TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E))
-      → EuclN → ℝ := fun pk y =>
-    ((partialLpLimit (I := I) (M := M) g r s h_atlas i α pk.1 pk.2 :
-      Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
-    with hpartAtom_def
-  -- The four-fold sum, as a single sum over `(P, Q, k, l)`.
-  set F : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s
-      × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E)) → EuclN → ℝ :=
-    fun x y =>
-      Set.indicator (chartPouKernel (I := I) (M := M) α)
-          (principalRotationFactor (I := I) (M := M)
-            g r s α P₀ x.1 x.2.1 x.2.2.1 x.2.2.2) y *
-        ((partialLpLimit (I := I) (M := M) g r s h_atlas i α x.1 x.2.2.1 :
-          Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
-    with hF_def
-  -- The per-summand `MemWkp K 2` membership and explicit-norm bound.
-  have h_data : ∀ x ∈ (Finset.univ :
-      Finset (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s
-        × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E))),
-      MemWkp (d := Module.finrank ℝ E) K 2 (F x) Ω ∧
-        ∃ C : ℝ, 0 ≤ C ∧
-          wkpNorm (d := Module.finrank ℝ E) K 2 (F x) Ω
-            ≤ ENNReal.ofReal C *
-              wkpNorm (d := Module.finrank ℝ E) K 2
-                (partAtom (x.1, x.2.2.1)) Ω := by
-    intro x _
-    exact wkpNorm_indicatorFactor_mul_atom_le (I := I) (M := M) α K
-      (principalRotationFactor_contDiffOn (I := I) (M := M)
-        g r s α P₀ x.1 x.2.1 x.2.2.1 x.2.2.2)
-      (partialLpLimit_memWkp (I := I) (M := M)
-        g r s h_atlas i α x.1 x.2.2.1 K h_pou)
-      (partialLpLimit_ae_zero_off_chartPouKernel (I := I) (M := M)
-        g r s h_atlas i α x.1 x.2.2.1 K h_pou)
-  -- A single nonnegative constant dominating every per-summand constant.
-  obtain ⟨Csum, hCsum_nn, hCsum_bd⟩ :=
-    exists_uniform_const_of_finite_wkpNorm_bounds (I := I) (M := M)
-      (α := α) (K := K) F partAtom (fun x => (x.1, x.2.2.1))
-      (fun x => (h_data x (Finset.mem_univ x)).2)
-  -- Bound on the four-fold-sum `wkpNorm`, via the aggregation lemma.
-  have h_bound :
-      wkpNorm (d := Module.finrank ℝ E) K 2
-          (fun y => ∑ x : TensorCompIdx (E := E) r s
-            × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E)
-            × Fin (Module.finrank ℝ E), F x y) Ω
-        ≤ ENNReal.ofReal (Csum * (Finset.univ :
-            Finset (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s
-              × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E))).card)
-          * ∑ pk : TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E),
-              wkpNorm (d := Module.finrank ℝ E) K 2 (partAtom pk) Ω :=
-    wkpNorm_finsetSum_le_const_mul_atomSum (I := I) (M := M)
-      (α := α) (K := K) Finset.univ Finset.univ F partAtom
-      (fun x => (x.1, x.2.2.1)) (fun x _ => Finset.mem_univ _)
-      Csum hCsum_nn
-      (fun x hx => (h_data x hx).1)
-      (fun x _ => hCsum_bd x)
-  -- Identify the single-product sum with the nested four-fold sum.
-  have h_eq : (fun y => ∑ x : TensorCompIdx (E := E) r s
-      × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E)
-      × Fin (Module.finrank ℝ E), F x y)
-      = (fun y => ∑ P : TensorCompIdx (E := E) r s,
-          ∑ Q : TensorCompIdx (E := E) r s,
-            ∑ k : Fin (Module.finrank ℝ E),
-              ∑ l : Fin (Module.finrank ℝ E),
-                Set.indicator (chartPouKernel (I := I) (M := M) α)
-                    (principalRotationFactor (I := I) (M := M)
-                      g r s α P₀ P Q k l) y *
-                  (partialLpLimit (I := I) (M := M) g r s h_atlas i α P k :
-                    EuclN → ℝ) y) := by
-    funext y
-    rw [hF_def]
-    simp only [Fintype.sum_prod_type]
-  -- The chart-partial index sum on the right is the chart-partial atom family.
-  have h_atom_eq : ∑ pk : TensorCompIdx (E := E) r s
-      × Fin (Module.finrank ℝ E), wkpNorm (d := Module.finrank ℝ E) K 2
-        (partAtom pk) Ω
-      = ∑ P : TensorCompIdx (E := E) r s,
-          ∑ k : Fin (Module.finrank ℝ E),
-            wkpNorm (d := Module.finrank ℝ E) K 2
-              (fun y => ((partialLpLimit (I := I) (M := M)
-                  g r s h_atlas i α P k :
-                Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
-              Ω := by
-    rw [Fintype.sum_prod_type]
-  -- Headline constant: the per-summand sum constant times the four-fold-index
-  -- cardinality.
-  refine ⟨Csum * (Finset.univ :
-      Finset (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s
-        × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E))).card,
-    by positivity, ?_⟩
-  -- Unfold the limit object and assemble the bound.
-  rw [show (covPrincipalRotationCoeffLimit (I := I) (M := M)
-        g r s h_atlas i α P₀ : EuclN → ℝ)
-      = (fun y => ∑ P : TensorCompIdx (E := E) r s,
-          ∑ Q : TensorCompIdx (E := E) r s,
-            ∑ k : Fin (Module.finrank ℝ E),
-              ∑ l : Fin (Module.finrank ℝ E),
-                Set.indicator (chartPouKernel (I := I) (M := M) α)
-                    (principalRotationFactor (I := I) (M := M)
-                      g r s α P₀ P Q k l) y *
-                  (partialLpLimit (I := I) (M := M) g r s h_atlas i α P k :
-                    EuclN → ℝ) y) from rfl]
-  rw [← h_eq, hΩ_def, ← h_atom_eq]
-  exact h_bound
-
-/-! ## Headline 2 — the lower-order rotation value coefficient limit
-
-`covLowerOrderRotationValueCoeffLimit g r s h_atlas i α P₀` is the sum of two
-groups: a four-fold sum over `(P, Q, k, l)` of the kernel-cut `C^∞` factor
-`valuePartialFactor` against the chart-partial atom `partialLpLimit P k`, and a
-five-fold sum over `(P, Q, k, l, p)` of the kernel-cut `C^∞` factor
-`valueComponentFactor` against the chart-component atom `componentLpLimit p`. -/
-
-/-- **Order-`K` `wkpNorm` bound for the lower-order rotation value coefficient
-limit.** For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an eigenbasis
-index `i`, an order `K`, a chart center `α : M`, a component multi-index `P₀`,
-and the order-`(K + 1)` partition-of-unity regularity input `h_pou`, there is a
-nonnegative constant `C` with
-
-```
-wkpNorm K 2 (covLowerOrderRotationValueCoeffLimit g r s h_atlas i α P₀)
-    (chartTargetEuclid α)
-  ≤ ENNReal.ofReal C
-      * ((∑ P, ∑ k, wkpNorm K 2 (partialLpLimit … P k) (chartTargetEuclid α))
-        + (∑ p, wkpNorm K 2 (componentLpLimit … p) (chartTargetEuclid α))),
-```
-
-the order-`K` analogue of the order-`0` companion
-`eLpNorm_covLowerOrderRotationValueCoeffLimit_le`, with the sums on the right
-ranging over the distinct chart-partial / chart-component atoms.
-
-Each of the two groups defining the limit object is a finite sum whose summands
-carry an `indicator (chartPouKernel α)` cut of a `C^∞` factor; the accompanying
-atom is `W^{K,2}` and vanishes almost everywhere off the compact
-partition-of-unity kernel, so the indicator-cut summand agrees almost everywhere
-with the uncut `C^∞`-factor product, controlled by `wkpNorm_coef_mul_factor_le`.
-The triangle inequality assembles the per-summand bounds; every summation
-multiplicity and every per-coefficient constant folds into the single constant
-`C`. -/
-theorem wkpNorm_covLowerOrderRotationValueCoeffLimit_le
-    (K : ℕ) (α : M) (P₀ : TensorCompIdx (E := E) r s)
-    (h_pou : ∀ (β : M) (Q : TensorCompIdx (E := E) r s),
-      MemWkp (d := Module.finrank ℝ E) (K + 1) 2
-        (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
-            (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
-              (eigenvectorResolvent (I := I) (M := M) g r s h_atlas i))
-            β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
-        (chartTargetEuclid (I := I) (M := M) β)) :
-    ∃ C : ℝ, 0 ≤ C ∧
-      wkpNorm (d := Module.finrank ℝ E) K 2
-          (covLowerOrderRotationValueCoeffLimit (I := I) (M := M)
-            g r s h_atlas i α P₀ : EuclN → ℝ)
-          (chartTargetEuclid (I := I) (M := M) α)
-        ≤ ENNReal.ofReal C *
-          ((∑ P : TensorCompIdx (E := E) r s,
-              ∑ k : Fin (Module.finrank ℝ E),
-                wkpNorm (d := Module.finrank ℝ E) K 2
-                  (fun y => ((partialLpLimit (I := I) (M := M)
-                      g r s h_atlas i α P k :
-                    Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
-                    EuclN → ℝ) y)
-                  (chartTargetEuclid (I := I) (M := M) α))
-            + (∑ p : TensorCompIdx (E := E) r s,
-                wkpNorm (d := Module.finrank ℝ E) K 2
-                  (fun y => ((componentLpLimit (I := I) (M := M)
-                      g r s h_atlas i α p :
-                    Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
-                    EuclN → ℝ) y)
-                  (chartTargetEuclid (I := I) (M := M) α))) := by
-  classical
-  set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hΩ_def
-  have hΩ_open : IsOpen Ω := chartTargetEuclid_isOpen (I := I) (M := M) α
-  -- Abbreviations for the two distinct atom families.
-  set partAtom : (TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E))
-      → EuclN → ℝ := fun pk y =>
-    ((partialLpLimit (I := I) (M := M) g r s h_atlas i α pk.1 pk.2 :
-      Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
-    with hpartAtom_def
-  set compAtom : TensorCompIdx (E := E) r s → EuclN → ℝ := fun p y =>
-    ((componentLpLimit (I := I) (M := M) g r s h_atlas i α p :
-      Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
-    with hcompAtom_def
-  -- The chart-partial group, as a single sum over `(P, Q, k, l)`.
-  set Fpart : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s
-      × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E)) → EuclN → ℝ :=
-    fun x y =>
-      Set.indicator (chartPouKernel (I := I) (M := M) α)
-          (valuePartialFactor (I := I) (M := M)
-            g r s α P₀ x.1 x.2.1 x.2.2.1 x.2.2.2) y *
-        ((partialLpLimit (I := I) (M := M) g r s h_atlas i α x.1 x.2.2.1 :
-          Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
-    with hFpart_def
-  -- The chart-component group, as a single sum over `(P, Q, k, l, p)`.
-  set Fcomp : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s
-      × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E)
-      × TensorCompIdx (E := E) r s) → EuclN → ℝ :=
-    fun x y =>
-      Set.indicator (chartPouKernel (I := I) (M := M) α)
-          (valueComponentFactor (I := I) (M := M)
-            g r s α P₀ x.1 x.2.1 x.2.2.1 x.2.2.2.1 x.2.2.2.2) y *
-        ((componentLpLimit (I := I) (M := M) g r s h_atlas i α x.2.2.2.2 :
-          Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
-    with hFcomp_def
-  -- The per-summand membership / bound for the chart-partial group.
-  have h_part_data : ∀ x ∈ (Finset.univ :
-      Finset (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s
-        × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E))),
-      MemWkp (d := Module.finrank ℝ E) K 2 (Fpart x) Ω ∧
-        ∃ C : ℝ, 0 ≤ C ∧
-          wkpNorm (d := Module.finrank ℝ E) K 2 (Fpart x) Ω
-            ≤ ENNReal.ofReal C *
-              wkpNorm (d := Module.finrank ℝ E) K 2
-                (partAtom (x.1, x.2.2.1)) Ω := by
-    intro x _
-    exact wkpNorm_indicatorFactor_mul_atom_le (I := I) (M := M) α K
-      (valuePartialFactor_contDiffOn (I := I) (M := M)
-        g r s α P₀ x.1 x.2.1 x.2.2.1 x.2.2.2)
-      (partialLpLimit_memWkp (I := I) (M := M)
-        g r s h_atlas i α x.1 x.2.2.1 K h_pou)
-      (partialLpLimit_ae_zero_off_chartPouKernel (I := I) (M := M)
-        g r s h_atlas i α x.1 x.2.2.1 K h_pou)
-  -- The per-summand membership / bound for the chart-component group.
-  have h_comp_data : ∀ x ∈ (Finset.univ :
-      Finset (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s
-        × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E)
-        × TensorCompIdx (E := E) r s)),
-      MemWkp (d := Module.finrank ℝ E) K 2 (Fcomp x) Ω ∧
-        ∃ C : ℝ, 0 ≤ C ∧
-          wkpNorm (d := Module.finrank ℝ E) K 2 (Fcomp x) Ω
-            ≤ ENNReal.ofReal C *
-              wkpNorm (d := Module.finrank ℝ E) K 2
-                (compAtom x.2.2.2.2) Ω := by
-    intro x _
-    exact wkpNorm_indicatorFactor_mul_atom_le (I := I) (M := M) α K
-      (valueComponentFactor_contDiffOn (I := I) (M := M)
-        g r s α P₀ x.1 x.2.1 x.2.2.1 x.2.2.2.1 x.2.2.2.2)
-      (componentLpLimit_memWkp (I := I) (M := M)
-        g r s h_atlas i α x.2.2.2.2 K h_pou)
-      (componentLpLimit_ae_zero_off_chartPouKernel (I := I) (M := M)
-        g r s h_atlas i α x.2.2.2.2)
-  -- A single nonnegative constant dominating every chart-partial-summand
-  -- constant, resp. every chart-component-summand constant.
-  obtain ⟨Cpart, hCpart_nn, hCpart_bd⟩ :=
-    exists_uniform_const_of_finite_wkpNorm_bounds (I := I) (M := M)
-      (α := α) (K := K) Fpart partAtom (fun x => (x.1, x.2.2.1))
-      (fun x => (h_part_data x (Finset.mem_univ x)).2)
-  obtain ⟨Ccomp, hCcomp_nn, hCcomp_bd⟩ :=
-    exists_uniform_const_of_finite_wkpNorm_bounds (I := I) (M := M)
-      (α := α) (K := K) Fcomp compAtom (fun x => x.2.2.2.2)
-      (fun x => (h_comp_data x (Finset.mem_univ x)).2)
-  -- Bound on the chart-partial group `wkpNorm`.
-  have h_part_bound :
-      wkpNorm (d := Module.finrank ℝ E) K 2
-          (fun y => ∑ x : TensorCompIdx (E := E) r s
-            × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E)
-            × Fin (Module.finrank ℝ E), Fpart x y) Ω
-        ≤ ENNReal.ofReal (Cpart * (Finset.univ :
-            Finset (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s
-              × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E))).card)
-          * ∑ pk : TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E),
-              wkpNorm (d := Module.finrank ℝ E) K 2 (partAtom pk) Ω :=
-    wkpNorm_finsetSum_le_const_mul_atomSum (I := I) (M := M)
-      (α := α) (K := K) Finset.univ Finset.univ Fpart partAtom
-      (fun x => (x.1, x.2.2.1)) (fun x _ => Finset.mem_univ _)
-      Cpart hCpart_nn
-      (fun x hx => (h_part_data x hx).1)
-      (fun x _ => hCpart_bd x)
-  -- Bound on the chart-component group `wkpNorm`.
-  have h_comp_bound :
-      wkpNorm (d := Module.finrank ℝ E) K 2
-          (fun y => ∑ x : TensorCompIdx (E := E) r s
-            × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E)
-            × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s,
-            Fcomp x y) Ω
-        ≤ ENNReal.ofReal (Ccomp * (Finset.univ :
-            Finset (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s
-              × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E)
-              × TensorCompIdx (E := E) r s)).card)
-          * ∑ p : TensorCompIdx (E := E) r s,
-              wkpNorm (d := Module.finrank ℝ E) K 2 (compAtom p) Ω :=
-    wkpNorm_finsetSum_le_const_mul_atomSum (I := I) (M := M)
-      (α := α) (K := K) Finset.univ Finset.univ Fcomp compAtom
-      (fun x => x.2.2.2.2) (fun x _ => Finset.mem_univ _)
-      Ccomp hCcomp_nn
-      (fun x hx => (h_comp_data x hx).1)
-      (fun x _ => hCcomp_bd x)
-  -- Identify the two single-product sums with the two nested-sum groups.
-  have h_part_eq : (fun y => ∑ x : TensorCompIdx (E := E) r s
-      × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E)
-      × Fin (Module.finrank ℝ E), Fpart x y)
-      = (fun y => ∑ P : TensorCompIdx (E := E) r s,
-          ∑ Q : TensorCompIdx (E := E) r s,
-            ∑ k : Fin (Module.finrank ℝ E),
-              ∑ l : Fin (Module.finrank ℝ E),
-                Set.indicator (chartPouKernel (I := I) (M := M) α)
-                    (valuePartialFactor (I := I) (M := M)
-                      g r s α P₀ P Q k l) y *
-                  (partialLpLimit (I := I) (M := M) g r s h_atlas i α P k :
-                    EuclN → ℝ) y) := by
-    funext y
-    rw [hFpart_def]
-    simp only [Fintype.sum_prod_type]
-  have h_comp_eq : (fun y => ∑ x : TensorCompIdx (E := E) r s
-      × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E)
-      × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s, Fcomp x y)
-      = (fun y => ∑ P : TensorCompIdx (E := E) r s,
-          ∑ Q : TensorCompIdx (E := E) r s,
-            ∑ k : Fin (Module.finrank ℝ E),
-              ∑ l : Fin (Module.finrank ℝ E),
-                ∑ p : TensorCompIdx (E := E) r s,
-                  Set.indicator (chartPouKernel (I := I) (M := M) α)
-                      (valueComponentFactor (I := I) (M := M)
-                        g r s α P₀ P Q k l p) y *
-                    (componentLpLimit (I := I) (M := M) g r s h_atlas i α p :
-                      EuclN → ℝ) y) := by
-    funext y
-    rw [hFcomp_def]
-    simp only [Fintype.sum_prod_type]
-  -- The chart-partial index sum on the right is the chart-partial atom family.
-  have h_part_atom_eq : ∑ pk : TensorCompIdx (E := E) r s
-      × Fin (Module.finrank ℝ E), wkpNorm (d := Module.finrank ℝ E) K 2
-        (partAtom pk) Ω
-      = ∑ P : TensorCompIdx (E := E) r s,
-          ∑ k : Fin (Module.finrank ℝ E),
-            wkpNorm (d := Module.finrank ℝ E) K 2
-              (fun y => ((partialLpLimit (I := I) (M := M)
-                  g r s h_atlas i α P k :
-                Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
-              Ω := by
-    rw [Fintype.sum_prod_type]
-  -- Headline constant: the larger of the two group constants.
-  refine ⟨max
-      (Cpart * (Finset.univ :
-        Finset (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s
-          × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E))).card)
-      (Ccomp * (Finset.univ :
-        Finset (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s
-          × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E)
-          × TensorCompIdx (E := E) r s)).card),
-    le_trans (by positivity) (le_max_left _ _), ?_⟩
-  -- Abbreviation for the headline constant.
-  set Cmax : ℝ := max
-      (Cpart * (Finset.univ :
-        Finset (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s
-          × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E))).card)
-      (Ccomp * (Finset.univ :
-        Finset (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s
-          × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E)
-          × TensorCompIdx (E := E) r s)).card) with hCmax_def
-  -- Bound on the chart-partial group, in the distinct-atom-sum form.
-  have hpart : wkpNorm (d := Module.finrank ℝ E) K 2
-        (fun y => ∑ x : TensorCompIdx (E := E) r s
-          × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E)
-          × Fin (Module.finrank ℝ E), Fpart x y) Ω
-      ≤ ENNReal.ofReal Cmax *
-        ∑ P : TensorCompIdx (E := E) r s,
-          ∑ k : Fin (Module.finrank ℝ E),
-            wkpNorm (d := Module.finrank ℝ E) K 2
-              (fun y => ((partialLpLimit (I := I) (M := M)
-                  g r s h_atlas i α P k :
-                Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
-              Ω := by
-    rw [← h_part_atom_eq]
-    refine h_part_bound.trans ?_
-    exact mul_le_mul_of_nonneg_right (ENNReal.ofReal_le_ofReal (le_max_left _ _)) (zero_le _)
-  -- Bound on the chart-component group, in the distinct-atom-sum form.
-  have hcomp : wkpNorm (d := Module.finrank ℝ E) K 2
-        (fun y => ∑ x : TensorCompIdx (E := E) r s
-          × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E)
-          × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s,
-          Fcomp x y) Ω
-      ≤ ENNReal.ofReal Cmax *
-        ∑ p : TensorCompIdx (E := E) r s,
-          wkpNorm (d := Module.finrank ℝ E) K 2
-            (fun y => ((componentLpLimit (I := I) (M := M)
-                g r s h_atlas i α p :
-              Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
-            Ω := by
-    refine h_comp_bound.trans ?_
-    exact mul_le_mul_of_nonneg_right (ENNReal.ofReal_le_ofReal (le_max_right _ _)) (zero_le _)
-  -- `MemWkp K 2` membership of the two groups, for the triangle inequality.
-  have h_part_memWkp : MemWkp (d := Module.finrank ℝ E) K 2
-      (fun y => ∑ x : TensorCompIdx (E := E) r s
-        × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E)
-        × Fin (Module.finrank ℝ E), Fpart x y) Ω :=
-    memWkp_finsetSum (I := I) (M := M) _ (fun x hx => (h_part_data x hx).1)
-  have h_comp_memWkp : MemWkp (d := Module.finrank ℝ E) K 2
-      (fun y => ∑ x : TensorCompIdx (E := E) r s
-        × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E)
-        × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s,
-        Fcomp x y) Ω :=
-    memWkp_finsetSum (I := I) (M := M) _ (fun x hx => (h_comp_data x hx).1)
-  -- Unfold the limit object into its two groups, bridge to single-product sums.
-  rw [show (covLowerOrderRotationValueCoeffLimit (I := I) (M := M)
-        g r s h_atlas i α P₀ : EuclN → ℝ)
-      = (fun y => (∑ P : TensorCompIdx (E := E) r s,
-            ∑ Q : TensorCompIdx (E := E) r s,
-              ∑ k : Fin (Module.finrank ℝ E),
-                ∑ l : Fin (Module.finrank ℝ E),
-                  Set.indicator (chartPouKernel (I := I) (M := M) α)
-                      (valuePartialFactor (I := I) (M := M)
-                        g r s α P₀ P Q k l) y *
-                    (partialLpLimit (I := I) (M := M) g r s h_atlas i α P k :
-                      EuclN → ℝ) y)
-          + ∑ P : TensorCompIdx (E := E) r s,
-              ∑ Q : TensorCompIdx (E := E) r s,
-                ∑ k : Fin (Module.finrank ℝ E),
-                  ∑ l : Fin (Module.finrank ℝ E),
-                    ∑ p : TensorCompIdx (E := E) r s,
-                      Set.indicator (chartPouKernel (I := I) (M := M) α)
-                          (valueComponentFactor (I := I) (M := M)
-                            g r s α P₀ P Q k l p) y *
-                        (componentLpLimit (I := I) (M := M)
-                          g r s h_atlas i α p : EuclN → ℝ) y) from rfl]
-  have h_bridge : (fun y => (∑ P : TensorCompIdx (E := E) r s,
-          ∑ Q : TensorCompIdx (E := E) r s,
-            ∑ k : Fin (Module.finrank ℝ E),
-              ∑ l : Fin (Module.finrank ℝ E),
-                Set.indicator (chartPouKernel (I := I) (M := M) α)
-                    (valuePartialFactor (I := I) (M := M)
-                      g r s α P₀ P Q k l) y *
-                  (partialLpLimit (I := I) (M := M) g r s h_atlas i α P k :
-                    EuclN → ℝ) y)
-        + ∑ P : TensorCompIdx (E := E) r s,
-            ∑ Q : TensorCompIdx (E := E) r s,
-              ∑ k : Fin (Module.finrank ℝ E),
-                ∑ l : Fin (Module.finrank ℝ E),
-                  ∑ p : TensorCompIdx (E := E) r s,
-                    Set.indicator (chartPouKernel (I := I) (M := M) α)
-                        (valueComponentFactor (I := I) (M := M)
-                          g r s α P₀ P Q k l p) y *
-                      (componentLpLimit (I := I) (M := M)
-                        g r s h_atlas i α p : EuclN → ℝ) y)
-      = (fun y => (∑ x : TensorCompIdx (E := E) r s
-            × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E)
-            × Fin (Module.finrank ℝ E), Fpart x y)
-          + ∑ x : TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s
-              × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E)
-              × TensorCompIdx (E := E) r s, Fcomp x y) := by
-    funext y
-    rw [← congrFun h_part_eq y, ← congrFun h_comp_eq y]
-  rw [h_bridge]
-  -- Triangle inequality, then the two group bounds, then distribute.
-  calc
-    wkpNorm (d := Module.finrank ℝ E) K 2
-        (fun y => (∑ x : TensorCompIdx (E := E) r s
-          × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E)
-          × Fin (Module.finrank ℝ E), Fpart x y)
-        + ∑ x : TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s
-            × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E)
-            × TensorCompIdx (E := E) r s, Fcomp x y) Ω
-        ≤ wkpNorm (d := Module.finrank ℝ E) K 2
-              (fun y => ∑ x : TensorCompIdx (E := E) r s
-                × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E)
-                × Fin (Module.finrank ℝ E), Fpart x y) Ω
-          + wkpNorm (d := Module.finrank ℝ E) K 2
-              (fun y => ∑ x : TensorCompIdx (E := E) r s
-                × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E)
-                × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s,
-                Fcomp x y) Ω :=
-        wkpNorm_add_le (d := Module.finrank ℝ E)
-          (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_part_memWkp h_comp_memWkp
-    _ ≤ ENNReal.ofReal Cmax *
-          (∑ P : TensorCompIdx (E := E) r s,
-            ∑ k : Fin (Module.finrank ℝ E),
-              wkpNorm (d := Module.finrank ℝ E) K 2
-                (fun y => ((partialLpLimit (I := I) (M := M)
-                    g r s h_atlas i α P k :
-                  Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
-                  EuclN → ℝ) y) Ω)
-        + ENNReal.ofReal Cmax *
-          (∑ p : TensorCompIdx (E := E) r s,
-            wkpNorm (d := Module.finrank ℝ E) K 2
-              (fun y => ((componentLpLimit (I := I) (M := M)
-                  g r s h_atlas i α p :
-                Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
-                EuclN → ℝ) y) Ω) :=
-        add_le_add hpart hcomp
-    _ = ENNReal.ofReal Cmax *
-          ((∑ P : TensorCompIdx (E := E) r s,
-              ∑ k : Fin (Module.finrank ℝ E),
-                wkpNorm (d := Module.finrank ℝ E) K 2
-                  (fun y => ((partialLpLimit (I := I) (M := M)
-                      g r s h_atlas i α P k :
-                    Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
-                    EuclN → ℝ) y) Ω)
-            + (∑ p : TensorCompIdx (E := E) r s,
-                wkpNorm (d := Module.finrank ℝ E) K 2
-                  (fun y => ((componentLpLimit (I := I) (M := M)
-                      g r s h_atlas i α p :
-                    Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
-                    EuclN → ℝ) y) Ω)) := by
-      rw [mul_add]
-
-/-! ## Headline 3 — the chart-density-weighted lower-order gradient divergence
-
-`weightedGradCoeffDivLimit g r s h_atlas i α P₀ l` is the sum of two four-fold
-sums over `(P, Q, k, p)`: the kernel-cut chart-Euclidean partial of the `C^∞`
-factor `weightedGradFactor` against the chart-component atom `componentLpLimit p`,
-and the kernel-cut `weightedGradFactor` against the chart-partial atom
-`partialLpLimit p l`. -/
-
-/-- **Order-`K` `wkpNorm` bound for the chart-density-weighted lower-order
-gradient divergence coefficient limit.** For a closed Riemannian manifold
-`(M, g)`, ranks `(r, s)`, an eigenbasis index `i`, an order `K`, a chart center
-`α : M`, a component multi-index `P₀`, a chart direction `l`, and the order-`(K +
-1)` partition-of-unity regularity input `h_pou`, there is a nonnegative constant
-`C` with
-
-```
-wkpNorm K 2 (weightedGradCoeffDivLimit g r s h_atlas i α P₀ l)
-    (chartTargetEuclid α)
-  ≤ ENNReal.ofReal C
-      * ((∑ p, wkpNorm K 2 (componentLpLimit … p) (chartTargetEuclid α))
-        + (∑ p, ∑ l', wkpNorm K 2 (partialLpLimit … p l') (chartTargetEuclid α))),
-```
-
-the order-`K` analogue of the order-`0` companion
-`eLpNorm_weightedGradCoeffDivLimit_le`, with the sums on the right ranging over
-the distinct chart-component / chart-partial atoms.
-
-Each of the two four-fold sums defining the limit object has summands carrying an
-`indicator (chartPouKernel α)` cut of a `C^∞` factor — the chart-Euclidean
-partial of `weightedGradFactor`, respectively `weightedGradFactor` itself; the
-accompanying atom is `W^{K,2}` and vanishes almost everywhere off the compact
-partition-of-unity kernel, so the indicator-cut summand agrees almost everywhere
-with the uncut `C^∞`-factor product, controlled by `wkpNorm_coef_mul_factor_le`.
-The triangle inequality assembles the per-summand bounds; every summation
-multiplicity and per-coefficient constant folds into the single constant `C`. -/
-theorem wkpNorm_weightedGradCoeffDivLimit_le
-    (K : ℕ) (α : M) (P₀ : TensorCompIdx (E := E) r s)
-    (l : Fin (Module.finrank ℝ E))
-    (h_pou : ∀ (β : M) (Q : TensorCompIdx (E := E) r s),
-      MemWkp (d := Module.finrank ℝ E) (K + 1) 2
-        (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
-            (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
-              (eigenvectorResolvent (I := I) (M := M) g r s h_atlas i))
-            β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
-        (chartTargetEuclid (I := I) (M := M) β)) :
-    ∃ C : ℝ, 0 ≤ C ∧
-      wkpNorm (d := Module.finrank ℝ E) K 2
-          (weightedGradCoeffDivLimit (I := I) (M := M)
-            g r s h_atlas i α P₀ l : EuclN → ℝ)
-          (chartTargetEuclid (I := I) (M := M) α)
-        ≤ ENNReal.ofReal C *
-          ((∑ p : TensorCompIdx (E := E) r s,
-              wkpNorm (d := Module.finrank ℝ E) K 2
-                (fun y => ((componentLpLimit (I := I) (M := M)
-                    g r s h_atlas i α p :
-                  Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
-                  EuclN → ℝ) y)
-                (chartTargetEuclid (I := I) (M := M) α))
-            + (∑ p : TensorCompIdx (E := E) r s,
-                ∑ l' : Fin (Module.finrank ℝ E),
-                  wkpNorm (d := Module.finrank ℝ E) K 2
-                    (fun y => ((partialLpLimit (I := I) (M := M)
-                        g r s h_atlas i α p l' :
-                      Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
-                      EuclN → ℝ) y)
-                    (chartTargetEuclid (I := I) (M := M) α))) := by
-  classical
-  set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hΩ_def
-  have hΩ_open : IsOpen Ω := chartTargetEuclid_isOpen (I := I) (M := M) α
-  -- Abbreviations for the two distinct atom families.
-  set compAtom : TensorCompIdx (E := E) r s → EuclN → ℝ := fun p y =>
-    ((componentLpLimit (I := I) (M := M) g r s h_atlas i α p :
-      Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
-    with hcompAtom_def
-  set partAtom : (TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E))
-      → EuclN → ℝ := fun pl y =>
-    ((partialLpLimit (I := I) (M := M) g r s h_atlas i α pl.1 pl.2 :
-      Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
-    with hpartAtom_def
-  -- The chart-component group, as a single sum over `(P, Q, k, p)`.
-  set Fcomp : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s
-      × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s) → EuclN → ℝ :=
-    fun x y =>
-      Set.indicator (chartPouKernel (I := I) (M := M) α)
-          (euclidPartial (E := E) l
-            (weightedGradFactor (I := I) (M := M)
-              g r s α P₀ l x.1 x.2.1 x.2.2.1 x.2.2.2)) y *
-        ((componentLpLimit (I := I) (M := M) g r s h_atlas i α x.2.2.2 :
-          Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
-    with hFcomp_def
-  -- The chart-partial group, as a single sum over `(P, Q, k, p)`.
-  set Fpart : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s
-      × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s) → EuclN → ℝ :=
-    fun x y =>
-      Set.indicator (chartPouKernel (I := I) (M := M) α)
-          (weightedGradFactor (I := I) (M := M)
-            g r s α P₀ l x.1 x.2.1 x.2.2.1 x.2.2.2) y *
-        ((partialLpLimit (I := I) (M := M) g r s h_atlas i α x.2.2.2 l :
-          Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
-    with hFpart_def
-  -- The per-summand membership / bound for the chart-component group.
-  have h_comp_data : ∀ x ∈ (Finset.univ :
-      Finset (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s
-        × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s)),
-      MemWkp (d := Module.finrank ℝ E) K 2 (Fcomp x) Ω ∧
-        ∃ C : ℝ, 0 ≤ C ∧
-          wkpNorm (d := Module.finrank ℝ E) K 2 (Fcomp x) Ω
-            ≤ ENNReal.ofReal C *
-              wkpNorm (d := Module.finrank ℝ E) K 2
-                (compAtom x.2.2.2) Ω := by
-    intro x _
-    exact wkpNorm_indicatorFactor_mul_atom_le (I := I) (M := M) α K
-      (euclidPartial_weightedGradFactor_contDiffOn (I := I) (M := M)
-        g r s α P₀ l x.1 x.2.1 x.2.2.1 x.2.2.2)
-      (componentLpLimit_memWkp (I := I) (M := M)
-        g r s h_atlas i α x.2.2.2 K h_pou)
-      (componentLpLimit_ae_zero_off_chartPouKernel (I := I) (M := M)
-        g r s h_atlas i α x.2.2.2)
-  -- The per-summand membership / bound for the chart-partial group.
-  have h_part_data : ∀ x ∈ (Finset.univ :
-      Finset (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s
-        × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s)),
-      MemWkp (d := Module.finrank ℝ E) K 2 (Fpart x) Ω ∧
-        ∃ C : ℝ, 0 ≤ C ∧
-          wkpNorm (d := Module.finrank ℝ E) K 2 (Fpart x) Ω
-            ≤ ENNReal.ofReal C *
-              wkpNorm (d := Module.finrank ℝ E) K 2
-                (partAtom (x.2.2.2, l)) Ω := by
-    intro x _
-    exact wkpNorm_indicatorFactor_mul_atom_le (I := I) (M := M) α K
-      (weightedGradFactor_contDiffOn (I := I) (M := M)
-        g r s α P₀ l x.1 x.2.1 x.2.2.1 x.2.2.2)
-      (partialLpLimit_memWkp (I := I) (M := M)
-        g r s h_atlas i α x.2.2.2 l K h_pou)
-      (partialLpLimit_ae_zero_off_chartPouKernel (I := I) (M := M)
-        g r s h_atlas i α x.2.2.2 l K h_pou)
-  -- A single nonnegative constant dominating every chart-component-summand
-  -- constant, resp. every chart-partial-summand constant.
-  obtain ⟨Ccomp, hCcomp_nn, hCcomp_bd⟩ :=
-    exists_uniform_const_of_finite_wkpNorm_bounds (I := I) (M := M)
-      (α := α) (K := K) Fcomp compAtom (fun x => x.2.2.2)
-      (fun x => (h_comp_data x (Finset.mem_univ x)).2)
-  obtain ⟨Cpart, hCpart_nn, hCpart_bd⟩ :=
-    exists_uniform_const_of_finite_wkpNorm_bounds (I := I) (M := M)
-      (α := α) (K := K) Fpart partAtom (fun x => (x.2.2.2, l))
-      (fun x => (h_part_data x (Finset.mem_univ x)).2)
-  -- Bound on the chart-component group `wkpNorm`.
-  have h_comp_bound :
-      wkpNorm (d := Module.finrank ℝ E) K 2
-          (fun y => ∑ x : TensorCompIdx (E := E) r s
-            × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E)
-            × TensorCompIdx (E := E) r s, Fcomp x y) Ω
-        ≤ ENNReal.ofReal (Ccomp * (Finset.univ :
-            Finset (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s
-              × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s)).card)
-          * ∑ p : TensorCompIdx (E := E) r s,
-              wkpNorm (d := Module.finrank ℝ E) K 2 (compAtom p) Ω :=
-    wkpNorm_finsetSum_le_const_mul_atomSum (I := I) (M := M)
-      (α := α) (K := K) Finset.univ Finset.univ Fcomp compAtom
-      (fun x => x.2.2.2) (fun x _ => Finset.mem_univ _)
-      Ccomp hCcomp_nn
-      (fun x hx => (h_comp_data x hx).1)
-      (fun x _ => hCcomp_bd x)
-  -- Bound on the chart-partial group `wkpNorm`.
-  have h_part_bound :
-      wkpNorm (d := Module.finrank ℝ E) K 2
-          (fun y => ∑ x : TensorCompIdx (E := E) r s
-            × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E)
-            × TensorCompIdx (E := E) r s, Fpart x y) Ω
-        ≤ ENNReal.ofReal (Cpart * (Finset.univ :
-            Finset (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s
-              × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s)).card)
-          * ∑ pl : TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E),
-              wkpNorm (d := Module.finrank ℝ E) K 2 (partAtom pl) Ω :=
-    wkpNorm_finsetSum_le_const_mul_atomSum (I := I) (M := M)
-      (α := α) (K := K) Finset.univ Finset.univ Fpart partAtom
-      (fun x => (x.2.2.2, l)) (fun x _ => Finset.mem_univ _)
-      Cpart hCpart_nn
-      (fun x hx => (h_part_data x hx).1)
-      (fun x _ => hCpart_bd x)
-  -- Identify the two single-product sums with the two nested-sum groups.
-  have h_comp_eq : (fun y => ∑ x : TensorCompIdx (E := E) r s
-      × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E)
-      × TensorCompIdx (E := E) r s, Fcomp x y)
-      = (fun y => ∑ P : TensorCompIdx (E := E) r s,
-          ∑ Q : TensorCompIdx (E := E) r s,
-            ∑ k : Fin (Module.finrank ℝ E),
-              ∑ p : TensorCompIdx (E := E) r s,
-                Set.indicator (chartPouKernel (I := I) (M := M) α)
-                    (euclidPartial (E := E) l
-                      (weightedGradFactor (I := I) (M := M)
-                        g r s α P₀ l P Q k p)) y *
-                  (componentLpLimit (I := I) (M := M) g r s h_atlas i α p :
-                    EuclN → ℝ) y) := by
-    funext y
-    rw [hFcomp_def]
-    simp only [Fintype.sum_prod_type]
-  have h_part_eq : (fun y => ∑ x : TensorCompIdx (E := E) r s
-      × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E)
-      × TensorCompIdx (E := E) r s, Fpart x y)
-      = (fun y => ∑ P : TensorCompIdx (E := E) r s,
-          ∑ Q : TensorCompIdx (E := E) r s,
-            ∑ k : Fin (Module.finrank ℝ E),
-              ∑ p : TensorCompIdx (E := E) r s,
-                Set.indicator (chartPouKernel (I := I) (M := M) α)
-                    (weightedGradFactor (I := I) (M := M)
-                      g r s α P₀ l P Q k p) y *
-                  (partialLpLimit (I := I) (M := M) g r s h_atlas i α p l :
-                    EuclN → ℝ) y) := by
-    funext y
-    rw [hFpart_def]
-    simp only [Fintype.sum_prod_type]
-  -- The chart-partial index sum on the right is the chart-partial atom family.
-  have h_part_atom_eq : ∑ pl : TensorCompIdx (E := E) r s
-      × Fin (Module.finrank ℝ E), wkpNorm (d := Module.finrank ℝ E) K 2
-        (partAtom pl) Ω
-      = ∑ p : TensorCompIdx (E := E) r s,
-          ∑ l' : Fin (Module.finrank ℝ E),
-            wkpNorm (d := Module.finrank ℝ E) K 2
-              (fun y => ((partialLpLimit (I := I) (M := M)
-                  g r s h_atlas i α p l' :
-                Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
-              Ω := by
-    rw [Fintype.sum_prod_type]
-  -- Headline constant: the larger of the two group constants.
-  refine ⟨max
-      (Ccomp * (Finset.univ :
-        Finset (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s
-          × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s)).card)
-      (Cpart * (Finset.univ :
-        Finset (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s
-          × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s)).card),
-    le_trans (by positivity) (le_max_left _ _), ?_⟩
-  -- Abbreviation for the headline constant.
-  set Cmax : ℝ := max
-      (Ccomp * (Finset.univ :
-        Finset (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s
-          × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s)).card)
-      (Cpart * (Finset.univ :
-        Finset (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s
-          × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s)).card)
-    with hCmax_def
-  -- Bound on the chart-component group, in the distinct-atom-sum form.
-  have hcomp : wkpNorm (d := Module.finrank ℝ E) K 2
-        (fun y => ∑ x : TensorCompIdx (E := E) r s
-          × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E)
-          × TensorCompIdx (E := E) r s, Fcomp x y) Ω
-      ≤ ENNReal.ofReal Cmax *
-        ∑ p : TensorCompIdx (E := E) r s,
-          wkpNorm (d := Module.finrank ℝ E) K 2
-            (fun y => ((componentLpLimit (I := I) (M := M)
-                g r s h_atlas i α p :
-              Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
-            Ω := by
-    refine h_comp_bound.trans ?_
-    exact mul_le_mul_of_nonneg_right (ENNReal.ofReal_le_ofReal (le_max_left _ _)) (zero_le _)
-  -- Bound on the chart-partial group, in the distinct-atom-sum form.
-  have hpart : wkpNorm (d := Module.finrank ℝ E) K 2
-        (fun y => ∑ x : TensorCompIdx (E := E) r s
-          × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E)
-          × TensorCompIdx (E := E) r s, Fpart x y) Ω
-      ≤ ENNReal.ofReal Cmax *
-        ∑ p : TensorCompIdx (E := E) r s,
-          ∑ l' : Fin (Module.finrank ℝ E),
-            wkpNorm (d := Module.finrank ℝ E) K 2
-              (fun y => ((partialLpLimit (I := I) (M := M)
-                  g r s h_atlas i α p l' :
-                Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
-              Ω := by
-    rw [← h_part_atom_eq]
-    refine h_part_bound.trans ?_
-    exact mul_le_mul_of_nonneg_right (ENNReal.ofReal_le_ofReal (le_max_right _ _)) (zero_le _)
-  -- `MemWkp K 2` membership of the two groups, for the triangle inequality.
-  have h_comp_memWkp : MemWkp (d := Module.finrank ℝ E) K 2
-      (fun y => ∑ x : TensorCompIdx (E := E) r s
-        × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E)
-        × TensorCompIdx (E := E) r s, Fcomp x y) Ω :=
-    memWkp_finsetSum (I := I) (M := M) _ (fun x hx => (h_comp_data x hx).1)
-  have h_part_memWkp : MemWkp (d := Module.finrank ℝ E) K 2
-      (fun y => ∑ x : TensorCompIdx (E := E) r s
-        × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E)
-        × TensorCompIdx (E := E) r s, Fpart x y) Ω :=
-    memWkp_finsetSum (I := I) (M := M) _ (fun x hx => (h_part_data x hx).1)
-  -- Unfold the limit object into its two groups, bridge to single-product sums.
-  rw [show (weightedGradCoeffDivLimit (I := I) (M := M)
-        g r s h_atlas i α P₀ l : EuclN → ℝ)
-      = (fun y => (∑ P : TensorCompIdx (E := E) r s,
-            ∑ Q : TensorCompIdx (E := E) r s,
-              ∑ k : Fin (Module.finrank ℝ E),
-                ∑ p : TensorCompIdx (E := E) r s,
-                  Set.indicator (chartPouKernel (I := I) (M := M) α)
-                      (euclidPartial (E := E) l
-                        (weightedGradFactor (I := I) (M := M)
-                          g r s α P₀ l P Q k p)) y *
-                    (componentLpLimit (I := I) (M := M) g r s h_atlas i α p :
-                      EuclN → ℝ) y)
-          + ∑ P : TensorCompIdx (E := E) r s,
-              ∑ Q : TensorCompIdx (E := E) r s,
-                ∑ k : Fin (Module.finrank ℝ E),
-                  ∑ p : TensorCompIdx (E := E) r s,
-                    Set.indicator (chartPouKernel (I := I) (M := M) α)
-                        (weightedGradFactor (I := I) (M := M)
-                          g r s α P₀ l P Q k p) y *
-                      (partialLpLimit (I := I) (M := M) g r s h_atlas i α p l :
-                        EuclN → ℝ) y) from rfl]
-  have h_bridge : (fun y => (∑ P : TensorCompIdx (E := E) r s,
-          ∑ Q : TensorCompIdx (E := E) r s,
-            ∑ k : Fin (Module.finrank ℝ E),
-              ∑ p : TensorCompIdx (E := E) r s,
-                Set.indicator (chartPouKernel (I := I) (M := M) α)
-                    (euclidPartial (E := E) l
-                      (weightedGradFactor (I := I) (M := M)
-                        g r s α P₀ l P Q k p)) y *
-                  (componentLpLimit (I := I) (M := M) g r s h_atlas i α p :
-                    EuclN → ℝ) y)
-        + ∑ P : TensorCompIdx (E := E) r s,
-            ∑ Q : TensorCompIdx (E := E) r s,
-              ∑ k : Fin (Module.finrank ℝ E),
-                ∑ p : TensorCompIdx (E := E) r s,
-                  Set.indicator (chartPouKernel (I := I) (M := M) α)
-                      (weightedGradFactor (I := I) (M := M)
-                        g r s α P₀ l P Q k p) y *
-                    (partialLpLimit (I := I) (M := M) g r s h_atlas i α p l :
-                      EuclN → ℝ) y)
-      = (fun y => (∑ x : TensorCompIdx (E := E) r s
-            × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E)
-            × TensorCompIdx (E := E) r s, Fcomp x y)
-          + ∑ x : TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s
-              × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s,
-              Fpart x y) := by
-    funext y
-    rw [← congrFun h_comp_eq y, ← congrFun h_part_eq y]
-  rw [h_bridge]
-  -- Triangle inequality, then the two group bounds, then distribute.
-  calc
-    wkpNorm (d := Module.finrank ℝ E) K 2
-        (fun y => (∑ x : TensorCompIdx (E := E) r s
-          × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E)
-          × TensorCompIdx (E := E) r s, Fcomp x y)
-        + ∑ x : TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s
-            × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s,
-            Fpart x y) Ω
-        ≤ wkpNorm (d := Module.finrank ℝ E) K 2
-              (fun y => ∑ x : TensorCompIdx (E := E) r s
-                × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E)
-                × TensorCompIdx (E := E) r s, Fcomp x y) Ω
-          + wkpNorm (d := Module.finrank ℝ E) K 2
-              (fun y => ∑ x : TensorCompIdx (E := E) r s
-                × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E)
-                × TensorCompIdx (E := E) r s, Fpart x y) Ω :=
-        wkpNorm_add_le (d := Module.finrank ℝ E)
-          (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_comp_memWkp h_part_memWkp
-    _ ≤ ENNReal.ofReal Cmax *
-          (∑ p : TensorCompIdx (E := E) r s,
-            wkpNorm (d := Module.finrank ℝ E) K 2
-              (fun y => ((componentLpLimit (I := I) (M := M)
-                  g r s h_atlas i α p :
-                Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
-                EuclN → ℝ) y) Ω)
-        + ENNReal.ofReal Cmax *
-          (∑ p : TensorCompIdx (E := E) r s,
-            ∑ l' : Fin (Module.finrank ℝ E),
-              wkpNorm (d := Module.finrank ℝ E) K 2
-                (fun y => ((partialLpLimit (I := I) (M := M)
-                    g r s h_atlas i α p l' :
-                  Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
-                  EuclN → ℝ) y) Ω) :=
-        add_le_add hcomp hpart
-    _ = ENNReal.ofReal Cmax *
-          ((∑ p : TensorCompIdx (E := E) r s,
-              wkpNorm (d := Module.finrank ℝ E) K 2
-                (fun y => ((componentLpLimit (I := I) (M := M)
-                    g r s h_atlas i α p :
-                  Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
-                  EuclN → ℝ) y) Ω)
-            + (∑ p : TensorCompIdx (E := E) r s,
-                ∑ l' : Fin (Module.finrank ℝ E),
-                  wkpNorm (d := Module.finrank ℝ E) K 2
-                    (fun y => ((partialLpLimit (I := I) (M := M)
-                        g r s h_atlas i α p l' :
-                      Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
-                      EuclN → ℝ) y) Ω)) := by
-      rw [mul_add]
-
 end LowerOrderWkpNormBounds
 
 /-! ## Eigenbasis-uniform companions
 
-The three headlines above each `∃`-bind their explicit constant `C` *after* the
+A per-`i` `wkpNorm` bound `∃`-binds its explicit constant `C` *after* the
 eigenbasis index `i`, so `C` is allowed to vary with `i`. The downstream
 bounded-operator endpoint instead needs a *single* constant working for every
 `i` simultaneously — the `∀ i` quantifier moved *inside* the `∃ C`.
 
-Such an eigenbasis-uniform restatement is not derivable from its per-`i`
-original — it carries its own proof, which is the per-`i` proof with the
+Such an eigenbasis-uniform restatement carries its own proof, with the
 constant witness hoisted before the `∀ i`. The hoist succeeds because the
 per-summand `wkpNorm` constant of each limit-object summand is *purely
 geometric*: it is the Leibniz constant of a smooth chart-target coefficient
@@ -1769,7 +659,6 @@ factor. -/
 section LowerOrderWkpNormBoundsUniform
 
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
-  (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
 
 /-! ### The eigenbasis-uniform smooth-coefficient `wkpNorm` bound
 
@@ -2039,988 +928,14 @@ private lemma exists_uniform_const_of_finite_wkpNorm_bounds_uniform
   exact Finset.single_le_sum
     (f := fun j' => Cf j') (fun j' _ => hCf_nn j') (Finset.mem_univ j)
 
-/-! ### Headline 1 — eigenbasis-uniform principal rotation coefficient limit -/
-
-/-- **Eigenbasis-uniform order-`K` `wkpNorm` bound for the principal rotation
-coefficient limit.** The eigenbasis-uniform companion of
-`wkpNorm_covPrincipalRotationCoeffLimit_le`: a *single* nonnegative constant
-`C`, independent of the eigenbasis index `i`, serves every `i` simultaneously —
-the `∀ i` quantifier moved inside the `∃ C`.
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an order `K`, a chart
-center `α : M`, and a component multi-index `P₀`, given the order-`(K + 1)`
-partition-of-unity regularity input `h_pou` — phrased uniformly over `i` — there
-is a nonnegative constant `C` with, for every `i`,
-
-```
-wkpNorm K 2 (covPrincipalRotationCoeffLimit g r s h_atlas i α P₀)
-    (chartTargetEuclid α)
-  ≤ ENNReal.ofReal C
-      * (∑ P, ∑ k, wkpNorm K 2 (partialLpLimit … P k) (chartTargetEuclid α)).
-```
-
-No exposed eigenvalue factor appears: the per-summand `wkpNorm` constant of each
-limit-object summand is the Leibniz constant of the smooth `i`-independent
-coefficient `principalRotationFactor`, produced by
-`wkpNorm_coef_mul_factor_le_uniform`; the chart-partial atom enters the bound
-only through its own order-`K` `wkpNorm`, which stays under the `∀ i`. The
-constant `C` is the collected per-summand constant times the four-fold-index
-cardinality, both `i`-independent and hence hoisted before the `∀ i`. -/
-theorem wkpNorm_covPrincipalRotationCoeffLimit_le_uniform
-    (K : ℕ) (α : M) (P₀ : TensorCompIdx (E := E) r s)
-    (h_pou : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
-      (β : M) (Q : TensorCompIdx (E := E) r s),
-      MemWkp (d := Module.finrank ℝ E) (K + 1) 2
-        (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
-            (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
-              (eigenvectorResolvent (I := I) (M := M) g r s h_atlas i))
-            β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
-        (chartTargetEuclid (I := I) (M := M) β)) :
-    ∃ C : ℝ, 0 ≤ C ∧
-      ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
-        wkpNorm (d := Module.finrank ℝ E) K 2
-            (covPrincipalRotationCoeffLimit (I := I) (M := M)
-              g r s h_atlas i α P₀ : EuclN → ℝ)
-            (chartTargetEuclid (I := I) (M := M) α)
-          ≤ ENNReal.ofReal C *
-            (∑ P : TensorCompIdx (E := E) r s,
-              ∑ k : Fin (Module.finrank ℝ E),
-                wkpNorm (d := Module.finrank ℝ E) K 2
-                  (fun y => ((partialLpLimit (I := I) (M := M)
-                      g r s h_atlas i α P k :
-                    Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
-                    EuclN → ℝ) y)
-                  (chartTargetEuclid (I := I) (M := M) α)) := by
-  classical
-  set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hΩ_def
-  -- The per-summand constant family: for the summand indexed by `x`, the
-  -- factor-independent constant for the smooth coefficient
-  -- `principalRotationFactor … P₀ x`. It is `i`-independent.
-  set Cf : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s
-      × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E)) → ℝ := fun x =>
-    (wkpNorm_indicatorFactor_mul_atom_le_uniform (I := I) (M := M) α K
-      (principalRotationFactor_contDiffOn (I := I) (M := M)
-        g r s α P₀ x.1 x.2.1 x.2.2.1 x.2.2.2)).choose
-    with hCf_def
-  have hCf_spec : ∀ x : TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s
-      × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E),
-      0 ≤ Cf x ∧ ∀ {G : EuclN → ℝ},
-        MemWkp (d := Module.finrank ℝ E) K 2 G Ω →
-        (∀ᵐ y ∂(chartL2Measure (I := I) (M := M) α),
-          y ∉ chartPouKernel (I := I) (M := M) α → G y = 0) →
-        MemWkp (d := Module.finrank ℝ E) K 2
-            (fun y => Set.indicator (chartPouKernel (I := I) (M := M) α)
-              (principalRotationFactor (I := I) (M := M)
-                g r s α P₀ x.1 x.2.1 x.2.2.1 x.2.2.2) y * G y) Ω ∧
-          wkpNorm (d := Module.finrank ℝ E) K 2
-              (fun y => Set.indicator (chartPouKernel (I := I) (M := M) α)
-                (principalRotationFactor (I := I) (M := M)
-                  g r s α P₀ x.1 x.2.1 x.2.2.1 x.2.2.2) y * G y) Ω
-            ≤ ENNReal.ofReal (Cf x) *
-              wkpNorm (d := Module.finrank ℝ E) K 2 G Ω :=
-    fun x =>
-      (wkpNorm_indicatorFactor_mul_atom_le_uniform (I := I) (M := M) α K
-        (principalRotationFactor_contDiffOn (I := I) (M := M)
-          g r s α P₀ x.1 x.2.1 x.2.2.1 x.2.2.2)).choose_spec
-  -- The per-`i` four-fold sum, as a single sum over `(P, Q, k, l)`.
-  set F : TensorEigenIdx (I := I) (M := M) g r s →
-      (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s
-        × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E))
-      → EuclN → ℝ :=
-    fun i x y =>
-      Set.indicator (chartPouKernel (I := I) (M := M) α)
-          (principalRotationFactor (I := I) (M := M)
-            g r s α P₀ x.1 x.2.1 x.2.2.1 x.2.2.2) y *
-        ((partialLpLimit (I := I) (M := M) g r s h_atlas i α x.1 x.2.2.1 :
-          Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
-    with hF_def
-  -- The per-`i` chart-partial atom family, indexed by `(P, k)`.
-  set partAtom : TensorEigenIdx (I := I) (M := M) g r s →
-      (TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E)) → EuclN → ℝ :=
-    fun i pk y =>
-    ((partialLpLimit (I := I) (M := M) g r s h_atlas i α pk.1 pk.2 :
-      Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
-    with hpartAtom_def
-  -- The collected per-summand constant, hoisted before the `∀ i`.
-  obtain ⟨Csum, hCsum_nn, hCsum_bd⟩ :=
-    exists_uniform_const_of_finite_wkpNorm_bounds_uniform (I := I) (M := M)
-      (α := α) (K := K) F partAtom (fun x => (x.1, x.2.2.1)) Cf
-      (fun x => (hCf_spec x).1)
-      (fun i x => by
-        -- The per-`i` per-summand bound, from `hCf_spec` against the
-        -- chart-partial atom's `MemWkp` / off-kernel vanishing.
-        have hatom := (hCf_spec x).2
-          (partialLpLimit_memWkp (I := I) (M := M)
-            g r s h_atlas i α x.1 x.2.2.1 K (h_pou i))
-          (partialLpLimit_ae_zero_off_chartPouKernel (I := I) (M := M)
-            g r s h_atlas i α x.1 x.2.2.1 K (h_pou i))
-        exact hatom.2)
-  -- Headline constant: the collected per-summand constant times the four-fold
-  -- index cardinality; hoisted here, before the `∀ i`.
-  refine ⟨Csum * (Finset.univ : Finset (TensorCompIdx (E := E) r s
-      × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E)
-      × Fin (Module.finrank ℝ E))).card, by positivity, fun i => ?_⟩
-  -- The per-summand `MemWkp K 2` membership for the index `i`.
-  have h_memWkp : ∀ x : TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s
-      × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E),
-      MemWkp (d := Module.finrank ℝ E) K 2 (F i x) Ω := by
-    intro x
-    have hatom := (hCf_spec x).2
-      (partialLpLimit_memWkp (I := I) (M := M)
-        g r s h_atlas i α x.1 x.2.2.1 K (h_pou i))
-      (partialLpLimit_ae_zero_off_chartPouKernel (I := I) (M := M)
-        g r s h_atlas i α x.1 x.2.2.1 K (h_pou i))
-    exact hatom.1
-  -- Bound on the four-fold-sum `wkpNorm`, via the aggregation lemma.
-  have h_bound :
-      wkpNorm (d := Module.finrank ℝ E) K 2
-          (fun y => ∑ x : TensorCompIdx (E := E) r s
-            × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E)
-            × Fin (Module.finrank ℝ E), F i x y) Ω
-        ≤ ENNReal.ofReal (Csum * (Finset.univ :
-            Finset (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s
-              × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E))).card)
-          * ∑ pk : TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E),
-              wkpNorm (d := Module.finrank ℝ E) K 2 (partAtom i pk) Ω :=
-    wkpNorm_finsetSum_le_const_mul_atomSum (I := I) (M := M)
-      (α := α) (K := K) Finset.univ Finset.univ (F i) (partAtom i)
-      (fun x => (x.1, x.2.2.1)) (fun x _ => Finset.mem_univ _)
-      Csum hCsum_nn
-      (fun x _ => h_memWkp x)
-      (fun x _ => hCsum_bd i x)
-  -- Identify the single-product sum with the nested four-fold sum.
-  have h_eq : (fun y => ∑ x : TensorCompIdx (E := E) r s
-      × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E)
-      × Fin (Module.finrank ℝ E), F i x y)
-      = (fun y => ∑ P : TensorCompIdx (E := E) r s,
-          ∑ Q : TensorCompIdx (E := E) r s,
-            ∑ k : Fin (Module.finrank ℝ E),
-              ∑ l : Fin (Module.finrank ℝ E),
-                Set.indicator (chartPouKernel (I := I) (M := M) α)
-                    (principalRotationFactor (I := I) (M := M)
-                      g r s α P₀ P Q k l) y *
-                  (partialLpLimit (I := I) (M := M) g r s h_atlas i α P k :
-                    EuclN → ℝ) y) := by
-    funext y
-    rw [hF_def]
-    simp only [Fintype.sum_prod_type]
-  -- The chart-partial index sum on the right is the chart-partial atom family.
-  have h_atom_eq : ∑ pk : TensorCompIdx (E := E) r s
-      × Fin (Module.finrank ℝ E), wkpNorm (d := Module.finrank ℝ E) K 2
-        (partAtom i pk) Ω
-      = ∑ P : TensorCompIdx (E := E) r s,
-          ∑ k : Fin (Module.finrank ℝ E),
-            wkpNorm (d := Module.finrank ℝ E) K 2
-              (fun y => ((partialLpLimit (I := I) (M := M)
-                  g r s h_atlas i α P k :
-                Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
-              Ω := by
-    rw [Fintype.sum_prod_type]
-  -- Unfold the limit object and assemble the bound.
-  rw [show (covPrincipalRotationCoeffLimit (I := I) (M := M)
-        g r s h_atlas i α P₀ : EuclN → ℝ)
-      = (fun y => ∑ P : TensorCompIdx (E := E) r s,
-          ∑ Q : TensorCompIdx (E := E) r s,
-            ∑ k : Fin (Module.finrank ℝ E),
-              ∑ l : Fin (Module.finrank ℝ E),
-                Set.indicator (chartPouKernel (I := I) (M := M) α)
-                    (principalRotationFactor (I := I) (M := M)
-                      g r s α P₀ P Q k l) y *
-                  (partialLpLimit (I := I) (M := M) g r s h_atlas i α P k :
-                    EuclN → ℝ) y) from rfl]
-  rw [← h_eq, hΩ_def, ← h_atom_eq]
-  exact h_bound
-
-/-! ### Headline 2 — eigenbasis-uniform lower-order rotation value coefficient
-limit -/
-
-/-- **Eigenbasis-uniform order-`K` `wkpNorm` bound for the lower-order rotation
-value coefficient limit.** The eigenbasis-uniform companion of
-`wkpNorm_covLowerOrderRotationValueCoeffLimit_le`: a *single* nonnegative
-constant `C`, independent of the eigenbasis index `i`, serves every `i`
-simultaneously — the `∀ i` quantifier moved inside the `∃ C`.
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an order `K`, a chart
-center `α : M`, and a component multi-index `P₀`, given the order-`(K + 1)`
-partition-of-unity regularity input `h_pou` — phrased uniformly over `i` — there
-is a nonnegative constant `C` with, for every `i`,
-
-```
-wkpNorm K 2 (covLowerOrderRotationValueCoeffLimit g r s h_atlas i α P₀)
-    (chartTargetEuclid α)
-  ≤ ENNReal.ofReal C
-      * ((∑ P, ∑ k, wkpNorm K 2 (partialLpLimit … P k) (chartTargetEuclid α))
-        + (∑ p, wkpNorm K 2 (componentLpLimit … p) (chartTargetEuclid α))).
-```
-
-No exposed eigenvalue factor appears: every per-summand `wkpNorm` constant is
-the Leibniz constant of an `i`-independent smooth coefficient
-(`valuePartialFactor` / `valueComponentFactor`), produced by
-`wkpNorm_coef_mul_factor_le_uniform`; the atoms enter the bound only through
-their own order-`K` `wkpNorm`, which stays under the `∀ i`. The constant `C` is
-the larger of the two group constants, both `i`-independent and hence hoisted
-before the `∀ i`. -/
-theorem wkpNorm_covLowerOrderRotationValueCoeffLimit_le_uniform
-    (K : ℕ) (α : M) (P₀ : TensorCompIdx (E := E) r s)
-    (h_pou : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
-      (β : M) (Q : TensorCompIdx (E := E) r s),
-      MemWkp (d := Module.finrank ℝ E) (K + 1) 2
-        (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
-            (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
-              (eigenvectorResolvent (I := I) (M := M) g r s h_atlas i))
-            β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
-        (chartTargetEuclid (I := I) (M := M) β)) :
-    ∃ C : ℝ, 0 ≤ C ∧
-      ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
-        wkpNorm (d := Module.finrank ℝ E) K 2
-            (covLowerOrderRotationValueCoeffLimit (I := I) (M := M)
-              g r s h_atlas i α P₀ : EuclN → ℝ)
-            (chartTargetEuclid (I := I) (M := M) α)
-          ≤ ENNReal.ofReal C *
-            ((∑ P : TensorCompIdx (E := E) r s,
-                ∑ k : Fin (Module.finrank ℝ E),
-                  wkpNorm (d := Module.finrank ℝ E) K 2
-                    (fun y => ((partialLpLimit (I := I) (M := M)
-                        g r s h_atlas i α P k :
-                      Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
-                      EuclN → ℝ) y)
-                    (chartTargetEuclid (I := I) (M := M) α))
-              + (∑ p : TensorCompIdx (E := E) r s,
-                  wkpNorm (d := Module.finrank ℝ E) K 2
-                    (fun y => ((componentLpLimit (I := I) (M := M)
-                        g r s h_atlas i α p :
-                      Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
-                      EuclN → ℝ) y)
-                    (chartTargetEuclid (I := I) (M := M) α))) := by
-  classical
-  set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hΩ_def
-  have hΩ_open : IsOpen Ω := chartTargetEuclid_isOpen (I := I) (M := M) α
-  -- The chart-partial-group per-summand constant family — `i`-independent.
-  set CfP : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E)) → ℝ := fun x =>
-    (wkpNorm_indicatorFactor_mul_atom_le_uniform (I := I) (M := M) α K
-      (valuePartialFactor_contDiffOn (I := I) (M := M)
-        g r s α P₀ x.1 x.2.1 x.2.2.1 x.2.2.2)).choose
-    with hCfP_def
-  have hCfP_spec : ∀ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E)),
-      0 ≤ CfP x ∧ ∀ {G : EuclN → ℝ},
-        MemWkp (d := Module.finrank ℝ E) K 2 G Ω →
-        (∀ᵐ y ∂(chartL2Measure (I := I) (M := M) α),
-          y ∉ chartPouKernel (I := I) (M := M) α → G y = 0) →
-        MemWkp (d := Module.finrank ℝ E) K 2
-            (fun y => Set.indicator (chartPouKernel (I := I) (M := M) α)
-              (valuePartialFactor (I := I) (M := M)
-                g r s α P₀ x.1 x.2.1 x.2.2.1 x.2.2.2) y * G y) Ω ∧
-          wkpNorm (d := Module.finrank ℝ E) K 2
-              (fun y => Set.indicator (chartPouKernel (I := I) (M := M) α)
-                (valuePartialFactor (I := I) (M := M)
-                  g r s α P₀ x.1 x.2.1 x.2.2.1 x.2.2.2) y * G y) Ω
-            ≤ ENNReal.ofReal (CfP x) *
-              wkpNorm (d := Module.finrank ℝ E) K 2 G Ω :=
-    fun x =>
-      (wkpNorm_indicatorFactor_mul_atom_le_uniform (I := I) (M := M) α K
-        (valuePartialFactor_contDiffOn (I := I) (M := M)
-          g r s α P₀ x.1 x.2.1 x.2.2.1 x.2.2.2)).choose_spec
-  -- The chart-component-group per-summand constant family — `i`-independent.
-  set CfC : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s) → ℝ := fun x =>
-    (wkpNorm_indicatorFactor_mul_atom_le_uniform (I := I) (M := M) α K
-      (valueComponentFactor_contDiffOn (I := I) (M := M)
-        g r s α P₀ x.1 x.2.1 x.2.2.1 x.2.2.2.1 x.2.2.2.2)).choose
-    with hCfC_def
-  have hCfC_spec : ∀ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s),
-      0 ≤ CfC x ∧ ∀ {G : EuclN → ℝ},
-        MemWkp (d := Module.finrank ℝ E) K 2 G Ω →
-        (∀ᵐ y ∂(chartL2Measure (I := I) (M := M) α),
-          y ∉ chartPouKernel (I := I) (M := M) α → G y = 0) →
-        MemWkp (d := Module.finrank ℝ E) K 2
-            (fun y => Set.indicator (chartPouKernel (I := I) (M := M) α)
-              (valueComponentFactor (I := I) (M := M)
-                g r s α P₀ x.1 x.2.1 x.2.2.1 x.2.2.2.1 x.2.2.2.2) y * G y) Ω ∧
-          wkpNorm (d := Module.finrank ℝ E) K 2
-              (fun y => Set.indicator (chartPouKernel (I := I) (M := M) α)
-                (valueComponentFactor (I := I) (M := M)
-                  g r s α P₀ x.1 x.2.1 x.2.2.1 x.2.2.2.1 x.2.2.2.2) y * G y) Ω
-            ≤ ENNReal.ofReal (CfC x) *
-              wkpNorm (d := Module.finrank ℝ E) K 2 G Ω :=
-    fun x =>
-      (wkpNorm_indicatorFactor_mul_atom_le_uniform (I := I) (M := M) α K
-        (valueComponentFactor_contDiffOn (I := I) (M := M)
-          g r s α P₀ x.1 x.2.1 x.2.2.1 x.2.2.2.1 x.2.2.2.2)).choose_spec
-  -- The per-`i` chart-partial group, as a single sum over `(P, Q, k, l)`.
-  set Fpart : TensorEigenIdx (I := I) (M := M) g r s → (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E)) → EuclN → ℝ :=
-    fun i x y =>
-      Set.indicator (chartPouKernel (I := I) (M := M) α)
-          (valuePartialFactor (I := I) (M := M)
-            g r s α P₀ x.1 x.2.1 x.2.2.1 x.2.2.2) y *
-        ((partialLpLimit (I := I) (M := M) g r s h_atlas i α x.1 x.2.2.1 :
-          Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
-    with hFpart_def
-  -- The per-`i` chart-component group, as a single sum over `(P, Q, k, l, p)`.
-  set Fcomp : TensorEigenIdx (I := I) (M := M) g r s → (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s) → EuclN → ℝ :=
-    fun i x y =>
-      Set.indicator (chartPouKernel (I := I) (M := M) α)
-          (valueComponentFactor (I := I) (M := M)
-            g r s α P₀ x.1 x.2.1 x.2.2.1 x.2.2.2.1 x.2.2.2.2) y *
-        ((componentLpLimit (I := I) (M := M) g r s h_atlas i α x.2.2.2.2 :
-          Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
-    with hFcomp_def
-  -- The per-`i` chart-partial atom family, indexed by `(P, k)`.
-  set partAtom : TensorEigenIdx (I := I) (M := M) g r s →
-      (TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E)) → EuclN → ℝ :=
-    fun i pk y =>
-    ((partialLpLimit (I := I) (M := M) g r s h_atlas i α pk.1 pk.2 :
-      Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
-    with hpartAtom_def
-  -- The per-`i` chart-component atom family, indexed by `p`.
-  set compAtom : TensorEigenIdx (I := I) (M := M) g r s →
-      TensorCompIdx (E := E) r s → EuclN → ℝ :=
-    fun i p y =>
-    ((componentLpLimit (I := I) (M := M) g r s h_atlas i α p :
-      Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
-    with hcompAtom_def
-  -- The collected per-summand constants, hoisted before the `∀ i`.
-  obtain ⟨Cpart, hCpart_nn, hCpart_bd⟩ :=
-    exists_uniform_const_of_finite_wkpNorm_bounds_uniform (I := I) (M := M)
-      (α := α) (K := K) Fpart partAtom (fun x => (x.1, x.2.2.1)) CfP
-      (fun x => (hCfP_spec x).1)
-      (fun i x => by
-        have hatom := (hCfP_spec x).2
-          (partialLpLimit_memWkp (I := I) (M := M)
-            g r s h_atlas i α x.1 x.2.2.1 K (h_pou i))
-          (partialLpLimit_ae_zero_off_chartPouKernel (I := I) (M := M)
-            g r s h_atlas i α x.1 x.2.2.1 K (h_pou i))
-        exact hatom.2)
-  obtain ⟨Ccomp, hCcomp_nn, hCcomp_bd⟩ :=
-    exists_uniform_const_of_finite_wkpNorm_bounds_uniform (I := I) (M := M)
-      (α := α) (K := K) Fcomp compAtom (fun x => x.2.2.2.2) CfC
-      (fun x => (hCfC_spec x).1)
-      (fun i x => by
-        have hatom := (hCfC_spec x).2
-          (componentLpLimit_memWkp (I := I) (M := M)
-            g r s h_atlas i α x.2.2.2.2 K (h_pou i))
-          (componentLpLimit_ae_zero_off_chartPouKernel (I := I) (M := M)
-            g r s h_atlas i α x.2.2.2.2)
-        exact hatom.2)
-  -- Headline constant: the larger of the two group constants; hoisted here.
-  refine ⟨max
-      (Cpart * (Finset.univ : Finset (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E))).card)
-      (Ccomp * (Finset.univ : Finset (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s)).card),
-    le_trans (by positivity) (le_max_left _ _), fun i => ?_⟩
-  -- Abbreviation for the headline constant.
-  set Cmax : ℝ := max
-      (Cpart * (Finset.univ : Finset (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E))).card)
-      (Ccomp * (Finset.univ : Finset (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s)).card) with hCmax_def
-  -- The per-summand `MemWkp K 2` membership for the index `i`.
-  have h_part_memWkp : ∀ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E)),
-      MemWkp (d := Module.finrank ℝ E) K 2 (Fpart i x) Ω := by
-    intro x
-    have hatom := (hCfP_spec x).2
-      (partialLpLimit_memWkp (I := I) (M := M)
-        g r s h_atlas i α x.1 x.2.2.1 K (h_pou i))
-      (partialLpLimit_ae_zero_off_chartPouKernel (I := I) (M := M)
-        g r s h_atlas i α x.1 x.2.2.1 K (h_pou i))
-    exact hatom.1
-  have h_comp_memWkp : ∀ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s),
-      MemWkp (d := Module.finrank ℝ E) K 2 (Fcomp i x) Ω := by
-    intro x
-    have hatom := (hCfC_spec x).2
-      (componentLpLimit_memWkp (I := I) (M := M)
-        g r s h_atlas i α x.2.2.2.2 K (h_pou i))
-      (componentLpLimit_ae_zero_off_chartPouKernel (I := I) (M := M)
-        g r s h_atlas i α x.2.2.2.2)
-    exact hatom.1
-  -- Bound on the chart-partial group `wkpNorm`.
-  have h_part_bound :
-      wkpNorm (d := Module.finrank ℝ E) K 2
-          (fun y => ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E)), Fpart i x y) Ω
-        ≤ ENNReal.ofReal (Cpart * (Finset.univ : Finset (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E))).card)
-          * ∑ pk : TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E),
-              wkpNorm (d := Module.finrank ℝ E) K 2 (partAtom i pk) Ω :=
-    wkpNorm_finsetSum_le_const_mul_atomSum (I := I) (M := M)
-      (α := α) (K := K) Finset.univ Finset.univ (Fpart i) (partAtom i)
-      (fun x => (x.1, x.2.2.1)) (fun x _ => Finset.mem_univ _)
-      Cpart hCpart_nn
-      (fun x _ => h_part_memWkp x)
-      (fun x _ => hCpart_bd i x)
-  -- Bound on the chart-component group `wkpNorm`.
-  have h_comp_bound :
-      wkpNorm (d := Module.finrank ℝ E) K 2
-          (fun y => ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fcomp i x y) Ω
-        ≤ ENNReal.ofReal (Ccomp * (Finset.univ : Finset (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s)).card)
-          * ∑ p : TensorCompIdx (E := E) r s,
-              wkpNorm (d := Module.finrank ℝ E) K 2 (compAtom i p) Ω :=
-    wkpNorm_finsetSum_le_const_mul_atomSum (I := I) (M := M)
-      (α := α) (K := K) Finset.univ Finset.univ (Fcomp i) (compAtom i)
-      (fun x => x.2.2.2.2) (fun x _ => Finset.mem_univ _)
-      Ccomp hCcomp_nn
-      (fun x _ => h_comp_memWkp x)
-      (fun x _ => hCcomp_bd i x)
-  -- Identify the two single-product sums with the two nested-sum groups.
-  have h_part_eq : (fun y => ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E)), Fpart i x y)
-      = (fun y => ∑ P : TensorCompIdx (E := E) r s,
-          ∑ Q : TensorCompIdx (E := E) r s,
-            ∑ k : Fin (Module.finrank ℝ E),
-              ∑ l : Fin (Module.finrank ℝ E),
-                Set.indicator (chartPouKernel (I := I) (M := M) α)
-                    (valuePartialFactor (I := I) (M := M)
-                      g r s α P₀ P Q k l) y *
-                  (partialLpLimit (I := I) (M := M) g r s h_atlas i α P k :
-                    EuclN → ℝ) y) := by
-    funext y
-    rw [hFpart_def]
-    simp only [Fintype.sum_prod_type]
-  have h_comp_eq : (fun y => ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fcomp i x y)
-      = (fun y => ∑ P : TensorCompIdx (E := E) r s,
-          ∑ Q : TensorCompIdx (E := E) r s,
-            ∑ k : Fin (Module.finrank ℝ E),
-              ∑ l : Fin (Module.finrank ℝ E),
-                ∑ p : TensorCompIdx (E := E) r s,
-                  Set.indicator (chartPouKernel (I := I) (M := M) α)
-                      (valueComponentFactor (I := I) (M := M)
-                        g r s α P₀ P Q k l p) y *
-                    (componentLpLimit (I := I) (M := M) g r s h_atlas i α p :
-                      EuclN → ℝ) y) := by
-    funext y
-    rw [hFcomp_def]
-    simp only [Fintype.sum_prod_type]
-  -- The chart-partial index sum on the right is the chart-partial atom family.
-  have h_part_atom_eq : ∑ pk : TensorCompIdx (E := E) r s
-      × Fin (Module.finrank ℝ E), wkpNorm (d := Module.finrank ℝ E) K 2
-        (partAtom i pk) Ω
-      = ∑ P : TensorCompIdx (E := E) r s,
-          ∑ k : Fin (Module.finrank ℝ E),
-            wkpNorm (d := Module.finrank ℝ E) K 2
-              (fun y => ((partialLpLimit (I := I) (M := M)
-                  g r s h_atlas i α P k :
-                Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
-              Ω := by
-    rw [Fintype.sum_prod_type]
-  -- Bound on the chart-partial group, in the distinct-atom-sum form.
-  have hpart : wkpNorm (d := Module.finrank ℝ E) K 2
-        (fun y => ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E)), Fpart i x y) Ω
-      ≤ ENNReal.ofReal Cmax *
-        ∑ P : TensorCompIdx (E := E) r s,
-          ∑ k : Fin (Module.finrank ℝ E),
-            wkpNorm (d := Module.finrank ℝ E) K 2
-              (fun y => ((partialLpLimit (I := I) (M := M)
-                  g r s h_atlas i α P k :
-                Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
-              Ω := by
-    rw [← h_part_atom_eq]
-    refine h_part_bound.trans ?_
-    exact mul_le_mul_of_nonneg_right
-      (ENNReal.ofReal_le_ofReal (le_max_left _ _)) (zero_le _)
-  -- Bound on the chart-component group, in the distinct-atom-sum form.
-  have hcomp : wkpNorm (d := Module.finrank ℝ E) K 2
-        (fun y => ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fcomp i x y) Ω
-      ≤ ENNReal.ofReal Cmax *
-        ∑ p : TensorCompIdx (E := E) r s,
-          wkpNorm (d := Module.finrank ℝ E) K 2
-            (fun y => ((componentLpLimit (I := I) (M := M)
-                g r s h_atlas i α p :
-              Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
-            Ω := by
-    refine h_comp_bound.trans ?_
-    exact mul_le_mul_of_nonneg_right
-      (ENNReal.ofReal_le_ofReal (le_max_right _ _)) (zero_le _)
-  -- `MemWkp K 2` membership of the two groups, for the triangle inequality.
-  have h_part_group_memWkp : MemWkp (d := Module.finrank ℝ E) K 2
-      (fun y => ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E)), Fpart i x y) Ω :=
-    memWkp_finsetSum (I := I) (M := M) _ (fun x _ => h_part_memWkp x)
-  have h_comp_group_memWkp : MemWkp (d := Module.finrank ℝ E) K 2
-      (fun y => ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fcomp i x y) Ω :=
-    memWkp_finsetSum (I := I) (M := M) _ (fun x _ => h_comp_memWkp x)
-  -- Unfold the limit object into its two groups, bridge to single-product sums.
-  rw [show (covLowerOrderRotationValueCoeffLimit (I := I) (M := M)
-        g r s h_atlas i α P₀ : EuclN → ℝ)
-      = (fun y => (∑ P : TensorCompIdx (E := E) r s,
-            ∑ Q : TensorCompIdx (E := E) r s,
-              ∑ k : Fin (Module.finrank ℝ E),
-                ∑ l : Fin (Module.finrank ℝ E),
-                  Set.indicator (chartPouKernel (I := I) (M := M) α)
-                      (valuePartialFactor (I := I) (M := M)
-                        g r s α P₀ P Q k l) y *
-                    (partialLpLimit (I := I) (M := M) g r s h_atlas i α P k :
-                      EuclN → ℝ) y)
-          + ∑ P : TensorCompIdx (E := E) r s,
-              ∑ Q : TensorCompIdx (E := E) r s,
-                ∑ k : Fin (Module.finrank ℝ E),
-                  ∑ l : Fin (Module.finrank ℝ E),
-                    ∑ p : TensorCompIdx (E := E) r s,
-                      Set.indicator (chartPouKernel (I := I) (M := M) α)
-                          (valueComponentFactor (I := I) (M := M)
-                            g r s α P₀ P Q k l p) y *
-                        (componentLpLimit (I := I) (M := M)
-                          g r s h_atlas i α p : EuclN → ℝ) y) from rfl]
-  have h_bridge : (fun y => (∑ P : TensorCompIdx (E := E) r s,
-          ∑ Q : TensorCompIdx (E := E) r s,
-            ∑ k : Fin (Module.finrank ℝ E),
-              ∑ l : Fin (Module.finrank ℝ E),
-                Set.indicator (chartPouKernel (I := I) (M := M) α)
-                    (valuePartialFactor (I := I) (M := M)
-                      g r s α P₀ P Q k l) y *
-                  (partialLpLimit (I := I) (M := M) g r s h_atlas i α P k :
-                    EuclN → ℝ) y)
-        + ∑ P : TensorCompIdx (E := E) r s,
-            ∑ Q : TensorCompIdx (E := E) r s,
-              ∑ k : Fin (Module.finrank ℝ E),
-                ∑ l : Fin (Module.finrank ℝ E),
-                  ∑ p : TensorCompIdx (E := E) r s,
-                    Set.indicator (chartPouKernel (I := I) (M := M) α)
-                        (valueComponentFactor (I := I) (M := M)
-                          g r s α P₀ P Q k l p) y *
-                      (componentLpLimit (I := I) (M := M)
-                        g r s h_atlas i α p : EuclN → ℝ) y)
-      = (fun y => (∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E)), Fpart i x y)
-          + ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fcomp i x y) := by
-    funext y
-    rw [← congrFun h_part_eq y, ← congrFun h_comp_eq y]
-  rw [h_bridge]
-  -- Triangle inequality, then the two group bounds, then distribute.
-  calc
-    wkpNorm (d := Module.finrank ℝ E) K 2
-        (fun y => (∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E)), Fpart i x y)
-        + ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fcomp i x y) Ω
-        ≤ wkpNorm (d := Module.finrank ℝ E) K 2
-              (fun y => ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E)), Fpart i x y) Ω
-          + wkpNorm (d := Module.finrank ℝ E) K 2
-              (fun y => ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fcomp i x y) Ω :=
-        wkpNorm_add_le (d := Module.finrank ℝ E)
-          (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open
-          h_part_group_memWkp h_comp_group_memWkp
-    _ ≤ ENNReal.ofReal Cmax *
-          (∑ P : TensorCompIdx (E := E) r s,
-            ∑ k : Fin (Module.finrank ℝ E),
-              wkpNorm (d := Module.finrank ℝ E) K 2
-                (fun y => ((partialLpLimit (I := I) (M := M)
-                    g r s h_atlas i α P k :
-                  Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
-                  EuclN → ℝ) y) Ω)
-        + ENNReal.ofReal Cmax *
-          (∑ p : TensorCompIdx (E := E) r s,
-            wkpNorm (d := Module.finrank ℝ E) K 2
-              (fun y => ((componentLpLimit (I := I) (M := M)
-                  g r s h_atlas i α p :
-                Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
-                EuclN → ℝ) y) Ω) :=
-        add_le_add hpart hcomp
-    _ = ENNReal.ofReal Cmax *
-          ((∑ P : TensorCompIdx (E := E) r s,
-              ∑ k : Fin (Module.finrank ℝ E),
-                wkpNorm (d := Module.finrank ℝ E) K 2
-                  (fun y => ((partialLpLimit (I := I) (M := M)
-                      g r s h_atlas i α P k :
-                    Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
-                    EuclN → ℝ) y) Ω)
-            + (∑ p : TensorCompIdx (E := E) r s,
-                wkpNorm (d := Module.finrank ℝ E) K 2
-                  (fun y => ((componentLpLimit (I := I) (M := M)
-                      g r s h_atlas i α p :
-                    Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
-                    EuclN → ℝ) y) Ω)) := by
-      rw [mul_add]
-
-/-! ### Headline 3 — eigenbasis-uniform chart-density-weighted lower-order
-gradient divergence -/
-
-/-- **Eigenbasis-uniform order-`K` `wkpNorm` bound for the chart-density-weighted
-lower-order gradient divergence coefficient limit.** The eigenbasis-uniform
-companion of `wkpNorm_weightedGradCoeffDivLimit_le`: a *single* nonnegative
-constant `C`, independent of the eigenbasis index `i`, serves every `i`
-simultaneously — the `∀ i` quantifier moved inside the `∃ C`.
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an order `K`, a chart
-center `α : M`, a component multi-index `P₀`, and a chart direction `l`, given
-the order-`(K + 1)` partition-of-unity regularity input `h_pou` — phrased
-uniformly over `i` — there is a nonnegative constant `C` with, for every `i`,
-
-```
-wkpNorm K 2 (weightedGradCoeffDivLimit g r s h_atlas i α P₀ l)
-    (chartTargetEuclid α)
-  ≤ ENNReal.ofReal C
-      * ((∑ p, wkpNorm K 2 (componentLpLimit … p) (chartTargetEuclid α))
-        + (∑ p, ∑ l', wkpNorm K 2 (partialLpLimit … p l') (chartTargetEuclid α))).
-```
-
-No exposed eigenvalue factor appears: every per-summand `wkpNorm` constant is
-the Leibniz constant of an `i`-independent smooth coefficient — a chart-Euclidean
-partial of `weightedGradFactor`, respectively `weightedGradFactor` itself —
-produced by `wkpNorm_coef_mul_factor_le_uniform`; the atoms enter the bound only
-through their own order-`K` `wkpNorm`, which stays under the `∀ i`. The constant
-`C` is the larger of the two group constants, both `i`-independent and hence
-hoisted before the `∀ i`. -/
-theorem wkpNorm_weightedGradCoeffDivLimit_le_uniform
-    (K : ℕ) (α : M) (P₀ : TensorCompIdx (E := E) r s)
-    (l : Fin (Module.finrank ℝ E))
-    (h_pou : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
-      (β : M) (Q : TensorCompIdx (E := E) r s),
-      MemWkp (d := Module.finrank ℝ E) (K + 1) 2
-        (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
-            (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
-              (eigenvectorResolvent (I := I) (M := M) g r s h_atlas i))
-            β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
-        (chartTargetEuclid (I := I) (M := M) β)) :
-    ∃ C : ℝ, 0 ≤ C ∧
-      ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
-        wkpNorm (d := Module.finrank ℝ E) K 2
-            (weightedGradCoeffDivLimit (I := I) (M := M)
-              g r s h_atlas i α P₀ l : EuclN → ℝ)
-            (chartTargetEuclid (I := I) (M := M) α)
-          ≤ ENNReal.ofReal C *
-            ((∑ p : TensorCompIdx (E := E) r s,
-                wkpNorm (d := Module.finrank ℝ E) K 2
-                  (fun y => ((componentLpLimit (I := I) (M := M)
-                      g r s h_atlas i α p :
-                    Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
-                    EuclN → ℝ) y)
-                  (chartTargetEuclid (I := I) (M := M) α))
-              + (∑ p : TensorCompIdx (E := E) r s,
-                  ∑ l' : Fin (Module.finrank ℝ E),
-                    wkpNorm (d := Module.finrank ℝ E) K 2
-                      (fun y => ((partialLpLimit (I := I) (M := M)
-                          g r s h_atlas i α p l' :
-                        Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
-                        EuclN → ℝ) y)
-                      (chartTargetEuclid (I := I) (M := M) α))) := by
-  classical
-  set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hΩ_def
-  have hΩ_open : IsOpen Ω := chartTargetEuclid_isOpen (I := I) (M := M) α
-  -- The chart-component-group per-summand constant family — `i`-independent.
-  set CfC : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s) → ℝ := fun x =>
-    (wkpNorm_indicatorFactor_mul_atom_le_uniform (I := I) (M := M) α K
-      (euclidPartial_weightedGradFactor_contDiffOn (I := I) (M := M)
-        g r s α P₀ l x.1 x.2.1 x.2.2.1 x.2.2.2)).choose
-    with hCfC_def
-  have hCfC_spec : ∀ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s),
-      0 ≤ CfC x ∧ ∀ {G : EuclN → ℝ},
-        MemWkp (d := Module.finrank ℝ E) K 2 G Ω →
-        (∀ᵐ y ∂(chartL2Measure (I := I) (M := M) α),
-          y ∉ chartPouKernel (I := I) (M := M) α → G y = 0) →
-        MemWkp (d := Module.finrank ℝ E) K 2
-            (fun y => Set.indicator (chartPouKernel (I := I) (M := M) α)
-              (euclidPartial (E := E) l
-                (weightedGradFactor (I := I) (M := M)
-                  g r s α P₀ l x.1 x.2.1 x.2.2.1 x.2.2.2)) y * G y) Ω ∧
-          wkpNorm (d := Module.finrank ℝ E) K 2
-              (fun y => Set.indicator (chartPouKernel (I := I) (M := M) α)
-                (euclidPartial (E := E) l
-                  (weightedGradFactor (I := I) (M := M)
-                    g r s α P₀ l x.1 x.2.1 x.2.2.1 x.2.2.2)) y * G y) Ω
-            ≤ ENNReal.ofReal (CfC x) *
-              wkpNorm (d := Module.finrank ℝ E) K 2 G Ω :=
-    fun x =>
-      (wkpNorm_indicatorFactor_mul_atom_le_uniform (I := I) (M := M) α K
-        (euclidPartial_weightedGradFactor_contDiffOn (I := I) (M := M)
-          g r s α P₀ l x.1 x.2.1 x.2.2.1 x.2.2.2)).choose_spec
-  -- The chart-partial-group per-summand constant family — `i`-independent.
-  set CfP : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s) → ℝ := fun x =>
-    (wkpNorm_indicatorFactor_mul_atom_le_uniform (I := I) (M := M) α K
-      (weightedGradFactor_contDiffOn (I := I) (M := M)
-        g r s α P₀ l x.1 x.2.1 x.2.2.1 x.2.2.2)).choose
-    with hCfP_def
-  have hCfP_spec : ∀ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s),
-      0 ≤ CfP x ∧ ∀ {G : EuclN → ℝ},
-        MemWkp (d := Module.finrank ℝ E) K 2 G Ω →
-        (∀ᵐ y ∂(chartL2Measure (I := I) (M := M) α),
-          y ∉ chartPouKernel (I := I) (M := M) α → G y = 0) →
-        MemWkp (d := Module.finrank ℝ E) K 2
-            (fun y => Set.indicator (chartPouKernel (I := I) (M := M) α)
-              (weightedGradFactor (I := I) (M := M)
-                g r s α P₀ l x.1 x.2.1 x.2.2.1 x.2.2.2) y * G y) Ω ∧
-          wkpNorm (d := Module.finrank ℝ E) K 2
-              (fun y => Set.indicator (chartPouKernel (I := I) (M := M) α)
-                (weightedGradFactor (I := I) (M := M)
-                  g r s α P₀ l x.1 x.2.1 x.2.2.1 x.2.2.2) y * G y) Ω
-            ≤ ENNReal.ofReal (CfP x) *
-              wkpNorm (d := Module.finrank ℝ E) K 2 G Ω :=
-    fun x =>
-      (wkpNorm_indicatorFactor_mul_atom_le_uniform (I := I) (M := M) α K
-        (weightedGradFactor_contDiffOn (I := I) (M := M)
-          g r s α P₀ l x.1 x.2.1 x.2.2.1 x.2.2.2)).choose_spec
-  -- The per-`i` chart-component group, as a single sum over `(P, Q, k, p)`.
-  set Fcomp : TensorEigenIdx (I := I) (M := M) g r s → (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s) → EuclN → ℝ :=
-    fun i x y =>
-      Set.indicator (chartPouKernel (I := I) (M := M) α)
-          (euclidPartial (E := E) l
-            (weightedGradFactor (I := I) (M := M)
-              g r s α P₀ l x.1 x.2.1 x.2.2.1 x.2.2.2)) y *
-        ((componentLpLimit (I := I) (M := M) g r s h_atlas i α x.2.2.2 :
-          Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
-    with hFcomp_def
-  -- The per-`i` chart-partial group, as a single sum over `(P, Q, k, p)`.
-  set Fpart : TensorEigenIdx (I := I) (M := M) g r s → (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s) → EuclN → ℝ :=
-    fun i x y =>
-      Set.indicator (chartPouKernel (I := I) (M := M) α)
-          (weightedGradFactor (I := I) (M := M)
-            g r s α P₀ l x.1 x.2.1 x.2.2.1 x.2.2.2) y *
-        ((partialLpLimit (I := I) (M := M) g r s h_atlas i α x.2.2.2 l :
-          Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
-    with hFpart_def
-  -- The per-`i` chart-component atom family, indexed by `p`.
-  set compAtom : TensorEigenIdx (I := I) (M := M) g r s →
-      TensorCompIdx (E := E) r s → EuclN → ℝ :=
-    fun i p y =>
-    ((componentLpLimit (I := I) (M := M) g r s h_atlas i α p :
-      Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
-    with hcompAtom_def
-  -- The per-`i` chart-partial atom family, indexed by `(p, l')`.
-  set partAtom : TensorEigenIdx (I := I) (M := M) g r s →
-      (TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E)) → EuclN → ℝ :=
-    fun i pl y =>
-    ((partialLpLimit (I := I) (M := M) g r s h_atlas i α pl.1 pl.2 :
-      Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
-    with hpartAtom_def
-  -- The collected per-summand constants, hoisted before the `∀ i`.
-  obtain ⟨Ccomp, hCcomp_nn, hCcomp_bd⟩ :=
-    exists_uniform_const_of_finite_wkpNorm_bounds_uniform (I := I) (M := M)
-      (α := α) (K := K) Fcomp compAtom (fun x => x.2.2.2) CfC
-      (fun x => (hCfC_spec x).1)
-      (fun i x => by
-        have hatom := (hCfC_spec x).2
-          (componentLpLimit_memWkp (I := I) (M := M)
-            g r s h_atlas i α x.2.2.2 K (h_pou i))
-          (componentLpLimit_ae_zero_off_chartPouKernel (I := I) (M := M)
-            g r s h_atlas i α x.2.2.2)
-        exact hatom.2)
-  obtain ⟨Cpart, hCpart_nn, hCpart_bd⟩ :=
-    exists_uniform_const_of_finite_wkpNorm_bounds_uniform (I := I) (M := M)
-      (α := α) (K := K) Fpart partAtom (fun x => (x.2.2.2, l)) CfP
-      (fun x => (hCfP_spec x).1)
-      (fun i x => by
-        have hatom := (hCfP_spec x).2
-          (partialLpLimit_memWkp (I := I) (M := M)
-            g r s h_atlas i α x.2.2.2 l K (h_pou i))
-          (partialLpLimit_ae_zero_off_chartPouKernel (I := I) (M := M)
-            g r s h_atlas i α x.2.2.2 l K (h_pou i))
-        exact hatom.2)
-  -- Headline constant: the larger of the two group constants; hoisted here.
-  refine ⟨max
-      (Ccomp * (Finset.univ : Finset (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s)).card)
-      (Cpart * (Finset.univ : Finset (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s)).card),
-    le_trans (by positivity) (le_max_left _ _), fun i => ?_⟩
-  -- Abbreviation for the headline constant.
-  set Cmax : ℝ := max
-      (Ccomp * (Finset.univ : Finset (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s)).card)
-      (Cpart * (Finset.univ : Finset (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s)).card) with hCmax_def
-  -- The per-summand `MemWkp K 2` membership for the index `i`.
-  have h_comp_memWkp : ∀ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s),
-      MemWkp (d := Module.finrank ℝ E) K 2 (Fcomp i x) Ω := by
-    intro x
-    have hatom := (hCfC_spec x).2
-      (componentLpLimit_memWkp (I := I) (M := M)
-        g r s h_atlas i α x.2.2.2 K (h_pou i))
-      (componentLpLimit_ae_zero_off_chartPouKernel (I := I) (M := M)
-        g r s h_atlas i α x.2.2.2)
-    exact hatom.1
-  have h_part_memWkp : ∀ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s),
-      MemWkp (d := Module.finrank ℝ E) K 2 (Fpart i x) Ω := by
-    intro x
-    have hatom := (hCfP_spec x).2
-      (partialLpLimit_memWkp (I := I) (M := M)
-        g r s h_atlas i α x.2.2.2 l K (h_pou i))
-      (partialLpLimit_ae_zero_off_chartPouKernel (I := I) (M := M)
-        g r s h_atlas i α x.2.2.2 l K (h_pou i))
-    exact hatom.1
-  -- Bound on the chart-component group `wkpNorm`.
-  have h_comp_bound :
-      wkpNorm (d := Module.finrank ℝ E) K 2
-          (fun y => ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fcomp i x y) Ω
-        ≤ ENNReal.ofReal (Ccomp * (Finset.univ : Finset (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s)).card)
-          * ∑ p : TensorCompIdx (E := E) r s,
-              wkpNorm (d := Module.finrank ℝ E) K 2 (compAtom i p) Ω :=
-    wkpNorm_finsetSum_le_const_mul_atomSum (I := I) (M := M)
-      (α := α) (K := K) Finset.univ Finset.univ (Fcomp i) (compAtom i)
-      (fun x => x.2.2.2) (fun x _ => Finset.mem_univ _)
-      Ccomp hCcomp_nn
-      (fun x _ => h_comp_memWkp x)
-      (fun x _ => hCcomp_bd i x)
-  -- Bound on the chart-partial group `wkpNorm`.
-  have h_part_bound :
-      wkpNorm (d := Module.finrank ℝ E) K 2
-          (fun y => ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fpart i x y) Ω
-        ≤ ENNReal.ofReal (Cpart * (Finset.univ : Finset (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s)).card)
-          * ∑ pl : TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E),
-              wkpNorm (d := Module.finrank ℝ E) K 2 (partAtom i pl) Ω :=
-    wkpNorm_finsetSum_le_const_mul_atomSum (I := I) (M := M)
-      (α := α) (K := K) Finset.univ Finset.univ (Fpart i) (partAtom i)
-      (fun x => (x.2.2.2, l)) (fun x _ => Finset.mem_univ _)
-      Cpart hCpart_nn
-      (fun x _ => h_part_memWkp x)
-      (fun x _ => hCpart_bd i x)
-  -- Identify the two single-product sums with the two nested-sum groups.
-  have h_comp_eq : (fun y => ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fcomp i x y)
-      = (fun y => ∑ P : TensorCompIdx (E := E) r s,
-          ∑ Q : TensorCompIdx (E := E) r s,
-            ∑ k : Fin (Module.finrank ℝ E),
-              ∑ p : TensorCompIdx (E := E) r s,
-                Set.indicator (chartPouKernel (I := I) (M := M) α)
-                    (euclidPartial (E := E) l
-                      (weightedGradFactor (I := I) (M := M)
-                        g r s α P₀ l P Q k p)) y *
-                  (componentLpLimit (I := I) (M := M) g r s h_atlas i α p :
-                    EuclN → ℝ) y) := by
-    funext y
-    rw [hFcomp_def]
-    simp only [Fintype.sum_prod_type]
-  have h_part_eq : (fun y => ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fpart i x y)
-      = (fun y => ∑ P : TensorCompIdx (E := E) r s,
-          ∑ Q : TensorCompIdx (E := E) r s,
-            ∑ k : Fin (Module.finrank ℝ E),
-              ∑ p : TensorCompIdx (E := E) r s,
-                Set.indicator (chartPouKernel (I := I) (M := M) α)
-                    (weightedGradFactor (I := I) (M := M)
-                      g r s α P₀ l P Q k p) y *
-                  (partialLpLimit (I := I) (M := M) g r s h_atlas i α p l :
-                    EuclN → ℝ) y) := by
-    funext y
-    rw [hFpart_def]
-    simp only [Fintype.sum_prod_type]
-  -- The chart-partial index sum on the right is the chart-partial atom family.
-  have h_part_atom_eq : ∑ pl : TensorCompIdx (E := E) r s
-      × Fin (Module.finrank ℝ E), wkpNorm (d := Module.finrank ℝ E) K 2
-        (partAtom i pl) Ω
-      = ∑ p : TensorCompIdx (E := E) r s,
-          ∑ l' : Fin (Module.finrank ℝ E),
-            wkpNorm (d := Module.finrank ℝ E) K 2
-              (fun y => ((partialLpLimit (I := I) (M := M)
-                  g r s h_atlas i α p l' :
-                Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
-              Ω := by
-    rw [Fintype.sum_prod_type]
-  -- Bound on the chart-component group, in the distinct-atom-sum form.
-  have hcomp : wkpNorm (d := Module.finrank ℝ E) K 2
-        (fun y => ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fcomp i x y) Ω
-      ≤ ENNReal.ofReal Cmax *
-        ∑ p : TensorCompIdx (E := E) r s,
-          wkpNorm (d := Module.finrank ℝ E) K 2
-            (fun y => ((componentLpLimit (I := I) (M := M)
-                g r s h_atlas i α p :
-              Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
-            Ω := by
-    refine h_comp_bound.trans ?_
-    exact mul_le_mul_of_nonneg_right
-      (ENNReal.ofReal_le_ofReal (le_max_left _ _)) (zero_le _)
-  -- Bound on the chart-partial group, in the distinct-atom-sum form.
-  have hpart : wkpNorm (d := Module.finrank ℝ E) K 2
-        (fun y => ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fpart i x y) Ω
-      ≤ ENNReal.ofReal Cmax *
-        ∑ p : TensorCompIdx (E := E) r s,
-          ∑ l' : Fin (Module.finrank ℝ E),
-            wkpNorm (d := Module.finrank ℝ E) K 2
-              (fun y => ((partialLpLimit (I := I) (M := M)
-                  g r s h_atlas i α p l' :
-                Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
-              Ω := by
-    rw [← h_part_atom_eq]
-    refine h_part_bound.trans ?_
-    exact mul_le_mul_of_nonneg_right
-      (ENNReal.ofReal_le_ofReal (le_max_right _ _)) (zero_le _)
-  -- `MemWkp K 2` membership of the two groups, for the triangle inequality.
-  have h_comp_group_memWkp : MemWkp (d := Module.finrank ℝ E) K 2
-      (fun y => ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fcomp i x y) Ω :=
-    memWkp_finsetSum (I := I) (M := M) _ (fun x _ => h_comp_memWkp x)
-  have h_part_group_memWkp : MemWkp (d := Module.finrank ℝ E) K 2
-      (fun y => ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fpart i x y) Ω :=
-    memWkp_finsetSum (I := I) (M := M) _ (fun x _ => h_part_memWkp x)
-  -- Unfold the limit object into its two groups, bridge to single-product sums.
-  rw [show (weightedGradCoeffDivLimit (I := I) (M := M)
-        g r s h_atlas i α P₀ l : EuclN → ℝ)
-      = (fun y => (∑ P : TensorCompIdx (E := E) r s,
-            ∑ Q : TensorCompIdx (E := E) r s,
-              ∑ k : Fin (Module.finrank ℝ E),
-                ∑ p : TensorCompIdx (E := E) r s,
-                  Set.indicator (chartPouKernel (I := I) (M := M) α)
-                      (euclidPartial (E := E) l
-                        (weightedGradFactor (I := I) (M := M)
-                          g r s α P₀ l P Q k p)) y *
-                    (componentLpLimit (I := I) (M := M) g r s h_atlas i α p :
-                      EuclN → ℝ) y)
-          + ∑ P : TensorCompIdx (E := E) r s,
-              ∑ Q : TensorCompIdx (E := E) r s,
-                ∑ k : Fin (Module.finrank ℝ E),
-                  ∑ p : TensorCompIdx (E := E) r s,
-                    Set.indicator (chartPouKernel (I := I) (M := M) α)
-                        (weightedGradFactor (I := I) (M := M)
-                          g r s α P₀ l P Q k p) y *
-                      (partialLpLimit (I := I) (M := M) g r s h_atlas i α p l :
-                        EuclN → ℝ) y) from rfl]
-  have h_bridge : (fun y => (∑ P : TensorCompIdx (E := E) r s,
-          ∑ Q : TensorCompIdx (E := E) r s,
-            ∑ k : Fin (Module.finrank ℝ E),
-              ∑ p : TensorCompIdx (E := E) r s,
-                Set.indicator (chartPouKernel (I := I) (M := M) α)
-                    (euclidPartial (E := E) l
-                      (weightedGradFactor (I := I) (M := M)
-                        g r s α P₀ l P Q k p)) y *
-                  (componentLpLimit (I := I) (M := M) g r s h_atlas i α p :
-                    EuclN → ℝ) y)
-        + ∑ P : TensorCompIdx (E := E) r s,
-            ∑ Q : TensorCompIdx (E := E) r s,
-              ∑ k : Fin (Module.finrank ℝ E),
-                ∑ p : TensorCompIdx (E := E) r s,
-                  Set.indicator (chartPouKernel (I := I) (M := M) α)
-                      (weightedGradFactor (I := I) (M := M)
-                        g r s α P₀ l P Q k p) y *
-                    (partialLpLimit (I := I) (M := M) g r s h_atlas i α p l :
-                      EuclN → ℝ) y)
-      = (fun y => (∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fcomp i x y)
-          + ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fpart i x y) := by
-    funext y
-    rw [← congrFun h_comp_eq y, ← congrFun h_part_eq y]
-  rw [h_bridge]
-  -- Triangle inequality, then the two group bounds, then distribute.
-  calc
-    wkpNorm (d := Module.finrank ℝ E) K 2
-        (fun y => (∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fcomp i x y)
-        + ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fpart i x y) Ω
-        ≤ wkpNorm (d := Module.finrank ℝ E) K 2
-              (fun y => ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fcomp i x y) Ω
-          + wkpNorm (d := Module.finrank ℝ E) K 2
-              (fun y => ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fpart i x y) Ω :=
-        wkpNorm_add_le (d := Module.finrank ℝ E)
-          (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open
-          h_comp_group_memWkp h_part_group_memWkp
-    _ ≤ ENNReal.ofReal Cmax *
-          (∑ p : TensorCompIdx (E := E) r s,
-            wkpNorm (d := Module.finrank ℝ E) K 2
-              (fun y => ((componentLpLimit (I := I) (M := M)
-                  g r s h_atlas i α p :
-                Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
-                EuclN → ℝ) y) Ω)
-        + ENNReal.ofReal Cmax *
-          (∑ p : TensorCompIdx (E := E) r s,
-            ∑ l' : Fin (Module.finrank ℝ E),
-              wkpNorm (d := Module.finrank ℝ E) K 2
-                (fun y => ((partialLpLimit (I := I) (M := M)
-                    g r s h_atlas i α p l' :
-                  Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
-                  EuclN → ℝ) y) Ω) :=
-        add_le_add hcomp hpart
-    _ = ENNReal.ofReal Cmax *
-          ((∑ p : TensorCompIdx (E := E) r s,
-              wkpNorm (d := Module.finrank ℝ E) K 2
-                (fun y => ((componentLpLimit (I := I) (M := M)
-                    g r s h_atlas i α p :
-                  Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
-                  EuclN → ℝ) y) Ω)
-            + (∑ p : TensorCompIdx (E := E) r s,
-                ∑ l' : Fin (Module.finrank ℝ E),
-                  wkpNorm (d := Module.finrank ℝ E) K 2
-                    (fun y => ((partialLpLimit (I := I) (M := M)
-                        g r s h_atlas i α p l' :
-                      Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
-                      EuclN → ℝ) y) Ω)) := by
-      rw [mul_add]
-
 /-! ## Chart-locality-free atom regularity for the eigenbasis-uniform companions
 
-The three eigenbasis-uniform headlines above are keyed on the partition-of-unity
-chart components / partials of the atlas-dependent eigenvector vector
-`tensorResolventEigenbasisVec h_atlas i`. Their chart-locality-free companions
-are keyed instead on the canonical eigenbasis vector
-`tensorResolventEigenbasisVec_ofCompact … i` extracted from the intrinsic
-compact-operator spectral theorem. The two atoms `componentLpLimit_unconditional`
-and `partialLpLimit_unconditional` are `MemWkp K 2` on the chart target
-(`componentLpLimit_memWkp_unconditional` / `partialLpLimit_memWkp_unconditional`)
+The eigenbasis-uniform headlines below are keyed on the partition-of-unity chart
+components / partials of the canonical eigenbasis vector
+`tensorResolventEigenbasisVec … i` extracted from the intrinsic
+compact-operator spectral theorem. The two atoms `componentLpLimit`
+and `partialLpLimit` are `MemWkp K 2` on the chart target
+(`componentLpLimit_memWkp` / `partialLpLimit_memWkp`)
 and vanish almost everywhere off the compact partition-of-unity kernel; the
 off-kernel vanishing is recorded here, reproving the chart-locality-free
 analogues of `componentLpLimit_ae_zero_off_chartPouKernel` and
@@ -3030,24 +945,24 @@ infrastructure. -/
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 /-- Chart-locality-free twin of `eigenvectorVec_pou_memWkp`: the partition-of-unity
 Euclidean chart components of the canonical eigenbasis vector
-`tensorResolventEigenbasisVec_ofCompact … i` are `MemWkp N 2` on every chart
+`tensorResolventEigenbasisVec … i` are `MemWkp N 2` on every chart
 target, given that those of the `L²`-coercion of the resolvent are `MemWkp N 2`.
 The two chart components differ by the nonzero scalar `μ⁻¹`, and `MemWkp` is
 scalar-invariant. -/
-private lemma eigenvectorVec_pou_memWkp_unconditional
+private lemma eigenvectorVec_pou_memWkp
     (i : TensorEigenIdx (I := I) (M := M) g r s) (N : ℕ)
     (h_pou : ∀ (β : M) (Q : TensorCompIdx (E := E) r s),
       MemWkp (d := Module.finrank ℝ E) N 2
         (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
             (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
-              (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i))
+              (eigenvectorResolvent (I := I) (M := M) g r s i))
             β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
         (chartTargetEuclid (I := I) (M := M) β))
     (β : M) (Q : TensorCompIdx (E := E) r s) :
     MemWkp (d := Module.finrank ℝ E) N 2
       (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
-          (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
-            (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s)
+          (tensorResolventEigenbasisVec (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s)
             i) β Q :
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
       (chartTargetEuclid (I := I) (M := M) β) := by
@@ -3058,38 +973,38 @@ private lemma eigenvectorVec_pou_memWkp_unconditional
   have h_res : MemWkp (d := Module.finrank ℝ E) N 2
       (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
           (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
-            (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i))
+            (eigenvectorResolvent (I := I) (M := M) g r s i))
           β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y) Ω :=
     h_pou β Q
   -- The eigenvector chart component is `μ⁻¹` times the resolvent-coercion chart
-  -- component (`eigenvector_chartComponent_eq_unconditional`). Rescale.
-  have h_chart_eq := eigenvector_chartComponent_eq_unconditional (I := I) (M := M)
+  -- component (`eigenvector_chartComponent_eq`). Rescale.
+  have h_chart_eq := eigenvector_chartComponent_eq (I := I) (M := M)
     g r s i β Q
   have h_ae : (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
-        (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
-          (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s)
+        (tensorResolventEigenbasisVec (I := I) (M := M)
+          (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s)
           i) β Q :
         Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
       =ᵐ[(volume : Measure EuclN).restrict Ω]
       (fun y => (i.fst.val)⁻¹ *
         ((tensorL2ChartComponent (I := I) (M := M) g r s
           (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
-            (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i))
+            (eigenvectorResolvent (I := I) (M := M) g r s i))
           β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y) := by
     have h_smul := Lp.coeFn_smul (i.fst.val)⁻¹
       (tensorL2ChartComponent (I := I) (M := M) g r s
         (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
-          (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i)) β Q)
+          (eigenvectorResolvent (I := I) (M := M) g r s i)) β Q)
     have h_smul' : (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
-          (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
-            (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s)
+          (tensorResolventEigenbasisVec (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s)
             i) β Q :
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
         =ᵐ[chartL2Measure (I := I) (M := M) β]
         (fun y => (i.fst.val)⁻¹ •
           ((tensorL2ChartComponent (I := I) (M := M) g r s
             (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
-              (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i))
+              (eigenvectorResolvent (I := I) (M := M) g r s i))
             β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y) := by
       rw [h_chart_eq]
       exact h_smul
@@ -3102,45 +1017,45 @@ private lemma eigenvectorVec_pou_memWkp_unconditional
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_res (i.fst.val)⁻¹)
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- The component atom `componentLpLimit_unconditional g r s i α P` vanishes almost
+/-- The component atom `componentLpLimit g r s i α P` vanishes almost
 everywhere off the compact partition-of-unity kernel `chartPouKernel α`.
 Chart-locality-free twin of `componentLpLimit_ae_zero_off_chartPouKernel`. -/
-private lemma componentLpLimit_ae_zero_off_chartPouKernel_unconditional
+private lemma componentLpLimit_ae_zero_off_chartPouKernel
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P : TensorCompIdx (E := E) r s) :
     ∀ᵐ y ∂(chartL2Measure (I := I) (M := M) α),
       y ∉ chartPouKernel (I := I) (M := M) α →
-        ((componentLpLimit_unconditional (I := I) (M := M) g r s i α P :
+        ((componentLpLimit (I := I) (M := M) g r s i α P :
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y = 0 := by
   classical
-  -- `componentLpLimit_unconditional = μ • tensorL2ChartComponent (eigenvector)`.
-  have h_smul : (fun y => ((componentLpLimit_unconditional (I := I) (M := M)
+  -- `componentLpLimit = μ • tensorL2ChartComponent (eigenvector)`.
+  have h_smul : (fun y => ((componentLpLimit (I := I) (M := M)
         g r s i α P :
         Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
       =ᵐ[chartL2Measure (I := I) (M := M) α]
       (fun y => i.fst.val •
         ((tensorL2ChartComponent (I := I) (M := M) g r s
-          (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
-            (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s)
+          (tensorResolventEigenbasisVec (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s)
             i) α P :
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y) := by
-    rw [componentLpLimit_unconditional]
+    rw [componentLpLimit]
     exact Lp.coeFn_smul i.fst.val _
   -- The canonical eigenvector chart component vanishes a.e. off the kernel.
   have h_comp_zero := tensorL2ChartComponent_ae_zero_off_chartPouKernel
     (I := I) (M := M) g r s
-    (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
-      (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s) i)
+    (tensorResolventEigenbasisVec (I := I) (M := M)
+      (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s) i)
     α P
   filter_upwards [h_smul, h_comp_zero] with y hy hy_zero hyK
   rw [hy, smul_eq_mul, hy_zero hyK, mul_zero]
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- The chart-partial atom `partialLpLimit_unconditional g r s i α P k` vanishes
+/-- The chart-partial atom `partialLpLimit g r s i α P k` vanishes
 almost everywhere off the compact partition-of-unity kernel `chartPouKernel α`,
 given the order-`(K + 1)` partition-of-unity regularity input `h_pou`.
 Chart-locality-free twin of `partialLpLimit_ae_zero_off_chartPouKernel`. -/
-private lemma partialLpLimit_ae_zero_off_chartPouKernel_unconditional
+private lemma partialLpLimit_ae_zero_off_chartPouKernel
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P : TensorCompIdx (E := E) r s)
     (k : Fin (Module.finrank ℝ E)) (K : ℕ)
@@ -3148,12 +1063,12 @@ private lemma partialLpLimit_ae_zero_off_chartPouKernel_unconditional
       MemWkp (d := Module.finrank ℝ E) (K + 1) 2
         (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
             (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
-              (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i))
+              (eigenvectorResolvent (I := I) (M := M) g r s i))
             β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
         (chartTargetEuclid (I := I) (M := M) β)) :
     ∀ᵐ y ∂(chartL2Measure (I := I) (M := M) α),
       y ∉ chartPouKernel (I := I) (M := M) α →
-        ((partialLpLimit_unconditional (I := I) (M := M) g r s i α P k :
+        ((partialLpLimit (I := I) (M := M) g r s i α P k :
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y = 0 := by
   classical
   set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hΩ_def
@@ -3161,60 +1076,60 @@ private lemma partialLpLimit_ae_zero_off_chartPouKernel_unconditional
   -- The canonical eigenvector chart component is `W^{1,2}` (from `W^{K+1,2}`).
   have h_comp_w1p : DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2
       (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
-          (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
-            (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s)
+          (tensorResolventEigenbasisVec (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s)
             i) α P :
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y) Ω :=
-    (eigenvectorVec_pou_memWkp_unconditional (I := I) (M := M) g r s i (K + 1)
+    (eigenvectorVec_pou_memWkp (I := I) (M := M) g r s i (K + 1)
       h_pou α P).memW1p
   -- The eigenvector weak chart partial is a genuine weak partial of it.
   have h_weak : DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) k
-      (eigenvectorChartWeakPartial_unconditional (I := I) (M := M)
+      (eigenvectorChartWeakPartial (I := I) (M := M)
         g r s i α P k)
       (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
-          (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
-            (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s)
+          (tensorResolventEigenbasisVec (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s)
             i) α P :
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y) Ω :=
-    eigenvectorChartWeakPartial_hasWeakPartialDeriv_unconditional (I := I) (M := M)
+    eigenvectorChartWeakPartial_hasWeakPartialDeriv (I := I) (M := M)
       g r s i α P k
   -- The eigenvector weak chart partial is `L²`.
   have h_weak_memLp : MemLp
-      (eigenvectorChartWeakPartial_unconditional (I := I) (M := M)
+      (eigenvectorChartWeakPartial (I := I) (M := M)
         g r s i α P k) 2
       ((volume : Measure EuclN).restrict Ω) := by
-    rw [eigenvectorChartWeakPartial_unconditional]
+    rw [eigenvectorChartWeakPartial]
     exact Lp.memLp _
   -- The canonical chart component vanishes a.e. off the kernel.
   have h_comp_zero := tensorL2ChartComponent_ae_zero_off_chartPouKernel
     (I := I) (M := M) g r s
-    (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
-      (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s) i)
+    (tensorResolventEigenbasisVec (I := I) (M := M)
+      (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s) i)
     α P
   -- Locality of weak partials propagates the off-kernel vanishing.
   have h_weak_zero : ∀ᵐ y ∂((volume : Measure EuclN).restrict Ω),
       y ∉ chartPouKernel (I := I) (M := M) α →
-        eigenvectorChartWeakPartial_unconditional (I := I) (M := M)
+        eigenvectorChartWeakPartial (I := I) (M := M)
           g r s i α P k y = 0 :=
     hasWeakPartialDeriv_ae_zero_off_of_ae_zero_off hΩ_open k
       (chartPouKernel_isCompact (I := I) (M := M) α).isClosed
       h_weak_memLp h_weak h_comp_w1p
       (by rw [← chartL2Measure]; exact h_comp_zero)
-  -- `partialLpLimit_unconditional = μ • eigenvectorChartWeakPartial_unconditional`.
-  have h_ae : (fun y => ((partialLpLimit_unconditional (I := I) (M := M)
+  -- `partialLpLimit = μ • eigenvectorChartWeakPartial`.
+  have h_ae : (fun y => ((partialLpLimit (I := I) (M := M)
         g r s i α P k :
         Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
       =ᵐ[chartL2Measure (I := I) (M := M) α]
       (fun y => i.fst.val •
-        eigenvectorChartWeakPartial_unconditional (I := I) (M := M)
+        eigenvectorChartWeakPartial (I := I) (M := M)
           g r s i α P k y) := by
-    rw [partialLpLimit_unconditional, eigenvectorChartWeakPartial_unconditional]
+    rw [partialLpLimit, eigenvectorChartWeakPartial]
     exact Lp.coeFn_smul i.fst.val _
   -- Off-kernel vanishing transfers from the weak partial to the rescaled atom.
   have hΩ_meas : MeasurableSet Ω := hΩ_open.measurableSet
   have h_weak_zero' : ∀ᵐ y ∂(chartL2Measure (I := I) (M := M) α),
       y ∉ chartPouKernel (I := I) (M := M) α →
-        eigenvectorChartWeakPartial_unconditional (I := I) (M := M)
+        eigenvectorChartWeakPartial (I := I) (M := M)
           g r s i α P k y = 0 := by
     rw [chartL2Measure]; exact h_weak_zero
   filter_upwards [h_ae, h_weak_zero'] with y hy hy_zero hyK
@@ -3228,9 +1143,9 @@ coefficient limit (chart-locality-free).** Chart-locality-free twin of
 `wkpNorm_covPrincipalRotationCoeffLimit_le_uniform`: a *single* nonnegative
 constant `C`, independent of the eigenbasis index `i`, serves every `i`
 simultaneously, with every limit object keyed on the canonical eigenbasis vector
-`tensorResolventEigenbasisVec_ofCompact … i` and the order-`(K + 1)`
+`tensorResolventEigenbasisVec … i` and the order-`(K + 1)`
 partition-of-unity regularity input `h_pou` keyed on
-`eigenvectorResolvent_unconditional`. -/
+`eigenvectorResolvent`. -/
 theorem wkpNorm_covPrincipalRotationCoeffLimit_le_uniform_unconditional
     (K : ℕ) (α : M) (P₀ : TensorCompIdx (E := E) r s)
     (h_pou : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -3238,20 +1153,20 @@ theorem wkpNorm_covPrincipalRotationCoeffLimit_le_uniform_unconditional
       MemWkp (d := Module.finrank ℝ E) (K + 1) 2
         (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
             (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
-              (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i))
+              (eigenvectorResolvent (I := I) (M := M) g r s i))
             β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
         (chartTargetEuclid (I := I) (M := M) β)) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
         wkpNorm (d := Module.finrank ℝ E) K 2
-            (covPrincipalRotationCoeffLimit_unconditional (I := I) (M := M)
+            (covPrincipalRotationCoeffLimit (I := I) (M := M)
               g r s i α P₀ : EuclN → ℝ)
             (chartTargetEuclid (I := I) (M := M) α)
           ≤ ENNReal.ofReal C *
             (∑ P : TensorCompIdx (E := E) r s,
               ∑ k : Fin (Module.finrank ℝ E),
                 wkpNorm (d := Module.finrank ℝ E) K 2
-                  (fun y => ((partialLpLimit_unconditional (I := I) (M := M)
+                  (fun y => ((partialLpLimit (I := I) (M := M)
                       g r s i α P k :
                     Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
                     EuclN → ℝ) y)
@@ -3296,14 +1211,14 @@ theorem wkpNorm_covPrincipalRotationCoeffLimit_le_uniform_unconditional
       Set.indicator (chartPouKernel (I := I) (M := M) α)
           (principalRotationFactor (I := I) (M := M)
             g r s α P₀ x.1 x.2.1 x.2.2.1 x.2.2.2) y *
-        ((partialLpLimit_unconditional (I := I) (M := M) g r s i α x.1 x.2.2.1 :
+        ((partialLpLimit (I := I) (M := M) g r s i α x.1 x.2.2.1 :
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
     with hF_def
   -- The per-`i` chart-partial atom family, indexed by `(P, k)`.
   set partAtom : TensorEigenIdx (I := I) (M := M) g r s →
       (TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E)) → EuclN → ℝ :=
     fun i pk y =>
-    ((partialLpLimit_unconditional (I := I) (M := M) g r s i α pk.1 pk.2 :
+    ((partialLpLimit (I := I) (M := M) g r s i α pk.1 pk.2 :
       Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
     with hpartAtom_def
   -- The collected per-summand constant, hoisted before the `∀ i`.
@@ -3313,9 +1228,9 @@ theorem wkpNorm_covPrincipalRotationCoeffLimit_le_uniform_unconditional
       (fun x => (hCf_spec x).1)
       (fun i x => by
         have hatom := (hCf_spec x).2
-          (partialLpLimit_memWkp_unconditional (I := I) (M := M)
+          (partialLpLimit_memWkp (I := I) (M := M)
             g r s i α x.1 x.2.2.1 K (h_pou i))
-          (partialLpLimit_ae_zero_off_chartPouKernel_unconditional (I := I) (M := M)
+          (partialLpLimit_ae_zero_off_chartPouKernel (I := I) (M := M)
             g r s i α x.1 x.2.2.1 K (h_pou i))
         exact hatom.2)
   -- Headline constant: the collected per-summand constant times the four-fold
@@ -3329,9 +1244,9 @@ theorem wkpNorm_covPrincipalRotationCoeffLimit_le_uniform_unconditional
       MemWkp (d := Module.finrank ℝ E) K 2 (F i x) Ω := by
     intro x
     have hatom := (hCf_spec x).2
-      (partialLpLimit_memWkp_unconditional (I := I) (M := M)
+      (partialLpLimit_memWkp (I := I) (M := M)
         g r s i α x.1 x.2.2.1 K (h_pou i))
-      (partialLpLimit_ae_zero_off_chartPouKernel_unconditional (I := I) (M := M)
+      (partialLpLimit_ae_zero_off_chartPouKernel (I := I) (M := M)
         g r s i α x.1 x.2.2.1 K (h_pou i))
     exact hatom.1
   -- Bound on the four-fold-sum `wkpNorm`, via the aggregation lemma.
@@ -3362,7 +1277,7 @@ theorem wkpNorm_covPrincipalRotationCoeffLimit_le_uniform_unconditional
                 Set.indicator (chartPouKernel (I := I) (M := M) α)
                     (principalRotationFactor (I := I) (M := M)
                       g r s α P₀ P Q k l) y *
-                  (partialLpLimit_unconditional (I := I) (M := M) g r s i α P k :
+                  (partialLpLimit (I := I) (M := M) g r s i α P k :
                     EuclN → ℝ) y) := by
     funext y
     rw [hF_def]
@@ -3374,13 +1289,13 @@ theorem wkpNorm_covPrincipalRotationCoeffLimit_le_uniform_unconditional
       = ∑ P : TensorCompIdx (E := E) r s,
           ∑ k : Fin (Module.finrank ℝ E),
             wkpNorm (d := Module.finrank ℝ E) K 2
-              (fun y => ((partialLpLimit_unconditional (I := I) (M := M)
+              (fun y => ((partialLpLimit (I := I) (M := M)
                   g r s i α P k :
                 Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
               Ω := by
     rw [Fintype.sum_prod_type]
   -- Unfold the limit object and assemble the bound.
-  rw [show (covPrincipalRotationCoeffLimit_unconditional (I := I) (M := M)
+  rw [show (covPrincipalRotationCoeffLimit (I := I) (M := M)
         g r s i α P₀ : EuclN → ℝ)
       = (fun y => ∑ P : TensorCompIdx (E := E) r s,
           ∑ Q : TensorCompIdx (E := E) r s,
@@ -3389,7 +1304,7 @@ theorem wkpNorm_covPrincipalRotationCoeffLimit_le_uniform_unconditional
                 Set.indicator (chartPouKernel (I := I) (M := M) α)
                     (principalRotationFactor (I := I) (M := M)
                       g r s α P₀ P Q k l) y *
-                  (partialLpLimit_unconditional (I := I) (M := M) g r s i α P k :
+                  (partialLpLimit (I := I) (M := M) g r s i α P k :
                     EuclN → ℝ) y) from rfl]
   rw [← h_eq, hΩ_def, ← h_atom_eq]
   exact h_bound
@@ -3407,27 +1322,27 @@ theorem wkpNorm_covLowerOrderRotationValueCoeffLimit_le_uniform_unconditional
       MemWkp (d := Module.finrank ℝ E) (K + 1) 2
         (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
             (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
-              (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i))
+              (eigenvectorResolvent (I := I) (M := M) g r s i))
             β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
         (chartTargetEuclid (I := I) (M := M) β)) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
         wkpNorm (d := Module.finrank ℝ E) K 2
-            (covLowerOrderRotationValueCoeffLimit_unconditional (I := I) (M := M)
+            (covLowerOrderRotationValueCoeffLimit (I := I) (M := M)
               g r s i α P₀ : EuclN → ℝ)
             (chartTargetEuclid (I := I) (M := M) α)
           ≤ ENNReal.ofReal C *
             ((∑ P : TensorCompIdx (E := E) r s,
                 ∑ k : Fin (Module.finrank ℝ E),
                   wkpNorm (d := Module.finrank ℝ E) K 2
-                    (fun y => ((partialLpLimit_unconditional (I := I) (M := M)
+                    (fun y => ((partialLpLimit (I := I) (M := M)
                         g r s i α P k :
                       Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
                       EuclN → ℝ) y)
                     (chartTargetEuclid (I := I) (M := M) α))
               + (∑ p : TensorCompIdx (E := E) r s,
                   wkpNorm (d := Module.finrank ℝ E) K 2
-                    (fun y => ((componentLpLimit_unconditional (I := I) (M := M)
+                    (fun y => ((componentLpLimit (I := I) (M := M)
                         g r s i α p :
                       Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
                       EuclN → ℝ) y)
@@ -3491,7 +1406,7 @@ theorem wkpNorm_covLowerOrderRotationValueCoeffLimit_le_uniform_unconditional
       Set.indicator (chartPouKernel (I := I) (M := M) α)
           (valuePartialFactor (I := I) (M := M)
             g r s α P₀ x.1 x.2.1 x.2.2.1 x.2.2.2) y *
-        ((partialLpLimit_unconditional (I := I) (M := M) g r s i α x.1 x.2.2.1 :
+        ((partialLpLimit (I := I) (M := M) g r s i α x.1 x.2.2.1 :
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
     with hFpart_def
   -- The per-`i` chart-component group, as a single sum over `(P, Q, k, l, p)`.
@@ -3500,21 +1415,21 @@ theorem wkpNorm_covLowerOrderRotationValueCoeffLimit_le_uniform_unconditional
       Set.indicator (chartPouKernel (I := I) (M := M) α)
           (valueComponentFactor (I := I) (M := M)
             g r s α P₀ x.1 x.2.1 x.2.2.1 x.2.2.2.1 x.2.2.2.2) y *
-        ((componentLpLimit_unconditional (I := I) (M := M) g r s i α x.2.2.2.2 :
+        ((componentLpLimit (I := I) (M := M) g r s i α x.2.2.2.2 :
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
     with hFcomp_def
   -- The per-`i` chart-partial atom family, indexed by `(P, k)`.
   set partAtom : TensorEigenIdx (I := I) (M := M) g r s →
       (TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E)) → EuclN → ℝ :=
     fun i pk y =>
-    ((partialLpLimit_unconditional (I := I) (M := M) g r s i α pk.1 pk.2 :
+    ((partialLpLimit (I := I) (M := M) g r s i α pk.1 pk.2 :
       Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
     with hpartAtom_def
   -- The per-`i` chart-component atom family, indexed by `p`.
   set compAtom : TensorEigenIdx (I := I) (M := M) g r s →
       TensorCompIdx (E := E) r s → EuclN → ℝ :=
     fun i p y =>
-    ((componentLpLimit_unconditional (I := I) (M := M) g r s i α p :
+    ((componentLpLimit (I := I) (M := M) g r s i α p :
       Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
     with hcompAtom_def
   -- The collected per-summand constants, hoisted before the `∀ i`.
@@ -3524,9 +1439,9 @@ theorem wkpNorm_covLowerOrderRotationValueCoeffLimit_le_uniform_unconditional
       (fun x => (hCfP_spec x).1)
       (fun i x => by
         have hatom := (hCfP_spec x).2
-          (partialLpLimit_memWkp_unconditional (I := I) (M := M)
+          (partialLpLimit_memWkp (I := I) (M := M)
             g r s i α x.1 x.2.2.1 K (h_pou i))
-          (partialLpLimit_ae_zero_off_chartPouKernel_unconditional (I := I) (M := M)
+          (partialLpLimit_ae_zero_off_chartPouKernel (I := I) (M := M)
             g r s i α x.1 x.2.2.1 K (h_pou i))
         exact hatom.2)
   obtain ⟨Ccomp, hCcomp_nn, hCcomp_bd⟩ :=
@@ -3535,9 +1450,9 @@ theorem wkpNorm_covLowerOrderRotationValueCoeffLimit_le_uniform_unconditional
       (fun x => (hCfC_spec x).1)
       (fun i x => by
         have hatom := (hCfC_spec x).2
-          (componentLpLimit_memWkp_unconditional (I := I) (M := M)
+          (componentLpLimit_memWkp (I := I) (M := M)
             g r s i α x.2.2.2.2 K (h_pou i))
-          (componentLpLimit_ae_zero_off_chartPouKernel_unconditional (I := I) (M := M)
+          (componentLpLimit_ae_zero_off_chartPouKernel (I := I) (M := M)
             g r s i α x.2.2.2.2)
         exact hatom.2)
   -- Headline constant: the larger of the two group constants; hoisted here.
@@ -3554,18 +1469,18 @@ theorem wkpNorm_covLowerOrderRotationValueCoeffLimit_le_uniform_unconditional
       MemWkp (d := Module.finrank ℝ E) K 2 (Fpart i x) Ω := by
     intro x
     have hatom := (hCfP_spec x).2
-      (partialLpLimit_memWkp_unconditional (I := I) (M := M)
+      (partialLpLimit_memWkp (I := I) (M := M)
         g r s i α x.1 x.2.2.1 K (h_pou i))
-      (partialLpLimit_ae_zero_off_chartPouKernel_unconditional (I := I) (M := M)
+      (partialLpLimit_ae_zero_off_chartPouKernel (I := I) (M := M)
         g r s i α x.1 x.2.2.1 K (h_pou i))
     exact hatom.1
   have h_comp_memWkp : ∀ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s),
       MemWkp (d := Module.finrank ℝ E) K 2 (Fcomp i x) Ω := by
     intro x
     have hatom := (hCfC_spec x).2
-      (componentLpLimit_memWkp_unconditional (I := I) (M := M)
+      (componentLpLimit_memWkp (I := I) (M := M)
         g r s i α x.2.2.2.2 K (h_pou i))
-      (componentLpLimit_ae_zero_off_chartPouKernel_unconditional (I := I) (M := M)
+      (componentLpLimit_ae_zero_off_chartPouKernel (I := I) (M := M)
         g r s i α x.2.2.2.2)
     exact hatom.1
   -- Bound on the chart-partial group `wkpNorm`.
@@ -3603,7 +1518,7 @@ theorem wkpNorm_covLowerOrderRotationValueCoeffLimit_le_uniform_unconditional
                 Set.indicator (chartPouKernel (I := I) (M := M) α)
                     (valuePartialFactor (I := I) (M := M)
                       g r s α P₀ P Q k l) y *
-                  (partialLpLimit_unconditional (I := I) (M := M) g r s i α P k :
+                  (partialLpLimit (I := I) (M := M) g r s i α P k :
                     EuclN → ℝ) y) := by
     funext y
     rw [hFpart_def]
@@ -3617,7 +1532,7 @@ theorem wkpNorm_covLowerOrderRotationValueCoeffLimit_le_uniform_unconditional
                   Set.indicator (chartPouKernel (I := I) (M := M) α)
                       (valueComponentFactor (I := I) (M := M)
                         g r s α P₀ P Q k l p) y *
-                    (componentLpLimit_unconditional (I := I) (M := M) g r s i α p :
+                    (componentLpLimit (I := I) (M := M) g r s i α p :
                       EuclN → ℝ) y) := by
     funext y
     rw [hFcomp_def]
@@ -3629,7 +1544,7 @@ theorem wkpNorm_covLowerOrderRotationValueCoeffLimit_le_uniform_unconditional
       = ∑ P : TensorCompIdx (E := E) r s,
           ∑ k : Fin (Module.finrank ℝ E),
             wkpNorm (d := Module.finrank ℝ E) K 2
-              (fun y => ((partialLpLimit_unconditional (I := I) (M := M)
+              (fun y => ((partialLpLimit (I := I) (M := M)
                   g r s i α P k :
                 Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
               Ω := by
@@ -3641,7 +1556,7 @@ theorem wkpNorm_covLowerOrderRotationValueCoeffLimit_le_uniform_unconditional
         ∑ P : TensorCompIdx (E := E) r s,
           ∑ k : Fin (Module.finrank ℝ E),
             wkpNorm (d := Module.finrank ℝ E) K 2
-              (fun y => ((partialLpLimit_unconditional (I := I) (M := M)
+              (fun y => ((partialLpLimit (I := I) (M := M)
                   g r s i α P k :
                 Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
               Ω := by
@@ -3655,7 +1570,7 @@ theorem wkpNorm_covLowerOrderRotationValueCoeffLimit_le_uniform_unconditional
       ≤ ENNReal.ofReal Cmax *
         ∑ p : TensorCompIdx (E := E) r s,
           wkpNorm (d := Module.finrank ℝ E) K 2
-            (fun y => ((componentLpLimit_unconditional (I := I) (M := M)
+            (fun y => ((componentLpLimit (I := I) (M := M)
                 g r s i α p :
               Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
             Ω := by
@@ -3670,7 +1585,7 @@ theorem wkpNorm_covLowerOrderRotationValueCoeffLimit_le_uniform_unconditional
       (fun y => ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fcomp i x y) Ω :=
     memWkp_finsetSum (I := I) (M := M) _ (fun x _ => h_comp_memWkp x)
   -- Unfold the limit object into its two groups, bridge to single-product sums.
-  rw [show (covLowerOrderRotationValueCoeffLimit_unconditional (I := I) (M := M)
+  rw [show (covLowerOrderRotationValueCoeffLimit (I := I) (M := M)
         g r s i α P₀ : EuclN → ℝ)
       = (fun y => (∑ P : TensorCompIdx (E := E) r s,
             ∑ Q : TensorCompIdx (E := E) r s,
@@ -3679,7 +1594,7 @@ theorem wkpNorm_covLowerOrderRotationValueCoeffLimit_le_uniform_unconditional
                   Set.indicator (chartPouKernel (I := I) (M := M) α)
                       (valuePartialFactor (I := I) (M := M)
                         g r s α P₀ P Q k l) y *
-                    (partialLpLimit_unconditional (I := I) (M := M) g r s i α P k :
+                    (partialLpLimit (I := I) (M := M) g r s i α P k :
                       EuclN → ℝ) y)
           + ∑ P : TensorCompIdx (E := E) r s,
               ∑ Q : TensorCompIdx (E := E) r s,
@@ -3689,7 +1604,7 @@ theorem wkpNorm_covLowerOrderRotationValueCoeffLimit_le_uniform_unconditional
                       Set.indicator (chartPouKernel (I := I) (M := M) α)
                           (valueComponentFactor (I := I) (M := M)
                             g r s α P₀ P Q k l p) y *
-                        (componentLpLimit_unconditional (I := I) (M := M)
+                        (componentLpLimit (I := I) (M := M)
                           g r s i α p : EuclN → ℝ) y) from rfl]
   have h_bridge : (fun y => (∑ P : TensorCompIdx (E := E) r s,
           ∑ Q : TensorCompIdx (E := E) r s,
@@ -3698,7 +1613,7 @@ theorem wkpNorm_covLowerOrderRotationValueCoeffLimit_le_uniform_unconditional
                 Set.indicator (chartPouKernel (I := I) (M := M) α)
                     (valuePartialFactor (I := I) (M := M)
                       g r s α P₀ P Q k l) y *
-                  (partialLpLimit_unconditional (I := I) (M := M) g r s i α P k :
+                  (partialLpLimit (I := I) (M := M) g r s i α P k :
                     EuclN → ℝ) y)
         + ∑ P : TensorCompIdx (E := E) r s,
             ∑ Q : TensorCompIdx (E := E) r s,
@@ -3708,7 +1623,7 @@ theorem wkpNorm_covLowerOrderRotationValueCoeffLimit_le_uniform_unconditional
                     Set.indicator (chartPouKernel (I := I) (M := M) α)
                         (valueComponentFactor (I := I) (M := M)
                           g r s α P₀ P Q k l p) y *
-                      (componentLpLimit_unconditional (I := I) (M := M)
+                      (componentLpLimit (I := I) (M := M)
                         g r s i α p : EuclN → ℝ) y)
       = (fun y => (∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E)), Fpart i x y)
           + ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fcomp i x y) := by
@@ -3731,14 +1646,14 @@ theorem wkpNorm_covLowerOrderRotationValueCoeffLimit_le_uniform_unconditional
           (∑ P : TensorCompIdx (E := E) r s,
             ∑ k : Fin (Module.finrank ℝ E),
               wkpNorm (d := Module.finrank ℝ E) K 2
-                (fun y => ((partialLpLimit_unconditional (I := I) (M := M)
+                (fun y => ((partialLpLimit (I := I) (M := M)
                     g r s i α P k :
                   Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
                   EuclN → ℝ) y) Ω)
         + ENNReal.ofReal Cmax *
           (∑ p : TensorCompIdx (E := E) r s,
             wkpNorm (d := Module.finrank ℝ E) K 2
-              (fun y => ((componentLpLimit_unconditional (I := I) (M := M)
+              (fun y => ((componentLpLimit (I := I) (M := M)
                   g r s i α p :
                 Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
                 EuclN → ℝ) y) Ω) :=
@@ -3747,13 +1662,13 @@ theorem wkpNorm_covLowerOrderRotationValueCoeffLimit_le_uniform_unconditional
           ((∑ P : TensorCompIdx (E := E) r s,
               ∑ k : Fin (Module.finrank ℝ E),
                 wkpNorm (d := Module.finrank ℝ E) K 2
-                  (fun y => ((partialLpLimit_unconditional (I := I) (M := M)
+                  (fun y => ((partialLpLimit (I := I) (M := M)
                       g r s i α P k :
                     Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
                     EuclN → ℝ) y) Ω)
             + (∑ p : TensorCompIdx (E := E) r s,
                 wkpNorm (d := Module.finrank ℝ E) K 2
-                  (fun y => ((componentLpLimit_unconditional (I := I) (M := M)
+                  (fun y => ((componentLpLimit (I := I) (M := M)
                       g r s i α p :
                     Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
                     EuclN → ℝ) y) Ω)) := by
@@ -3773,19 +1688,19 @@ theorem wkpNorm_weightedGradCoeffDivLimit_le_uniform_unconditional
       MemWkp (d := Module.finrank ℝ E) (K + 1) 2
         (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
             (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
-              (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i))
+              (eigenvectorResolvent (I := I) (M := M) g r s i))
             β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
         (chartTargetEuclid (I := I) (M := M) β)) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
         wkpNorm (d := Module.finrank ℝ E) K 2
-            (weightedGradCoeffDivLimit_unconditional (I := I) (M := M)
+            (weightedGradCoeffDivLimit (I := I) (M := M)
               g r s i α P₀ l : EuclN → ℝ)
             (chartTargetEuclid (I := I) (M := M) α)
           ≤ ENNReal.ofReal C *
             ((∑ p : TensorCompIdx (E := E) r s,
                 wkpNorm (d := Module.finrank ℝ E) K 2
-                  (fun y => ((componentLpLimit_unconditional (I := I) (M := M)
+                  (fun y => ((componentLpLimit (I := I) (M := M)
                       g r s i α p :
                     Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
                     EuclN → ℝ) y)
@@ -3793,7 +1708,7 @@ theorem wkpNorm_weightedGradCoeffDivLimit_le_uniform_unconditional
               + (∑ p : TensorCompIdx (E := E) r s,
                   ∑ l' : Fin (Module.finrank ℝ E),
                     wkpNorm (d := Module.finrank ℝ E) K 2
-                      (fun y => ((partialLpLimit_unconditional (I := I) (M := M)
+                      (fun y => ((partialLpLimit (I := I) (M := M)
                           g r s i α p l' :
                         Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
                         EuclN → ℝ) y)
@@ -3860,7 +1775,7 @@ theorem wkpNorm_weightedGradCoeffDivLimit_le_uniform_unconditional
           (euclidPartial (E := E) l
             (weightedGradFactor (I := I) (M := M)
               g r s α P₀ l x.1 x.2.1 x.2.2.1 x.2.2.2)) y *
-        ((componentLpLimit_unconditional (I := I) (M := M) g r s i α x.2.2.2 :
+        ((componentLpLimit (I := I) (M := M) g r s i α x.2.2.2 :
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
     with hFcomp_def
   -- The per-`i` chart-partial group, as a single sum over `(P, Q, k, p)`.
@@ -3869,21 +1784,21 @@ theorem wkpNorm_weightedGradCoeffDivLimit_le_uniform_unconditional
       Set.indicator (chartPouKernel (I := I) (M := M) α)
           (weightedGradFactor (I := I) (M := M)
             g r s α P₀ l x.1 x.2.1 x.2.2.1 x.2.2.2) y *
-        ((partialLpLimit_unconditional (I := I) (M := M) g r s i α x.2.2.2 l :
+        ((partialLpLimit (I := I) (M := M) g r s i α x.2.2.2 l :
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
     with hFpart_def
   -- The per-`i` chart-component atom family, indexed by `p`.
   set compAtom : TensorEigenIdx (I := I) (M := M) g r s →
       TensorCompIdx (E := E) r s → EuclN → ℝ :=
     fun i p y =>
-    ((componentLpLimit_unconditional (I := I) (M := M) g r s i α p :
+    ((componentLpLimit (I := I) (M := M) g r s i α p :
       Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
     with hcompAtom_def
   -- The per-`i` chart-partial atom family, indexed by `(p, l')`.
   set partAtom : TensorEigenIdx (I := I) (M := M) g r s →
       (TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E)) → EuclN → ℝ :=
     fun i pl y =>
-    ((partialLpLimit_unconditional (I := I) (M := M) g r s i α pl.1 pl.2 :
+    ((partialLpLimit (I := I) (M := M) g r s i α pl.1 pl.2 :
       Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
     with hpartAtom_def
   -- The collected per-summand constants, hoisted before the `∀ i`.
@@ -3893,9 +1808,9 @@ theorem wkpNorm_weightedGradCoeffDivLimit_le_uniform_unconditional
       (fun x => (hCfC_spec x).1)
       (fun i x => by
         have hatom := (hCfC_spec x).2
-          (componentLpLimit_memWkp_unconditional (I := I) (M := M)
+          (componentLpLimit_memWkp (I := I) (M := M)
             g r s i α x.2.2.2 K (h_pou i))
-          (componentLpLimit_ae_zero_off_chartPouKernel_unconditional (I := I) (M := M)
+          (componentLpLimit_ae_zero_off_chartPouKernel (I := I) (M := M)
             g r s i α x.2.2.2)
         exact hatom.2)
   obtain ⟨Cpart, hCpart_nn, hCpart_bd⟩ :=
@@ -3904,9 +1819,9 @@ theorem wkpNorm_weightedGradCoeffDivLimit_le_uniform_unconditional
       (fun x => (hCfP_spec x).1)
       (fun i x => by
         have hatom := (hCfP_spec x).2
-          (partialLpLimit_memWkp_unconditional (I := I) (M := M)
+          (partialLpLimit_memWkp (I := I) (M := M)
             g r s i α x.2.2.2 l K (h_pou i))
-          (partialLpLimit_ae_zero_off_chartPouKernel_unconditional (I := I) (M := M)
+          (partialLpLimit_ae_zero_off_chartPouKernel (I := I) (M := M)
             g r s i α x.2.2.2 l K (h_pou i))
         exact hatom.2)
   -- Headline constant: the larger of the two group constants; hoisted here.
@@ -3923,18 +1838,18 @@ theorem wkpNorm_weightedGradCoeffDivLimit_le_uniform_unconditional
       MemWkp (d := Module.finrank ℝ E) K 2 (Fcomp i x) Ω := by
     intro x
     have hatom := (hCfC_spec x).2
-      (componentLpLimit_memWkp_unconditional (I := I) (M := M)
+      (componentLpLimit_memWkp (I := I) (M := M)
         g r s i α x.2.2.2 K (h_pou i))
-      (componentLpLimit_ae_zero_off_chartPouKernel_unconditional (I := I) (M := M)
+      (componentLpLimit_ae_zero_off_chartPouKernel (I := I) (M := M)
         g r s i α x.2.2.2)
     exact hatom.1
   have h_part_memWkp : ∀ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s),
       MemWkp (d := Module.finrank ℝ E) K 2 (Fpart i x) Ω := by
     intro x
     have hatom := (hCfP_spec x).2
-      (partialLpLimit_memWkp_unconditional (I := I) (M := M)
+      (partialLpLimit_memWkp (I := I) (M := M)
         g r s i α x.2.2.2 l K (h_pou i))
-      (partialLpLimit_ae_zero_off_chartPouKernel_unconditional (I := I) (M := M)
+      (partialLpLimit_ae_zero_off_chartPouKernel (I := I) (M := M)
         g r s i α x.2.2.2 l K (h_pou i))
     exact hatom.1
   -- Bound on the chart-component group `wkpNorm`.
@@ -3973,7 +1888,7 @@ theorem wkpNorm_weightedGradCoeffDivLimit_le_uniform_unconditional
                     (euclidPartial (E := E) l
                       (weightedGradFactor (I := I) (M := M)
                         g r s α P₀ l P Q k p)) y *
-                  (componentLpLimit_unconditional (I := I) (M := M) g r s i α p :
+                  (componentLpLimit (I := I) (M := M) g r s i α p :
                     EuclN → ℝ) y) := by
     funext y
     rw [hFcomp_def]
@@ -3986,7 +1901,7 @@ theorem wkpNorm_weightedGradCoeffDivLimit_le_uniform_unconditional
                 Set.indicator (chartPouKernel (I := I) (M := M) α)
                     (weightedGradFactor (I := I) (M := M)
                       g r s α P₀ l P Q k p) y *
-                  (partialLpLimit_unconditional (I := I) (M := M) g r s i α p l :
+                  (partialLpLimit (I := I) (M := M) g r s i α p l :
                     EuclN → ℝ) y) := by
     funext y
     rw [hFpart_def]
@@ -3998,7 +1913,7 @@ theorem wkpNorm_weightedGradCoeffDivLimit_le_uniform_unconditional
       = ∑ p : TensorCompIdx (E := E) r s,
           ∑ l' : Fin (Module.finrank ℝ E),
             wkpNorm (d := Module.finrank ℝ E) K 2
-              (fun y => ((partialLpLimit_unconditional (I := I) (M := M)
+              (fun y => ((partialLpLimit (I := I) (M := M)
                   g r s i α p l' :
                 Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
               Ω := by
@@ -4009,7 +1924,7 @@ theorem wkpNorm_weightedGradCoeffDivLimit_le_uniform_unconditional
       ≤ ENNReal.ofReal Cmax *
         ∑ p : TensorCompIdx (E := E) r s,
           wkpNorm (d := Module.finrank ℝ E) K 2
-            (fun y => ((componentLpLimit_unconditional (I := I) (M := M)
+            (fun y => ((componentLpLimit (I := I) (M := M)
                 g r s i α p :
               Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
             Ω := by
@@ -4023,7 +1938,7 @@ theorem wkpNorm_weightedGradCoeffDivLimit_le_uniform_unconditional
         ∑ p : TensorCompIdx (E := E) r s,
           ∑ l' : Fin (Module.finrank ℝ E),
             wkpNorm (d := Module.finrank ℝ E) K 2
-              (fun y => ((partialLpLimit_unconditional (I := I) (M := M)
+              (fun y => ((partialLpLimit (I := I) (M := M)
                   g r s i α p l' :
                 Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
               Ω := by
@@ -4039,7 +1954,7 @@ theorem wkpNorm_weightedGradCoeffDivLimit_le_uniform_unconditional
       (fun y => ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fpart i x y) Ω :=
     memWkp_finsetSum (I := I) (M := M) _ (fun x _ => h_part_memWkp x)
   -- Unfold the limit object into its two groups, bridge to single-product sums.
-  rw [show (weightedGradCoeffDivLimit_unconditional (I := I) (M := M)
+  rw [show (weightedGradCoeffDivLimit (I := I) (M := M)
         g r s i α P₀ l : EuclN → ℝ)
       = (fun y => (∑ P : TensorCompIdx (E := E) r s,
             ∑ Q : TensorCompIdx (E := E) r s,
@@ -4049,7 +1964,7 @@ theorem wkpNorm_weightedGradCoeffDivLimit_le_uniform_unconditional
                       (euclidPartial (E := E) l
                         (weightedGradFactor (I := I) (M := M)
                           g r s α P₀ l P Q k p)) y *
-                    (componentLpLimit_unconditional (I := I) (M := M) g r s i α p :
+                    (componentLpLimit (I := I) (M := M) g r s i α p :
                       EuclN → ℝ) y)
           + ∑ P : TensorCompIdx (E := E) r s,
               ∑ Q : TensorCompIdx (E := E) r s,
@@ -4058,7 +1973,7 @@ theorem wkpNorm_weightedGradCoeffDivLimit_le_uniform_unconditional
                     Set.indicator (chartPouKernel (I := I) (M := M) α)
                         (weightedGradFactor (I := I) (M := M)
                           g r s α P₀ l P Q k p) y *
-                      (partialLpLimit_unconditional (I := I) (M := M) g r s i α p l :
+                      (partialLpLimit (I := I) (M := M) g r s i α p l :
                         EuclN → ℝ) y) from rfl]
   have h_bridge : (fun y => (∑ P : TensorCompIdx (E := E) r s,
           ∑ Q : TensorCompIdx (E := E) r s,
@@ -4068,7 +1983,7 @@ theorem wkpNorm_weightedGradCoeffDivLimit_le_uniform_unconditional
                     (euclidPartial (E := E) l
                       (weightedGradFactor (I := I) (M := M)
                         g r s α P₀ l P Q k p)) y *
-                  (componentLpLimit_unconditional (I := I) (M := M) g r s i α p :
+                  (componentLpLimit (I := I) (M := M) g r s i α p :
                     EuclN → ℝ) y)
         + ∑ P : TensorCompIdx (E := E) r s,
             ∑ Q : TensorCompIdx (E := E) r s,
@@ -4077,7 +1992,7 @@ theorem wkpNorm_weightedGradCoeffDivLimit_le_uniform_unconditional
                   Set.indicator (chartPouKernel (I := I) (M := M) α)
                       (weightedGradFactor (I := I) (M := M)
                         g r s α P₀ l P Q k p) y *
-                    (partialLpLimit_unconditional (I := I) (M := M) g r s i α p l :
+                    (partialLpLimit (I := I) (M := M) g r s i α p l :
                       EuclN → ℝ) y)
       = (fun y => (∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fcomp i x y)
           + ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fpart i x y) := by
@@ -4099,7 +2014,7 @@ theorem wkpNorm_weightedGradCoeffDivLimit_le_uniform_unconditional
     _ ≤ ENNReal.ofReal Cmax *
           (∑ p : TensorCompIdx (E := E) r s,
             wkpNorm (d := Module.finrank ℝ E) K 2
-              (fun y => ((componentLpLimit_unconditional (I := I) (M := M)
+              (fun y => ((componentLpLimit (I := I) (M := M)
                   g r s i α p :
                 Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
                 EuclN → ℝ) y) Ω)
@@ -4107,7 +2022,7 @@ theorem wkpNorm_weightedGradCoeffDivLimit_le_uniform_unconditional
           (∑ p : TensorCompIdx (E := E) r s,
             ∑ l' : Fin (Module.finrank ℝ E),
               wkpNorm (d := Module.finrank ℝ E) K 2
-                (fun y => ((partialLpLimit_unconditional (I := I) (M := M)
+                (fun y => ((partialLpLimit (I := I) (M := M)
                     g r s i α p l' :
                   Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
                   EuclN → ℝ) y) Ω) :=
@@ -4115,14 +2030,14 @@ theorem wkpNorm_weightedGradCoeffDivLimit_le_uniform_unconditional
     _ = ENNReal.ofReal Cmax *
           ((∑ p : TensorCompIdx (E := E) r s,
               wkpNorm (d := Module.finrank ℝ E) K 2
-                (fun y => ((componentLpLimit_unconditional (I := I) (M := M)
+                (fun y => ((componentLpLimit (I := I) (M := M)
                     g r s i α p :
                   Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
                   EuclN → ℝ) y) Ω)
             + (∑ p : TensorCompIdx (E := E) r s,
                 ∑ l' : Fin (Module.finrank ℝ E),
                   wkpNorm (d := Module.finrank ℝ E) K 2
-                    (fun y => ((partialLpLimit_unconditional (I := I) (M := M)
+                    (fun y => ((partialLpLimit (I := I) (M := M)
                         g r s i α p l' :
                       Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
                       EuclN → ℝ) y) Ω)) := by
@@ -4132,30 +2047,24 @@ end LowerOrderWkpNormBoundsUniform
 
 /-! ## Chart-locality-free per-`i` companions
 
-The three per-`i` headlines `wkpNorm_covPrincipalRotationCoeffLimit_le`,
-`wkpNorm_covLowerOrderRotationValueCoeffLimit_le` and
-`wkpNorm_weightedGradCoeffDivLimit_le` of `LowerOrderWkpNormBounds` are keyed on
-the partition-of-unity chart components / partials of the atlas-dependent
-eigenvector vector `tensorResolventEigenbasisVec h_atlas i`. Their
-chart-locality-free companions below are keyed instead on the canonical
-eigenbasis vector `tensorResolventEigenbasisVec_ofCompact … i` extracted from the
-intrinsic compact-operator spectral theorem: every limit object is the
-`_unconditional` limit `covPrincipalRotationCoeffLimit_unconditional` /
-`covLowerOrderRotationValueCoeffLimit_unconditional` /
-`weightedGradCoeffDivLimit_unconditional`, every atom is the `_unconditional`
-atom `componentLpLimit_unconditional` / `partialLpLimit_unconditional`, and the
+The three per-`i` chart-locality-free headlines below are keyed on the
+partition-of-unity chart components / partials of the canonical eigenbasis vector
+`tensorResolventEigenbasisVec … i` extracted from the intrinsic
+compact-operator spectral theorem: every limit object is the
+`_unconditional` limit `covPrincipalRotationCoeffLimit` /
+`covLowerOrderRotationValueCoeffLimit` /
+`weightedGradCoeffDivLimit`, every atom is the `_unconditional`
+atom `componentLpLimit` / `partialLpLimit`, and the
 order-`(K + 1)` partition-of-unity regularity input `h_pou` is keyed on
-`eigenvectorResolvent_unconditional`. Each companion carries the same single-`i`
-per-index hypothesis as its per-`i` original — the eigenbasis index `i` is now an
-explicit argument in place of the dropped `h_atlas` section variable — and is
-proved line-for-line by the same aggregation route through the file-private
-helpers `wkpNorm_indicatorFactor_mul_atom_le`,
+`eigenvectorResolvent`. The eigenbasis index `i` is an explicit
+argument, and each companion is proved by the aggregation route through the
+file-private helpers `wkpNorm_indicatorFactor_mul_atom_le`,
 `exists_uniform_const_of_finite_wkpNorm_bounds` and
 `wkpNorm_finsetSum_le_const_mul_atomSum`, with the per-summand atom membership and
 off-kernel vanishing supplied by the chart-locality-free atom lemmas
-`componentLpLimit_memWkp_unconditional` / `partialLpLimit_memWkp_unconditional`
-and `componentLpLimit_ae_zero_off_chartPouKernel_unconditional` /
-`partialLpLimit_ae_zero_off_chartPouKernel_unconditional`. -/
+`componentLpLimit_memWkp` / `partialLpLimit_memWkp`
+and `componentLpLimit_ae_zero_off_chartPouKernel` /
+`partialLpLimit_ae_zero_off_chartPouKernel`. -/
 
 section LowerOrderWkpNormBoundsUnconditional
 
@@ -4169,19 +2078,19 @@ theorem wkpNorm_covPrincipalRotationCoeffLimit_le_unconditional
       MemWkp (d := Module.finrank ℝ E) (K + 1) 2
         (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
             (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
-              (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i))
+              (eigenvectorResolvent (I := I) (M := M) g r s i))
             β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
         (chartTargetEuclid (I := I) (M := M) β)) :
     ∃ C : ℝ, 0 ≤ C ∧
       wkpNorm (d := Module.finrank ℝ E) K 2
-          (covPrincipalRotationCoeffLimit_unconditional (I := I) (M := M)
+          (covPrincipalRotationCoeffLimit (I := I) (M := M)
             g r s i α P₀ : EuclN → ℝ)
           (chartTargetEuclid (I := I) (M := M) α)
         ≤ ENNReal.ofReal C *
           (∑ P : TensorCompIdx (E := E) r s,
             ∑ k : Fin (Module.finrank ℝ E),
               wkpNorm (d := Module.finrank ℝ E) K 2
-                (fun y => ((partialLpLimit_unconditional (I := I) (M := M)
+                (fun y => ((partialLpLimit (I := I) (M := M)
                     g r s i α P k :
                   Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
                 (chartTargetEuclid (I := I) (M := M) α)) := by
@@ -4190,7 +2099,7 @@ theorem wkpNorm_covPrincipalRotationCoeffLimit_le_unconditional
   -- Abbreviation for the chart-partial atom family, indexed by `(P, k)`.
   set partAtom : (TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E))
       → EuclN → ℝ := fun pk y =>
-    ((partialLpLimit_unconditional (I := I) (M := M) g r s i α pk.1 pk.2 :
+    ((partialLpLimit (I := I) (M := M) g r s i α pk.1 pk.2 :
       Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
     with hpartAtom_def
   -- The four-fold sum, as a single sum over `(P, Q, k, l)`.
@@ -4200,7 +2109,7 @@ theorem wkpNorm_covPrincipalRotationCoeffLimit_le_unconditional
       Set.indicator (chartPouKernel (I := I) (M := M) α)
           (principalRotationFactor (I := I) (M := M)
             g r s α P₀ x.1 x.2.1 x.2.2.1 x.2.2.2) y *
-        ((partialLpLimit_unconditional (I := I) (M := M) g r s i α x.1 x.2.2.1 :
+        ((partialLpLimit (I := I) (M := M) g r s i α x.1 x.2.2.1 :
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
     with hF_def
   -- The per-summand `MemWkp K 2` membership and explicit-norm bound.
@@ -4217,9 +2126,9 @@ theorem wkpNorm_covPrincipalRotationCoeffLimit_le_unconditional
     exact wkpNorm_indicatorFactor_mul_atom_le (I := I) (M := M) α K
       (principalRotationFactor_contDiffOn (I := I) (M := M)
         g r s α P₀ x.1 x.2.1 x.2.2.1 x.2.2.2)
-      (partialLpLimit_memWkp_unconditional (I := I) (M := M)
+      (partialLpLimit_memWkp (I := I) (M := M)
         g r s i α x.1 x.2.2.1 K h_pou)
-      (partialLpLimit_ae_zero_off_chartPouKernel_unconditional (I := I) (M := M)
+      (partialLpLimit_ae_zero_off_chartPouKernel (I := I) (M := M)
         g r s i α x.1 x.2.2.1 K h_pou)
   -- A single nonnegative constant dominating every per-summand constant.
   obtain ⟨Csum, hCsum_nn, hCsum_bd⟩ :=
@@ -4254,7 +2163,7 @@ theorem wkpNorm_covPrincipalRotationCoeffLimit_le_unconditional
                 Set.indicator (chartPouKernel (I := I) (M := M) α)
                     (principalRotationFactor (I := I) (M := M)
                       g r s α P₀ P Q k l) y *
-                  (partialLpLimit_unconditional (I := I) (M := M) g r s i α P k :
+                  (partialLpLimit (I := I) (M := M) g r s i α P k :
                     EuclN → ℝ) y) := by
     funext y
     rw [hF_def]
@@ -4266,7 +2175,7 @@ theorem wkpNorm_covPrincipalRotationCoeffLimit_le_unconditional
       = ∑ P : TensorCompIdx (E := E) r s,
           ∑ k : Fin (Module.finrank ℝ E),
             wkpNorm (d := Module.finrank ℝ E) K 2
-              (fun y => ((partialLpLimit_unconditional (I := I) (M := M)
+              (fun y => ((partialLpLimit (I := I) (M := M)
                   g r s i α P k :
                 Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
               Ω := by
@@ -4278,7 +2187,7 @@ theorem wkpNorm_covPrincipalRotationCoeffLimit_le_unconditional
         × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E))).card,
     by positivity, ?_⟩
   -- Unfold the limit object and assemble the bound.
-  rw [show (covPrincipalRotationCoeffLimit_unconditional (I := I) (M := M)
+  rw [show (covPrincipalRotationCoeffLimit (I := I) (M := M)
         g r s i α P₀ : EuclN → ℝ)
       = (fun y => ∑ P : TensorCompIdx (E := E) r s,
           ∑ Q : TensorCompIdx (E := E) r s,
@@ -4287,7 +2196,7 @@ theorem wkpNorm_covPrincipalRotationCoeffLimit_le_unconditional
                 Set.indicator (chartPouKernel (I := I) (M := M) α)
                     (principalRotationFactor (I := I) (M := M)
                       g r s α P₀ P Q k l) y *
-                  (partialLpLimit_unconditional (I := I) (M := M) g r s i α P k :
+                  (partialLpLimit (I := I) (M := M) g r s i α P k :
                     EuclN → ℝ) y) from rfl]
   rw [← h_eq, hΩ_def, ← h_atom_eq]
   exact h_bound
@@ -4300,26 +2209,26 @@ theorem wkpNorm_covLowerOrderRotationValueCoeffLimit_le_unconditional
       MemWkp (d := Module.finrank ℝ E) (K + 1) 2
         (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
             (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
-              (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i))
+              (eigenvectorResolvent (I := I) (M := M) g r s i))
             β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
         (chartTargetEuclid (I := I) (M := M) β)) :
     ∃ C : ℝ, 0 ≤ C ∧
       wkpNorm (d := Module.finrank ℝ E) K 2
-          (covLowerOrderRotationValueCoeffLimit_unconditional (I := I) (M := M)
+          (covLowerOrderRotationValueCoeffLimit (I := I) (M := M)
             g r s i α P₀ : EuclN → ℝ)
           (chartTargetEuclid (I := I) (M := M) α)
         ≤ ENNReal.ofReal C *
           ((∑ P : TensorCompIdx (E := E) r s,
               ∑ k : Fin (Module.finrank ℝ E),
                 wkpNorm (d := Module.finrank ℝ E) K 2
-                  (fun y => ((partialLpLimit_unconditional (I := I) (M := M)
+                  (fun y => ((partialLpLimit (I := I) (M := M)
                       g r s i α P k :
                     Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
                     EuclN → ℝ) y)
                   (chartTargetEuclid (I := I) (M := M) α))
             + (∑ p : TensorCompIdx (E := E) r s,
                 wkpNorm (d := Module.finrank ℝ E) K 2
-                  (fun y => ((componentLpLimit_unconditional (I := I) (M := M)
+                  (fun y => ((componentLpLimit (I := I) (M := M)
                       g r s i α p :
                     Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
                     EuclN → ℝ) y)
@@ -4330,11 +2239,11 @@ theorem wkpNorm_covLowerOrderRotationValueCoeffLimit_le_unconditional
   -- Abbreviations for the two distinct atom families.
   set partAtom : (TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E))
       → EuclN → ℝ := fun pk y =>
-    ((partialLpLimit_unconditional (I := I) (M := M) g r s i α pk.1 pk.2 :
+    ((partialLpLimit (I := I) (M := M) g r s i α pk.1 pk.2 :
       Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
     with hpartAtom_def
   set compAtom : TensorCompIdx (E := E) r s → EuclN → ℝ := fun p y =>
-    ((componentLpLimit_unconditional (I := I) (M := M) g r s i α p :
+    ((componentLpLimit (I := I) (M := M) g r s i α p :
       Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
     with hcompAtom_def
   -- The chart-partial group, as a single sum over `(P, Q, k, l)`.
@@ -4344,7 +2253,7 @@ theorem wkpNorm_covLowerOrderRotationValueCoeffLimit_le_unconditional
       Set.indicator (chartPouKernel (I := I) (M := M) α)
           (valuePartialFactor (I := I) (M := M)
             g r s α P₀ x.1 x.2.1 x.2.2.1 x.2.2.2) y *
-        ((partialLpLimit_unconditional (I := I) (M := M) g r s i α x.1 x.2.2.1 :
+        ((partialLpLimit (I := I) (M := M) g r s i α x.1 x.2.2.1 :
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
     with hFpart_def
   -- The chart-component group, as a single sum over `(P, Q, k, l, p)`.
@@ -4355,7 +2264,7 @@ theorem wkpNorm_covLowerOrderRotationValueCoeffLimit_le_unconditional
       Set.indicator (chartPouKernel (I := I) (M := M) α)
           (valueComponentFactor (I := I) (M := M)
             g r s α P₀ x.1 x.2.1 x.2.2.1 x.2.2.2.1 x.2.2.2.2) y *
-        ((componentLpLimit_unconditional (I := I) (M := M) g r s i α x.2.2.2.2 :
+        ((componentLpLimit (I := I) (M := M) g r s i α x.2.2.2.2 :
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
     with hFcomp_def
   -- The per-summand membership / bound for the chart-partial group.
@@ -4372,9 +2281,9 @@ theorem wkpNorm_covLowerOrderRotationValueCoeffLimit_le_unconditional
     exact wkpNorm_indicatorFactor_mul_atom_le (I := I) (M := M) α K
       (valuePartialFactor_contDiffOn (I := I) (M := M)
         g r s α P₀ x.1 x.2.1 x.2.2.1 x.2.2.2)
-      (partialLpLimit_memWkp_unconditional (I := I) (M := M)
+      (partialLpLimit_memWkp (I := I) (M := M)
         g r s i α x.1 x.2.2.1 K h_pou)
-      (partialLpLimit_ae_zero_off_chartPouKernel_unconditional (I := I) (M := M)
+      (partialLpLimit_ae_zero_off_chartPouKernel (I := I) (M := M)
         g r s i α x.1 x.2.2.1 K h_pou)
   -- The per-summand membership / bound for the chart-component group.
   have h_comp_data : ∀ x ∈ (Finset.univ :
@@ -4391,9 +2300,9 @@ theorem wkpNorm_covLowerOrderRotationValueCoeffLimit_le_unconditional
     exact wkpNorm_indicatorFactor_mul_atom_le (I := I) (M := M) α K
       (valueComponentFactor_contDiffOn (I := I) (M := M)
         g r s α P₀ x.1 x.2.1 x.2.2.1 x.2.2.2.1 x.2.2.2.2)
-      (componentLpLimit_memWkp_unconditional (I := I) (M := M)
+      (componentLpLimit_memWkp (I := I) (M := M)
         g r s i α x.2.2.2.2 K h_pou)
-      (componentLpLimit_ae_zero_off_chartPouKernel_unconditional (I := I) (M := M)
+      (componentLpLimit_ae_zero_off_chartPouKernel (I := I) (M := M)
         g r s i α x.2.2.2.2)
   -- A single nonnegative constant dominating every chart-partial-summand
   -- constant, resp. every chart-component-summand constant.
@@ -4452,7 +2361,7 @@ theorem wkpNorm_covLowerOrderRotationValueCoeffLimit_le_unconditional
                 Set.indicator (chartPouKernel (I := I) (M := M) α)
                     (valuePartialFactor (I := I) (M := M)
                       g r s α P₀ P Q k l) y *
-                  (partialLpLimit_unconditional (I := I) (M := M) g r s i α P k :
+                  (partialLpLimit (I := I) (M := M) g r s i α P k :
                     EuclN → ℝ) y) := by
     funext y
     rw [hFpart_def]
@@ -4468,7 +2377,7 @@ theorem wkpNorm_covLowerOrderRotationValueCoeffLimit_le_unconditional
                   Set.indicator (chartPouKernel (I := I) (M := M) α)
                       (valueComponentFactor (I := I) (M := M)
                         g r s α P₀ P Q k l p) y *
-                    (componentLpLimit_unconditional (I := I) (M := M) g r s i α p :
+                    (componentLpLimit (I := I) (M := M) g r s i α p :
                       EuclN → ℝ) y) := by
     funext y
     rw [hFcomp_def]
@@ -4480,7 +2389,7 @@ theorem wkpNorm_covLowerOrderRotationValueCoeffLimit_le_unconditional
       = ∑ P : TensorCompIdx (E := E) r s,
           ∑ k : Fin (Module.finrank ℝ E),
             wkpNorm (d := Module.finrank ℝ E) K 2
-              (fun y => ((partialLpLimit_unconditional (I := I) (M := M)
+              (fun y => ((partialLpLimit (I := I) (M := M)
                   g r s i α P k :
                 Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
               Ω := by
@@ -4513,7 +2422,7 @@ theorem wkpNorm_covLowerOrderRotationValueCoeffLimit_le_unconditional
         ∑ P : TensorCompIdx (E := E) r s,
           ∑ k : Fin (Module.finrank ℝ E),
             wkpNorm (d := Module.finrank ℝ E) K 2
-              (fun y => ((partialLpLimit_unconditional (I := I) (M := M)
+              (fun y => ((partialLpLimit (I := I) (M := M)
                   g r s i α P k :
                 Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
               Ω := by
@@ -4529,7 +2438,7 @@ theorem wkpNorm_covLowerOrderRotationValueCoeffLimit_le_unconditional
       ≤ ENNReal.ofReal Cmax *
         ∑ p : TensorCompIdx (E := E) r s,
           wkpNorm (d := Module.finrank ℝ E) K 2
-            (fun y => ((componentLpLimit_unconditional (I := I) (M := M)
+            (fun y => ((componentLpLimit (I := I) (M := M)
                 g r s i α p :
               Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
             Ω := by
@@ -4548,7 +2457,7 @@ theorem wkpNorm_covLowerOrderRotationValueCoeffLimit_le_unconditional
         Fcomp x y) Ω :=
     memWkp_finsetSum (I := I) (M := M) _ (fun x hx => (h_comp_data x hx).1)
   -- Unfold the limit object into its two groups, bridge to single-product sums.
-  rw [show (covLowerOrderRotationValueCoeffLimit_unconditional (I := I) (M := M)
+  rw [show (covLowerOrderRotationValueCoeffLimit (I := I) (M := M)
         g r s i α P₀ : EuclN → ℝ)
       = (fun y => (∑ P : TensorCompIdx (E := E) r s,
             ∑ Q : TensorCompIdx (E := E) r s,
@@ -4557,7 +2466,7 @@ theorem wkpNorm_covLowerOrderRotationValueCoeffLimit_le_unconditional
                   Set.indicator (chartPouKernel (I := I) (M := M) α)
                       (valuePartialFactor (I := I) (M := M)
                         g r s α P₀ P Q k l) y *
-                    (partialLpLimit_unconditional (I := I) (M := M) g r s i α P k :
+                    (partialLpLimit (I := I) (M := M) g r s i α P k :
                       EuclN → ℝ) y)
           + ∑ P : TensorCompIdx (E := E) r s,
               ∑ Q : TensorCompIdx (E := E) r s,
@@ -4567,7 +2476,7 @@ theorem wkpNorm_covLowerOrderRotationValueCoeffLimit_le_unconditional
                       Set.indicator (chartPouKernel (I := I) (M := M) α)
                           (valueComponentFactor (I := I) (M := M)
                             g r s α P₀ P Q k l p) y *
-                        (componentLpLimit_unconditional (I := I) (M := M)
+                        (componentLpLimit (I := I) (M := M)
                           g r s i α p : EuclN → ℝ) y) from rfl]
   have h_bridge : (fun y => (∑ P : TensorCompIdx (E := E) r s,
           ∑ Q : TensorCompIdx (E := E) r s,
@@ -4576,7 +2485,7 @@ theorem wkpNorm_covLowerOrderRotationValueCoeffLimit_le_unconditional
                 Set.indicator (chartPouKernel (I := I) (M := M) α)
                     (valuePartialFactor (I := I) (M := M)
                       g r s α P₀ P Q k l) y *
-                  (partialLpLimit_unconditional (I := I) (M := M) g r s i α P k :
+                  (partialLpLimit (I := I) (M := M) g r s i α P k :
                     EuclN → ℝ) y)
         + ∑ P : TensorCompIdx (E := E) r s,
             ∑ Q : TensorCompIdx (E := E) r s,
@@ -4586,7 +2495,7 @@ theorem wkpNorm_covLowerOrderRotationValueCoeffLimit_le_unconditional
                     Set.indicator (chartPouKernel (I := I) (M := M) α)
                         (valueComponentFactor (I := I) (M := M)
                           g r s α P₀ P Q k l p) y *
-                      (componentLpLimit_unconditional (I := I) (M := M)
+                      (componentLpLimit (I := I) (M := M)
                         g r s i α p : EuclN → ℝ) y)
       = (fun y => (∑ x : TensorCompIdx (E := E) r s
             × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E)
@@ -4621,14 +2530,14 @@ theorem wkpNorm_covLowerOrderRotationValueCoeffLimit_le_unconditional
           (∑ P : TensorCompIdx (E := E) r s,
             ∑ k : Fin (Module.finrank ℝ E),
               wkpNorm (d := Module.finrank ℝ E) K 2
-                (fun y => ((partialLpLimit_unconditional (I := I) (M := M)
+                (fun y => ((partialLpLimit (I := I) (M := M)
                     g r s i α P k :
                   Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
                   EuclN → ℝ) y) Ω)
         + ENNReal.ofReal Cmax *
           (∑ p : TensorCompIdx (E := E) r s,
             wkpNorm (d := Module.finrank ℝ E) K 2
-              (fun y => ((componentLpLimit_unconditional (I := I) (M := M)
+              (fun y => ((componentLpLimit (I := I) (M := M)
                   g r s i α p :
                 Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
                 EuclN → ℝ) y) Ω) :=
@@ -4637,13 +2546,13 @@ theorem wkpNorm_covLowerOrderRotationValueCoeffLimit_le_unconditional
           ((∑ P : TensorCompIdx (E := E) r s,
               ∑ k : Fin (Module.finrank ℝ E),
                 wkpNorm (d := Module.finrank ℝ E) K 2
-                  (fun y => ((partialLpLimit_unconditional (I := I) (M := M)
+                  (fun y => ((partialLpLimit (I := I) (M := M)
                       g r s i α P k :
                     Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
                     EuclN → ℝ) y) Ω)
             + (∑ p : TensorCompIdx (E := E) r s,
                 wkpNorm (d := Module.finrank ℝ E) K 2
-                  (fun y => ((componentLpLimit_unconditional (I := I) (M := M)
+                  (fun y => ((componentLpLimit (I := I) (M := M)
                       g r s i α p :
                     Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
                     EuclN → ℝ) y) Ω)) := by
@@ -4658,18 +2567,18 @@ theorem wkpNorm_weightedGradCoeffDivLimit_le_unconditional
       MemWkp (d := Module.finrank ℝ E) (K + 1) 2
         (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
             (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
-              (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i))
+              (eigenvectorResolvent (I := I) (M := M) g r s i))
             β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
         (chartTargetEuclid (I := I) (M := M) β)) :
     ∃ C : ℝ, 0 ≤ C ∧
       wkpNorm (d := Module.finrank ℝ E) K 2
-          (weightedGradCoeffDivLimit_unconditional (I := I) (M := M)
+          (weightedGradCoeffDivLimit (I := I) (M := M)
             g r s i α P₀ l : EuclN → ℝ)
           (chartTargetEuclid (I := I) (M := M) α)
         ≤ ENNReal.ofReal C *
           ((∑ p : TensorCompIdx (E := E) r s,
               wkpNorm (d := Module.finrank ℝ E) K 2
-                (fun y => ((componentLpLimit_unconditional (I := I) (M := M)
+                (fun y => ((componentLpLimit (I := I) (M := M)
                     g r s i α p :
                   Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
                   EuclN → ℝ) y)
@@ -4677,7 +2586,7 @@ theorem wkpNorm_weightedGradCoeffDivLimit_le_unconditional
             + (∑ p : TensorCompIdx (E := E) r s,
                 ∑ l' : Fin (Module.finrank ℝ E),
                   wkpNorm (d := Module.finrank ℝ E) K 2
-                    (fun y => ((partialLpLimit_unconditional (I := I) (M := M)
+                    (fun y => ((partialLpLimit (I := I) (M := M)
                         g r s i α p l' :
                       Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
                       EuclN → ℝ) y)
@@ -4687,12 +2596,12 @@ theorem wkpNorm_weightedGradCoeffDivLimit_le_unconditional
   have hΩ_open : IsOpen Ω := chartTargetEuclid_isOpen (I := I) (M := M) α
   -- Abbreviations for the two distinct atom families.
   set compAtom : TensorCompIdx (E := E) r s → EuclN → ℝ := fun p y =>
-    ((componentLpLimit_unconditional (I := I) (M := M) g r s i α p :
+    ((componentLpLimit (I := I) (M := M) g r s i α p :
       Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
     with hcompAtom_def
   set partAtom : (TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E))
       → EuclN → ℝ := fun pl y =>
-    ((partialLpLimit_unconditional (I := I) (M := M) g r s i α pl.1 pl.2 :
+    ((partialLpLimit (I := I) (M := M) g r s i α pl.1 pl.2 :
       Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
     with hpartAtom_def
   -- The chart-component group, as a single sum over `(P, Q, k, p)`.
@@ -4703,7 +2612,7 @@ theorem wkpNorm_weightedGradCoeffDivLimit_le_unconditional
           (euclidPartial (E := E) l
             (weightedGradFactor (I := I) (M := M)
               g r s α P₀ l x.1 x.2.1 x.2.2.1 x.2.2.2)) y *
-        ((componentLpLimit_unconditional (I := I) (M := M) g r s i α x.2.2.2 :
+        ((componentLpLimit (I := I) (M := M) g r s i α x.2.2.2 :
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
     with hFcomp_def
   -- The chart-partial group, as a single sum over `(P, Q, k, p)`.
@@ -4713,7 +2622,7 @@ theorem wkpNorm_weightedGradCoeffDivLimit_le_unconditional
       Set.indicator (chartPouKernel (I := I) (M := M) α)
           (weightedGradFactor (I := I) (M := M)
             g r s α P₀ l x.1 x.2.1 x.2.2.1 x.2.2.2) y *
-        ((partialLpLimit_unconditional (I := I) (M := M) g r s i α x.2.2.2 l :
+        ((partialLpLimit (I := I) (M := M) g r s i α x.2.2.2 l :
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
     with hFpart_def
   -- The per-summand membership / bound for the chart-component group.
@@ -4730,9 +2639,9 @@ theorem wkpNorm_weightedGradCoeffDivLimit_le_unconditional
     exact wkpNorm_indicatorFactor_mul_atom_le (I := I) (M := M) α K
       (euclidPartial_weightedGradFactor_contDiffOn (I := I) (M := M)
         g r s α P₀ l x.1 x.2.1 x.2.2.1 x.2.2.2)
-      (componentLpLimit_memWkp_unconditional (I := I) (M := M)
+      (componentLpLimit_memWkp (I := I) (M := M)
         g r s i α x.2.2.2 K h_pou)
-      (componentLpLimit_ae_zero_off_chartPouKernel_unconditional (I := I) (M := M)
+      (componentLpLimit_ae_zero_off_chartPouKernel (I := I) (M := M)
         g r s i α x.2.2.2)
   -- The per-summand membership / bound for the chart-partial group.
   have h_part_data : ∀ x ∈ (Finset.univ :
@@ -4748,9 +2657,9 @@ theorem wkpNorm_weightedGradCoeffDivLimit_le_unconditional
     exact wkpNorm_indicatorFactor_mul_atom_le (I := I) (M := M) α K
       (weightedGradFactor_contDiffOn (I := I) (M := M)
         g r s α P₀ l x.1 x.2.1 x.2.2.1 x.2.2.2)
-      (partialLpLimit_memWkp_unconditional (I := I) (M := M)
+      (partialLpLimit_memWkp (I := I) (M := M)
         g r s i α x.2.2.2 l K h_pou)
-      (partialLpLimit_ae_zero_off_chartPouKernel_unconditional (I := I) (M := M)
+      (partialLpLimit_ae_zero_off_chartPouKernel (I := I) (M := M)
         g r s i α x.2.2.2 l K h_pou)
   -- A single nonnegative constant dominating every chart-component-summand
   -- constant, resp. every chart-partial-summand constant.
@@ -4808,7 +2717,7 @@ theorem wkpNorm_weightedGradCoeffDivLimit_le_unconditional
                     (euclidPartial (E := E) l
                       (weightedGradFactor (I := I) (M := M)
                         g r s α P₀ l P Q k p)) y *
-                  (componentLpLimit_unconditional (I := I) (M := M) g r s i α p :
+                  (componentLpLimit (I := I) (M := M) g r s i α p :
                     EuclN → ℝ) y) := by
     funext y
     rw [hFcomp_def]
@@ -4823,7 +2732,7 @@ theorem wkpNorm_weightedGradCoeffDivLimit_le_unconditional
                 Set.indicator (chartPouKernel (I := I) (M := M) α)
                     (weightedGradFactor (I := I) (M := M)
                       g r s α P₀ l P Q k p) y *
-                  (partialLpLimit_unconditional (I := I) (M := M) g r s i α p l :
+                  (partialLpLimit (I := I) (M := M) g r s i α p l :
                     EuclN → ℝ) y) := by
     funext y
     rw [hFpart_def]
@@ -4835,7 +2744,7 @@ theorem wkpNorm_weightedGradCoeffDivLimit_le_unconditional
       = ∑ p : TensorCompIdx (E := E) r s,
           ∑ l' : Fin (Module.finrank ℝ E),
             wkpNorm (d := Module.finrank ℝ E) K 2
-              (fun y => ((partialLpLimit_unconditional (I := I) (M := M)
+              (fun y => ((partialLpLimit (I := I) (M := M)
                   g r s i α p l' :
                 Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
               Ω := by
@@ -4866,7 +2775,7 @@ theorem wkpNorm_weightedGradCoeffDivLimit_le_unconditional
       ≤ ENNReal.ofReal Cmax *
         ∑ p : TensorCompIdx (E := E) r s,
           wkpNorm (d := Module.finrank ℝ E) K 2
-            (fun y => ((componentLpLimit_unconditional (I := I) (M := M)
+            (fun y => ((componentLpLimit (I := I) (M := M)
                 g r s i α p :
               Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
             Ω := by
@@ -4881,7 +2790,7 @@ theorem wkpNorm_weightedGradCoeffDivLimit_le_unconditional
         ∑ p : TensorCompIdx (E := E) r s,
           ∑ l' : Fin (Module.finrank ℝ E),
             wkpNorm (d := Module.finrank ℝ E) K 2
-              (fun y => ((partialLpLimit_unconditional (I := I) (M := M)
+              (fun y => ((partialLpLimit (I := I) (M := M)
                   g r s i α p l' :
                 Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
               Ω := by
@@ -4900,7 +2809,7 @@ theorem wkpNorm_weightedGradCoeffDivLimit_le_unconditional
         × TensorCompIdx (E := E) r s, Fpart x y) Ω :=
     memWkp_finsetSum (I := I) (M := M) _ (fun x hx => (h_part_data x hx).1)
   -- Unfold the limit object into its two groups, bridge to single-product sums.
-  rw [show (weightedGradCoeffDivLimit_unconditional (I := I) (M := M)
+  rw [show (weightedGradCoeffDivLimit (I := I) (M := M)
         g r s i α P₀ l : EuclN → ℝ)
       = (fun y => (∑ P : TensorCompIdx (E := E) r s,
             ∑ Q : TensorCompIdx (E := E) r s,
@@ -4910,7 +2819,7 @@ theorem wkpNorm_weightedGradCoeffDivLimit_le_unconditional
                       (euclidPartial (E := E) l
                         (weightedGradFactor (I := I) (M := M)
                           g r s α P₀ l P Q k p)) y *
-                    (componentLpLimit_unconditional (I := I) (M := M) g r s i α p :
+                    (componentLpLimit (I := I) (M := M) g r s i α p :
                       EuclN → ℝ) y)
           + ∑ P : TensorCompIdx (E := E) r s,
               ∑ Q : TensorCompIdx (E := E) r s,
@@ -4919,7 +2828,7 @@ theorem wkpNorm_weightedGradCoeffDivLimit_le_unconditional
                     Set.indicator (chartPouKernel (I := I) (M := M) α)
                         (weightedGradFactor (I := I) (M := M)
                           g r s α P₀ l P Q k p) y *
-                      (partialLpLimit_unconditional (I := I) (M := M) g r s i α p l :
+                      (partialLpLimit (I := I) (M := M) g r s i α p l :
                         EuclN → ℝ) y) from rfl]
   have h_bridge : (fun y => (∑ P : TensorCompIdx (E := E) r s,
           ∑ Q : TensorCompIdx (E := E) r s,
@@ -4929,7 +2838,7 @@ theorem wkpNorm_weightedGradCoeffDivLimit_le_unconditional
                     (euclidPartial (E := E) l
                       (weightedGradFactor (I := I) (M := M)
                         g r s α P₀ l P Q k p)) y *
-                  (componentLpLimit_unconditional (I := I) (M := M) g r s i α p :
+                  (componentLpLimit (I := I) (M := M) g r s i α p :
                     EuclN → ℝ) y)
         + ∑ P : TensorCompIdx (E := E) r s,
             ∑ Q : TensorCompIdx (E := E) r s,
@@ -4938,7 +2847,7 @@ theorem wkpNorm_weightedGradCoeffDivLimit_le_unconditional
                   Set.indicator (chartPouKernel (I := I) (M := M) α)
                       (weightedGradFactor (I := I) (M := M)
                         g r s α P₀ l P Q k p) y *
-                    (partialLpLimit_unconditional (I := I) (M := M) g r s i α p l :
+                    (partialLpLimit (I := I) (M := M) g r s i α p l :
                       EuclN → ℝ) y)
       = (fun y => (∑ x : TensorCompIdx (E := E) r s
             × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E)
@@ -4971,7 +2880,7 @@ theorem wkpNorm_weightedGradCoeffDivLimit_le_unconditional
     _ ≤ ENNReal.ofReal Cmax *
           (∑ p : TensorCompIdx (E := E) r s,
             wkpNorm (d := Module.finrank ℝ E) K 2
-              (fun y => ((componentLpLimit_unconditional (I := I) (M := M)
+              (fun y => ((componentLpLimit (I := I) (M := M)
                   g r s i α p :
                 Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
                 EuclN → ℝ) y) Ω)
@@ -4979,7 +2888,7 @@ theorem wkpNorm_weightedGradCoeffDivLimit_le_unconditional
           (∑ p : TensorCompIdx (E := E) r s,
             ∑ l' : Fin (Module.finrank ℝ E),
               wkpNorm (d := Module.finrank ℝ E) K 2
-                (fun y => ((partialLpLimit_unconditional (I := I) (M := M)
+                (fun y => ((partialLpLimit (I := I) (M := M)
                     g r s i α p l' :
                   Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
                   EuclN → ℝ) y) Ω) :=
@@ -4987,14 +2896,14 @@ theorem wkpNorm_weightedGradCoeffDivLimit_le_unconditional
     _ = ENNReal.ofReal Cmax *
           ((∑ p : TensorCompIdx (E := E) r s,
               wkpNorm (d := Module.finrank ℝ E) K 2
-                (fun y => ((componentLpLimit_unconditional (I := I) (M := M)
+                (fun y => ((componentLpLimit (I := I) (M := M)
                     g r s i α p :
                   Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
                   EuclN → ℝ) y) Ω)
             + (∑ p : TensorCompIdx (E := E) r s,
                 ∑ l' : Fin (Module.finrank ℝ E),
                   wkpNorm (d := Module.finrank ℝ E) K 2
-                    (fun y => ((partialLpLimit_unconditional (I := I) (M := M)
+                    (fun y => ((partialLpLimit (I := I) (M := M)
                         g r s i α p l' :
                       Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
                       EuclN → ℝ) y) Ω)) := by

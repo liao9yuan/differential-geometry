@@ -8,18 +8,17 @@ import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartJUniformBound
 For ranks `r s : ℕ` and a chart centre `α : M`, the intrinsic chart
 Fréchet-derivative piece
 `tensorRSIntrinsicChartCLM r s α T b : TangentSpace I b →L[ℝ] TensorRSSpace r s I b`
-admits a uniform pointwise operator-norm bound on any compact
-`K ⊆ (chartAt H α).source` under the locally-constant-chart hypothesis
-`HasLocallyConstantChartAt H M`. Concretely there is `C > 0` such that for
-every `b ∈ K` and every tangent vector `X : TangentSpace I b`,
+admits a pointwise operator-norm bound at any point `b`, parametrised by
+op-norm bounds `C_fib`, `C_J` on the two trivialisation families. Concretely,
+for every tangent vector `X : TangentSpace I b`,
 
   `‖tensorRSIntrinsicChartCLM r s α T b X‖ ≤
-      C * ‖fderiv ℝ (chart-pulled repr of T) (extChartAt I α b)‖ * ‖X‖`.
+      C_fib * C_J * ‖fderiv ℝ (chart-pulled repr of T) (extChartAt I α b)‖ * ‖X‖`.
 
-The constant `C` is independent of `T`, `b`, and `X`: it absorbs the uniform
-op-norm bounds on the chart-`(r, s)` fibre right-inverse
-`tensorRSChartFiberFromModel α b` and on the chart-Jacobian `chartJ α b`
-(equivalently the tangent-bundle forward trivialisation `trivToE α b`).
+The factor `C_fib * C_J` absorbs the op-norm bounds on the chart-`(r, s)`
+fibre right-inverse `tensorRSChartFiberFromModel α b` and on the
+chart-Jacobian `chartJ α b` (equivalently the tangent-bundle forward
+trivialisation `trivToE α b`).
 
 ## Strategy
 
@@ -127,48 +126,6 @@ private lemma tensorRSIntrinsicChartCLM_pointwise_opNorm_le_factors
       C_fib * (N * (C_J * ‖X‖)) = C_fib * C_J * N * ‖X‖ := by ring
   rw [h_rearrange] at h_main_step
   exact h_main_step
-
-/-- **Uniform pointwise operator-norm bound** on the intrinsic chart
-Fréchet-derivative CLM `tensorRSIntrinsicChartCLM r s α T b` over any compact
-subset of the chart-`α` source.
-
-The constant `C` is independent of `T`, `b ∈ K`, and `X : TangentSpace I b`,
-and only depends on the chart at `α`, the locality hypothesis, and the
-compact set `K`. The bound is in the natural form that pulls the
-Fréchet-derivative norm out as a factor, since the CLM only depends on `T`
-through this derivative. -/
-theorem tensorRSIntrinsicChartCLM_opNorm_isBounded_on_compact
-    (h_atlas : HasLocallyConstantChartAt H M)
-    (r s : ℕ) (α : M) {K : Set M} (hK : IsCompact K)
-    (hKsub : K ⊆ (chartAt H α).source) :
-    ∃ C : ℝ, 0 < C ∧
-      ∀ (T : Π b : M, TensorRSSpace r s I b),
-      ∀ b ∈ K, ∀ X : TangentSpace I b,
-        ‖tensorRSIntrinsicChartCLM (I := I) r s α T b X‖ ≤
-          C * ‖fderiv ℝ (tensorRSChartE_section_repr (I := I) r s α T ∘
-            (extChartAt I α).symm) (extChartAt I α b)‖ * ‖X‖ := by
-  classical
-  -- Step 1: uniform fibre-right-inverse op-norm bound on K.
-  obtain ⟨C_fib, hC_fib_pos, hC_fib_bound⟩ :=
-    tensorRSChartFiberFromModel_opNorm_isBounded_on_compact
-      (I := I) (M := M) h_atlas r s α hK hKsub
-  have hC_fib_nn : 0 ≤ C_fib := le_of_lt hC_fib_pos
-  -- Step 2: uniform chart-Jacobian op-norm bound on K.
-  obtain ⟨C_J, hC_J_pos, hC_J_bound⟩ :=
-    chartJ_opNorm_isBounded_on_compact (I := I) (M := M) h_atlas α hK hKsub
-  have hC_J_nn : 0 ≤ C_J := le_of_lt hC_J_pos
-  -- Set the headline constant.
-  set C : ℝ := C_fib * C_J with hC_def
-  have hC_pos : 0 < C := mul_pos hC_fib_pos hC_J_pos
-  refine ⟨C, hC_pos, ?_⟩
-  intro T b hb X
-  have hC_fib_b : ∀ D : TensorRSModel r s ℝ E,
-      ‖tensorRSChartFiberFromModel (I := I) r s α b D‖ ≤ C_fib * ‖D‖ :=
-    fun D => hC_fib_bound b hb D
-  have hC_J_b : ‖chartJ (I := I) (M := M) α b‖ ≤ C_J := hC_J_bound b hb
-  exact tensorRSIntrinsicChartCLM_pointwise_opNorm_le_factors
-    (I := I) (M := M) r s α T b
-    hC_fib_b hC_fib_nn hC_J_b hC_J_nn X
 
 end Connection
 end Integral

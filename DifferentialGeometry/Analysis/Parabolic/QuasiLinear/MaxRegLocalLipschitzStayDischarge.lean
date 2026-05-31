@@ -211,7 +211,7 @@ theorem maxRegDuhamelMap_deriv_coeff_ae (hT : 0 < T) (hT1 : T ≤ 1)
     rw [hderiv, timeModeCoeff_add (I := I) (M := M),
       maxRegHomogeneousDerivField_timeModeCoeff (I := I) (M := M) (a := a)
         (T := T) hT.le u₀ i,
-      maximalRegularityDerivField_timeModeCoeff_ofCompact (I := I) (M := M)
+      maximalRegularityDerivField_timeModeCoeff (I := I) (M := M)
         (h_compact := h_compact) (a := a) hT.le gforce i]
   have haddcoe := Lp.coeFn_add
     (homDerivModeCoeff (I := I) (M := M) (a := a) (T := T) u₀ i)
@@ -249,7 +249,7 @@ theorem maxRegDuhamelSolField_coeff_ae (hT : 0 < T) (hT1 : T ≤ 1)
     rw [maxRegDuhamelSolField, timeModeCoeff_add (I := I) (M := M),
       maxRegHomogeneousSolField_timeModeCoeff (I := I) (M := M) (a := a)
         (T := T) hT.le u₀ i,
-      maximalRegularitySolField_timeModeCoeff_ofCompact (I := I) (M := M)
+      maximalRegularitySolField_timeModeCoeff (I := I) (M := M)
         (h_compact := h_compact) (a := a) hT.le gforce i]
   have haddcoe := Lp.coeFn_add
     (homModeCoeff (I := I) (M := M) (a := a) (T := T) u₀ i)
@@ -371,7 +371,7 @@ theorem recentred_link (hT : 0 < T) (hT1 : T ≤ 1)
           (recentredHi (I := I) (M := M) hT hT1 u₀ gforce t) =
         (recentredCarrier (I := I) (M := M) hT hT1 u₀ gforce).toFun t := by
   haveI : Countable (TensorEigenIdx (I := I) (M := M) g r s) :=
-    MaximalRegularity.countable_tensorEigenIdx_ofCompact (I := I) (M := M)
+    MaximalRegularity.countable_tensorEigenIdx (I := I) (M := M)
       (g := g) (r := r) (s := s) h_compact
   -- a.e.-coordinate matching, mode by mode (countable index ⇒ swap quantifiers).
   have hper : ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
@@ -461,7 +461,7 @@ theorem recentred_repr_eq_field_sub (hT : 0 < T) (hT1 : T ≤ 1)
           tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
             (show (a + 1) ≤ a + 2 by linarith) u₀ := by
   haveI : Countable (TensorEigenIdx (I := I) (M := M) g r s) :=
-    MaximalRegularity.countable_tensorEigenIdx_ofCompact (I := I) (M := M)
+    MaximalRegularity.countable_tensorEigenIdx (I := I) (M := M)
       (g := g) (r := r) (s := s) h_compact
   set u := maxRegRecentredCrossScaleField (I := I) (M := M)
     (h_compact := h_compact) hT hT1 u₀ gforce with hu_def
@@ -482,7 +482,7 @@ theorem recentred_repr_eq_field_sub (hT : 0 < T) (hT1 : T ≤ 1)
       rw [maxRegDuhamelSolFieldHa1, timeModeCoeff_add (I := I) (M := M),
         maxRegHomogeneousSolFieldHa1_timeModeCoeff (I := I) (M := M) (a := a)
           (T := T) hT.le u₀ i,
-        maximalRegularitySolFieldHa1_timeModeCoeff_ofCompact (I := I) (M := M)
+        maximalRegularitySolFieldHa1_timeModeCoeff (I := I) (M := M)
           (h_compact := h_compact) (a := a) hT hT1 gforce i]
     have haddcoe := Lp.coeFn_add
       (homModeCoeff (I := I) (M := M) (a := a) (T := T) u₀ i)
@@ -581,7 +581,7 @@ theorem maxRegHomogeneousSolField_norm_le
       Real.sqrt T * ‖u₀‖ := by
   rw [show Real.sqrt T * ‖u₀‖ = 1 * ‖TimeSobolev.const T u₀‖ by
     rw [TimeSobolev.norm_const, one_mul]]
-  refine norm_le_of_weighted_perMode_le_ofCompact (I := I) (M := M)
+  refine norm_le_of_weighted_perMode_le (I := I) (M := M)
     (a := a + 2) (b := a + 2) (h_compact := h_compact) (C := 1) (by norm_num) _ _ (fun i => ?_)
   rw [maxRegHomogeneousSolField_timeModeCoeff (I := I) (M := M) (a := a) (T := T) hT u₀ i,
     norm_timeModeCoeff_const_top_sq (I := I) (M := M) (a := a) u₀ i hT, one_pow, one_mul,
@@ -597,7 +597,7 @@ theorem maxRegHomogeneousDerivField_norm_le
       Real.sqrt T * ‖u₀‖ := by
   rw [show Real.sqrt T * ‖u₀‖ = 1 * ‖TimeSobolev.const T u₀‖ by
     rw [TimeSobolev.norm_const, one_mul]]
-  refine norm_le_of_weighted_perMode_le_ofCompact (I := I) (M := M)
+  refine norm_le_of_weighted_perMode_le (I := I) (M := M)
     (a := a + 2) (b := a) (h_compact := h_compact) (C := 1) (by norm_num) _ _ (fun i => ?_)
   rw [maxRegHomogeneousDerivField_timeModeCoeff (I := I) (M := M) (a := a) (T := T) hT u₀ i,
     norm_timeModeCoeff_const_top_sq (I := I) (M := M) (a := a) u₀ i hT, one_pow, one_mul,
@@ -610,10 +610,10 @@ theorem maximalRegularitySolField_norm_le
     (h_compact : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g r s))
     (hT : 0 ≤ T) (f : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
     ‖maximalRegularitySolField (I := I) (M := M) a hT f‖ ≤ (1 + T) * ‖f‖ := by
-  refine norm_le_of_weighted_perMode_le_ofCompact (I := I) (M := M)
+  refine norm_le_of_weighted_perMode_le (I := I) (M := M)
     (a := a) (b := a + 2) (h_compact := h_compact) (C := 1 + T)
     (by linarith) _ f (fun i => ?_)
-  rw [maximalRegularitySolField_timeModeCoeff_ofCompact (I := I) (M := M)
+  rw [maximalRegularitySolField_timeModeCoeff (I := I) (M := M)
     (h_compact := h_compact) (a := a) hT f i]
   exact weighted_solModeCoeff_le (I := I) (M := M) (a := a) hT f i
 
@@ -623,9 +623,9 @@ theorem maximalRegularityDerivField_norm_le
     (h_compact : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g r s))
     (hT : 0 ≤ T) (f : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
     ‖maximalRegularityDerivField (I := I) (M := M) a hT f‖ ≤ 2 * ‖f‖ := by
-  refine norm_le_of_weighted_perMode_le_ofCompact (I := I) (M := M)
+  refine norm_le_of_weighted_perMode_le (I := I) (M := M)
     (a := a) (b := a) (h_compact := h_compact) (C := 2) (by norm_num) _ f (fun i => ?_)
-  rw [maximalRegularityDerivField_timeModeCoeff_ofCompact (I := I) (M := M)
+  rw [maximalRegularityDerivField_timeModeCoeff (I := I) (M := M)
     (h_compact := h_compact) (a := a) hT f i]
   exact weighted_derivModeCoeff_le (I := I) (M := M) (a := a) hT f i
 

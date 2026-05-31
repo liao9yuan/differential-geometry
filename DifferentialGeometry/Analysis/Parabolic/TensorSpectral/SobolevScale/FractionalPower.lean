@@ -100,7 +100,6 @@ powers' target scales line up definitionally. -/
 namespace tensorHs
 
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
-  {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M}
 
 /-- Transport an `Hˢ` element along an equality `σ = τ` of exponents:
 the coordinate family is unchanged, only the index of the Sobolev space
@@ -178,7 +177,6 @@ the fractional power needs. -/
 namespace tensorHs
 
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
-  {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M}
 
 /-- The Sobolev weight is additive in the exponent:
 `(1 + λᵢ)^{σ+τ} = (1 + λᵢ)^σ · (1 + λᵢ)^τ`. -/
@@ -223,7 +221,6 @@ algebraic fact is that this carries the `Hˢ` weighting to the
 namespace tensorHs
 
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
-  {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M}
 
 /-- The pointwise weight-transfer identity behind the fractional power:
 weighting the `θ`-rescaled coordinate at exponent `σ − 2θ` recovers the
@@ -586,7 +583,6 @@ on-the-nose `σ − s`. -/
 namespace tensorHs
 
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
-  {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M}
 
 /-- For `T ∈ Hˢ`, the `(sh/2)`-rescaled coordinate family is
 weighted-square-summable at the exponent `σ − sh`. (This is the

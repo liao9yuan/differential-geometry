@@ -5,7 +5,7 @@ import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.Eig
 
 For a closed Riemannian manifold `(M, g)` and ranks `(r, s)`, the chart
 `P₀`-component of a resolvent eigenvector of the connection Laplacian `Δ_∇` —
-`tensorL2ChartComponent g r s (tensorResolventEigenbasisVec h_atlas i) α P₀` —
+`tensorL2ChartComponent g r s (tensorResolventEigenbasisVec … i) α P₀` —
 satisfies a *scalar* divergence-form weak-elliptic identity with principal
 symbol `weightedInvGramOnEuclid g α` (`= √(det g) · gⁱʲ`), packaged in
 `eigenvectorTensorChartBilinearData`, a value of
@@ -141,60 +141,11 @@ exponent `2 * k` is `≤ 2`, so the headline follows from the order-2 result by
 the downward monotonicity `MemWkp.le_of_le`. -/
 
 /-- **Arbitrary-order interior regularity of the eigenvector chart component,
-order `2k` for `k ≤ 1`.**
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, the uniform-Sobolev
-hypothesis `h_atlas`, an eigenbasis index `i`, a chart center `α : M`, a
-component multi-index `P₀`, an interior subdomain `Ω''` (open, with relatively
-compact closure) and a difference-quotient room radius `R₀ > 0` with
-`Metric.cthickening R₀ (closure Ω'') ⊆ chartTargetEuclid α`, the chart
-`P₀`-component
-
-```
-tensorL2ChartComponent g r s (tensorResolventEigenbasisVec h_atlas i) α P₀
-```
-
-of the resolvent eigenvector lies in `MemWkp (2 * k) 2 … Ω''` — it has interior
-`W^{2k,2}` regularity on `Ω''` — for every `k ≤ 1`.
-
-For `k = 0` the conclusion is `W^{0,2} = L²` regularity; for `k = 1` it is the
-`W^{2,2}` regularity of `eigenvector_chartComponent_memWkp`. Both are obtained
-from the order-2 result by the downward monotonicity `MemWkp.le_of_le`, since
-`2 * k ≤ 2` for `k ≤ 1`. -/
-theorem eigenvector_chartComponent_memWkp_two_k
-    (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
-    (i : TensorEigenIdx (I := I) (M := M) g r s)
-    (α : M) (P₀ : TensorCompIdx (E := E) r s)
-    {Ω'' : Set EuclN} (hΩ''_open : IsOpen Ω'')
-    (hΩ''_compact_closure : IsCompact (closure Ω''))
-    {R₀ : ℝ} (hR₀_pos : 0 < R₀)
-    (h_room : Metric.cthickening R₀ (closure Ω'') ⊆
-      chartTargetEuclid (I := I) (M := M) α)
-    {k : ℕ} (hk : k ≤ 1) :
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
-      (d := Module.finrank ℝ E) (2 * k) 2
-      (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
-        (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i) α P₀ :
-        Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y) Ω'' := by
-  -- The order-2 interior-regularity result.
-  have h_two : DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
-      (d := Module.finrank ℝ E) 2 2
-      (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
-        (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i) α P₀ :
-        Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y) Ω'' :=
-    eigenvector_chartComponent_memWkp g r s h_atlas i α P₀
-      hΩ''_open hΩ''_compact_closure hR₀_pos h_room
-  -- `2 * k ≤ 2` for `k ≤ 1`, so downward monotonicity in the order applies.
-  have h_le : 2 * k ≤ 2 := by omega
-  exact DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.le_of_le h_le h_two
-
-/-- **Arbitrary-order interior regularity of the eigenvector chart component,
 order `2k` for `k ≤ 1` — chart-locality-free twin.**
 
 Chart-locality-free twin of `eigenvector_chartComponent_memWkp_two_k`, re-keyed
-onto the intrinsic eigenbasis vector `tensorResolventEigenbasisVec_ofCompact
-(tensorResolventL2_isCompactOperator_intrinsic g r s) i`.
+onto the intrinsic eigenbasis vector `tensorResolventEigenbasisVec
+(tensorResolventL2_isCompactOperator g r s) i`.
 
 For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an eigenbasis index
 `i`, a chart center `α : M`, a component multi-index `P₀`, an interior subdomain
@@ -204,8 +155,8 @@ the chart `P₀`-component
 
 ```
 tensorL2ChartComponent g r s
-  (tensorResolventEigenbasisVec_ofCompact
-    (tensorResolventL2_isCompactOperator_intrinsic g r s) i) α P₀
+  (tensorResolventEigenbasisVec
+    (tensorResolventL2_isCompactOperator g r s) i) α P₀
 ```
 
 of the resolvent eigenvector lies in `MemWkp (2 * k) 2 … Ω''` — it has interior
@@ -213,10 +164,10 @@ of the resolvent eigenvector lies in `MemWkp (2 * k) 2 … Ω''` — it has inte
 hypothesis on the atlas.
 
 For `k = 0` the conclusion is `W^{0,2} = L²` regularity; for `k = 1` it is the
-`W^{2,2}` regularity of `eigenvector_chartComponent_memWkp_unconditional`. Both
+`W^{2,2}` regularity of `eigenvector_chartComponent_memWkp`. Both
 are obtained from the order-2 result by the downward monotonicity
 `MemWkp.le_of_le`, since `2 * k ≤ 2` for `k ≤ 1`. -/
-theorem eigenvector_chartComponent_memWkp_two_k_unconditional
+theorem eigenvector_chartComponent_memWkp_two_k
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
@@ -229,19 +180,19 @@ theorem eigenvector_chartComponent_memWkp_two_k_unconditional
     DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
       (d := Module.finrank ℝ E) (2 * k) 2
       (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
-        (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
-          (DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.tensorResolventL2_isCompactOperator_intrinsic
+        (tensorResolventEigenbasisVec (I := I) (M := M)
+          (DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.tensorResolventL2_isCompactOperator
             (I := I) (M := M) g r s) i) α P₀ :
         Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y) Ω'' := by
   -- The order-2 interior-regularity result (chart-locality-free).
   have h_two : DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
       (d := Module.finrank ℝ E) 2 2
       (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
-        (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
-          (DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.tensorResolventL2_isCompactOperator_intrinsic
+        (tensorResolventEigenbasisVec (I := I) (M := M)
+          (DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.tensorResolventL2_isCompactOperator
             (I := I) (M := M) g r s) i) α P₀ :
         Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y) Ω'' :=
-    eigenvector_chartComponent_memWkp_unconditional g r s i α P₀
+    eigenvector_chartComponent_memWkp g r s i α P₀
       hΩ''_open hΩ''_compact_closure hR₀_pos h_room
   -- `2 * k ≤ 2` for `k ≤ 1`, so downward monotonicity in the order applies.
   have h_le : 2 * k ≤ 2 := by omega
@@ -311,42 +262,7 @@ theorem tensorChartComponent_memWkp_succ_of_diffData
 section ElaborationTests
 
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
-  (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
   (i : TensorEigenIdx (I := I) (M := M) g r s)
-
-/-- The arbitrary-order headline produces interior `MemWkp (2 * k) 2` of the
-eigenvector chart component for every `k ≤ 1`. -/
-example (α : M) (P₀ : TensorCompIdx (E := E) r s)
-    {Ω'' : Set EuclN} (hΩ''_open : IsOpen Ω'')
-    (hΩ''_compact_closure : IsCompact (closure Ω''))
-    {R₀ : ℝ} (hR₀_pos : 0 < R₀)
-    (h_room : Metric.cthickening R₀ (closure Ω'') ⊆
-      chartTargetEuclid (I := I) (M := M) α)
-    {k : ℕ} (hk : k ≤ 1) :
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
-      (d := Module.finrank ℝ E) (2 * k) 2
-      (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
-        (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i) α P₀ :
-        Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y) Ω'' :=
-  eigenvector_chartComponent_memWkp_two_k g r s h_atlas i α P₀
-    hΩ''_open hΩ''_compact_closure hR₀_pos h_room hk
-
-/-- At `k = 1` the arbitrary-order headline reproduces the `W^{2,2}` interior
-regularity of `eigenvector_chartComponent_memWkp`. -/
-example (α : M) (P₀ : TensorCompIdx (E := E) r s)
-    {Ω'' : Set EuclN} (hΩ''_open : IsOpen Ω'')
-    (hΩ''_compact_closure : IsCompact (closure Ω''))
-    {R₀ : ℝ} (hR₀_pos : 0 < R₀)
-    (h_room : Metric.cthickening R₀ (closure Ω'') ⊆
-      chartTargetEuclid (I := I) (M := M) α) :
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
-      (d := Module.finrank ℝ E) 2 2
-      (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
-        (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i) α P₀ :
-        Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y) Ω'' := by
-  have h := eigenvector_chartComponent_memWkp_two_k g r s h_atlas i α P₀
-    hΩ''_open hΩ''_compact_closure hR₀_pos h_room (k := 1) (le_refl 1)
-  simpa using h
 
 /-- The chart-locality-free arbitrary-order headline produces interior
 `MemWkp (2 * k) 2` of the eigenvector chart component for every `k ≤ 1`, with no
@@ -361,11 +277,11 @@ example (α : M) (P₀ : TensorCompIdx (E := E) r s)
     DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
       (d := Module.finrank ℝ E) (2 * k) 2
       (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
-        (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
-          (DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.tensorResolventL2_isCompactOperator_intrinsic
+        (tensorResolventEigenbasisVec (I := I) (M := M)
+          (DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.tensorResolventL2_isCompactOperator
             (I := I) (M := M) g r s) i) α P₀ :
         Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y) Ω'' :=
-  eigenvector_chartComponent_memWkp_two_k_unconditional g r s i α P₀
+  eigenvector_chartComponent_memWkp_two_k g r s i α P₀
     hΩ''_open hΩ''_compact_closure hR₀_pos h_room hk
 
 end ElaborationTests

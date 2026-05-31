@@ -12,31 +12,19 @@ import Mathlib.Analysis.Normed.Operator.Bilinear
 /-!
 # Uniform operator-norm bounds for slot-correction infrastructure
 
-Consolidated uniform operator-norm bounds used throughout the chart-spectral
-machinery on a closed Riemannian manifold `(M, g)` with a locally constant
-chart selection (`HasLocallyConstantChartAt H M`):
+Uniform operator-norm bounds used throughout the chart-spectral machinery on a
+closed Riemannian manifold `(M, g)`:
 
-1. **Section-fibre norm comparison** — for a chart base point `α` and ranks
-   `(r, s)`, the bundle-fibre norm `‖S.toSection b‖` of a smooth
-   compactly-supported `(r, s)`-tensor section `S` is bounded squared by the
-   pointwise tensor inner product on the closed support of the chart-atlas
-   partition-of-unity weight at `α`:
-   `‖S.toSection b‖² ≤ K_S · tensorInnerPointwise g r s b (S.toFun b) (S.toFun b)`.
-2. **Christoffel-correction uniform op-norm bound** — the chart-local
-   Christoffel-correction CLM `christoffelCorrection g α b Y` is uniformly
-   operator-norm bounded over `b ∈ tsupport (chartAtlasPOU I M α)` by a
-   constant (depending on `g` and the chart at `α`, independent of `b, Y`)
-   times `‖Y‖`.
-3. **Chart Levi-Civita parallel CLM op-norm bound** — the chart Levi-Civita
-   parallel CLM `chartLeviCivitaParallelCLM g α b (chartBasisVecFiber α j)`
-   has a uniform operator-norm bound on the closed support of the
-   chart-atlas POU weight at `α`.
-4. **Input / output slot-correction headline bounds** — the chart-frame
-   input / output slot corrections satisfy
-   `‖chartTensorRSInputSlotCorrection r s g α T (chartBasisVecFiber α j) b k‖
-       ≤ M_F · ‖T b‖`
-   (and the analogous output-slot bound), uniformly on
-   `tsupport (chartAtlasPOU I M α)`.
+* **Unconditional chart Levi-Civita parallel CLM op-norm bound** — for a
+  chart base point `α`, the chart Levi-Civita parallel CLM
+  `chartLeviCivitaParallelCLM g α b (chartBasisVecFiber α j)` has a uniform
+  operator-norm bound on the closed support of the chart-atlas
+  partition-of-unity weight at `α`, where the operator norm is computed with
+  respect to the Riemannian fibre norm on `TangentSpace I b`. No locality
+  hypothesis on the chart selection is required.
+
+Supporting model-side suprema, slot-substitution pointwise bounds, and
+`tangentSlotCLM` factor-product bounds are provided as private helpers.
 -/
 
 noncomputable section
@@ -96,111 +84,6 @@ private lemma pouTsupport_subset_chartAt_source_secNorm (α : M) :
     pouTsupport_subset_baseSet (I := I) (M := M) α hb
   rw [trivializationAt_baseSet_eq_chartAt_source (I := I)] at hb_base
   exact hb_base
-
-/-! ## Headline: section-fibre norm squared bounded by the tensor inner product
-
-The headline result discharges the `K_S` parameter of downstream
-`tensorInnerPointwise`-quadratic bounds: there is a uniform `K_S ≥ 0` such
-that for every smooth compactly-supported `(r, s)`-tensor section `S` and
-every `b` in the closed support of the chart-`α` partition-of-unity weight,
-`‖S.toSection b‖^2 ≤ K_S * tensorInnerPointwise g r s b (S.toFun b) (S.toFun b)`. -/
-
-/-- **Section-fibre norm comparison by the pointwise tensor inner product.**
-
-For a closed Riemannian manifold `(M, g)`, a chart base point `α`, and ranks
-`(r, s)`, under the locality hypothesis `HasLocallyConstantChartAt H M` on
-the chart-selection function, there is a non-negative constant `K_S` such
-that for every smooth compactly-supported `(r, s)`-tensor section `S` and
-every base point `b` in the closed support of the chart-atlas
-partition-of-unity weight at `α`,
-`‖S.toSection b‖² ≤ K_S · tensorInnerPointwise g r s b (S.toFun b) (S.toFun b)`.
-
-The constant `K_S` depends only on `(g, r, s, α)` and on the locality
-hypothesis; it is independent of `S`. -/
-theorem norm_section_sq_le_const_mul_tensorInnerPointwise_on_pouTsupport
-    (h_atlas : HasLocallyConstantChartAt H M)
-    (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
-    ∃ K_S : ℝ, 0 ≤ K_S ∧
-      ∀ (S : SmoothCcTensor g r s) {b : M},
-        b ∈ tsupport (fun x : M =>
-            ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) →
-        ‖S.toSection b‖ ^ 2 ≤
-          K_S * tensorInnerPointwise (I := I) (M := M) g r s b
-            (S.toFun b) (S.toFun b) := by
-  classical
-  -- Compact closed-support set `K := tsupport(ρ_α) ⊆ (chartAt H α).source`.
-  set Kα : Set M := tsupport (fun x : M =>
-      ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) with hKα_def
-  have hKα_compact : IsCompact Kα :=
-    pouTsupport_isCompact (I := I) (M := M) α
-  have hKα_sub_source : Kα ⊆ (chartAt H α).source :=
-    pouTsupport_subset_chartAt_source_secNorm (I := I) (M := M) α
-  -- Step 1: chart-trivialisation-inverse norm bound on `Kα`.
-  obtain ⟨K, hK_nn, hK_le⟩ :=
-    chartRSTwistInv_sq_norm_le_const_mul_tensorInnerPointwise_on_pouTsupport
-      (I := I) (M := M) g r s α
-  -- Step 2: uniform chart-twist op-norm bound on `Kα` (uses locality).
-  obtain ⟨M_tw, hM_tw_pos, hM_tw_le⟩ :=
-    chartRSTwist_pointwise_opNorm_isBounded_on_compact
-      (I := I) (M := M) (E := E) h_atlas α hKα_compact hKα_sub_source r s
-  -- Assemble `K_S := M_tw^2 * K`.
-  refine ⟨M_tw ^ 2 * K, by positivity, ?_⟩
-  intro S b hb
-  -- `b ∈ baseSet` for the round-trip identity.
-  have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
-    pouTsupport_subset_baseSet (I := I) (M := M) α hb
-  -- Abbreviate `Y := chartRSTwistInv α b r s (S.toFun b)`.
-  set Y : TensorRSModel r s ℝ E :=
-    chartRSTwistInv (I := I) (M := M) α b r s (S.toFun b) with hY_def
-  -- Round-trip: `chartRSTwist α b r s Y = S.toFun b` on `baseSet`.
-  have h_round : chartRSTwist (I := I) (M := M) α b r s Y = S.toFun b := by
-    rw [hY_def]
-    exact chartRSTwist_chartRSTwistInv (I := I) (M := M) α hb_base r s (S.toFun b)
-  -- Chart-twist op-norm at `Y`: `‖chartRSTwist α b r s Y‖ ≤ M_tw * ‖Y‖`.
-  have h_tw_Y : ‖chartRSTwist (I := I) (M := M) α b r s Y‖ ≤ M_tw * ‖Y‖ :=
-    hM_tw_le b hb Y
-  -- Rewrite using the round-trip on the LHS.
-  rw [h_round] at h_tw_Y
-  -- Inverse-twist norm bound at `S.toFun b`:
-  -- `‖chartRSTwistInv α b r s (S.toFun b)‖^2 ≤ K * tensorInnerPointwise g r s b (S.toFun b) (S.toFun b)`.
-  have h_inv : ‖Y‖ ^ 2 ≤
-      K * tensorInnerPointwise (I := I) (M := M) g r s b
-        (S.toFun b) (S.toFun b) := by
-    rw [hY_def]
-    exact hK_le hb (S.toFun b)
-  -- Square the chart-twist bound: `‖S.toFun b‖^2 ≤ (M_tw * ‖Y‖)^2 = M_tw^2 * ‖Y‖^2`.
-  have h_lhs_nn : 0 ≤ ‖S.toFun b‖ := norm_nonneg _
-  have h_Y_nn : 0 ≤ ‖Y‖ := norm_nonneg _
-  have h_M_tw_nn : 0 ≤ M_tw := le_of_lt hM_tw_pos
-  have h_rhs_nn : 0 ≤ M_tw * ‖Y‖ := mul_nonneg h_M_tw_nn h_Y_nn
-  have h_sq : ‖S.toFun b‖ ^ 2 ≤ (M_tw * ‖Y‖) ^ 2 := by
-    have := mul_self_le_mul_self h_lhs_nn h_tw_Y
-    have h_lhs_sq : ‖S.toFun b‖ * ‖S.toFun b‖ = ‖S.toFun b‖ ^ 2 := by rw [sq]
-    have h_rhs_sq : (M_tw * ‖Y‖) * (M_tw * ‖Y‖) = (M_tw * ‖Y‖) ^ 2 := by rw [sq]
-    linarith
-  have h_expand : (M_tw * ‖Y‖) ^ 2 = M_tw ^ 2 * ‖Y‖ ^ 2 := by ring
-  -- Chain: ‖S.toFun b‖^2 ≤ M_tw^2 * ‖Y‖^2 ≤ M_tw^2 * (K * tensorInnerPointwise ...).
-  have h_chain : ‖S.toFun b‖ ^ 2 ≤
-      M_tw ^ 2 * (K * tensorInnerPointwise (I := I) (M := M) g r s b
-        (S.toFun b) (S.toFun b)) := by
-    have h_M_tw_sq_nn : 0 ≤ M_tw ^ 2 := sq_nonneg _
-    have h_step1 : ‖S.toFun b‖ ^ 2 ≤ M_tw ^ 2 * ‖Y‖ ^ 2 := by
-      calc ‖S.toFun b‖ ^ 2 ≤ (M_tw * ‖Y‖) ^ 2 := h_sq
-        _ = M_tw ^ 2 * ‖Y‖ ^ 2 := h_expand
-    have h_step2 : M_tw ^ 2 * ‖Y‖ ^ 2 ≤
-        M_tw ^ 2 * (K * tensorInnerPointwise (I := I) (M := M) g r s b
-          (S.toFun b) (S.toFun b)) :=
-      mul_le_mul_of_nonneg_left h_inv h_M_tw_sq_nn
-    exact h_step1.trans h_step2
-  -- Reassociate `M_tw^2 * (K * X) = (M_tw^2 * K) * X`.
-  have h_assoc :
-      M_tw ^ 2 * (K * tensorInnerPointwise (I := I) (M := M) g r s b
-        (S.toFun b) (S.toFun b)) =
-      M_tw ^ 2 * K * tensorInnerPointwise (I := I) (M := M) g r s b
-        (S.toFun b) (S.toFun b) := by ring
-  -- Apply the definitional identification `‖S.toSection b‖ = ‖S.toFun b‖`.
-  rw [section_norm_eq_toFun_norm S b]
-  linarith
 
 /-! ## Compactness and chart-source containment of `tsupport (POU α)`
 
@@ -432,150 +315,6 @@ private lemma christoffelCorrection_summand_opNorm_le
         chartModelBasisVecSup E := by ring
   linarith
 
-/-! ## Headline uniform op-norm bound on `christoffelCorrection` -/
-
-/-- **Uniform operator-norm bound for `christoffelCorrection g α b` on
-`tsupport (chartAtlasPOU I M α)`.**
-
-For a closed Riemannian manifold `(M, g)` with a locally constant chart
-selection at the model, there exists a non-negative constant `C` depending
-only on `g`, the chart at `α`, and the model space `E`, such that for every
-`b` in the closed support of the canonical chart-atlas partition-of-unity
-weight at `α`, the Christoffel-correction CLM satisfies
-
-  `‖christoffelCorrection g α b Y‖ ≤ C * ‖Y‖`
-
-for every `Y : E`. The constant `C` is independent of `b` and `Y`. -/
-theorem christoffelCorrection_opNorm_isBounded_on_pouTsupport
-    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
-    (g : SmoothRiemannianMetric I M) (α : M) :
-    ∃ C : ℝ, 0 ≤ C ∧
-      ∀ {b : M}, b ∈ tsupport (fun x : M =>
-          ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) →
-        ∀ Y : E, ‖christoffelCorrection (I := I) g α b Y‖ ≤ C * ‖Y‖ := by
-  classical
-  -- Notation for the compact base set.
-  set K : Set M := tsupport (fun x : M =>
-    ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) with hK_def
-  have hK_compact : IsCompact K := pouTsupport_isCompact (I := I) (M := M) α
-  have hK_sub : K ⊆ (chartAt H α).source :=
-    pouTsupport_subset_chartAt_source_chrCorr (I := I) (M := M) α
-  -- γ2.1: uniform bound on `‖chartJ α b‖`.
-  obtain ⟨C_J, hCJ_pos, hCJ_bound⟩ :=
-    chartJ_opNorm_isBounded_on_compact (I := I) (M := M) h_atlas α hK_compact hK_sub
-  have hCJ_nn : 0 ≤ C_J := le_of_lt hCJ_pos
-  -- Christoffel sup bound on the chart image.
-  obtain ⟨C_Γ, hCΓ_nn, hCΓ_bound⟩ :=
-    chartChristoffel_bdd_on_pou_tsupport (I := I) (M := M) g α
-  -- Set the headline constant.
-  set n : ℕ := Module.finrank ℝ E with hn_def
-  set C_coord : ℝ := chartModelBasisCoordSup E with hC_coord_def
-  set C_vec : ℝ := chartModelBasisVecSup E with hC_vec_def
-  set C : ℝ := (n : ℝ) ^ 3 *
-    (C_coord * C_J * (C_coord * C_Γ) * C_vec) with hC_def
-  have hC_coord_nn : 0 ≤ C_coord := chartModelBasisCoordSup_nonneg
-  have hC_vec_nn : 0 ≤ C_vec := chartModelBasisVecSup_nonneg
-  have hC_nn : 0 ≤ C := by
-    have hn_nn : (0 : ℝ) ≤ (n : ℝ) := by positivity
-    have : (0 : ℝ) ≤ (n : ℝ) ^ 3 := by positivity
-    have hrest_nn : 0 ≤ C_coord * C_J * (C_coord * C_Γ) * C_vec := by positivity
-    exact mul_nonneg this hrest_nn
-  refine ⟨C, hC_nn, ?_⟩
-  intro b hb Y
-  -- Pointwise op-norm of the triple sum bounded by sum of op-norms.
-  -- Unfold the definition.
-  have hb_chartJ : ‖chartJ (I := I) (M := M) α b‖ ≤ C_J := hCJ_bound b hb
-  -- Translate `b ∈ K` to `extChartAt I α b ∈ extChartAt I α '' K`.
-  have hb_extImg : extChartAt I α b ∈
-      (extChartAt I α) ''
-        (tsupport (fun x : M =>
-          ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)) := by
-    exact ⟨b, hb, rfl⟩
-  have hb_Γ : ∀ i j k : Fin (Module.finrank ℝ E),
-      |chartChristoffel (I := I) g α i j k (extChartAt I α b)| ≤ C_Γ := by
-    intro i j k
-    exact hCΓ_bound (extChartAt I α b) hb_extImg i j k
-  -- Set the per-summand bound `D := C_coord * C_J * (C_coord * ‖Y‖ * C_Γ) * C_vec`.
-  set D : ℝ := C_coord * C_J * (C_coord * ‖Y‖ * C_Γ) * C_vec with hD_def
-  have hD_nn : 0 ≤ D := by
-    have : 0 ≤ C_coord * ‖Y‖ * C_Γ := by positivity
-    have : 0 ≤ C_coord * C_J := by positivity
-    positivity
-  -- For each summand `(i, j, k)`, the op-norm is ≤ D.
-  have h_per : ∀ i j k : Fin (Module.finrank ℝ E),
-      ‖(((chartModelBasis E).coord i).toContinuousLinearMap.comp
-            (trivToE (I := I) α b)).smulRight
-          (((chartModelBasis E).repr Y j *
-              chartChristoffel (I := I) g α i j k (extChartAt I α b)) •
-            (chartModelBasis E) k)‖ ≤ D := by
-    intro i j k
-    exact christoffelCorrection_summand_opNorm_le (I := I)
-      g α b Y i j k C_J hb_chartJ hCJ_nn C_Γ (hb_Γ i j k) hCΓ_nn
-  -- Triangle inequality on the triple sum.
-  unfold christoffelCorrection
-  -- Step a: opNorm of `∑_i (· · ·) ≤ ∑_i ‖· · ·‖`.
-  have h_outer_norm :
-      ‖∑ i : Fin (Module.finrank ℝ E),
-          ∑ j : Fin (Module.finrank ℝ E),
-            ∑ k : Fin (Module.finrank ℝ E),
-              (((chartModelBasis E).coord i).toContinuousLinearMap.comp
-                  (trivToE (I := I) α b)).smulRight
-                (((chartModelBasis E).repr Y j *
-                    chartChristoffel (I := I) g α i j k (extChartAt I α b)) •
-                  (chartModelBasis E) k)‖ ≤
-        ∑ i : Fin (Module.finrank ℝ E),
-          ∑ j : Fin (Module.finrank ℝ E),
-            ∑ k : Fin (Module.finrank ℝ E), D := by
-    refine (norm_sum_le _ _).trans ?_
-    refine Finset.sum_le_sum (fun i _ => ?_)
-    refine (norm_sum_le _ _).trans ?_
-    refine Finset.sum_le_sum (fun j _ => ?_)
-    refine (norm_sum_le _ _).trans ?_
-    refine Finset.sum_le_sum (fun k _ => ?_)
-    exact h_per i j k
-  -- Step b: collapse the triple sum-of-constant.
-  have h_sum_const :
-      ∑ i : Fin (Module.finrank ℝ E),
-        ∑ j : Fin (Module.finrank ℝ E),
-          ∑ k : Fin (Module.finrank ℝ E), D = (n : ℝ) ^ 3 * D := by
-    have h_inner :
-        ∀ i j : Fin (Module.finrank ℝ E),
-          (∑ _k : Fin (Module.finrank ℝ E), D) = (n : ℝ) * D := by
-      intro i j
-      rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin]
-      simp [nsmul_eq_mul, hn_def]
-    have h_middle :
-        ∀ i : Fin (Module.finrank ℝ E),
-          (∑ _j : Fin (Module.finrank ℝ E),
-            (∑ _k : Fin (Module.finrank ℝ E), D)) = (n : ℝ) ^ 2 * D := by
-      intro i
-      calc (∑ _j : Fin (Module.finrank ℝ E),
-              (∑ _k : Fin (Module.finrank ℝ E), D))
-            = ∑ _j : Fin (Module.finrank ℝ E), (n : ℝ) * D := by
-              refine Finset.sum_congr rfl (fun j _ => ?_)
-              exact h_inner i j
-          _ = (n : ℝ) * ((n : ℝ) * D) := by
-              rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin]
-              simp [nsmul_eq_mul, hn_def]
-          _ = (n : ℝ) ^ 2 * D := by ring
-    calc (∑ i : Fin (Module.finrank ℝ E),
-            (∑ _j : Fin (Module.finrank ℝ E),
-              (∑ _k : Fin (Module.finrank ℝ E), D)))
-          = ∑ i : Fin (Module.finrank ℝ E), (n : ℝ) ^ 2 * D := by
-            refine Finset.sum_congr rfl (fun i _ => ?_)
-            exact h_middle i
-        _ = (n : ℝ) * ((n : ℝ) ^ 2 * D) := by
-            rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin]
-            simp [nsmul_eq_mul, hn_def]
-        _ = (n : ℝ) ^ 3 * D := by ring
-  rw [h_sum_const] at h_outer_norm
-  -- Step c: rewrite `(n : ℝ)^3 * D = C * ‖Y‖`.
-  have h_C_eq : (n : ℝ) ^ 3 * D = C * ‖Y‖ := by
-    rw [hC_def, hD_def]
-    ring
-  rw [h_C_eq] at h_outer_norm
-  exact h_outer_norm
-
 /-! ## Chart Levi-Civita parallel CLM uniform op-norm bound
 
 A finite-dimensional inner-product space is automatically complete; we
@@ -758,85 +497,12 @@ private lemma chartLeviCivitaParallelCLM_chartBasisVecFiber_opNorm_le_factors
         C_Jinv * C_χ * (C_J * C_Jinv * ‖(chartModelBasis E) j‖) := by ring
   linarith
 
-/-- **Uniform operator-norm bound for the chart Levi-Civita parallel CLM
-applied to a chart-basis vector field, on `tsupport (chartAtlasPOU I M α)`.**
+/-! ### Unconditional chart Levi-Civita parallel CLM op-norm bound
 
-For a closed Riemannian manifold `(M, g)` with a locally constant chart
-selection at the model, there exists a non-negative constant `C` depending
-only on `g`, the chart at `α`, and the model space `E`, such that for every
-`b` in the closed support of the canonical chart-atlas partition-of-unity
-weight at `α` and every model-basis index `j`,
-
-  `‖chartLeviCivitaParallelCLM g α b (chartBasisVecFiber α j)‖ ≤ C`
-
-where the norm is the operator norm of the continuous linear map
-`TangentSpace I b →L[ℝ] TangentSpace I b`. The constant `C` is independent
-of `b` and `j`. -/
-theorem chartLeviCivitaParallelCLM_chartBasisVec_opNorm_isBounded_on_pouTsupport
-    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
-    (g : SmoothRiemannianMetric I M) (α : M) :
-    ∃ C : ℝ, 0 ≤ C ∧
-      ∀ {b : M}, b ∈ pouTsupportSet (I := I) (M := M) α →
-        ∀ (j : Fin (Module.finrank ℝ E)),
-          ‖chartLeviCivitaParallelCLM (I := I) g α b
-              (chartBasisVecFiber (I := I) α j)‖ ≤ C := by
-  classical
-  -- Set up the compact base set.
-  set K : Set M := pouTsupportSet (I := I) (M := M) α with hK_def
-  have hK_compact : IsCompact K := pouTsupportSet_isCompact (I := I) (M := M) α
-  have hK_sub : K ⊆ (chartAt H α).source :=
-    pouTsupportSet_subset_chartAt_source (I := I) (M := M) α
-  -- γ2.1: uniform bounds on `‖chartJ α b‖` and `‖chartJinv α b‖`.
-  obtain ⟨C_J, hCJ_pos, hCJ_bound⟩ :=
-    chartJ_opNorm_isBounded_on_compact (I := I) (M := M) h_atlas α hK_compact hK_sub
-  obtain ⟨C_Jinv, hCJinv_pos, hCJinv_bound⟩ :=
-    chartJinv_opNorm_isBounded_on_compact (I := I) (M := M)
-      h_atlas α hK_compact hK_sub
-  have hCJ_nn : 0 ≤ C_J := le_of_lt hCJ_pos
-  have hCJinv_nn : 0 ≤ C_Jinv := le_of_lt hCJinv_pos
-  -- γ2.5.A.a: uniform bound on `christoffelCorrection g α b Y`.
-  obtain ⟨C_χ, hCχ_nn, hCχ_bound⟩ :=
-    christoffelCorrection_opNorm_isBounded_on_pouTsupport
-      (I := I) (M := M) h_atlas g α
-  -- Maximum norm of model basis vectors.
-  set C_e : ℝ := chartModelBasisVecSup' E with hCe_def
-  have hCe_nn : 0 ≤ C_e := chartModelBasisVecSup'_nonneg
-  -- The headline constant.
-  set C : ℝ := C_Jinv * C_χ * (C_J * C_Jinv * C_e) with hC_def
-  have hC_nn : 0 ≤ C := by positivity
-  refine ⟨C, hC_nn, ?_⟩
-  intro b hb j
-  -- Apply the factored bound.
-  have h_CJ : ‖chartJ (I := I) (M := M) α b‖ ≤ C_J := hCJ_bound b hb
-  have h_CJinv : ‖chartJinv (I := I) (M := M) α b‖ ≤ C_Jinv := hCJinv_bound b hb
-  have h_Cχ : ∀ Y : E, ‖christoffelCorrection (I := I) g α b Y‖ ≤ C_χ * ‖Y‖ :=
-    fun Y => hCχ_bound (b := b) hb Y
-  have h_factored :=
-    chartLeviCivitaParallelCLM_chartBasisVecFiber_opNorm_le_factors
-      (I := I) (M := M) g α b j C_J C_Jinv C_χ
-      h_CJ hCJ_nn h_CJinv hCJinv_nn h_Cχ hCχ_nn
-  -- And finally bound `‖(chartModelBasis E) j‖ ≤ C_e`.
-  have h_ej_le : ‖(chartModelBasis E) j‖ ≤ C_e :=
-    norm_basis_le_chartModelBasisVecSup' (E := E) j
-  have h_ej_nn : 0 ≤ ‖(chartModelBasis E) j‖ := norm_nonneg _
-  -- `‖...‖ ≤ C_Jinv * C_χ * (C_J * C_Jinv * ‖e_j‖) ≤ C_Jinv * C_χ * (C_J * C_Jinv * C_e) = C`.
-  have h_inner_nn : 0 ≤ C_J * C_Jinv := mul_nonneg hCJ_nn hCJinv_nn
-  have h_outer_nn : 0 ≤ C_Jinv * C_χ := mul_nonneg hCJinv_nn hCχ_nn
-  have h_inner_le :
-      C_J * C_Jinv * ‖(chartModelBasis E) j‖ ≤ C_J * C_Jinv * C_e :=
-    mul_le_mul_of_nonneg_left h_ej_le h_inner_nn
-  have h_outer_le :
-      C_Jinv * C_χ * (C_J * C_Jinv * ‖(chartModelBasis E) j‖) ≤
-        C_Jinv * C_χ * (C_J * C_Jinv * C_e) :=
-    mul_le_mul_of_nonneg_left h_inner_le h_outer_nn
-  linarith
-
-/-! ### Unconditional twin of the chart Levi-Civita parallel CLM op-norm bound
-
-The unconditional headline removes the locality hypothesis `HasLocallyConstantChartAt`.
-The operator norm is computed with respect to the Riemannian fibre norm on
-`TangentSpace I b` (installed via the `RiemannianBundle` instance from `g`),
-matching the convention of the unconditional Levi-Civita-parallel bound
+The unconditional headline requires no locality hypothesis on the chart
+selection. The operator norm is computed with respect to the Riemannian fibre
+norm on `TangentSpace I b` (installed via the `RiemannianBundle` instance from
+`g`), matching the convention of the unconditional Levi-Civita-parallel bound
 `chartLeviCivitaParallelCLM_general_X_opNorm_isBounded_on_pouTsupport_unconditional`.
 
 The chart-basis vector field is specialised from the general vector argument:
@@ -861,7 +527,7 @@ partition-of-unity weight at `α` and every model-basis index `j`,
 where the operator norm uses the Riemannian fibre norm on `TangentSpace I b`.
 The constant `C` is independent of `b` and `j`. No locality hypothesis on the
 chart selection is required. -/
-theorem chartLeviCivitaParallelCLM_chartBasisVec_opNorm_isBounded_on_pouTsupport_unconditional
+theorem chartLeviCivitaParallelCLM_chartBasisVec_opNorm_isBounded_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (α : M) :
     letI cg : Bundle.ContinuousRiemannianMetric E (TangentSpace I : M → Type _) :=
       g.toContinuousRiemannianMetric
@@ -1079,247 +745,20 @@ private lemma tangentSlotCLM_prod_norm_le (n : ℕ) (b : M)
   · intro i _; exact norm_nonneg _
   · intro i _; exact tangentSlotCLM_factor_norm_le (I := I) n b k Φ i
 
-/-! ### The headline uniform op-norm bound — input slot
+/-! ### Slot-correction uniform bounds live downstream (Riemannian norm)
 
-The key headline bound on `chartTensorRSInputSlotCorrection`, in
-`TensorRSSpace`-norm, by a constant times `‖T b‖`. -/
-
-theorem chartTensorRSInputSlotCorrection_norm_le_const_on_pouTsupport
-    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
-    (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
-    ∃ M_F : ℝ, 0 ≤ M_F ∧
-      ∀ (T : Π b' : M, TensorRSSpace r s I b') {b : M},
-        b ∈ pouTsupportSet (I := I) (M := M) α →
-        ∀ (j : Fin (Module.finrank ℝ E)) (k : Fin r),
-          ‖chartTensorRSInputSlotCorrection (I := I) r s g α T
-              (chartBasisVecFiber (I := I) α j) b k‖ ≤
-            M_F * ‖T b‖ := by
-  classical
-  -- Part B: uniform bound on `chartLeviCivitaParallelCLM`.
-  obtain ⟨C_B, hC_B_nn, hC_B⟩ :=
-    chartLeviCivitaParallelCLM_chartBasisVec_opNorm_isBounded_on_pouTsupport
-      (I := I) (M := M) h_atlas g α
-  -- Build the headline constant.
-  set M_F : ℝ := (max C_B 1) ^ r with hM_F_def
-  have hM_F_nn : 0 ≤ M_F := by
-    have h1 : 0 ≤ max C_B 1 := le_trans zero_le_one (le_max_right _ _)
-    exact pow_nonneg h1 r
-  refine ⟨M_F, hM_F_nn, ?_⟩
-  intro T b hb j k
-  -- Set abbreviations.
-  set Φ : TangentSpace I b →L[ℝ] TangentSpace I b :=
-    chartLeviCivitaParallelCLM (I := I) g α b
-      (chartBasisVecFiber (I := I) α j) with hΦ_def
-  set Ψ : Fin r → (TangentSpace I b →L[ℝ] TangentSpace I b) :=
-    tangentSlotCLM (I := I) r k Φ with hΨ_def
-  -- Φ is bounded by C_B on tsupport.
-  have hΦ_norm : ‖Φ‖ ≤ C_B := hC_B (b := b) hb j
-  -- Product bound on Ψ.
-  have hΨ_prod : (∏ i : Fin r, ‖Ψ i‖) ≤ (max ‖Φ‖ 1) ^ r := by
-    rw [hΨ_def]
-    exact tangentSlotCLM_prod_norm_le (I := I) r b k Φ
-  -- (max ‖Φ‖ 1) ^ r ≤ (max C_B 1) ^ r.
-  have h_max_le : max ‖Φ‖ 1 ≤ max C_B 1 :=
-    max_le_max hΦ_norm le_rfl
-  have h_max_nn : 0 ≤ max ‖Φ‖ 1 := le_trans zero_le_one (le_max_right _ _)
-  have hΨ_prod_le_C : (∏ i : Fin r, ‖Ψ i‖) ≤ M_F := by
-    refine hΨ_prod.trans ?_
-    rw [hM_F_def]
-    exact pow_le_pow_left₀ h_max_nn h_max_le r
-  -- Now apply `tensorRSSpace_opNorm_le_bound`.
-  -- For any x : Tensor0SSpace r I b, bound ‖(slot correction) x‖.
-  -- The constant for the opNorm_le_bound call is `M_F * ‖T b‖`.
-  have hRHS_nn : 0 ≤ M_F * ‖T b‖ :=
-    mul_nonneg hM_F_nn (norm_nonneg _)
-  refine tensorRSSpace_opNorm_le_bound (𝕜 := ℝ) (E := E) (I := I) (M := M)
-    (chartTensorRSInputSlotCorrection (I := I) r s g α T
-      (chartBasisVecFiber (I := I) α j) b k) hRHS_nn ?_
-  intro x
-  -- Unfold the slot correction.
-  -- (chartTensorRSInputSlotCorrection ... : TensorRSSpace r s I b)
-  --   = (T b : Tensor0SSpace r → Tensor0SSpace s) ∘ (substCLM r b Ψ).
-  -- Apply at x.
-  have hcomp : (show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b from
-      chartTensorRSInputSlotCorrection (I := I) r s g α T
-        (chartBasisVecFiber (I := I) α j) b k) x =
-      (show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b from T b)
-        (tensorSlotSubstCLM (I := I) r b Ψ x) := by
-    -- chartTensorRSInputSlotCorrection unfolds to T b .comp (substCLM r b Ψ).
-    change ((show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b from T b).comp
-        (tensorSlotSubstCLM (I := I) r b Ψ)) x =
-      (show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b from T b)
-        (tensorSlotSubstCLM (I := I) r b Ψ x)
-    rw [ContinuousLinearMap.comp_apply]
-  rw [hcomp]
-  -- ‖T b (substCLM Ψ x)‖ ≤ ‖T b‖_RS * ‖substCLM Ψ x‖
-  have hT_apply :
-      ‖(show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b from T b)
-          (tensorSlotSubstCLM (I := I) r b Ψ x)‖ ≤
-        ‖T b‖ * ‖tensorSlotSubstCLM (I := I) r b Ψ x‖ :=
-    tensorRSSpace_norm_apply_le (𝕜 := ℝ) (E := E) (I := I) (M := M) (T b) _
-  -- ‖substCLM Ψ x‖ ≤ (∏ ‖Ψ i‖) * ‖x‖.
-  have hsubst :
-      ‖tensorSlotSubstCLM (I := I) r b Ψ x‖ ≤
-        (∏ i : Fin r, ‖Ψ i‖) * ‖x‖ :=
-    tensorSlotSubstCLM_apply_norm_le (I := I) r b Ψ x
-  -- Combine.
-  have hTb_nn : 0 ≤ ‖T b‖ := norm_nonneg _
-  have hx_nn : 0 ≤ ‖x‖ := norm_nonneg _
-  have h_step1 :
-      ‖T b‖ * ‖tensorSlotSubstCLM (I := I) r b Ψ x‖ ≤
-        ‖T b‖ * ((∏ i : Fin r, ‖Ψ i‖) * ‖x‖) :=
-    mul_le_mul_of_nonneg_left hsubst hTb_nn
-  have h_inner_nn : 0 ≤ (∏ i : Fin r, ‖Ψ i‖) * ‖x‖ :=
-    mul_nonneg (Finset.prod_nonneg (fun i _ => norm_nonneg _)) hx_nn
-  -- ‖T b‖ * ((∏ ‖Ψ i‖) * ‖x‖) ≤ ‖T b‖ * (M_F * ‖x‖).
-  have h_step2 :
-      ‖T b‖ * ((∏ i : Fin r, ‖Ψ i‖) * ‖x‖) ≤
-        ‖T b‖ * (M_F * ‖x‖) := by
-    have h_prod_factor : (∏ i : Fin r, ‖Ψ i‖) * ‖x‖ ≤ M_F * ‖x‖ :=
-      mul_le_mul_of_nonneg_right hΨ_prod_le_C hx_nn
-    exact mul_le_mul_of_nonneg_left h_prod_factor hTb_nn
-  have h_rearrange : ‖T b‖ * (M_F * ‖x‖) = M_F * ‖T b‖ * ‖x‖ := by ring
-  -- Chain via le_trans.
-  have hChain1 :
-      ‖(show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b from T b)
-          (tensorSlotSubstCLM (I := I) r b Ψ x)‖ ≤
-        ‖T b‖ * ((∏ i : Fin r, ‖Ψ i‖) * ‖x‖) :=
-    hT_apply.trans h_step1
-  have hChain2 :
-      ‖(show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b from T b)
-          (tensorSlotSubstCLM (I := I) r b Ψ x)‖ ≤
-        ‖T b‖ * (M_F * ‖x‖) :=
-    hChain1.trans h_step2
-  rw [h_rearrange] at hChain2
-  exact hChain2
-
-/-! ### The headline uniform op-norm bound — output slot
-
-The output side is structurally identical but with the substitution acting
-on the *output* `(0, s)`-tensor rather than the input `(0, r)`-tensor. The
-factorisation is `substCLM_l .comp T b`, so the argument is dual:
-`‖substCLM_l (T b x)‖ ≤ ‖substCLM_l‖ * ‖T b x‖ ≤ ‖substCLM_l‖ * ‖T b‖ * ‖x‖`. -/
-
-theorem chartTensorRSOutputSlotCorrection_norm_le_const_on_pouTsupport
-    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
-    (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
-    ∃ M_F : ℝ, 0 ≤ M_F ∧
-      ∀ (T : Π b' : M, TensorRSSpace r s I b') {b : M},
-        b ∈ pouTsupportSet (I := I) (M := M) α →
-        ∀ (j : Fin (Module.finrank ℝ E)) (l : Fin s),
-          ‖chartTensorRSOutputSlotCorrection (I := I) r s g α T
-              (chartBasisVecFiber (I := I) α j) b l‖ ≤
-            M_F * ‖T b‖ := by
-  classical
-  -- Part B: uniform bound on `chartLeviCivitaParallelCLM`.
-  obtain ⟨C_B, hC_B_nn, hC_B⟩ :=
-    chartLeviCivitaParallelCLM_chartBasisVec_opNorm_isBounded_on_pouTsupport
-      (I := I) (M := M) h_atlas g α
-  -- Build the headline constant.
-  set M_F : ℝ := (max C_B 1) ^ s with hM_F_def
-  have hM_F_nn : 0 ≤ M_F := by
-    have h1 : 0 ≤ max C_B 1 := le_trans zero_le_one (le_max_right _ _)
-    exact pow_nonneg h1 s
-  refine ⟨M_F, hM_F_nn, ?_⟩
-  intro T b hb j l
-  -- Set abbreviations.
-  set Φ : TangentSpace I b →L[ℝ] TangentSpace I b :=
-    chartLeviCivitaParallelCLM (I := I) g α b
-      (chartBasisVecFiber (I := I) α j) with hΦ_def
-  set Ψ : Fin s → (TangentSpace I b →L[ℝ] TangentSpace I b) :=
-    tangentSlotCLM (I := I) s l Φ with hΨ_def
-  -- Φ is bounded by C_B on tsupport.
-  have hΦ_norm : ‖Φ‖ ≤ C_B := hC_B (b := b) hb j
-  -- Product bound on Ψ (now on Fin s, slot l).
-  have hΨ_prod : (∏ i : Fin s, ‖Ψ i‖) ≤ (max ‖Φ‖ 1) ^ s := by
-    rw [hΨ_def]
-    exact tangentSlotCLM_prod_norm_le (I := I) s b l Φ
-  -- (max ‖Φ‖ 1) ^ s ≤ (max C_B 1) ^ s.
-  have h_max_le : max ‖Φ‖ 1 ≤ max C_B 1 :=
-    max_le_max hΦ_norm le_rfl
-  have h_max_nn : 0 ≤ max ‖Φ‖ 1 := le_trans zero_le_one (le_max_right _ _)
-  have hΨ_prod_le_C : (∏ i : Fin s, ‖Ψ i‖) ≤ M_F := by
-    refine hΨ_prod.trans ?_
-    rw [hM_F_def]
-    exact pow_le_pow_left₀ h_max_nn h_max_le s
-  -- Apply `tensorRSSpace_opNorm_le_bound`.
-  have hRHS_nn : 0 ≤ M_F * ‖T b‖ :=
-    mul_nonneg hM_F_nn (norm_nonneg _)
-  refine tensorRSSpace_opNorm_le_bound (𝕜 := ℝ) (E := E) (I := I) (M := M)
-    (chartTensorRSOutputSlotCorrection (I := I) r s g α T
-      (chartBasisVecFiber (I := I) α j) b l) hRHS_nn ?_
-  intro x
-  -- Unfold: chartTensorRSOutputSlotCorrection = substCLM_l.comp T b. Apply at x.
-  have hcomp : (show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b from
-      chartTensorRSOutputSlotCorrection (I := I) r s g α T
-        (chartBasisVecFiber (I := I) α j) b l) x =
-      tensorSlotSubstCLM (I := I) s b Ψ
-        ((show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b from T b) x) := by
-    change ((tensorSlotSubstCLM (I := I) s b Ψ).comp
-        (show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b from T b)) x =
-      tensorSlotSubstCLM (I := I) s b Ψ
-        ((show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b from T b) x)
-    rw [ContinuousLinearMap.comp_apply]
-  rw [hcomp]
-  -- ‖substCLM Ψ (T b x)‖ ≤ (∏ ‖Ψ i‖) * ‖T b x‖.
-  have hsubst :
-      ‖tensorSlotSubstCLM (I := I) s b Ψ
-          ((show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b from T b) x)‖ ≤
-        (∏ i : Fin s, ‖Ψ i‖) *
-          ‖(show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b from T b) x‖ :=
-    tensorSlotSubstCLM_apply_norm_le (I := I) s b Ψ _
-  -- ‖T b x‖ ≤ ‖T b‖_RS * ‖x‖.
-  have hT_apply :
-      ‖(show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b from T b) x‖ ≤
-        ‖T b‖ * ‖x‖ :=
-    tensorRSSpace_norm_apply_le (𝕜 := ℝ) (E := E) (I := I) (M := M) (T b) x
-  -- Combine: ‖substCLM Ψ (T b x)‖ ≤ (∏ ‖Ψ i‖) * ‖T b‖ * ‖x‖ ≤ M_F * ‖T b‖ * ‖x‖.
-  have hTb_nn : 0 ≤ ‖T b‖ := norm_nonneg _
-  have hx_nn : 0 ≤ ‖x‖ := norm_nonneg _
-  have h_prod_nn : 0 ≤ ∏ i : Fin s, ‖Ψ i‖ :=
-    Finset.prod_nonneg (fun i _ => norm_nonneg _)
-  -- (∏ ‖Ψ i‖) * ‖T b x‖ ≤ (∏ ‖Ψ i‖) * (‖T b‖ * ‖x‖).
-  have h_step1 :
-      (∏ i : Fin s, ‖Ψ i‖) *
-        ‖(show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b from T b) x‖ ≤
-      (∏ i : Fin s, ‖Ψ i‖) * (‖T b‖ * ‖x‖) :=
-    mul_le_mul_of_nonneg_left hT_apply h_prod_nn
-  -- (∏ ‖Ψ i‖) * (‖T b‖ * ‖x‖) ≤ M_F * (‖T b‖ * ‖x‖).
-  have h_step2 :
-      (∏ i : Fin s, ‖Ψ i‖) * (‖T b‖ * ‖x‖) ≤
-        M_F * (‖T b‖ * ‖x‖) := by
-    have h_inner_nn : 0 ≤ ‖T b‖ * ‖x‖ := mul_nonneg hTb_nn hx_nn
-    exact mul_le_mul_of_nonneg_right hΨ_prod_le_C h_inner_nn
-  have h_rearrange : M_F * (‖T b‖ * ‖x‖) = M_F * ‖T b‖ * ‖x‖ := by ring
-  -- Chain the bounds.
-  have hChain1 :
-      ‖tensorSlotSubstCLM (I := I) s b Ψ
-          ((show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b from T b) x)‖ ≤
-        (∏ i : Fin s, ‖Ψ i‖) * (‖T b‖ * ‖x‖) :=
-    hsubst.trans h_step1
-  have hChain2 :
-      ‖tensorSlotSubstCLM (I := I) s b Ψ
-          ((show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b from T b) x)‖ ≤
-        M_F * (‖T b‖ * ‖x‖) :=
-    hChain1.trans h_step2
-  rw [h_rearrange] at hChain2
-  exact hChain2
-
-/-! ### Slot-correction unconditional twins live downstream (Riemannian norm)
-
-The locality-free uniform op-norm bounds for the chart-frame input / output
-slot corrections are NOT provided here. Their proof would route through the
+The uniform op-norm bounds for the chart-frame input / output slot corrections
+are NOT provided here. A model-fibre formulation would route through the
 model-fibre operator norm of `chartLeviCivitaParallelCLM`
 (`tensorSlotSubstCLM`'s factor product is the model `E →L[ℝ] E` operator norm
 of the substituted CLMs), which factors through the model-to-model chart-
-Jacobian operator norm `‖chartJ α b‖` / `‖chartJinv α b‖` — the discontinuous
-quantity that no `HasLocallyConstantChartAt`-free uniform bound controls.
+Jacobian operator norm `‖chartJ α b‖` / `‖chartJinv α b‖` — a discontinuous
+quantity that no uniform op-norm bound controls.
 
-The genuinely unconditional formulation instead measures the slot corrections
-in the Riemannian fibre norm on `TensorRSSpace`; that bound is proved
-downstream once the Riemannian trivialisation op-norm comparisons are in scope.
-It cannot be stated here because the supporting infrastructure imports this
-file. -/
+The unconditional formulation instead measures the slot corrections in the
+Riemannian fibre norm on `TensorRSSpace`; that bound is proved downstream once
+the Riemannian trivialisation op-norm comparisons are in scope. It cannot be
+stated here because the supporting infrastructure imports this file. -/
 
 end TensorSpectral
 end Parabolic

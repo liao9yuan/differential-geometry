@@ -7,12 +7,11 @@ import Mathlib.Analysis.Normed.Module.Multilinear.Basic
 # Uniform operator-norm bounds on the chart `(r, s)`-tensor twist over a compact base set
 
 For a smooth manifold `M` modelled on `(E, H)` with model `I`, and a fixed base
-point `α : M`, this file proves uniform operator-norm bounds on the chart
+point `α : M`, this file proves pointwise operator-norm bounds on the chart
 `(r, s)`-tensor twist `chartRSTwist α b r s` and its inverse
 `chartRSTwistInv α b r s`, viewed as continuous linear maps on
-`TensorRSModel r s ℝ E`, for `b` ranging over an arbitrary compact subset
-`K ⊆ (chartAt H α).source`, under the locality hypothesis
-`HasLocallyConstantChartAt H M` on the chart-selection function.
+`TensorRSModel r s ℝ E`, in terms of the operator norms of `chartJ`/`chartJinv`
+at the base point `b`.
 
 ## Strategy
 
@@ -30,25 +29,13 @@ Chaining these,
 `‖chartRSTwist α b r s T α'‖ ≤ ‖chartJ α b‖^s * ‖chartJinv α b‖^r * ‖T‖ * ‖α'‖`.
 Hence `‖chartRSTwist α b r s T‖ ≤ ‖chartJ α b‖^s * ‖chartJinv α b‖^r * ‖T‖`.
 
-Combining this with the previously-shipped uniform bounds
-`chartJ_opNorm_isBounded_on_compact` and
-`chartJinv_opNorm_isBounded_on_compact` yields the uniform per-tensor
-pointwise bound `‖chartRSTwist α b r s T‖ ≤ C * ‖T‖` over any compact subset
-of the chart source.
-
 ## Main results
 
 * `chartRSTwist_opNorm_le` — pointwise op-norm bound on `chartRSTwist α b r s T`
   in terms of `‖chartJ α b‖^s * ‖chartJinv α b‖^r * ‖T‖`.
 * `chartRSTwistInv_opNorm_le` — analogous bound for the inverse twist.
-* `chartRSTwist_pointwise_opNorm_isBounded_on_compact` — uniform pointwise
-  bound on `chartRSTwist α b r s T` over any compact `K ⊆ (chartAt H α).source`.
-* `chartRSTwistInv_pointwise_opNorm_isBounded_on_compact` — analogous bound for
-  the inverse twist.
 
-Both compact-subset headlines carry the locality hypothesis
-`HasLocallyConstantChartAt H M` on the chart selection of `M` and require no
-Riemannian-metric structure.
+Both bounds are predicate-free and require no Riemannian-metric structure.
 -/
 
 noncomputable section
@@ -79,6 +66,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 /-! ## Step 1: pointwise operator-norm bounds on the twist of a single tensor -/
 
+set_option linter.unusedSectionVars false in
 /-- Pointwise operator-norm bound on `chartRSTwist α b r s T`, as a continuous
 linear map `Tensor0SModel r ℝ E →L[ℝ] Tensor0SModel s ℝ E`:
 `‖chartRSTwist α b r s T‖ ≤ ‖chartJ α b‖^s * ‖chartJinv α b‖^r * ‖T‖`. -/
@@ -150,6 +138,7 @@ lemma chartRSTwist_opNorm_le
   rw [h_final] at h_combined
   exact h_combined
 
+set_option linter.unusedSectionVars false in
 /-- Pointwise operator-norm bound on `chartRSTwistInv α b r s T`:
 `‖chartRSTwistInv α b r s T‖ ≤ ‖chartJinv α b‖^s * ‖chartJ α b‖^r * ‖T‖`. -/
 lemma chartRSTwistInv_opNorm_le
@@ -211,100 +200,6 @@ lemma chartRSTwistInv_opNorm_le
           ‖chartJ (I := I) (M := M) α b‖ ^ r * ‖T‖ * ‖α'‖ := by ring
   rw [h_final] at h_combined
   exact h_combined
-
-/-! ## Step 2: uniform pointwise bounds on a compact subset of the chart source -/
-
-/-- Uniform pointwise operator-norm bound on the chart-`(α, b)`-twist of any
-`(r, s)`-tensor `T`, over any compact `K ⊆ (chartAt H α).source`. There is a
-single constant `C > 0` such that
-`‖chartRSTwist α b r s T‖ ≤ C * ‖T‖` for every `T` and every `b ∈ K`. -/
-theorem chartRSTwist_pointwise_opNorm_isBounded_on_compact
-    (h_atlas : HasLocallyConstantChartAt H M)
-    (α : M) {K : Set M} (hK : IsCompact K) (hKsub : K ⊆ (chartAt H α).source)
-    (r s : ℕ) :
-    ∃ C : ℝ, 0 < C ∧ ∀ b ∈ K, ∀ T : TensorRSModel r s ℝ E,
-      ‖chartRSTwist (I := I) (M := M) α b r s T‖ ≤ C * ‖T‖ := by
-  obtain ⟨C₁, hC₁_pos, hC₁_le⟩ :=
-    chartJ_opNorm_isBounded_on_compact (I := I) (M := M)
-      h_atlas α hK hKsub
-  obtain ⟨C₂, hC₂_pos, hC₂_le⟩ :=
-    chartJinv_opNorm_isBounded_on_compact (I := I) (M := M)
-      h_atlas α hK hKsub
-  refine ⟨C₁ ^ s * C₂ ^ r, by positivity, ?_⟩
-  intro b hb T
-  have h_bound := chartRSTwist_opNorm_le (I := I) (M := M) α b r s T
-  have h_J : ‖chartJ (I := I) (M := M) α b‖ ≤ C₁ := hC₁_le b hb
-  have h_Jinv : ‖chartJinv (I := I) (M := M) α b‖ ≤ C₂ := hC₂_le b hb
-  have h_J_nn : 0 ≤ ‖chartJ (I := I) (M := M) α b‖ := norm_nonneg _
-  have h_Jinv_nn : 0 ≤ ‖chartJinv (I := I) (M := M) α b‖ := norm_nonneg _
-  have h_J_pow : ‖chartJ (I := I) (M := M) α b‖ ^ s ≤ C₁ ^ s :=
-    pow_le_pow_left₀ h_J_nn h_J s
-  have h_Jinv_pow : ‖chartJinv (I := I) (M := M) α b‖ ^ r ≤ C₂ ^ r :=
-    pow_le_pow_left₀ h_Jinv_nn h_Jinv r
-  have h_Jpow_nn : 0 ≤ ‖chartJ (I := I) (M := M) α b‖ ^ s := by positivity
-  have h_C2pow_nn : 0 ≤ C₂ ^ r := by positivity
-  have h_T_nn : 0 ≤ ‖T‖ := norm_nonneg _
-  have h_prod_le :
-      ‖chartJ (I := I) (M := M) α b‖ ^ s *
-          ‖chartJinv (I := I) (M := M) α b‖ ^ r ≤ C₁ ^ s * C₂ ^ r := by
-    calc
-      ‖chartJ (I := I) (M := M) α b‖ ^ s *
-          ‖chartJinv (I := I) (M := M) α b‖ ^ r
-          ≤ ‖chartJ (I := I) (M := M) α b‖ ^ s * C₂ ^ r :=
-            mul_le_mul_of_nonneg_left h_Jinv_pow h_Jpow_nn
-      _ ≤ C₁ ^ s * C₂ ^ r :=
-            mul_le_mul_of_nonneg_right h_J_pow h_C2pow_nn
-  calc
-    ‖chartRSTwist (I := I) (M := M) α b r s T‖
-        ≤ ‖chartJ (I := I) (M := M) α b‖ ^ s *
-            ‖chartJinv (I := I) (M := M) α b‖ ^ r * ‖T‖ := h_bound
-    _ ≤ C₁ ^ s * C₂ ^ r * ‖T‖ :=
-          mul_le_mul_of_nonneg_right h_prod_le h_T_nn
-
-/-- Uniform pointwise operator-norm bound on the inverse chart-`(α, b)`-twist
-of any `(r, s)`-tensor `T`, over any compact `K ⊆ (chartAt H α).source`. -/
-theorem chartRSTwistInv_pointwise_opNorm_isBounded_on_compact
-    (h_atlas : HasLocallyConstantChartAt H M)
-    (α : M) {K : Set M} (hK : IsCompact K) (hKsub : K ⊆ (chartAt H α).source)
-    (r s : ℕ) :
-    ∃ C : ℝ, 0 < C ∧ ∀ b ∈ K, ∀ T : TensorRSModel r s ℝ E,
-      ‖chartRSTwistInv (I := I) (M := M) α b r s T‖ ≤ C * ‖T‖ := by
-  obtain ⟨C₁, hC₁_pos, hC₁_le⟩ :=
-    chartJ_opNorm_isBounded_on_compact (I := I) (M := M)
-      h_atlas α hK hKsub
-  obtain ⟨C₂, hC₂_pos, hC₂_le⟩ :=
-    chartJinv_opNorm_isBounded_on_compact (I := I) (M := M)
-      h_atlas α hK hKsub
-  refine ⟨C₂ ^ s * C₁ ^ r, by positivity, ?_⟩
-  intro b hb T
-  have h_bound := chartRSTwistInv_opNorm_le (I := I) (M := M) α b r s T
-  have h_J : ‖chartJ (I := I) (M := M) α b‖ ≤ C₁ := hC₁_le b hb
-  have h_Jinv : ‖chartJinv (I := I) (M := M) α b‖ ≤ C₂ := hC₂_le b hb
-  have h_J_nn : 0 ≤ ‖chartJ (I := I) (M := M) α b‖ := norm_nonneg _
-  have h_Jinv_nn : 0 ≤ ‖chartJinv (I := I) (M := M) α b‖ := norm_nonneg _
-  have h_J_pow : ‖chartJ (I := I) (M := M) α b‖ ^ r ≤ C₁ ^ r :=
-    pow_le_pow_left₀ h_J_nn h_J r
-  have h_Jinv_pow : ‖chartJinv (I := I) (M := M) α b‖ ^ s ≤ C₂ ^ s :=
-    pow_le_pow_left₀ h_Jinv_nn h_Jinv s
-  have h_Jinvpow_nn : 0 ≤ ‖chartJinv (I := I) (M := M) α b‖ ^ s := by positivity
-  have h_C1pow_nn : 0 ≤ C₁ ^ r := by positivity
-  have h_T_nn : 0 ≤ ‖T‖ := norm_nonneg _
-  have h_prod_le :
-      ‖chartJinv (I := I) (M := M) α b‖ ^ s *
-          ‖chartJ (I := I) (M := M) α b‖ ^ r ≤ C₂ ^ s * C₁ ^ r := by
-    calc
-      ‖chartJinv (I := I) (M := M) α b‖ ^ s *
-          ‖chartJ (I := I) (M := M) α b‖ ^ r
-          ≤ ‖chartJinv (I := I) (M := M) α b‖ ^ s * C₁ ^ r :=
-            mul_le_mul_of_nonneg_left h_J_pow h_Jinvpow_nn
-      _ ≤ C₂ ^ s * C₁ ^ r :=
-            mul_le_mul_of_nonneg_right h_Jinv_pow h_C1pow_nn
-  calc
-    ‖chartRSTwistInv (I := I) (M := M) α b r s T‖
-        ≤ ‖chartJinv (I := I) (M := M) α b‖ ^ s *
-            ‖chartJ (I := I) (M := M) α b‖ ^ r * ‖T‖ := h_bound
-    _ ≤ C₂ ^ s * C₁ ^ r * ‖T‖ :=
-          mul_le_mul_of_nonneg_right h_prod_le h_T_nn
 
 end TensorSpectral
 end Parabolic

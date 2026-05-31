@@ -33,7 +33,7 @@ is genuinely first order in `h(u)`.
 family `coeff : TensorEigenIdx → ℝ` plus a weighted-`ℓ²` summability witness, not
 a pointwise tensor field.  To write `N(u)` we realize the finitely-supported `u`
 as a genuine smooth compactly-supported `(0,2)`-tensor section
-`T_u = tensorHsSmoothRepr_unconditional u` (the chart-locality-free smooth
+`T_u = tensorHsSmoothRepr u` (the chart-locality-free smooth
 representative on the dense finite-support subspace), assemble the smooth metric
 `g_bg + h_sym(T_u)` on its validity domain via `tensorSectionRealizeMetric`, and
 take the smooth `(0,2)`-tensor section of the geometric remainder
@@ -96,7 +96,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 We realize a finitely-supported `u : tensorHs g_bg 0 2 ((a:ℝ)+1)` at its own
 Sobolev order: its chart-locality-free smooth representative
-`tensorHsSmoothRepr_unconditional u hu_fs` is a `SmoothCcTensor g_bg 0 2`, from
+`tensorHsSmoothRepr u hu_fs` is a `SmoothCcTensor g_bg 0 2`, from
 which the symmetric extracted bilinear form `tensorHsBilinSymm` is built.  When
 that form is `g_bg`-fibre small with constant `< 1`, the assembled
 `g_bg + h_sym` is a genuine `SmoothRiemannianMetric`. -/
@@ -120,7 +120,7 @@ def realizeMetricAt (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
     SmoothRiemannianMetric I M :=
   if h : realizableAt (I := I) g_bg u then
     tensorSectionRealizeMetric (I := I) g_bg
-      (Analysis.Parabolic.TensorSpectral.tensorHsSmoothRepr_unconditional
+      (Analysis.Parabolic.TensorSpectral.tensorHsSmoothRepr
         (I := I) (M := M) u h.choose)
       h.choose_spec.choose_spec.1 h.choose_spec.choose_spec.2
   else
@@ -177,7 +177,7 @@ def deTurckRemainderSection (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
       hasCompactSupport :=
         (deTurckRHSSection (I := I) g_bg (realizeMetricAt (I := I) g_bg u)).hasCompactSupport }
       - rawTensorConnLapSmooth (I := I) g_bg 0 2
-          (Analysis.Parabolic.TensorSpectral.tensorHsSmoothRepr_unconditional
+          (Analysis.Parabolic.TensorSpectral.tensorHsSmoothRepr
             (I := I) (M := M) u h.choose)
   else
     0
@@ -193,7 +193,7 @@ order-`a` spectral Sobolev element `N(u)`. -/
 resolvent on the closed manifold `(M, g_bg)`. -/
 private def hCompact (g_bg : SmoothRiemannianMetric I M) :
     IsCompactOperator (tensorResolventL2 (I := I) (M := M) g_bg 0 2) :=
-  tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g_bg 0 2
+  tensorResolventL2_isCompactOperator (I := I) (M := M) g_bg 0 2
 
 /-- **The geometric Ricci–DeTurck nonlinearity** as a map of spectral Sobolev
 spaces
@@ -212,7 +212,7 @@ def deTurckGeometricN (g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (u : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 1)) :
     tensorHs (I := I) (M := M) g_bg 0 2 (a : ℝ) where
   coeff i :=
-    tensorL2Coeff_ofCompact (I := I) (M := M) (hCompact (I := I) g_bg)
+    tensorL2Coeff (I := I) (M := M) (hCompact (I := I) g_bg)
       (SmoothCcTensor.toL2 (deTurckRemainderSection (I := I) g_bg u)) i
   weighted_summable :=
     smoothCcTensor_tensorL2Coeff_weighted_summable (I := I) (M := M) g_bg
@@ -225,7 +225,7 @@ coordinate of the geometric remainder section. -/
     (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
       (I := I) (M := M) g_bg 0 2) :
     (deTurckGeometricN (I := I) g_bg a u).coeff i =
-      tensorL2Coeff_ofCompact (I := I) (M := M) (hCompact (I := I) g_bg)
+      tensorL2Coeff (I := I) (M := M) (hCompact (I := I) g_bg)
         (SmoothCcTensor.toL2 (deTurckRemainderSection (I := I) g_bg u)) i :=
   rfl
 
@@ -242,7 +242,7 @@ theorem deTurckGeometricN_of_not_realizable (g_bg : SmoothRiemannianMetric I M)
   rw [deTurckGeometricN_coeff, hsec,
     show SmoothCcTensor.toL2 (g := g_bg) (r := 0) (s := 2)
         (0 : SmoothCcTensor g_bg 0 2) = 0 from map_zero _,
-    tensorL2Coeff_ofCompact_eq_inner, inner_zero_right]
+    tensorL2Coeff_eq_inner, inner_zero_right]
   rfl
 
 end MetricRealization

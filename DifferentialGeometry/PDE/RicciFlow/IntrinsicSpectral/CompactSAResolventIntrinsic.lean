@@ -31,10 +31,10 @@ analytic ingredients are:
 
 Self-adjointness is already unconditional
 (`tensorResolventL2_isSelfAdjoint`, from the symmetry of the H¹ inner
-product). The headline `tensorResolventL2_isCompactOperator_intrinsic`
+product). The headline `tensorResolventL2_isCompactOperator`
 produces exactly the `IsCompactOperator (tensorResolventL2 g r s)` predicate
 consumed by the resolvent eigenbasis construction
-(`tensorResolventHilbertEigenbasisSigma_ofCompact`).
+(`tensorResolventHilbertEigenbasisSigma`).
 -/
 
 noncomputable section
@@ -81,7 +81,7 @@ The proof combines:
   compositional reduction deriving L²-side compactness from H¹ → L²
   compactness via the factorisation
   `tensorResolventL2 = TensorH1ComplToTensorL2 ∘L tensorResolvent`. -/
-theorem tensorResolventL2_isCompactOperator_intrinsic
+theorem tensorResolventL2_isCompactOperator
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     IsCompactOperator (tensorResolventL2 (I := I) (M := M) g r s) :=
   tensorResolventL2_isCompactOperator_of_isCompactOperator
@@ -99,20 +99,20 @@ chart-selection hypothesis anywhere in the chain. -/
 
 /-- The L²-side tensor resolvent `tensorResolventL2 g r s` on a closed
 Riemannian manifold is both a compact operator and self-adjoint, with no
-chart-selection hypothesis. Compactness is `tensorResolventL2_isCompactOperator_intrinsic`
+chart-selection hypothesis. Compactness is `tensorResolventL2_isCompactOperator`
 and self-adjointness is `tensorResolventL2_isSelfAdjoint`. -/
 theorem tensorResolventL2_isCompactOperator_isSelfAdjoint_intrinsic
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     IsCompactOperator (tensorResolventL2 (I := I) (M := M) g r s) ∧
       IsSelfAdjoint (tensorResolventL2 (I := I) (M := M) g r s) :=
-  ⟨tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s,
+  ⟨tensorResolventL2_isCompactOperator (I := I) (M := M) g r s,
    tensorResolventL2_isSelfAdjoint (I := I) (M := M) g r s⟩
 
 /-! ## Sanity test: the headline is exactly the eigenbasis hypothesis -/
 
 example (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     IsCompactOperator (tensorResolventL2 (I := I) (M := M) g r s) :=
-  tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s
+  tensorResolventL2_isCompactOperator (I := I) (M := M) g r s
 
 end IntrinsicSpectral
 end RicciFlow

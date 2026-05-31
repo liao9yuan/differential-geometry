@@ -545,9 +545,7 @@ eLpNorm
 ```
 
 where `ρ_α` is the chart-atlas partition-of-unity weight at `α`. The constant
-`C` is independent of `S`. The locality hypothesis
-`HasLocallyConstantChartAt H M` is accepted in the signature for symmetry with
-neighbouring per-`α` atom bounds; the proof itself does not need it. -/
+`C` is independent of `S`. -/
 theorem exists_eLpNorm_sq_pou_mul_sum_triv_chart_cov_le_const_mul_h1NormSq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -1001,115 +999,6 @@ theorem exists_integral_indicator_tsupp_raw_sq_le_const_mul_h1NormSq
   exact h_smoothCc'.trans h_rhs_le
 
 end RawAtoms
-
-/-! ## Unconditional `L²` bound on the Christoffel slot-correction atom sum -/
-
-section ChristoffelAtoms
-
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
-  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
-variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
-variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-  [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-private local instance : MeasurableSpace E := borel E
-private local instance : BorelSpace E := ⟨rfl⟩
-private local instance : MeasurableSpace M := borel M
-private local instance : BorelSpace M := ⟨rfl⟩
-
-private lemma exists_eLpNorm_chartPou_mul_sqrt_slotCorrection_per_direction
-    (h_atlas : HasLocallyConstantChartAt H M)
-    (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
-    (j : Fin (Module.finrank ℝ E)) :
-    ∃ C : ℝ, 0 ≤ C ∧
-      ∀ (S : SmoothCcTensorH1 g r s),
-        eLpNorm
-            (fun b : M =>
-              ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) b *
-                Real.sqrt
-                  ((∑ k : Fin r,
-                      ‖chartTensorRSInputSlotCorrection (I := I) r s g α
-                          (fun b' => S.toCcTensor.toSection b')
-                          (chartBasisVecFiber (I := I) α j) b k‖ ^ 2) +
-                    (∑ l : Fin s,
-                      ‖chartTensorRSOutputSlotCorrection (I := I) r s g α
-                          (fun b' => S.toCcTensor.toSection b')
-                          (chartBasisVecFiber (I := I) α j) b l‖ ^ 2)))
-            2 (riemannianVolumeMeasure (I := I) (M := M) g) ≤
-          ENNReal.ofReal C * (‖S‖₊ : ℝ≥0∞) := by
-  classical
-  obtain ⟨M_F_in, hM_F_in_nn, hM_F_in_le⟩ :=
-    chartTensorRSInputSlotCorrection_norm_le_const_on_pouTsupport
-      (I := I) (M := M) h_atlas g r s α
-  obtain ⟨M_F_out, hM_F_out_nn, hM_F_out_le⟩ :=
-    chartTensorRSOutputSlotCorrection_norm_le_const_on_pouTsupport
-      (I := I) (M := M) h_atlas g r s α
-  set M_F : ℝ := max M_F_in M_F_out with hM_F_def
-  have hM_F_nn : 0 ≤ M_F := le_max_of_le_left hM_F_in_nn
-  have hM_F_in_le' : M_F_in ≤ M_F := le_max_left _ _
-  have hM_F_out_le' : M_F_out ≤ M_F := le_max_right _ _
-  have hM_F_input :
-      ∀ (S : SmoothCcTensor g r s) {b : M},
-        b ∈ tsupport (fun x : M =>
-            ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) →
-        ∀ k : Fin r,
-          ‖chartTensorRSInputSlotCorrection (I := I) r s g α
-              (fun b' => S.toSection b') (chartBasisVecFiber (I := I) α j) b k‖ ≤
-            M_F * ‖S.toSection b‖ := by
-    intro S b hb k
-    have h_orig :=
-      hM_F_in_le (fun b' => S.toSection b') (b := b) hb j k
-    have h_factor : M_F_in * ‖S.toSection b‖ ≤ M_F * ‖S.toSection b‖ :=
-      mul_le_mul_of_nonneg_right hM_F_in_le' (norm_nonneg _)
-    exact h_orig.trans h_factor
-  have hM_F_output :
-      ∀ (S : SmoothCcTensor g r s) {b : M},
-        b ∈ tsupport (fun x : M =>
-            ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) →
-        ∀ l : Fin s,
-          ‖chartTensorRSOutputSlotCorrection (I := I) r s g α
-              (fun b' => S.toSection b') (chartBasisVecFiber (I := I) α j) b l‖ ≤
-            M_F * ‖S.toSection b‖ := by
-    intro S b hb l
-    have h_orig :=
-      hM_F_out_le (fun b' => S.toSection b') (b := b) hb j l
-    have h_factor : M_F_out * ‖S.toSection b‖ ≤ M_F * ‖S.toSection b‖ :=
-      mul_le_mul_of_nonneg_right hM_F_out_le' (norm_nonneg _)
-    exact h_orig.trans h_factor
-  obtain ⟨K_S, hK_S_nn, hK_S_bound⟩ :=
-    norm_section_sq_le_const_mul_tensorInnerPointwise_on_pouTsupport
-      (I := I) (M := M) h_atlas g r s α
-  exact
-    exists_eLpNorm_chartPou_mul_sqrt_chart_christoffel_correction_le_const_mul_h1Norm
-      (I := I) (M := M) g r s α (chartBasisVecFiber (I := I) α j)
-      hM_F_nn hM_F_input hM_F_output hK_S_nn hK_S_bound
-
-/-- **Unconditional `L²` bound on the partition-of-unity-weighted Christoffel
-slot-correction sum.** -/
-theorem exists_eLpNorm_sq_pou_mul_sqrt_sum_christoffel_correction_le_const_mul_h1NormSq
-    (h_atlas : HasLocallyConstantChartAt H M)
-    (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
-    (j : Fin (Module.finrank ℝ E)) :
-    ∃ C : ℝ, 0 ≤ C ∧
-      ∀ (S : SmoothCcTensorH1 g r s),
-        eLpNorm
-            (fun b : M =>
-              ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) b *
-                Real.sqrt
-                  ((∑ k : Fin r,
-                      ‖chartTensorRSInputSlotCorrection (I := I) r s g α
-                          (fun b' => S.toCcTensor.toSection b')
-                          (chartBasisVecFiber (I := I) α j) b k‖ ^ 2) +
-                    (∑ l : Fin s,
-                      ‖chartTensorRSOutputSlotCorrection (I := I) r s g α
-                          (fun b' => S.toCcTensor.toSection b')
-                          (chartBasisVecFiber (I := I) α j) b l‖ ^ 2)))
-            2 (riemannianVolumeMeasure (I := I) (M := M) g) ≤
-          ENNReal.ofReal C * (‖S‖₊ : ℝ≥0∞) :=
-  exists_eLpNorm_chartPou_mul_sqrt_slotCorrection_per_direction
-    (I := I) (M := M) h_atlas g r s α j
-
-end ChristoffelAtoms
 
 /-! ## `AEStronglyMeasurable` companions for the `raw²` and Christoffel atoms -/
 
@@ -1751,15 +1640,12 @@ theorem exists_eLpNorm_pou_mul_sum_fiber_chart_cov_le_const_mul_h1Norm_unconditi
 
 end CovariantAtomsRiemannian
 
-/-! ## Riemannian-fibre-norm Christoffel slot-correction atom `L²` bound (HLCC-free)
+/-! ## Riemannian-fibre-norm Christoffel slot-correction atom `L²` bound
 
-This section twins the locality-conditioned model-norm Christoffel slot-correction
-atom `exists_eLpNorm_sq_pou_mul_sqrt_sum_christoffel_correction_le_const_mul_h1NormSq`
-in the **intrinsic Riemannian fibre norm**, dropping the chart-locality predicate.
+This section provides the model-free Christoffel slot-correction atom `L²` bound
+in the **intrinsic Riemannian fibre norm**.
 
-The two model-norm slot operator-norm bounds
-(`chartTensorRS{Input,Output}SlotCorrection_norm_le_const_on_pouTsupport`,
-which carry `HasLocallyConstantChartAt`) are replaced by their unconditional
+The model-norm slot operator-norm bounds are replaced by their unconditional
 Riemannian-fibre-norm counterparts, derived here from:
 
 * the honest model-space Christoffel-correction bound
@@ -2375,14 +2261,12 @@ attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 /-- **Unconditional Riemannian-fibre-norm Christoffel slot-correction atom `L²`
-bound.** The intrinsic-fibre-norm twin of
-`exists_eLpNorm_sq_pou_mul_sqrt_sum_christoffel_correction_le_const_mul_h1NormSq`,
-with the `HasLocallyConstantChartAt` predicate removed. The per-`α` per-direction
+bound.** The per-`α` per-direction
 `L²` norm of the partition-of-unity-weighted square-root of the Euclidean sum of
 squared **Riemannian fibre norms** of the chart-frame input / output slot
 Christoffel corrections is bounded by `ENNReal.ofReal C · ‖S‖₊`, with `C`
 depending only on `(g, r, s, α, j)`. -/
-theorem exists_eLpNorm_sq_pou_mul_sqrt_sum_christoffel_correction_le_const_mul_h1NormSq_unconditional
+theorem exists_eLpNorm_sq_pou_mul_sqrt_sum_christoffel_correction_le_const_mul_h1NormSq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (j : Fin (Module.finrank ℝ E)) :
     letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=

@@ -8,7 +8,7 @@ import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckPrincipalPart
 # Design of the Ricci–DeTurck nonlinearity on the spectral Sobolev scale
 
 The quasilinear strong-existence engine
-`quasilinear_strong_existence_ofCompact`
+`quasilinear_strong_existence`
 (`Analysis/Parabolic/QuasiLinear/MaxRegFixedPoint.lean`) consumes a
 nonlinearity
 
@@ -44,10 +44,10 @@ field.
 The realization splits into two maps of very different difficulty:
 
 * **`H^{a+2} → TensorL2`** — *available, chart-locality-free*: the
-  inclusion `tensorHsToL2_ofCompact` (re-exported below as `realizeToL2`)
+  inclusion `tensorHsToL2` (re-exported below as `realizeToL2`)
   reconstructs the `L²` tensor with the prescribed eigenbasis coordinates
   via the inverse Hilbert-basis representation against
-  `tensorResolventHilbertEigenbasisSigma_ofCompact`.  It is linear,
+  `tensorResolventHilbertEigenbasisSigma`.  It is linear,
   continuous, norm-non-increasing, and needs no chart-locality witness.
 
 * **`TensorL2 → SmoothRiemannianMetric`** — *the gate, NOT available*:
@@ -127,7 +127,7 @@ def realizeToL2 (g_bg : SmoothRiemannianMetric I M) (a : ℕ)
       (tensorResolventL2 (I := I) (M := M) g_bg 0 2)) :
     tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 2) →L[ℝ]
       TensorL2 0 2 g_bg :=
-  tensorHsToL2_ofCompact (I := I) (M := M) (g := g_bg) (r := 0) (s := 2)
+  tensorHsToL2 (I := I) (M := M) (g := g_bg) (r := 0) (s := 2)
     h_compact (by have : (0 : ℝ) ≤ (a : ℝ) := Nat.cast_nonneg a; linarith)
 
 /-- `realizeToL2` is norm-non-increasing: its operator norm is `≤ 1`. -/
@@ -135,7 +135,7 @@ theorem realizeToL2_opNorm_le_one (g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (h_compact : IsCompactOperator
       (tensorResolventL2 (I := I) (M := M) g_bg 0 2)) :
     ‖realizeToL2 (I := I) (M := M) g_bg a h_compact‖ ≤ 1 :=
-  tensorHsToL2_ofCompact_opNorm_le_one (I := I) (M := M)
+  tensorHsToL2_opNorm_le_one (I := I) (M := M)
     (g := g_bg) (r := 0) (s := 2)
     (by have : (0 : ℝ) ≤ (a : ℝ) := Nat.cast_nonneg a; linarith)
 
@@ -147,9 +147,9 @@ coordinate of `u`: the realization is faithful on coordinates. -/
       (tensorResolventL2 (I := I) (M := M) g_bg 0 2))
     (u : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 2))
     (i : TensorEigenIdx (I := I) (M := M) g_bg 0 2) :
-    tensorL2Coeff_ofCompact (I := I) (M := M) h_compact
+    tensorL2Coeff (I := I) (M := M) h_compact
         (realizeToL2 (I := I) (M := M) g_bg a h_compact u) i = u.coeff i :=
-  tensorHsToL2_ofCompact_tensorL2Coeff_ofCompact (I := I) (M := M)
+  tensorHsToL2_tensorL2Coeff (I := I) (M := M)
     (by have : (0 : ℝ) ≤ (a : ℝ) := Nat.cast_nonneg a; linarith) u i
 
 /-- The realization-to-`L²` map sends `0` to `0` (it is linear). -/
@@ -206,7 +206,7 @@ If the geometric remainder is realized as a continuous linear map
 then composing with `firstOrderRemainderInclusion` produces a continuous
 linear map `H^{a+2} →L[ℝ] H^a` into the engine's codomain, with operator
 norm bounded by `‖R‖`.  This confirms the codomain bookkeeping demanded by
-`quasilinear_strong_existence_ofCompact` (which needs `N : H^{a+2} → H^a`):
+`quasilinear_strong_existence` (which needs `N : H^{a+2} → H^a`):
 the loss of one derivative places the output in `H^{a+1} ⊆ H^a`. -/
 theorem firstOrderRemainder_lands_in_Ha
     (g_bg : SmoothRiemannianMetric I M) (a : ℕ)

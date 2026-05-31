@@ -63,7 +63,7 @@ theorem deturck_solution_c2_continuous_icc0
         (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
           (I := I) (M := M) g_bg 0 2),
       (u s).coeff i
-        = tensorL2Coeff_ofCompact (I := I) (M := M) (hCompact (I := I) (M := M) g_bg)
+        = tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g_bg)
             (Integral.L2.SmoothCcTensor.toL2 (T_s s)) i)
     -- The chart-`2`-jet time-continuity of the Gram entries of the LINEAR realize
     -- `g_DT` on the Levi-Civita good set.  This is the `Hᵃ ↪ C²` Sobolev-embedding

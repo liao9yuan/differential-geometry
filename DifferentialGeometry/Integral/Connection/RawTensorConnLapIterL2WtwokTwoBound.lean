@@ -21,17 +21,7 @@ order-zero chart-Sobolev L² bound for `rawTensorConnLap`).
 * `rawTensorConnLapIter_succ` — the `(k+1)`-th iterate equals the one-step
   bundled connection Laplacian of the `k`-th iterate.
 * `rawTensorConnLapSmooth_toSection_apply` — the underlying section value at
-  `x` agrees with `rawTensorConnLap`.
-* `rawTensorConnLapIter_L2NormSq_le_wtwokTwoNorm_sq_one` — for `k = 1`, the
-  `L²` norm squared of the iterate is bounded by a non-negative constant
-  times `(wtwokTwoNorm g 1 T)²` (the bundled form of the chart-Sobolev L²
-  bound).
-
-The general-`k` headline `rawTensorConnLapIter_L2NormSq_le_wtwokTwoNorm_sq`
-requires a higher-order chart-Sobolev bound asserting that, for each `m ≥ 0`,
-`wtwokTwoNorm g m (rawTensorConnLapSmooth g r s T) ≤ K_m · wtwokTwoNorm g (m+1) T`.
-That higher-order extension is not built in this file. The `k = 0` and
-`k = 1` headlines below are unconditional. -/
+  `x` agrees with `rawTensorConnLap`. -/
 
 noncomputable section
 
@@ -121,103 +111,8 @@ lemma rawTensorConnLapIter_one
     rawTensorConnLapIter (I := I) g r s 1 T =
       rawTensorConnLapSmooth (I := I) g r s T := rfl
 
--- The k = 0 bound is non-trivial in general (it asserts that the L² norm of
--- `T` is controlled by `wtwokTwoNorm g 0 T`). We do not develop this lemma
--- here; the k = 1 case below is the one that follows directly from the
--- existing chart-Sobolev L² bound on `rawTensorConnLap`.
-
-/-! ## Step case `k = 1`: direct application of the chart-Sobolev L² bound
-on `rawTensorConnLap`. -/
-
-/-- **L² bound on the first iterate.** For `k = 1`, the iterate is
-`rawTensorConnLapSmooth g r s T`, whose underlying section value is
-`rawTensorConnLap g r s T`. The chart-Sobolev L² bound
-`rawTensorConnLap_L2NormSq_le_wtwokTwoNorm_sq` then gives the headline.
-
-The constant `C` is non-negative; it depends on the metric `g`, the chart
-atlas (via the locality hypotheses), and the ranks `(r, s)`. -/
-theorem rawTensorConnLapIter_L2NormSq_le_wtwokTwoNorm_sq_one
-    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
-    (h_atlas_strong :
-        DifferentialGeometry.Geometry.HasChartSourceConsistentChartAt H M)
-    (g : SmoothRiemannianMetric I M) (r s : ℕ) :
-    ∃ C : ℝ, 0 ≤ C ∧
-      ∀ (T : SmoothCcTensor g r s),
-        (letI : MeasurableSpace M := borel M
-         haveI : BorelSpace M := ⟨rfl⟩
-         Measurable (fun x : M =>
-            ‖(rawTensorConnLapIter (I := I) g r s 1 T).toSection x‖ ^ 2)) →
-        ∫⁻ x,
-            (‖(rawTensorConnLapIter (I := I) g r s 1 T).toSection x‖ₑ
-                : ℝ≥0∞) ^ 2
-            ∂(riemannianVolumeMeasure (I := I) (M := M) g) ≤
-          ENNReal.ofReal C *
-            (wtwokTwoNorm (I := I) (M := M) g 1 T) ^ 2 := by
-  classical
-  -- Invoke the chart-Sobolev L² bound on `rawTensorConnLap`.
-  obtain ⟨C, hC_nn, hbound⟩ :=
-    rawTensorConnLap_L2NormSq_le_wtwokTwoNorm_sq (I := I) (M := M)
-      h_atlas h_atlas_strong g r s
-  refine ⟨C, hC_nn, ?_⟩
-  intro T hmeas
-  -- Rewrite the iterate as `rawTensorConnLapSmooth` and then unfold its
-  -- underlying section to `rawTensorConnLap`.
-  have h_iter_section : ∀ x : M,
-      (rawTensorConnLapIter (I := I) g r s 1 T).toSection x =
-        rawTensorConnLap (I := I) g r s
-          (fun z : M => T.toSection z) x := by
-    intro x
-    rw [rawTensorConnLapIter_one]
-    exact rawTensorConnLapSmooth_toSection_apply (I := I) g r s T x
-  -- Equality of the squared-norm integrand functions on `M`.
-  have h_fun_eq :
-      (fun x : M => (‖(rawTensorConnLapIter (I := I) g r s 1 T).toSection x‖ₑ
-            : ℝ≥0∞) ^ 2) =
-      (fun x : M => (‖rawTensorConnLap (I := I) g r s
-            (fun z : M => T.toSection z) x‖ₑ : ℝ≥0∞) ^ 2) := by
-    funext x
-    rw [h_iter_section x]
-  -- Same for the squared `‖·‖` measurability hypothesis input.
-  have h_meas_eq :
-      (fun x : M =>
-          ‖(rawTensorConnLapIter (I := I) g r s 1 T).toSection x‖ ^ 2) =
-      (fun x : M =>
-          ‖rawTensorConnLap (I := I) g r s
-            (fun z : M => T.toSection z) x‖ ^ 2) := by
-    funext x
-    rw [h_iter_section x]
-  letI : MeasurableSpace M := borel M
-  haveI : BorelSpace M := ⟨rfl⟩
-  have hmeas' :
-      Measurable (fun x : M =>
-          ‖rawTensorConnLap (I := I) g r s
-            (fun z : M => T.toSection z) x‖ ^ 2) := by
-    rw [← h_meas_eq]; exact hmeas
-  have h_integral_eq :
-      ∫⁻ x,
-          (‖(rawTensorConnLapIter (I := I) g r s 1 T).toSection x‖ₑ : ℝ≥0∞) ^ 2
-          ∂(riemannianVolumeMeasure (I := I) (M := M) g) =
-      ∫⁻ x,
-          (‖rawTensorConnLap (I := I) g r s
-              (fun z : M => T.toSection z) x‖ₑ : ℝ≥0∞) ^ 2
-          ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
-    refine lintegral_congr ?_
-    intro x
-    rw [h_iter_section x]
-  rw [h_integral_eq]
-  exact hbound T hmeas'
-
 end Connection
 end Integral
 end DifferentialGeometry
 
 end
-
-section Sanity
-#print axioms
-  DifferentialGeometry.Integral.Connection.rawTensorConnLapIter_zero
-#print axioms
-  DifferentialGeometry.Integral.Connection.rawTensorConnLapIter_succ
-#print axioms
-  DifferentialGeometry.Integral.Connection.rawTensorConnLapIter_L2NormSq_le_wtwokTwoNorm_sq_one
-end Sanity

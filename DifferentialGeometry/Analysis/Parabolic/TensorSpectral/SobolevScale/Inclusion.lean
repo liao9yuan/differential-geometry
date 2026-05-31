@@ -13,9 +13,8 @@ weighted square-summability at `σ` implies it at any `τ ≤ σ`, and the
 
 This file constructs the continuous linear inclusion
 `tensorHsInclusion`, proves it is a coordinate-preserving contraction
-(operator norm `≤ 1`) and injective, establishes its functoriality
-(identity at `τ = σ`, composition for `ρ ≤ τ ≤ σ`), and shows it is
-compatible with the `L²` inclusion `tensorHsToL2`.
+(operator norm `≤ 1`) and injective, and establishes its functoriality
+(identity at `τ = σ`, composition for `ρ ≤ τ ≤ σ`).
 
 Finally, it proves that the finitely-supported coordinate families —
 equivalently, finite linear combinations of the spectral basis vectors
@@ -37,8 +36,6 @@ diagonal rescaling isometry `rescaleEquivL2`.
   a norm-non-increasing contraction.
 * `tensorHsInclusion_injective` — it is injective.
 * `tensorHsInclusion_refl`, `tensorHsInclusion_trans` — functoriality.
-* `tensorHsToL2_comp_tensorHsInclusion` — the `L²` inclusion factors
-  through any intermediate `Hᵗ`.
 * `tensorHs_hasSum_smul_basisVec` — every `T ∈ Hˢ` is the unconditional
   sum `∑ᵢ (coeff i T) • bᵢ` of its spectral basis components.
 * `tensorHsFiniteSupportSubmodule_dense` — the finitely-supported
@@ -94,7 +91,6 @@ then `(1+λᵢ)^τ ≤ (1+λᵢ)^σ` gives `∑ᵢ (1+λᵢ)^τ cᵢ² < ∞`. -
 namespace tensorHs
 
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
-  {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M}
 
 /-- For `τ ≤ σ`, the coordinate family of an `Hˢ` element is
 weighted-square-summable at the smaller exponent `τ`. -/
@@ -291,93 +287,6 @@ theorem tensorHsInclusion_trans_apply {g : SmoothRiemannianMetric I M}
   ext i
   simp only [tensorHsInclusion_coeff_apply]
 
-/-! ## Compatibility with the `L²` inclusion `tensorHsToL2`
-
-For `0 ≤ τ ≤ σ`, the inclusion `Hˢ → TensorL2` factors through any
-intermediate `Hᵗ`: `tensorHsToL2 hτ ∘ tensorHsInclusion hτσ`
-agrees with `tensorHsToL2 hσ`. Both sides are coordinate-preserving, so
-they agree once the `L²` eigenbasis coordinates match. -/
-
-/-- For `0 ≤ τ ≤ σ`, the `L²` inclusion of `Hˢ` factors through `Hᵗ`:
-`tensorHsToL2 hτ ∘ tensorHsInclusion hτσ = tensorHsToL2 hσ`. -/
-theorem tensorHsToL2_comp_tensorHsInclusion
-    {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M} {τ σ : ℝ}
-    (hτ : 0 ≤ τ) (hτσ : τ ≤ σ) :
-    (tensorHsToL2 (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas hτ).comp
-        (tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s) hτσ) =
-      tensorHsToL2 (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas (hτ.trans hτσ) := by
-  -- Both `L²` images have the same eigenbasis coordinates; the
-  -- eigenbasis representation is injective.
-  ext T
-  refine (tensorResolventHilbertEigenbasisSigma
-    (I := I) (M := M) h_atlas).repr.injective ?_
-  ext i
-  have hlhs : ((tensorResolventHilbertEigenbasisSigma
-        (I := I) (M := M) h_atlas).repr
-      ((tensorHsToL2 (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas hτ).comp
-        (tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s) hτσ) T)) i =
-      T.coeff i := by
-    have h := tensorHsToL2_tensorL2Coeff
-        (I := I) (M := M) (h_atlas := h_atlas) hτ
-      (tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s) hτσ T) i
-    rw [tensorHsInclusion_coeff_apply] at h
-    simpa only [ContinuousLinearMap.coe_comp', Function.comp_apply,
-      tensorL2Coeff] using h
-  have hrhs : ((tensorResolventHilbertEigenbasisSigma
-        (I := I) (M := M) h_atlas).repr
-      (tensorHsToL2 (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas (hτ.trans hτσ) T)) i =
-      T.coeff i := by
-    have h := tensorHsToL2_tensorL2Coeff
-      (I := I) (M := M) (h_atlas := h_atlas)
-      (hτ.trans hτσ) T i
-    simpa only [tensorL2Coeff] using h
-  rw [hlhs, hrhs]
-
-/-- For `0 ≤ τ ≤ σ`, the `L²` inclusion of `Hˢ` factors through `Hᵗ`,
-applied form. -/
-theorem tensorHsToL2_tensorHsInclusion {g : SmoothRiemannianMetric I M}
-    {r s : ℕ} {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M}
-    {τ σ : ℝ} (hτ : 0 ≤ τ) (hτσ : τ ≤ σ)
-    (T : tensorHs (I := I) (M := M) g r s σ) :
-    tensorHsToL2 (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas hτ
-        (tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s) hτσ T) =
-      tensorHsToL2 (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas (hτ.trans hτσ) T := by
-  have h := tensorHsToL2_comp_tensorHsInclusion (I := I) (M := M)
-    (g := g) (r := r) (s := s) (h_atlas := h_atlas) hτ hτσ
-  exact congrArg (fun L => L T) h
-
-/-- For `0 ≤ σ`, the `L²` inclusion `tensorHsToL2` factors as the
-inclusion `Hˢ → H⁰` followed by the isometric identification
-`H⁰ ≃ₗᵢ TensorL2`. -/
-theorem tensorHsZeroEquivL2_comp_tensorHsInclusion_zero
-    {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M} {σ : ℝ}
-    (hσ : 0 ≤ σ) (T : tensorHs (I := I) (M := M) g r s σ) :
-    tensorHsZeroEquivL2 (I := I) (M := M) h_atlas
-        (tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s) hσ T) =
-      tensorHsToL2 (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas hσ T := by
-  -- Compare `L²` eigenbasis coordinates: both equal `T.coeff`.
-  refine (tensorResolventHilbertEigenbasisSigma
-    (I := I) (M := M) h_atlas).repr.injective ?_
-  ext i
-  have hlhs : ((tensorResolventHilbertEigenbasisSigma
-        (I := I) (M := M) h_atlas).repr
-      (tensorHsZeroEquivL2 (I := I) (M := M) h_atlas
-        (tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s) hσ T))) i =
-      T.coeff i := by
-    have h := tensorHsZeroEquivL2_tensorL2Coeff (I := I) (M := M)
-      h_atlas (tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s) hσ T) i
-    rw [tensorHsInclusion_coeff_apply] at h
-    simpa only [tensorL2Coeff] using h
-  have hrhs : ((tensorResolventHilbertEigenbasisSigma
-        (I := I) (M := M) h_atlas).repr
-      (tensorHsToL2 (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas hσ T)) i = T.coeff i := by
-    have h := tensorHsToL2_tensorL2Coeff
-      (I := I) (M := M) (h_atlas := h_atlas) hσ T i
-    simpa only [tensorL2Coeff] using h
-  rw [hlhs, hrhs]
-
 /-! ## The submodule of finitely-supported elements
 
 A coordinate family with finite support is weighted-square-summable for
@@ -386,8 +295,7 @@ elements is a linear subspace of `Hˢ`, and below it is shown dense. -/
 
 namespace tensorHs
 
-variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
-  {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M} {σ : ℝ}
+variable {g : SmoothRiemannianMetric I M} {r s : ℕ} {σ : ℝ}
 
 /-- The submodule of `Hˢ` consisting of elements whose eigenbasis
 coordinate family has finite support. Equivalently, the span of the
@@ -436,8 +344,7 @@ the finitely-supported submodule is then immediate. -/
 
 namespace tensorHs
 
-variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
-  {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M} {σ : ℝ}
+variable {g : SmoothRiemannianMetric I M} {r s : ℕ} {σ : ℝ}
 
 open scoped Classical in
 /-- The rescaling isometry carries the spectral basis component

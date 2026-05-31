@@ -414,7 +414,7 @@ value lies in the spectral smooth subspace `⋂_σ Hˢ`.
 
 The single fixed `u` is realized coherently by every `Hˢ` witness because
 all witnesses have the *same* eigen-coordinate family `i ↦ perModeConv λᵢ
-(φ i) t`, and `tensorHsToL2_ofCompact` is coordinate-faithful. -/
+(φ i) t`, and `tensorHsToL2` is coordinate-faithful. -/
 theorem duhamel_into_all_tensorHs {g : SmoothRiemannianMetric I M} {r s : ℕ}
     {t : ℝ} (ht : 0 ≤ t)
     (h_compact : IsCompactOperator (tensorResolventL2
@@ -426,15 +426,15 @@ theorem duhamel_into_all_tensorHs {g : SmoothRiemannianMetric I M} {r s : ℕ}
         tensorSobolevWeight (I := I) (M := M) i c *
           ∫ s in (0 : ℝ)..t, (φ i s) ^ 2)) :
     ∃ u : TensorL2 r s g,
-      (∀ i, tensorL2Coeff_ofCompact (I := I) (M := M) h_compact u i =
+      (∀ i, tensorL2Coeff (I := I) (M := M) h_compact u i =
         perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i) (φ i) t) ∧
       ∀ σ : ℝ, ∀ hσ : 0 ≤ σ,
         ∃ v : tensorHs (I := I) (M := M) g r s σ,
-          tensorHsToL2_ofCompact (I := I) (M := M) (g := g) (r := r) (s := s)
+          tensorHsToL2 (I := I) (M := M) (g := g) (r := r) (s := s)
               h_compact hσ v = u := by
   classical
   -- The fixed `L²` element `u` with coordinates `i ↦ perModeConv λᵢ (φ i) t`.
-  set bsis := tensorResolventHilbertEigenbasisSigma_ofCompact
+  set bsis := tensorResolventHilbertEigenbasisSigma
     (I := I) (M := M) h_compact with hbsis_def
   have hval_summable :
       Summable (fun i : TensorEigenIdx (I := I) (M := M) g r s =>
@@ -458,10 +458,10 @@ theorem duhamel_into_all_tensorHs {g : SmoothRiemannianMetric I M} {r s : ℕ}
     rw [h_eq]; exact hval_summable
   set u : TensorL2 r s g := bsis.repr.symm ⟨_, hmemℓp⟩ with hu_def
   -- The coordinates of `u` are the value family.
-  have hu_coeff : ∀ i, tensorL2Coeff_ofCompact (I := I) (M := M) h_compact u i =
+  have hu_coeff : ∀ i, tensorL2Coeff (I := I) (M := M) h_compact u i =
       perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i) (φ i) t := by
     intro i
-    rw [tensorL2Coeff_ofCompact, hu_def, hbsis_def,
+    rw [tensorL2Coeff, hu_def, hbsis_def,
       LinearIsometryEquiv.apply_symm_apply]
   refine ⟨u, hu_coeff, fun σ hσ => ?_⟩
   -- The `Hˢ` witness at order `σ`: gained one derivative from forcing in
@@ -491,19 +491,19 @@ theorem duhamel_into_all_tensorHs {g : SmoothRiemannianMetric I M} {r s : ℕ}
   refine ⟨v, ?_⟩
   -- The realization of `v` matches `u`: both have the same eigenbasis
   -- coordinates `i ↦ perModeConv λᵢ (φ i) t`.  The eigenbasis representation
-  -- is injective, so matching `tensorL2Coeff_ofCompact` on every `i` suffices.
+  -- is injective, so matching `tensorL2Coeff` on every `i` suffices.
   refine bsis.repr.injective ?_
   ext i
-  -- `bsis.repr T i = tensorL2Coeff_ofCompact h_compact T i` by definition.
-  have hcoeff_lhs : (bsis.repr (tensorHsToL2_ofCompact (I := I) (M := M)
+  -- `bsis.repr T i = tensorL2Coeff h_compact T i` by definition.
+  have hcoeff_lhs : (bsis.repr (tensorHsToL2 (I := I) (M := M)
         (g := g) (r := r) (s := s) h_compact hσ v)) i =
-      tensorL2Coeff_ofCompact (I := I) (M := M) h_compact
-        (tensorHsToL2_ofCompact (I := I) (M := M) (g := g) (r := r) (s := s)
+      tensorL2Coeff (I := I) (M := M) h_compact
+        (tensorHsToL2 (I := I) (M := M) (g := g) (r := r) (s := s)
           h_compact hσ v) i := rfl
   have hcoeff_rhs : (bsis.repr u) i =
-      tensorL2Coeff_ofCompact (I := I) (M := M) h_compact u i := rfl
+      tensorL2Coeff (I := I) (M := M) h_compact u i := rfl
   rw [hcoeff_lhs, hcoeff_rhs,
-    tensorHsToL2_ofCompact_tensorL2Coeff_ofCompact
+    tensorHsToL2_tensorL2Coeff
       (I := I) (M := M) (h_compact := h_compact) hσ v i,
     hu_coeff i]
   -- `v.coeff i = vTop.coeff i = perModeConv λᵢ (φ i) t`.

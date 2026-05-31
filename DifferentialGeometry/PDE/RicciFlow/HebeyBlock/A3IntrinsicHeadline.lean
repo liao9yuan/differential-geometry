@@ -40,7 +40,7 @@ canonical bundle-trivialisation norm instances) throughout. No
 
 ## Public theorem
 
-* `exists_eLpNorm_sqrt_g_inner_gradFun_tensorChartComponentScalar_le_const_mul_h1Norm_intrinsic`
+* `exists_eLpNorm_sqrt_g_inner_gradFun_tensorChartComponentScalar_le_const_mul_h1Norm`
 -/
 
 noncomputable section
@@ -391,7 +391,7 @@ where `u_α := tensorChartComponentScalar g r s S.toCcTensor α Idx Jdx` and
 `C := √(A · C₄² + B · C₂² + C₃)` with `C₃ := B · C_bridge · (r + s) · M_F²`
 depends only on `(g, r, s, α)`. Unlike the locality-conditioned companion, no
 `HasLocallyConstantChartAt` hypothesis is required. -/
-theorem exists_eLpNorm_sqrt_g_inner_gradFun_tensorChartComponentScalar_le_const_mul_h1Norm_intrinsic
+theorem exists_eLpNorm_sqrt_g_inner_gradFun_tensorChartComponentScalar_le_const_mul_h1Norm
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (S : SmoothCcTensorH1 g r s)
@@ -1195,4 +1195,4 @@ end
 
 open DifferentialGeometry.PDE.RicciFlow.HebeyBlock in
 #print axioms
-  exists_eLpNorm_sqrt_g_inner_gradFun_tensorChartComponentScalar_le_const_mul_h1Norm_intrinsic
+  exists_eLpNorm_sqrt_g_inner_gradFun_tensorChartComponentScalar_le_const_mul_h1Norm

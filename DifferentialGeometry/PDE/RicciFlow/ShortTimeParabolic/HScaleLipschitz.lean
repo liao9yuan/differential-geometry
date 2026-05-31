@@ -94,8 +94,8 @@ theorem deturckN_hscale_lipschitz
         (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
           (I := I) (M := M) g_bg 0 2),
       (N_cont u).coeff i =
-        tensorL2Coeff_ofCompact (I := I) (M := M)
-          (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g_bg 0 2)
+        tensorL2Coeff (I := I) (M := M)
+          (tensorResolventL2_isCompactOperator (I := I) (M := M) g_bg 0 2)
           (DifferentialGeometry.Integral.L2.SmoothCcTensor.toL2 (Nsec u)) i)
     (hNsec_realize : ∀ (u : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 1))
         (x : M) (v w : TangentSpace I x),
@@ -109,15 +109,15 @@ theorem deturckN_hscale_lipschitz
       Summable (fun i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
             (I := I) (M := M) g_bg 0 2 =>
           tensorSobolevWeight (I := I) (M := M) i (a : ℝ) *
-            (tensorL2Coeff_ofCompact (I := I) (M := M)
-                (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g_bg 0 2)
+            (tensorL2Coeff (I := I) (M := M)
+                (tensorResolventL2_isCompactOperator (I := I) (M := M) g_bg 0 2)
                 (DifferentialGeometry.Integral.L2.SmoothCcTensor.toL2 (Nsec u)
                   - DifferentialGeometry.Integral.L2.SmoothCcTensor.toL2 (Nsec u')) i) ^ 2)
         ∧ (∑' i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
               (I := I) (M := M) g_bg 0 2,
             tensorSobolevWeight (I := I) (M := M) i (a : ℝ) *
-              (tensorL2Coeff_ofCompact (I := I) (M := M)
-                  (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g_bg 0 2)
+              (tensorL2Coeff (I := I) (M := M)
+                  (tensorResolventL2_isCompactOperator (I := I) (M := M) g_bg 0 2)
                   (DifferentialGeometry.Integral.L2.SmoothCcTensor.toL2 (Nsec u)
                     - DifferentialGeometry.Integral.L2.SmoothCcTensor.toL2 (Nsec u')) i) ^ 2)
             ≤ ((K : ℝ) * dist u u') ^ 2) :
@@ -129,24 +129,24 @@ theorem deturckN_hscale_lipschitz
   classical
   -- Abbreviations for the compact-resolvent witness and the coefficient extractor.
   set hcompact :=
-    tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g_bg 0 2 with hcompact_def
+    tensorResolventL2_isCompactOperator (I := I) (M := M) g_bg 0 2 with hcompact_def
   -- Unpack the weighted per-mode Lipschitz constant.
   obtain ⟨K, hK⟩ := hNsec_lip
   -- The bound holds on the whole space, so any positive radius works; pick `R = 1`.
   refine ⟨K, 1, by norm_num, ?_⟩
   -- Reduce `LipschitzOnWith` to the metric Lipschitz inequality.
   refine LipschitzOnWith.of_dist_le_mul (fun u _ u' _ => ?_)
-  -- The `tensorL2Coeff_ofCompact` extractor is additive in its `L²` argument;
+  -- The `tensorL2Coeff` extractor is additive in its `L²` argument;
   -- hence it respects subtraction.
   have hsub :
       ∀ (S T : DifferentialGeometry.Integral.L2.TensorL2 0 2 g_bg)
         (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
           (I := I) (M := M) g_bg 0 2),
-        tensorL2Coeff_ofCompact (I := I) (M := M) hcompact (S - T) i =
-          tensorL2Coeff_ofCompact (I := I) (M := M) hcompact S i
-            - tensorL2Coeff_ofCompact (I := I) (M := M) hcompact T i := by
+        tensorL2Coeff (I := I) (M := M) hcompact (S - T) i =
+          tensorL2Coeff (I := I) (M := M) hcompact S i
+            - tensorL2Coeff (I := I) (M := M) hcompact T i := by
     intro S T i
-    unfold tensorL2Coeff_ofCompact
+    unfold tensorL2Coeff
     rw [map_sub]
     rfl
   -- Pointwise: the eigenbasis coordinate of `N_cont u - N_cont u'` is the
@@ -155,7 +155,7 @@ theorem deturckN_hscale_lipschitz
       ∀ i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
         (I := I) (M := M) g_bg 0 2,
         (N_cont u - N_cont u').coeff i =
-          tensorL2Coeff_ofCompact (I := I) (M := M) hcompact
+          tensorL2Coeff (I := I) (M := M) hcompact
             (DifferentialGeometry.Integral.L2.SmoothCcTensor.toL2 (Nsec u)
               - DifferentialGeometry.Integral.L2.SmoothCcTensor.toL2 (Nsec u')) i := by
     intro i
@@ -176,7 +176,7 @@ theorem deturckN_hscale_lipschitz
             ((N_cont u - N_cont u').coeff i) ^ 2)
           = (fun i =>
               tensorSobolevWeight (I := I) (M := M) i (a : ℝ) *
-                (tensorL2Coeff_ofCompact (I := I) (M := M) hcompact
+                (tensorL2Coeff (I := I) (M := M) hcompact
                     (DifferentialGeometry.Integral.L2.SmoothCcTensor.toL2 (Nsec u)
                       - DifferentialGeometry.Integral.L2.SmoothCcTensor.toL2 (Nsec u'))
                     i) ^ 2) := by

@@ -108,7 +108,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 /-! ## The spectral-smooth-subspace membership hypothesis, abbreviated
 
 The gate hypothesis `SpectralSmoothRealizesAsSmooth` asks that an `L²` tensor `u`
-lie, via the chart-locality-free inclusion `tensorHsToL2_ofCompact`, in every
+lie, via the chart-locality-free inclusion `tensorHsToL2`, in every
 `Hˢ`. We abbreviate that hypothesis on a fixed `u`. -/
 
 /-- **Gate membership.** `MemAllTensorHs g r s u` holds when, for every exponent
@@ -119,15 +119,15 @@ def MemAllTensorHs (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (u : TensorL2 r s g) : Prop :=
   ∀ σ : ℝ, ∀ hσ : 0 ≤ σ,
     ∃ v : tensorHs (I := I) (M := M) g r s σ,
-      tensorHsToL2_ofCompact (I := I) (M := M) (g := g) (r := r) (s := s)
-          (tensorResolventL2_isCompactOperator_intrinsic
+      tensorHsToL2 (I := I) (M := M) (g := g) (r := r) (s := s)
+          (tensorResolventL2_isCompactOperator
             (I := I) (M := M) g r s) hσ v = u
 
 /-! ## Coordinate faithfulness of the gate hypothesis
 
-The chart-locality-free coordinate functional `tensorL2Coeff_ofCompact` reads off
+The chart-locality-free coordinate functional `tensorL2Coeff` reads off
 the eigenbasis coordinate of an `L²` element. By
-`tensorHsToL2_ofCompact_tensorL2Coeff_ofCompact`, the coordinate of the inclusion
+`tensorHsToL2_tensorL2Coeff`, the coordinate of the inclusion
 of an `Hˢ` element `v` is `v.coeff`. Consequently, any `Hˢ` witness of a fixed
 `u` has coordinate family forced to equal `spectralCoeff g r s u`. -/
 
@@ -138,16 +138,16 @@ of an `Hˢ` element `v` is `v.coeff`. Consequently, any `Hˢ` witness of a fixed
 theorem gateWitness_coeff_eq (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (u : TensorL2 r s g) {σ : ℝ} (hσ : 0 ≤ σ)
     (v : tensorHs (I := I) (M := M) g r s σ)
-    (hv : tensorHsToL2_ofCompact (I := I) (M := M) (g := g) (r := r) (s := s)
-        (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s)
+    (hv : tensorHsToL2 (I := I) (M := M) (g := g) (r := r) (s := s)
+        (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s)
         hσ v = u)
     (i : TensorSpectral.TensorEigenIdx (I := I) (M := M) g r s) :
     v.coeff i = spectralCoeff (I := I) (M := M) g r s u i := by
   -- The coordinate of `inclusion v` equals `v.coeff i`.
   have h :=
-    tensorHsToL2_ofCompact_tensorL2Coeff_ofCompact
+    tensorHsToL2_tensorL2Coeff
       (I := I) (M := M)
-      (h_compact := tensorResolventL2_isCompactOperator_intrinsic
+      (h_compact := tensorResolventL2_isCompactOperator
         (I := I) (M := M) g r s) hσ v i
   -- Rewriting `inclusion v = u` turns the LHS into the coordinate of `u`.
   rw [hv] at h
@@ -196,7 +196,7 @@ theorem gateWitness_zero_coeff_eq (g : SmoothRiemannianMetric I M) (r s : ℕ)
 
 When the spectral coordinate family of `u` is finitely supported, the `σ = 0`
 witness is a finitely-supported `H⁰` element, so its unconditional spectral
-smooth representative `tensorHsSmoothRepr_unconditional` is a genuine
+smooth representative `tensorHsSmoothRepr` is a genuine
 `SmoothCcTensor` realizing `u`. -/
 
 /-- **Smooth realization of a finitely-supported gate element.** If `u` lies in
@@ -216,8 +216,8 @@ theorem spectralSmooth_realizesAsSmooth_of_finite_support'
   have hv₀_fs : (Function.support v₀.coeff).Finite := by
     rw [h_coeff]; exact hu_fs
   -- The unconditional spectral smooth representative of `v₀` realizes `u`.
-  refine ⟨tensorHsSmoothRepr_unconditional (I := I) (M := M) v₀ hv₀_fs, ?_⟩
-  rw [tensorHsSmoothRepr_toL2_unconditional (I := I) (M := M)
+  refine ⟨tensorHsSmoothRepr (I := I) (M := M) v₀ hv₀_fs, ?_⟩
+  rw [tensorHsSmoothRepr_toL2 (I := I) (M := M)
     (le_refl (0 : ℝ)) v₀ hv₀_fs]
   exact hv₀
 
@@ -241,9 +241,9 @@ gate to it. -/
 exists a spectral exponent `σ ≥ 0` and a constant `C ≥ 0` such that for every
 finitely-supported spectral element `T : tensorHs g r s σ`, the tensor
 `W^{2k,2}` norm of its unconditional smooth representative
-`tensorHsSmoothRepr_unconditional T` is bounded by `C · ‖T‖`:
+`tensorHsSmoothRepr T` is bounded by `C · ‖T‖`:
 ```
-(wtwokTwoNorm g k (tensorHsSmoothRepr_unconditional T)).toReal ≤ C · ‖T‖.
+(wtwokTwoNorm g k (tensorHsSmoothRepr T)).toReal ≤ C · ‖T‖.
 ```
 This is the chart-locality-free iterated elliptic-regularity / Gårding estimate
 on the dense finite-support subspace, the sole remaining analytic input for the
@@ -254,13 +254,13 @@ def IteratedGardingExtensionBound (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∀ (T : tensorHs (I := I) (M := M) g r s σ)
       (hT_fs : (Function.support T.coeff).Finite),
       (wtwokTwoNorm (I := I) (M := M) g k
-          (tensorHsSmoothRepr_unconditional (I := I) (M := M) T hT_fs)).toReal ≤
+          (tensorHsSmoothRepr (I := I) (M := M) T hT_fs)).toReal ≤
         C * ‖T‖
 
 /-! ## The eigenvalue-tail summability input and the explicit `ℓ¹` control
 
 The on-disk per-eigenvector quantitative chart-Sobolev bound
-`tensorHsSmoothRepr_wtwokTwoNorm_le_uniform_unconditional` controls the
+`tensorHsSmoothRepr_wtwokTwoNorm_le_uniform` controls the
 `W^{2k,2}` norm of a finite-support smooth representative by the explicit finite
 `ℓ¹` sum `∑_{i ∈ supp} |cᵢ| · (1 + λᵢ)^{2k+1}`. To turn this into a *spectral*
 norm bound (the `IteratedGardingExtensionBound` predicate) one needs the
@@ -454,7 +454,7 @@ def TensorSuperCriticalReconstruct (g : SmoothRiemannianMetric I M) (r s : ℕ) 
 `Hˢ`) has all its canonical Euclidean chart components in `MemWkpChart g (2k) 2`
 for every order `k`. This is the all-orders spectral→chart elliptic embedding —
 the generalization to general (infinite-support) elements of the per-eigenvector
-unconditional bound `eigenvector_chartComponent_memWkp_arbitrary_unconditional`.
+unconditional bound `eigenvector_chartComponent_memWkp_arbitrary`.
 Its order-`2` instance is the documented open `Order2NormEquivOnSmooth`. -/
 def SpectralChartRegularity (g : SmoothRiemannianMetric I M) (r s : ℕ) : Prop :=
   ∀ u : TensorL2 r s g, MemAllTensorHs (I := I) (M := M) g r s u →
