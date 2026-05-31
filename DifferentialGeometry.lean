@@ -465,6 +465,7 @@ import DifferentialGeometry.Geometry.Riemannian.Exponential.FinalClosure
 import DifferentialGeometry.Geometry.Riemannian.Exponential.InverseManifoldChain
 import DifferentialGeometry.Geometry.Riemannian.Exponential.IntrinsicExp
 import DifferentialGeometry.Geometry.Riemannian.Exponential.IntrinsicExpContinuity
+import DifferentialGeometry.Geometry.Riemannian.Exponential.IntrinsicMfderivAtZero
 import DifferentialGeometry.Geometry.Riemannian.Exponential.LocalDiffeomorphism
 import DifferentialGeometry.Geometry.Riemannian.Exponential.MfderivAtZero
 import DifferentialGeometry.Geometry.Riemannian.Exponential.MinimizingGeodesic

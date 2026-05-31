@@ -70,7 +70,7 @@ All theorems are formulated on a generic Banach space `E`; `[InnerProductSpace �
 noncomputable section
 
 open Set Function Filter Metric Asymptotics Real
-open scoped Topology NNReal
+open scoped Topology NNReal ContDiff
 
 namespace DifferentialGeometry
 namespace Analysis
@@ -2274,6 +2274,122 @@ theorem exists_contDiffOn_flow_C2
   obtain ⟨U, hU1, hU2, hU3⟩ :=
     exists_contDiffOn_flow_Cnat hΦ (n := 2) (by norm_num) (by exact_mod_cast hf) ht₀ hr
   exact ⟨U, hU1, hU2, by exact_mod_cast hU3⟩
+
+/-! ## Uniform-radius all-orders (`C^∞`) flow regularity
+
+The per-order headline `exists_contDiffOn_flow_Cnat` produces, at order `n`, an open
+neighbourhood `U_n` **whose radius depends on `n`** (the augmented-flow recursion caps the
+flow box to fit inside the prior-order regularity neighbourhood, so the ball shrinks as `n`
+grows).  Consequently it cannot deliver `ContDiffOn ℝ ∞ Φ` on a single fixed domain.
+
+The fixed-domain engine `contDiffOn_flow_of_spatial_smooth_seq`, by contrast, takes the box
+radius `(ρ, T)` as an **input** and returns `ContDiffOn ℝ (k : ℕ∞) Φ` on that *same* box for
+any finite `k`.  Its only order-dependent hypothesis is the joint `C^j` smoothness of the
+canonical spatial piece `spatialPieceFn Φ` (the spatial restriction of `fderiv ℝ Φ`) on the
+fixed box, for each level `j < k`; the coproduct identity for `fderiv ℝ Φ` is
+order-independent (`fderiv_flow_eq_coprod_spatialPiece`, needing only `C^1` of `f`).
+
+Therefore, supplying the spatial-piece smoothness at **all** finite orders on one fixed box
+upgrades the conclusion to `ContDiffOn ℝ ∞ Φ` on that same box.  The all-orders spatial-piece
+hypothesis is the genuine "smooth dependence on parameters of the variational linear ODE"
+content; it is *not* a repackaging of the conclusion (it concerns `spatialPieceFn Φ`, a
+different function, and at each finite order is one regularity level below the conclusion).
+This mirrors the conditional finite-order headline
+`contDiffOn_flow_of_isLocalFlow_of_contDiff_general`. -/
+
+omit [FiniteDimensional ℝ E] in
+/-- **Uniform-radius all-orders (`C^∞`) flow regularity on a fixed box.**
+
+Given the standard three-layer nesting / bound data for a local flow `Φ` of a jointly
+`C^∞` field `f`, together with the joint `C^j` smoothness of the spatial piece
+`spatialPieceFn Φ` on the **fixed** box `ball x₀ ρ ×ˢ Ioo (t₀ - T) (t₀ + T)` at *every*
+finite order `j`, the flow `Φ` is jointly `C^∞` on that same fixed box.
+
+The radius `(ρ, T)` is fixed once: every finite-order instance of
+`contDiffOn_flow_of_spatial_smooth_seq` is invoked with the *same* box, and the result is
+assembled via `contDiffOn_infty`.  The spatial-piece smoothness hypothesis
+`hLsp_smooth` is the smooth-parameter-dependence content of the variational linear ODE and
+is the sole remaining mathematical input. -/
+theorem contDiffOn_flow_infty_of_spatial_smooth_all
+    (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
+    {T_out T_mid T M : ℝ} (hT : 0 < T) (hT_lt_mid : T < T_mid) (hT_mid_lt_out : T_mid < T_out)
+    (hM : 0 ≤ M) (hMT_mid : M * T_mid < 1)
+    (hsub : Icc (t₀ - T_out) (t₀ + T_out) ⊆ Icc tmin tmax)
+    {ρ_out ρ_mid ρ : ℝ≥0} {r' : ℝ≥0} (hr' : 0 < r')
+    (hρ_lt_mid : (ρ : ℝ) < (ρ_mid : ℝ)) (hρ_mid_lt_out : (ρ_mid : ℝ) < (ρ_out : ℝ))
+    (hρρ' : (ρ_mid : ℝ) + (r' : ℝ) ≤ (r : ℝ))
+    (hρ_out_le_r : (ρ_out : ℝ) ≤ (r : ℝ))
+    (hA_bd : ∀ x ∈ closedBall x₀ (ρ_out : ℝ), ∀ τ ∈ Icc (t₀ - T_out) (t₀ + T_out),
+      ‖fderiv ℝ (f τ) (Φ ⟨x, τ⟩)‖ ≤ M)
+    (hf_Cinfty : ContDiffOn ℝ ∞ (uncurry f) (Set.univ : Set (ℝ × E)))
+    (hLsp_smooth : ∀ j : ℕ,
+      ContDiffOn ℝ (j : ℕ∞) (spatialPieceFn Φ)
+        ((ball x₀ (ρ : ℝ)) ×ˢ Ioo (t₀ - T) (t₀ + T))) :
+    ContDiffOn ℝ ∞ Φ ((ball x₀ (ρ : ℝ)) ×ˢ Ioo (t₀ - T) (t₀ + T)) := by
+  -- The coproduct identity for `fderiv ℝ Φ` is order-independent (needs only `C^1` of `f`).
+  have hf_C1 : ContDiffOn ℝ 1 (uncurry f) (Set.univ : Set (ℝ × E)) := by
+    have h_le : ((1 : ℕ∞) : WithTop ℕ∞) ≤ ∞ := by exact_mod_cast (le_top : (1 : ℕ∞) ≤ (⊤ : ℕ∞))
+    simpa using hf_Cinfty.of_le h_le
+  have hLsp_eq : ∀ q ∈ ((ball x₀ (ρ : ℝ)) ×ˢ Ioo (t₀ - T) (t₀ + T)),
+      fderiv ℝ Φ q = (spatialPieceFn Φ q).coprod (timePieceFn f Φ q) :=
+    fderiv_flow_eq_coprod_spatialPiece hΦ hf_C1 hT hT_lt_mid hT_mid_lt_out hM hMT_mid hsub hr'
+      hρ_lt_mid hρ_mid_lt_out hρρ' hρ_out_le_r hA_bd
+  -- Reduce `C^∞` to "`C^k` for every finite `k`" and run the fixed-domain engine per `k`.
+  rw [contDiffOn_infty]
+  intro k
+  -- `f` is `C^k` (from `C^∞`).
+  have hf_Ck : ContDiffOn ℝ (k : ℕ∞) (uncurry f) (Set.univ : Set (ℝ × E)) := by
+    have h_le : ((k : ℕ∞) : WithTop ℕ∞) ≤ ∞ := by exact_mod_cast (le_top : (k : ℕ∞) ≤ (⊤ : ℕ∞))
+    exact hf_Cinfty.of_le h_le
+  -- Apply the fixed-domain engine on the SAME box, with `Lsp_seq j := spatialPieceFn Φ`.
+  exact contDiffOn_flow_of_spatial_smooth_seq hΦ hT hT_lt_mid hT_mid_lt_out hM hMT_mid hsub hr'
+    hρ_lt_mid hρ_mid_lt_out hρρ' hρ_out_le_r hA_bd k hf_Ck (fun _ => spatialPieceFn Φ)
+    (fun j _ => hLsp_smooth j) (fun _ _ => hLsp_eq)
+
+/-- **Uniform-radius all-orders (`C^∞`) flow regularity (existence form).**
+
+In finite dimensions, a local flow `Φ` of a jointly `C^∞` field `f` is jointly `C^∞` on a
+**single fixed** open neighbourhood of `(x₀, t₀)` — `ball x₀ ρ ×ˢ Ioo (t₀ - T) (t₀ + T)` —
+**provided** the spatial piece `spatialPieceFn Φ` is jointly `C^j` on that fixed box at every
+finite order `j` (the smooth-parameter-dependence content of the variational linear ODE).
+All bound / nesting data is derived internally via `exists_flow_nesting_data`.
+
+This is the all-orders, fixed-domain strengthening of `exists_contDiffOn_flow_Cnat`: the
+per-order theorem's neighbourhood shrinks with the order, whereas here a *single* domain
+carries `ContDiffOn ℝ ∞`.  The hypothesis `hLsp_smooth` is stated against the nesting box
+produced by `exists_flow_nesting_data`, exposed through the existential so the caller can
+discharge it on the concrete box. -/
+theorem exists_contDiffOn_flow_Cinfty
+    (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
+    (hf : ContDiffOn ℝ ∞ (uncurry f) (Set.univ : Set (ℝ × E)))
+    (ht₀ : t₀ ∈ Ioo tmin tmax) (hr : 0 < (r : ℝ))
+    (hLsp : ∀ ⦃ρ : ℝ≥0⦄ ⦃T : ℝ⦄, 0 < T →
+      ((ball x₀ (ρ : ℝ)) ×ˢ Ioo (t₀ - T) (t₀ + T) ⊆ closedBall x₀ (r : ℝ) ×ˢ Icc tmin tmax) →
+      ∀ j : ℕ, ContDiffOn ℝ (j : ℕ∞) (spatialPieceFn Φ)
+        ((ball x₀ (ρ : ℝ)) ×ˢ Ioo (t₀ - T) (t₀ + T))) :
+    ∃ U : Set (E × ℝ), IsOpen U ∧ (x₀, t₀) ∈ U ∧ ContDiffOn ℝ ∞ Φ U := by
+  have hf_C1 : ContDiffOn ℝ 1 (uncurry f) (Set.univ : Set (ℝ × E)) := by
+    have h_le : ((1 : ℕ∞) : WithTop ℕ∞) ≤ ∞ := by exact_mod_cast (le_top : (1 : ℕ∞) ≤ (⊤ : ℕ∞))
+    simpa using hf.of_le h_le
+  obtain ⟨T_out, T_mid, T, M, ρ_out, ρ_mid, ρ, r',
+    hT, hT_lt_mid, hT_mid_lt_out, hM, hMT_mid, hr', hρ_pos, hρ_lt_mid, hρ_mid_lt_out,
+    hρρ', hρ_out_le_r, hsub, hA_bd⟩ := exists_flow_nesting_data hΦ hf_C1 ht₀ hr
+  -- The fixed box sits inside the local-flow domain box (for the spatial-piece hypothesis).
+  have h_ρ_r : (ρ : ℝ) ≤ (r : ℝ) :=
+    le_trans (le_of_lt hρ_lt_mid) (le_trans (le_of_lt hρ_mid_lt_out) hρ_out_le_r)
+  have h_T_out : Icc (t₀ - T) (t₀ + T) ⊆ Icc (t₀ - T_out) (t₀ + T_out) :=
+    Icc_subset_Icc (by linarith) (by linarith)
+  have hbox_sub : (ball x₀ (ρ : ℝ)) ×ˢ Ioo (t₀ - T) (t₀ + T)
+      ⊆ closedBall x₀ (r : ℝ) ×ˢ Icc tmin tmax := by
+    intro q hq
+    refine ⟨?_, ?_⟩
+    · exact closedBall_subset_closedBall h_ρ_r
+        (mem_closedBall.mpr (le_of_lt (mem_ball.mp hq.1)))
+    · exact hsub (h_T_out (Ioo_subset_Icc_self hq.2))
+  refine ⟨(ball x₀ (ρ : ℝ)) ×ˢ Ioo (t₀ - T) (t₀ + T), isOpen_ball.prod isOpen_Ioo,
+    ⟨mem_ball_self hρ_pos, ⟨by linarith, by linarith⟩⟩, ?_⟩
+  exact contDiffOn_flow_infty_of_spatial_smooth_all hΦ hT hT_lt_mid hT_mid_lt_out hM hMT_mid hsub
+    hr' hρ_lt_mid hρ_mid_lt_out hρρ' hρ_out_le_r hA_bd hf (hLsp hT hbox_sub)
 
 end Headline
 
