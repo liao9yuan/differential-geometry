@@ -403,7 +403,7 @@ private lemma contDiffOn_chartCurve {γ : ℝ → M} (hγ : ContMDiff 𝓘(ℝ, 
   exact contMDiffOn_iff_contDiffOn.mp h_comp_mdiff
 
 /-- The chart trajectory is `ContDiffAt ℝ ∞` at `t`. -/
-private lemma contDiffAt_chartCurve {γ : ℝ → M} (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) (t : ℝ) :
+lemma contDiffAt_chartCurve {γ : ℝ → M} (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) (t : ℝ) :
     ContDiffAt ℝ ∞ (chartCurve (I := I) (γ t) γ) t :=
   (contDiffOn_chartCurve (I := I) hγ t).contDiffAt
     ((chartTime_isOpen (I := I) hγ t).mem_nhds (mem_chartTime_self (I := I) γ t))
