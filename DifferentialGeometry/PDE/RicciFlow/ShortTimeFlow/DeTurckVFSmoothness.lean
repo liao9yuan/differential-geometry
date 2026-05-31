@@ -58,30 +58,33 @@ theorem deturck_vf_joint_smoothness
       (Set.Ioo (0 : ℝ) T ×ˢ Set.univ) := sorry
 
 theorem deturck_vf_continuous_up_to_zero
-    (g_bg g₀ : SmoothRiemannianMetric I M)
+    (g₀ : SmoothRiemannianMetric I M)
     (g_DT : ℝ → SmoothRiemannianMetric I M) (T : ℝ)
-    (hC2 : ∀ x : M, ∀ v w : TangentSpace I x,
-      ContinuousOn (fun s : ℝ => (g_DT s).inner x v w) (Set.Icc 0 T))
-    (h_partial : ∀ (α : M) (l i j : Fin (Module.finrank ℝ E)) (y : E),
+    (h_gram0 : ∀ (α : M) (i j : Fin (Module.finrank ℝ E)),
       ContinuousOn
-        (fun t : ℝ =>
+        (fun q : ℝ × E =>
+          Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT q.1) α i j q.2)
+        (Set.Icc (0 : ℝ) T ×ˢ interior (extChartAt I α).target))
+    (h_partial : ∀ (α : M) (l i j : Fin (Module.finrank ℝ E)),
+      ContinuousOn
+        (fun q : ℝ × E =>
           Integral.DivergenceTheorem.partialDeriv (E := E) l
-            (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t) α i j) y)
-        (Set.Icc (0 : ℝ) T))
-    (h_partial2 : ∀ (α : M) (m l i j : Fin (Module.finrank ℝ E)) (y : E),
+            (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT q.1) α i j) q.2)
+        (Set.Icc (0 : ℝ) T ×ˢ interior (extChartAt I α).target))
+    (h_partial2 : ∀ (α : M) (m l i j : Fin (Module.finrank ℝ E)),
       ContinuousOn
-        (fun t : ℝ =>
+        (fun q : ℝ × E =>
           Integral.DivergenceTheorem.partialDeriv (E := E) m
             (Integral.DivergenceTheorem.partialDeriv (E := E) l
-              (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t) α i j)) y)
-        (Set.Icc (0 : ℝ) T)) :
+              (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT q.1) α i j)) q.2)
+        (Set.Icc (0 : ℝ) T ×ˢ interior (extChartAt I α).target)) :
     (ContinuousOn (fun q : ℝ × M => (deTurckVF (I := I) (g_DT q.1) g₀ q.2 : TangentSpace I q.2))
       (Set.Icc (0 : ℝ) T ×ˢ Set.univ))
     ∧ (∀ (α : M) (k : Fin (Module.finrank ℝ E)),
         ContinuousOn (fun q : ℝ × E =>
           fderiv ℝ (fun y : E =>
             DeTurckLinearization.chartDeTurckVFComp (I := I) (g_DT q.1) g₀ α k y) q.2)
-          (Set.Icc (0 : ℝ) T ×ˢ Set.univ)) := sorry
+          (Set.Icc (0 : ℝ) T ×ˢ interior (extChartAt I α).target)) := sorry
 
 theorem deturck_solution_joint_smooth
     (g_DT : ℝ → SmoothRiemannianMetric I M) (T : ℝ)

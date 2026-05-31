@@ -66,8 +66,12 @@ theorem interior_ici_deriv_to_ordinary
 theorem gfam_inner_continuous_on
     (g_DT : ℝ → SmoothRiemannianMetric I M) (T : ℝ) (hT : 0 < T)
     (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M)) (x : M) (v w : TangentSpace I x)
-    (hg : ∀ (y : M) (p q : TangentSpace I y),
-      ContinuousOn (fun s : ℝ => (g_DT s).inner y p q) (Set.Icc 0 T))
+    (hg_joint : ∀ (α : M) (i j : Fin (Module.finrank ℝ E)),
+      ContinuousOn
+        (fun q : ℝ × M =>
+          Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT q.1) α i j
+            (extChartAt I α q.2))
+        (Set.Icc 0 T ×ˢ Set.univ))
     (hΦ_orbit : ∀ y : M,
       ContinuousOn (fun s : ℝ => (Φ_fam s : M → M) y) (Set.Icc 0 T))
     (hΦ_mfderiv : ∀ (y : M) (p : TangentSpace I y),
@@ -79,12 +83,21 @@ theorem gfam_inner_continuous_on
 theorem ricci_gfam_continuous_on
     (g_DT : ℝ → SmoothRiemannianMetric I M) (T : ℝ) (hT : 0 < T)
     (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M)) (x : M) (v w : TangentSpace I x)
-    (hC2 : ∀ (y : M) (p q : TangentSpace I y),
-      ContinuousOn (fun s : ℝ => (g_DT s).inner y p q) (Set.Icc 0 T))
+    (hC2 : ∀ (α : M) (y : M), y ∈ chartLeviCivitaGoodSet (I := I) α →
+      ∀ i j : Fin (Module.finrank ℝ E), ∀ k : ℕ, k ≤ 2 →
+        ContinuousOn
+          (fun s : ℝ => iteratedFDeriv ℝ k
+            (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT s) α i j)
+            (extChartAt I α y))
+          (Set.Icc 0 T))
     (hΦ0 : ∀ y : M,
       ContinuousOn (fun s : ℝ => (Φ_fam s : M → M) y) (Set.Icc 0 T))
     (hΦ : ∀ (y : M) (p : TangentSpace I y),
-      ContinuousOn (fun s : ℝ => (mfderiv I I (Φ_fam s : M → M) y p : E)) (Set.Icc 0 T)) :
+      ContinuousOn (fun s : ℝ => (mfderiv I I (Φ_fam s : M → M) y p : E)) (Set.Icc 0 T))
+    (hricci_joint : ContinuousOn
+      (fun s : ℝ => ricciTensor (I := I) (g_DT s) ((Φ_fam s : M → M) x)
+        (mfderiv I I (Φ_fam s : M → M) x v) (mfderiv I I (Φ_fam s : M → M) x w))
+      (Set.Icc 0 T)) :
     ContinuousOn
       (fun s : ℝ => ricciTensor (I := I)
         (Diffeomorph.pullbackMetric (g_DT s) (Φ_fam s)) x v w)

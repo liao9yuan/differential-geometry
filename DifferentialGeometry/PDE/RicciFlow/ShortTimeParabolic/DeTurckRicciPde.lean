@@ -61,7 +61,8 @@ theorem deturck_metric_pde_interior
         (scaleLaplacianFun (I := I) (M := M) (u₂ s) +
           deTurckGeometricN (I := I) g_bg a
             (tensorHsInclusion (I := I) (M := M) (g := g_bg) (r := 0) (s := 2)
-              (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s))) s) :
+              (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s))) s)
+    (hvalid : ∀ s ∈ Set.Ioo (0 : ℝ) T, realizableAt (I := I) g_bg (u₂ s)) :
     ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, ∀ v w : TangentSpace I x,
       HasDerivWithinAt (fun s : ℝ => (g_DT s).inner x v w)
         (deTurckRicciRHS (I := I) g_bg (g_DT t) x v w) (Set.Ici 0) t := sorry

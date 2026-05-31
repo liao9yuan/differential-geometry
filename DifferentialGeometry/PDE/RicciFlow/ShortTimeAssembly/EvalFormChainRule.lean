@@ -79,6 +79,9 @@ theorem evalform_geometry_slot
         (Set.Ici (0 : ℝ)) s
         ((1 : ℝ →L[ℝ] ℝ).smulRight
           (-(deTurckVF (I := I) (g_DT s) g_bg ((Φ_fam s : M → M) x)))))
+    (hΦ : ContMDiffOn (𝓘(ℝ, ℝ).prod I) I ∞
+      (fun q : ℝ × M => (Φ_fam q.1 : M → M) q.2)
+      (Set.Ioo (0 : ℝ) T ×ˢ Set.univ))
     (T'v P'v : (x : M) → TangentSpace I x → ℝ → (E →L[ℝ] E))
     (T'w P'w : (x : M) → TangentSpace I x → ℝ → (E →L[ℝ] E))
     (hv_flat : ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, ∀ v : TangentSpace I x,

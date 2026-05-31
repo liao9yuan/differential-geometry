@@ -86,11 +86,11 @@ theorem rhs_matches_deturck_at_solution
     (u₂ : ℝ → tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 2))
     (ℓ_a : tensorHs (I := I) (M := M) g_bg 0 2 (a : ℝ) →L[ℝ] ℝ)
     (x : M) (v w : TangentSpace I x)
-    (hreal : ∀ u : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 2),
-      (realizeMetricMap (I := I) g_bg a u).inner x v w
+    (hreal : ∀ s : ℝ,
+      (realizeMetricMap (I := I) g_bg a (u₂ s)).inner x v w
         = g_bg.inner x v w +
           ℓ_a (tensorHsInclusion (I := I) (M := M) (g := g_bg) (r := 0) (s := 2)
-            (show (a : ℝ) ≤ (a : ℝ) + 2 by linarith) u)) :
+            (show (a : ℝ) ≤ (a : ℝ) + 2 by linarith) (u₂ s))) :
     ∀ t ∈ Set.Ico (0 : ℝ) T,
       ℓ_a (scaleLaplacianFun (I := I) (M := M) (u₂ t) +
           deTurckGeometricN (I := I) g_bg a

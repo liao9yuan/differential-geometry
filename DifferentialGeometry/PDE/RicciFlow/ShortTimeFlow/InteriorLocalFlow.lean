@@ -66,6 +66,8 @@ theorem interior_flow_uniqueness_glue
     (T : ℝ) (hT : 0 < T)
     (hper : ∀ α : M, ChartLocalPicardData (I := I) X α)
     (hperNeg : ∀ α : M, ChartLocalPicardData (I := I) (fun t x => -(X t x)) α)
+    (hTle : ∀ α : M, T ≤ (hper α).T)
+    (hTleNeg : ∀ α : M, T ≤ (hperNeg α).T)
     (hSmoothX_chart : ∀ α : M, ContDiff ℝ ∞ (Function.uncurry fun t y =>
       (X t ((chartAt H α).symm (I.symm y)) : E)))
     (hSmoothNegX_chart : ∀ α : M, ContDiff ℝ ∞ (Function.uncurry fun t y =>

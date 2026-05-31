@@ -47,8 +47,13 @@ variable
 theorem deturck_solution_c2_continuous_icc0
     (g_bg : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ}
     (g_DT : ℝ → SmoothRiemannianMetric I M)
-    (_hsol : IsQuasilinearMetricParabolicSolution (I := I)
-              (deTurckRicciRHS (I := I) g_bg) (g_DT 0) T g_DT) :
+    (u : ℝ → tensorHs (I := I) (M := M) g_bg 0 2 (a : ℝ))
+    (hcont : ContinuousOn (fun s : ℝ => u s) (Set.Icc 0 T))
+    (hfs : ∀ s : ℝ, (Function.support (u s).coeff).Finite)
+    (hreal : ∀ (s : ℝ) (x : M) (v w : TangentSpace I x),
+      (g_DT s).inner x v w
+        = g_bg.inner x v w +
+          tensorHsBilinSymm (I := I) g_bg (u s) (hfs s) x v w) :
     (∀ (x : M) (v w : TangentSpace I x),
       ContinuousOn (fun s : ℝ => (g_DT s).inner x v w) (Set.Icc 0 T))
     ∧ (∀ (x : M) (v w : TangentSpace I x),

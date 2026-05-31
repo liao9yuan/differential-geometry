@@ -81,7 +81,17 @@ theorem flat_value_jet_identity
     (X : Cₛ^∞⟮I; E, (TangentSpace I)⟯)
     (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M)) (t : ℝ) (x : M) (v : TangentSpace I x)
     (T' P' : E →L[ℝ] E)
-    (hflat : RawVariationalIdentityFlat (I := I) Φ_fam t x v T' P') :
+    (hflat : RawVariationalIdentityFlat (I := I) Φ_fam t x v T' P')
+    (hΦflow : HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => (Φ_fam s : M → M) x)
+      (Set.Ici (0 : ℝ)) t
+      ((1 : ℝ →L[ℝ] ℝ).smulRight
+        (-((X : ∀ y : M, TangentSpace I y) ((Φ_fam t : M → M) x)))))
+    (hRdiff : DifferentiableAt ℝ
+      (chartRawRepr (I := I) (Φ_fam t x) (X : ∀ y : M, TangentSpace I y))
+      (extChartAt I (Φ_fam t x) (Φ_fam t x)))
+    (hCdiff : DifferentiableAt ℝ
+      (fun z => chartMovingTriv (I := I) (Φ_fam t x) z)
+      (extChartAt I (Φ_fam t x) (Φ_fam t x))) :
     T' (mfderiv I I (Φ_fam t : M → M) x v) + P' v
       = -(fderiv ℝ (chartRawRepr (I := I) (Φ_fam t x)
               (X : ∀ y : M, TangentSpace I y))
