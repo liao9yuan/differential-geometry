@@ -86,6 +86,12 @@ theorem flat_value_jet_identity
       (Set.Ici (0 : ℝ)) t
       ((1 : ℝ →L[ℝ] ℝ).smulRight
         (-((X : ∀ y : M, TangentSpace I y) ((Φ_fam t : M → M) x)))))
+    (hΦnbhd : ∃ T₀ : ℝ, 0 < T₀ ∧ ∃ W : Set M, IsOpen W ∧ x ∈ W ∧
+      ∀ y ∈ W, ∀ s ∈ Set.Ioo (t - T₀) (t + T₀),
+        HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun u : ℝ => (Φ_fam u : M → M) y)
+          (Set.Ioo (t - T₀) (t + T₀)) s
+          ((1 : ℝ →L[ℝ] ℝ).smulRight
+            (-((X : ∀ y : M, TangentSpace I y) ((Φ_fam s : M → M) y)))))
     (hRdiff : DifferentiableAt ℝ
       (chartRawRepr (I := I) (Φ_fam t x) (X : ∀ y : M, TangentSpace I y))
       (extChartAt I (Φ_fam t x) (Φ_fam t x)))

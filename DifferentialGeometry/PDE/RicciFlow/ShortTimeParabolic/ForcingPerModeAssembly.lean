@@ -43,17 +43,63 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+/-- **Interior continuity of the continuous DeTurck forcing.**
+
+Re-anchored away from the finite-support-gated `deTurckGeometricN` (globally
+discontinuous: it jumps to `0` off the non-open finite-support locus, so
+`s ↦ deTurckGeometricN g_bg a (u₁ s)` is genuinely discontinuous on the infinite-
+support path) onto the *same* continuous realize-based nonlinearity `N_cont` as
+in `deturckN_hscale_lipschitz` (binder/construction shape kept IDENTICAL).
+
+As in `permode_sum_hasderivat`, the order-`(a+1)` carrier `u₁` is anchored to an
+order-`(a+2)` lift `u₂` via `hu₁`, so the solution field's continuity in the
+higher norm is available. The construction data `N_cont`, `repr`, `Nsec` and the
+construction/realize-identity hypotheses `hN_coeff`, `hNsec_realize`,
+`hrepr_small` are exactly those of `deturckN_hscale_lipschitz` (the *same*
+continuous nonlinearity): coordinate/realize identities about `N_cont`'s
+coordinates and `Nsec`'s bilinear extraction, NOT the continuity conclusion. The
+`hcont`/`hball` hypotheses confine the carrier to the ball where the realize
+construction is valid.
+
+The conclusion is the continuity of `s ↦ N_cont (u₁ s)` (the *continuous*
+nonlinearity), which is TRUE and dependency-sufficient: it follows in the fill
+phase from the continuity of `u₁` (through `u₂`), of the linear realize
+`ccTensorBilinSymm`, and of the eigenbasis-coordinate packaging. -/
 theorem forcing_continuous_interior
     (g_bg : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ}
+    (u₂ : ℝ → tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 2))
     (u₁ : ℝ → tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 1))
     (u₀ : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 2)) (R : ℝ)
+    (hu₁ : ∀ s, u₁ s = tensorHsInclusion (I := I) (M := M) (g := g_bg) (r := 0) (s := 2)
+      (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s))
+    (N_cont : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 1) →
+      tensorHs (I := I) (M := M) g_bg 0 2 (a : ℝ))
+    (repr : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 1) →
+      DifferentialGeometry.Integral.L2.SmoothCcTensor g_bg 0 2)
+    (Nsec : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 1) →
+      DifferentialGeometry.Integral.L2.SmoothCcTensor g_bg 0 2)
+    (hN_coeff : ∀ (u : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 1))
+        (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+          (I := I) (M := M) g_bg 0 2),
+      (N_cont u).coeff i =
+        tensorL2Coeff_ofCompact (I := I) (M := M)
+          (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g_bg 0 2)
+          (DifferentialGeometry.Integral.L2.SmoothCcTensor.toL2 (Nsec u)) i)
+    (hNsec_realize : ∀ (u : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 1))
+        (x : M) (v w : TangentSpace I x),
+      ccTensorBilinSymm (I := I) g_bg (Nsec u) x v w =
+        ccTensorBilinSymm (I := I) g_bg (repr u) x v w)
+    (hrepr_small : ∀ u : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 1),
+      ∃ δ' : ℝ, δ' < 1 ∧
+        gFibreOpBound (I := I) (M := M) g_bg
+          (ccTensorBilinSymm (I := I) g_bg (repr u)) δ')
     (hcont : ∀ ε : ℝ, 0 < ε → ContinuousOn u₁ (Set.Icc ε T))
     (hball : ∀ ε : ℝ, 0 < ε → ∀ s ∈ Set.Icc ε T,
       u₁ s ∈ Metric.closedBall
         (tensorHsInclusion (I := I) (M := M) (g := g_bg) (r := 0) (s := 2)
           (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) u₀) R) :
     ∀ ε : ℝ, 0 < ε →
-      ContinuousOn (fun s => (deTurckGeometricN (I := I) g_bg a (u₁ s) :
+      ContinuousOn (fun s => (N_cont (u₁ s) :
         tensorHs (I := I) (M := M) g_bg 0 2 (a : ℝ))) (Set.Icc ε T) := sorry
 
 theorem permode_sum_hasderivat

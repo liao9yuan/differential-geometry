@@ -71,9 +71,19 @@ theorem flow_t0_continuity_extension
     (hcont0 : ContinuousOn
       (fun q : ℝ × M => (X_DT q.1 q.2 : TangentSpace I q.2))
       (Set.Icc (0 : ℝ) T ×ˢ Set.univ))
+    (hgrad0 : ∀ α : M,
+      ContinuousOn
+        (fun q : ℝ × M =>
+          fderiv ℝ (chartRawRepr (I := I) α (X_DT q.1)) (extChartAt I α q.2))
+        (Set.Icc (0 : ℝ) T ×ˢ Set.univ))
     (hinterior : ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M,
       HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => Φ s x) (Set.Ici (0 : ℝ)) t
-        ((1 : ℝ →L[ℝ] ℝ).smulRight (X_DT t (Φ t x)))) :
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (X_DT t (Φ t x))))
+    (hpicard : ∀ x : M, ∃ α : M, ∃ δ : ℝ, 0 < δ ∧ x ∈ (chartAt H α).source ∧
+      ∀ s ∈ Set.Ico (0 : ℝ) (min δ T), Φ s x ∈ (chartAt H α).source ∧
+        extChartAt I α (Φ s x)
+          = extChartAt I α x + ∫ r in (0 : ℝ)..s,
+              chartRawRepr (I := I) α (X_DT r) (extChartAt I α (Φ r x))) :
     (∀ x : M, ContinuousWithinAt (fun s : ℝ => Φ s x) (Set.Ici (0 : ℝ)) 0)
     ∧ (∀ (x : M) (v : TangentSpace I x),
         ContinuousWithinAt (fun s : ℝ => (mfderiv I I (fun y : M => Φ s y) x v : E))

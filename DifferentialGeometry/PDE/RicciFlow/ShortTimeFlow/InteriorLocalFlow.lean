@@ -76,9 +76,14 @@ theorem interior_flow_uniqueness_glue
       (∀ x : M, ∃ α : M, ∀ s : ℝ, Φcc s x =
         (chartAt H α).symm (I.symm ((hper α).flow (I ((chartAt H α) x)) s))) ∧
       (∀ t ∈ Set.Ioo (0 : ℝ) T, ∃ d : M ≃ₘ⟮I, I⟯ M, ∀ x : M, d x = Φcc t x) ∧
-      (∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M,
-        HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => Φcc s x) (Set.Ici (0 : ℝ)) t
-          ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φcc t x)))) := sorry
+      (∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, ∃ α : M, x ∈ (hper α).U ∧
+        (∀ s : ℝ, Φcc s x =
+          (chartAt H α).symm (I.symm ((hper α).flow (I ((chartAt H α) x)) s))) ∧
+        HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => Φcc s x)
+          (Set.Icc (0 : ℝ) (hper α).T) t
+          ((mfderivWithin 𝓘(ℝ, E) I (extChartAt I α).symm (Set.range I)
+              ((hper α).flow (I ((chartAt H α) x)) t)) ∘L
+            ((ContinuousLinearMap.id ℝ ℝ).smulRight (X t (Φcc t x))))) := sorry
 
 theorem chartcover_orbit_is_bare_integral_curve
     (X : ℝ → ∀ x : M, TangentSpace I x) (hX : AutonomizedFieldJointC1 (I := I) X)
@@ -87,8 +92,21 @@ theorem chartcover_orbit_is_bare_integral_curve
     (hper : ∀ α : M, ChartLocalPicardData (I := I) X α)
     (hTle : ∀ α : M, T ≤ (hper α).T)
     (hrepr : ∀ x : M, ∃ α : M, x ∈ (hper α).U ∧ ∀ s : ℝ, Φcc s x =
-      (chartAt H α).symm (I.symm ((hper α).flow (I ((chartAt H α) x)) s))) :
-    ∀ t : ℝ, 0 < t → t < T → ∀ x : M, HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => Φcc s x)
-      (Set.Ici (0 : ℝ)) t ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φcc t x))) := sorry
+      (chartAt H α).symm (I.symm ((hper α).flow (I ((chartAt H α) x)) s)))
+    (hconf : ∀ x : M, ∀ α : M, x ∈ (hper α).U →
+      ∀ t : ℝ, 0 < t → t < T →
+        ((hper α).flow (I ((chartAt H α) x))) ⁻¹' (Set.range I) ∈
+          𝓝[Set.Icc (0 : ℝ) (hper α).T] t)
+    (htgt : ∀ x : M, ∀ α : M, x ∈ (hper α).U →
+      ∀ t : ℝ, 0 < t → t < T →
+        (hper α).flow (I ((chartAt H α) x)) t ∈ (extChartAt I α).target) :
+    ∀ t : ℝ, 0 < t → t < T → ∀ x : M, ∃ α : M, x ∈ (hper α).U ∧
+      (∀ s : ℝ, Φcc s x =
+        (chartAt H α).symm (I.symm ((hper α).flow (I ((chartAt H α) x)) s))) ∧
+      HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => Φcc s x)
+        (Set.Icc (0 : ℝ) (hper α).T) t
+        ((mfderivWithin 𝓘(ℝ, E) I (extChartAt I α).symm (Set.range I)
+            ((hper α).flow (I ((chartAt H α) x)) t)) ∘L
+          ((ContinuousLinearMap.id ℝ ℝ).smulRight (X t (Φcc t x)))) := sorry
 
 end DifferentialGeometry.PDE.RicciFlow

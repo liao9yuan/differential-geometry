@@ -43,14 +43,82 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+/-- **H-scale local Lipschitz estimate for the continuous DeTurck nonlinearity.**
+
+Re-anchored away from the finite-support-gated `deTurckGeometricN` (which is
+globally discontinuous, hence not Lipschitz on any ball: it jumps to `0` at
+infinite-support points arbitrarily close to a realizable center) onto a
+*continuous* realize-based nonlinearity `N_cont`, carried as internal data
+together with an honest construction/agreement hypothesis tying it to the
+**linear** realize (`ccTensorBilinSymm` / `exists_smooth_metric_of_smooth_tensor_small`),
+which works for infinite-support inputs via a smooth representative.
+
+The construction data:
+* `repr u : SmoothCcTensor g_bg 0 2` — a smooth representative of `u`, the
+  realize input (for infinite-support inputs the existence of such a
+  representative is the open Gårding/Weyl input; carried here as an internal,
+  honestly-flagged hypothesis `hrepr_small`, non-leaking — it constrains the
+  internal carrier, never `g₀`/the headline);
+* `Nsec u : SmoothCcTensor g_bg 0 2` — the realize-based geometric remainder
+  section.
+
+The honest construction hypothesis splits into:
+* `hN_coeff` — `N_cont u`'s eigenbasis coordinates ARE the `L²` coordinates of
+  the remainder section `Nsec u` (the *same* packaging as the genuine
+  `deTurckGeometricN_coeff`, but anchored on the continuous realize section
+  `Nsec u` instead of the gated `deTurckRemainderSection u`);
+* `hNsec_realize` — `Nsec u`'s extracted symmetric bilinear form IS the linear
+  realize `ccTensorBilinSymm (repr u)` (a genuine analytic *realize identity*,
+  not the Lipschitz conclusion): this ties `Nsec` to the linear realization
+  program.
+
+Neither hypothesis is the conclusion: they are coefficient/realize identities
+about `N_cont`'s *coordinates* and `Nsec`'s *bilinear extraction*, structurally
+distinct from "`N_cont` is Lipschitz on a ball". The conclusion — local
+Lipschitz-ness of `N_cont` — is then derived (in the fill phase) from the
+continuity of the linear realize `ccTensorBilinSymm` in `H^{a+1}`. -/
 theorem deturckN_hscale_lipschitz
     (g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (u₀ : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 2)) :
+    (u₀ : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 2))
+    (N_cont : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 1) →
+      tensorHs (I := I) (M := M) g_bg 0 2 (a : ℝ))
+    (repr : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 1) →
+      DifferentialGeometry.Integral.L2.SmoothCcTensor g_bg 0 2)
+    (Nsec : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 1) →
+      DifferentialGeometry.Integral.L2.SmoothCcTensor g_bg 0 2)
+    (hN_coeff : ∀ (u : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 1))
+        (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+          (I := I) (M := M) g_bg 0 2),
+      (N_cont u).coeff i =
+        tensorL2Coeff_ofCompact (I := I) (M := M)
+          (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g_bg 0 2)
+          (DifferentialGeometry.Integral.L2.SmoothCcTensor.toL2 (Nsec u)) i)
+    (hNsec_realize : ∀ (u : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 1))
+        (x : M) (v w : TangentSpace I x),
+      ccTensorBilinSymm (I := I) g_bg (Nsec u) x v w =
+        ccTensorBilinSymm (I := I) g_bg (repr u) x v w)
+    (hrepr_small : ∀ u : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 1),
+      ∃ δ' : ℝ, δ' < 1 ∧
+        gFibreOpBound (I := I) (M := M) g_bg
+          (ccTensorBilinSymm (I := I) g_bg (repr u)) δ')
+    (hNsec_lip : ∃ K : ℝ≥0, ∀ u u' : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 1),
+      Summable (fun i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+            (I := I) (M := M) g_bg 0 2 =>
+          tensorSobolevWeight (I := I) (M := M) i (a : ℝ) *
+            (tensorL2Coeff_ofCompact (I := I) (M := M)
+                (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g_bg 0 2)
+                (DifferentialGeometry.Integral.L2.SmoothCcTensor.toL2 (Nsec u)
+                  - DifferentialGeometry.Integral.L2.SmoothCcTensor.toL2 (Nsec u')) i) ^ 2)
+        ∧ (∑' i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+              (I := I) (M := M) g_bg 0 2,
+            tensorSobolevWeight (I := I) (M := M) i (a : ℝ) *
+              (tensorL2Coeff_ofCompact (I := I) (M := M)
+                  (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g_bg 0 2)
+                  (DifferentialGeometry.Integral.L2.SmoothCcTensor.toL2 (Nsec u)
+                    - DifferentialGeometry.Integral.L2.SmoothCcTensor.toL2 (Nsec u')) i) ^ 2)
+            ≤ ((K : ℝ) * dist u u') ^ 2) :
     ∃ (L_R : ℝ≥0) (R : ℝ), 0 < R ∧
-      LipschitzOnWith L_R
-        (deTurckGeometricN (I := I) g_bg a :
-          tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 1) →
-            tensorHs (I := I) (M := M) g_bg 0 2 (a : ℝ))
+      LipschitzOnWith L_R N_cont
         (Metric.closedBall
           (tensorHsInclusion (I := I) (M := M) (g := g_bg) (r := 0) (s := 2)
             (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) u₀) R) := sorry

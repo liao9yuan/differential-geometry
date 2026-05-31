@@ -46,14 +46,20 @@ variable
 
 theorem deturck_solution_c2_continuous_icc0
     (g_bg : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ}
+    (ha : 2 * a > Module.finrank ℝ E + 4)
     (g_DT : ℝ → SmoothRiemannianMetric I M)
     (u : ℝ → tensorHs (I := I) (M := M) g_bg 0 2 (a : ℝ))
+    (T_s : ℝ → Integral.L2.SmoothCcTensor g_bg 0 2)
     (hcont : ContinuousOn (fun s : ℝ => u s) (Set.Icc 0 T))
-    (hfs : ∀ s : ℝ, (Function.support (u s).coeff).Finite)
     (hreal : ∀ (s : ℝ) (x : M) (v w : TangentSpace I x),
       (g_DT s).inner x v w
-        = g_bg.inner x v w +
-          tensorHsBilinSymm (I := I) g_bg (u s) (hfs s) x v w) :
+        = g_bg.inner x v w + ccTensorBilinSymm (I := I) g_bg (T_s s) x v w)
+    (hsmoothrepr : ∀ (s : ℝ)
+        (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+          (I := I) (M := M) g_bg 0 2),
+      (u s).coeff i
+        = tensorL2Coeff_ofCompact (I := I) (M := M) (hCompact (I := I) (M := M) g_bg)
+            (Integral.L2.SmoothCcTensor.toL2 (T_s s)) i) :
     (∀ (x : M) (v w : TangentSpace I x),
       ContinuousOn (fun s : ℝ => (g_DT s).inner x v w) (Set.Icc 0 T))
     ∧ (∀ (x : M) (v w : TangentSpace I x),

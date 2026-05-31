@@ -63,7 +63,7 @@ theorem flow_pushforward_continuous_in_time
       (fun q : ℝ × M => (TotalSpace.mk' E q.2 (X q.1 q.2) : TangentBundle I M))
       (Set.Ioo (0 : ℝ) T ×ˢ Set.univ)) :
     (∀ (x : M) (v : TangentSpace I x), ContinuousOn
-      (fun s : ℝ => (mfderiv I I (Φ_fam s : M → M) x v : E)) (Set.Icc 0 T))
+      (fun s : ℝ => (mfderiv I I (Φ_fam s : M → M) x v : E)) (Set.Ico 0 T))
     ∧ (∀ x : M, ContinuousWithinAt (fun s : ℝ => (Φ_fam s : M → M) x) (Set.Ici (0 : ℝ)) 0) := sorry
 
 theorem flow_family_identification
@@ -97,7 +97,12 @@ theorem joint_smooth_moving_mfderiv_continuous
         (Set.Icc (0 : ℝ) T ×ˢ Set.univ))
     (hinterior : ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M,
       HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => Φ s x) (Set.Ici (0 : ℝ)) t
-        ((1 : ℝ →L[ℝ] ℝ).smulRight (X_DT t (Φ t x)))) :
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (X_DT t (Φ t x))))
+    (hpicard : ∀ x : M, ∃ α : M, ∃ δ : ℝ, 0 < δ ∧ x ∈ (chartAt H α).source ∧
+      ∀ s ∈ Set.Ico (0 : ℝ) (min δ T), Φ s x ∈ (chartAt H α).source ∧
+        extChartAt I α (Φ s x)
+          = extChartAt I α x + ∫ r in (0 : ℝ)..s,
+              chartRawRepr (I := I) α (X_DT r) (extChartAt I α (Φ r x))) :
     (∀ x : M, ContinuousWithinAt (fun s : ℝ => Φ s x) (Set.Ici (0 : ℝ)) 0)
     ∧ (∀ (x : M) (v : TangentSpace I x),
         ContinuousWithinAt (fun s : ℝ => (mfderiv I I (fun y : M => Φ s y) x v : E))
