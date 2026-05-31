@@ -63,7 +63,41 @@ theorem forward_flow_jointsmooth_onesided
       (∀ x : M, ContinuousWithinAt (fun s : ℝ => Φ s x) (Set.Ici (0 : ℝ)) 0) ∧
       (∀ (x : M) (v : TangentSpace I x),
         ContinuousWithinAt (fun s : ℝ => (mfderiv I I (fun y : M => Φ s y) x v : E))
-          (Set.Ici (0 : ℝ)) 0) := sorry
+          (Set.Ici (0 : ℝ)) 0) := by
+  -- ROUTE (cutoff multi-window glue → bare interior flow → diffeomorphism family →
+  -- t=0 continuity extension), and the precise PARTIAL stop point.
+  --
+  -- Conjunct 3 (bare velocity for ALL `t ∈ (0,T)`) requires a SINGLE global flow `Φ`
+  -- carrying `X_DT`'s geometric velocity on the whole open horizon `(0,T)`.  The field
+  -- `X_DT` is only jointly `C∞` on `(0,T) ×ˢ univ` (`hint`), so no single time-cutoff
+  -- field `Xt = cutoffEta a b δ • X_DT` (`interior_field_global_cutoff_extension`) can
+  -- equal `X_DT` on all of `(0,T)`: a cutoff supported in `[a-2δ, b+2δ] ⊂ (0,T)` vanishes
+  -- near both endpoints.  The honest construction is the per-interior-point cutoff glue:
+  -- for each `t₀ ∈ (0,T)` a window `Ioo a b ∋ t₀` with `Xt = X_DT` there and
+  -- `AutonomizedFieldJointC1 Xt`; the global bare flow of `Xt`
+  -- (`h3_global_flow_jointContMDiffOn_on_closed_manifold` / cutoff route through
+  -- `time_dependent_vf_globalflow_on_closed_mfd`) carries `X_DT`'s bare velocity on that
+  -- window; the per-window flows are glued into one `Φ` on `(0,T)` by bare-flow
+  -- uniqueness (`bare_integral_flow_eqOn_of_jointC1`), exactly the clopen/preconnected
+  -- patching of the sibling `flow_family_identification` but at the level of CONSTRUCTING
+  -- (not identifying) the flow.  The per-time diffeomorphism witnesses (conjunct 2) then
+  -- come from `time_dependent_vf_diffeomorph_family_of_smooth_bijective`, and conjuncts
+  -- 4/5 (t=0 right-continuity of the orbit and the moving mfderiv) from the sibling
+  -- `flow_t0_continuity_extension` (whose conjunct-5 moving-mfderiv continuity is itself
+  -- the open variational-flow endpoint, isolated below).
+  --
+  -- MISSING INFRA (no such producer on disk; existence search logged in the report):
+  -- a "global bare flow on `(0,T)` of an interior-`C∞`-only time-dependent field" lemma
+  --   `(hint : ContMDiffOn … (Ioo 0 T ×ˢ univ)) →
+  --      ∃ Φ, (∀ x, Φ 0 x = x) ∧
+  --        (∀ t ∈ Ioo 0 T, ∀ x, HasMFDerivWithinAt 𝓘(ℝ,ℝ) I (fun s => Φ s x) (Ici 0) t
+  --          (𝟙.smulRight (X_DT t (Φ t x)))) ∧ (chart-Picard integral anchor `hpicard`)`.
+  -- All existing global producers (`h3_global_flow_jointContMDiffOn_on_closed_manifold`,
+  -- `time_dependent_vf_globalflow_on_closed_mfd`) require GLOBAL (`ℝ × M`) smoothness or
+  -- chart-local Picard data for the genuine field, neither available from interior-only
+  -- `hint`.  This multi-window construction is the remaining work; it is left here as a
+  -- single labeled `sorry` (PARTIAL), pending that producer.
+  sorry
 
 /-- **Orbit right-continuity at `t = 0`.**
 
@@ -214,14 +248,27 @@ theorem flow_t0_continuity_extension
         ContinuousWithinAt (fun s : ℝ => (mfderiv I I (fun y : M => Φ s y) x v : E))
           (Set.Ici (0 : ℝ)) 0) := by
   refine ⟨flow_orbit_continuousWithinAt_zero X_DT T hT Φ hΦ0 hcont0 hpicard, ?_⟩
-  -- The moving-spatial-Jacobian right-continuity at `t = 0` is the variational-flow
-  -- endpoint argument: `s ↦ mfderiv (Φ s) x v` solves the linearised flow whose
-  -- coefficient is the spatial Jacobian `∇(chartRawRepr X_DT)` (= `hgrad0`), and its
-  -- right-limit at `0` is governed by that Jacobian being continuous up to `0`.
-  -- There is no in-signature integral anchor for the spatial Jacobian (only `hpicard`
-  -- for the orbit), so deriving the variational integral equation from `hinterior`
-  -- requires the smooth-dependence-on-initial-conditions development; this is the
-  -- remaining open obligation, isolated here. See report.
+  -- ALLOWED GAP (variational-flow endpoint): moving-spatial-Jacobian right-continuity at
+  -- `t = 0`, i.e. `ContinuousWithinAt (s ↦ mfderiv I I (Φ s) x v) (Ici 0) 0`.
+  --
+  -- This is the smooth-dependence-on-initial-conditions ENDPOINT statement.  The map
+  -- `s ↦ mfderiv (Φ s) x v` solves the linearised (variational) flow whose coefficient is
+  -- the spatial Jacobian `∇(chartRawRepr X_DT)` (the continuity of which up to `0` is
+  -- exactly `hgrad0`); its right-limit at `0` is governed by that Jacobian being
+  -- continuous up to `0`.  Deriving it needs the linearised-flow INTEGRAL equation up to
+  -- `0`, for which the only in-signature anchor (`hpicard`) is for the ORBIT, not the
+  -- spatial Jacobian.
+  --
+  -- MISSING INFRA (existence search logged in the report — not on disk):
+  --   `variational_flow_mfderiv_continuousWithinAt_zero`
+  --     (hΦ0 : ∀ x, Φ 0 x = x) (hinterior : … bare ODE on Ici 0)
+  --     (hgrad0 : … spatial-Jacobian continuity up to 0)
+  --     (hpicard-style variational integral anchor for `mfderivWithin`) :
+  --     ∀ x v, ContinuousWithinAt (fun s => (mfderiv I I (Φ s) x v : E)) (Ici 0) 0
+  -- The on-disk smooth-dependence stack (`SmoothDependence/VariationalEquation.lean`,
+  -- `SmoothInSpace/VariationalODE.lean` — e.g. `IsLocalFlow.hasDerivAt_partial_spatial_fderiv`)
+  -- supplies the INTERIOR variational `HasDerivAt`, never the `t→0⁺` endpoint right-limit.
+  -- Per the WAVE-2 ADDENDUM this is the one allowed single labeled `sorry`.
   sorry
 
 end DifferentialGeometry.PDE.RicciFlow
