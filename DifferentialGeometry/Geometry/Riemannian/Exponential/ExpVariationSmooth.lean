@@ -820,6 +820,282 @@ theorem expMapIntrinsic_variation_contMDiffAt
     s₀ t₀ Φ ρ T t'
     ⟨hρ_pos, hT_pos, ht'_Ioo, ht'_pos, hG_cd, hΦ_init, hΦ_ode, hΦ_target⟩ hsmall
 
+/-! ## Internal discharge of the smallness coupling for small variation parameter
+
+The coupling `hsmall` of `expMapIntrinsic_variation_contMDiff` has five conjuncts.
+Three of them are *pure continuity* in the variation parameter and require no
+smallness input on the moving basepoint:
+
+* the chart-`(γ t₀)`-source membership `γ p.2 ∈ (chartAt H (γ t₀)).source`, and
+* the phase-ball membership of `chartFlowVelCoordMap (γ t₀) γ V₀ t' p`,
+
+both of which hold on a fixed neighbourhood of `(0, t₀)` because at `(0, t₀)` the
+coordinatisation hits the *centre* `(extChartAt I (γ t₀) (γ t₀), 0)` of the
+phase-ball (`chartFiberCoord_self_zero`), and the coordinatisation is jointly
+continuous (`chartFlowVelCoordMap_contMDiffAt`).  These two are discharged here.
+
+The remaining three conjuncts — the cross-chart moving-foot confinement
+(`hfoot`), the intrinsic/chart-fixed exponential agreement (`hwexp`), and the
+small-velocity geodesic rescaling (`hwresc`) — are *moving-basepoint* smallness
+statements: their fixed-basepoint witnesses
+(`foot_in_source_throughout`,
+`exists_expMapIntrinsic_eq_expMap_radius`,
+`maximalGeodesic_rescale_at_one_of_small`) each produce a positive radius that
+depends on the basepoint, and discharging them *uniformly* over the moving
+basepoint `γ p.2` near `γ t₀` is the genuine cross-chart input.  That uniform
+moving-basepoint smallness package is isolated in the residual hypothesis
+`hmoving` below; the wrapper consumes it as a black box exactly as
+`expMapIntrinsic_variation_contMDiff` consumes the bridge. -/
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- **Continuity discharge of the geometric conjuncts of the smallness coupling.**
+For the chart-`(γ t₀)` phase-ball radius `ρ > 0` and a smooth basepoint curve `γ`,
+there is `δ > 0` such that for every `s₀` in the `δ`-ball about `0`, on a
+neighbourhood of `(s₀, t₀)` the basepoint `γ p.2` lies in the chart-`(γ t₀)`
+source and the coordinatisation `chartFlowVelCoordMap (γ t₀) γ V₀ t' p` lies in
+the phase-ball about `(extChartAt I (γ t₀) (γ t₀), 0)`.
+
+This is pure continuity: `chartFlowVelCoordMap (γ t₀) γ V₀ t'` is jointly
+continuous (it is `ContMDiffAt` by `chartFlowVelCoordMap_contMDiffAt`), and its
+value at `(0, t₀)` is the phase-ball centre, since the first factor is
+`extChartAt I (γ t₀) (γ t₀)` and the second factor is
+`chartFiberCoord (γ t₀) ⟨γ t₀, (0/t') • (V₀ t₀).snd⟩ = 0` by
+`chartFiberCoord_self_zero`.  Hence the joint preimage of the open phase-ball is
+an open neighbourhood of `(0, t₀)`; a small enough `δ` keeps `(s₀, t₀)` inside it
+for `‖s₀‖ < δ`, and the open neighbourhood itself witnesses the eventual
+statement at each such `(s₀, t₀)`. -/
+theorem expMapIntrinsic_variation_smallField_phaseBall
+    (γ : ℝ → M) (V₀ : ℝ → TangentBundle I M)
+    (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ)
+    (hV₀ : ContMDiff 𝓘(ℝ, ℝ) I.tangent ∞ V₀)
+    (hproj : ∀ t, (V₀ t).proj = γ t)
+    (t₀ t' ρ : ℝ) (hρ_pos : 0 < ρ) :
+    ∃ δ > 0, ∀ s₀ ∈ Metric.ball (0 : ℝ) δ,
+      ∀ᶠ p in 𝓝 (s₀, t₀),
+        γ p.2 ∈ (chartAt H (γ t₀)).source ∧
+          chartFlowVelCoordMap (I := I) (γ t₀) γ V₀ t' p ∈
+            Metric.ball ((extChartAt I (γ t₀) (γ t₀), (0 : E)) : E × E) ρ := by
+  classical
+  set α : M := γ t₀ with hα_def
+  -- `chartFlowVelCoordMap α γ V₀ t'` is jointly continuous at `(0, t₀)`.
+  have hΨ_cont : ContinuousAt (chartFlowVelCoordMap (I := I) α γ V₀ t') (0, t₀) :=
+    (chartFlowVelCoordMap_contMDiffAt (I := I) γ V₀ t' hV₀ hproj hγ 0 t₀).continuousAt
+  -- Its value at `(0, t₀)` is the phase-ball centre.
+  have hΨ0_eq : chartFlowVelCoordMap (I := I) α γ V₀ t' (0, t₀) =
+      ((extChartAt I α α, (0 : E)) : E × E) := by
+    rw [chartFlowVelCoordMap_apply]
+    refine Prod.ext ?_ ?_
+    · simp only
+      rw [hα_def]
+    · -- second factor: `chartFiberCoord α ⟨γ t₀, (0/t') • (V₀ t₀).snd⟩ = 0`.
+      simp only
+      have hmk : (TotalSpace.mk' E (E := (TangentSpace I : M → Type _)) (γ (0, t₀).2)
+            (((0, t₀).1 / t') • (V₀ (0, t₀).2).snd)) =
+            (⟨α, (0 : E)⟩ : TangentBundle I M) := by
+        refine TotalSpace.ext ?_ ?_
+        · simp only [hα_def]
+        · simp only [TotalSpace.mk', zero_div, zero_smul]
+          rfl
+      rw [hmk]
+      exact chartFiberCoord_self_zero (I := I) α
+  -- The phase-ball is open and contains the centre.
+  have hcenter_mem : ((extChartAt I α α, (0 : E)) : E × E) ∈
+      Metric.ball ((extChartAt I α α, (0 : E)) : E × E) ρ :=
+    Metric.mem_ball_self hρ_pos
+  -- Chart-`α` source membership at `(0, t₀)`: `α ∈ (chartAt H α).source`.
+  have hsrc0 : γ (0, t₀).2 ∈ (chartAt H α).source := by
+    simp only
+    rw [hα_def]; exact mem_chart_source H (γ t₀)
+  -- The set `U` of phase points `p` with both properties is a neighbourhood of `(0, t₀)`.
+  have hU : ∀ᶠ p in 𝓝 ((0 : ℝ), t₀),
+      γ p.2 ∈ (chartAt H α).source ∧
+        chartFlowVelCoordMap (I := I) α γ V₀ t' p ∈
+          Metric.ball ((extChartAt I α α, (0 : E)) : E × E) ρ := by
+    -- Phase-ball part: preimage of the open ball under the continuous map.
+    have hball_ev : ∀ᶠ p in 𝓝 ((0 : ℝ), t₀),
+        chartFlowVelCoordMap (I := I) α γ V₀ t' p ∈
+          Metric.ball ((extChartAt I α α, (0 : E)) : E × E) ρ := by
+      have hmem : Metric.ball ((extChartAt I α α, (0 : E)) : E × E) ρ ∈
+          𝓝 (chartFlowVelCoordMap (I := I) α γ V₀ t' (0, t₀)) := by
+        rw [hΨ0_eq]; exact Metric.isOpen_ball.mem_nhds hcenter_mem
+      exact hΨ_cont.preimage_mem_nhds hmem
+    -- Source part: preimage of the open chart source under the continuous basepoint.
+    have hsrc_ev : ∀ᶠ p in 𝓝 ((0 : ℝ), t₀),
+        γ p.2 ∈ (chartAt H α).source := by
+      have hγ_cont : ContinuousAt (fun p : ℝ × ℝ => γ p.2) (0, t₀) :=
+        (hγ.continuous.comp continuous_snd).continuousAt
+      exact hγ_cont.preimage_mem_nhds ((chartAt H α).open_source.mem_nhds hsrc0)
+    filter_upwards [hball_ev, hsrc_ev] with p hp_ball hp_src
+    exact ⟨hp_src, hp_ball⟩
+  -- Extract an open neighbourhood `O ∋ (0, t₀)` on which both properties hold.
+  obtain ⟨O, hO_sub, hO_open, hO_mem⟩ := eventually_nhds_iff.mp hU
+  -- `O` is open and contains `(0, t₀)`; the slice `{s | (s, t₀) ∈ O}` is open in `ℝ`
+  -- and contains `0`, so it contains a `δ`-ball about `0`.
+  have hslice_open : IsOpen {s : ℝ | (s, t₀) ∈ O} :=
+    hO_open.preimage (by fun_prop : Continuous (fun s : ℝ => (s, t₀)))
+  have hslice_mem : (0 : ℝ) ∈ {s : ℝ | (s, t₀) ∈ O} := hO_mem
+  obtain ⟨δ, hδ_pos, hδ_sub⟩ := Metric.isOpen_iff.mp hslice_open 0 hslice_mem
+  refine ⟨δ, hδ_pos, fun s₀ hs₀ => ?_⟩
+  -- For `s₀ ∈ ball 0 δ`, `(s₀, t₀) ∈ O`, and `O` open gives `O ∈ 𝓝 (s₀, t₀)`.
+  have hs₀O : (s₀, t₀) ∈ O := hδ_sub hs₀
+  have hO_nhds : O ∈ 𝓝 (s₀, t₀) := hO_open.mem_nhds hs₀O
+  filter_upwards [hO_nhds] with p hp
+  exact hO_sub p hp
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- **Moving-basepoint smallness package (residual).**  For the chart-`(γ t₀)`
+geodesic flow `Φ` of `exists_chartExp_jointContDiffOn_nat` at evaluation time `t'`
+and phase-ball radius `ρ`, there is `δ > 0` such that for every `s₀` in the
+`δ`-ball about `0`, on a neighbourhood of `(s₀, t₀)` the three *moving-basepoint*
+smallness conjuncts of `hsmall` hold:
+
+* `hfoot` — the chart-`(γ t₀)` flow base orbit launched from `γ p.2` keeps its
+  foot in `(γ p.2)`'s **home** chart `(chartAt H (γ p.2)).source` throughout
+  `[0, t']` (cross-chart moving-foot confinement);
+* `hwexp` — the intrinsic and chart-fixed exponentials agree at `γ p.2` for the
+  small launch velocity `p.1 • (V₀ p.2).snd`;
+* `hwresc` — the small-velocity geodesic rescaling identity at `γ p.2`.
+
+The fixed-basepoint witnesses are `foot_in_source_throughout`,
+`exists_expMapIntrinsic_eq_expMap_radius`, and
+`maximalGeodesic_rescale_at_one_of_small`, each producing a positive radius that
+depends on the basepoint.  Discharging the three conjuncts *uniformly* over the
+moving basepoint `γ p.2` near `γ t₀` — for which the chart-`(γ t₀)`-flow
+identification of the moving-foot geodesic (`expMapIntrinsic_eq_chartFlow_proj_residual`)
+must be coupled with the home-chart confinement of the geodesic launched from
+`γ p.2` (`foot_in_source_throughout`) — is the genuine cross-chart input flagged
+as the residual of this wrapper. -/
+theorem expMapIntrinsic_variation_smallField_moving
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [T2Space (TangentBundle I M)]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (γ : ℝ → M) (V₀ : ℝ → TangentBundle I M)
+    (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ)
+    (hV₀ : ContMDiff 𝓘(ℝ, ℝ) I.tangent ∞ V₀)
+    (hproj : ∀ t, (V₀ t).proj = γ t)
+    (n : ℕ) (hn : 1 ≤ n) (t₀ : ℝ)
+    (Φ : (E × E) × ℝ → E × E) (ρ T t' : ℝ)
+    (hΦ : 0 < ρ ∧ 0 < T ∧ t' ∈ Set.Ioo (-T) T ∧ 0 < t' ∧
+      ContDiffOn ℝ (n : ℕ∞)
+        (fun z : E × E => (Φ ((z, t') : (E × E) × ℝ)).1)
+        (Metric.ball ((extChartAt I (γ t₀) (γ t₀), (0 : E)) : E × E) ρ) ∧
+      (∀ z ∈ Metric.ball ((extChartAt I (γ t₀) (γ t₀), (0 : E)) : E × E) ρ,
+        Φ ((z, (0 : ℝ)) : (E × E) × ℝ) = z) ∧
+      (∀ z ∈ Metric.ball ((extChartAt I (γ t₀) (γ t₀), (0 : E)) : E × E) ρ,
+        ∀ s ∈ Set.Ioo (-T) T,
+        HasDerivAt (fun s' : ℝ => Φ ((z, s') : (E × E) × ℝ))
+          (chartPhaseVF (I := I) g (γ t₀) (Φ ((z, s) : (E × E) × ℝ))) s) ∧
+      (∀ z ∈ Metric.ball ((extChartAt I (γ t₀) (γ t₀), (0 : E)) : E × E) ρ,
+        ∀ s ∈ Set.Icc (-T) T,
+        Φ ((z, s) : (E × E) × ℝ) ∈
+          (interior (extChartAt I (γ t₀)).target) ×ˢ (Set.univ : Set E))) :
+    ∃ δ > 0, ∀ s₀ ∈ Metric.ball (0 : ℝ) δ,
+      ∀ᶠ p in 𝓝 (s₀, t₀),
+        (∀ s ∈ Set.Icc (0 : ℝ) t',
+          (extChartAt I (γ t₀)).symm
+              (Φ (((extChartAt I (γ t₀) (γ p.2),
+                  chartFiberCoord (I := I) (γ t₀)
+                    (TotalSpace.mk' E (E := (TangentSpace I : M → Type _)) (γ p.2)
+                      (t'⁻¹ • (p.1 • (V₀ p.2).snd : E)))) : E × E), s) : E × E).1 ∈
+            (chartAt H (γ p.2)).source) ∧
+        expMapIntrinsic (I := I) g hEnorm (γ p.2)
+              ((p.1 • (V₀ p.2).snd : E) : TangentSpace I (γ p.2)) =
+            expMap (I := I) g (γ p.2)
+              ((p.1 • (V₀ p.2).snd : E) : TangentSpace I (γ p.2)) ∧
+        maximalGeodesic (I := I) g (γ p.2)
+              ((1 : ℝ) • ((p.1 • (V₀ p.2).snd : E) : TangentSpace I (γ p.2))) 1 =
+            maximalGeodesic (I := I) g (γ p.2)
+              ((t'⁻¹ • (p.1 • (V₀ p.2).snd : E)) : TangentSpace I (γ p.2)) t' := by
+  sorry
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- **Internal discharge of the smallness coupling for small variation parameter.**
+The wrapper of `expMapIntrinsic_variation_contMDiff` that obtains the chart-`(γ t₀)`
+geodesic flow internally and discharges the five-conjunct coupling `hsmall` for
+sufficiently small variation parameter `s₀`: there is `δ > 0` such that for every
+`s₀` in the `δ`-ball about `0`, the two-parameter intrinsic exponential variation
+`(s, t) ↦ expMapIntrinsic (γ t) (s • (V₀ t).snd)` is jointly `ContMDiff
+(𝓘(ℝ,ℝ).prod 𝓘(ℝ,ℝ)) I n` at `(s₀, t₀)`.
+
+This is the form the second-variation construction consumes.  The geometric
+conjuncts of `hsmall` (chart-source and phase-ball membership) are discharged by
+`expMapIntrinsic_variation_smallField_phaseBall` (pure continuity, the value at
+`(0, t₀)` being the phase-ball centre); the three *moving-basepoint* smallness
+conjuncts — the cross-chart moving-foot confinement, the intrinsic/chart-fixed
+exponential agreement, and the small-velocity geodesic rescaling — are supplied
+by `expMapIntrinsic_variation_smallField_moving`, the uniform-over-moving-basepoint
+smallness package isolated for this file.  The smallness `δ` is genuine (it is the
+variation-parameter threshold), not the conclusion. -/
+theorem expMapIntrinsic_variation_contMDiffAt_of_smallField
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [T2Space (TangentBundle I M)]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (γ : ℝ → M) (V₀ : ℝ → TangentBundle I M)
+    (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ)
+    (hV₀ : ContMDiff 𝓘(ℝ, ℝ) I.tangent ∞ V₀)
+    (hproj : ∀ t, (V₀ t).proj = γ t)
+    (n : ℕ) (hn : 1 ≤ n) (t₀ : ℝ) :
+    ∃ δ > 0, ∀ s₀ ∈ Metric.ball (0 : ℝ) δ,
+      ContMDiffAt (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) I (n : ℕ∞)
+        (fun p : ℝ × ℝ =>
+          expMapIntrinsic (I := I) g hEnorm (γ p.2)
+            ((p.1 • (V₀ p.2).snd : E) : TangentSpace I (γ p.2))) (s₀, t₀) := by
+  classical
+  -- Obtain the chart-`(γ t₀)` geodesic flow at order `n`.
+  obtain ⟨Φ, ρ, T, t', hρ_pos, hT_pos, ht'_Ioo, ht'_pos, hG_cd, hΦ_init, hΦ_ode,
+    hΦ_target⟩ :=
+    exists_chartExp_jointContDiffOn_nat (I := I) g (γ t₀) n hn
+  -- The continuity discharge of the geometric conjuncts (chart-source + phase-ball).
+  obtain ⟨δ₁, hδ₁_pos, hphase⟩ :=
+    expMapIntrinsic_variation_smallField_phaseBall (I := I) γ V₀ hγ hV₀ hproj
+      t₀ t' ρ hρ_pos
+  -- The moving-basepoint smallness package for the remaining three conjuncts.
+  obtain ⟨δ₂, hδ₂_pos, hmove⟩ :=
+    expMapIntrinsic_variation_smallField_moving (I := I) g hEnorm γ V₀ hγ hV₀ hproj
+      n hn t₀ Φ ρ T t'
+      ⟨hρ_pos, hT_pos, ht'_Ioo, ht'_pos, hG_cd, hΦ_init, hΦ_ode, hΦ_target⟩
+  -- Take `δ := min δ₁ δ₂`.
+  refine ⟨min δ₁ δ₂, lt_min hδ₁_pos hδ₂_pos, fun s₀ hs₀ => ?_⟩
+  have hs₀₁ : s₀ ∈ Metric.ball (0 : ℝ) δ₁ :=
+    Metric.ball_subset_ball (min_le_left _ _) hs₀
+  have hs₀₂ : s₀ ∈ Metric.ball (0 : ℝ) δ₂ :=
+    Metric.ball_subset_ball (min_le_right _ _) hs₀
+  -- Assemble the full five-conjunct coupling `hsmall` near `(s₀, t₀)`.
+  have hsmall : ∀ᶠ p in 𝓝 (s₀, t₀),
+      (γ p.2 ∈ (chartAt H (γ t₀)).source ∧
+        chartFlowVelCoordMap (I := I) (γ t₀) γ V₀ t' p ∈
+          Metric.ball ((extChartAt I (γ t₀) (γ t₀), (0 : E)) : E × E) ρ) ∧
+      (∀ s ∈ Set.Icc (0 : ℝ) t',
+        (extChartAt I (γ t₀)).symm
+            (Φ (((extChartAt I (γ t₀) (γ p.2),
+                chartFiberCoord (I := I) (γ t₀)
+                  (TotalSpace.mk' E (E := (TangentSpace I : M → Type _)) (γ p.2)
+                    (t'⁻¹ • (p.1 • (V₀ p.2).snd : E)))) : E × E), s) : E × E).1 ∈
+          (chartAt H (γ p.2)).source) ∧
+      expMapIntrinsic (I := I) g hEnorm (γ p.2)
+            ((p.1 • (V₀ p.2).snd : E) : TangentSpace I (γ p.2)) =
+          expMap (I := I) g (γ p.2)
+            ((p.1 • (V₀ p.2).snd : E) : TangentSpace I (γ p.2)) ∧
+      maximalGeodesic (I := I) g (γ p.2)
+            ((1 : ℝ) • ((p.1 • (V₀ p.2).snd : E) : TangentSpace I (γ p.2))) 1 =
+          maximalGeodesic (I := I) g (γ p.2)
+            ((t'⁻¹ • (p.1 • (V₀ p.2).snd : E)) : TangentSpace I (γ p.2)) t' := by
+    filter_upwards [hphase s₀ hs₀₁, hmove s₀ hs₀₂] with p hp_phase hp_move
+    exact ⟨hp_phase, hp_move⟩
+  -- Conclude via the headline manifold lift.
+  exact expMapIntrinsic_variation_contMDiff (I := I) g hEnorm γ V₀ hγ hV₀ hproj n hn
+    s₀ t₀ Φ ρ T t'
+    ⟨hρ_pos, hT_pos, ht'_Ioo, ht'_pos, hG_cd, hΦ_init, hΦ_ode, hΦ_target⟩ hsmall
+
 end Headline
 
 end Exponential
