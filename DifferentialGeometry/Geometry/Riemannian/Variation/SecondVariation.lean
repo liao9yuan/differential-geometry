@@ -132,8 +132,8 @@ private lemma speedSq_eq_chartGramAlongCurve
     fderiv ℝ (fun w : ℝ => extChartAt I α (f s w)) v (1 : ℝ) with hD
   -- The slice `t ↦ f s t` is smooth: it is the joint map precomposed with
   -- the smooth inclusion `u ↦ (s, u)`.
-  have hslice : ContMDiff (𝓘(ℝ, ℝ)) I ∞ (fun u : ℝ => f s u) := by
-    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞
+  have hslice : ContMDiff (𝓘(ℝ, ℝ)) I (8 : ℕ) (fun u : ℝ => f s u) := by
+    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (8 : ℕ)
         (fun u : ℝ => (s, u)) :=
       contMDiff_const.prodMk contMDiff_id
     exact (hf : ContMDiff _ _ _ _).comp hincl
@@ -147,8 +147,9 @@ private lemma speedSq_eq_chartGramAlongCurve
       (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f s u) t (1 : ℝ) : E)
         = (trivializationAt E (TangentSpace I) α).symmL ℝ
             ((fun u : ℝ => f s u) t) (D t) := by
-    have h := MFDerivAlongCurve.raw_mfderiv_eq_symmL_apply_fderiv (I := I) (M := M)
-      (γ := fun u : ℝ => f s u) hslice α hsrc
+    have h := MFDerivAlongCurve.raw_mfderiv_eq_symmL_apply_fderiv_of_mdifferentiableAt
+      (I := I) (M := M)
+      (γ := fun u : ℝ => f s u) (hslice.mdifferentiableAt (by norm_num)) α hsrc
     -- The composite `extChartAt I α ∘ (fun u => f s u)` is the foot-pinned slice.
     have hcomp : ((extChartAt I α) ∘ (fun u : ℝ => f s u))
         = (fun w : ℝ => extChartAt I α (f s w)) := rfl
@@ -221,22 +222,23 @@ mfderiv-applied-to-a-smooth-vector formula handled by
 `ContMDiffAt.mfderiv_apply`. -/
 private lemma velocity_totalSpace_contMDiff
     (f : ℝ → ℝ → M) (hf : IsSmoothVariation (I := I) f) :
-    ContMDiff (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, E)) ∞
+    ContMDiff (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, E)) (7 : ℕ)
       (fun p : ℝ × ℝ =>
         (TotalSpace.mk' E (E := (TangentSpace I : M → Type _))
           (f p.1 p.2) (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f p.1 u) p.2 (1 : ℝ)) :
             TangentBundle I M)) := by
   classical
-  -- Joint smoothness of `f : ℝ × ℝ → M` as a curried map.
-  have hf_uncurry : ContMDiff (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) I ∞
+  -- Joint smoothness of `f : ℝ × ℝ → M` as a curried map (at the fixed finite
+  -- order `8` of `IsSmoothVariation`).
+  have hf_uncurry : ContMDiff (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) I (8 : ℕ)
       (fun p : ℝ × ℝ => f p.1 p.2) := hf
   -- We use `Bundle.contMDiffAt_totalSpace`: smooth into a total space decomposes
   -- into smooth projection + smooth trivialisation-applied fiber value.
   -- Reduce to pointwise smoothness.
   intro p₀
   rw [Bundle.contMDiffAt_totalSpace]
-  refine ⟨hf_uncurry.contMDiffAt, ?_⟩
-  -- We need: `ContMDiffAt (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, E) ∞
+  refine ⟨(hf_uncurry.contMDiffAt).of_le (by exact_mod_cast (by norm_num : (7 : ℕ) ≤ 8)), ?_⟩
+  -- We need: `ContMDiffAt (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, E) 7
   --   (fun p => (trivializationAt E (TangentSpace I) (f p₀.1 p₀.2)
   --       ⟨f p.1 p.2, mfderiv (fun u => f p.1 u) p.2 1⟩).2) p₀`.
   -- Set up `ContMDiffAt.mfderiv_apply`:
@@ -244,7 +246,7 @@ private lemma velocity_totalSpace_contMDiff
   --   g : ℝ × ℝ → ℝ, g q = q.2
   --   g₁ = id, g₂ = const 1
   have hF_smooth : ContMDiffAt
-      ((𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)).prod (𝓘(ℝ, ℝ))) I ∞
+      ((𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)).prod (𝓘(ℝ, ℝ))) I (8 : ℕ)
       (Function.uncurry (fun q : ℝ × ℝ => fun u : ℝ => f q.1 u))
       (p₀, p₀.2) := by
     -- `Function.uncurry (fun q u => f q.1 u) = fun r : (ℝ × ℝ) × ℝ => f r.1.1 r.2`.
@@ -253,24 +255,24 @@ private lemma velocity_totalSpace_contMDiff
     rw [this]
     -- Compose: r ↦ (r.1.1, r.2) ↦ f r.1.1 r.2.
     have hproj : ContMDiff ((𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)).prod (𝓘(ℝ, ℝ)))
-        (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞
+        (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (8 : ℕ)
         (fun r : (ℝ × ℝ) × ℝ => (r.1.1, r.2)) :=
       contMDiff_fst.fst.prodMk contMDiff_snd
     exact (hf_uncurry.comp hproj).contMDiffAt
-  have hg_smooth : ContMDiffAt (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ)) ∞
+  have hg_smooth : ContMDiffAt (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ)) (7 : ℕ)
       (fun q : ℝ × ℝ => q.2) p₀ := contMDiffAt_snd
-  have hg₁_smooth : ContMDiffAt (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞
+  have hg₁_smooth : ContMDiffAt (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (7 : ℕ)
       (id : ℝ × ℝ → ℝ × ℝ) p₀ := contMDiffAt_id
-  have hg₂_smooth : ContMDiffAt (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ)) ∞
+  have hg₂_smooth : ContMDiffAt (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ)) (7 : ℕ)
       (fun _ : ℝ × ℝ => (1 : ℝ)) p₀ := contMDiffAt_const
-  -- Apply mfderiv_apply with m = ∞, n = ∞.
+  -- Apply mfderiv_apply with m = 7, n = 8.
   have h_smooth_mfd := ContMDiffAt.mfderiv_apply
     (I := 𝓘(ℝ, ℝ)) (I' := I)
     (f := fun q : ℝ × ℝ => fun u : ℝ => f q.1 u)
     (g := fun q : ℝ × ℝ => q.2)
     (g₁ := id) (g₂ := fun _ : ℝ × ℝ => (1 : ℝ))
-    (x₀ := p₀) (n := ∞) (m := ∞)
-    hF_smooth hg_smooth hg₁_smooth hg₂_smooth (by simp)
+    (x₀ := p₀) (n := (8 : ℕ)) (m := (7 : ℕ))
+    hF_smooth hg_smooth hg₁_smooth hg₂_smooth (by exact_mod_cast (by norm_num : (7 : ℕ) + 1 ≤ 8))
   -- `h_smooth_mfd` gives smoothness of
   --   `fun x => inTangentCoordinates 𝓘(ℝ, ℝ) I (fun q => q.2)
   --       (fun q => f q.1 q.2) (fun q => mfderiv 𝓘(ℝ,ℝ) I (fun u => f q.1 u) q.2)
@@ -329,7 +331,7 @@ private lemma velocity_totalSpace_contMDiff
         = _
     rw [Trivialization.coe_linearMapAt_of_mem _ hp]
   -- Step 3: transport smoothness through the equality.
-  change ContMDiffAt _ 𝓘(ℝ, E) ∞
+  change ContMDiffAt _ 𝓘(ℝ, E) (7 : ℕ)
       (fun p : ℝ × ℝ => (trivializationAt E (TangentSpace I) (f p₀.1 p₀.2)
         ⟨f p.1 p.2, mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f p.1 u) p.2 (1 : ℝ)⟩).2) p₀
   exact h_smooth_mfd.congr_of_eventuallyEq h_eq
@@ -559,28 +561,28 @@ theorem S1_moving_foot_metric_compatibility
   -- `C²` at `(0, t)` (foot pinned at `α = f 0 t`).
   have hF2 : ContDiffAt ℝ 2
       (fun p : ℝ × ℝ => extChartAt I α (f p.1 p.2)) (0, t) := by
-    have hext : ContMDiffAt I 𝓘(ℝ, E) ∞ (extChartAt I α) (f 0 t) :=
-      contMDiffAt_extChartAt (I := I) (x := α)
-    have hcomp : ContMDiffAt (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, E) ∞
+    have hext : ContMDiffAt I 𝓘(ℝ, E) (8 : ℕ) (extChartAt I α) (f 0 t) :=
+      (contMDiffAt_extChartAt (I := I) (x := α)).of_le (by exact_mod_cast le_top)
+    have hcomp : ContMDiffAt (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, E) (8 : ℕ)
         (fun p : ℝ × ℝ => extChartAt I α (f p.1 p.2)) (0, t) :=
       hext.comp (0, t) hf.contMDiffAt
-    have key : ContDiffAt ℝ ∞
+    have key : ContDiffAt ℝ (8 : ℕ)
         (fun p : ℝ × ℝ => extChartAt I α (f p.1 p.2)) (0, t) := by
       rw [← contMDiffAt_iff_contDiffAt, modelWithCornersSelf_prod,
         ← chartedSpaceSelf_prod]
       exact hcomp
-    exact key.of_le (by decide)
+    exact key.of_le (by exact_mod_cast (by norm_num : (2 : ℕ) ≤ 8))
   -- Smoothness of the transverse curve `γ = fun s => f s t`.
-  have hγ_smooth : ContMDiff (𝓘(ℝ, ℝ)) I ∞ γ := by
-    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞
+  have hγ_smooth : ContMDiff (𝓘(ℝ, ℝ)) I (8 : ℕ) γ := by
+    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (8 : ℕ)
         (fun s : ℝ => (s, t)) :=
       contMDiff_id.prodMk contMDiff_const
     exact (hf : ContMDiff _ _ _ _).comp hincl
   -- Smoothness of each longitudinal slice `fun u => f s u` (used to bridge
   -- the chart-`α`-coordinate of `mfderiv` to a Fréchet derivative).
-  have hslice : ∀ s : ℝ, ContMDiff (𝓘(ℝ, ℝ)) I ∞ (fun u : ℝ => f s u) := by
+  have hslice : ∀ s : ℝ, ContMDiff (𝓘(ℝ, ℝ)) I (8 : ℕ) (fun u : ℝ => f s u) := by
     intro s
-    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞
+    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (8 : ℕ)
         (fun u : ℝ => (s, u)) :=
       contMDiff_const.prodMk contMDiff_id
     exact (hf : ContMDiff _ _ _ _).comp hincl
@@ -603,8 +605,8 @@ theorem S1_moving_foot_metric_compatibility
         (I := I) γ Vsec 0 s := by
     intro s hs
     have hsrc : (fun u : ℝ => f s u) t ∈ (chartAt H α).source := hs
-    have hbridge := MFDerivAlongCurve.chartCoord_mfderiv_along_curve_eq_fderiv
-      (I := I) (M := M) (γ := fun u : ℝ => f s u) (hslice s) α (t := t) hsrc
+    have hbridge := MFDerivAlongCurve.chartCoord_mfderiv_along_curve_eq_fderiv_of_mdifferentiableAt
+      (I := I) (M := M) (γ := fun u : ℝ => f s u) ((hslice s).mdifferentiableAt (by norm_num)) α hsrc
     -- `chartRepAt γ Vsec 0 s = CLMat_{γ 0}(γ s)(Vsec s)`; `γ 0 = α`.
     change V s =
       (trivializationAt E (TangentSpace I) (γ 0)).continuousLinearMapAt ℝ (γ s)
@@ -832,7 +834,7 @@ the model spaces `ℝ × ℝ` and `ℝ` are trivial, so `ContMDiff` is `ContDiff
 private lemma speedSq_contDiff
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M)
     (hf : IsSmoothVariation (I := I) f) :
-    ContDiff ℝ ∞ (fun p : ℝ × ℝ => speedSq (I := I) g f p.1 p.2) := by
+    ContDiff ℝ (7 : ℕ) (fun p : ℝ × ℝ => speedSq (I := I) g f p.1 p.2) := by
   have hvel := velocity_totalSpace_contMDiff (I := I) (M := M) f hf
   letI rb : Bundle.RiemannianBundle (TangentSpace I : M → Type _) :=
     ⟨g.toRiemannianMetric⟩
@@ -842,7 +844,7 @@ private lemma speedSq_contDiff
     (v := fun p : ℝ × ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f p.1 u) p.2 (1 : ℝ))
     (w := fun p : ℝ × ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f p.1 u) p.2 (1 : ℝ))
     hvel hvel
-  have hcm : ContMDiff (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞
+  have hcm : ContMDiff (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (7 : ℕ)
       (fun p : ℝ × ℝ => speedSq (I := I) g f p.1 p.2) := by
     refine hinner.congr ?_; intro p; rfl
   rw [← contMDiff_iff_contDiff, modelWithCornersSelf_prod, ← chartedSpaceSelf_prod]
@@ -885,7 +887,7 @@ theorem S2_diff_under_interval_integral
         (fun s : ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f s u) t (1 : ℝ)) 0)
       (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f 0 u) t (1 : ℝ)) with hDdef
   -- (1) `Φ = speedSq` is jointly `C^∞` in `(s, t)` (`speedSq_contDiff`).
-  have hΦ : ContDiff ℝ ∞ G := by
+  have hΦ : ContDiff ℝ (7 : ℕ) G := by
     rw [hG, hΦdef]; exact speedSq_contDiff (I := I) (M := M) g f _hf
   have hΦcont : Continuous G := hΦ.continuous
   -- (2) The pointwise `s`-derivative of `Φ(·, t)` at `s = 0` is `D t`
@@ -1220,22 +1222,25 @@ sections along a smooth curve.** Smooth-curve wrapper of
 supplies continuity of `γ` at `t₀` and differentiability of the chart trajectory
 `chartCurve (γ t₀) γ` at `t₀`. -/
 private lemma metric_compat_hasDerivAt_inner
+    {n : WithTop ℕ∞} (hn : 1 ≤ n)
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (V W : ∀ t, TangentSpace I (γ t)) (t₀ : ℝ)
-    (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ)
+    (hγ : ContMDiff 𝓘(ℝ, ℝ) I n γ)
     (hVdiff : DifferentiableAt ℝ (chartRepAt (I := I) γ V t₀) t₀)
     (hWdiff : DifferentiableAt ℝ (chartRepAt (I := I) γ W t₀) t₀) :
     HasDerivAt (fun s : ℝ => g.inner (γ s) (V s) (W s))
       (g.inner (γ t₀) (covDerivAlong (I := I) g γ V t₀) (W t₀)
         + g.inner (γ t₀) (V t₀) (covDerivAlong (I := I) g γ W t₀)) t₀ := by
-  -- The chart trajectory `chartCurve (γ t₀) γ = extChartAt (γ t₀) ∘ γ` is `C^∞`,
-  -- hence differentiable at `t₀`.
+  -- The chart trajectory `chartCurve (γ t₀) γ = extChartAt (γ t₀) ∘ γ` is `C^n`
+  -- (`1 ≤ n`), hence differentiable at `t₀`.
+  have hn0 : n ≠ 0 := by
+    intro h; rw [h] at hn; exact absurd hn (by simp)
   have hchartDeriv : DifferentiableAt ℝ (chartCurve (I := I) (γ t₀) γ) t₀ := by
-    have hmdiff : ContMDiffAt 𝓘(ℝ, ℝ) 𝓘(ℝ, E) ∞ ((extChartAt I (γ t₀)) ∘ γ) t₀ := by
-      have hφ : ContMDiffAt I 𝓘(ℝ, E) ∞ (extChartAt I (γ t₀)) (γ t₀) :=
-        contMDiffAt_extChartAt (I := I) (x := γ t₀) (n := ∞)
+    have hmdiff : ContMDiffAt 𝓘(ℝ, ℝ) 𝓘(ℝ, E) n ((extChartAt I (γ t₀)) ∘ γ) t₀ := by
+      have hφ : ContMDiffAt I 𝓘(ℝ, E) n (extChartAt I (γ t₀)) (γ t₀) :=
+        (contMDiffAt_extChartAt (I := I) (x := γ t₀)).of_le (by exact_mod_cast le_top)
       exact hφ.comp t₀ (hγ.contMDiffAt)
-    exact (contMDiffAt_iff_contDiffAt.mp hmdiff).differentiableAt (by simp)
+    exact (contMDiffAt_iff_contDiffAt.mp hmdiff).differentiableAt hn0
   exact metric_compat_hasDerivAt_inner_of_chartCurveDeriv (I := I) g γ V W t₀
     hγ.continuous.continuousAt hchartDeriv hVdiff hWdiff
 
@@ -1261,18 +1266,18 @@ private lemma commute_ds_dt_intrinsic
   classical
   set α : M := f 0 t with hα
   -- Smoothness of the longitudinal/transverse slices of `f`.
-  have hslice_u : ∀ s : ℝ, ContMDiff (𝓘(ℝ, ℝ)) I ∞ (fun u : ℝ => f s u) := by
+  have hslice_u : ∀ s : ℝ, ContMDiff (𝓘(ℝ, ℝ)) I (8 : ℕ) (fun u : ℝ => f s u) := by
     intro s
-    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞ (fun u : ℝ => (s, u)) :=
+    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (8 : ℕ) (fun u : ℝ => (s, u)) :=
       contMDiff_const.prodMk contMDiff_id
     exact (hf : ContMDiff _ _ _ _).comp hincl
-  have hslice_v : ∀ v : ℝ, ContMDiff (𝓘(ℝ, ℝ)) I ∞ (fun u : ℝ => f u v) := by
+  have hslice_v : ∀ v : ℝ, ContMDiff (𝓘(ℝ, ℝ)) I (8 : ℕ) (fun u : ℝ => f u v) := by
     intro v
-    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞ (fun u : ℝ => (u, v)) :=
+    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (8 : ℕ) (fun u : ℝ => (u, v)) :=
       contMDiff_id.prodMk contMDiff_const
     exact (hf : ContMDiff _ _ _ _).comp hincl
-  have htransverse : ContMDiff (𝓘(ℝ, ℝ)) I ∞ (fun s : ℝ => f s t) := hslice_v t
-  have hcentral : ContMDiff (𝓘(ℝ, ℝ)) I ∞ (fun v : ℝ => f 0 v) := hslice_u 0
+  have htransverse : ContMDiff (𝓘(ℝ, ℝ)) I (8 : ℕ) (fun s : ℝ => f s t) := hslice_v t
+  have hcentral : ContMDiff (𝓘(ℝ, ℝ)) I (8 : ℕ) (fun v : ℝ => f 0 v) := hslice_u 0
   -- The two intrinsic covariant derivatives unfold at the common foot `α = f 0 t`.
   -- LHS foot: `(fun s => f s t) 0 = f 0 t = α`.  RHS foot: `(fun v => f 0 v) t = f 0 t = α`.
   rw [covDerivAlong_def, covDerivAlong_def]
@@ -1298,8 +1303,8 @@ private lemma commute_ds_dt_intrinsic
   have hrepL_eq : repL =ᶠ[𝓝 (0 : ℝ)] secL := by
     filter_upwards [hopenL.mem_nhds h0L] with s hs
     have hsrc : (fun u : ℝ => f s u) t ∈ (chartAt H α).source := hs
-    have hbridge := MFDerivAlongCurve.chartCoord_mfderiv_along_curve_eq_fderiv
-      (I := I) (M := M) (γ := fun u : ℝ => f s u) (hslice_u s) α (t := t) hsrc
+    have hbridge := MFDerivAlongCurve.chartCoord_mfderiv_along_curve_eq_fderiv_of_mdifferentiableAt
+      (I := I) (M := M) (γ := fun u : ℝ => f s u) ((hslice_u s).mdifferentiableAt (by norm_num)) α hsrc
     change (trivializationAt E (TangentSpace I) ((fun s : ℝ => f s t) 0)).continuousLinearMapAt ℝ
         ((fun s : ℝ => f s t) s) (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f s u) t (1 : ℝ))
       = fderiv ℝ (fun v : ℝ => extChartAt I α (f s v)) t (1 : ℝ)
@@ -1317,8 +1322,8 @@ private lemma commute_ds_dt_intrinsic
   have hrepR_eq : repR =ᶠ[𝓝 t] secR := by
     filter_upwards [hopenR.mem_nhds h0R] with v hv
     have hsrc : (fun u : ℝ => f u v) 0 ∈ (chartAt H α).source := hv
-    have hbridge := MFDerivAlongCurve.chartCoord_mfderiv_along_curve_eq_fderiv
-      (I := I) (M := M) (γ := fun u : ℝ => f u v) (hslice_v v) α (t := 0) hsrc
+    have hbridge := MFDerivAlongCurve.chartCoord_mfderiv_along_curve_eq_fderiv_of_mdifferentiableAt
+      (I := I) (M := M) (γ := fun u : ℝ => f u v) ((hslice_v v).mdifferentiableAt (by norm_num)) α hsrc
     change (trivializationAt E (TangentSpace I) ((fun v : ℝ => f 0 v) t)).continuousLinearMapAt ℝ
         ((fun v : ℝ => f 0 v) v) (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f u v) 0 (1 : ℝ))
       = fderiv ℝ (fun u : ℝ => extChartAt I α (f u v)) 0 (1 : ℝ)
@@ -1459,15 +1464,17 @@ theorem commute_ds_dt_intrinsic_C2
 
 /-! ## Differentiability of the variation-field and velocity chart-reps -/
 
-/-- The chart-pulled variation `(u, v) ↦ extChartAt I α (f u v)` is jointly `C^∞`
-at any `(s₀, t₀)` whose foot `f s₀ t₀` lies in the chart source at `α`. -/
+/-- The chart-pulled variation `(u, v) ↦ extChartAt I α (f u v)` is jointly `C^8`
+(the fixed finite order of `IsSmoothVariation`) at any `(s₀, t₀)` whose foot
+`f s₀ t₀` lies in the chart source at `α`. Downstream consumers extract the order
+they need (`C¹`, `C²`, or a small constant) via `.of_le` from `8`. -/
 private lemma chartPulled_contDiffAt_infty
     (f : ℝ → ℝ → M) (hf : IsSmoothVariation (I := I) f) (α : M) (s₀ t₀ : ℝ)
     (hsrc : f s₀ t₀ ∈ (chartAt H α).source) :
-    ContDiffAt ℝ ∞ (fun p : ℝ × ℝ => extChartAt I α (f p.1 p.2)) (s₀, t₀) := by
-  have hext : ContMDiffAt I 𝓘(ℝ, E) ∞ (extChartAt I α) (f s₀ t₀) :=
-    contMDiffAt_extChartAt' (I := I) (x := α) hsrc
-  have hcomp : ContMDiffAt (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, E) ∞
+    ContDiffAt ℝ (8 : ℕ) (fun p : ℝ × ℝ => extChartAt I α (f p.1 p.2)) (s₀, t₀) := by
+  have hext : ContMDiffAt I 𝓘(ℝ, E) (8 : ℕ) (extChartAt I α) (f s₀ t₀) :=
+    contMDiffAt_extChartAt' (I := I) (n := (8 : ℕ)) (x := α) hsrc
+  have hcomp : ContMDiffAt (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, E) (8 : ℕ)
       (fun p : ℝ × ℝ => extChartAt I α (f p.1 p.2)) (s₀, t₀) :=
     hext.comp (s₀, t₀) hf.contMDiffAt
   rw [← contMDiffAt_iff_contDiffAt, modelWithCornersSelf_prod, ← chartedSpaceSelf_prod]
@@ -1487,39 +1494,39 @@ private lemma variationField_chartRep_differentiableAt
         (fun v : ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f u v) 0 (1 : ℝ)) t₀) t₀ := by
   classical
   set α : M := f 0 t₀ with hα
-  have hslice_v : ∀ v : ℝ, ContMDiff (𝓘(ℝ, ℝ)) I ∞ (fun u : ℝ => f u v) := by
+  have hslice_v : ∀ v : ℝ, ContMDiff (𝓘(ℝ, ℝ)) I (8 : ℕ) (fun u : ℝ => f u v) := by
     intro v
-    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞ (fun u : ℝ => (u, v)) :=
+    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (8 : ℕ) (fun u : ℝ => (u, v)) :=
       contMDiff_id.prodMk contMDiff_const
     exact (hf : ContMDiff _ _ _ _).comp hincl
-  have hcentral : ContMDiff (𝓘(ℝ, ℝ)) I ∞ (fun v : ℝ => f 0 v) := by
-    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞ (fun v : ℝ => ((0 : ℝ), v)) :=
+  have hcentral : ContMDiff (𝓘(ℝ, ℝ)) I (8 : ℕ) (fun v : ℝ => f 0 v) := by
+    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (8 : ℕ) (fun v : ℝ => ((0 : ℝ), v)) :=
       contMDiff_const.prodMk contMDiff_id
     exact (hf : ContMDiff _ _ _ _).comp hincl
   -- The smooth model section `v ↦ fderiv (fun u => extChartAt α (f u v)) 0 1`.
   set sec : ℝ → E := fun v : ℝ => fderiv ℝ (fun u : ℝ => extChartAt I α (f u v)) 0 (1 : ℝ)
     with hsec
-  -- It is `C^∞` at `t₀`: partial fderiv of a jointly-smooth map, then `eval at 1`.
-  have hsec_cdiff : ContDiffAt ℝ ∞ sec t₀ := by
-    -- `(v, u) ↦ extChartAt α (f u v)` is jointly `C^∞` at `(t₀, 0)`.
+  -- It is `C^7` at `t₀`: partial fderiv of a jointly-`C^8` map, then `eval at 1`.
+  have hsec_cdiff : ContDiffAt ℝ (7 : ℕ) sec t₀ := by
+    -- `(v, u) ↦ extChartAt α (f u v)` is jointly `C^8` at `(t₀, 0)`.
     have hsrc0 : f 0 t₀ ∈ (chartAt H α).source := by rw [hα]; exact mem_chart_source H (f 0 t₀)
-    have hjoint : ContDiffAt ℝ ∞
+    have hjoint : ContDiffAt ℝ (8 : ℕ)
         (Function.uncurry (fun v u : ℝ => extChartAt I α (f u v))) (t₀, (0 : ℝ)) := by
       have h := chartPulled_contDiffAt_infty (I := I) f hf α 0 t₀ hsrc0
       -- swap the two coordinates: `(v, u) ↦ extChartAt α (f u v)`.
-      have hswap : ContDiffAt ℝ ∞
+      have hswap : ContDiffAt ℝ (8 : ℕ)
           ((fun p : ℝ × ℝ => extChartAt I α (f p.1 p.2)) ∘ (fun q : ℝ × ℝ => (q.2, q.1)))
           (t₀, (0 : ℝ)) :=
         h.comp (t₀, (0 : ℝ)) ((contDiffAt_snd).prodMk (contDiffAt_fst))
       exact hswap
-    have hg0 : ContDiffAt ℝ ∞ (fun _ : ℝ => (0 : ℝ)) t₀ := contDiffAt_const
-    have hpartial : ContDiffAt ℝ ∞
+    have hg0 : ContDiffAt ℝ (7 : ℕ) (fun _ : ℝ => (0 : ℝ)) t₀ := contDiffAt_const
+    have hpartial : ContDiffAt ℝ (7 : ℕ)
         (fun v : ℝ => fderiv ℝ (fun u : ℝ => extChartAt I α (f u v)) ((fun _ : ℝ => (0:ℝ)) v)) t₀ :=
       ContDiffAt.fderiv (𝕜 := ℝ)
         (f := fun v u : ℝ => extChartAt I α (f u v)) (g := fun _ : ℝ => (0 : ℝ))
-        hjoint hg0 (by simp)
+        hjoint hg0 (by exact_mod_cast (by norm_num : (7 : ℕ) + 1 ≤ 8))
     -- Apply the evaluation-at-1 CLM.
-    have heval : ContDiffAt ℝ ∞
+    have heval : ContDiffAt ℝ (7 : ℕ)
         (fun v : ℝ => (ContinuousLinearMap.apply ℝ E (1 : ℝ))
           (fderiv ℝ (fun u : ℝ => extChartAt I α (f u v)) 0)) t₀ :=
       (ContinuousLinearMap.apply ℝ E (1 : ℝ)).contDiff.contDiffAt.comp t₀ hpartial
@@ -1534,8 +1541,8 @@ private lemma variationField_chartRep_differentiableAt
         =ᶠ[𝓝 t₀] sec := by
     filter_upwards [hopen.mem_nhds h0] with v hv
     have hsrc : (fun u : ℝ => f u v) 0 ∈ (chartAt H α).source := hv
-    have hbridge := MFDerivAlongCurve.chartCoord_mfderiv_along_curve_eq_fderiv
-      (I := I) (M := M) (γ := fun u : ℝ => f u v) (hslice_v v) α (t := 0) hsrc
+    have hbridge := MFDerivAlongCurve.chartCoord_mfderiv_along_curve_eq_fderiv_of_mdifferentiableAt
+      (I := I) (M := M) (γ := fun u : ℝ => f u v) ((hslice_v v).mdifferentiableAt (by norm_num)) α hsrc
     change (trivializationAt E (TangentSpace I) ((fun v : ℝ => f 0 v) t₀)).continuousLinearMapAt ℝ
         ((fun v : ℝ => f 0 v) v) (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f u v) 0 (1 : ℝ)) = sec v
     rw [hsec, show (fun v : ℝ => f 0 v) t₀ = α from hα.symm]
@@ -1557,26 +1564,26 @@ private lemma velocityField_chartRep_differentiableAt
         (fun v : ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f 0 u) v (1 : ℝ)) t₀) t₀ := by
   classical
   set α : M := f 0 t₀ with hα
-  have hcentral : ContMDiff (𝓘(ℝ, ℝ)) I ∞ (fun v : ℝ => f 0 v) := by
-    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞ (fun v : ℝ => ((0 : ℝ), v)) :=
+  have hcentral : ContMDiff (𝓘(ℝ, ℝ)) I (8 : ℕ) (fun v : ℝ => f 0 v) := by
+    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (8 : ℕ) (fun v : ℝ => ((0 : ℝ), v)) :=
       contMDiff_const.prodMk contMDiff_id
     exact (hf : ContMDiff _ _ _ _).comp hincl
   -- The smooth model section `v ↦ fderiv (extChartAt α ∘ (f 0 ·)) v 1`, which is
   -- the velocity of the `C^∞` chart curve.
   set sec : ℝ → E := fun v : ℝ => fderiv ℝ (fun w : ℝ => extChartAt I α (f 0 w)) v (1 : ℝ)
     with hsec
-  have hchartcurve_cdiff : ContDiffAt ℝ ∞ (fun w : ℝ => extChartAt I α (f 0 w)) t₀ := by
-    have hext : ContMDiffAt I 𝓘(ℝ, E) ∞ (extChartAt I α) (f 0 t₀) :=
-      contMDiffAt_extChartAt (I := I) (x := α)
-    have hcomp : ContMDiffAt (𝓘(ℝ, ℝ)) 𝓘(ℝ, E) ∞ (fun w : ℝ => extChartAt I α (f 0 w)) t₀ :=
+  have hchartcurve_cdiff : ContDiffAt ℝ (8 : ℕ) (fun w : ℝ => extChartAt I α (f 0 w)) t₀ := by
+    have hext : ContMDiffAt I 𝓘(ℝ, E) (8 : ℕ) (extChartAt I α) (f 0 t₀) :=
+      (contMDiffAt_extChartAt (I := I) (x := α)).of_le (by exact_mod_cast le_top)
+    have hcomp : ContMDiffAt (𝓘(ℝ, ℝ)) 𝓘(ℝ, E) (8 : ℕ) (fun w : ℝ => extChartAt I α (f 0 w)) t₀ :=
       hext.comp t₀ hcentral.contMDiffAt
     exact contMDiffAt_iff_contDiffAt.mp hcomp
-  -- the chart curve is `C^∞` on a neighbourhood, so its `fderiv` (hence the
-  -- eval-at-1 section `sec`) is `C^∞`.
-  have hsec_cdiff : ContDiffAt ℝ ∞ sec t₀ := by
-    have hfd : ContDiffAt ℝ ∞ (fderiv ℝ (fun w : ℝ => extChartAt I α (f 0 w))) t₀ :=
-      hchartcurve_cdiff.fderiv_right (by simp)
-    have heval : ContDiffAt ℝ ∞
+  -- the chart curve is `C^8` on a neighbourhood, so its `fderiv` (hence the
+  -- eval-at-1 section `sec`) is `C^7`.
+  have hsec_cdiff : ContDiffAt ℝ (7 : ℕ) sec t₀ := by
+    have hfd : ContDiffAt ℝ (7 : ℕ) (fderiv ℝ (fun w : ℝ => extChartAt I α (f 0 w))) t₀ :=
+      hchartcurve_cdiff.fderiv_right (by exact_mod_cast (by norm_num : (7 : ℕ) + 1 ≤ 8))
+    have heval : ContDiffAt ℝ (7 : ℕ)
         (fun v : ℝ => (ContinuousLinearMap.apply ℝ E (1 : ℝ))
           (fderiv ℝ (fun w : ℝ => extChartAt I α (f 0 w)) v)) t₀ :=
       (ContinuousLinearMap.apply ℝ E (1 : ℝ)).contDiff.contDiffAt.comp t₀ hfd
@@ -1591,8 +1598,8 @@ private lemma velocityField_chartRep_differentiableAt
         =ᶠ[𝓝 t₀] sec := by
     filter_upwards [hopen.mem_nhds h0] with v hv
     have hsrc : (fun w : ℝ => f 0 w) v ∈ (chartAt H α).source := hv
-    have hbridge := MFDerivAlongCurve.chartCoord_mfderiv_along_curve_eq_fderiv
-      (I := I) (M := M) (γ := fun w : ℝ => f 0 w) hcentral α (t := v) hsrc
+    have hbridge := MFDerivAlongCurve.chartCoord_mfderiv_along_curve_eq_fderiv_of_mdifferentiableAt
+      (I := I) (M := M) (γ := fun w : ℝ => f 0 w) (hcentral.mdifferentiableAt (by norm_num)) α hsrc
     change (trivializationAt E (TangentSpace I) ((fun v : ℝ => f 0 v) t₀)).continuousLinearMapAt ℝ
         ((fun v : ℝ => f 0 v) v) (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f 0 u) v (1 : ℝ)) = sec v
     rw [hsec, show (fun v : ℝ => f 0 v) t₀ = α from hα.symm]
@@ -1609,18 +1616,18 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 smoothness. The `ContMDiff` analogue of `continuousOn_g_inner_along_curve`; the
 tangent-space norm-instance diamond is resolved by the disabled instances. -/
 private lemma g_inner_along_curve_contMDiff
-    (g : SmoothRiemannianMetric I M)
+    {n : WithTop ℕ∞} [ENat.LEInfty n] (g : SmoothRiemannianMetric I M)
     {γ : ℝ → M} {v w : ∀ t : ℝ, TangentSpace I (γ t)}
-    (hv : ContMDiff (𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, E)) ∞ (fun t : ℝ => (TotalSpace.mk' E
+    (hv : ContMDiff (𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, E)) n (fun t : ℝ => (TotalSpace.mk' E
       (E := (TangentSpace I : M → Type _)) (γ t) (v t) : TangentBundle I M)))
-    (hw : ContMDiff (𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, E)) ∞ (fun t : ℝ => (TotalSpace.mk' E
+    (hw : ContMDiff (𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, E)) n (fun t : ℝ => (TotalSpace.mk' E
       (E := (TangentSpace I : M → Type _)) (γ t) (w t) : TangentBundle I M))) :
-    ContDiff ℝ ∞ (fun t : ℝ => g.inner (γ t) (v t) (w t)) := by
+    ContDiff ℝ n (fun t : ℝ => g.inner (γ t) (v t) (w t)) := by
   letI rb : Bundle.RiemannianBundle (TangentSpace I : M → Type _) :=
     ⟨g.toRiemannianMetric⟩
   have hinner := ContMDiff.inner_bundle (F := E) (B := M)
     (E := (TangentSpace I : M → Type _)) (b := γ) (v := v) (w := w) hv hw
-  have hcm : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ)) ∞ (fun t : ℝ => g.inner (γ t) (v t) (w t)) := by
+  have hcm : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ)) n (fun t : ℝ => g.inner (γ t) (v t) (w t)) := by
     refine hinner.congr (fun t => ?_); rfl
   rw [← contMDiff_iff_contDiff]; exact hcm
 
@@ -1696,8 +1703,8 @@ theorem first_variation_formula
   rw [intervalIntegral.integral_congr hintegrand_eq] at hS2
   -- (4) Integration by parts via metric compatibility (`metric_compat_hasDerivAt_inner`).
   -- The boundary function `h t := ⟨V t, γ' t⟩` has derivative `⟨∇_t V, γ'⟩ + ⟨V, ∇_t γ'⟩`.
-  have hγ_smooth : ContMDiff (𝓘(ℝ, ℝ)) I ∞ γ := by
-    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞ (fun v : ℝ => ((0 : ℝ), v)) :=
+  have hγ_smooth : ContMDiff (𝓘(ℝ, ℝ)) I (8 : ℕ) γ := by
+    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (8 : ℕ) (fun v : ℝ => ((0 : ℝ), v)) :=
       contMDiff_const.prodMk contMDiff_id
     exact (hf : ContMDiff _ _ _ _).comp hincl
   -- Chart-rep differentiability of `V` and `γ'` at every `t₀`.
@@ -1713,7 +1720,7 @@ theorem first_variation_formula
         (g.inner (γ t) (covDerivAlong (I := I) g γ V t) (γ' t)
           + g.inner (γ t) (V t) (covDerivAlong (I := I) g γ γ' t)) t := by
     intro t _ht
-    exact metric_compat_hasDerivAt_inner (I := I) g γ V γ' t hγ_smooth (hVdiff t) (hγ'diff t)
+    exact metric_compat_hasDerivAt_inner (I := I) (by exact_mod_cast (by norm_num : (1 : ℕ) ≤ 8)) g γ V γ' t hγ_smooth (hVdiff t) (hγ'diff t)
   -- The boundary values vanish: `V 0 = V L = 0` (endpoints fixed).
   have hV0 : V 0 = 0 := by
     change mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f u 0) 0 (1 : ℝ) = 0
@@ -1732,34 +1739,34 @@ theorem first_variation_formula
       + g.inner (γ t) (V t) (covDerivAlong (I := I) g γ γ' t) with hbd'_def
   -- Total-space smoothness of `V` (swapped variation) and `γ'`.
   have hfswap : IsSmoothVariation (I := I) (fun a b : ℝ => f b a) := by
-    have hswapmap : ContMDiff (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞
+    have hswapmap : ContMDiff (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (8 : ℕ)
         (fun q : ℝ × ℝ => (q.2, q.1)) := contMDiff_snd.prodMk contMDiff_fst
     exact (hf : ContMDiff _ _ _ _).comp hswapmap
-  have hVtotal : ContMDiff (𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, E)) ∞ (fun t : ℝ =>
+  have hVtotal : ContMDiff (𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, E)) (7 : ℕ) (fun t : ℝ =>
       (TotalSpace.mk' E (E := (TangentSpace I : M → Type _)) (γ t) (V t) : TangentBundle I M)) := by
     have hbase := velocity_totalSpace_contMDiff (I := I) (M := M) (fun a b : ℝ => f b a) hfswap
     have hcomp := hbase.comp
-      (contMDiff_id.prodMk contMDiff_const : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞
+      (contMDiff_id.prodMk contMDiff_const : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (7 : ℕ)
         (fun t : ℝ => (t, (0 : ℝ))))
     refine hcomp.congr (fun t => ?_)
     rfl
-  have hγ'total : ContMDiff (𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, E)) ∞ (fun t : ℝ =>
+  have hγ'total : ContMDiff (𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, E)) (7 : ℕ) (fun t : ℝ =>
       (TotalSpace.mk' E (E := (TangentSpace I : M → Type _)) (γ t) (γ' t) : TangentBundle I M)) := by
     have hbase := velocity_totalSpace_contMDiff (I := I) (M := M) f hf
     have hcomp := hbase.comp
-      (contMDiff_const.prodMk contMDiff_id : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞
+      (contMDiff_const.prodMk contMDiff_id : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (7 : ℕ)
         (fun t : ℝ => ((0 : ℝ), t)))
     refine hcomp.congr (fun t => ?_)
     rfl
   -- `hbd` is `C^∞`.
-  have hbd_contdiff : ContDiff ℝ ∞ hbd :=
+  have hbd_contdiff : ContDiff ℝ (7 : ℕ) hbd :=
     g_inner_along_curve_contMDiff (I := I) (M := M) g hVtotal hγ'total
   -- `deriv hbd` is continuous, and `hbd' = deriv hbd`.
-  have hderiv_cont : Continuous (deriv hbd) := hbd_contdiff.continuous_deriv (by simp)
+  have hderiv_cont : Continuous (deriv hbd) := hbd_contdiff.continuous_deriv (by norm_num)
   have hbd'_eq_deriv : ∀ t : ℝ, hbd' t = deriv hbd t := by
     intro t
     have hd : HasDerivAt hbd (hbd' t) t := by
-      have := metric_compat_hasDerivAt_inner (I := I) g γ V γ' t hγ_smooth (hVdiff t) (hγ'diff t)
+      have := metric_compat_hasDerivAt_inner (I := I) (by exact_mod_cast (by norm_num : (1 : ℕ) ≤ 8)) g γ V γ' t hγ_smooth (hVdiff t) (hγ'diff t)
       exact this
     exact (hd.deriv).symm
   have hbd'_cont : Continuous hbd' := by
@@ -1769,7 +1776,7 @@ theorem first_variation_formula
   -- (5) FTC: `∫₀ᴸ hbd' = hbd L - hbd 0 = 0` (boundary values vanish since `V 0 = V L = 0`).
   have hFTC : (∫ t in (0 : ℝ)..L, hbd' t) = hbd L - hbd 0 := by
     refine intervalIntegral.integral_eq_sub_of_hasDerivAt (fun t ht => ?_) hbd'_int
-    exact metric_compat_hasDerivAt_inner (I := I) g γ V γ' t hγ_smooth (hVdiff t) (hγ'diff t)
+    exact metric_compat_hasDerivAt_inner (I := I) (by exact_mod_cast (by norm_num : (1 : ℕ) ≤ 8)) g γ V γ' t hγ_smooth (hVdiff t) (hγ'diff t)
   have hbdL0 : hbd L = 0 := by
     change g.inner (γ L) (V L) (γ' L) = 0
     rw [hVL, map_zero, ContinuousLinearMap.zero_apply]
@@ -1789,7 +1796,7 @@ theorem first_variation_formula
       (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f 0 u) t (1 : ℝ)) with hD2num_def
   -- `D2num` is continuous: it is the partial `s`-derivative of the jointly-`C^∞`
   -- speed-squared `G := fun p => speedSq g f p.1 p.2` at `(0, t)`.
-  have hG : ContDiff ℝ ∞ (fun p : ℝ × ℝ => speedSq (I := I) g f p.1 p.2) :=
+  have hG : ContDiff ℝ (7 : ℕ) (fun p : ℝ × ℝ => speedSq (I := I) g f p.1 p.2) :=
     speedSq_contDiff (I := I) (M := M) g f hf
   have hD2num_eq : ∀ t : ℝ,
       D2num t = fderiv ℝ (fun p : ℝ × ℝ => speedSq (I := I) g f p.1 p.2) (0, t) (1, 0) := by
@@ -1938,8 +1945,8 @@ theorem first_variation_formula_free_endpoint
   rw [intervalIntegral.integral_congr hintegrand_eq] at hS2
   -- (4) Integration by parts via metric compatibility (`metric_compat_hasDerivAt_inner`).
   -- The boundary function `h t := ⟨V t, γ' t⟩` has derivative `⟨∇_t V, γ'⟩ + ⟨V, ∇_t γ'⟩`.
-  have hγ_smooth : ContMDiff (𝓘(ℝ, ℝ)) I ∞ γ := by
-    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞ (fun v : ℝ => ((0 : ℝ), v)) :=
+  have hγ_smooth : ContMDiff (𝓘(ℝ, ℝ)) I (8 : ℕ) γ := by
+    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (8 : ℕ) (fun v : ℝ => ((0 : ℝ), v)) :=
       contMDiff_const.prodMk contMDiff_id
     exact (hf : ContMDiff _ _ _ _).comp hincl
   -- Chart-rep differentiability of `V` and `γ'` at every `t₀`.
@@ -1955,7 +1962,7 @@ theorem first_variation_formula_free_endpoint
         (g.inner (γ t) (covDerivAlong (I := I) g γ V t) (γ' t)
           + g.inner (γ t) (V t) (covDerivAlong (I := I) g γ γ' t)) t := by
     intro t _ht
-    exact metric_compat_hasDerivAt_inner (I := I) g γ V γ' t hγ_smooth (hVdiff t) (hγ'diff t)
+    exact metric_compat_hasDerivAt_inner (I := I) (by exact_mod_cast (by norm_num : (1 : ℕ) ≤ 8)) g γ V γ' t hγ_smooth (hVdiff t) (hγ'diff t)
   -- Interval-integrability of the boundary derivative `hbd'`.
   -- `hbd := ⟨V, γ'⟩` is `C^∞` (inner product of two smooth sections), so
   -- `deriv hbd` is continuous; and `hbd' = deriv hbd` by `hbdry`.
@@ -1965,34 +1972,34 @@ theorem first_variation_formula_free_endpoint
       + g.inner (γ t) (V t) (covDerivAlong (I := I) g γ γ' t) with hbd'_def
   -- Total-space smoothness of `V` (swapped variation) and `γ'`.
   have hfswap : IsSmoothVariation (I := I) (fun a b : ℝ => f b a) := by
-    have hswapmap : ContMDiff (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞
+    have hswapmap : ContMDiff (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (8 : ℕ)
         (fun q : ℝ × ℝ => (q.2, q.1)) := contMDiff_snd.prodMk contMDiff_fst
     exact (hf : ContMDiff _ _ _ _).comp hswapmap
-  have hVtotal : ContMDiff (𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, E)) ∞ (fun t : ℝ =>
+  have hVtotal : ContMDiff (𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, E)) (7 : ℕ) (fun t : ℝ =>
       (TotalSpace.mk' E (E := (TangentSpace I : M → Type _)) (γ t) (V t) : TangentBundle I M)) := by
     have hbase := velocity_totalSpace_contMDiff (I := I) (M := M) (fun a b : ℝ => f b a) hfswap
     have hcomp := hbase.comp
-      (contMDiff_id.prodMk contMDiff_const : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞
+      (contMDiff_id.prodMk contMDiff_const : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (7 : ℕ)
         (fun t : ℝ => (t, (0 : ℝ))))
     refine hcomp.congr (fun t => ?_)
     rfl
-  have hγ'total : ContMDiff (𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, E)) ∞ (fun t : ℝ =>
+  have hγ'total : ContMDiff (𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, E)) (7 : ℕ) (fun t : ℝ =>
       (TotalSpace.mk' E (E := (TangentSpace I : M → Type _)) (γ t) (γ' t) : TangentBundle I M)) := by
     have hbase := velocity_totalSpace_contMDiff (I := I) (M := M) f hf
     have hcomp := hbase.comp
-      (contMDiff_const.prodMk contMDiff_id : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞
+      (contMDiff_const.prodMk contMDiff_id : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (7 : ℕ)
         (fun t : ℝ => ((0 : ℝ), t)))
     refine hcomp.congr (fun t => ?_)
     rfl
   -- `hbd` is `C^∞`.
-  have hbd_contdiff : ContDiff ℝ ∞ hbd :=
+  have hbd_contdiff : ContDiff ℝ (7 : ℕ) hbd :=
     g_inner_along_curve_contMDiff (I := I) (M := M) g hVtotal hγ'total
   -- `deriv hbd` is continuous, and `hbd' = deriv hbd`.
-  have hderiv_cont : Continuous (deriv hbd) := hbd_contdiff.continuous_deriv (by simp)
+  have hderiv_cont : Continuous (deriv hbd) := hbd_contdiff.continuous_deriv (by norm_num)
   have hbd'_eq_deriv : ∀ t : ℝ, hbd' t = deriv hbd t := by
     intro t
     have hd : HasDerivAt hbd (hbd' t) t := by
-      have := metric_compat_hasDerivAt_inner (I := I) g γ V γ' t hγ_smooth (hVdiff t) (hγ'diff t)
+      have := metric_compat_hasDerivAt_inner (I := I) (by exact_mod_cast (by norm_num : (1 : ℕ) ≤ 8)) g γ V γ' t hγ_smooth (hVdiff t) (hγ'diff t)
       exact this
     exact (hd.deriv).symm
   have hbd'_cont : Continuous hbd' := by
@@ -2002,7 +2009,7 @@ theorem first_variation_formula_free_endpoint
   -- (5) FTC: `∫₀ᴸ hbd' = hbd L - hbd 0`.  The boundary term is *kept*.
   have hFTC : (∫ t in (0 : ℝ)..L, hbd' t) = hbd L - hbd 0 := by
     refine intervalIntegral.integral_eq_sub_of_hasDerivAt (fun t ht => ?_) hbd'_int
-    exact metric_compat_hasDerivAt_inner (I := I) g γ V γ' t hγ_smooth (hVdiff t) (hγ'diff t)
+    exact metric_compat_hasDerivAt_inner (I := I) (by exact_mod_cast (by norm_num : (1 : ℕ) ≤ 8)) g γ V γ' t hγ_smooth (hVdiff t) (hγ'diff t)
   -- (6) `A t := ⟨∇_t V, γ'⟩` is continuous: it equals `½ ∂_s speedSq|₀`, the
   -- partial derivative of the jointly-`C^∞` speed-squared (`S1`/`S2` reasoning).
   set A : ℝ → ℝ := fun t : ℝ => g.inner (γ t) (covDerivAlong (I := I) g γ V t) (γ' t)
@@ -2015,7 +2022,7 @@ theorem first_variation_formula_free_endpoint
       (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f 0 u) t (1 : ℝ)) with hD2num_def
   -- `D2num` is continuous: it is the partial `s`-derivative of the jointly-`C^∞`
   -- speed-squared `G := fun p => speedSq g f p.1 p.2` at `(0, t)`.
-  have hG : ContDiff ℝ ∞ (fun p : ℝ × ℝ => speedSq (I := I) g f p.1 p.2) :=
+  have hG : ContDiff ℝ (7 : ℕ) (fun p : ℝ × ℝ => speedSq (I := I) g f p.1 p.2) :=
     speedSq_contDiff (I := I) (M := M) g f hf
   have hD2num_eq : ∀ t : ℝ,
       D2num t = fderiv ℝ (fun p : ℝ × ℝ => speedSq (I := I) g f p.1 p.2) (0, t) (1, 0) := by
@@ -2117,11 +2124,11 @@ theorem first_variation_vanishes_for_geodesic
       rw [hfc t, hfγ]; exact hUnit t ht)
   -- The integrand `⟨V, ∇_t γ'⟩` vanishes on `[0, L]`: `γ` is a geodesic, so
   -- `∇_t γ' = covDerivAlong g γ γ' = 0`.
-  have hsmooth_central : ContMDiff (𝓘(ℝ, ℝ)) I ∞ (fun v : ℝ => f 0 v) := by
-    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞ (fun v : ℝ => ((0 : ℝ), v)) :=
+  have hsmooth_central : ContMDiff (𝓘(ℝ, ℝ)) I (8 : ℕ) (fun v : ℝ => f 0 v) := by
+    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (8 : ℕ) (fun v : ℝ => ((0 : ℝ), v)) :=
       contMDiff_const.prodMk contMDiff_id
     exact (hf : ContMDiff _ _ _ _).comp hincl
-  have hγ_smooth : ContMDiff (𝓘(ℝ, ℝ)) I ∞ γ := hfγ ▸ hsmooth_central
+  have hγ_smooth : ContMDiff (𝓘(ℝ, ℝ)) I (8 : ℕ) γ := hfγ ▸ hsmooth_central
   -- `covDerivAlong g (f 0 ·) γ' t = 0` for `t ∈ [0, L]`.
   have haccel0 : ∀ t ∈ Set.Icc (0 : ℝ) L,
       covDerivAlong (I := I) g (fun v : ℝ => f 0 v)
@@ -2130,7 +2137,8 @@ theorem first_variation_vanishes_for_geodesic
     have hgeo : HasGeodesicEquationAt (I := I) g γ t := hγ t ht
     have hzero : covDerivAlong (I := I) g γ
         (fun s => (mfderiv 𝓘(ℝ, ℝ) I γ s : ℝ →L[ℝ] _) (1 : ℝ)) t = 0 :=
-      (covDerivAlong_velocity_eq_zero_iff_hasGeodesicEquationAt (I := I) g γ t hγ_smooth).mpr hgeo
+      covDerivAlong_velocity_eq_zero_of_hasGeodesicEquationAt_C2 (I := I) g γ t
+        (hγ_smooth.contMDiffAt.of_le (by exact_mod_cast (by norm_num : (2 : ℕ) ≤ 8))) hgeo
     rw [hfγ]; exact hzero
   -- Hence the integrand vanishes on `[0, L]`, so the integral is `0`.
   have hint0 : (∫ t in (0 : ℝ)..L,
@@ -2167,14 +2175,15 @@ the forward chart-`β` coordinate map `continuousLinearMapAt β (γ t)` to that
 lemma's identity (and using `continuousLinearMapAt ∘ symmL = id` on the base set)
 produces the chart-`β` covariant derivative directly. -/
 private lemma chartCoord_covDerivAlong_eq_chartCovDerivAlong_chartRepAtBase
+    {n : WithTop ℕ∞} [ENat.LEInfty n] (hn : n ≠ 0)
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M) (V : ∀ t, TangentSpace I (γ t))
     (t : ℝ) (β : M)
-    (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) (hβ : γ t ∈ (chartAt H β).source)
+    (hγ : ContMDiff 𝓘(ℝ, ℝ) I n γ) (hβ : γ t ∈ (chartAt H β).source)
     (hV : DifferentiableAt ℝ (chartRepAt (I := I) γ V t) t) :
     (trivializationAt E (TangentSpace I) β).continuousLinearMapAt ℝ (γ t)
         (covDerivAlong (I := I) g γ V t)
       = chartCovDerivAlong (I := I) g β γ (chartRepAtBase (I := I) β γ V) t := by
-  have hinv := covDerivAlong_chart_foot_invariance (I := I) g γ V t β hγ hβ hV
+  have hinv := covDerivAlong_chart_foot_invariance (I := I) hn g γ V t β hγ hβ hV
   rw [← hinv]
   have hmem : γ t ∈ (trivializationAt E (TangentSpace I) β).baseSet := by
     rw [TangentBundle.trivializationAt_baseSet]; exact hβ
@@ -2194,7 +2203,7 @@ private lemma slice_velocityField_chartRep_differentiableAt
       (chartRepAt (I := I) (fun v : ℝ => f u v)
         (fun v : ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun w : ℝ => f u w) v (1 : ℝ)) t₀) t₀ := by
   have hf' : IsSmoothVariation (I := I) (fun a b : ℝ => f (u + a) b) := by
-    have hcomp : ContMDiff (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞
+    have hcomp : ContMDiff (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (8 : ℕ)
         (fun p : ℝ × ℝ => (u + p.1, p.2)) :=
       (contMDiff_const.add contMDiff_fst).prodMk contMDiff_snd
     exact (hf : ContMDiff _ _ _ _).comp hcomp
@@ -2221,13 +2230,13 @@ private lemma slice_longitudinalField_transverse_chartRep_differentiableAt
         (fun u : ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun w : ℝ => f u w) v (1 : ℝ)) 0) 0 := by
   classical
   set α : M := f 0 v with hα
-  have hslice_u : ∀ s : ℝ, ContMDiff (𝓘(ℝ, ℝ)) I ∞ (fun w : ℝ => f s w) := by
+  have hslice_u : ∀ s : ℝ, ContMDiff (𝓘(ℝ, ℝ)) I (8 : ℕ) (fun w : ℝ => f s w) := by
     intro s
-    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞ (fun w : ℝ => (s, w)) :=
+    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (8 : ℕ) (fun w : ℝ => (s, w)) :=
       contMDiff_const.prodMk contMDiff_id
     exact (hf : ContMDiff _ _ _ _).comp hincl
-  have htransverse : ContMDiff (𝓘(ℝ, ℝ)) I ∞ (fun u : ℝ => f u v) := by
-    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞ (fun u : ℝ => (u, v)) :=
+  have htransverse : ContMDiff (𝓘(ℝ, ℝ)) I (8 : ℕ) (fun u : ℝ => f u v) := by
+    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (8 : ℕ) (fun u : ℝ => (u, v)) :=
       contMDiff_id.prodMk contMDiff_const
     exact (hf : ContMDiff _ _ _ _).comp hincl
   -- The smooth model section: `u ↦ fderiv_w (extChartAt α (f u w)) v 1`.
@@ -2235,18 +2244,18 @@ private lemma slice_longitudinalField_transverse_chartRep_differentiableAt
     with hsec
   -- It is `C^∞` at `0`: the partial fderiv (in `w` at `v`) of the jointly-smooth chart-pull,
   -- evaluated at `1`, varying `u`.
-  have hsec_cdiff : ContDiffAt ℝ ∞ sec 0 := by
+  have hsec_cdiff : ContDiffAt ℝ (7 : ℕ) sec 0 := by
     have hsrc0 : f 0 v ∈ (chartAt H α).source := by rw [hα]; exact mem_chart_source H (f 0 v)
-    have hjoint : ContDiffAt ℝ ∞
+    have hjoint : ContDiffAt ℝ (8 : ℕ)
         (Function.uncurry (fun u w : ℝ => extChartAt I α (f u w))) (0, v) := by
       have h := chartPulled_contDiffAt_infty (I := I) f hf α 0 v hsrc0
       exact h
-    have hgv : ContDiffAt ℝ ∞ (fun _ : ℝ => v) 0 := contDiffAt_const
-    have hpartial : ContDiffAt ℝ ∞
+    have hgv : ContDiffAt ℝ (7 : ℕ) (fun _ : ℝ => v) 0 := contDiffAt_const
+    have hpartial : ContDiffAt ℝ (7 : ℕ)
         (fun u : ℝ => fderiv ℝ (fun w : ℝ => extChartAt I α (f u w)) ((fun _ : ℝ => v) u)) 0 :=
       ContDiffAt.fderiv (𝕜 := ℝ)
         (f := fun u w : ℝ => extChartAt I α (f u w)) (g := fun _ : ℝ => v)
-        hjoint hgv (by rw [show (∞ : WithTop ℕ∞) + 1 = ∞ from rfl])
+        hjoint hgv (by exact_mod_cast (by norm_num : (7 : ℕ) + 1 ≤ 8))
     exact (ContinuousLinearMap.apply ℝ E (1 : ℝ)).contDiff.contDiffAt.comp 0 hpartial
   -- The chart-rep agrees with `sec` near `0`.
   have hopen : IsOpen {u : ℝ | f u v ∈ (chartAt H α).source} :=
@@ -2258,8 +2267,8 @@ private lemma slice_longitudinalField_transverse_chartRep_differentiableAt
         =ᶠ[𝓝 (0 : ℝ)] sec := by
     filter_upwards [hopen.mem_nhds h0] with u hu
     have hsrc : (fun w : ℝ => f u w) v ∈ (chartAt H α).source := hu
-    have hbridge := MFDerivAlongCurve.chartCoord_mfderiv_along_curve_eq_fderiv
-      (I := I) (M := M) (γ := fun w : ℝ => f u w) (hslice_u u) α (t := v) hsrc
+    have hbridge := MFDerivAlongCurve.chartCoord_mfderiv_along_curve_eq_fderiv_of_mdifferentiableAt
+      (I := I) (M := M) (γ := fun w : ℝ => f u w) ((hslice_u u).mdifferentiableAt (by norm_num)) α hsrc
     change (trivializationAt E (TangentSpace I) ((fun u : ℝ => f u v) 0)).continuousLinearMapAt ℝ
         ((fun u : ℝ => f u v) u) (mfderiv (𝓘(ℝ, ℝ)) I (fun w : ℝ => f u w) v (1 : ℝ)) = sec u
     rw [hsec, show (fun u : ℝ => f u v) 0 = α from hα.symm]
@@ -2285,19 +2294,19 @@ private lemma chartCoord_longitudinalVelocity_contDiffAt
   set β : M := f 0 t with hβ
   -- Joint `C^∞` of the chart-pull `F (u, v) := extChartAt β (f u v)` near `(0, t)`.
   have hsrc0 : f 0 t ∈ (chartAt H β).source := by rw [hβ]; exact mem_chart_source H (f 0 t)
-  have hF : ContDiffAt ℝ ∞ (fun p : ℝ × ℝ => extChartAt I β (f p.1 p.2)) (0, t) :=
+  have hF : ContDiffAt ℝ (8 : ℕ) (fun p : ℝ × ℝ => extChartAt I β (f p.1 p.2)) (0, t) :=
     chartPulled_contDiffAt_infty (I := I) f hf β 0 t hsrc0
   -- The model section: `Ymodel p := fderiv F p (0, 1)`, jointly `C^∞`, hence `C²`.
-  have hfd : ContDiffAt ℝ ∞ (fderiv ℝ (fun q : ℝ × ℝ => extChartAt I β (f q.1 q.2))) (0, t) :=
-    hF.fderiv_right (m := ∞) (by rw [show (∞ : WithTop ℕ∞) + 1 = ∞ from rfl])
+  have hfd : ContDiffAt ℝ (7 : ℕ) (fderiv ℝ (fun q : ℝ × ℝ => extChartAt I β (f q.1 q.2))) (0, t) :=
+    hF.fderiv_right (m := (7 : ℕ)) (by exact_mod_cast (by norm_num : (7 : ℕ) + 1 ≤ 8))
   have hYmodel : ContDiffAt ℝ 2 (fun p : ℝ × ℝ =>
       fderiv ℝ (fun q : ℝ × ℝ => extChartAt I β (f q.1 q.2)) p (0, 1)) (0, t) :=
     ((ContinuousLinearMap.apply ℝ E ((0, 1) : ℝ × ℝ)).contDiff.contDiffAt.comp (0, t)
       hfd).of_le (by norm_cast)
   -- Slice smoothness for the bridge `chartCoord_mfderiv_along_curve_eq_fderiv`.
-  have hslice_u : ∀ s : ℝ, ContMDiff (𝓘(ℝ, ℝ)) I ∞ (fun w : ℝ => f s w) := by
+  have hslice_u : ∀ s : ℝ, ContMDiff (𝓘(ℝ, ℝ)) I (8 : ℕ) (fun w : ℝ => f s w) := by
     intro s
-    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞ (fun w : ℝ => (s, w)) :=
+    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (8 : ℕ) (fun w : ℝ => (s, w)) :=
       contMDiff_const.prodMk contMDiff_id
     exact (hf : ContMDiff _ _ _ _).comp hincl
   -- The chart-pull is jointly continuous (from `hF`), so `f u v ∈ source β` is open
@@ -2315,8 +2324,8 @@ private lemma chartCoord_longitudinalVelocity_contDiffAt
       (fun p : ℝ × ℝ => fderiv ℝ (fun q : ℝ × ℝ => extChartAt I β (f q.1 q.2)) p (0, 1)) := by
     filter_upwards [hopen.mem_nhds hmem0] with p hp
     have hsrc : (fun w : ℝ => f p.1 w) p.2 ∈ (chartAt H β).source := hp
-    have hbridge := MFDerivAlongCurve.chartCoord_mfderiv_along_curve_eq_fderiv
-      (I := I) (M := M) (γ := fun w : ℝ => f p.1 w) (hslice_u p.1) β (t := p.2) hsrc
+    have hbridge := MFDerivAlongCurve.chartCoord_mfderiv_along_curve_eq_fderiv_of_mdifferentiableAt
+      (I := I) (M := M) (γ := fun w : ℝ => f p.1 w) ((hslice_u p.1).mdifferentiableAt (by norm_num)) β hsrc
     -- `(extChartAt β ∘ (f p.1 ·)) = fun w => extChartAt β (f p.1 w)`, and its `fderiv 1`
     -- equals the joint partial fderiv `fderiv F p (0, 1)`.
     have hcompfun : ((extChartAt I β) ∘ (fun w : ℝ => f p.1 w))
@@ -2364,13 +2373,13 @@ private lemma slice_secondCovDeriv_chartRep_differentiableAt
   classical
   set β : M := f 0 t with hβ
   -- Slice smoothness.
-  have hslice_u : ∀ s : ℝ, ContMDiff (𝓘(ℝ, ℝ)) I ∞ (fun w : ℝ => f s w) := by
+  have hslice_u : ∀ s : ℝ, ContMDiff (𝓘(ℝ, ℝ)) I (8 : ℕ) (fun w : ℝ => f s w) := by
     intro s
-    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞ (fun w : ℝ => (s, w)) :=
+    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (8 : ℕ) (fun w : ℝ => (s, w)) :=
       contMDiff_const.prodMk contMDiff_id
     exact (hf : ContMDiff _ _ _ _).comp hincl
-  have htransverse : ContMDiff (𝓘(ℝ, ℝ)) I ∞ (fun s : ℝ => f s t) := by
-    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞ (fun s : ℝ => (s, t)) :=
+  have htransverse : ContMDiff (𝓘(ℝ, ℝ)) I (8 : ℕ) (fun s : ℝ => f s t) := by
+    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (8 : ℕ) (fun s : ℝ => (s, t)) :=
       contMDiff_id.prodMk contMDiff_const
     exact (hf : ContMDiff _ _ _ _).comp hincl
   set velT : ℝ → ℝ → E :=
@@ -2393,13 +2402,13 @@ private lemma slice_secondCovDeriv_chartRep_differentiableAt
   have hY_diff : DifferentiableAt ℝ Y 0 := hY_C1.differentiableAt (by norm_cast)
   have hderivY_diff : DifferentiableAt ℝ (deriv Y) 0 :=
     (hY_C2.derivWithin (m := 1) (by norm_cast)).differentiableAt (by norm_cast)
-  -- The chart curve `u (s) := extChartAt β (f s t)` is `C^∞`, hence `deriv u` differentiable.
+  -- The chart curve `u (s) := extChartAt β (f s t)` is `C^8`, hence `deriv u` differentiable.
   set uC : ℝ → E := chartCurve (I := I) β (fun s : ℝ => f s t) with huC
-  have huC_cdiff : ContDiffAt ℝ ∞ uC 0 := contDiffAt_chartCurve (I := I) htransverse 0
-  have huC_diff : DifferentiableAt ℝ uC 0 := huC_cdiff.differentiableAt (by simp)
+  have huC_cdiff : ContDiffAt ℝ (8 : ℕ) uC 0 := contDiffAt_chartCurve (I := I) htransverse 0
+  have huC_diff : DifferentiableAt ℝ uC 0 := huC_cdiff.differentiableAt (by norm_num)
   have hderivuC_diff : DifferentiableAt ℝ (deriv uC) 0 :=
-    (huC_cdiff.derivWithin (m := ∞) (by rw [show (∞ : WithTop ℕ∞) + 1 = ∞ from rfl])).differentiableAt
-      (by simp)
+    (huC_cdiff.derivWithin (m := (1 : ℕ)) (by exact_mod_cast (by norm_num : (1 : ℕ) + 1 ≤ 8))).differentiableAt
+      (by norm_num)
   -- Christoffel differentiability at the foot `uC 0 = extChartAt β β`.
   have huC0 : uC 0 = extChartAt I β β := by rw [huC, chartCurve_def, hβ]
   have hΓ_diff : ∀ i j k : Fin (Module.finrank ℝ E),
@@ -2421,7 +2430,7 @@ private lemma slice_secondCovDeriv_chartRep_differentiableAt
     -- `slice_longitudinalField_transverse_chartRep_differentiableAt` reindexed by the shift
     -- `a ↦ s + a` so the transverse foot at `a = 0` is `f s t`.
     have hf' : IsSmoothVariation (I := I) (fun a b : ℝ => f (s + a) b) := by
-      have hcomp : ContMDiff (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞
+      have hcomp : ContMDiff (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (8 : ℕ)
           (fun p : ℝ × ℝ => (s + p.1, p.2)) :=
         (contMDiff_const.add contMDiff_fst).prodMk contMDiff_snd
       exact (hf : ContMDiff _ _ _ _).comp hcomp
@@ -2460,7 +2469,7 @@ private lemma slice_secondCovDeriv_chartRep_differentiableAt
     change (trivializationAt E (TangentSpace I) β).continuousLinearMapAt ℝ (f s t)
         (covDerivAlong (I := I) g (fun s' : ℝ => f s' t) (fun s' : ℝ => velT s' t) s)
       = chartCovDerivAlong (I := I) g β (fun s : ℝ => f s t) Y s
-    have hfwd := chartCoord_covDerivAlong_eq_chartCovDerivAlong_chartRepAtBase (I := I) g
+    have hfwd := chartCoord_covDerivAlong_eq_chartCovDerivAlong_chartRepAtBase (I := I) (by norm_num) g
       (fun s' : ℝ => f s' t) (fun s' : ℝ => velT s' t) s β htransverse hs (hVTdiff s)
     rw [hfwd]
     -- `chartRepAtBase β (f · t) (velT · t) = Y`.
@@ -2505,19 +2514,19 @@ private lemma chartCoord_transverseVelocity_contDiffAt
   set β : M := f 0 t with hβ
   -- Joint `C^∞` of the chart-pull `F (u, v) := extChartAt β (f u v)` near `(0, t)`.
   have hsrc0 : f 0 t ∈ (chartAt H β).source := by rw [hβ]; exact mem_chart_source H (f 0 t)
-  have hF : ContDiffAt ℝ ∞ (fun p : ℝ × ℝ => extChartAt I β (f p.1 p.2)) (0, t) :=
+  have hF : ContDiffAt ℝ (8 : ℕ) (fun p : ℝ × ℝ => extChartAt I β (f p.1 p.2)) (0, t) :=
     chartPulled_contDiffAt_infty (I := I) f hf β 0 t hsrc0
   -- The model section: `Ymodel p := fderiv F p (1, 0)`, jointly `C^∞`, hence `C²`.
-  have hfd : ContDiffAt ℝ ∞ (fderiv ℝ (fun q : ℝ × ℝ => extChartAt I β (f q.1 q.2))) (0, t) :=
-    hF.fderiv_right (m := ∞) (by rw [show (∞ : WithTop ℕ∞) + 1 = ∞ from rfl])
+  have hfd : ContDiffAt ℝ (7 : ℕ) (fderiv ℝ (fun q : ℝ × ℝ => extChartAt I β (f q.1 q.2))) (0, t) :=
+    hF.fderiv_right (m := (7 : ℕ)) (by exact_mod_cast (by norm_num : (7 : ℕ) + 1 ≤ 8))
   have hYmodel : ContDiffAt ℝ 2 (fun p : ℝ × ℝ =>
       fderiv ℝ (fun q : ℝ × ℝ => extChartAt I β (f q.1 q.2)) p (1, 0)) (0, t) :=
     ((ContinuousLinearMap.apply ℝ E ((1, 0) : ℝ × ℝ)).contDiff.contDiffAt.comp (0, t)
       hfd).of_le (by norm_cast)
   -- Slice smoothness for the bridge `chartCoord_mfderiv_along_curve_eq_fderiv`.
-  have hslice_v : ∀ v : ℝ, ContMDiff (𝓘(ℝ, ℝ)) I ∞ (fun w : ℝ => f w v) := by
+  have hslice_v : ∀ v : ℝ, ContMDiff (𝓘(ℝ, ℝ)) I (8 : ℕ) (fun w : ℝ => f w v) := by
     intro v
-    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞ (fun w : ℝ => (w, v)) :=
+    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (8 : ℕ) (fun w : ℝ => (w, v)) :=
       contMDiff_id.prodMk contMDiff_const
     exact (hf : ContMDiff _ _ _ _).comp hincl
   -- The chart-pull is jointly continuous (from `hF`), so `f u v ∈ source β` is open
@@ -2535,8 +2544,8 @@ private lemma chartCoord_transverseVelocity_contDiffAt
       (fun p : ℝ × ℝ => fderiv ℝ (fun q : ℝ × ℝ => extChartAt I β (f q.1 q.2)) p (1, 0)) := by
     filter_upwards [hopen.mem_nhds hmem0] with p hp
     have hsrc : (fun w : ℝ => f w p.2) p.1 ∈ (chartAt H β).source := hp
-    have hbridge := MFDerivAlongCurve.chartCoord_mfderiv_along_curve_eq_fderiv
-      (I := I) (M := M) (γ := fun w : ℝ => f w p.2) (hslice_v p.2) β (t := p.1) hsrc
+    have hbridge := MFDerivAlongCurve.chartCoord_mfderiv_along_curve_eq_fderiv_of_mdifferentiableAt
+      (I := I) (M := M) (γ := fun w : ℝ => f w p.2) ((hslice_v p.2).mdifferentiableAt (by norm_num)) β hsrc
     -- `(extChartAt β ∘ (f · p.2)) = fun w => extChartAt β (f w p.2)`, and its `fderiv 1`
     -- equals the joint partial fderiv `fderiv F p (1, 0)`.
     have hcompfun : ((extChartAt I β) ∘ (fun w : ℝ => f w p.2))
@@ -2579,13 +2588,13 @@ private lemma slice_transverseField_longitudinal_chartRep_differentiableAt
         (fun v : ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun w : ℝ => f w v) s (1 : ℝ)) t₀) t₀ := by
   classical
   set α : M := f s t₀ with hα
-  have hslice_v : ∀ v : ℝ, ContMDiff (𝓘(ℝ, ℝ)) I ∞ (fun w : ℝ => f w v) := by
+  have hslice_v : ∀ v : ℝ, ContMDiff (𝓘(ℝ, ℝ)) I (8 : ℕ) (fun w : ℝ => f w v) := by
     intro v
-    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞ (fun w : ℝ => (w, v)) :=
+    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (8 : ℕ) (fun w : ℝ => (w, v)) :=
       contMDiff_id.prodMk contMDiff_const
     exact (hf : ContMDiff _ _ _ _).comp hincl
-  have hslice_s : ContMDiff (𝓘(ℝ, ℝ)) I ∞ (fun v : ℝ => f s v) := by
-    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞ (fun v : ℝ => (s, v)) :=
+  have hslice_s : ContMDiff (𝓘(ℝ, ℝ)) I (8 : ℕ) (fun v : ℝ => f s v) := by
+    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (8 : ℕ) (fun v : ℝ => (s, v)) :=
       contMDiff_const.prodMk contMDiff_id
     exact (hf : ContMDiff _ _ _ _).comp hincl
   -- The smooth model section: `v ↦ fderiv_w (extChartAt α (f w v)) s 1`.
@@ -2593,23 +2602,23 @@ private lemma slice_transverseField_longitudinal_chartRep_differentiableAt
     with hsec
   -- It is `C^∞` at `t₀`: the partial fderiv (in `w` at `s`) of the jointly-smooth chart-pull,
   -- evaluated at `1`, varying `v`.
-  have hsec_cdiff : ContDiffAt ℝ ∞ sec t₀ := by
+  have hsec_cdiff : ContDiffAt ℝ (7 : ℕ) sec t₀ := by
     have hsrc0 : f s t₀ ∈ (chartAt H α).source := by rw [hα]; exact mem_chart_source H (f s t₀)
     -- `(v, w) ↦ extChartAt α (f w v)` is jointly `C^∞` at `(t₀, s)`.
-    have hjoint : ContDiffAt ℝ ∞
+    have hjoint : ContDiffAt ℝ (8 : ℕ)
         (Function.uncurry (fun v w : ℝ => extChartAt I α (f w v))) (t₀, s) := by
       have h := chartPulled_contDiffAt_infty (I := I) f hf α s t₀ hsrc0
-      have hswap : ContDiffAt ℝ ∞
+      have hswap : ContDiffAt ℝ (8 : ℕ)
           ((fun p : ℝ × ℝ => extChartAt I α (f p.1 p.2)) ∘ (fun q : ℝ × ℝ => (q.2, q.1)))
           (t₀, s) :=
         h.comp (t₀, s) ((contDiffAt_snd).prodMk (contDiffAt_fst))
       exact hswap
-    have hgs : ContDiffAt ℝ ∞ (fun _ : ℝ => s) t₀ := contDiffAt_const
-    have hpartial : ContDiffAt ℝ ∞
+    have hgs : ContDiffAt ℝ (7 : ℕ) (fun _ : ℝ => s) t₀ := contDiffAt_const
+    have hpartial : ContDiffAt ℝ (7 : ℕ)
         (fun v : ℝ => fderiv ℝ (fun w : ℝ => extChartAt I α (f w v)) ((fun _ : ℝ => s) v)) t₀ :=
       ContDiffAt.fderiv (𝕜 := ℝ)
         (f := fun v w : ℝ => extChartAt I α (f w v)) (g := fun _ : ℝ => s)
-        hjoint hgs (by rw [show (∞ : WithTop ℕ∞) + 1 = ∞ from rfl])
+        hjoint hgs (by exact_mod_cast (by norm_num : (7 : ℕ) + 1 ≤ 8))
     exact (ContinuousLinearMap.apply ℝ E (1 : ℝ)).contDiff.contDiffAt.comp t₀ hpartial
   -- The chart-rep agrees with `sec` near `t₀`.
   have hopen : IsOpen {v : ℝ | f s v ∈ (chartAt H α).source} :=
@@ -2621,8 +2630,8 @@ private lemma slice_transverseField_longitudinal_chartRep_differentiableAt
         =ᶠ[𝓝 t₀] sec := by
     filter_upwards [hopen.mem_nhds h0] with v hv
     have hsrc : (fun w : ℝ => f w v) s ∈ (chartAt H α).source := hv
-    have hbridge := MFDerivAlongCurve.chartCoord_mfderiv_along_curve_eq_fderiv
-      (I := I) (M := M) (γ := fun w : ℝ => f w v) (hslice_v v) α (t := s) hsrc
+    have hbridge := MFDerivAlongCurve.chartCoord_mfderiv_along_curve_eq_fderiv_of_mdifferentiableAt
+      (I := I) (M := M) (γ := fun w : ℝ => f w v) ((hslice_v v).mdifferentiableAt (by norm_num)) α hsrc
     change (trivializationAt E (TangentSpace I) ((fun v : ℝ => f s v) t₀)).continuousLinearMapAt ℝ
         ((fun v : ℝ => f s v) v) (mfderiv (𝓘(ℝ, ℝ)) I (fun w : ℝ => f w v) s (1 : ℝ)) = sec v
     rw [hsec, show (fun v : ℝ => f s v) t₀ = α from hα.symm]
@@ -2647,24 +2656,24 @@ private lemma slice_transverseVelocity_chartRep_differentiableAt
         (fun u : ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun w : ℝ => f w v) u (1 : ℝ)) 0) 0 := by
   classical
   set α : M := f 0 v with hα
-  have htransverse : ContMDiff (𝓘(ℝ, ℝ)) I ∞ (fun u : ℝ => f u v) := by
-    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞ (fun u : ℝ => (u, v)) :=
+  have htransverse : ContMDiff (𝓘(ℝ, ℝ)) I (8 : ℕ) (fun u : ℝ => f u v) := by
+    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (8 : ℕ) (fun u : ℝ => (u, v)) :=
       contMDiff_id.prodMk contMDiff_const
     exact (hf : ContMDiff _ _ _ _).comp hincl
   -- The smooth model section `u ↦ fderiv (extChartAt α ∘ (f · v)) u 1`, the velocity of
   -- the `C^∞` chart curve.
   set sec : ℝ → E := fun u : ℝ => fderiv ℝ (fun w : ℝ => extChartAt I α (f w v)) u (1 : ℝ)
     with hsec
-  have hchartcurve_cdiff : ContDiffAt ℝ ∞ (fun w : ℝ => extChartAt I α (f w v)) 0 := by
-    have hext : ContMDiffAt I 𝓘(ℝ, E) ∞ (extChartAt I α) (f 0 v) :=
+  have hchartcurve_cdiff : ContDiffAt ℝ (8 : ℕ) (fun w : ℝ => extChartAt I α (f w v)) 0 := by
+    have hext : ContMDiffAt I 𝓘(ℝ, E) (8 : ℕ) (extChartAt I α) (f 0 v) :=
       contMDiffAt_extChartAt (I := I) (x := α)
-    have hcomp : ContMDiffAt (𝓘(ℝ, ℝ)) 𝓘(ℝ, E) ∞ (fun w : ℝ => extChartAt I α (f w v)) 0 :=
+    have hcomp : ContMDiffAt (𝓘(ℝ, ℝ)) 𝓘(ℝ, E) (8 : ℕ) (fun w : ℝ => extChartAt I α (f w v)) 0 :=
       hext.comp 0 htransverse.contMDiffAt
     exact contMDiffAt_iff_contDiffAt.mp hcomp
-  have hsec_cdiff : ContDiffAt ℝ ∞ sec 0 := by
-    have hfd : ContDiffAt ℝ ∞ (fderiv ℝ (fun w : ℝ => extChartAt I α (f w v))) 0 :=
-      hchartcurve_cdiff.fderiv_right (by simp)
-    have heval : ContDiffAt ℝ ∞
+  have hsec_cdiff : ContDiffAt ℝ (7 : ℕ) sec 0 := by
+    have hfd : ContDiffAt ℝ (7 : ℕ) (fderiv ℝ (fun w : ℝ => extChartAt I α (f w v))) 0 :=
+      hchartcurve_cdiff.fderiv_right (by exact_mod_cast (by norm_num : (7 : ℕ) + 1 ≤ 8))
+    have heval : ContDiffAt ℝ (7 : ℕ)
         (fun u : ℝ => (ContinuousLinearMap.apply ℝ E (1 : ℝ))
           (fderiv ℝ (fun w : ℝ => extChartAt I α (f w v)) u)) 0 :=
       (ContinuousLinearMap.apply ℝ E (1 : ℝ)).contDiff.contDiffAt.comp 0 hfd
@@ -2679,8 +2688,8 @@ private lemma slice_transverseVelocity_chartRep_differentiableAt
         =ᶠ[𝓝 (0 : ℝ)] sec := by
     filter_upwards [hopen.mem_nhds h0] with u hu
     have hsrc : (fun w : ℝ => f w v) u ∈ (chartAt H α).source := hu
-    have hbridge := MFDerivAlongCurve.chartCoord_mfderiv_along_curve_eq_fderiv
-      (I := I) (M := M) (γ := fun w : ℝ => f w v) htransverse α (t := u) hsrc
+    have hbridge := MFDerivAlongCurve.chartCoord_mfderiv_along_curve_eq_fderiv_of_mdifferentiableAt
+      (I := I) (M := M) (γ := fun w : ℝ => f w v) (htransverse.mdifferentiableAt (by norm_num)) α hsrc
     change (trivializationAt E (TangentSpace I) ((fun u : ℝ => f u v) 0)).continuousLinearMapAt ℝ
         ((fun u : ℝ => f u v) u) (mfderiv (𝓘(ℝ, ℝ)) I (fun w : ℝ => f w v) u (1 : ℝ)) = sec u
     rw [hsec, show (fun u : ℝ => f u v) 0 = α from hα.symm]
@@ -2731,18 +2740,18 @@ private theorem commute_ds_dt_curvature_innerS
   classical
   set β : M := f 0 t with hβ
   -- Slice smoothness.
-  have hslice_u : ∀ s : ℝ, ContMDiff (𝓘(ℝ, ℝ)) I ∞ (fun w : ℝ => f s w) := by
+  have hslice_u : ∀ s : ℝ, ContMDiff (𝓘(ℝ, ℝ)) I (8 : ℕ) (fun w : ℝ => f s w) := by
     intro s
-    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞ (fun w : ℝ => (s, w)) :=
+    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (8 : ℕ) (fun w : ℝ => (s, w)) :=
       contMDiff_const.prodMk contMDiff_id
     exact (hf : ContMDiff _ _ _ _).comp hincl
-  have hslice_v : ∀ v : ℝ, ContMDiff (𝓘(ℝ, ℝ)) I ∞ (fun w : ℝ => f w v) := by
+  have hslice_v : ∀ v : ℝ, ContMDiff (𝓘(ℝ, ℝ)) I (8 : ℕ) (fun w : ℝ => f w v) := by
     intro v
-    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞ (fun w : ℝ => (w, v)) :=
+    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (8 : ℕ) (fun w : ℝ => (w, v)) :=
       contMDiff_id.prodMk contMDiff_const
     exact (hf : ContMDiff _ _ _ _).comp hincl
-  have htransverse : ContMDiff (𝓘(ℝ, ℝ)) I ∞ (fun s : ℝ => f s t) := hslice_v t
-  have hcentral : ContMDiff (𝓘(ℝ, ℝ)) I ∞ (fun v : ℝ => f 0 v) := hslice_u 0
+  have htransverse : ContMDiff (𝓘(ℝ, ℝ)) I (8 : ℕ) (fun s : ℝ => f s t) := hslice_v t
+  have hcentral : ContMDiff (𝓘(ℝ, ℝ)) I (8 : ℕ) (fun v : ℝ => f 0 v) := hslice_u 0
   -- Abbreviation for the transverse velocity section `∂_s f`.
   set velS : ℝ → ℝ → E :=
     fun s v => mfderiv (𝓘(ℝ, ℝ)) I (fun w : ℝ => f w v) s (1 : ℝ) with hvelS
@@ -2786,7 +2795,7 @@ private theorem commute_ds_dt_curvature_innerS
             (covDerivAlong (I := I) g (fun v : ℝ => f s v) (fun v : ℝ => velS s v) t) := by
     intro s hs
     rw [hY_chartRepAtBase_u s]
-    exact (chartCoord_covDerivAlong_eq_chartCovDerivAlong_chartRepAtBase (I := I) g
+    exact (chartCoord_covDerivAlong_eq_chartCovDerivAlong_chartRepAtBase (I := I) (by norm_num) g
       (fun w : ℝ => f s w) (fun w : ℝ => velS s w) t β (hslice_u s) hs
       (hinnerL_diff s)).symm
   -- The right inner field `u ↦ velS u v = ∂_s f` along `f · v` has differentiable chart-rep at `0`.
@@ -2799,7 +2808,7 @@ private theorem commute_ds_dt_curvature_innerS
             (covDerivAlong (I := I) g (fun u : ℝ => f u v) (fun u : ℝ => velS u v) 0) := by
     intro v hv
     rw [hY_chartRepAtBase_v v]
-    exact (chartCoord_covDerivAlong_eq_chartCovDerivAlong_chartRepAtBase (I := I) g
+    exact (chartCoord_covDerivAlong_eq_chartCovDerivAlong_chartRepAtBase (I := I) (by norm_num) g
       (fun w : ℝ => f w v) (fun w : ℝ => velS w v) 0 β (hslice_v v) hv (hinnerR_diff v)).symm
   -- (C) The outer sections agree, near the basepoint, with the fixed-chart inner sections.
   set innerL : ∀ s : ℝ, TangentSpace I ((fun s : ℝ => f s t) s) :=
@@ -2827,7 +2836,7 @@ private theorem commute_ds_dt_curvature_innerS
         = chartCovDerivAlong (I := I) g β (fun s : ℝ => f s t)
             (fun s : ℝ => chartCovDerivAlong (I := I) g β (fun v : ℝ => f s v)
               (fun v : ℝ => Y s v) t) 0 := by
-    rw [chartCoord_covDerivAlong_eq_chartCovDerivAlong_chartRepAtBase (I := I) g
+    rw [chartCoord_covDerivAlong_eq_chartCovDerivAlong_chartRepAtBase (I := I) (by norm_num) g
       (fun s : ℝ => f s t) innerL 0 β htransverse (by rw [hβ] at hsrcβ ⊢; exact hsrcβ) houterL]
     rw [show chartRepAtBase (I := I) β (fun s : ℝ => f s t) innerL
         = chartRepAt (I := I) (fun s : ℝ => f s t) innerL 0 from
@@ -2839,7 +2848,7 @@ private theorem commute_ds_dt_curvature_innerS
         = chartCovDerivAlong (I := I) g β (fun v : ℝ => f 0 v)
             (fun v : ℝ => chartCovDerivAlong (I := I) g β (fun u : ℝ => f u v)
               (fun u : ℝ => Y u v) 0) t := by
-    rw [chartCoord_covDerivAlong_eq_chartCovDerivAlong_chartRepAtBase (I := I) g
+    rw [chartCoord_covDerivAlong_eq_chartCovDerivAlong_chartRepAtBase (I := I) (by norm_num) g
       (fun v : ℝ => f 0 v) innerR t β hcentral (by rw [hβ] at hsrcβ ⊢; exact hsrcβ) houterR]
     rw [show chartRepAtBase (I := I) β (fun v : ℝ => f 0 v) innerR
         = chartRepAt (I := I) (fun v : ℝ => f 0 v) innerR t from
@@ -2892,8 +2901,8 @@ private theorem commute_ds_dt_curvature_innerS
   -- (iii) `fderiv (extChartAt (f 0 t) (f · t)) 0 1 = mfderiv (f · t) 0 1`.
   have hslotS : (fderiv ℝ (fun u : ℝ => extChartAt I (f 0 t) (f u t)) 0 (1 : ℝ))
       = (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f u t) 0 (1 : ℝ) : E) := by
-    have hbridge := MFDerivAlongCurve.chartCoord_mfderiv_along_curve_eq_fderiv
-      (I := I) (M := M) (γ := fun u : ℝ => f u t) (hslice_v t) (f 0 t) (t := 0)
+    have hbridge := MFDerivAlongCurve.chartCoord_mfderiv_along_curve_eq_fderiv_of_mdifferentiableAt
+      (I := I) (M := M) (γ := fun u : ℝ => f u t) ((hslice_v t).mdifferentiableAt (by norm_num)) (f 0 t)
       (by change f 0 t ∈ (chartAt H (f 0 t)).source; exact hfoot_src)
     have hcompfun : ((extChartAt I (f 0 t)) ∘ (fun u : ℝ => f u t))
         = (fun u : ℝ => extChartAt I (f 0 t) (f u t)) := rfl
@@ -2901,8 +2910,8 @@ private theorem commute_ds_dt_curvature_innerS
     exact hbridge.symm
   have hslotT : (fderiv ℝ (fun v : ℝ => extChartAt I (f 0 t) (f 0 v)) t (1 : ℝ))
       = (mfderiv (𝓘(ℝ, ℝ)) I (fun w : ℝ => f 0 w) t (1 : ℝ) : E) := by
-    have hbridge := MFDerivAlongCurve.chartCoord_mfderiv_along_curve_eq_fderiv
-      (I := I) (M := M) (γ := fun w : ℝ => f 0 w) (hslice_u 0) (f 0 t) (t := t)
+    have hbridge := MFDerivAlongCurve.chartCoord_mfderiv_along_curve_eq_fderiv_of_mdifferentiableAt
+      (I := I) (M := M) (γ := fun w : ℝ => f 0 w) ((hslice_u 0).mdifferentiableAt (by norm_num)) (f 0 t)
       (by change f 0 t ∈ (chartAt H (f 0 t)).source; exact hfoot_src)
     have hcompfun : ((extChartAt I (f 0 t)) ∘ (fun w : ℝ => f 0 w))
         = (fun w : ℝ => extChartAt I (f 0 t) (f 0 w)) := rfl
@@ -2949,18 +2958,18 @@ private theorem commute_ds_dt_curvature
   classical
   set β : M := f 0 t with hβ
   -- Slice smoothness.
-  have hslice_u : ∀ s : ℝ, ContMDiff (𝓘(ℝ, ℝ)) I ∞ (fun w : ℝ => f s w) := by
+  have hslice_u : ∀ s : ℝ, ContMDiff (𝓘(ℝ, ℝ)) I (8 : ℕ) (fun w : ℝ => f s w) := by
     intro s
-    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞ (fun w : ℝ => (s, w)) :=
+    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (8 : ℕ) (fun w : ℝ => (s, w)) :=
       contMDiff_const.prodMk contMDiff_id
     exact (hf : ContMDiff _ _ _ _).comp hincl
-  have hslice_v : ∀ v : ℝ, ContMDiff (𝓘(ℝ, ℝ)) I ∞ (fun w : ℝ => f w v) := by
+  have hslice_v : ∀ v : ℝ, ContMDiff (𝓘(ℝ, ℝ)) I (8 : ℕ) (fun w : ℝ => f w v) := by
     intro v
-    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞ (fun w : ℝ => (w, v)) :=
+    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (8 : ℕ) (fun w : ℝ => (w, v)) :=
       contMDiff_id.prodMk contMDiff_const
     exact (hf : ContMDiff _ _ _ _).comp hincl
-  have htransverse : ContMDiff (𝓘(ℝ, ℝ)) I ∞ (fun s : ℝ => f s t) := hslice_v t
-  have hcentral : ContMDiff (𝓘(ℝ, ℝ)) I ∞ (fun v : ℝ => f 0 v) := hslice_u 0
+  have htransverse : ContMDiff (𝓘(ℝ, ℝ)) I (8 : ℕ) (fun s : ℝ => f s t) := hslice_v t
+  have hcentral : ContMDiff (𝓘(ℝ, ℝ)) I (8 : ℕ) (fun v : ℝ => f 0 v) := hslice_u 0
   -- Abbreviation for the longitudinal velocity section `∂_t f`.
   set velT : ℝ → ℝ → E :=
     fun s v => mfderiv (𝓘(ℝ, ℝ)) I (fun w : ℝ => f s w) v (1 : ℝ) with hvelT
@@ -3004,7 +3013,7 @@ private theorem commute_ds_dt_curvature
             (covDerivAlong (I := I) g (fun v : ℝ => f s v) (fun v : ℝ => velT s v) t) := by
     intro s hs
     rw [hY_chartRepAtBase_u s]
-    exact (chartCoord_covDerivAlong_eq_chartCovDerivAlong_chartRepAtBase (I := I) g
+    exact (chartCoord_covDerivAlong_eq_chartCovDerivAlong_chartRepAtBase (I := I) (by norm_num) g
       (fun w : ℝ => f s w) (fun w : ℝ => velT s w) t β (hslice_u s) hs
       (slice_velocityField_chartRep_differentiableAt (I := I) g f hf s t)).symm
   -- The right inner field `u ↦ velT u v = ∂_t f` along `f · v` has differentiable chart-rep at `0`.
@@ -3017,7 +3026,7 @@ private theorem commute_ds_dt_curvature
             (covDerivAlong (I := I) g (fun u : ℝ => f u v) (fun u : ℝ => velT u v) 0) := by
     intro v hv
     rw [hY_chartRepAtBase_v v]
-    exact (chartCoord_covDerivAlong_eq_chartCovDerivAlong_chartRepAtBase (I := I) g
+    exact (chartCoord_covDerivAlong_eq_chartCovDerivAlong_chartRepAtBase (I := I) (by norm_num) g
       (fun w : ℝ => f w v) (fun w : ℝ => velT w v) 0 β (hslice_v v) hv (hinnerR_diff v)).symm
   -- (C) The outer sections agree, near the basepoint, with the fixed-chart inner sections.
   set innerL : ∀ s : ℝ, TangentSpace I ((fun s : ℝ => f s t) s) :=
@@ -3046,7 +3055,7 @@ private theorem commute_ds_dt_curvature
         = chartCovDerivAlong (I := I) g β (fun s : ℝ => f s t)
             (fun s : ℝ => chartCovDerivAlong (I := I) g β (fun v : ℝ => f s v)
               (fun v : ℝ => Y s v) t) 0 := by
-    rw [chartCoord_covDerivAlong_eq_chartCovDerivAlong_chartRepAtBase (I := I) g
+    rw [chartCoord_covDerivAlong_eq_chartCovDerivAlong_chartRepAtBase (I := I) (by norm_num) g
       (fun s : ℝ => f s t) innerL 0 β htransverse (by rw [hβ] at hsrcβ ⊢; exact hsrcβ) houterL]
     rw [show chartRepAtBase (I := I) β (fun s : ℝ => f s t) innerL
         = chartRepAt (I := I) (fun s : ℝ => f s t) innerL 0 from
@@ -3058,7 +3067,7 @@ private theorem commute_ds_dt_curvature
         = chartCovDerivAlong (I := I) g β (fun v : ℝ => f 0 v)
             (fun v : ℝ => chartCovDerivAlong (I := I) g β (fun u : ℝ => f u v)
               (fun u : ℝ => Y u v) 0) t := by
-    rw [chartCoord_covDerivAlong_eq_chartCovDerivAlong_chartRepAtBase (I := I) g
+    rw [chartCoord_covDerivAlong_eq_chartCovDerivAlong_chartRepAtBase (I := I) (by norm_num) g
       (fun v : ℝ => f 0 v) innerR t β hcentral (by rw [hβ] at hsrcβ ⊢; exact hsrcβ) houterR]
     rw [show chartRepAtBase (I := I) β (fun v : ℝ => f 0 v) innerR
         = chartRepAt (I := I) (fun v : ℝ => f 0 v) innerR t from
@@ -3113,8 +3122,8 @@ private theorem commute_ds_dt_curvature
   -- (iii) `fderiv (extChartAt (f 0 t) (f · t)) 0 1 = mfderiv (f · t) 0 1`.
   have hslotS : (fderiv ℝ (fun u : ℝ => extChartAt I (f 0 t) (f u t)) 0 (1 : ℝ))
       = (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f u t) 0 (1 : ℝ) : E) := by
-    have hbridge := MFDerivAlongCurve.chartCoord_mfderiv_along_curve_eq_fderiv
-      (I := I) (M := M) (γ := fun u : ℝ => f u t) (hslice_v t) (f 0 t) (t := 0)
+    have hbridge := MFDerivAlongCurve.chartCoord_mfderiv_along_curve_eq_fderiv_of_mdifferentiableAt
+      (I := I) (M := M) (γ := fun u : ℝ => f u t) ((hslice_v t).mdifferentiableAt (by norm_num)) (f 0 t)
       (by change f 0 t ∈ (chartAt H (f 0 t)).source; exact hfoot_src)
     have hcompfun : ((extChartAt I (f 0 t)) ∘ (fun u : ℝ => f u t))
         = (fun u : ℝ => extChartAt I (f 0 t) (f u t)) := rfl
@@ -3122,8 +3131,8 @@ private theorem commute_ds_dt_curvature
     exact hbridge.symm
   have hslotT : (fderiv ℝ (fun v : ℝ => extChartAt I (f 0 t) (f 0 v)) t (1 : ℝ))
       = (mfderiv (𝓘(ℝ, ℝ)) I (fun w : ℝ => f 0 w) t (1 : ℝ) : E) := by
-    have hbridge := MFDerivAlongCurve.chartCoord_mfderiv_along_curve_eq_fderiv
-      (I := I) (M := M) (γ := fun w : ℝ => f 0 w) (hslice_u 0) (f 0 t) (t := t)
+    have hbridge := MFDerivAlongCurve.chartCoord_mfderiv_along_curve_eq_fderiv_of_mdifferentiableAt
+      (I := I) (M := M) (γ := fun w : ℝ => f 0 w) ((hslice_u 0).mdifferentiableAt (by norm_num)) (f 0 t)
       (by change f 0 t ∈ (chartAt H (f 0 t)).source; exact hfoot_src)
     have hcompfun : ((extChartAt I (f 0 t)) ∘ (fun w : ℝ => f 0 w))
         = (fun w : ℝ => extChartAt I (f 0 t) (f 0 w)) := rfl
@@ -3211,7 +3220,7 @@ private lemma commute_ds_dt_intrinsic_shifted
   -- The `s`-shifted variation `fsh a b := f (s + a) b`.
   set fsh : ℝ → ℝ → M := fun a b : ℝ => f (s + a) b with hfsh
   have hfsh_smooth : IsSmoothVariation (I := I) fsh := by
-    have hshift : ContMDiff (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞
+    have hshift : ContMDiff (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (8 : ℕ)
         (fun q : ℝ × ℝ => (s + q.1, q.2)) :=
       (contMDiff_const.add contMDiff_fst).prodMk contMDiff_snd
     exact (hf : ContMDiff _ _ _ _).comp hshift
@@ -3234,8 +3243,8 @@ private lemma commute_ds_dt_intrinsic_shifted
       = mfderiv (𝓘(ℝ, ℝ)) I (fun w : ℝ => f w v) s (1 : ℝ) := by
     intro v
     -- `(fun u => fsh u v) = (fun w => f w v) ∘ (fun u => s + u)`; chain rule at `0`.
-    have hslice_v : ContMDiff (𝓘(ℝ, ℝ)) I ∞ (fun w : ℝ => f w v) := by
-      have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞ (fun w : ℝ => (w, v)) :=
+    have hslice_v : ContMDiff (𝓘(ℝ, ℝ)) I (8 : ℕ) (fun w : ℝ => f w v) := by
+      have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (8 : ℕ) (fun w : ℝ => (w, v)) :=
         contMDiff_id.prodMk contMDiff_const
       exact (hf : ContMDiff _ _ _ _).comp hincl
     have hcomp_eq : (fun u : ℝ => fsh u v)
@@ -3304,13 +3313,13 @@ private lemma slice_secondCovDeriv_central_chartRep_differentiableAt
   classical
   set β : M := f 0 t with hβ
   -- Slice smoothness.
-  have hslice_v : ∀ v : ℝ, ContMDiff (𝓘(ℝ, ℝ)) I ∞ (fun w : ℝ => f w v) := by
+  have hslice_v : ∀ v : ℝ, ContMDiff (𝓘(ℝ, ℝ)) I (8 : ℕ) (fun w : ℝ => f w v) := by
     intro v
-    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞ (fun w : ℝ => (w, v)) :=
+    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (8 : ℕ) (fun w : ℝ => (w, v)) :=
       contMDiff_id.prodMk contMDiff_const
     exact (hf : ContMDiff _ _ _ _).comp hincl
-  have hcentral : ContMDiff (𝓘(ℝ, ℝ)) I ∞ (fun v : ℝ => f 0 v) := by
-    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞ (fun v : ℝ => ((0 : ℝ), v)) :=
+  have hcentral : ContMDiff (𝓘(ℝ, ℝ)) I (8 : ℕ) (fun v : ℝ => f 0 v) := by
+    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (8 : ℕ) (fun v : ℝ => ((0 : ℝ), v)) :=
       contMDiff_const.prodMk contMDiff_id
     exact (hf : ContMDiff _ _ _ _).comp hincl
   set velS : ℝ → ℝ → E :=
@@ -3330,13 +3339,13 @@ private lemma slice_secondCovDeriv_central_chartRep_differentiableAt
   -- The chart curve `uC u v := extChartAt β (f u v)` is jointly `C^∞`.
   have hsrc0 : f 0 t ∈ (chartAt H β).source := by rw [hβ]; exact mem_chart_source H (f 0 t)
   set uC : ℝ → ℝ → E := fun u v => extChartAt I β (f u v) with huC
-  have huC_joint : ContDiffAt ℝ ∞ (fun p : ℝ × ℝ => uC p.1 p.2) (0, t) :=
+  have huC_joint : ContDiffAt ℝ (8 : ℕ) (fun p : ℝ × ℝ => uC p.1 p.2) (0, t) :=
     chartPulled_contDiffAt_infty (I := I) f hf β 0 t hsrc0
   -- `uC(0, ·)` and `v ↦ deriv_u uC(·, v)|_0` are differentiable at `t`.
   have huC0_diff : DifferentiableAt ℝ (fun v : ℝ => uC 0 v) t := by
-    have hincl : ContDiffAt ℝ ∞ (fun v : ℝ => ((0 : ℝ), v)) t :=
+    have hincl : ContDiffAt ℝ (8 : ℕ) (fun v : ℝ => ((0 : ℝ), v)) t :=
       (contDiff_const.prodMk contDiff_id).contDiffAt
-    exact ((huC_joint.comp t hincl).differentiableAt (by simp))
+    exact ((huC_joint.comp t hincl).differentiableAt (by norm_num))
   -- `deriv_u Y(·, v)|_0 = fderiv_u Y(·, v)|_0 1`, differentiable in `v` at `t` (joint `C²`).
   have hpartialY : HasDerivAt
       (fun v : ℝ => fderiv ℝ (fun u : ℝ => Y u v) 0 (1 : ℝ))
@@ -3399,7 +3408,7 @@ private lemma slice_secondCovDeriv_central_chartRep_differentiableAt
     change (trivializationAt E (TangentSpace I) β).continuousLinearMapAt ℝ (f 0 v)
         (covDerivAlong (I := I) g (fun u : ℝ => f u v) (fun u : ℝ => velS u v) 0)
       = Z v
-    have hfwd := chartCoord_covDerivAlong_eq_chartCovDerivAlong_chartRepAtBase (I := I) g
+    have hfwd := chartCoord_covDerivAlong_eq_chartCovDerivAlong_chartRepAtBase (I := I) (by norm_num) g
       (fun u : ℝ => f u v) (fun u : ℝ => velS u v) 0 β (hslice_v v) hv (hinnerR_diff v)
     rw [hfwd]
     -- `chartRepAtBase β (f · v) (velS · v) = Y(·, v)`.
@@ -3431,8 +3440,8 @@ private lemma variationField_covDeriv_chartRep_differentiableAt
           (fun w : ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f u w) 0 (1 : ℝ)) v) t) t := by
   classical
   set β : M := f 0 t with hβ
-  have hcentral : ContMDiff (𝓘(ℝ, ℝ)) I ∞ (fun v : ℝ => f 0 v) := by
-    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞ (fun v : ℝ => ((0 : ℝ), v)) :=
+  have hcentral : ContMDiff (𝓘(ℝ, ℝ)) I (8 : ℕ) (fun v : ℝ => f 0 v) := by
+    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (8 : ℕ) (fun v : ℝ => ((0 : ℝ), v)) :=
       contMDiff_const.prodMk contMDiff_id
     exact (hf : ContMDiff _ _ _ _).comp hincl
   set Vsec : ℝ → E := fun v : ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f u v) 0 (1 : ℝ)
@@ -3454,13 +3463,13 @@ private lemma variationField_covDeriv_chartRep_differentiableAt
   have hY0_diff : DifferentiableAt ℝ Y0 t := hY0_C1.differentiableAt (by norm_cast)
   have hderivY0_diff : DifferentiableAt ℝ (deriv Y0) t :=
     (hY0_C2.derivWithin (m := 1) (by norm_cast)).differentiableAt (by norm_cast)
-  -- The chart curve `uC v := extChartAt β (f 0 v)` is `C^∞`, hence `deriv uC` differentiable.
+  -- The chart curve `uC v := extChartAt β (f 0 v)` is `C^8`, hence `deriv uC` differentiable.
   set uC : ℝ → E := chartCurve (I := I) β (fun v : ℝ => f 0 v) with huC
-  have huC_cdiff : ContDiffAt ℝ ∞ uC t := contDiffAt_chartCurve (I := I) hcentral t
-  have huC_diff : DifferentiableAt ℝ uC t := huC_cdiff.differentiableAt (by simp)
+  have huC_cdiff : ContDiffAt ℝ (8 : ℕ) uC t := contDiffAt_chartCurve (I := I) hcentral t
+  have huC_diff : DifferentiableAt ℝ uC t := huC_cdiff.differentiableAt (by norm_num)
   have hderivuC_diff : DifferentiableAt ℝ (deriv uC) t :=
-    (huC_cdiff.derivWithin (m := ∞) (by rw [show (∞ : WithTop ℕ∞) + 1 = ∞ from rfl])).differentiableAt
-      (by simp)
+    (huC_cdiff.derivWithin (m := (1 : ℕ)) (by exact_mod_cast (by norm_num : (1 : ℕ) + 1 ≤ 8))).differentiableAt
+      (by norm_num)
   -- Christoffel differentiability at the foot `uC t = extChartAt β β`.
   have huC0 : uC t = extChartAt I β β := by rw [huC, chartCurve_def, hβ]
   have hΓ_diff : ∀ i j k : Fin (Module.finrank ℝ E),
@@ -3488,7 +3497,7 @@ private lemma variationField_covDeriv_chartRep_differentiableAt
     change (trivializationAt E (TangentSpace I) β).continuousLinearMapAt ℝ (f 0 v)
         (covDerivAlong (I := I) g (fun w : ℝ => f 0 w) Vsec v)
       = chartCovDerivAlong (I := I) g β (fun w : ℝ => f 0 w) Y0 v
-    have hfwd := chartCoord_covDerivAlong_eq_chartCovDerivAlong_chartRepAtBase (I := I) g
+    have hfwd := chartCoord_covDerivAlong_eq_chartCovDerivAlong_chartRepAtBase (I := I) (by norm_num) g
       (fun w : ℝ => f 0 w) Vsec v β hcentral hv (hVdiff v)
     rw [hfwd]
     have hYeq : chartRepAtBase (I := I) β (fun w : ℝ => f 0 w) Vsec = Y0 := by
@@ -3602,7 +3611,7 @@ private theorem S2_diff_under_interval_integral_general
   set Φ : ℝ → ℝ → ℝ := fun s t => speedSq (I := I) g f s t with hΦdef
   set G : ℝ × ℝ → ℝ := fun p : ℝ × ℝ => Φ p.1 p.2 with hG
   -- (1) `Φ = speedSq` is jointly `C^∞`.
-  have hΦ : ContDiff ℝ ∞ G := by
+  have hΦ : ContDiff ℝ (7 : ℕ) G := by
     rw [hG, hΦdef]; exact speedSq_contDiff (I := I) (M := M) g f hf
   have hΦcont : Continuous G := hΦ.continuous
   -- (2) The pointwise `s`-derivative of the slice `Φ(·, t)` is `fderiv G (·, t) (1,0)`.
@@ -3768,7 +3777,7 @@ theorem first_variation_general_s
   -- `f' a b := f (s₀ + a) b`; the chain rule transports the derivative to `s₀`.
   set fsh : ℝ → ℝ → M := fun a b : ℝ => f (s₀ + a) b with hfsh
   have hfsh_smooth : IsSmoothVariation (I := I) fsh := by
-    have hshift : ContMDiff (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞
+    have hshift : ContMDiff (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (8 : ℕ)
         (fun q : ℝ × ℝ => (s₀ + q.1, q.2)) :=
       (contMDiff_const.add contMDiff_fst).prodMk contMDiff_snd
     exact (hf : ContMDiff _ _ _ _).comp hshift
@@ -3959,7 +3968,7 @@ theorem second_variation_derivation
   -- neighbourhood.
   -- The jointly-`C^∞` speed-squared `G (s, t) := speedSq g f s t`.
   set G : ℝ × ℝ → ℝ := fun p : ℝ × ℝ => speedSq (I := I) g f p.1 p.2 with hG
-  have hGcdiff : ContDiff ℝ ∞ G := speedSq_contDiff (I := I) (M := M) g f hf
+  have hGcdiff : ContDiff ℝ (7 : ℕ) G := speedSq_contDiff (I := I) (M := M) g f hf
   -- The slice-`s` partial derivative of `√G`: `P (s, t) := ∂_s √(G (s, t))`.
   set P : ℝ × ℝ → ℝ := fun p : ℝ × ℝ =>
     fderiv ℝ (fun q : ℝ × ℝ => Real.sqrt (G q)) p (1, 0) with hP
@@ -3996,7 +4005,7 @@ theorem second_variation_derivation
       -- The numerator `2 ⟨∇_s ∂_t f, ∂_t f⟩` (parameter-shifted `S1`).
       set fsh : ℝ → ℝ → M := fun a b : ℝ => f (s + a) b with hfsh
       have hfsh_smooth : IsSmoothVariation (I := I) fsh := by
-        have hshift : ContMDiff (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞
+        have hshift : ContMDiff (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (8 : ℕ)
             (fun q : ℝ × ℝ => (s + q.1, q.2)) :=
           (contMDiff_const.add contMDiff_fst).prodMk contMDiff_snd
         exact (hf : ContMDiff _ _ _ _).comp hshift
@@ -4061,12 +4070,13 @@ theorem second_variation_derivation
     -- The open positivity set `U := {p | 0 < G p}`; `√G` is `C^∞` on `U`.
     set U : Set (ℝ × ℝ) := {p : ℝ × ℝ | 0 < G p} with hU
     have hUopen : IsOpen U := isOpen_lt continuous_const hGcdiff.continuous
-    -- `√G` is `C^∞` on `U`.
-    have hsqrtG_on : ContDiffOn ℝ ∞ (fun p : ℝ × ℝ => Real.sqrt (G p)) U :=
+    -- `√G` is `C^7` on `U`.
+    have hsqrtG_on : ContDiffOn ℝ (7 : ℕ) (fun p : ℝ × ℝ => Real.sqrt (G p)) U :=
       hGcdiff.contDiffOn.sqrt (fun p hp => ne_of_gt hp)
-    -- `P` is `C^∞` on `U`: it is the partial Fréchet derivative `∂_s √G`.
-    have hP_cdiff : ContDiffOn ℝ ∞ P U := by
-      have hfdw := hsqrtG_on.fderivWithin (m := ∞) hUopen.uniqueDiffOn (by norm_cast)
+    -- `P` is `C^6` on `U`: it is the partial Fréchet derivative `∂_s √G`.
+    have hP_cdiff : ContDiffOn ℝ (6 : ℕ) P U := by
+      have hfdw := hsqrtG_on.fderivWithin (m := (6 : ℕ)) hUopen.uniqueDiffOn
+        (by exact_mod_cast (by norm_num : (6 : ℕ) + 1 ≤ 7))
       have hP_eq : Set.EqOn P
           (fun p : ℝ × ℝ =>
             fderivWithin ℝ (fun q : ℝ × ℝ => Real.sqrt (G q)) U p (1, 0)) U := by
@@ -4077,7 +4087,8 @@ theorem second_variation_derivation
     have hP_contOn : ContinuousOn P U := hP_cdiff.continuousOn
     have hQ_contOn : ContinuousOn Q U := by
       -- `Q = fun p => fderiv P p (1, 0)`, continuous since `P` is `C²` on the open `U`.
-      have hfdw := hP_cdiff.fderivWithin (m := ∞) hUopen.uniqueDiffOn (by norm_cast)
+      have hfdw := hP_cdiff.fderivWithin (m := (5 : ℕ)) hUopen.uniqueDiffOn
+        (by exact_mod_cast (by norm_num : (5 : ℕ) + 1 ≤ 6))
       have hQ_eq : Set.EqOn Q
           (fun p : ℝ × ℝ => fderivWithin ℝ P U p (1, 0)) U := by
         intro p hp
@@ -4176,9 +4187,9 @@ theorem second_variation_derivation
     -- Geometric abbreviations along the central geodesic.
     set γ' : ∀ t : ℝ, TangentSpace I (γ t) := fun t : ℝ => mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ)
       with hγ'def
-    have hγ_smooth : ContMDiff (𝓘(ℝ, ℝ)) I ∞ γ := by
-      have hsmooth_central : ContMDiff (𝓘(ℝ, ℝ)) I ∞ (fun v : ℝ => f 0 v) := by
-        have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞ (fun v : ℝ => ((0 : ℝ), v)) :=
+    have hγ_smooth : ContMDiff (𝓘(ℝ, ℝ)) I (8 : ℕ) γ := by
+      have hsmooth_central : ContMDiff (𝓘(ℝ, ℝ)) I (8 : ℕ) (fun v : ℝ => f 0 v) := by
+        have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (8 : ℕ) (fun v : ℝ => ((0 : ℝ), v)) :=
           contMDiff_const.prodMk contMDiff_id
         exact (hf : ContMDiff _ _ _ _).comp hincl
       exact hfγ ▸ hsmooth_central
@@ -4216,8 +4227,8 @@ theorem second_variation_derivation
     have hgeo0 : ∀ t ∈ Set.Icc (0 : ℝ) L, covDerivAlong (I := I) g γ γ' t = 0 := by
       intro t ht
       have hgeo : HasGeodesicEquationAt (I := I) g γ t := hγ t ht
-      exact (covDerivAlong_velocity_eq_zero_iff_hasGeodesicEquationAt (I := I) g γ t
-        hγ_smooth).mpr hgeo
+      exact covDerivAlong_velocity_eq_zero_of_hasGeodesicEquationAt_C2 (I := I) g γ t
+        (hγ_smooth.contMDiffAt.of_le (by exact_mod_cast (by norm_num : (2 : ℕ) ≤ 8))) hgeo
     -- (E1) `⟨∇_t V, γ'⟩ = 0` on `[0, L]`: differentiate the (identically zero) `⟨V, γ'⟩`.
     have hVnabperp : ∀ t ∈ Set.Icc (0 : ℝ) L,
         g.inner (γ t) (covDerivAlong (I := I) g γ Vsec t) (γ' t) = 0 := by
@@ -4227,7 +4238,7 @@ theorem second_variation_derivation
         funext s; rw [hVsec_eq s]; exact hVperp s
       have hderiv0 : HasDerivAt (fun s : ℝ => g.inner (γ s) (Vsec s) (γ' s)) 0 t := by
         rw [hconst]; exact hasDerivAt_const t 0
-      have hmc := metric_compat_hasDerivAt_inner (I := I) g γ Vsec γ' t hγ_smooth
+      have hmc := metric_compat_hasDerivAt_inner (I := I) (by exact_mod_cast (by norm_num : (1 : ℕ) ≤ 8)) g γ Vsec γ' t hγ_smooth
         (hVdiff t) (hγ'diff t)
       have huniq := hderiv0.unique hmc
       -- `0 = ⟨∇_t V, γ'⟩ + ⟨V, ∇_t γ'⟩`, and `∇_t γ' = 0`.
@@ -4335,11 +4346,11 @@ theorem second_variation_derivation
       have hRHS : HasDerivAt (fun s : ℝ => fderiv ℝ G (s, t) (1, 0)) (g_ss t) 0 := by
         have hslicediff : DifferentiableAt ℝ
             (fun p : ℝ × ℝ => fderiv ℝ G p (1, 0)) (0, t) := by
-          have hfd : ContDiff ℝ ∞ (fun p : ℝ × ℝ => fderiv ℝ G p) :=
-            hGcdiff.fderiv_right (m := ∞) (by rw [show (∞ : WithTop ℕ∞) + 1 = ∞ from rfl])
-          have hfdapp : ContDiff ℝ ∞ (fun p : ℝ × ℝ => fderiv ℝ G p (1, 0)) :=
+          have hfd : ContDiff ℝ (6 : ℕ) (fun p : ℝ × ℝ => fderiv ℝ G p) :=
+            hGcdiff.fderiv_right (by exact_mod_cast (by norm_num : (6 : ℕ) + 1 ≤ 7))
+          have hfdapp : ContDiff ℝ (6 : ℕ) (fun p : ℝ × ℝ => fderiv ℝ G p (1, 0)) :=
             (ContinuousLinearMap.apply ℝ ℝ ((1, 0) : ℝ × ℝ)).contDiff.comp hfd
-          exact (hfdapp.differentiable (by simp)).differentiableAt
+          exact (hfdapp.differentiable (by norm_num)).differentiableAt
         have := Aux2.hasDerivAt_slice_fst (fun u v : ℝ => fderiv ℝ G (u, v) (1, 0)) 0 t hslicediff
         simpa [hg_ssdef] using this
       -- The two functions agree near `0`: `2 P √G = ∂_s G` where `G > 0`.
@@ -4388,8 +4399,8 @@ theorem second_variation_derivation
       set Wsec : ∀ s : ℝ, TangentSpace I (c s) := fun s : ℝ =>
         covDerivAlong (I := I) g (fun s' : ℝ => f s' t)
           (fun s' : ℝ => velTsec s') s with hWsec
-      have hc_smooth : ContMDiff (𝓘(ℝ, ℝ)) I ∞ c := by
-        have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞ (fun s : ℝ => (s, t)) :=
+      have hc_smooth : ContMDiff (𝓘(ℝ, ℝ)) I (8 : ℕ) c := by
+        have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (8 : ℕ) (fun s : ℝ => (s, t)) :=
           contMDiff_id.prodMk contMDiff_const
         exact (hf : ContMDiff _ _ _ _).comp hincl
       -- `c 0 = γ t` and `velTsec 0 = γ' t`.
@@ -4401,7 +4412,7 @@ theorem second_variation_derivation
       have hWdiff : DifferentiableAt ℝ (chartRepAt (I := I) c Wsec 0) 0 :=
         slice_secondCovDeriv_chartRep_differentiableAt (I := I) g f hf t
       -- Metric compatibility on `c`: `∂_s ⟨W, velT⟩|₀ = ⟨∇_s W, velT⟩ + ⟨W, ∇_s velT⟩`.
-      have hmc := metric_compat_hasDerivAt_inner (I := I) g c Wsec velTsec 0
+      have hmc := metric_compat_hasDerivAt_inner (I := I) (by exact_mod_cast (by norm_num : (1 : ℕ) ≤ 8)) g c Wsec velTsec 0
         hc_smooth hWdiff hvelTdiff
       -- `∇_s W|₀ = W2 t`, `∇_s velT|₀ = ∇_t V`, `velT 0 = γ'`, `W 0 = ∇_t V`.
       have hcovW : covDerivAlong (I := I) g c Wsec 0 = W2 t := by
@@ -4439,7 +4450,7 @@ theorem second_variation_derivation
         -- `S1` for the shifted variation at `s`.
         set fsh : ℝ → ℝ → M := fun a b : ℝ => f (s + a) b with hfsh
         have hfsh_smooth : IsSmoothVariation (I := I) fsh := by
-          have hshift : ContMDiff (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞
+          have hshift : ContMDiff (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (8 : ℕ)
               (fun q : ℝ × ℝ => (s + q.1, q.2)) :=
             (contMDiff_const.add contMDiff_fst).prodMk contMDiff_snd
           exact (hf : ContMDiff _ _ _ _).comp hshift
@@ -4481,11 +4492,11 @@ theorem second_variation_derivation
       have hgss_deriv : HasDerivAt (fun s : ℝ => fderiv ℝ G (s, t) (1, 0)) (g_ss t) 0 := by
         have hslicediff : DifferentiableAt ℝ
             (fun p : ℝ × ℝ => fderiv ℝ G p (1, 0)) (0, t) := by
-          have hfd : ContDiff ℝ ∞ (fun p : ℝ × ℝ => fderiv ℝ G p) :=
-            hGcdiff.fderiv_right (m := ∞) (by rw [show (∞ : WithTop ℕ∞) + 1 = ∞ from rfl])
-          have hfdapp : ContDiff ℝ ∞ (fun p : ℝ × ℝ => fderiv ℝ G p (1, 0)) :=
+          have hfd : ContDiff ℝ (6 : ℕ) (fun p : ℝ × ℝ => fderiv ℝ G p) :=
+            hGcdiff.fderiv_right (by exact_mod_cast (by norm_num : (6 : ℕ) + 1 ≤ 7))
+          have hfdapp : ContDiff ℝ (6 : ℕ) (fun p : ℝ × ℝ => fderiv ℝ G p (1, 0)) :=
             (ContinuousLinearMap.apply ℝ ℝ ((1, 0) : ℝ × ℝ)).contDiff.comp hfd
-          exact (hfdapp.differentiable (by simp)).differentiableAt
+          exact (hfdapp.differentiable (by norm_num)).differentiableAt
         have := Aux2.hasDerivAt_slice_fst (fun u v : ℝ => fderiv ℝ G (u, v) (1, 0)) 0 t hslicediff
         simpa [hg_ssdef] using this
       -- The two derivatives of equal functions agree: `g_ss t = 2 (⟨W2, γ'⟩ + ‖∇_t V‖²)`.
@@ -4650,7 +4661,7 @@ theorem second_variation_derivation
           HasDerivAt (fun s : ℝ => g.inner (γ s) (Asec s) (γ' s))
             (g.inner (γ t) (Bsec t) (γ' t)) t := by
         intro t ht
-        have hmc := metric_compat_hasDerivAt_inner (I := I) g γ Asec γ' t hγ_smooth
+        have hmc := metric_compat_hasDerivAt_inner (I := I) (by exact_mod_cast (by norm_num : (1 : ℕ) ≤ 8)) g γ Asec γ' t hγ_smooth
           (hAsecdiff t) (hγ'diff t)
         -- `∇_t γ' = 0`, so the second term drops.
         have hB2 : g.inner (γ t) (Asec t) (covDerivAlong (I := I) g γ γ' t) = 0 := by
@@ -4685,7 +4696,7 @@ theorem second_variation_derivation
       -- (7) Continuity / integrability on `[0, L]`.
       -- `γ` is `C¹` on `[0, L]`.
       have hγ_C1On : ContMDiffOn (𝓘(ℝ, ℝ)) I 1 γ (Set.Icc 0 L) :=
-        (hγ_smooth.of_le (by norm_cast : (1 : ℕ∞) ≤ ∞)).contMDiffOn
+        (hγ_smooth.of_le (by exact_mod_cast (by norm_num : (1 : ℕ) ≤ 8))).contMDiffOn
       -- Total-space continuity of `V`, `γ'`, and `∇_t V` along `γ` on `[0, L]`.
       have hV_total : ContinuousOn
           (fun t : ℝ => (TotalSpace.mk' E (E := (TangentSpace I : M → Type _))
@@ -4754,15 +4765,15 @@ theorem second_variation_derivation
         exact hnablaVsq_cont
       -- `g_ss` is continuous on `[0, L]` (`G` is jointly `C^∞`).
       have hg_ss_continuousOn : ContinuousOn g_ss (Set.Icc 0 L) := by
-        have hC : ContDiff ℝ ∞ (fun p : ℝ × ℝ =>
+        have hC : ContDiff ℝ (5 : ℕ) (fun p : ℝ × ℝ =>
             fderiv ℝ (fun q : ℝ × ℝ => fderiv ℝ G q (1, 0)) p (1, 0)) := by
-          have hfd1 : ContDiff ℝ ∞ (fun p : ℝ × ℝ => fderiv ℝ G p) :=
-            hGcdiff.fderiv_right (m := ∞) (by rw [show (∞ : WithTop ℕ∞) + 1 = ∞ from rfl])
-          have hfd1app : ContDiff ℝ ∞ (fun p : ℝ × ℝ => fderiv ℝ G p (1, 0)) :=
+          have hfd1 : ContDiff ℝ (6 : ℕ) (fun p : ℝ × ℝ => fderiv ℝ G p) :=
+            hGcdiff.fderiv_right (by exact_mod_cast (by norm_num : (6 : ℕ) + 1 ≤ 7))
+          have hfd1app : ContDiff ℝ (6 : ℕ) (fun p : ℝ × ℝ => fderiv ℝ G p (1, 0)) :=
             (ContinuousLinearMap.apply ℝ ℝ ((1, 0) : ℝ × ℝ)).contDiff.comp hfd1
-          have hfd2 : ContDiff ℝ ∞ (fun p : ℝ × ℝ => fderiv ℝ
+          have hfd2 : ContDiff ℝ (5 : ℕ) (fun p : ℝ × ℝ => fderiv ℝ
               (fun q : ℝ × ℝ => fderiv ℝ G q (1, 0)) p) :=
-            hfd1app.fderiv_right (m := ∞) (by rw [show (∞ : WithTop ℕ∞) + 1 = ∞ from rfl])
+            hfd1app.fderiv_right (by exact_mod_cast (by norm_num : (5 : ℕ) + 1 ≤ 6))
           exact (ContinuousLinearMap.apply ℝ ℝ ((1, 0) : ℝ × ℝ)).contDiff.comp hfd2
         have hgsslice : ContinuousOn (fun t : ℝ =>
             fderiv ℝ (fun q : ℝ × ℝ => fderiv ℝ G q (1, 0)) (0, t) (1, 0)) (Set.Icc 0 L) := by

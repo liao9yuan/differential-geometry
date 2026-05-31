@@ -302,6 +302,49 @@ theorem raw_mfderiv_eq_symmL_apply_fderiv
     _ = ((trivializationAt E (TangentSpace I) α).symmL ℝ (γ t))
           ((fderiv ℝ ((extChartAt I α) ∘ γ) t : ℝ →L[ℝ] E) (1 : ℝ)) := by rw [hCC]
 
+/-- **`MDifferentiableAt`-level raw form equals `symmL` of chart-pulled-back
+`fderiv`.**
+
+The same identity as `raw_mfderiv_eq_symmL_apply_fderiv`, but requiring only
+`MDifferentiableAt 𝓘(ℝ, ℝ) I γ t` (in place of global `C^∞` smoothness of `γ`).
+The original proof uses the smoothness hypothesis solely through
+`chartCoord_mfderiv_along_curve_eq_fderiv`, which itself has an
+`MDifferentiableAt`-only variant
+(`chartCoord_mfderiv_along_curve_eq_fderiv_of_mdifferentiableAt`); everything else
+(`symmL_continuousLinearMapAt`, the base-set membership) is regularity-free. This
+is the velocity bridge consumed by variational arguments where the curve is only
+finite-order differentiable. -/
+theorem raw_mfderiv_eq_symmL_apply_fderiv_of_mdifferentiableAt
+    {γ : ℝ → M} {t : ℝ} (hγ : MDifferentiableAt 𝓘(ℝ, ℝ) I γ t)
+    (α : M) (ht : γ t ∈ (chartAt H α).source) :
+    ((mfderiv 𝓘(ℝ, ℝ) I γ t : ℝ →L[ℝ] _) (1 : ℝ) : E) =
+      ((trivializationAt E (TangentSpace I) α).symmL ℝ (γ t))
+        ((fderiv ℝ ((extChartAt I α) ∘ γ) t : ℝ →L[ℝ] E) (1 : ℝ)) := by
+  -- The trivialization `α`-coordinate form of the velocity, via the
+  -- `MDifferentiableAt`-only chain-rule variant.
+  have hCC : ((trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ (γ t))
+      ((mfderiv 𝓘(ℝ, ℝ) I γ t : ℝ →L[ℝ] _) (1 : ℝ)) =
+        (fderiv ℝ ((extChartAt I α) ∘ γ) t : ℝ →L[ℝ] E) (1 : ℝ) :=
+    chartCoord_mfderiv_along_curve_eq_fderiv_of_mdifferentiableAt
+      (I := I) (M := M) (γ := γ) hγ α ht
+  -- Apply `symmL` to both sides and use the `symmL ∘ continuousLinearMapAt = id`
+  -- identity on the chart base set.
+  have hbaseSet : γ t ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
+    rw [TangentBundle.trivializationAt_baseSet]; exact ht
+  have hround :
+      ((trivializationAt E (TangentSpace I) α).symmL ℝ (γ t))
+          (((trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ (γ t))
+            ((mfderiv 𝓘(ℝ, ℝ) I γ t : ℝ →L[ℝ] _) (1 : ℝ))) =
+        ((mfderiv 𝓘(ℝ, ℝ) I γ t : ℝ →L[ℝ] _) (1 : ℝ)) :=
+    (trivializationAt E (TangentSpace I) α).symmL_continuousLinearMapAt
+      (R := ℝ) hbaseSet _
+  calc ((mfderiv 𝓘(ℝ, ℝ) I γ t : ℝ →L[ℝ] _) (1 : ℝ) : E)
+      = ((trivializationAt E (TangentSpace I) α).symmL ℝ (γ t))
+          (((trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ (γ t))
+            ((mfderiv 𝓘(ℝ, ℝ) I γ t : ℝ →L[ℝ] _) (1 : ℝ))) := hround.symm
+    _ = ((trivializationAt E (TangentSpace I) α).symmL ℝ (γ t))
+          ((fderiv ℝ ((extChartAt I α) ∘ γ) t : ℝ →L[ℝ] E) (1 : ℝ)) := by rw [hCC]
+
 /-! ### Bundled tangent map continuity along the curve
 
 The tangent map of `γ`, evaluated at the input `⟨t, 1⟩ : TangentBundle 𝓘(ℝ, ℝ) ℝ`,
@@ -328,12 +371,12 @@ This is the canonical *bundle-level* continuity statement underlying the raw
 `E`-valued mfderiv-velocity continuity along the curve (via fibre extraction
 through the local trivialisation at any chart basepoint). -/
 theorem continuous_tangentMap_unitLift
-    {γ : ℝ → M} (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) :
+    {γ : ℝ → M} {n : WithTop ℕ∞} (hn : 1 ≤ n) (hγ : ContMDiff 𝓘(ℝ, ℝ) I n γ) :
     Continuous (fun t : ℝ =>
       tangentMap 𝓘(ℝ, ℝ) I γ (⟨t, (1 : ℝ)⟩ : TangentBundle 𝓘(ℝ, ℝ) ℝ)) := by
   -- `tangentMap γ` is continuous on `TangentBundle 𝓘(ℝ, ℝ) ℝ`.
   have h_tan_cont : Continuous (tangentMap 𝓘(ℝ, ℝ) I γ) :=
-    hγ.continuous_tangentMap (by exact_mod_cast (le_top : (1 : ℕ∞) ≤ ⊤))
+    hγ.continuous_tangentMap hn
   -- The input `t ↦ ⟨t, 1⟩ : ℝ → TangentBundle 𝓘(ℝ, ℝ) ℝ` is continuous.
   -- Use `tangentBundleModelSpaceHomeomorph` to identify `TangentBundle 𝓘(ℝ, ℝ) ℝ ≃ₜ ℝ × ℝ`.
   have h_input_cont :

@@ -1540,6 +1540,11 @@ private lemma isSmoothVariation_of_chartGlue
         (extChartAt I c (ξ t) + ηf s • (βf t • w)))
     (hH_out : ∀ s t, t ∉ tsupport βf → Hfun s t = ξ t) :
     IsSmoothVariation (I := I) (fun s t => Hfun s t) := by
+  -- Prove joint `C^∞` first, then downgrade to the fixed finite order of
+  -- `IsSmoothVariation`.
+  suffices hsmooth : ContMDiff (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) I ∞
+      (fun p : ℝ × ℝ => Hfun p.1 p.2) by
+    exact hsmooth.of_le (ENat.LEInfty.out (m := ((8 : ℕ) : WithTop ℕ∞)))
   apply contMDiff_of_locally_contMDiffOn
   intro p
   by_cases hp : p.2 ∈ W
@@ -1735,9 +1740,10 @@ private lemma broken_piece_firstVariation
     rw [hcongr, intervalIntegral.integral_const, smul_eq_mul, mul_one, sub_zero]
   · -- (I) Conjunct 3: path length of each slice dominates the endpoint edistance.
     intro s
-    -- The slice `Fξ s` is `C^∞`, hence `C¹` on `[0, len]`.
-    have hslice_smooth : ContMDiff (𝓘(ℝ, ℝ)) I ∞ (fun t : ℝ => Fξ s t) := by
-      have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞
+    -- The slice `Fξ s` is `C^8` (the fixed finite order of `IsSmoothVariation`),
+    -- hence `C¹` on `[0, len]`.
+    have hslice_smooth : ContMDiff (𝓘(ℝ, ℝ)) I (8 : ℕ) (fun t : ℝ => Fξ s t) := by
+      have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (8 : ℕ)
           (fun t : ℝ => (s, t)) := contMDiff_const.prodMk contMDiff_id
       exact (hsmooth : ContMDiff _ _ _ _).comp hincl
     -- `pathELength = ofReal (arcLength)` via the `C¹` conversion.
@@ -1746,7 +1752,8 @@ private lemma broken_piece_firstVariation
         (E := (TangentSpace I : M → Type _)) (Fξ s t)
         (mfderiv 𝓘(ℝ, ℝ) I (fun t : ℝ => Fξ s t) t (1 : ℝ))) := by
       have := MFDerivAlongCurve.continuous_tangentMap_unitLift (I := I) (M := M)
-        (γ := fun t : ℝ => Fξ s t) hslice_smooth
+        (γ := fun t : ℝ => Fξ s t)
+        (by exact_mod_cast (by norm_num : (1 : ℕ) ≤ 8)) hslice_smooth
       simpa only [tangentMap] using this
     have hspeed_cont : ContinuousOn (fun t : ℝ => Real.sqrt
         (g.inner (Fξ s t)
@@ -1779,7 +1786,7 @@ private lemma broken_piece_firstVariation
       exact hEnorm (Fξ s t) (mfderiv 𝓘(ℝ, ℝ) I (fun t : ℝ => Fξ s t) t (1 : ℝ))
     rw [← hpath_eq]
     have hC1 : ContMDiffOn 𝓘(ℝ, ℝ) I 1 (fun t : ℝ => Fξ s t) (Set.Icc 0 len) :=
-      (hslice_smooth.contMDiffOn).of_le (by exact_mod_cast le_top)
+      (hslice_smooth.contMDiffOn).of_le (by exact_mod_cast (by norm_num : (1 : ℕ) ≤ 8))
     exact riemannianEDist_le_pathELength (I := I) (γ := fun t : ℝ => Fξ s t)
       (a := 0) (b := len) hC1 rfl rfl hlen.le
 

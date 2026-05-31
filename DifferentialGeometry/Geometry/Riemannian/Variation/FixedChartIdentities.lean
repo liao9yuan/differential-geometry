@@ -61,14 +61,23 @@ open DifferentialGeometry.Geometry.Riemannian.Geodesic
 
 /-! ## Smooth two-parameter variation -/
 
-/-- A smooth two-parameter variation `f : ℝ → ℝ → M` is one whose
-uncurried map `ℝ × ℝ → M` is jointly smooth. Since neither factor is a
-manifold of positive geometric dimension carrying the project's
-geometric structures, joint smoothness on `ℝ × ℝ` is admissible here. -/
+/-- A "smooth" two-parameter variation `f : ℝ → ℝ → M` is one whose uncurried
+map `ℝ × ℝ → M` is jointly `C^N` for the FIXED finite order `N := 8`. Since
+neither factor is a manifold of positive geometric dimension carrying the
+project's geometric structures, joint regularity on `ℝ × ℝ` is admissible here.
+
+The order is fixed and finite (rather than `∞`) so that the per-order
+exponential geodesic variation — which is only `C^n` for each finite `n`, never
+globally `C^∞` (the `C^∞` geodesic flow is a Mathlib gap) — can satisfy this
+predicate. `N = 8` comfortably exceeds the regularity the second-variation
+machinery consumes: the arc length is differentiated twice in `s` and once in
+`t`, with covariant derivatives (curvature) and chart-rep velocity-field
+manipulations adding a few more, all extracted at order `≤ 2` (or a small
+constant) via `.of_le` from `N`. -/
 def IsSmoothVariation
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
     (f : ℝ → ℝ → M) : Prop :=
-  ContMDiff (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) I ∞ (fun p : ℝ × ℝ => f p.1 p.2)
+  ContMDiff (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) I (8 : ℕ) (fun p : ℝ × ℝ => f p.1 p.2)
 
 /-! ## Mixed-partial Schwarz machinery for `E`-valued two-parameter maps
 
@@ -232,16 +241,16 @@ private lemma chartPulled_contDiffAt
     (f : ℝ → ℝ → M) (hf : IsSmoothVariation (I := I) f) (s t : ℝ) :
     ContDiffAt ℝ 2
       (fun p : ℝ × ℝ => extChartAt I (f s t) (f p.1 p.2)) (s, t) := by
-  have hext : ContMDiffAt I 𝓘(ℝ, E) ∞ (extChartAt I (f s t)) (f s t) :=
-    contMDiffAt_extChartAt (I := I) (x := f s t)
-  have hcomp : ContMDiffAt (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, E) ∞
+  have hext : ContMDiffAt I 𝓘(ℝ, E) (8 : ℕ) (extChartAt I (f s t)) (f s t) :=
+    (contMDiffAt_extChartAt (I := I) (x := f s t)).of_le (by exact_mod_cast le_top)
+  have hcomp : ContMDiffAt (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, E) (8 : ℕ)
       (fun p : ℝ × ℝ => extChartAt I (f s t) (f p.1 p.2)) (s, t) :=
     hext.comp (s, t) hf.contMDiffAt
-  have key : ContDiffAt ℝ ∞
+  have key : ContDiffAt ℝ (8 : ℕ)
       (fun p : ℝ × ℝ => extChartAt I (f s t) (f p.1 p.2)) (s, t) := by
     rw [← contMDiffAt_iff_contDiffAt, modelWithCornersSelf_prod, ← chartedSpaceSelf_prod]
     exact hcomp
-  exact key.of_le (by decide)
+  exact key.of_le (by exact_mod_cast (by norm_num : (2 : ℕ) ≤ 8))
 
 /-! ## Commutation of mixed covariant derivatives (fixed chart) -/
 

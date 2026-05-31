@@ -370,10 +370,10 @@ the signature; its source coincides with `(chartAt H (γ t)).source`. -/
 private def chartTime (I : ModelWithCorners ℝ E H) (γ : ℝ → M) (t : ℝ) : Set ℝ :=
   γ ⁻¹' (extChartAt I (γ t)).source
 
-private lemma chartTime_isOpen {γ : ℝ → M} (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) (t : ℝ) :
+private lemma chartTime_isOpen {γ : ℝ → M} (hγ : Continuous γ) (t : ℝ) :
     IsOpen (chartTime I γ t) := by
   have hsrc : IsOpen (extChartAt I (γ t)).source := isOpen_extChartAt_source (I := I) (γ t)
-  exact hγ.continuous.isOpen_preimage _ hsrc
+  exact hγ.isOpen_preimage _ hsrc
 
 private lemma mem_chartTime_self (γ : ℝ → M) (t : ℝ) : t ∈ chartTime I γ t := by
   rw [chartTime, mem_preimage, extChartAt_source]
@@ -384,14 +384,16 @@ private lemma chartTime_eq_chartSource (γ : ℝ → M) (t : ℝ) :
   rw [chartTime, extChartAt_source]
 
 /-- The chart-`(γ t)`-pullback `chartCurve (γ t) γ = extChartAt I (γ t) ∘ γ`
-is `C^∞` (`ContDiffOn ℝ ∞`) on the open set `chartTime γ t`. -/
-private lemma contDiffOn_chartCurve {γ : ℝ → M} (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) (t : ℝ) :
-    ContDiffOn ℝ ∞ (chartCurve (I := I) (γ t) γ) (chartTime I γ t) := by
+is `C^n` (`ContDiffOn ℝ n`) on the open set `chartTime γ t`, for any regularity
+order `n` matching that of the curve `γ`. -/
+private lemma contDiffOn_chartCurve {n : WithTop ℕ∞} [IsManifold I n M] {γ : ℝ → M}
+    (hγ : ContMDiff 𝓘(ℝ, ℝ) I n γ) (t : ℝ) :
+    ContDiffOn ℝ n (chartCurve (I := I) (γ t) γ) (chartTime I γ t) := by
   have h_comp_mdiff :
-      ContMDiffOn 𝓘(ℝ, ℝ) 𝓘(ℝ, E) ∞ ((extChartAt I (γ t)) ∘ γ) (chartTime I γ t) := by
-    have hφ : ContMDiffOn I 𝓘(ℝ, E) ∞ (extChartAt I (γ t)) (chartAt H (γ t)).source :=
-      contMDiffOn_extChartAt (I := I) (n := ∞) (x := γ t)
-    have hγU : ContMDiffOn 𝓘(ℝ, ℝ) I ∞ γ (chartTime I γ t) := hγ.contMDiffOn
+      ContMDiffOn 𝓘(ℝ, ℝ) 𝓘(ℝ, E) n ((extChartAt I (γ t)) ∘ γ) (chartTime I γ t) := by
+    have hφ : ContMDiffOn I 𝓘(ℝ, E) n (extChartAt I (γ t)) (chartAt H (γ t)).source :=
+      contMDiffOn_extChartAt (I := I) (n := n) (x := γ t)
+    have hγU : ContMDiffOn 𝓘(ℝ, ℝ) I n γ (chartTime I γ t) := hγ.contMDiffOn
     have hmaps : MapsTo γ (chartTime I γ t) (chartAt H (γ t)).source := by
       intro s hs
       rw [chartTime, mem_preimage, extChartAt_source] at hs
@@ -402,11 +404,13 @@ private lemma contDiffOn_chartCurve {γ : ℝ → M} (hγ : ContMDiff 𝓘(ℝ, 
   rw [hfun]
   exact contMDiffOn_iff_contDiffOn.mp h_comp_mdiff
 
-/-- The chart trajectory is `ContDiffAt ℝ ∞` at `t`. -/
-lemma contDiffAt_chartCurve {γ : ℝ → M} (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) (t : ℝ) :
-    ContDiffAt ℝ ∞ (chartCurve (I := I) (γ t) γ) t :=
+/-- The chart trajectory is `ContDiffAt ℝ n` at `t`, for any regularity order `n`
+matching that of the curve `γ`. -/
+lemma contDiffAt_chartCurve {n : WithTop ℕ∞} [IsManifold I n M] {γ : ℝ → M}
+    (hγ : ContMDiff 𝓘(ℝ, ℝ) I n γ) (t : ℝ) :
+    ContDiffAt ℝ n (chartCurve (I := I) (γ t) γ) t :=
   (contDiffOn_chartCurve (I := I) hγ t).contDiffAt
-    ((chartTime_isOpen (I := I) hγ t).mem_nhds (mem_chartTime_self (I := I) γ t))
+    ((chartTime_isOpen (I := I) hγ.continuous t).mem_nhds (mem_chartTime_self (I := I) γ t))
 
 /-- On `chartTime γ t`, the chart-`(γ t)`-coordinate of the velocity field
 `s ↦ mfderiv γ s 1` coincides with `deriv (chartCurve (γ t) γ)`. This is
@@ -438,7 +442,7 @@ private lemma velocity_chartRep_eventuallyEq {γ : ℝ → M} (hγ : ContMDiff �
     chartRepAt (I := I) γ (fun s => (mfderiv 𝓘(ℝ, ℝ) I γ s : ℝ →L[ℝ] _) (1 : ℝ)) t
       =ᶠ[𝓝 t] deriv (chartCurve (I := I) (γ t) γ) :=
   (velocity_chartRep_eqOn (I := I) hγ t).eventuallyEq_of_mem
-    ((chartTime_isOpen (I := I) hγ t).mem_nhds (mem_chartTime_self (I := I) γ t))
+    ((chartTime_isOpen (I := I) hγ.continuous t).mem_nhds (mem_chartTime_self (I := I) γ t))
 
 /-! ## The keystone velocity equivalence
 
@@ -470,7 +474,7 @@ theorem covDerivAlong_velocity_eq_zero_iff_hasGeodesicEquationAt
   -- The chart trajectory is `C^∞` at `t`.
   have hu_cdiff : ContDiffAt ℝ ∞ u t := contDiffAt_chartCurve (I := I) hγ t
   -- `u` is `C^∞` on the open set `chartTime γ t` (a neighbourhood of `t`).
-  have hU_open : IsOpen (chartTime I γ t) := chartTime_isOpen (I := I) hγ t
+  have hU_open : IsOpen (chartTime I γ t) := chartTime_isOpen (I := I) hγ.continuous t
   have ht_mem : t ∈ chartTime I γ t := mem_chartTime_self (I := I) γ t
   have hU_nhds : chartTime I γ t ∈ 𝓝 t := hU_open.mem_nhds ht_mem
   have hu_cdiffOn : ContDiffOn ℝ ∞ u (chartTime I γ t) :=
@@ -744,9 +748,10 @@ of the conclusion. The smoothness `hγ` of the curve supplies the chart
 trajectory's `HasDerivAt` and the eventual two-source membership that make
 the chart-transition chain rule valid near `t`. -/
 theorem covDerivAlong_chart_foot_invariance [I.Boundaryless]
+    {n : WithTop ℕ∞} [ENat.LEInfty n] (hn : n ≠ 0)
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M) (V : ∀ t, TangentSpace I (γ t))
     (t : ℝ) (β : M)
-    (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ)
+    (hγ : ContMDiff 𝓘(ℝ, ℝ) I n γ)
     (hβ : γ t ∈ (chartAt H β).source)
     (hV : DifferentiableAt ℝ (chartRepAt (I := I) γ V t) t) :
     (trivializationAt E (TangentSpace I) β).symmL ℝ (γ t)
@@ -774,7 +779,7 @@ theorem covDerivAlong_chart_foot_invariance [I.Boundaryless]
   set repβ : ℝ → E := chartRepAtBase (I := I) β γ V with hrepβ_def
   -- `HasDerivAt` for the chart-α trajectory and the foot-chart representation.
   have huα_hd : HasDerivAt uα (deriv uα t) t :=
-    ((contDiffAt_chartCurve (I := I) hγ t).differentiableAt (by simp)).hasDerivAt
+    ((contDiffAt_chartCurve (I := I) hγ t).differentiableAt hn).hasDerivAt
   have hrepα_hd : HasDerivAt repα (deriv repα t) t := hV.hasDerivAt
   -- An open neighbourhood `U ∋ t` on which `γ` stays in both chart sources.
   set U : Set ℝ := γ ⁻¹' ((chartAt H α).source ∩ (chartAt H β).source) with hU_def
