@@ -506,27 +506,6 @@ lemma indexForm_eq_intervalIntegral
     indexForm (I := I) g γ a b V W =
       ∫ t in a..b, indexFormIntegrand (I := I) g γ V W t := rfl
 
-/-! ## Minimiser implies index form is non-negative -/
-
-/-- A length-minimising unit-speed geodesic `γ : [0, L] → M` realises
-a local minimum of arc length on endpoint-fixed smooth variations;
-consequently the index form is non-negative on every endpoint-fixed
-smooth variation field `V`. -/
-theorem minimiser_implies_second_variation_nonneg
-    (g : SmoothRiemannianMetric I M) (γ : ℝ → M) (L : ℝ) (V : ℝ → E)
-    (_hγ : IsGeodesicOn (I := I) g γ (Set.Icc 0 L))
-    (_hmin : ∀ η : ℝ → M, ContMDiffOn 𝓘(ℝ, ℝ) I 1 η (Set.Icc 0 L) →
-      η 0 = γ 0 → η L = γ L →
-      arcLength (I := I) g γ 0 L ≤ arcLength (I := I) g η 0 L)
-    (_hUnit : ∀ t ∈ Set.Icc (0 : ℝ) L,
-      g.inner (γ t)
-          (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ))
-          (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ)) = 1)
-    (_hVperp : ∀ t ∈ Set.Icc (0 : ℝ) L,
-      g.inner (γ t) (V t) (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ)) = 0)
-    (_hV0 : V 0 = 0) (_hVL : V L = 0) :
-    0 ≤ indexForm (I := I) g γ 0 L V V := sorry
-
 /-! ## Moving-foot metric compatibility for the speed-squared -/
 
 /-- **Metric compatibility for the moving-foot speed-squared.** For a smooth
@@ -3912,7 +3891,7 @@ theorem second_variation_derivation
           (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ))
           (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ)) = 1)
     (hfix0 : ∀ s : ℝ, f s 0 = γ 0) (hfixL : ∀ s : ℝ, f s L = γ L)
-    (hVperp : ∀ t : ℝ,
+    (hVperp : ∀ t ∈ Set.Icc (0 : ℝ) L,
       g.inner (γ t) (V t) (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ)) = 0) :
     HasDerivAt
       (fun s : ℝ => deriv
@@ -4229,18 +4208,30 @@ theorem second_variation_derivation
       have hgeo : HasGeodesicEquationAt (I := I) g γ t := hγ t ht
       exact covDerivAlong_velocity_eq_zero_of_hasGeodesicEquationAt_C2 (I := I) g γ t
         (hγ_smooth.contMDiffAt.of_le (by exact_mod_cast (by norm_num : (2 : ℕ) ≤ 8))) hgeo
-    -- (E1) `⟨∇_t V, γ'⟩ = 0` on `[0, L]`: differentiate the (identically zero) `⟨V, γ'⟩`.
+    -- (E1) `⟨∇_t V, γ'⟩ = 0` on `[0, L]`: the function `t ↦ ⟨V t, γ' t⟩` is identically
+    -- `0` on `[0, L]` (`hVperp`), so its within-derivative along `[0, L]` is `0`; uniqueness
+    -- of the within-derivative (`Icc 0 L` has the unique-difference property, `0 < L`)
+    -- forces the metric-compatibility value to vanish.  Only `[0, L]` data is used, so the
+    -- two endpoints — where a two-sided derivative would require values outside `[0, L]` —
+    -- are handled by the one-sided within-derivative.
     have hVnabperp : ∀ t ∈ Set.Icc (0 : ℝ) L,
         g.inner (γ t) (covDerivAlong (I := I) g γ Vsec t) (γ' t) = 0 := by
       intro t ht
-      -- The function `t ↦ ⟨V t, γ' t⟩` is identically `0` (hVperp), so its derivative is `0`.
-      have hconst : (fun s : ℝ => g.inner (γ s) (Vsec s) (γ' s)) = (fun _ : ℝ => (0 : ℝ)) := by
-        funext s; rw [hVsec_eq s]; exact hVperp s
-      have hderiv0 : HasDerivAt (fun s : ℝ => g.inner (γ s) (Vsec s) (γ' s)) 0 t := by
-        rw [hconst]; exact hasDerivAt_const t 0
+      -- The within-derivative of the (locally-`0`-on-`[0, L]`) function is `0`.
+      have hderiv0 : HasDerivWithinAt (fun s : ℝ => g.inner (γ s) (Vsec s) (γ' s)) 0
+          (Set.Icc 0 L) t := by
+        refine (hasDerivWithinAt_const t (Set.Icc 0 L) (0 : ℝ)).congr_of_mem ?_ ht
+        intro s hs
+        rw [hVsec_eq s]; exact hVperp s hs
+      -- The metric-compatibility two-sided derivative, restricted to `[0, L]`.
       have hmc := metric_compat_hasDerivAt_inner (I := I) (by exact_mod_cast (by norm_num : (1 : ℕ) ≤ 8)) g γ Vsec γ' t hγ_smooth
         (hVdiff t) (hγ'diff t)
-      have huniq := hderiv0.unique hmc
+      have hmcWithin : HasDerivWithinAt (fun s : ℝ => g.inner (γ s) (Vsec s) (γ' s))
+          (g.inner (γ t) (covDerivAlong (I := I) g γ Vsec t) (γ' t)
+            + g.inner (γ t) (Vsec t) (covDerivAlong (I := I) g γ γ' t)) (Set.Icc 0 L) t :=
+        hmc.hasDerivWithinAt
+      -- Uniqueness of the within-derivative on `Icc 0 L`.
+      have huniq := (uniqueDiffOn_Icc hL t ht).eq_deriv (Set.Icc 0 L) hderiv0 hmcWithin
       -- `0 = ⟨∇_t V, γ'⟩ + ⟨V, ∇_t γ'⟩`, and `∇_t γ' = 0`.
       have hB : g.inner (γ t) (Vsec t) (covDerivAlong (I := I) g γ γ' t) = 0 := by
         rw [hgeo0 t ht]
@@ -4834,26 +4825,6 @@ theorem second_variation_derivation
   have hmem : Set.Ioo (-δ) δ ∈ nhds (0 : ℝ) := Ioo_mem_nhds (by linarith) hδpos
   exact hg₁_deriv.congr_of_eventuallyEq
     (Filter.eventuallyEq_of_mem hmem (fun s hs => hderiv_eq s hs))
-
-/-! ## Construction of a smooth variation with prescribed variation field -/
-
-/-- **Exponential-map construction of a smooth endpoint-fixed variation.**
-Given a smooth curve `γ` and a smooth `E`-valued variation field `V` vanishing
-at the endpoints `0` and `L`, there is a smooth two-parameter variation `f`
-whose central curve is `γ`, whose `s`-velocity at `s = 0` realises `V`
-(`∂_s f|_{s = 0} = V`), and which keeps both endpoints fixed
-(`f s 0 = γ 0` and `f s L = γ L` for every `s`). The construction follows the
-geodesic exponential map of the field, `f s t := exp_{γ t}(s · V t)`. -/
-theorem S5_exp_variation_construction
-    (g : SmoothRiemannianMetric I M) (γ : ℝ → M) (V : ℝ → E) (L : ℝ)
-    (_hγ : ContMDiff (𝓘(ℝ, ℝ)) I ∞ γ) (_hV : ContDiff ℝ ∞ V)
-    (_hV0 : V 0 = 0) (_hVL : V L = 0) :
-    ∃ f : ℝ → ℝ → M,
-      IsSmoothVariation (I := I) f ∧
-      (∀ t : ℝ, f 0 t = γ t) ∧
-      (∀ t : ℝ,
-        (mfderiv (𝓘(ℝ, ℝ)) I (fun s : ℝ => f s t) 0 (1 : ℝ) : E) = V t) ∧
-      (∀ s : ℝ, f s 0 = γ 0) ∧ (∀ s : ℝ, f s L = γ L) := sorry
 
 /-! ## Interval-integrability of the index-form integrand -/
 

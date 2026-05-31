@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Riemannian.BonnetMyers.RicciBound
 import DifferentialGeometry.Geometry.Riemannian.Variation.ParallelTransport
 import DifferentialGeometry.Geometry.Riemannian.Variation.SecondVariation
+import DifferentialGeometry.Geometry.Riemannian.Variation.SecondVariationMinimiser
 import DifferentialGeometry.Integral.Connection.Ricci
 import DifferentialGeometry.Integral.Connection.Curvature
 import DifferentialGeometry.Integral.Connection.LeviCivita
@@ -875,6 +876,8 @@ theorem sum_index_form_bound_by_curvature_hypothesis
 
 /-! ## Length-bound contradiction assembly -/
 
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
 /-- **length-bound-contradiction-assembly.** *Bonnet-Myers length
 bound.* For a unit-speed minimising geodesic `γ : [0, L] → M` on a
 Riemannian manifold whose Ricci curvature satisfies
@@ -888,7 +891,14 @@ negative sum of index forms. On the other hand
 gives `0 ≤ indexForm g γ 0 L V_i V_i`, hence the sum is non-negative.
 This contradiction forces `L ≤ π / √K`. -/
 theorem length_bound_contradiction_assembly
+    [T2Space (TangentBundle I M)] [ConnectedSpace M]
+    [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] [CompleteSpace E]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M) {L : ℝ} (_hL : 0 < L)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (_hγ_smooth : ContMDiff (𝓘(ℝ, ℝ)) I ∞ γ)
     (_hγ : ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ (Set.Icc 0 L))
     (_hgeo : IsGeodesicOn (I := I) g γ (Set.Icc 0 L)) {K : ℝ}
     (_hK : 0 < K)
@@ -920,7 +930,12 @@ theorem length_bound_contradiction_assembly
       MeasureTheory.volume 0 L)
     (_hmin : ∀ η : ℝ → M, ContMDiffOn 𝓘(ℝ, ℝ) I 1 η (Set.Icc 0 L) →
       η 0 = γ 0 → η L = γ L →
-      arcLength (I := I) g γ 0 L ≤ arcLength (I := I) g η 0 L) :
+      arcLength (I := I) g γ 0 L ≤ arcLength (I := I) g η 0 L)
+    (_hVbundle : ∀ i : Fin (Module.finrank ℝ E - 1),
+      ContMDiff 𝓘(ℝ, ℝ) I.tangent ∞
+        (fun t : ℝ => (TotalSpace.mk' E (E := (TangentSpace I : M → Type _)) (γ t)
+          ((SectionAlongCurve.smulFun
+            (fun s => Real.sin (Real.pi * s / L)) (e i)).toFun t)))) :
     L ≤ Real.pi / Real.sqrt K := by
   classical
   by_contra hcontra
@@ -1004,10 +1019,10 @@ theorem length_bound_contradiction_assembly
           map_smul (g.inner (γ t)) _ _]
       rw [ContinuousLinearMap.smul_apply, smul_eq_mul, _hPerp t ht i, mul_zero]
     refine minimiser_implies_second_variation_nonneg
-      (I := I) g γ L
+      (I := I) g hEnorm γ L
       (fun t => (SectionAlongCurve.smulFun
         (fun t => Real.sin (Real.pi * t / L)) (e i)).toFun t)
-      _hgeo _hmin hUnit_mfd hVperp ?_ ?_
+      _hL _hγ_smooth (_hVbundle i) _hgeo _hmin hUnit_mfd hVperp ?_ ?_
     · -- V 0 = 0: sin(π·0/L) = sin 0 = 0, so the smul gives zero.
       simp [SectionAlongCurve.smulFun_toFun, Real.sin_zero]
     · -- V L = 0: sin(π·L/L) = sin π = 0, so the smul gives zero.

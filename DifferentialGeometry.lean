@@ -500,6 +500,7 @@ import DifferentialGeometry.Geometry.Riemannian.Variation.ParallelTransport
 import DifferentialGeometry.Geometry.Riemannian.Variation.ParallelLocalODE
 import DifferentialGeometry.Geometry.Riemannian.Variation.PerpFrame
 import DifferentialGeometry.Geometry.Riemannian.Variation.SecondVariation
+import DifferentialGeometry.Geometry.Riemannian.Variation.SecondVariationMinimiser
 import DifferentialGeometry.Geometry.Riemannian.Variation.FixedChartIdentities
 import DifferentialGeometry.Geometry.Riemannian.Topology.SemilocallySimplyConnected
 import DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.Basic

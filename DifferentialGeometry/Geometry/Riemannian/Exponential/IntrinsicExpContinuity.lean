@@ -231,61 +231,6 @@ theorem intrinsicGeodesic_arc_finite_chart_cover
   · intro t r hr
     exact hq t r hr
 
-/-- **Chart-phase ODE uniqueness re-centred at a base time `t`.** The
-neighbourhood-of-`0` chart-coordinate ODE uniqueness
-`Geodesic.chartPhaseVF_orbit_uniqueness` re-based at an arbitrary base time `t`
-by a time-shift `s ↦ s + t`.  Two chart-phase ODE solutions agreeing at `t` and
-staying in the chart-target interior product near `t` agree on a neighbourhood
-of `t`. -/
-private theorem chartPhaseVF_orbit_uniqueness_at
-    {g : SmoothRiemannianMetric I M} {α : M}
-    {c₁ c₂ : ℝ → E × E} {z₀ : E × E} {t : ℝ}
-    (hz₀ : z₀ ∈ (interior (extChartAt I α).target) ×ˢ (Set.univ : Set E))
-    (h1 : c₁ t = z₀) (h2 : c₂ t = z₀)
-    (hd1 : ∀ᶠ s in 𝓝 t,
-      HasDerivAt c₁ (chartPhaseVF (I := I) g α (c₁ s)) s ∧
-        c₁ s ∈ (interior (extChartAt I α).target) ×ˢ (Set.univ : Set E))
-    (hd2 : ∀ᶠ s in 𝓝 t,
-      HasDerivAt c₂ (chartPhaseVF (I := I) g α (c₂ s)) s ∧
-        c₂ s ∈ (interior (extChartAt I α).target) ×ˢ (Set.univ : Set E)) :
-    c₁ =ᶠ[𝓝 t] c₂ := by
-  classical
-  set d₁ : ℝ → E × E := fun s => c₁ (s + t) with hd₁_def
-  set d₂ : ℝ → E × E := fun s => c₂ (s + t) with hd₂_def
-  have hshift : Filter.Tendsto (fun s : ℝ => s + t) (𝓝 0) (𝓝 t) := by
-    have h := (continuous_add_const t).tendsto (0 : ℝ)
-    simpa using h
-  have he1 : d₁ 0 = z₀ := by simp [hd₁_def, h1]
-  have he2 : d₂ 0 = z₀ := by simp [hd₂_def, h2]
-  have hdd1 : ∀ᶠ s in 𝓝 (0 : ℝ),
-      HasDerivAt d₁ (chartPhaseVF (I := I) g α (d₁ s)) s ∧
-        d₁ s ∈ (interior (extChartAt I α).target) ×ˢ (Set.univ : Set E) := by
-    filter_upwards [hshift.eventually hd1] with s hs
-    obtain ⟨hder, hmem⟩ := hs
-    refine ⟨?_, hmem⟩
-    have hadd : HasDerivAt (fun r : ℝ => r + t) 1 s := by
-      simpa using (hasDerivAt_id s).add_const t
-    have hcomp := HasDerivAt.scomp s hder hadd
-    simpa [hd₁_def, mul_one] using hcomp
-  have hdd2 : ∀ᶠ s in 𝓝 (0 : ℝ),
-      HasDerivAt d₂ (chartPhaseVF (I := I) g α (d₂ s)) s ∧
-        d₂ s ∈ (interior (extChartAt I α).target) ×ˢ (Set.univ : Set E) := by
-    filter_upwards [hshift.eventually hd2] with s hs
-    obtain ⟨hder, hmem⟩ := hs
-    refine ⟨?_, hmem⟩
-    have hadd : HasDerivAt (fun r : ℝ => r + t) 1 s := by
-      simpa using (hasDerivAt_id s).add_const t
-    have hcomp := HasDerivAt.scomp s hder hadd
-    simpa [hd₂_def, mul_one] using hcomp
-  have hdeq : d₁ =ᶠ[𝓝 (0 : ℝ)] d₂ :=
-    chartPhaseVF_orbit_uniqueness (I := I) (g := g) (α := α) hz₀ he1 he2 hdd1 hdd2
-  have hshift2 : Filter.Tendsto (fun s : ℝ => s - t) (𝓝 t) (𝓝 0) := by
-    have h := (continuous_add_const (-t)).tendsto t
-    simpa [sub_eq_add_neg] using h
-  filter_upwards [hshift2.eventually hdeq] with s hs
-  simp only [hd₁_def, hd₂_def] at hs
-  simpa using hs
-
 /-! ## 2b. Converse lift: from the moving-foot geodesic equation to a
 chart-centred integral curve
 
@@ -441,7 +386,7 @@ theorem intrinsicGeodesic_hasGeodesicEquationAt_to_lift
       (I := I) y hp_target
   -- (D) Chart-phase ODE uniqueness re-centred at `t`: `c₁ =ᶠ c₂`.
   have hceq : c₁ =ᶠ[𝓝 t] c₂ :=
-    chartPhaseVF_orbit_uniqueness_at (I := I) (g := g) (α := y)
+    chartPhaseVF_orbit_uniqueness_at (I := I) (g := g) (q := y)
       hz₀_int hc₁_t hc₂_t hc₁_phase hc₂_phase
   -- (E) Project the first-component equality back to `γ =ᶠ projectCurve f₁`.
   have hfst : ∀ᶠ s in 𝓝 t, extChartAt I y (γ s) = extChartAt I y (f₁ s).proj := by
