@@ -2488,28 +2488,444 @@ private lemma slice_secondCovDeriv_chartRep_differentiableAt
   exact (hbridge.differentiableAt_iff).mpr hccd_diff
 
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong in
+/-- **Joint `C²`-regularity of the chart-`(f 0 t)`-coordinate transverse velocity.**
+The function `(u, v) ↦ φ_{f 0 t}(∂_s f|_{(u, v)})`, i.e. the chart-`(f 0 t)`-
+coordinate of the transverse velocity `∂_s f`, is `C²` jointly at `(0, t)`. Near
+`(0, t)` it agrees with the partial Fréchet derivative
+`(u, v) ↦ fderiv_w (extChartAt (f 0 t) (f w v)) u 1` of the jointly-`C^∞`
+chart-pull `(u, v) ↦ extChartAt (f 0 t) (f u v)`, which is `C^∞`. The slot
+direction is `(1, 0)` (the `u`-partial), the transverse-velocity analogue of
+`chartCoord_longitudinalVelocity_contDiffAt`. -/
+private lemma chartCoord_transverseVelocity_contDiffAt
+    (f : ℝ → ℝ → M) (hf : IsSmoothVariation (I := I) f) (t : ℝ) :
+    ContDiffAt ℝ 2 (fun p : ℝ × ℝ =>
+        (trivializationAt E (TangentSpace I) (f 0 t)).continuousLinearMapAt ℝ (f p.1 p.2)
+          (mfderiv (𝓘(ℝ, ℝ)) I (fun w : ℝ => f w p.2) p.1 (1 : ℝ))) (0, t) := by
+  classical
+  set β : M := f 0 t with hβ
+  -- Joint `C^∞` of the chart-pull `F (u, v) := extChartAt β (f u v)` near `(0, t)`.
+  have hsrc0 : f 0 t ∈ (chartAt H β).source := by rw [hβ]; exact mem_chart_source H (f 0 t)
+  have hF : ContDiffAt ℝ ∞ (fun p : ℝ × ℝ => extChartAt I β (f p.1 p.2)) (0, t) :=
+    chartPulled_contDiffAt_infty (I := I) f hf β 0 t hsrc0
+  -- The model section: `Ymodel p := fderiv F p (1, 0)`, jointly `C^∞`, hence `C²`.
+  have hfd : ContDiffAt ℝ ∞ (fderiv ℝ (fun q : ℝ × ℝ => extChartAt I β (f q.1 q.2))) (0, t) :=
+    hF.fderiv_right (m := ∞) (by rw [show (∞ : WithTop ℕ∞) + 1 = ∞ from rfl])
+  have hYmodel : ContDiffAt ℝ 2 (fun p : ℝ × ℝ =>
+      fderiv ℝ (fun q : ℝ × ℝ => extChartAt I β (f q.1 q.2)) p (1, 0)) (0, t) :=
+    ((ContinuousLinearMap.apply ℝ E ((1, 0) : ℝ × ℝ)).contDiff.contDiffAt.comp (0, t)
+      hfd).of_le (by norm_cast)
+  -- Slice smoothness for the bridge `chartCoord_mfderiv_along_curve_eq_fderiv`.
+  have hslice_v : ∀ v : ℝ, ContMDiff (𝓘(ℝ, ℝ)) I ∞ (fun w : ℝ => f w v) := by
+    intro v
+    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞ (fun w : ℝ => (w, v)) :=
+      contMDiff_id.prodMk contMDiff_const
+    exact (hf : ContMDiff _ _ _ _).comp hincl
+  -- The chart-pull is jointly continuous (from `hF`), so `f u v ∈ source β` is open
+  -- in `(u, v)` and holds near `(0, t)`.
+  have hf_cont : Continuous (fun p : ℝ × ℝ => f p.1 p.2) := hf.continuous
+  have hopen : IsOpen {p : ℝ × ℝ | f p.1 p.2 ∈ (chartAt H β).source} :=
+    hf_cont.isOpen_preimage _ (chartAt H β).open_source
+  have hmem0 : (0, t) ∈ {p : ℝ × ℝ | f p.1 p.2 ∈ (chartAt H β).source} := by
+    change f 0 t ∈ (chartAt H β).source; exact hsrc0
+  -- On that open neighbourhood, the goal function agrees with `Ymodel`.
+  have heq : (fun p : ℝ × ℝ =>
+      (trivializationAt E (TangentSpace I) β).continuousLinearMapAt ℝ (f p.1 p.2)
+        (mfderiv (𝓘(ℝ, ℝ)) I (fun w : ℝ => f w p.2) p.1 (1 : ℝ)))
+        =ᶠ[𝓝 (0, t)]
+      (fun p : ℝ × ℝ => fderiv ℝ (fun q : ℝ × ℝ => extChartAt I β (f q.1 q.2)) p (1, 0)) := by
+    filter_upwards [hopen.mem_nhds hmem0] with p hp
+    have hsrc : (fun w : ℝ => f w p.2) p.1 ∈ (chartAt H β).source := hp
+    have hbridge := MFDerivAlongCurve.chartCoord_mfderiv_along_curve_eq_fderiv
+      (I := I) (M := M) (γ := fun w : ℝ => f w p.2) (hslice_v p.2) β (t := p.1) hsrc
+    -- `(extChartAt β ∘ (f · p.2)) = fun w => extChartAt β (f w p.2)`, and its `fderiv 1`
+    -- equals the joint partial fderiv `fderiv F p (1, 0)`.
+    have hcompfun : ((extChartAt I β) ∘ (fun w : ℝ => f w p.2))
+        = (fun w : ℝ => extChartAt I β (f w p.2)) := rfl
+    rw [hcompfun] at hbridge
+    rw [hbridge]
+    -- Convert the slice fderiv to the joint partial fderiv at `p` via the inclusion
+    -- chain rule `w ↦ (w, p.2)`.
+    have hdiffJoint : DifferentiableAt ℝ (fun q : ℝ × ℝ => extChartAt I β (f q.1 q.2)) p := by
+      have hC1 : ContDiffAt ℝ 1 (fun q : ℝ × ℝ => extChartAt I β (f q.1 q.2)) p :=
+        (chartPulled_contDiffAt_infty (I := I) f hf β p.1 p.2 hsrc).of_le (by norm_cast)
+      exact hC1.differentiableAt (by simp)
+    have hincl : HasFDerivAt (fun w : ℝ => (w, p.2)) (ContinuousLinearMap.inl ℝ ℝ ℝ) p.1 :=
+      hasFDerivAt_prodMk_left p.1 p.2
+    have hG : HasFDerivAt (fun q : ℝ × ℝ => extChartAt I β (f q.1 q.2))
+        (fderiv ℝ (fun q : ℝ × ℝ => extChartAt I β (f q.1 q.2)) p) p :=
+      hdiffJoint.hasFDerivAt
+    have hch := hG.comp p.1 hincl
+    have hcompfun2 : (fun w : ℝ => extChartAt I β (f w p.2))
+        = (fun q : ℝ × ℝ => extChartAt I β (f q.1 q.2)) ∘ (fun w : ℝ => (w, p.2)) := rfl
+    rw [hcompfun2, hch.fderiv]
+    simp [ContinuousLinearMap.inl]
+  exact hYmodel.congr_of_eventuallyEq heq
+
+open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong in
+/-- **Differentiability of the transverse-velocity chart-rep along a longitudinal
+slice.** For a smooth variation `f` and any `s`, the pinned chart-`(f s t₀)`-
+coordinate representation of the transverse velocity field `v ↦ ∂_s f|_{(s, v)}`
+(read along the longitudinal slice `f s ·`) is differentiable at `t₀`. Near `t₀`
+it agrees with the partial Fréchet derivative
+`v ↦ fderiv_w (extChartAt (f s t₀) (f w v)) s 1` of the jointly-`C^∞` chart-pull
+`(w, v) ↦ extChartAt (f s t₀) (f w v)`, which is `C^∞` in `v`. This is the
+transverse-velocity analogue (`∂_s f`-field) of
+`slice_velocityField_chartRep_differentiableAt`. -/
+private lemma slice_transverseField_longitudinal_chartRep_differentiableAt
+    (_g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M)
+    (hf : IsSmoothVariation (I := I) f) (s t₀ : ℝ) :
+    DifferentiableAt ℝ
+      (chartRepAt (I := I) (fun v : ℝ => f s v)
+        (fun v : ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun w : ℝ => f w v) s (1 : ℝ)) t₀) t₀ := by
+  classical
+  set α : M := f s t₀ with hα
+  have hslice_v : ∀ v : ℝ, ContMDiff (𝓘(ℝ, ℝ)) I ∞ (fun w : ℝ => f w v) := by
+    intro v
+    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞ (fun w : ℝ => (w, v)) :=
+      contMDiff_id.prodMk contMDiff_const
+    exact (hf : ContMDiff _ _ _ _).comp hincl
+  have hslice_s : ContMDiff (𝓘(ℝ, ℝ)) I ∞ (fun v : ℝ => f s v) := by
+    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞ (fun v : ℝ => (s, v)) :=
+      contMDiff_const.prodMk contMDiff_id
+    exact (hf : ContMDiff _ _ _ _).comp hincl
+  -- The smooth model section: `v ↦ fderiv_w (extChartAt α (f w v)) s 1`.
+  set sec : ℝ → E := fun v : ℝ => fderiv ℝ (fun w : ℝ => extChartAt I α (f w v)) s (1 : ℝ)
+    with hsec
+  -- It is `C^∞` at `t₀`: the partial fderiv (in `w` at `s`) of the jointly-smooth chart-pull,
+  -- evaluated at `1`, varying `v`.
+  have hsec_cdiff : ContDiffAt ℝ ∞ sec t₀ := by
+    have hsrc0 : f s t₀ ∈ (chartAt H α).source := by rw [hα]; exact mem_chart_source H (f s t₀)
+    -- `(v, w) ↦ extChartAt α (f w v)` is jointly `C^∞` at `(t₀, s)`.
+    have hjoint : ContDiffAt ℝ ∞
+        (Function.uncurry (fun v w : ℝ => extChartAt I α (f w v))) (t₀, s) := by
+      have h := chartPulled_contDiffAt_infty (I := I) f hf α s t₀ hsrc0
+      have hswap : ContDiffAt ℝ ∞
+          ((fun p : ℝ × ℝ => extChartAt I α (f p.1 p.2)) ∘ (fun q : ℝ × ℝ => (q.2, q.1)))
+          (t₀, s) :=
+        h.comp (t₀, s) ((contDiffAt_snd).prodMk (contDiffAt_fst))
+      exact hswap
+    have hgs : ContDiffAt ℝ ∞ (fun _ : ℝ => s) t₀ := contDiffAt_const
+    have hpartial : ContDiffAt ℝ ∞
+        (fun v : ℝ => fderiv ℝ (fun w : ℝ => extChartAt I α (f w v)) ((fun _ : ℝ => s) v)) t₀ :=
+      ContDiffAt.fderiv (𝕜 := ℝ)
+        (f := fun v w : ℝ => extChartAt I α (f w v)) (g := fun _ : ℝ => s)
+        hjoint hgs (by rw [show (∞ : WithTop ℕ∞) + 1 = ∞ from rfl])
+    exact (ContinuousLinearMap.apply ℝ E (1 : ℝ)).contDiff.contDiffAt.comp t₀ hpartial
+  -- The chart-rep agrees with `sec` near `t₀`.
+  have hopen : IsOpen {v : ℝ | f s v ∈ (chartAt H α).source} :=
+    hslice_s.continuous.isOpen_preimage _ (chartAt H α).open_source
+  have h0 : t₀ ∈ {v : ℝ | f s v ∈ (chartAt H α).source} := by
+    change f s t₀ ∈ (chartAt H α).source; rw [hα]; exact mem_chart_source H (f s t₀)
+  have heq : (chartRepAt (I := I) (fun v : ℝ => f s v)
+      (fun v : ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun w : ℝ => f w v) s (1 : ℝ)) t₀)
+        =ᶠ[𝓝 t₀] sec := by
+    filter_upwards [hopen.mem_nhds h0] with v hv
+    have hsrc : (fun w : ℝ => f w v) s ∈ (chartAt H α).source := hv
+    have hbridge := MFDerivAlongCurve.chartCoord_mfderiv_along_curve_eq_fderiv
+      (I := I) (M := M) (γ := fun w : ℝ => f w v) (hslice_v v) α (t := s) hsrc
+    change (trivializationAt E (TangentSpace I) ((fun v : ℝ => f s v) t₀)).continuousLinearMapAt ℝ
+        ((fun v : ℝ => f s v) v) (mfderiv (𝓘(ℝ, ℝ)) I (fun w : ℝ => f w v) s (1 : ℝ)) = sec v
+    rw [hsec, show (fun v : ℝ => f s v) t₀ = α from hα.symm]
+    have hcompfun : ((extChartAt I α) ∘ (fun w : ℝ => f w v))
+        = (fun w : ℝ => extChartAt I α (f w v)) := rfl
+    rw [hcompfun] at hbridge
+    exact hbridge
+  exact (heq.differentiableAt_iff).mpr (hsec_cdiff.differentiableAt (by simp))
+
+open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong in
+/-- **Differentiability of the transverse-velocity chart-rep along the transverse
+slice.** For a smooth variation `f` and any `v`, the pinned chart-`(f 0 v)`-
+coordinate representation of the transverse velocity field `u ↦ ∂_s f|_{(u, v)}`
+(read along the transverse slice `f · v`) is differentiable at `0`. This is just
+the velocity of the `C^∞` transverse curve `f · v`, so its chart-rep agrees near
+`0` with the velocity of the `C^∞` chart curve `extChartAt (f 0 v) ∘ (f · v)`. -/
+private lemma slice_transverseVelocity_chartRep_differentiableAt
+    (_g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M)
+    (hf : IsSmoothVariation (I := I) f) (v : ℝ) :
+    DifferentiableAt ℝ
+      (chartRepAt (I := I) (fun u : ℝ => f u v)
+        (fun u : ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun w : ℝ => f w v) u (1 : ℝ)) 0) 0 := by
+  classical
+  set α : M := f 0 v with hα
+  have htransverse : ContMDiff (𝓘(ℝ, ℝ)) I ∞ (fun u : ℝ => f u v) := by
+    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞ (fun u : ℝ => (u, v)) :=
+      contMDiff_id.prodMk contMDiff_const
+    exact (hf : ContMDiff _ _ _ _).comp hincl
+  -- The smooth model section `u ↦ fderiv (extChartAt α ∘ (f · v)) u 1`, the velocity of
+  -- the `C^∞` chart curve.
+  set sec : ℝ → E := fun u : ℝ => fderiv ℝ (fun w : ℝ => extChartAt I α (f w v)) u (1 : ℝ)
+    with hsec
+  have hchartcurve_cdiff : ContDiffAt ℝ ∞ (fun w : ℝ => extChartAt I α (f w v)) 0 := by
+    have hext : ContMDiffAt I 𝓘(ℝ, E) ∞ (extChartAt I α) (f 0 v) :=
+      contMDiffAt_extChartAt (I := I) (x := α)
+    have hcomp : ContMDiffAt (𝓘(ℝ, ℝ)) 𝓘(ℝ, E) ∞ (fun w : ℝ => extChartAt I α (f w v)) 0 :=
+      hext.comp 0 htransverse.contMDiffAt
+    exact contMDiffAt_iff_contDiffAt.mp hcomp
+  have hsec_cdiff : ContDiffAt ℝ ∞ sec 0 := by
+    have hfd : ContDiffAt ℝ ∞ (fderiv ℝ (fun w : ℝ => extChartAt I α (f w v))) 0 :=
+      hchartcurve_cdiff.fderiv_right (by simp)
+    have heval : ContDiffAt ℝ ∞
+        (fun u : ℝ => (ContinuousLinearMap.apply ℝ E (1 : ℝ))
+          (fderiv ℝ (fun w : ℝ => extChartAt I α (f w v)) u)) 0 :=
+      (ContinuousLinearMap.apply ℝ E (1 : ℝ)).contDiff.contDiffAt.comp 0 hfd
+    exact heval
+  -- The chart-rep agrees with `sec` near `0`.
+  have hopen : IsOpen {u : ℝ | f u v ∈ (chartAt H α).source} :=
+    htransverse.continuous.isOpen_preimage _ (chartAt H α).open_source
+  have h0 : (0 : ℝ) ∈ {u : ℝ | f u v ∈ (chartAt H α).source} := by
+    change f 0 v ∈ (chartAt H α).source; rw [hα]; exact mem_chart_source H (f 0 v)
+  have heq : (chartRepAt (I := I) (fun u : ℝ => f u v)
+      (fun u : ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun w : ℝ => f w v) u (1 : ℝ)) 0)
+        =ᶠ[𝓝 (0 : ℝ)] sec := by
+    filter_upwards [hopen.mem_nhds h0] with u hu
+    have hsrc : (fun w : ℝ => f w v) u ∈ (chartAt H α).source := hu
+    have hbridge := MFDerivAlongCurve.chartCoord_mfderiv_along_curve_eq_fderiv
+      (I := I) (M := M) (γ := fun w : ℝ => f w v) htransverse α (t := u) hsrc
+    change (trivializationAt E (TangentSpace I) ((fun u : ℝ => f u v) 0)).continuousLinearMapAt ℝ
+        ((fun u : ℝ => f u v) u) (mfderiv (𝓘(ℝ, ℝ)) I (fun w : ℝ => f w v) u (1 : ℝ)) = sec u
+    rw [hsec, show (fun u : ℝ => f u v) 0 = α from hα.symm]
+    have hcompfun : ((extChartAt I α) ∘ (fun w : ℝ => f w v))
+        = (fun w : ℝ => extChartAt I α (f w v)) := rfl
+    rw [hcompfun] at hbridge
+    exact hbridge
+  exact (heq.differentiableAt_iff).mpr (hsec_cdiff.differentiableAt (by simp))
+
+open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong in
+/-- **Intrinsic curvature commutation on a smooth variation, transverse-velocity
+field.** The `∂_s f`-field analogue of `commute_ds_dt_curvature`: for a smooth
+two-parameter variation `f`, the commutator of the transverse and longitudinal
+covariant derivatives of the *transverse* velocity field `∂_s f`, evaluated at the
+central curve `s = 0`, equals the Riemann curvature operator of the Levi-Civita
+connection applied to the transverse velocity `V := ∂_s f|_{s = 0}`, the
+longitudinal velocity `γ' := ∂_t f|_{s = 0}`, and `V`:
+`∇_s ∇_t (∂_s f) − ∇_t ∇_s (∂_s f) = R(V, γ') V`, with all covariant derivatives
+the intrinsic `covDerivAlong` at the common foot `f 0 t`.
+
+The proof is identical in structure to `commute_ds_dt_curvature` with the inner
+field `∂_t f` replaced by `∂_s f`; the chart-coordinate section is the chart-`(f 0
+t)`-coordinate of `∂_s f` (jointly `C²` by `chartCoord_transverseVelocity_contDiffAt`),
+and the inner/outer regularity dischargers are supplied by the transverse-velocity
+slice differentiability lemmas. The `houterL`/`houterR` hypotheses are the genuine
+regularity assumptions that the nested covariant-derivative fields vary
+differentiably in chart coordinates. -/
+private theorem commute_ds_dt_curvature_innerS
+    (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M)
+    (hf : IsSmoothVariation (I := I) f) (t : ℝ)
+    (houterL : DifferentiableAt ℝ (chartRepAt (I := I) (fun s : ℝ => f s t)
+        (fun s : ℝ => covDerivAlong (I := I) g (fun v : ℝ => f s v)
+          (fun v : ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun w : ℝ => f w v) s (1 : ℝ)) t) 0) 0)
+    (houterR : DifferentiableAt ℝ (chartRepAt (I := I) (fun v : ℝ => f 0 v)
+        (fun v : ℝ => covDerivAlong (I := I) g (fun u : ℝ => f u v)
+          (fun u : ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun w : ℝ => f w v) u (1 : ℝ)) 0) t) t) :
+    covDerivAlong (I := I) g (fun s : ℝ => f s t)
+        (fun s : ℝ => covDerivAlong (I := I) g (fun v : ℝ => f s v)
+          (fun v : ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun w : ℝ => f w v) s (1 : ℝ)) t) 0
+      - covDerivAlong (I := I) g (fun v : ℝ => f 0 v)
+        (fun v : ℝ => covDerivAlong (I := I) g (fun u : ℝ => f u v)
+          (fun u : ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun w : ℝ => f w v) u (1 : ℝ)) 0) t
+      = (DifferentialGeometry.Integral.Connection.riemannOp
+          (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) (f 0 t))
+          (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f u t) 0 (1 : ℝ))
+          (mfderiv (𝓘(ℝ, ℝ)) I (fun w : ℝ => f 0 w) t (1 : ℝ))
+          (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f u t) 0 (1 : ℝ)) := by
+  classical
+  set β : M := f 0 t with hβ
+  -- Slice smoothness.
+  have hslice_u : ∀ s : ℝ, ContMDiff (𝓘(ℝ, ℝ)) I ∞ (fun w : ℝ => f s w) := by
+    intro s
+    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞ (fun w : ℝ => (s, w)) :=
+      contMDiff_const.prodMk contMDiff_id
+    exact (hf : ContMDiff _ _ _ _).comp hincl
+  have hslice_v : ∀ v : ℝ, ContMDiff (𝓘(ℝ, ℝ)) I ∞ (fun w : ℝ => f w v) := by
+    intro v
+    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞ (fun w : ℝ => (w, v)) :=
+      contMDiff_id.prodMk contMDiff_const
+    exact (hf : ContMDiff _ _ _ _).comp hincl
+  have htransverse : ContMDiff (𝓘(ℝ, ℝ)) I ∞ (fun s : ℝ => f s t) := hslice_v t
+  have hcentral : ContMDiff (𝓘(ℝ, ℝ)) I ∞ (fun v : ℝ => f 0 v) := hslice_u 0
+  -- Abbreviation for the transverse velocity section `∂_s f`.
+  set velS : ℝ → ℝ → E :=
+    fun s v => mfderiv (𝓘(ℝ, ℝ)) I (fun w : ℝ => f w v) s (1 : ℝ) with hvelS
+  -- The chart-`β`-coordinate of the transverse velocity, the `Y` of the fixed-chart
+  -- curvature identity. Both inner orders of the commutator differentiate the SAME field
+  -- `∂_s f`, so both use this single section `Y`.
+  set Y : ℝ → ℝ → E := fun u v =>
+    (trivializationAt E (TangentSpace I) β).continuousLinearMapAt ℝ (f u v) (velS u v) with hY
+  -- `Y u ·` is the chart-`β`-coordinate representation of `∂_s f` along the slice `f u ·`.
+  have hY_chartRepAtBase_u : ∀ u : ℝ,
+      (fun v : ℝ => Y u v)
+        = chartRepAtBase (I := I) β (fun w : ℝ => f u w) (fun w : ℝ => velS u w) := by
+    intro u; funext v; rw [hY, chartRepAtBase_apply]
+  -- `Y · v` is the chart-`β`-coordinate representation of `∂_s f` along the slice `f · v`.
+  have hY_chartRepAtBase_v : ∀ v : ℝ,
+      (fun u : ℝ => Y u v)
+        = chartRepAtBase (I := I) β (fun w : ℝ => f w v) (fun w : ℝ => velS w v) := by
+    intro v; funext u; rw [hY, chartRepAtBase_apply]
+  -- `Y` is jointly `C²` at `(0, t)`.
+  have hY_C2 : ContDiffAt ℝ 2 (fun p : ℝ × ℝ => Y p.1 p.2) (0, t) :=
+    chartCoord_transverseVelocity_contDiffAt (I := I) f hf t
+  -- The fixed-chart curvature identity for `Y` at `(0, t)`.
+  have hfixed := curvature_identity_on_variation_fixed_chart (I := I) g f hf Y 0 t hY_C2
+  -- (A) Open neighbourhood facts: `f s t ∈ source β` near `s = 0`, `f 0 v ∈ source β` near `v = t`.
+  have hsrcβ : f 0 t ∈ (chartAt H β).source := by rw [hβ]; exact mem_chart_source H (f 0 t)
+  have hopenL : IsOpen {s : ℝ | f s t ∈ (chartAt H β).source} :=
+    htransverse.continuous.isOpen_preimage _ (chartAt H β).open_source
+  have h0L : (0 : ℝ) ∈ {s : ℝ | f s t ∈ (chartAt H β).source} := hsrcβ
+  have hopenR : IsOpen {v : ℝ | f 0 v ∈ (chartAt H β).source} :=
+    hcentral.continuous.isOpen_preimage _ (chartAt H β).open_source
+  have h0R : t ∈ {v : ℝ | f 0 v ∈ (chartAt H β).source} := hsrcβ
+  -- (B) Inner bridges (conditional on the foot lying in `source β`):
+  --   the fixed-chart inner expression is the chart-`β`-coordinate of the intrinsic inner.
+  -- Inner field `v ↦ velS s v = ∂_s f` along `f s ·` has differentiable chart-rep at `t`.
+  have hinnerL_diff : ∀ s : ℝ, DifferentiableAt ℝ
+      (chartRepAt (I := I) (fun v : ℝ => f s v) (fun v : ℝ => velS s v) t) t := fun s =>
+    slice_transverseField_longitudinal_chartRep_differentiableAt (I := I) g f hf s t
+  have hinnerL : ∀ s : ℝ, f s t ∈ (chartAt H β).source →
+      chartCovDerivAlong (I := I) g β (fun v : ℝ => f s v) (fun v : ℝ => Y s v) t
+        = (trivializationAt E (TangentSpace I) β).continuousLinearMapAt ℝ (f s t)
+            (covDerivAlong (I := I) g (fun v : ℝ => f s v) (fun v : ℝ => velS s v) t) := by
+    intro s hs
+    rw [hY_chartRepAtBase_u s]
+    exact (chartCoord_covDerivAlong_eq_chartCovDerivAlong_chartRepAtBase (I := I) g
+      (fun w : ℝ => f s w) (fun w : ℝ => velS s w) t β (hslice_u s) hs
+      (hinnerL_diff s)).symm
+  -- The right inner field `u ↦ velS u v = ∂_s f` along `f · v` has differentiable chart-rep at `0`.
+  have hinnerR_diff : ∀ v : ℝ, DifferentiableAt ℝ
+      (chartRepAt (I := I) (fun u : ℝ => f u v) (fun u : ℝ => velS u v) 0) 0 := fun v =>
+    slice_transverseVelocity_chartRep_differentiableAt (I := I) g f hf v
+  have hinnerR : ∀ v : ℝ, f 0 v ∈ (chartAt H β).source →
+      chartCovDerivAlong (I := I) g β (fun u : ℝ => f u v) (fun u : ℝ => Y u v) 0
+        = (trivializationAt E (TangentSpace I) β).continuousLinearMapAt ℝ (f 0 v)
+            (covDerivAlong (I := I) g (fun u : ℝ => f u v) (fun u : ℝ => velS u v) 0) := by
+    intro v hv
+    rw [hY_chartRepAtBase_v v]
+    exact (chartCoord_covDerivAlong_eq_chartCovDerivAlong_chartRepAtBase (I := I) g
+      (fun w : ℝ => f w v) (fun w : ℝ => velS w v) 0 β (hslice_v v) hv (hinnerR_diff v)).symm
+  -- (C) The outer sections agree, near the basepoint, with the fixed-chart inner sections.
+  set innerL : ∀ s : ℝ, TangentSpace I ((fun s : ℝ => f s t) s) :=
+    fun s => covDerivAlong (I := I) g (fun v : ℝ => f s v) (fun v : ℝ => velS s v) t with hinnerL_def
+  set innerR : ∀ v : ℝ, TangentSpace I ((fun v : ℝ => f 0 v) v) :=
+    fun v => covDerivAlong (I := I) g (fun u : ℝ => f u v) (fun u : ℝ => velS u v) 0 with hinnerR_def
+  have hrepL_eq : chartRepAt (I := I) (fun s : ℝ => f s t) innerL 0
+      =ᶠ[𝓝 (0 : ℝ)]
+        (fun s : ℝ => chartCovDerivAlong (I := I) g β (fun v : ℝ => f s v) (fun v : ℝ => Y s v) t) := by
+    filter_upwards [hopenL.mem_nhds h0L] with s hs
+    rw [chartRepAt_apply]
+    change (trivializationAt E (TangentSpace I) β).continuousLinearMapAt ℝ (f s t) (innerL s) = _
+    rw [hinnerL_def, ← hinnerL s hs]
+  have hrepR_eq : chartRepAt (I := I) (fun v : ℝ => f 0 v) innerR t
+      =ᶠ[𝓝 t]
+        (fun v : ℝ => chartCovDerivAlong (I := I) g β (fun u : ℝ => f u v) (fun u : ℝ => Y u v) 0) := by
+    filter_upwards [hopenR.mem_nhds h0R] with v hv
+    rw [chartRepAt_apply]
+    change (trivializationAt E (TangentSpace I) β).continuousLinearMapAt ℝ (f 0 v) (innerR v) = _
+    rw [hinnerR_def, ← hinnerR v hv]
+  -- (D) Outer bridges.
+  have houterL_bridge :
+      (trivializationAt E (TangentSpace I) β).continuousLinearMapAt ℝ ((fun s : ℝ => f s t) 0)
+          (covDerivAlong (I := I) g (fun s : ℝ => f s t) innerL 0)
+        = chartCovDerivAlong (I := I) g β (fun s : ℝ => f s t)
+            (fun s : ℝ => chartCovDerivAlong (I := I) g β (fun v : ℝ => f s v)
+              (fun v : ℝ => Y s v) t) 0 := by
+    rw [chartCoord_covDerivAlong_eq_chartCovDerivAlong_chartRepAtBase (I := I) g
+      (fun s : ℝ => f s t) innerL 0 β htransverse (by rw [hβ] at hsrcβ ⊢; exact hsrcβ) houterL]
+    rw [show chartRepAtBase (I := I) β (fun s : ℝ => f s t) innerL
+        = chartRepAt (I := I) (fun s : ℝ => f s t) innerL 0 from
+      chartRepAtBase_foot (I := I) (fun s : ℝ => f s t) innerL 0]
+    rw [chartCovDerivAlong_def, chartCovDerivAlong_def, hrepL_eq.deriv_eq, hrepL_eq.eq_of_nhds]
+  have houterR_bridge :
+      (trivializationAt E (TangentSpace I) β).continuousLinearMapAt ℝ ((fun v : ℝ => f 0 v) t)
+          (covDerivAlong (I := I) g (fun v : ℝ => f 0 v) innerR t)
+        = chartCovDerivAlong (I := I) g β (fun v : ℝ => f 0 v)
+            (fun v : ℝ => chartCovDerivAlong (I := I) g β (fun u : ℝ => f u v)
+              (fun u : ℝ => Y u v) 0) t := by
+    rw [chartCoord_covDerivAlong_eq_chartCovDerivAlong_chartRepAtBase (I := I) g
+      (fun v : ℝ => f 0 v) innerR t β hcentral (by rw [hβ] at hsrcβ ⊢; exact hsrcβ) houterR]
+    rw [show chartRepAtBase (I := I) β (fun v : ℝ => f 0 v) innerR
+        = chartRepAt (I := I) (fun v : ℝ => f 0 v) innerR t from
+      chartRepAtBase_foot (I := I) (fun v : ℝ => f 0 v) innerR t]
+    rw [chartCovDerivAlong_def, chartCovDerivAlong_def, hrepR_eq.deriv_eq, hrepR_eq.eq_of_nhds]
+  -- (E) Assemble: round-trip at the foot, then apply the fixed-chart identity.
+  have hfootOuterL : (fun s : ℝ => f s t) 0 = β := by rw [hβ]
+  have hfootOuterR : (fun v : ℝ => f 0 v) t = β := by rw [hβ]
+  have hmemβ : β ∈ (trivializationAt E (TangentSpace I) β).baseSet :=
+    FiberBundle.mem_baseSet_trivializationAt E (TangentSpace I) β
+  have hLeft : covDerivAlong (I := I) g (fun s : ℝ => f s t) innerL 0
+      = (trivializationAt E (TangentSpace I) β).symmL ℝ β
+          (chartCovDerivAlong (I := I) g β (fun s : ℝ => f s t)
+            (fun s : ℝ => chartCovDerivAlong (I := I) g β (fun v : ℝ => f s v)
+              (fun v : ℝ => Y s v) t) 0) := by
+    rw [← houterL_bridge, hfootOuterL]
+    exact ((trivializationAt E (TangentSpace I) β).symmL_continuousLinearMapAt
+      (R := ℝ) hmemβ _).symm
+  have hRight : covDerivAlong (I := I) g (fun v : ℝ => f 0 v) innerR t
+      = (trivializationAt E (TangentSpace I) β).symmL ℝ β
+          (chartCovDerivAlong (I := I) g β (fun v : ℝ => f 0 v)
+            (fun v : ℝ => chartCovDerivAlong (I := I) g β (fun u : ℝ => f u v)
+              (fun u : ℝ => Y u v) 0) t) := by
+    rw [← houterR_bridge, hfootOuterR]
+    exact ((trivializationAt E (TangentSpace I) β).symmL_continuousLinearMapAt
+      (R := ℝ) hmemβ _).symm
+  -- The goal's LHS sections are `innerL`, `innerR` (defeq).
+  change covDerivAlong (I := I) g (fun s : ℝ => f s t) innerL 0
+      - covDerivAlong (I := I) g (fun v : ℝ => f 0 v) innerR t = _
+  rw [hLeft, hRight, ← map_sub]
+  -- Apply the fixed-chart curvature identity: the commutator equals `riemannOp` on `Y 0 t`.
+  rw [hfixed]
+  -- Convert the three remaining mismatches:
+  -- (i) `symmL_β β = id` at the foot (round trip);
+  -- (ii) `Y 0 t = mfderiv (f · t) 0 1` (foot `clmAt = id`, `velS 0 t = mfderiv`);
+  -- (iii) the two `fderiv` tangent slots equal the corresponding `mfderiv` fibre vectors.
+  have hfoot_src : f 0 t ∈ (chartAt H (f 0 t)).source := mem_chart_source H (f 0 t)
+  have hfoot_clm : ∀ x : TangentSpace I (f 0 t),
+      (trivializationAt E (TangentSpace I) (f 0 t)).continuousLinearMapAt ℝ (f 0 t) x = x := by
+    intro x
+    rw [TangentBundle.continuousLinearMapAt_trivializationAt_eq_core (I := I) hfoot_src]
+    exact (tangentBundleCore I M).coordChange_self (achart H (f 0 t)) (f 0 t)
+      (mem_achart_source H (f 0 t)) x
+  have hfoot_symmL : ∀ x : TangentSpace I (f 0 t),
+      (trivializationAt E (TangentSpace I) (f 0 t)).symmL ℝ (f 0 t) x = x := by
+    intro x
+    rw [TangentBundle.symmL_trivializationAt_eq_core (I := I) hfoot_src]
+    exact (tangentBundleCore I M).coordChange_self (achart H (f 0 t)) (f 0 t)
+      (mem_achart_source H (f 0 t)) x
+  -- (iii) `fderiv (extChartAt (f 0 t) (f · t)) 0 1 = mfderiv (f · t) 0 1`.
+  have hslotS : (fderiv ℝ (fun u : ℝ => extChartAt I (f 0 t) (f u t)) 0 (1 : ℝ))
+      = (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f u t) 0 (1 : ℝ) : E) := by
+    have hbridge := MFDerivAlongCurve.chartCoord_mfderiv_along_curve_eq_fderiv
+      (I := I) (M := M) (γ := fun u : ℝ => f u t) (hslice_v t) (f 0 t) (t := 0)
+      (by change f 0 t ∈ (chartAt H (f 0 t)).source; exact hfoot_src)
+    have hcompfun : ((extChartAt I (f 0 t)) ∘ (fun u : ℝ => f u t))
+        = (fun u : ℝ => extChartAt I (f 0 t) (f u t)) := rfl
+    rw [hcompfun, hfoot_clm] at hbridge
+    exact hbridge.symm
+  have hslotT : (fderiv ℝ (fun v : ℝ => extChartAt I (f 0 t) (f 0 v)) t (1 : ℝ))
+      = (mfderiv (𝓘(ℝ, ℝ)) I (fun w : ℝ => f 0 w) t (1 : ℝ) : E) := by
+    have hbridge := MFDerivAlongCurve.chartCoord_mfderiv_along_curve_eq_fderiv
+      (I := I) (M := M) (γ := fun w : ℝ => f 0 w) (hslice_u 0) (f 0 t) (t := t)
+      (by change f 0 t ∈ (chartAt H (f 0 t)).source; exact hfoot_src)
+    have hcompfun : ((extChartAt I (f 0 t)) ∘ (fun w : ℝ => f 0 w))
+        = (fun w : ℝ => extChartAt I (f 0 t) (f 0 w)) := rfl
+    rw [hcompfun, hfoot_clm] at hbridge
+    exact hbridge.symm
+  -- (ii) `Y 0 t = mfderiv (f · t) 0 1`.
+  have hYft : Y 0 t = (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f u t) 0 (1 : ℝ) : E) := by
+    rw [hY]
+    change (trivializationAt E (TangentSpace I) β).continuousLinearMapAt ℝ (f 0 t) (velS 0 t)
+      = mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f u t) 0 (1 : ℝ)
+    rw [hβ, hfoot_clm]
+  rw [hslotS, hslotT, hYft]
+  rw [show (trivializationAt E (TangentSpace I) β).symmL ℝ β
+        = (trivializationAt E (TangentSpace I) (f 0 t)).symmL ℝ (f 0 t) from by rw [hβ]]
+  rw [hfoot_symmL]
+
+open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong in
 /-- **Intrinsic curvature commutation on a smooth variation.** For a smooth
 two-parameter variation `f`, the commutator of the transverse and longitudinal
 covariant derivatives of the longitudinal velocity field `∂_t f`, evaluated at the
 central curve `s = 0`, equals the Riemann curvature operator of the Levi-Civita
 connection applied to the transverse velocity `V := ∂_s f|_{s = 0}`, the
-longitudinal velocity `γ' := ∂_t f|_{s = 0}`, and `γ'`:
-`∇_s ∇_t (∂_t f) − ∇_t ∇_s (∂_t f) = R(V, γ') γ'`, with all covariant derivatives
-the intrinsic `covDerivAlong` at the common foot `f 0 t`.
-
-The two transverse/longitudinal derivative orders are pinned at the moving feet
-`f s t` and `f 0 v` respectively, so the second-order commutator mixes a chart at
-the outer foot `f s t` with the inner covariant derivative living in the moving
-foot chart. `covDerivAlong_chart_foot_invariance` re-expresses every nested
-intrinsic covariant derivative in the single common chart `f 0 t`, where the
-already-proven chart-level identity
-`curvature_identity_on_variation_fixed_chart` applies; the round-trip identities
-at the foot then transport back to the intrinsic answer.
-
-The hypotheses `houterL`/`houterR` are the genuine regularity assumptions that the
-nested covariant-derivative fields vary differentiably in chart coordinates (the
-same hypothesis class that `covDerivAlong_chart_foot_invariance` itself consumes);
-they are not restatements of the conclusion. -/
+longitudinal velocity `γ' := ∂_t f|_{s = 0}`, and `γ'`. -/
 private theorem commute_ds_dt_curvature
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M)
     (hf : IsSmoothVariation (I := I) f) (t : ℝ)
@@ -2770,6 +3186,330 @@ private lemma covDerivAlong_const_add_shift
   rw [covDerivAlong_def, covDerivAlong_def]
   rw [hfoot]
   rw [hchart]
+
+open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong in
+/-- **Mixed-commutation lifted to the transverse curve.** For a smooth variation
+`f`, at every transverse parameter `s` the transverse covariant derivative of the
+longitudinal velocity `∇_s (∂_t f)|_{(s, t)}` (along the transverse curve `f · t`)
+equals the longitudinal covariant derivative of the transverse velocity
+`∇_t (∂_s f)|_{(s, t)}` (along the longitudinal slice `f s ·`), both intrinsic
+vectors at the common foot `f s t`. This is `commute_ds_dt_intrinsic` applied to
+the `s`-shifted variation `(a, b) ↦ f (s + a) b`, whose central slice at `a = 0`
+is `f s ·`; the affine-shift covariance of `covDerivAlong`
+(`covDerivAlong_const_add_shift`) and the chain rule for the shifted
+`s`-velocity (`mfderiv` of `a ↦ f (s + a) v` at `0` equals the `s`-velocity
+`mfderiv (f · v) s 1`) translate the single-foot commutation to parameter `s`. -/
+private lemma commute_ds_dt_intrinsic_shifted
+    (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M)
+    (hf : IsSmoothVariation (I := I) f) (t : ℝ) :
+    (fun s : ℝ => covDerivAlong (I := I) g (fun s' : ℝ => f s' t)
+        (fun s' : ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun w : ℝ => f s' w) t (1 : ℝ)) s)
+      = (fun s : ℝ => covDerivAlong (I := I) g (fun v : ℝ => f s v)
+        (fun v : ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun w : ℝ => f w v) s (1 : ℝ)) t) := by
+  classical
+  funext s
+  -- The `s`-shifted variation `fsh a b := f (s + a) b`.
+  set fsh : ℝ → ℝ → M := fun a b : ℝ => f (s + a) b with hfsh
+  have hfsh_smooth : IsSmoothVariation (I := I) fsh := by
+    have hshift : ContMDiff (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞
+        (fun q : ℝ × ℝ => (s + q.1, q.2)) :=
+      (contMDiff_const.add contMDiff_fst).prodMk contMDiff_snd
+    exact (hf : ContMDiff _ _ _ _).comp hshift
+  -- The single-foot commutation for `fsh` at parameter `t`.
+  have hcomm := commute_ds_dt_intrinsic (I := I) g fsh hfsh_smooth t
+  -- LHS of `hcomm`: `∇_a (∂_t fsh)|_{a = 0}` along `a ↦ fsh a t = f (s + a) t`.
+  -- By `covDerivAlong_const_add_shift` it equals `∇_s (∂_t f)|_{(s, t)}`.
+  have hLHS : covDerivAlong (I := I) g (fun a : ℝ => fsh a t)
+        (fun a : ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => fsh a u) t (1 : ℝ)) 0
+      = covDerivAlong (I := I) g (fun s' : ℝ => f s' t)
+        (fun s' : ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun w : ℝ => f s' w) t (1 : ℝ)) s := by
+    have hshift := covDerivAlong_const_add_shift (I := I) g (fun s' : ℝ => f s' t)
+      (fun s' : ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun w : ℝ => f s' w) t (1 : ℝ)) s
+    -- The shifted base curve and section coincide (defeq) with the `fsh`-forms.
+    exact hshift
+  -- RHS of `hcomm`: `∇_t (∂_s fsh)|_{a = 0}` along `v ↦ fsh 0 v = f s v`.
+  -- `fsh 0 v = f s v` and the shifted `s`-velocity `∂_a (fsh · v)|_0 = ∂_s f|_{(s, v)}`.
+  have hbaseR : (fun v : ℝ => fsh 0 v) = (fun v : ℝ => f s v) := by funext v; rw [hfsh]; simp
+  have hsecR : ∀ v : ℝ, mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => fsh u v) 0 (1 : ℝ)
+      = mfderiv (𝓘(ℝ, ℝ)) I (fun w : ℝ => f w v) s (1 : ℝ) := by
+    intro v
+    -- `(fun u => fsh u v) = (fun w => f w v) ∘ (fun u => s + u)`; chain rule at `0`.
+    have hslice_v : ContMDiff (𝓘(ℝ, ℝ)) I ∞ (fun w : ℝ => f w v) := by
+      have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞ (fun w : ℝ => (w, v)) :=
+        contMDiff_id.prodMk contMDiff_const
+      exact (hf : ContMDiff _ _ _ _).comp hincl
+    have hcomp_eq : (fun u : ℝ => fsh u v)
+        = (fun w : ℝ => f w v) ∘ (fun u : ℝ => s + u) := by funext u; simp only [hfsh, Function.comp]
+    have hψ_mdiff : MDifferentiableAt (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ)) (fun u : ℝ => s + u) 0 := by
+      have hcd : ContMDiffAt (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ)) ∞ (fun u : ℝ => s + u) 0 := by
+        rw [contMDiffAt_iff_contDiffAt]
+        exact (contDiffAt_const.add contDiffAt_id)
+      exact hcd.mdifferentiableAt (by simp)
+    have hφ_mdiff : MDifferentiableAt (𝓘(ℝ, ℝ)) I (fun w : ℝ => f w v) ((fun u : ℝ => s + u) 0) := by
+      have hpt : ((fun u : ℝ => s + u) 0) = s := by simp
+      rw [hpt]; exact (hslice_v.contMDiffAt).mdifferentiableAt (by simp)
+    rw [hcomp_eq, mfderiv_comp 0 hφ_mdiff hψ_mdiff]
+    -- `mfderiv (fun u => s + u) 0` applied to `1` gives `1` (affine shift on `ℝ`).
+    have hderiv : HasDerivAt (fun u : ℝ => s + u) (1 : ℝ) 0 := by
+      simpa using (hasDerivAt_id (0 : ℝ)).const_add s
+    have hψfd : mfderiv (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ)) (fun u : ℝ => s + u) 0 (1 : ℝ) = (1 : ℝ) := by
+      have heq : mfderiv (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ)) (fun u : ℝ => s + u) 0
+          = fderiv ℝ (fun u : ℝ => s + u) 0 :=
+        mfderiv_eq_fderiv (𝕜 := ℝ) (f := fun u : ℝ => s + u) (x := 0)
+      rw [heq]
+      change deriv (fun u : ℝ => s + u) 0 = (1 : ℝ)
+      exact hderiv.deriv
+    rw [ContinuousLinearMap.comp_apply]
+    rw [show (mfderiv (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ)) (fun u : ℝ => s + u) 0) (1 : ℝ) = (1 : ℝ) from hψfd]
+    -- residual: `mfderiv (f · v) ((fun u => s + u) 0) 1 = mfderiv (f · v) s 1`; foot `s + 0 = s`.
+    -- `TangentSpace I x` is definitionally `E`, so the foot rewrite is type-correct.
+    change mfderiv (𝓘(ℝ, ℝ)) I (fun w : ℝ => f w v) (s + 0) (1 : ℝ)
+      = mfderiv (𝓘(ℝ, ℝ)) I (fun w : ℝ => f w v) s (1 : ℝ)
+    rw [add_zero]
+  have hRHS : covDerivAlong (I := I) g (fun v : ℝ => fsh 0 v)
+        (fun v : ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => fsh u v) 0 (1 : ℝ)) t
+      = covDerivAlong (I := I) g (fun v : ℝ => f s v)
+        (fun v : ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun w : ℝ => f w v) s (1 : ℝ)) t := by
+    rw [hbaseR]
+    congr 1
+    funext v; exact hsecR v
+  rw [← hLHS, ← hRHS]
+  exact hcomm
+
+open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
+  DifferentialGeometry.Integral.DivergenceTheorem in
+/-- **Chart-rep differentiability of the second transverse covariant derivative
+along the central curve.** For a smooth variation `f`, the pinned chart-`(f 0 t)`-
+coordinate representation of the section
+`v ↦ ∇_s ∂_s f|_{(·, v)}|_{s = 0}` (the second transverse covariant derivative of
+the transverse velocity, read along the central curve `v ↦ f 0 v`) is
+differentiable at `v = t`. Near `t` it agrees with the chart-`(f 0 t)` covariant
+derivative `v ↦ (D/dv)`-free expression: the chart-`(f 0 t)`-coordinate `Z(v)` of
+`∇_s ∂_s f|_{(·, v)}|_0` is `deriv_u Y(·, v)|_0 + Γ(deriv_u uC(·, v)|_0, Y(0, v),
+uC(0, v))`, where `Y(u, v)` is the jointly-`C²` chart-coordinate of `∂_s f`
+(`chartCoord_transverseVelocity_contDiffAt`) and `uC(u, v) = extChartAt (f 0 t)
+(f u v)` is the jointly-`C^∞` chart-pull. Joint `C²` of `Y` makes the inner
+`u`-partial `deriv_u Y(·, v)|_0` differentiable in `v`
+(`Aux2.hasDerivAt_partial_fst`), and the Christoffel contraction is differentiable
+likewise; transporting through the eventual chart-coordinate equality gives the
+chart-rep differentiability. This is the `houterR` discharger for the
+transverse-velocity curvature commutation. -/
+private lemma slice_secondCovDeriv_central_chartRep_differentiableAt
+    (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M)
+    (hf : IsSmoothVariation (I := I) f) (t : ℝ) :
+    DifferentiableAt ℝ
+      (chartRepAt (I := I) (fun v : ℝ => f 0 v)
+        (fun v : ℝ => covDerivAlong (I := I) g (fun u : ℝ => f u v)
+          (fun u : ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun w : ℝ => f w v) u (1 : ℝ)) 0) t) t := by
+  classical
+  set β : M := f 0 t with hβ
+  -- Slice smoothness.
+  have hslice_v : ∀ v : ℝ, ContMDiff (𝓘(ℝ, ℝ)) I ∞ (fun w : ℝ => f w v) := by
+    intro v
+    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞ (fun w : ℝ => (w, v)) :=
+      contMDiff_id.prodMk contMDiff_const
+    exact (hf : ContMDiff _ _ _ _).comp hincl
+  have hcentral : ContMDiff (𝓘(ℝ, ℝ)) I ∞ (fun v : ℝ => f 0 v) := by
+    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞ (fun v : ℝ => ((0 : ℝ), v)) :=
+      contMDiff_const.prodMk contMDiff_id
+    exact (hf : ContMDiff _ _ _ _).comp hincl
+  set velS : ℝ → ℝ → E :=
+    fun u v => mfderiv (𝓘(ℝ, ℝ)) I (fun w : ℝ => f w v) u (1 : ℝ) with hvelS
+  -- The jointly-`C²` chart-`β`-coordinate of the transverse velocity `∂_s f`.
+  set Y : ℝ → ℝ → E := fun u v =>
+    (trivializationAt E (TangentSpace I) β).continuousLinearMapAt ℝ (f u v) (velS u v) with hY
+  have hY_C2 : ContDiffAt ℝ 2 (fun p : ℝ × ℝ => Y p.1 p.2) (0, t) :=
+    chartCoord_transverseVelocity_contDiffAt (I := I) f hf t
+  -- `Y(0, ·)` and its `v`-slice derivatives are differentiable at `t`.
+  have hY0_C2 : ContDiffAt ℝ 2 (fun v : ℝ => Y 0 v) t := by
+    have hincl : ContDiffAt ℝ 2 (fun v : ℝ => ((0 : ℝ), v)) t :=
+      (contDiff_const.prodMk contDiff_id).contDiffAt
+    exact hY_C2.comp t hincl
+  have hY0_diff : DifferentiableAt ℝ (fun v : ℝ => Y 0 v) t :=
+    hY0_C2.differentiableAt (by norm_cast)
+  -- The chart curve `uC u v := extChartAt β (f u v)` is jointly `C^∞`.
+  have hsrc0 : f 0 t ∈ (chartAt H β).source := by rw [hβ]; exact mem_chart_source H (f 0 t)
+  set uC : ℝ → ℝ → E := fun u v => extChartAt I β (f u v) with huC
+  have huC_joint : ContDiffAt ℝ ∞ (fun p : ℝ × ℝ => uC p.1 p.2) (0, t) :=
+    chartPulled_contDiffAt_infty (I := I) f hf β 0 t hsrc0
+  -- `uC(0, ·)` and `v ↦ deriv_u uC(·, v)|_0` are differentiable at `t`.
+  have huC0_diff : DifferentiableAt ℝ (fun v : ℝ => uC 0 v) t := by
+    have hincl : ContDiffAt ℝ ∞ (fun v : ℝ => ((0 : ℝ), v)) t :=
+      (contDiff_const.prodMk contDiff_id).contDiffAt
+    exact ((huC_joint.comp t hincl).differentiableAt (by simp))
+  -- `deriv_u Y(·, v)|_0 = fderiv_u Y(·, v)|_0 1`, differentiable in `v` at `t` (joint `C²`).
+  have hpartialY : HasDerivAt
+      (fun v : ℝ => fderiv ℝ (fun u : ℝ => Y u v) 0 (1 : ℝ))
+      (fderiv ℝ (fderiv ℝ (fun p : ℝ × ℝ => Y p.1 p.2)) (0, t) (0, 1) (1, 0)) t :=
+    Aux2.hasDerivAt_partial_fst Y 0 t hY_C2
+  -- `deriv_u uC(·, v)|_0 = fderiv_u uC(·, v)|_0 1`, differentiable in `v` at `t` (joint `C^∞`).
+  have huC_joint_C2 : ContDiffAt ℝ 2 (fun p : ℝ × ℝ => uC p.1 p.2) (0, t) :=
+    huC_joint.of_le (by norm_cast)
+  have hpartialU : HasDerivAt
+      (fun v : ℝ => fderiv ℝ (fun u : ℝ => uC u v) 0 (1 : ℝ))
+      (fderiv ℝ (fderiv ℝ (fun p : ℝ × ℝ => uC p.1 p.2)) (0, t) (0, 1) (1, 0)) t :=
+    Aux2.hasDerivAt_partial_fst uC 0 t huC_joint_C2
+  -- Christoffel differentiability at the foot `uC 0 t = extChartAt β β`.
+  have huC0t : uC 0 t = extChartAt I β β := by rw [huC, hβ]
+  have hΓ_diff : ∀ i j k : Fin (Module.finrank ℝ E),
+      DifferentiableAt ℝ (chartChristoffel (I := I) g β i j k) (uC 0 t) := by
+    intro i j k
+    rw [huC0t]
+    exact Aux3.chartChristoffel_differentiableAt_self (I := I) g β i j k
+  -- The chart-`β` covariant-derivative-coordinate of `∇_s ∂_s f` as a function of `v`.
+  set Z : ℝ → E := fun v : ℝ =>
+    chartCovDerivAlong (I := I) g β (fun u : ℝ => f u v) (fun u : ℝ => Y u v) 0 with hZdef
+  -- `Z` is differentiable at `t`: `Z v = deriv_u Y(·,v)|_0 + Γ(deriv_u uC(·,v)|_0, Y(0,v), uC(0,v))`.
+  have hZ_diff : DifferentiableAt ℝ Z t := by
+    have hZeq : Z = (fun v : ℝ => fderiv ℝ (fun u : ℝ => Y u v) 0 (1 : ℝ)
+        + chartChristoffelContraction (I := I) g β
+            (fderiv ℝ (fun u : ℝ => uC u v) 0 (1 : ℝ)) (Y 0 v) (uC 0 v)) := by
+      funext v
+      -- `chartCovDerivAlong = deriv X + Γ(deriv uC, X 0, uC 0)`; `deriv = fderiv · 1`
+      -- definitionally (`fderiv_apply_one_eq_deriv` is `rfl`), and the chart curve is `uC(·, v)`.
+      change chartCovDerivAlong (I := I) g β (fun u : ℝ => f u v) (fun u : ℝ => Y u v) 0
+        = fderiv ℝ (fun u : ℝ => Y u v) 0 (1 : ℝ)
+          + chartChristoffelContraction (I := I) g β
+              (fderiv ℝ (fun u : ℝ => uC u v) 0 (1 : ℝ)) (Y 0 v) (uC 0 v)
+      rw [chartCovDerivAlong_def, fderiv_apply_one_eq_deriv, fderiv_apply_one_eq_deriv]
+      rfl
+    rw [hZeq]
+    refine DifferentiableAt.add hpartialY.differentiableAt ?_
+    have hΓhd := hasDerivAt_chartChristoffelContraction (I := I) g β
+      (P := fun v : ℝ => fderiv ℝ (fun u : ℝ => uC u v) 0 (1 : ℝ))
+      (Q := fun v : ℝ => Y 0 v) (R := fun v : ℝ => uC 0 v)
+      (P' := _) (Q' := _) (R' := _)
+      hpartialU hY0_diff.hasDerivAt huC0_diff.hasDerivAt hΓ_diff
+    exact hΓhd.differentiableAt
+  -- The chart-rep of `∇_s ∂_s f` along `γ` agrees near `t` with `Z`.
+  have hopen : IsOpen {v : ℝ | f 0 v ∈ (chartAt H β).source} :=
+    hcentral.continuous.isOpen_preimage _ (chartAt H β).open_source
+  have h0R : t ∈ {v : ℝ | f 0 v ∈ (chartAt H β).source} := by
+    change f 0 t ∈ (chartAt H β).source; exact hsrc0
+  -- Inner chart-rep differentiability of `∂_s f` along `f · v` at `0`.
+  have hinnerR_diff : ∀ v : ℝ, DifferentiableAt ℝ
+      (chartRepAt (I := I) (fun u : ℝ => f u v) (fun u : ℝ => velS u v) 0) 0 := fun v =>
+    slice_transverseVelocity_chartRep_differentiableAt (I := I) g f hf v
+  have hbridge : (chartRepAt (I := I) (fun v : ℝ => f 0 v)
+        (fun v : ℝ => covDerivAlong (I := I) g (fun u : ℝ => f u v)
+          (fun u : ℝ => velS u v) 0) t)
+      =ᶠ[nhds t] Z := by
+    filter_upwards [hopen.mem_nhds h0R] with v hv
+    rw [chartRepAt_apply]
+    change (trivializationAt E (TangentSpace I) β).continuousLinearMapAt ℝ (f 0 v)
+        (covDerivAlong (I := I) g (fun u : ℝ => f u v) (fun u : ℝ => velS u v) 0)
+      = Z v
+    have hfwd := chartCoord_covDerivAlong_eq_chartCovDerivAlong_chartRepAtBase (I := I) g
+      (fun u : ℝ => f u v) (fun u : ℝ => velS u v) 0 β (hslice_v v) hv (hinnerR_diff v)
+    rw [hfwd]
+    -- `chartRepAtBase β (f · v) (velS · v) = Y(·, v)`.
+    have hYeq : chartRepAtBase (I := I) β (fun u : ℝ => f u v) (fun u : ℝ => velS u v)
+        = (fun u : ℝ => Y u v) := by
+      funext u; rw [chartRepAtBase_apply, hY]
+    rw [hYeq, hZdef]
+  exact (hbridge.differentiableAt_iff).mpr hZ_diff
+
+open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
+  DifferentialGeometry.Integral.DivergenceTheorem in
+/-- **Chart-rep differentiability of the longitudinal covariant derivative of the
+variation field along the central curve.** For a smooth variation `f`, the pinned
+chart-`(f 0 t)`-coordinate representation of the section
+`v ↦ ∇_t (∂_s f|_{s = 0})|_{v}` (the longitudinal covariant derivative of the
+variation field `∂_s f|_{s = 0}`, read along the central curve `v ↦ f 0 v`) is
+differentiable at `v = t`. Near `t` it agrees with the chart-`(f 0 t)` covariant
+derivative `v ↦ chartCovDerivAlong g (f 0 t) (f 0 ·) Y0 v` of the chart-coordinate
+`Y0(v) := Y(0, v)` of the variation field, the `u = 0` slice of the jointly-`C²`
+transverse-velocity chart-coordinate `Y` (`chartCoord_transverseVelocity_contDiffAt`).
+Joint `C²` of `Y` makes `Y0` `C²`, so its chart covariant derivative — `deriv Y0 +
+Christoffel` — is differentiable. -/
+private lemma variationField_covDeriv_chartRep_differentiableAt
+    (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M)
+    (hf : IsSmoothVariation (I := I) f) (t : ℝ) :
+    DifferentiableAt ℝ
+      (chartRepAt (I := I) (fun v : ℝ => f 0 v)
+        (fun v : ℝ => covDerivAlong (I := I) g (fun w : ℝ => f 0 w)
+          (fun w : ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f u w) 0 (1 : ℝ)) v) t) t := by
+  classical
+  set β : M := f 0 t with hβ
+  have hcentral : ContMDiff (𝓘(ℝ, ℝ)) I ∞ (fun v : ℝ => f 0 v) := by
+    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞ (fun v : ℝ => ((0 : ℝ), v)) :=
+      contMDiff_const.prodMk contMDiff_id
+    exact (hf : ContMDiff _ _ _ _).comp hincl
+  set Vsec : ℝ → E := fun v : ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f u v) 0 (1 : ℝ)
+    with hVsecdef
+  -- The chart-`β`-coordinate `Y0(v)` of the variation field along the central curve.
+  set Y0 : ℝ → E := fun v : ℝ =>
+    (trivializationAt E (TangentSpace I) β).continuousLinearMapAt ℝ (f 0 v) (Vsec v) with hY0
+  -- `Y0` is `C²` at `t`: the `u = 0` slice of the jointly-`C²` transverse-velocity chart-coord.
+  have hY0_C2 : ContDiffAt ℝ 2 Y0 t := by
+    have hjoint : ContDiffAt ℝ 2 (fun p : ℝ × ℝ =>
+        (trivializationAt E (TangentSpace I) (f 0 t)).continuousLinearMapAt ℝ (f p.1 p.2)
+          (mfderiv (𝓘(ℝ, ℝ)) I (fun w : ℝ => f w p.2) p.1 (1 : ℝ))) (0, t) :=
+      chartCoord_transverseVelocity_contDiffAt (I := I) f hf t
+    have hincl : ContDiffAt ℝ 2 (fun v : ℝ => ((0 : ℝ), v)) t :=
+      (contDiff_const.prodMk contDiff_id).contDiffAt
+    have hcomp := hjoint.comp t hincl
+    exact hcomp
+  have hY0_C1 : ContDiffAt ℝ 1 Y0 t := hY0_C2.of_le one_le_two
+  have hY0_diff : DifferentiableAt ℝ Y0 t := hY0_C1.differentiableAt (by norm_cast)
+  have hderivY0_diff : DifferentiableAt ℝ (deriv Y0) t :=
+    (hY0_C2.derivWithin (m := 1) (by norm_cast)).differentiableAt (by norm_cast)
+  -- The chart curve `uC v := extChartAt β (f 0 v)` is `C^∞`, hence `deriv uC` differentiable.
+  set uC : ℝ → E := chartCurve (I := I) β (fun v : ℝ => f 0 v) with huC
+  have huC_cdiff : ContDiffAt ℝ ∞ uC t := contDiffAt_chartCurve (I := I) hcentral t
+  have huC_diff : DifferentiableAt ℝ uC t := huC_cdiff.differentiableAt (by simp)
+  have hderivuC_diff : DifferentiableAt ℝ (deriv uC) t :=
+    (huC_cdiff.derivWithin (m := ∞) (by rw [show (∞ : WithTop ℕ∞) + 1 = ∞ from rfl])).differentiableAt
+      (by simp)
+  -- Christoffel differentiability at the foot `uC t = extChartAt β β`.
+  have huC0 : uC t = extChartAt I β β := by rw [huC, chartCurve_def, hβ]
+  have hΓ_diff : ∀ i j k : Fin (Module.finrank ℝ E),
+      DifferentiableAt ℝ (chartChristoffel (I := I) g β i j k) (uC t) := by
+    intro i j k
+    rw [huC0]
+    exact Aux3.chartChristoffel_differentiableAt_self (I := I) g β i j k
+  -- The chart-rep of `∇_t V` along the central curve agrees near `t` with the
+  -- chart-`β` covariant derivative of `Y0`.
+  have hsrcβ : f 0 t ∈ (chartAt H β).source := by rw [hβ]; exact mem_chart_source H (f 0 t)
+  have hopen : IsOpen {v : ℝ | f 0 v ∈ (chartAt H β).source} :=
+    hcentral.continuous.isOpen_preimage _ (chartAt H β).open_source
+  have h0R : t ∈ {v : ℝ | f 0 v ∈ (chartAt H β).source} := hsrcβ
+  -- Inner chart-rep differentiability of `Vsec` along `γ`.
+  have hVdiff : ∀ v : ℝ, DifferentiableAt ℝ (chartRepAt (I := I) (fun w : ℝ => f 0 w) Vsec v) v := by
+    intro v
+    have h := variationField_chartRep_differentiableAt (I := I) g f hf v
+    exact h
+  have hbridge : (chartRepAt (I := I) (fun v : ℝ => f 0 v)
+        (fun v : ℝ => covDerivAlong (I := I) g (fun w : ℝ => f 0 w) Vsec v) t)
+      =ᶠ[nhds t]
+        (fun v : ℝ => chartCovDerivAlong (I := I) g β (fun w : ℝ => f 0 w) Y0 v) := by
+    filter_upwards [hopen.mem_nhds h0R] with v hv
+    rw [chartRepAt_apply]
+    change (trivializationAt E (TangentSpace I) β).continuousLinearMapAt ℝ (f 0 v)
+        (covDerivAlong (I := I) g (fun w : ℝ => f 0 w) Vsec v)
+      = chartCovDerivAlong (I := I) g β (fun w : ℝ => f 0 w) Y0 v
+    have hfwd := chartCoord_covDerivAlong_eq_chartCovDerivAlong_chartRepAtBase (I := I) g
+      (fun w : ℝ => f 0 w) Vsec v β hcentral hv (hVdiff v)
+    rw [hfwd]
+    have hYeq : chartRepAtBase (I := I) β (fun w : ℝ => f 0 w) Vsec = Y0 := by
+      funext w; rw [chartRepAtBase_apply, hY0]
+    rw [hYeq]
+  -- The chart-`β` covariant derivative of `Y0` along `γ` is differentiable at `t`.
+  have hccd_diff : DifferentiableAt ℝ
+      (fun v : ℝ => chartCovDerivAlong (I := I) g β (fun w : ℝ => f 0 w) Y0 v) t := by
+    have hfun : (fun v : ℝ => chartCovDerivAlong (I := I) g β (fun w : ℝ => f 0 w) Y0 v)
+        = (fun v : ℝ => deriv Y0 v
+            + chartChristoffelContraction (I := I) g β (deriv uC v) (Y0 v) (uC v)) := by
+      funext v; rw [chartCovDerivAlong_def]
+    rw [hfun]
+    refine DifferentiableAt.add hderivY0_diff ?_
+    have hΓhd := hasDerivAt_chartChristoffelContraction (I := I) g β
+      (P := deriv uC) (Q := Y0) (R := uC)
+      (P' := deriv (deriv uC) t) (Q' := deriv Y0 t) (R' := deriv uC t)
+      hderivuC_diff.hasDerivAt hY0_diff.hasDerivAt huC_diff.hasDerivAt hΓ_diff
+    exact hΓhd.differentiableAt
+  -- Transport differentiability through the eventual equality.
+  refine (hbridge.differentiableAt_iff).mpr hccd_diff
 
 /-- **Local positive lower bound for the speed near a regular parameter value.**
 For a smooth two-parameter variation `f` whose slice `t ↦ f s₀ t` is regular
@@ -3113,8 +3853,41 @@ theorem first_variation_general_s
   rw [intervalIntegral.integral_congr hintegrand_eq] at hS2
   exact hS2
 
+/-! ## Continuity of the inner product along a curve -/
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+/-- Continuity on a set `s ⊆ ℝ` of the scalar `t ↦ g.inner (γ t) (v t) (w t)`
+for a base curve `γ` and two sections `v, w` along `γ` presented through their
+total-space continuity. Mirrors `continuous_g_inner_along_param` in its
+`ContinuousOn` form over a single-parameter base curve. The diamond between
+the project's tangent-space norm instances and the `RiemannianBundle`-derived
+ones is resolved locally; the scalar `ℝ`-valued conclusion is independent of
+the disabled instances. -/
+lemma continuousOn_g_inner_along_curve
+    (g : SmoothRiemannianMetric I M)
+    {γ : ℝ → M} {v w : ∀ t : ℝ, TangentSpace I (γ t)} {s : Set ℝ}
+    (hv : ContinuousOn (fun t : ℝ => TotalSpace.mk' E
+      (E := (TangentSpace I : M → Type _)) (γ t) (v t)) s)
+    (hw : ContinuousOn (fun t : ℝ => TotalSpace.mk' E
+      (E := (TangentSpace I : M → Type _)) (γ t) (w t)) s) :
+    ContinuousOn (fun t : ℝ => g.inner (γ t) (v t) (w t)) s := by
+  letI cg : Bundle.ContinuousRiemannianMetric E (TangentSpace I : M → Type _) :=
+    g.toContinuousRiemannianMetric
+  letI rb : Bundle.RiemannianBundle (TangentSpace I : M → Type _) :=
+    ⟨cg.toRiemannianMetric⟩
+  have h := ContinuousOn.inner_bundle (F := E) (B := M)
+    (E := (TangentSpace I : M → Type _)) (b := γ) (v := v) (w := w)
+    (s := s) hv hw
+  refine h.congr ?_
+  intro t _ht
+  rfl
+
 /-! ## Second variation derivation -/
 
+set_option maxHeartbeats 4000000 in
+set_option synthInstance.maxHeartbeats 4000000 in
 /-- The **second variation of arc length** for a unit-speed geodesic
 `γ` and an endpoint-fixed smooth variation `f` of `γ` with variation
 field `V := ∂_s f|_{s = 0}`:
@@ -3741,7 +4514,303 @@ theorem second_variation_derivation
     -- skew-symmetry `⟨R(V, γ') V, γ'⟩ = − ⟨R(V, γ') γ', V⟩` (`riemannOp_metric_skew`).
     have hgss_int :
         (∫ t in (0 : ℝ)..L, g_ss t / 2) = indexForm (I := I) g γ 0 L V V := by
-      sorry
+      -- The transverse-velocity field `∂_s f` and the second transverse covariant
+      -- derivative `Asec t := ∇_s ∂_s f|_{(·, t)}|_{s = 0}`, a section along `γ`.
+      set velS : ℝ → ℝ → E := fun u v : ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun w : ℝ => f w v) u (1 : ℝ)
+        with hvelSdef
+      set velT : ℝ → ℝ → E := fun s v : ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun w : ℝ => f s w) v (1 : ℝ)
+        with hvelTdef
+      set Asec : ∀ t : ℝ, TangentSpace I (γ t) := fun t : ℝ =>
+        covDerivAlong (I := I) g (fun u : ℝ => f u t) (fun u : ℝ => velS u t) 0 with hAsecdef
+      -- `∇_t Asec`, the longitudinal covariant derivative of `Asec` along `γ`.
+      set Bsec : ∀ t : ℝ, TangentSpace I (γ t) := fun t : ℝ =>
+        covDerivAlong (I := I) g γ Asec t with hBsecdef
+      -- The Riemann curvature term `R(V t, γ' t) (V t)` as a section along `γ`.
+      set Rsec : ∀ t : ℝ, TangentSpace I (γ t) := fun t : ℝ =>
+        (DifferentialGeometry.Integral.Connection.riemannOp
+          (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) (γ t))
+          (V t) (γ' t) (V t) with hRsecdef
+      -- (1) Pointwise curvature commutation: `W2 t = Bsec t + Rsec t` (`t` arbitrary).
+      have hcurv : ∀ t : ℝ, W2 t = Bsec t + Rsec t := by
+        intro t
+        -- `houterL`/`houterR` regularity dischargers for the transverse-velocity commutation.
+        have houterL : DifferentiableAt ℝ (chartRepAt (I := I) (fun s : ℝ => f s t)
+            (fun s : ℝ => covDerivAlong (I := I) g (fun v : ℝ => f s v)
+              (fun v : ℝ => velS s v) t) 0) 0 := by
+          -- The inner field equals `∇_s ∂_t f` as a function of `s`
+          -- (`commute_ds_dt_intrinsic_shifted`), matching `slice_secondCovDeriv`.
+          have hsec_eq : (fun s : ℝ => covDerivAlong (I := I) g (fun v : ℝ => f s v)
+              (fun v : ℝ => velS s v) t)
+              = (fun s : ℝ => covDerivAlong (I := I) g (fun s' : ℝ => f s' t)
+                (fun s' : ℝ => velT s' t) s) :=
+            (commute_ds_dt_intrinsic_shifted (I := I) g f hf t).symm
+          rw [hsec_eq]
+          exact slice_secondCovDeriv_chartRep_differentiableAt (I := I) g f hf t
+        have houterR : DifferentiableAt ℝ (chartRepAt (I := I) (fun v : ℝ => f 0 v)
+            (fun v : ℝ => covDerivAlong (I := I) g (fun u : ℝ => f u v)
+              (fun u : ℝ => velS u v) 0) t) t :=
+          slice_secondCovDeriv_central_chartRep_differentiableAt (I := I) g f hf t
+        -- The intrinsic curvature commutation for the transverse-velocity field.
+        have hcomm := commute_ds_dt_curvature_innerS (I := I) g f hf t houterL houterR
+        -- The first term equals `W2 t`: its inner field `∇_t ∂_s f` equals `∇_s ∂_t f`
+        -- (`commute_ds_dt_intrinsic_shifted`), so the outer `∇_s` agree.
+        have hfirst : covDerivAlong (I := I) g (fun s : ℝ => f s t)
+            (fun s : ℝ => covDerivAlong (I := I) g (fun v : ℝ => f s v)
+              (fun v : ℝ => velS s v) t) 0 = W2 t := by
+          have hsec_eq : (fun s : ℝ => covDerivAlong (I := I) g (fun v : ℝ => f s v)
+              (fun v : ℝ => velS s v) t)
+              = (fun s : ℝ => covDerivAlong (I := I) g (fun s' : ℝ => f s' t)
+                (fun s' : ℝ => velT s' t) s) :=
+            (commute_ds_dt_intrinsic_shifted (I := I) g f hf t).symm
+          rw [hsec_eq, hW2def]
+        -- The second term is `Bsec t`: `∇_t (∇_s ∂_s f) = ∇_t Asec` along `γ = f 0 ·`.
+        have hsecond : covDerivAlong (I := I) g (fun v : ℝ => f 0 v)
+            (fun v : ℝ => covDerivAlong (I := I) g (fun u : ℝ => f u v)
+              (fun u : ℝ => velS u v) 0) t = Bsec t := by
+          rw [hBsecdef]
+          change covDerivAlong (I := I) g (fun v : ℝ => f 0 v) Asec t
+            = covDerivAlong (I := I) g γ Asec t
+          rw [show (fun v : ℝ => f 0 v) = γ from hfγ]
+        -- The curvature value: `R(velS 0 t, velT 0 t)(velS 0 t) = Rsec t` since
+        -- `velS 0 t = V t`, `velT 0 t = γ' t`.
+        have hvelS0 : velS 0 t = V t := (hVeq t).symm
+        have hvelT0 : velT 0 t = γ' t := by
+          have h1 : velT 0 t = mfderiv (𝓘(ℝ, ℝ)) I (fun w : ℝ => f 0 w) t (1 : ℝ) := rfl
+          rw [h1, show (fun w : ℝ => f 0 w) = γ from hfγ]
+          rfl
+        rw [hfirst, hsecond] at hcomm
+        -- `hcomm : W2 t - Bsec t = riemannOp ... (velS 0 t)(velT 0 t)(velS 0 t)`.
+        have hVeq' : (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f u t) 0 (1 : ℝ) : E) = V t :=
+          (hVeq t).symm
+        have hγ'eq : (mfderiv (𝓘(ℝ, ℝ)) I (fun w : ℝ => f 0 w) t (1 : ℝ) : E) = γ' t := by
+          rw [show (fun w : ℝ => f 0 w) = γ from hfγ]; rfl
+        -- Transport the curvature value through `f 0 t = γ t` (foot) and the velocity values.
+        have hfoot : f 0 t = γ t := hfc t
+        have hR : (DifferentialGeometry.Integral.Connection.riemannOp
+              (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) (f 0 t))
+              (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f u t) 0 (1 : ℝ))
+              (mfderiv (𝓘(ℝ, ℝ)) I (fun w : ℝ => f 0 w) t (1 : ℝ))
+              (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f u t) 0 (1 : ℝ)) = Rsec t := by
+          rw [hRsecdef]
+          -- First the (non-dependent, `E`-valued) velocity rewrites, then the foot via `▸`.
+          rw [hVeq', hγ'eq]
+          exact hfoot ▸ rfl
+        rw [hR] at hcomm
+        -- `hcomm : W2 t - Bsec t = Rsec t`, so `W2 t = Bsec t + Rsec t`.
+        rw [← hcomm]; abel
+      -- (2) The skew identity `⟨Rsec t, γ' t⟩ = − ⟨R(V, γ') γ', V⟩` (`riemannOp_metric_skew`).
+      have hskew : ∀ t : ℝ, g.inner (γ t) (Rsec t) (γ' t)
+          = - g.inner (γ t) ((DifferentialGeometry.Integral.Connection.riemannOp
+              (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) (γ t))
+              (V t) (γ' t) (γ' t)) (V t) := by
+        intro t
+        -- `g(R(V,γ')V, γ') + g(V, R(V,γ')γ') = 0` (metric skew, `Z := V`, `W := γ'`).
+        have hsk := DifferentialGeometry.Integral.Connection.riemannOp_metric_skew
+          (I := I) g (γ t) (V t) (γ' t) (V t) (γ' t)
+        -- `hsk : g(R(V,γ')V, γ') + g(V, R(V,γ')γ') = 0`.
+        change g.inner (γ t) (Rsec t) (γ' t)
+          = - g.inner (γ t) ((DifferentialGeometry.Integral.Connection.riemannOp
+              (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) (γ t))
+              (V t) (γ' t) (γ' t)) (V t)
+        rw [hRsecdef]
+        have hsymm : g.inner (γ t) (V t) ((DifferentialGeometry.Integral.Connection.riemannOp
+              (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) (γ t))
+              (V t) (γ' t) (γ' t))
+            = g.inner (γ t) ((DifferentialGeometry.Integral.Connection.riemannOp
+              (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) (γ t))
+              (V t) (γ' t) (γ' t)) (V t) := g.symm (γ t) _ _
+        rw [hsymm] at hsk
+        linarith [hsk]
+      -- (3) Endpoint vanishing of `Asec`: `Asec 0 = 0`, `Asec L = 0`.
+      have hAsec_endpoint : ∀ t₀ : ℝ, (∀ u : ℝ, f u t₀ = γ t₀) → Asec t₀ = 0 := by
+        intro t₀ hconst
+        change covDerivAlong (I := I) g (fun u : ℝ => f u t₀) (fun u : ℝ => velS u t₀) 0 = 0
+        -- The transverse curve `u ↦ f u t₀` is constant, so `∂_s f|_{(u, t₀)} = 0` for all `u`.
+        have hvel0 : (fun u : ℝ => velS u t₀) = (fun _ : ℝ => (0 : E)) := by
+          funext u
+          change mfderiv (𝓘(ℝ, ℝ)) I (fun w : ℝ => f w t₀) u (1 : ℝ) = (0 : E)
+          have hconstfun : (fun w : ℝ => f w t₀) = (fun _ : ℝ => γ t₀) := by
+            funext w; exact hconst w
+          rw [hconstfun, mfderiv_const]
+          rfl
+        rw [hvel0]
+        -- `∇_s 0 = 0`.
+        exact covDerivAlong_zero (I := I) g (fun u : ℝ => f u t₀) 0
+      have hAsec0 : Asec 0 = 0 := hAsec_endpoint 0 (fun u => hfix0 u)
+      have hAsecL : Asec L = 0 := hAsec_endpoint L (fun u => hfixL u)
+      -- (4) Chart-rep differentiability of `Asec` along `γ` at every `t`.
+      have hAsecdiff : ∀ t₀ : ℝ, DifferentiableAt ℝ (chartRepAt (I := I) γ Asec t₀) t₀ := by
+        intro t₀
+        have h := slice_secondCovDeriv_central_chartRep_differentiableAt (I := I) g f hf t₀
+        -- `(fun v => f 0 v) = γ`; the section matches `Asec` (set-folded).
+        rw [show (fun v : ℝ => f 0 v) = γ from hfγ] at h
+        exact h
+      -- (5) Metric-compatibility derivative of `⟨Asec, γ'⟩`, with `∇_t γ' = 0` on `[0, L]`.
+      have hDderiv : ∀ t ∈ Set.Icc (0 : ℝ) L,
+          HasDerivAt (fun s : ℝ => g.inner (γ s) (Asec s) (γ' s))
+            (g.inner (γ t) (Bsec t) (γ' t)) t := by
+        intro t ht
+        have hmc := metric_compat_hasDerivAt_inner (I := I) g γ Asec γ' t hγ_smooth
+          (hAsecdiff t) (hγ'diff t)
+        -- `∇_t γ' = 0`, so the second term drops.
+        have hB2 : g.inner (γ t) (Asec t) (covDerivAlong (I := I) g γ γ' t) = 0 := by
+          rw [hgeo0 t ht]; simp
+        rw [hB2, add_zero] at hmc
+        -- `covDerivAlong g γ Asec t = Bsec t` (set-folded).
+        exact hmc
+      -- (6) Pointwise integrand identity on `[0, L]`:
+      --   `g_ss t / 2 = indexFormIntegrand t + ⟨Bsec t, γ' t⟩`.
+      have hpt_id : ∀ t ∈ Set.Icc (0 : ℝ) L,
+          g_ss t / 2 = indexFormIntegrand (I := I) g γ V V t
+            + g.inner (γ t) (Bsec t) (γ' t) := by
+        intro t ht
+        rw [hgss_pt t ht]
+        -- `⟨W2, γ'⟩ = ⟨Bsec, γ'⟩ + ⟨Rsec, γ'⟩` (curvature), and `⟨Rsec, γ'⟩ = −⟨R γ', V⟩` (skew).
+        have hWexp : g.inner (γ t) (W2 t) (γ' t)
+            = g.inner (γ t) (Bsec t) (γ' t) + g.inner (γ t) (Rsec t) (γ' t) := by
+          rw [hcurv t, map_add, ContinuousLinearMap.add_apply]
+        -- `Vsec = V` as sections, so `covDerivAlong g γ Vsec = covDerivAlong g γ V`.
+        have hVsecfun : Vsec = (fun t : ℝ => V t) := by funext s; exact hVsec_eq s
+        -- `indexFormIntegrand` unfolded (`let`-free) form.
+        have hIFI : indexFormIntegrand (I := I) g γ V V t
+            = g.inner (γ t) (covDerivAlong (I := I) g γ V t) (covDerivAlong (I := I) g γ V t)
+              - g.inner (γ t)
+                ((DifferentialGeometry.Integral.Connection.riemannOp
+                  (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) (γ t))
+                  (V t) (γ' t) (γ' t)) (V t) := rfl
+        rw [hIFI, hWexp, hskew t]
+        -- `covDerivAlong g γ Vsec = covDerivAlong g γ V` (as `Vsec = V`).
+        rw [hVsecfun]
+        ring
+      -- (7) Continuity / integrability on `[0, L]`.
+      -- `γ` is `C¹` on `[0, L]`.
+      have hγ_C1On : ContMDiffOn (𝓘(ℝ, ℝ)) I 1 γ (Set.Icc 0 L) :=
+        (hγ_smooth.of_le (by norm_cast : (1 : ℕ∞) ≤ ∞)).contMDiffOn
+      -- Total-space continuity of `V`, `γ'`, and `∇_t V` along `γ` on `[0, L]`.
+      have hV_total : ContinuousOn
+          (fun t : ℝ => (TotalSpace.mk' E (E := (TangentSpace I : M → Type _))
+            (γ t) (V t) : TangentBundle I M)) (Set.Icc 0 L) := by
+        have hsec : ContinuousOn
+            (fun t : ℝ => (TotalSpace.mk' E (E := (TangentSpace I : M → Type _))
+              (γ t) (Vsec t) : TangentBundle I M)) (Set.Icc 0 L) :=
+          sectionAlongCurve_continuousOn_totalSpace_of_contMDiffOn (I := I) γ Vsec hγ_C1On
+            (fun t _ => hVdiff t)
+        refine hsec.congr (fun t _ => ?_)
+        rw [hVsec_eq t]
+      have hγ'_total : ContinuousOn
+          (fun t : ℝ => (TotalSpace.mk' E (E := (TangentSpace I : M → Type _))
+            (γ t) (γ' t) : TangentBundle I M)) (Set.Icc 0 L) :=
+        sectionAlongCurve_continuousOn_totalSpace_of_contMDiffOn (I := I) γ γ' hγ_C1On
+          (fun t _ => hγ'diff t)
+      have hnablaV_diff : ∀ t₀ : ℝ, DifferentiableAt ℝ
+          (chartRepAt (I := I) γ (covDerivAlong (I := I) g γ Vsec) t₀) t₀ := by
+        intro t₀
+        have h := variationField_covDeriv_chartRep_differentiableAt (I := I) g f hf t₀
+        rw [show (fun v : ℝ => f 0 v) = γ from hfγ] at h
+        exact h
+      have hnablaV_total : ContinuousOn
+          (fun t : ℝ => (TotalSpace.mk' E (E := (TangentSpace I : M → Type _))
+            (γ t) (covDerivAlong (I := I) g γ Vsec t) : TangentBundle I M)) (Set.Icc 0 L) :=
+        sectionAlongCurve_continuousOn_totalSpace_of_contMDiffOn (I := I) γ
+          (covDerivAlong (I := I) g γ Vsec) hγ_C1On (fun t _ => hnablaV_diff t)
+      -- Continuity of `⟨∇_t V, ∇_t V⟩` (= `‖∇_t V‖²`) on `[0, L]`.
+      have hnablaVsq_cont : ContinuousOn
+          (fun t : ℝ => g.inner (γ t) (covDerivAlong (I := I) g γ Vsec t)
+            (covDerivAlong (I := I) g γ Vsec t)) (Set.Icc 0 L) :=
+        continuousOn_g_inner_along_curve (I := I) (M := M) g hnablaV_total hnablaV_total
+      -- Continuity of the curvature term `⟨R(V, γ') γ', V⟩` on `[0, L]`.
+      have hRsec_total : ContinuousOn
+          (fun t : ℝ => (TotalSpace.mk' E (E := (TangentSpace I : M → Type _))
+            (γ t)
+            ((DifferentialGeometry.Integral.Connection.riemannOp
+              (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) (γ t))
+              (V t) (γ' t) (γ' t)) : TangentBundle I M)) (Set.Icc 0 L) :=
+        ((((DifferentialGeometry.Integral.Connection.riemannOp_section_continuous
+            (I := I) g).comp_continuousOn
+            (s := Set.Icc (0 : ℝ) L) hγ_C1On.continuousOn).clm_bundle_apply
+            hV_total).clm_bundle_apply hγ'_total).clm_bundle_apply hγ'_total
+      have hRcurv_cont : ContinuousOn
+          (fun t : ℝ => g.inner (γ t)
+            ((DifferentialGeometry.Integral.Connection.riemannOp
+              (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) (γ t))
+              (V t) (γ' t) (γ' t)) (V t)) (Set.Icc 0 L) :=
+        continuousOn_g_inner_along_curve (I := I) (M := M) g hRsec_total hV_total
+      -- `indexFormIntegrand g γ V V` is continuous on `[0, L]`.
+      have hindexFormIntegrand_continuousOn :
+          ContinuousOn (fun t : ℝ => indexFormIntegrand (I := I) g γ V V t) (Set.Icc 0 L) := by
+        have heq : (fun t : ℝ => indexFormIntegrand (I := I) g γ V V t)
+            = (fun t : ℝ => g.inner (γ t) (covDerivAlong (I := I) g γ V t)
+                (covDerivAlong (I := I) g γ V t)
+              - g.inner (γ t)
+                ((DifferentialGeometry.Integral.Connection.riemannOp
+                  (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) (γ t))
+                  (V t) (γ' t) (γ' t)) (V t)) := rfl
+        rw [heq]
+        refine ContinuousOn.sub ?_ hRcurv_cont
+        -- `covDerivAlong g γ V = covDerivAlong g γ Vsec` since `V = Vsec`.
+        have hVfunsec : (V : ∀ t, TangentSpace I (γ t)) = Vsec := by
+          funext s; exact (hVsec_eq s).symm
+        rw [hVfunsec]
+        exact hnablaVsq_cont
+      -- `g_ss` is continuous on `[0, L]` (`G` is jointly `C^∞`).
+      have hg_ss_continuousOn : ContinuousOn g_ss (Set.Icc 0 L) := by
+        have hC : ContDiff ℝ ∞ (fun p : ℝ × ℝ =>
+            fderiv ℝ (fun q : ℝ × ℝ => fderiv ℝ G q (1, 0)) p (1, 0)) := by
+          have hfd1 : ContDiff ℝ ∞ (fun p : ℝ × ℝ => fderiv ℝ G p) :=
+            hGcdiff.fderiv_right (m := ∞) (by rw [show (∞ : WithTop ℕ∞) + 1 = ∞ from rfl])
+          have hfd1app : ContDiff ℝ ∞ (fun p : ℝ × ℝ => fderiv ℝ G p (1, 0)) :=
+            (ContinuousLinearMap.apply ℝ ℝ ((1, 0) : ℝ × ℝ)).contDiff.comp hfd1
+          have hfd2 : ContDiff ℝ ∞ (fun p : ℝ × ℝ => fderiv ℝ
+              (fun q : ℝ × ℝ => fderiv ℝ G q (1, 0)) p) :=
+            hfd1app.fderiv_right (m := ∞) (by rw [show (∞ : WithTop ℕ∞) + 1 = ∞ from rfl])
+          exact (ContinuousLinearMap.apply ℝ ℝ ((1, 0) : ℝ × ℝ)).contDiff.comp hfd2
+        have hgsslice : ContinuousOn (fun t : ℝ =>
+            fderiv ℝ (fun q : ℝ × ℝ => fderiv ℝ G q (1, 0)) (0, t) (1, 0)) (Set.Icc 0 L) := by
+          have hincl : Continuous (fun t : ℝ => ((0 : ℝ), t)) :=
+            continuous_const.prodMk continuous_id
+          exact (hC.continuous.comp hincl).continuousOn
+        exact hgsslice
+      -- Interval-integrability of `indexFormIntegrand` and `⟨Bsec, γ'⟩` on `[0, L]`.
+      have hindexFormIntegrand_intervalIntegrable :
+          IntervalIntegrable (fun t : ℝ => indexFormIntegrand (I := I) g γ V V t)
+            MeasureTheory.volume 0 L := by
+        apply ContinuousOn.intervalIntegrable
+        rw [Set.uIcc_of_le (le_of_lt hL)]
+        exact hindexFormIntegrand_continuousOn
+      have hBsec_continuousOn :
+          ContinuousOn (fun t : ℝ => g.inner (γ t) (Bsec t) (γ' t)) (Set.Icc 0 L) := by
+        apply ContinuousOn.congr
+          (f := fun t : ℝ => g_ss t / 2 - indexFormIntegrand (I := I) g γ V V t)
+        · exact (hg_ss_continuousOn.div_const 2).sub hindexFormIntegrand_continuousOn
+        · intro t ht
+          have := hpt_id t ht
+          linarith [this]
+      have hBsec_intervalIntegrable :
+          IntervalIntegrable (fun t : ℝ => g.inner (γ t) (Bsec t) (γ' t))
+            MeasureTheory.volume 0 L := by
+        apply ContinuousOn.intervalIntegrable
+        rw [Set.uIcc_of_le (le_of_lt hL)]
+        exact hBsec_continuousOn
+      -- The boundary integral `∫ ⟨Bsec, γ'⟩` equals `⟨Asec L, γ' L⟩ − ⟨Asec 0, γ' 0⟩ = 0` (FTC).
+      have hBint : (∫ t in (0 : ℝ)..L, g.inner (γ t) (Bsec t) (γ' t)) = 0 := by
+        have hFTC : (∫ t in (0 : ℝ)..L, g.inner (γ t) (Bsec t) (γ' t))
+            = g.inner (γ L) (Asec L) (γ' L) - g.inner (γ 0) (Asec 0) (γ' 0) := by
+          apply intervalIntegral.integral_eq_sub_of_hasDerivAt
+          · intro t ht
+            rw [Set.uIcc_of_le (le_of_lt hL)] at ht
+            exact hDderiv t ht
+          · exact hBsec_intervalIntegrable
+        rw [hFTC, hAsec0, hAsecL]
+        simp
+      -- (8) Assemble: `∫ g_ss/2 = ∫ indexFormIntegrand + ∫ ⟨Bsec, γ'⟩ = indexForm + 0`.
+      have hsplit : (∫ t in (0 : ℝ)..L, g_ss t / 2)
+          = (∫ t in (0 : ℝ)..L, indexFormIntegrand (I := I) g γ V V t)
+            + (∫ t in (0 : ℝ)..L, g.inner (γ t) (Bsec t) (γ' t)) := by
+        rw [← intervalIntegral.integral_add hindexFormIntegrand_intervalIntegrable hBsec_intervalIntegrable]
+        refine intervalIntegral.integral_congr (fun t ht => ?_)
+        rw [Set.uIcc_of_le (le_of_lt hL)] at ht
+        exact hpt_id t ht
+      rw [hsplit, hBint, add_zero, indexForm_eq_intervalIntegral]
     have hQint : (∫ t in (0 : ℝ)..L, Q (0, t)) = indexForm (I := I) g γ 0 L V V := by
       rw [← hgss_int]
       refine intervalIntegral.integral_congr (fun t ht => ?_)
@@ -3776,35 +4845,6 @@ theorem S5_exp_variation_construction
       (∀ s : ℝ, f s 0 = γ 0) ∧ (∀ s : ℝ, f s L = γ L) := sorry
 
 /-! ## Interval-integrability of the index-form integrand -/
-
-attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
-  Tensor0SBundle.tangentSpace_normedSpace in
-omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
-/-- Continuity on a set `s ⊆ ℝ` of the scalar `t ↦ g.inner (γ t) (v t) (w t)`
-for a base curve `γ` and two sections `v, w` along `γ` presented through their
-total-space continuity. Mirrors `continuous_g_inner_along_param` in its
-`ContinuousOn` form over a single-parameter base curve. The diamond between
-the project's tangent-space norm instances and the `RiemannianBundle`-derived
-ones is resolved locally; the scalar `ℝ`-valued conclusion is independent of
-the disabled instances. -/
-lemma continuousOn_g_inner_along_curve
-    (g : SmoothRiemannianMetric I M)
-    {γ : ℝ → M} {v w : ∀ t : ℝ, TangentSpace I (γ t)} {s : Set ℝ}
-    (hv : ContinuousOn (fun t : ℝ => TotalSpace.mk' E
-      (E := (TangentSpace I : M → Type _)) (γ t) (v t)) s)
-    (hw : ContinuousOn (fun t : ℝ => TotalSpace.mk' E
-      (E := (TangentSpace I : M → Type _)) (γ t) (w t)) s) :
-    ContinuousOn (fun t : ℝ => g.inner (γ t) (v t) (w t)) s := by
-  letI cg : Bundle.ContinuousRiemannianMetric E (TangentSpace I : M → Type _) :=
-    g.toContinuousRiemannianMetric
-  letI rb : Bundle.RiemannianBundle (TangentSpace I : M → Type _) :=
-    ⟨cg.toRiemannianMetric⟩
-  have h := ContinuousOn.inner_bundle (F := E) (B := M)
-    (E := (TangentSpace I : M → Type _)) (b := γ) (v := v) (w := w)
-    (s := s) hv hw
-  refine h.congr ?_
-  intro t _ht
-  rfl
 
 set_option maxHeartbeats 4000000 in
 set_option synthInstance.maxHeartbeats 4000000 in
