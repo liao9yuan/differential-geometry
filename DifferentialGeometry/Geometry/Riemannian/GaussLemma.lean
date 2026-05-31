@@ -3960,12 +3960,229 @@ At any interior parameter of a length-minimising curve, there is a
 `δ`-neighbourhood on which the curve, after rescaling, is a monotone
 radial geodesic in normal coordinates at `γ(t₀)`. -/
 
-/-- **Local radial identification.** Let `γ : ℝ → M` be a
-length-minimising `C¹` curve on `[a, b]`. At every interior parameter
-`t₀ ∈ (a, b)` there is a `δ > 0` such that the sub-arc
-`γ |[t₀ - δ, t₀ + δ]` is (after monotone rescaling) the radial geodesic
-`s ↦ expMap g (γ t₀) (s • v)` in normal coordinates at `γ t₀`, for some
-tangent vector `v : TangentSpace I (γ t₀)`. -/
+/-- **`C¹` smoothness of the central radial curve on `[0, 1]`.** For
+`‖a‖ < expMapC2Radius g p`, the curve `t ↦ expMap g p (t • a)` is `C¹` on
+`[0, 1]`.  Each parameter `t ∈ [0, 1]` has `‖t • a‖ ≤ ‖a‖`, so
+`radialCurve_contMDiffAt2` provides `C²`-smoothness pointwise; we downgrade to
+the `C¹`-on-set form needed for `pathELength` / `riemannianEDist`. -/
+private lemma radialCurve_contMDiffOn_Icc
+    (g : SmoothRiemannianMetric I M) (p : M) (a : E)
+    (ha : ‖a‖ < expMapC2Radius (I := I) g p) :
+    CMDiff[Set.Icc (0 : ℝ) 1] 1
+      (fun u : ℝ => (expMap (I := I) g p (show TangentSpace I p from (u • a)) : M)) := by
+  intro t ht
+  have hnorm : ‖t • a‖ < expMapC2Radius (I := I) g p := by
+    rw [norm_smul, Real.norm_eq_abs]
+    obtain ⟨h0, h1⟩ := ht
+    have habs : |t| ≤ 1 := by rw [abs_of_nonneg h0]; exact h1
+    calc |t| * ‖a‖ ≤ 1 * ‖a‖ := mul_le_mul_of_nonneg_right habs (norm_nonneg _)
+      _ = ‖a‖ := one_mul _
+      _ < _ := ha
+  exact ((radialCurve_contMDiffAt2 (I := I) g p a t hnorm).of_le
+    (by norm_num)).contMDiffWithinAt
+
+/-- **Central radial path length equals the radius.** For
+`‖a‖ < expMapC2Radius g p`, the `pathELength` of `t ↦ expMap g p (t • a)` over
+`[0, 1]` is exactly `ofReal √(g_p(a, a))`.  The velocity has constant `g`-speed
+`√(g_p(a, a))` on the interior `(0, 1)` (`radialSpeedSq_eq_inner`), so via
+`hEnorm` the integrand `‖mfderiv‖ₑ` is the constant `ofReal √(g_p(a, a))` there,
+and the lintegral over `(0, 1)` (measure `1`) returns that constant. -/
+private lemma radialCurve_pathELength_eq
+    (g : SmoothRiemannianMetric I M) (p : M) (a : E)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+        ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (ha : ‖a‖ < expMapC2Radius (I := I) g p) :
+    pathELength I
+        (fun u : ℝ => (expMap (I := I) g p (show TangentSpace I p from (u • a)) : M)) 0 1
+      = ENNReal.ofReal (Real.sqrt (g.inner p a a)) := by
+  classical
+  set γr : ℝ → M :=
+    fun u : ℝ => (expMap (I := I) g p (show TangentSpace I p from (u • a)) : M)
+    with hγr_def
+  -- The constant `g`-speed on the interior, transported to the integrand.
+  have hintegrand : ∀ t ∈ Set.Ioo (0 : ℝ) 1,
+      ‖mfderiv 𝓘(ℝ, ℝ) I γr t 1‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner p a a)) := by
+    intro t ht
+    have hsp := radialSpeedSq_eq_inner (I := I) g p a ha t ht
+    -- `radialSpeedSq g p a t = g.inner (γr t) (mfderiv γr t 1) (mfderiv γr t 1)` definitionally.
+    have hsp' : g.inner (γr t) (mfderiv 𝓘(ℝ, ℝ) I γr t 1) (mfderiv 𝓘(ℝ, ℝ) I γr t 1)
+        = g.inner p a a := hsp
+    rw [hEnorm (γr t) (mfderiv 𝓘(ℝ, ℝ) I γr t 1), hsp']
+  -- Integrate the constant over `Ioo 0 1`.
+  rw [pathELength_eq_lintegral_mfderiv_Ioo]
+  rw [MeasureTheory.setLIntegral_congr_fun measurableSet_Ioo hintegrand]
+  rw [MeasureTheory.setLIntegral_const, Real.volume_Ioo, sub_zero,
+    ENNReal.ofReal_one, mul_one]
+
+/-- **Radial distance equals the radius (inside the `C²` ball).** For a chart
+endpoint `a` with `√(g_p(a, a)) < expRadiusGp g p` (equivalently `a` in the
+normal-chart target and in the natural exponential domain), the Riemannian
+distance from `p` to the radial point `expMap g p a` equals `ofReal √(g_p(a, a))`.
+The `≤` direction is the radial path length bound `radialCurve_pathELength_eq`
+(the radial geodesic realises the distance); the `≥` direction is the Gauss-lemma
+radial lower bound `normalBall_radial_unique_minimizer`. -/
+private theorem radial_riemannianEDist_eq_radius
+    (g : SmoothRiemannianMetric I M) (p : M) {a : E}
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+        ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (ha_dom : (show TangentSpace I p from a) ∈ expDomain (I := I) g p)
+    (ha_ball : a ∈ (NormalCoordinates.normalChartAt (I := I) g p).target)
+    (ha_small : Real.sqrt (g.inner p a a) < expRadiusGp (I := I) g p) :
+    riemannianEDist I p (expMap (I := I) g p (show TangentSpace I p from a))
+      = ENNReal.ofReal (Real.sqrt (g.inner p a a)) := by
+  classical
+  -- Euclidean smallness from the `g_p`-smallness.
+  have ha_eucl : ‖a‖ < expMapC2Radius (I := I) g p :=
+    norm_lt_expMapC2Radius_of_sqrt_inner_lt (I := I) g p ha_small
+  -- `≥`: the Gauss radial lower bound.
+  have hge : ENNReal.ofReal (Real.sqrt (g.inner p a a)) ≤
+      riemannianEDist I p (expMap (I := I) g p (show TangentSpace I p from a)) :=
+    normalBall_radial_unique_minimizer (I := I) g p hEnorm ha_dom ha_ball ha_small
+  -- `≤`: the radial geodesic from `p` to `expMap p a` realises that length.
+  have hle : riemannianEDist I p (expMap (I := I) g p (show TangentSpace I p from a))
+      ≤ ENNReal.ofReal (Real.sqrt (g.inner p a a)) := by
+    set γr : ℝ → M :=
+      fun u : ℝ => (expMap (I := I) g p (show TangentSpace I p from (u • a)) : M)
+      with hγr_def
+    have hγr0 : γr 0 = p := by
+      rw [hγr_def]; simp only [zero_smul]; exact expMap_zero (I := I) g p
+    have hγr1 : γr 1 = expMap (I := I) g p (show TangentSpace I p from a) := by
+      rw [hγr_def]; simp only [one_smul]
+    have hγr_C1 : CMDiff[Set.Icc (0 : ℝ) 1] 1 γr :=
+      radialCurve_contMDiffOn_Icc (I := I) g p a ha_eucl
+    have hdist_le : riemannianEDist I (γr 0) (γr 1) ≤ pathELength I γr 0 1 :=
+      riemannianEDist_le_pathELength (I := I) (γ := γr) (a := 0) (b := 1)
+        hγr_C1 rfl rfl zero_le_one
+    rw [hγr0, hγr1] at hdist_le
+    refine hdist_le.trans ?_
+    rw [radialCurve_pathELength_eq (I := I) g p a hEnorm ha_eucl]
+  exact le_antisymm hle hge
+
+/-- **Short-time confinement of a curve to the small normal ball at its
+launch point.** If `γ` is `C¹` on `[a, b]` with `γ t₀ = q` at an interior
+parameter `t₀ ∈ (a, b)`, then there is a `δ > 0` such that the forward sub-arc
+`γ |[t₀, t₀ + δ]` lies inside `q`'s normal-chart source with `g_q`-chart radius
+below `expRadiusGp g q`.  This is pure continuity: the chart-radial value
+`t ↦ √(g_q(ψ_q(γ t), ψ_q(γ t)))` is continuous and vanishes at `t₀`, so it stays
+below the positive threshold `expRadiusGp g q` on a forward neighbourhood; the
+source-membership is the openness of the chart source at `q = γ t₀`. -/
+private theorem exists_forward_confinement_to_smallBall
+    (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {a b : ℝ} {t₀ : ℝ}
+    (hγ : CMDiff[Set.Icc a b] 1 γ) (ht₀ : t₀ ∈ Set.Ioo a b)
+    {q : M} (hq : γ t₀ = q) :
+    ∃ δ : ℝ, 0 < δ ∧ t₀ + δ ≤ b ∧
+      (∀ t ∈ Set.Icc t₀ (t₀ + δ),
+        γ t ∈ (NormalCoordinates.normalChartAt (I := I) g q).source) ∧
+      (∀ t ∈ Set.Icc t₀ (t₀ + δ),
+        Real.sqrt (g.inner q
+            (NormalCoordinates.normalChartAt (I := I) g q (γ t))
+            (NormalCoordinates.normalChartAt (I := I) g q (γ t)))
+          < expRadiusGp (I := I) g q) := by
+  classical
+  set ψ := NormalCoordinates.normalChartAt (I := I) g q with hψ_def
+  set B : E →L[ℝ] E →L[ℝ] ℝ := g.inner q with hB_def
+  have hBsym : ∀ x y : E, B x y = B y x := g.symm q
+  have hBnn : ∀ x : E, 0 ≤ B x x := fun x => by
+    rcases eq_or_ne x 0 with h | h
+    · subst h; simp
+    · exact (g.pos q x h).le
+  -- Continuity of `γ` on `[a, b]`; and `q ∈ ψ.source`, `ψ q = 0`.
+  have hγcont : ContinuousOn γ (Set.Icc a b) := hγ.continuousOn
+  have ht₀Icc : t₀ ∈ Set.Icc a b := ⟨ht₀.1.le, ht₀.2.le⟩
+  have hqsrc : q ∈ ψ.source := by
+    rw [hψ_def]; exact NormalCoordinates.normalChartAt_source (I := I) g q
+  have hψq : ψ q = 0 := by
+    rw [hψ_def]; exact NormalCoordinates.normalChartAt_centre (I := I) g q
+  -- The chart-radial value `ρ t := √(B (ψ (γ t)) (ψ (γ t)))`.
+  set ρ : ℝ → ℝ := fun t => Real.sqrt (B (ψ (γ t)) (ψ (γ t))) with hρ_def
+  -- `γ t₀ = q ∈ ψ.source`, so `γ` maps a neighbourhood (in `[a,b]`) into `ψ.source`.
+  have hγt₀_src : γ t₀ ∈ ψ.source := by rw [hq]; exact hqsrc
+  have hopen_src : IsOpen ψ.source := by
+    rw [hψ_def]; exact NormalCoordinates.normalChartAt_open_source (I := I) g q
+  -- The preimage `γ ⁻¹' ψ.source` is a (relative) neighbourhood of `t₀` in `[a,b]`.
+  have hpre_nhds : γ ⁻¹' ψ.source ∈ nhdsWithin t₀ (Set.Icc a b) :=
+    (hγcont t₀ ht₀Icc).preimage_mem_nhdsWithin (hopen_src.mem_nhds hγt₀_src)
+  -- `ρ` is continuous within `[a,b]` at `t₀` on the source-preimage, and `ρ t₀ = 0`.
+  have hρt₀ : ρ t₀ = 0 := by
+    rw [hρ_def]; simp only [hq, hψq, map_zero, Real.sqrt_zero]
+  -- Continuity of `ρ` near `t₀` (restricted to the source-preimage where `ψ∘γ` is continuous).
+  have hψcont : ContinuousOn ψ ψ.source := by
+    rw [hψ_def]; exact (NormalCoordinates.normalChartAt_contMDiffOn (I := I) g q).continuousOn
+  have hρ_contWithin : ContinuousWithinAt ρ (Set.Icc a b ∩ γ ⁻¹' ψ.source) t₀ := by
+    have hcomp : ContinuousWithinAt (fun t => ψ (γ t))
+        (Set.Icc a b ∩ γ ⁻¹' ψ.source) t₀ := by
+      have h1 : ContinuousWithinAt γ (Set.Icc a b ∩ γ ⁻¹' ψ.source) t₀ :=
+        (hγcont t₀ ht₀Icc).mono Set.inter_subset_left
+      have hmaps : Set.MapsTo γ (Set.Icc a b ∩ γ ⁻¹' ψ.source) ψ.source :=
+        fun t ht => ht.2
+      exact (hψcont _ hγt₀_src).comp h1 hmaps
+    exact ((psd_sqrt_lipschitz B hBsym hBnn).continuous.continuousAt.comp_continuousWithinAt hcomp)
+  -- The threshold is positive; pull back the `< expRadiusGp` condition.
+  have hR_pos : 0 < expRadiusGp (I := I) g q := expRadiusGp_pos (I := I) g q
+  have hρ_small_nhds : {t | ρ t < expRadiusGp (I := I) g q} ∈
+      nhdsWithin t₀ (Set.Icc a b ∩ γ ⁻¹' ψ.source) := by
+    have : Set.Iio (expRadiusGp (I := I) g q) ∈ nhds (ρ t₀) := by
+      rw [hρt₀]; exact isOpen_Iio.mem_nhds hR_pos
+    exact hρ_contWithin this
+  -- Combine: the set `S := {t | γ t ∈ source ∧ ρ t < R}` is a `nhdsWithin t₀ [a,b]` set.
+  have hS_nhds : {t | γ t ∈ ψ.source ∧ ρ t < expRadiusGp (I := I) g q} ∈
+      nhdsWithin t₀ (Set.Icc a b) := by
+    -- `nhdsWithin t₀ (Icc ∩ pre) = nhdsWithin t₀ Icc ⊓ 𝓟 pre`; intersect.
+    have hpre_nhds' : (γ ⁻¹' ψ.source) ∈ nhdsWithin t₀ (Set.Icc a b) := hpre_nhds
+    have hρ_in_Icc : {t | ρ t < expRadiusGp (I := I) g q} ∈
+        nhdsWithin t₀ (Set.Icc a b) := by
+      rw [show Set.Icc a b ∩ γ ⁻¹' ψ.source
+          = (Set.Icc a b) ∩ (γ ⁻¹' ψ.source) from rfl] at hρ_small_nhds
+      rw [nhdsWithin_inter_of_mem' hpre_nhds'] at hρ_small_nhds
+      exact hρ_small_nhds
+    filter_upwards [hpre_nhds', hρ_in_Icc] with t htpre htρ
+    exact ⟨htpre, htρ⟩
+  -- Extract a forward radius `δ`.  We use the right-interval form of `nhdsWithin`.
+  have ht₀_lt_b : t₀ < b := ht₀.2
+  -- `Ico t₀ b ⊆ Icc a b`, and `nhdsWithin t₀ (Ico t₀ b) ≤ nhdsWithin t₀ (Icc a b)`.
+  have hIco_sub : Set.Ico t₀ b ⊆ Set.Icc a b := fun t ht => ⟨ht₀.1.le.trans ht.1, ht.2.le⟩
+  have hS_nhds_right : {t | γ t ∈ ψ.source ∧ ρ t < expRadiusGp (I := I) g q} ∈
+      nhdsWithin t₀ (Set.Ico t₀ b) :=
+    nhdsWithin_mono t₀ hIco_sub hS_nhds
+  -- `nhdsWithin t₀ (Ico t₀ b)` has a basis of `Ico t₀ t₀'`; extract one inside `S`.
+  rw [nhdsWithin_Ico_eq_nhdsGE ht₀_lt_b, mem_nhdsGE_iff_exists_Ico_subset] at hS_nhds_right
+  obtain ⟨u, hu_mem, hu_sub⟩ := hS_nhds_right
+  -- `u ∈ Ioi t₀`, so `u > t₀`; pick `δ` with `t₀ + δ < u` and `t₀ + δ ≤ b`.
+  have hu_gt : t₀ < u := hu_mem
+  set δ : ℝ := min ((u - t₀) / 2) (b - t₀) with hδ_def
+  have hδ_pos : 0 < δ := by
+    rw [hδ_def]; exact lt_min (by linarith) (by linarith [ht₀_lt_b])
+  have hδ_le_b : t₀ + δ ≤ b := by
+    rw [hδ_def]; have := min_le_right ((u - t₀) / 2) (b - t₀); linarith
+  have hδ_lt_u : t₀ + δ < u := by
+    rw [hδ_def]; have := min_le_left ((u - t₀) / 2) (b - t₀); linarith
+  -- For `t ∈ Icc t₀ (t₀+δ) ⊆ Ico t₀ u`, `t ∈ S`.
+  have hmemS : ∀ t ∈ Set.Icc t₀ (t₀ + δ),
+      γ t ∈ ψ.source ∧ ρ t < expRadiusGp (I := I) g q := by
+    intro t ht
+    have ht_Ico : t ∈ Set.Ico t₀ u := ⟨ht.1, lt_of_le_of_lt ht.2 hδ_lt_u⟩
+    exact hu_sub ht_Ico
+  refine ⟨δ, hδ_pos, hδ_le_b, ?_, ?_⟩
+  · intro t ht; exact (hmemS t ht).1
+  · intro t ht; exact (hmemS t ht).2
+
+/-- **Forward local radial identification of a minimiser.** Let `γ : ℝ → M` be
+a length-minimising `C¹` curve on `[a, b]` (`riemannianEDist (γ a) (γ b) =
+pathELength γ a b`, with finite length `hfin`).  At every interior parameter
+`t₀ ∈ (a, b)` there is a `δ > 0` such that the forward sub-arc
+`γ |[t₀, t₀ + δ]` is, after a monotone rescaling, the radial geodesic
+`s ↦ expMap g (γ t₀) (σ s • v)` in normal coordinates centred at `γ t₀`, for a
+launch vector `v : T_{γ t₀} M` and a monotone `σ` with `σ 0 = 0`.
+
+This is the moving-foot no-corner regularity: re-based at the foot `γ t₀`, the
+restricted minimiser realises the chart-radial distance to its forward endpoint,
+hence — by the endpoint-generic radial rigidity `normalBall_radial_minimizer_equality`
+applied with base `γ t₀` — coincides with a monotone radial reparametrisation.
+The sub-arc minimality is `subArc_of_minimizer_is_minimizer`; the equality
+`pathELength = ofReal √(g_{γ t₀}(v, v))` feeding the rigidity is
+`radial_riemannianEDist_eq_radius` (distance equals radius inside the small
+normal ball) composed with the sub-arc minimality; the short-time ball
+confinement is `exists_forward_confinement_to_smallBall`. -/
 theorem local_radial_identification_of_minimizer
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -3973,58 +4190,87 @@ theorem local_radial_identification_of_minimizer
     {γ : ℝ → M} {a b : ℝ}
     (hγ : CMDiff[Icc a b] 1 γ)
     (hmin : riemannianEDist I (γ a) (γ b) = pathELength I γ a b)
+    (hfin : pathELength I γ a b ≠ ⊤)
     (hab : a ≤ b) {t₀ : ℝ} (ht₀ : t₀ ∈ Ioo a b) :
-    ∃ δ : ℝ, 0 < δ ∧ Icc (t₀ - δ) (t₀ + δ) ⊆ Icc a b ∧
-      ∃ v : TangentSpace I (γ t₀), ∀ s : ℝ, s ∈ Icc (-δ) δ →
-        γ (t₀ + s) = expMap (I := I) g (γ t₀) (s • v) := by
-  -- Extract interior-room data from `ht₀ : t₀ ∈ Ioo a b`.
-  obtain ⟨ha_lt, hb_lt⟩ := ht₀
-  have hδ_left_pos : 0 < t₀ - a := sub_pos.mpr ha_lt
-  have hδ_right_pos : 0 < b - t₀ := sub_pos.mpr hb_lt
-  -- Choose `δ := min (t₀ - a) (b - t₀) / 2`. Halving gives room on both
-  -- sides while keeping `δ > 0`.
-  set δ := min (t₀ - a) (b - t₀) / 2 with hδ_def
-  have hmin_pos : 0 < min (t₀ - a) (b - t₀) := lt_min hδ_left_pos hδ_right_pos
-  have hδ_pos : 0 < δ := by
-    rw [hδ_def]; exact half_pos hmin_pos
-  -- The interval bound `Icc (t₀ - δ) (t₀ + δ) ⊆ Icc a b`.
-  have hδ_le_left : δ ≤ t₀ - a := by
-    rw [hδ_def]
-    have h₁ : min (t₀ - a) (b - t₀) ≤ t₀ - a := min_le_left _ _
-    have h₂ : min (t₀ - a) (b - t₀) / 2 ≤ min (t₀ - a) (b - t₀) := by
-      exact half_le_self hmin_pos.le
-    exact h₂.trans h₁
-  have hδ_le_right : δ ≤ b - t₀ := by
-    rw [hδ_def]
-    have h₁ : min (t₀ - a) (b - t₀) ≤ b - t₀ := min_le_right _ _
-    have h₂ : min (t₀ - a) (b - t₀) / 2 ≤ min (t₀ - a) (b - t₀) := by
-      exact half_le_self hmin_pos.le
-    exact h₂.trans h₁
-  have h_lower : a ≤ t₀ - δ := by linarith
-  have h_upper : t₀ + δ ≤ b := by linarith
-  have h_subset : Icc (t₀ - δ) (t₀ + δ) ⊆ Icc a b :=
-    Icc_subset_Icc h_lower h_upper
-  -- The witness `v : TangentSpace I (γ t₀)` and the radial identification
-  -- `γ(t₀ + s) = expMap g (γ t₀) (s • v)` for `s ∈ [-δ, δ]` is the
-  -- equality case of the Gauss-lemma minimiser identification. The
-  -- proof composes `subArc_of_minimizer_is_minimizer` (with `hfin`
-  -- derived from `hmin` plus `riemannianEDist ≤ pathELength`) followed
-  -- by the equality case of `normalBall_radial_unique_minimizer`
-  -- (currently a length lower bound; the equality case sits as a
-  -- pending substep upstream). We isolate the existence of the witness
-  -- as an intermediate claim consumed below.
-  have hwitness :
-      ∃ v : TangentSpace I (γ t₀), ∀ s : ℝ, s ∈ Icc (-δ) δ →
-        γ (t₀ + s) = expMap (I := I) g (γ t₀) (s • v) := by
-    -- The sub-arc on `[t₀ - δ, t₀ + δ]` is itself a minimiser (via
-    -- `subArc_of_minimizer_is_minimizer`); inside the normal chart at
-    -- `γ t₀` the equality case of `normalBall_radial_unique_minimizer`
-    -- forces the sub-arc to coincide with a radial geodesic. The
-    -- explicit construction of `v` from this equality case is the
-    -- remaining substep, pending the upstream equality-case fill.
-    sorry
-  -- Package the choice of `δ`, the room subset, and the witness.
-  exact ⟨δ, hδ_pos, h_subset, hwitness⟩
+    ∃ δ : ℝ, 0 < δ ∧ Icc t₀ (t₀ + δ) ⊆ Icc a b ∧
+      ∃ (v : TangentSpace I (γ t₀)) (σ : ℝ → ℝ),
+        MonotoneOn σ (Icc 0 δ) ∧ σ 0 = 0 ∧
+        ∀ s : ℝ, s ∈ Icc 0 δ →
+          γ (t₀ + s) = expMap (I := I) g (γ t₀) (σ s • v) := by
+  classical
+  set q : M := γ t₀ with hq_def
+  -- Short-time confinement of the forward sub-arc to `q`'s small normal ball.
+  obtain ⟨δ, hδ_pos, hδ_le_b, hsrc, hradial_small⟩ :=
+    exists_forward_confinement_to_smallBall (I := I) g hγ ht₀ (q := q) hq_def.symm
+  -- Interior room: `a ≤ t₀ ≤ t₀ + δ ≤ b`, so the sub-interval is inside `[a, b]`.
+  have ht₀_ge_a : a ≤ t₀ := ht₀.1.le
+  have h_subset : Icc t₀ (t₀ + δ) ⊆ Icc a b :=
+    Icc_subset_Icc ht₀_ge_a hδ_le_b
+  -- The chart at `q` and the forward endpoint's chart coordinate `v`.
+  set ψ := NormalCoordinates.normalChartAt (I := I) g q with hψ_def
+  set v : E := ψ (γ (t₀ + δ)) with hv_def
+  -- The forward sub-arc is `C¹`.
+  have hδ_endIcc : t₀ + δ ∈ Set.Icc t₀ (t₀ + δ) := ⟨by linarith, le_rfl⟩
+  have hγ_sub : CMDiff[Set.Icc t₀ (t₀ + δ)] 1 γ := hγ.mono h_subset
+  -- The forward sub-arc is itself a minimiser (`subArc_of_minimizer_is_minimizer`).
+  have hsub_min : riemannianEDist I (γ t₀) (γ (t₀ + δ)) = pathELength I γ t₀ (t₀ + δ) :=
+    subArc_of_minimizer_is_minimizer (I := I) hγ hmin hfin hab ht₀_ge_a
+      (by linarith) hδ_le_b
+  -- Smallness of `v` (chart-radial value of the endpoint) below `expRadiusGp q`.
+  have hv_small : Real.sqrt (g.inner q v v) < expRadiusGp (I := I) g q := by
+    have h := hradial_small (t₀ + δ) hδ_endIcc
+    rw [hv_def]; exact h
+  -- `v ∈ ψ.target` and `v ∈ expDomain q` (small radius ⟹ in the `C²` ball ⟹ both).
+  have hv_eucl : ‖v‖ < expMapC2Radius (I := I) g q :=
+    norm_lt_expMapC2Radius_of_sqrt_inner_lt (I := I) g q hv_small
+  have hv_ball : v ∈ ψ.target := by
+    rw [hψ_def]; exact ball_subset_normalChartAt_target (I := I) g q hv_eucl
+  have hv_dom : (show TangentSpace I q from v) ∈ expDomain (I := I) g q :=
+    mem_expDomain_of_norm_lt_radius (I := I) g q hv_eucl
+  -- `q = expMap q (ψ q)` and the endpoint `γ(t₀+δ) = expMap q v` (chart round-trip).
+  have hγend_src : γ (t₀ + δ) ∈ ψ.source := hsrc (t₀ + δ) hδ_endIcc
+  have hend_eq : γ (t₀ + δ) = expMap (I := I) g q (show TangentSpace I q from v) := by
+    have hround : ψ.symm (ψ (γ (t₀ + δ))) = γ (t₀ + δ) := by
+      rw [hψ_def]
+      exact NormalCoordinates.normalChartAt_left_inv (I := I) g q hγend_src
+    have hsymm : ψ.symm v = expMap (I := I) g q (show TangentSpace I q from v) := by
+      rw [hψ_def]
+      exact NormalCoordinates.normalChartAt_symm_apply (I := I) g q
+        (show v ∈ ψ.symm.source from hv_ball)
+    rw [← hround, ← hv_def, hsymm]
+  -- The distance from `q` to the endpoint equals the radius `ofReal √(g_q(v,v))`.
+  have hdist_eq : riemannianEDist I q (expMap (I := I) g q (show TangentSpace I q from v))
+      = ENNReal.ofReal (Real.sqrt (g.inner q v v)) :=
+    radial_riemannianEDist_eq_radius (I := I) g q hEnorm hv_dom hv_ball hv_small
+  -- Hence the sub-arc length equals `ofReal √(g_q(v,v))`, the rigidity input.
+  have hlen : pathELength I γ t₀ (t₀ + δ)
+      = ENNReal.ofReal (Real.sqrt (g.inner q v v)) := by
+    rw [← hsub_min]
+    show riemannianEDist I (γ t₀) (γ (t₀ + δ)) = _
+    rw [hq_def, hend_eq]; exact hdist_eq
+  -- Apply the endpoint-generic radial rigidity with base `q = γ t₀`.
+  have hab_sub : t₀ < t₀ + δ := by linarith
+  have hγa_sub : γ t₀ = q := hq_def
+  have hγb_sub : γ (t₀ + δ) = expMap (I := I) g q (show TangentSpace I q from v) := hend_eq
+  have hγ_inBall : ∀ t ∈ Set.Icc t₀ (t₀ + δ), γ t ∈ ψ.source := by
+    intro t ht; rw [hψ_def]; exact hsrc t ht
+  obtain ⟨φ, hφ_mono, hφ0, hφ1, hφ_eq⟩ :=
+    normalBall_radial_minimizer_equality (I := I) g q hEnorm hv_dom hv_ball hv_small
+      hab_sub hγ_sub hγa_sub hγb_sub hγ_inBall hlen
+  -- Reindex `φ` on `[t₀, t₀+δ]` to `σ` on `[0, δ]` via `σ s := φ (t₀ + s)`.
+  refine ⟨δ, hδ_pos, h_subset, (show TangentSpace I q from v), fun s => φ (t₀ + s), ?_, ?_, ?_⟩
+  · -- `σ` monotone on `[0, δ]`.
+    intro s hs t ht hst
+    have hs' : t₀ + s ∈ Set.Icc t₀ (t₀ + δ) := ⟨by linarith [hs.1], by linarith [hs.2]⟩
+    have ht' : t₀ + t ∈ Set.Icc t₀ (t₀ + δ) := ⟨by linarith [ht.1], by linarith [ht.2]⟩
+    exact hφ_mono hs' ht' (by linarith)
+  · -- `σ 0 = φ t₀ = 0`.
+    simp only [add_zero]; exact hφ0
+  · -- The radial identification, reindexed.
+    intro s hs
+    have hs' : t₀ + s ∈ Set.Icc t₀ (t₀ + δ) := ⟨by linarith [hs.1], by linarith [hs.2]⟩
+    have := hφ_eq (t₀ + s) hs'
+    rw [hq_def]; exact this
 
 end LocalRadialIdentification
 
@@ -4072,15 +4318,24 @@ theorem arclength_reparam_is_smooth_geodesic
       simp at ht
     · intro t ht
       simp at ht
-  · -- Nondegenerate case `a < b`: this is the substantive arclength
-    -- reparametrisation, requiring `local_radial_identification_of_minimizer`
-    -- (still a `sorry` in this file) plus a global gluing argument via
-    -- geodesic uniqueness. The construction is: pull the arclength parameter
-    -- `s : [a, b] → [0, L]` through the local radial-geodesic identification
-    -- on each `δ`-neighbourhood, then glue using the chart-flow uniqueness
-    -- in `Geodesic/Uniqueness.lean`. We leave this branch as a `sorry` until
-    -- the local-radial identification lemma is filled and the global
-    -- gluing infrastructure is built.
+  · -- Nondegenerate case `a < b`: the substantive arclength reparametrisation.
+    -- The forward local radial identification `local_radial_identification_of_minimizer`
+    -- is now available: re-based at any interior foot `γ t₀`, the minimiser is a
+    -- monotone radial reparametrisation of a radial geodesic.  The remaining
+    -- construction, not yet built, is:
+    --   (i)  the arclength function `s(t) := (pathELength γ a t).toReal`, its
+    --        strict monotonicity (positive `g`-speed away from rest), and its
+    --        `C¹` inverse `t(s)` giving the unit-speed reparam `η := γ ∘ t`;
+    --   (ii) at each interior arclength point, the monotone reparam `σ` of the
+    --        forward radial identification becomes the *identity* under arclength
+    --        (a unit-speed radial geodesic has arclength `= parameter`), turning
+    --        the conclusion into the linear radial form `η(s+·) = expMap (η s) (· • v̂)`
+    --        with `|v̂|_g = 1`, which is `IsGeodesicAt` and `ContMDiffAt ∞` via
+    --        `radial_maximalGeodesic_hasGeodesicEquationAt_of_small` and the
+    --        `expMap`-radial-curve smoothness;
+    --   (iii) the no-corner gluing of consecutive radial pieces via the chart-flow
+    --        geodesic uniqueness in `Geodesic/Uniqueness.lean`.
+    -- Steps (i)-(iii) are left as the residual of this branch.
     sorry
 
 end ArclengthReparam
