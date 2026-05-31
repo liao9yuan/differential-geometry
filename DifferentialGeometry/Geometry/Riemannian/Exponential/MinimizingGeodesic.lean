@@ -967,6 +967,226 @@ theorem expMapIntrinsic_local_surjective
   rw [hintr_eq_q] at hd
   rw [hd, ENNReal.toReal_ofReal (Real.sqrt_nonneg _)]
 
+/-! ## 7e. `C^∞`-in-time regularity of moving-foot geodesics
+
+The `C¹` time-regularity of a moving-foot geodesic
+(`HopfRinow.isGeodesicOn_contMDiffOn_one`) suffices for the constant-speed and
+distance lemmas, but the broken first-variation / no-corner argument needs the
+full `C^∞` regularity (the variation construction differentiates the curve twice
+and feeds `IsSmoothVariation`).  This is supplied here by an ODE-bootstrap: the
+chart curve `u = φ_α ∘ γ` of a geodesic solves, on a neighbourhood of any time
+`t`, the first-order phase-space ODE `(u, u')' = chartPhaseVF g α (u, u')` whose
+right-hand side `chartPhaseVF` is `C^∞` on `interior(target) ×ˢ univ`
+(`chartPhaseVF_contDiffOn`).  Mathlib's
+`ODE.contDiffOn_enat_Icc_of_hasDerivWithinAt` then upgrades the `C¹` solution to
+`C^∞`, and the chart round-trip `(extChartAt I α).symm ∘ u = γ` (smooth chart)
+transfers this to `ContMDiff 𝓘(ℝ,ℝ) I ∞ γ`. -/
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- **`C^∞`-in-time regularity of the chart curve of a moving-foot geodesic.**
+The chart-coordinate curve `u = φ_{γ t} ∘ γ` of a moving-foot geodesic `γ`,
+geodesic on an open set `s ∋ t` and continuous on `s`, is `ContDiffAt ℝ ∞` at
+`t`.  The chart pair `(u, u')` solves the `C^∞` first-order phase-space geodesic
+ODE `(u, u')' = chartPhaseVF g (γ t) (u, u')` (the velocity clause
+`hasGeodesicEquationAt_fixedChart_eventually_hasDerivAt` and the acceleration
+clause `hasGeodesicEquationAt_fixedChart_hasDerivAt_velocity`), so the
+ODE-smoothness bootstrap `ODE.contDiffOn_enat_Icc_of_hasDerivWithinAt` (with the
+`C^∞` field `chartPhaseVF_contDiffOn`) upgrades the `C¹` solution
+(`chartCurve_contDiffAt_one_of_isGeodesicOn`) to `C^∞`. -/
+theorem chartCurve_contDiffAt_top_of_isGeodesicOn
+    (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {s : Set ℝ} {t : ℝ}
+    (hs : IsOpen s) (ht : t ∈ s)
+    (hγ : DifferentialGeometry.Geometry.Riemannian.Geodesic.IsGeodesicOn
+      (I := I) g γ s)
+    (hcont : ContinuousOn γ s) :
+    ContDiffAt ℝ ∞
+      (DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve
+        (I := I) (γ t) γ) t := by
+  classical
+  haveI : CompleteSpace E := FiniteDimensional.complete ℝ E
+  set α : M := γ t with hα_def
+  set u : ℝ → E := DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve
+    (I := I) α γ with hu_def
+  have hα_src : α ∈ (chartAt H α).source := mem_chart_source H α
+  have hcontAt_t : ContinuousAt γ t := hcont.continuousAt (hs.mem_nhds ht)
+  have hsrc_nhds : (fun s' => γ s') ⁻¹' (chartAt H α).source ∈ 𝓝 t :=
+    hcontAt_t.preimage_mem_nhds ((chartAt H α).open_source.mem_nhds hα_src)
+  have hW_nhds : (fun s' => γ s') ⁻¹' (chartAt H α).source ∩ s ∈ 𝓝 t :=
+    Filter.inter_mem hsrc_nhds (hs.mem_nhds ht)
+  obtain ⟨W', hW'_sub, hW'_open, htW'⟩ := mem_nhds_iff.mp hW_nhds
+  have hW'_src : ∀ r ∈ W', γ r ∈ (chartAt H α).source := fun r hr => (hW'_sub hr).1
+  have hW'_geo : ∀ r ∈ W',
+      DifferentialGeometry.Geometry.Riemannian.Geodesic.HasGeodesicEquationAt
+        (I := I) g γ r := fun r hr => hγ r (hW'_sub hr).2
+  have hW'_contAt : ∀ r ∈ W', ContinuousAt γ r :=
+    fun r hr => hcont.continuousAt (hs.mem_nhds (hW'_sub hr).2)
+  -- The phase pair `Z r = (u r, deriv u r)`.
+  set Z : ℝ → E × E := fun r => (u r, deriv u r) with hZ_def
+  -- On `W'`, `Z` solves the phase-space geodesic ODE.
+  have hZ_ode : ∀ r ∈ W',
+      HasDerivAt Z
+        (DifferentialGeometry.Geometry.Riemannian.Geodesic.chartPhaseVF
+          (I := I) g α (Z r)) r := by
+    intro r hr
+    have hu_d : HasDerivAt u (deriv u r) r := by
+      have hev :=
+        DifferentialGeometry.Geometry.Riemannian.Geodesic.hasGeodesicEquationAt_fixedChart_eventually_hasDerivAt
+          (I := I) g α (γ := γ) (t := r) (hW'_contAt r hr) (hW'_src r hr)
+          (hW'_geo r hr)
+      simpa [hu_def] using hev.self_of_nhds
+    have hdu_d : HasDerivAt (deriv u)
+        (- DifferentialGeometry.Geometry.Riemannian.Geodesic.chartChristoffelContraction
+            (I := I) g α (deriv u r) (deriv u r) (u r)) r := by
+      simpa [hu_def] using
+        DifferentialGeometry.Geometry.Riemannian.Geodesic.hasGeodesicEquationAt_fixedChart_hasDerivAt_velocity
+          (I := I) g α (γ := γ) (t := r) (hW'_contAt r hr) (hW'_src r hr)
+          (hW'_geo r hr)
+    have hprod : HasDerivAt Z
+        (deriv u r,
+          - DifferentialGeometry.Geometry.Riemannian.Geodesic.chartChristoffelContraction
+              (I := I) g α (deriv u r) (deriv u r) (u r)) r :=
+      hu_d.prodMk hdu_d
+    simpa only [hZ_def,
+      DifferentialGeometry.Geometry.Riemannian.Geodesic.chartPhaseVF_mk] using hprod
+  -- `u r = φ_α (γ r) ∈ interior(target)` on `W'` (boundaryless).
+  have hu_int : ∀ r ∈ W', u r ∈ interior (extChartAt I α).target := by
+    intro r hr
+    have hur : u r = extChartAt I α (γ r) := by
+      rw [hu_def,
+        DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve_def]
+    rw [hur]
+    exact DifferentialGeometry.Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
+      (I := I) α
+      ((extChartAt I α).map_source (by rw [extChartAt_source]; exact hW'_src r hr))
+  -- An `Icc` neighbourhood `[a, b] ⊆ W'` of `t`.
+  obtain ⟨ε, hε_pos, hball⟩ := Metric.isOpen_iff.mp hW'_open t htW'
+  set a : ℝ := t - ε / 2 with ha_def
+  set b : ℝ := t + ε / 2 with hb_def
+  have hIcc_sub : Set.Icc a b ⊆ W' := by
+    intro r hr
+    apply hball
+    rw [Metric.mem_ball, Real.dist_eq]
+    rcases hr with ⟨hr1, hr2⟩
+    rw [abs_lt]
+    refine ⟨by simp only [ha_def] at hr1; linarith, by simp only [hb_def] at hr2; linarith⟩
+  have ht_mem_lo : a < t := by simp only [ha_def]; linarith
+  have ht_mem_hi : t < b := by simp only [hb_def]; linarith
+  -- Bootstrap the phase pair `Z` to `C^∞` on `[a, b]`.
+  have hZ_smooth : ContDiffOn ℝ ∞ Z (Set.Icc a b) := by
+    refine ODE.contDiffOn_enat_Icc_of_hasDerivWithinAt
+      (f := fun _ : ℝ =>
+        DifferentialGeometry.Geometry.Riemannian.Geodesic.chartPhaseVF (I := I) g α)
+      (u := interior (extChartAt I α).target ×ˢ (Set.univ : Set E))
+      (n := (⊤ : ℕ∞)) ?_ ?_ ?_
+    · have huncurry :
+          Function.uncurry
+            (fun _ : ℝ =>
+              DifferentialGeometry.Geometry.Riemannian.Geodesic.chartPhaseVF (I := I) g α)
+            = fun p : ℝ × (E × E) =>
+                DifferentialGeometry.Geometry.Riemannian.Geodesic.chartPhaseVF
+                  (I := I) g α p.2 := by
+        funext p; rfl
+      rw [huncurry]
+      exact (DifferentialGeometry.Geometry.Riemannian.Geodesic.chartPhaseVF_contDiffOn
+        (I := I) g α).comp contDiffOn_snd (fun p hp => hp.2)
+    · intro r hr
+      exact (hZ_ode r (hIcc_sub hr)).hasDerivWithinAt
+    · intro r hr
+      exact ⟨hu_int r (hIcc_sub hr), Set.mem_univ _⟩
+  -- Extract `ContDiffAt ℝ ∞ Z t` and project to the first coordinate `u`.
+  have hZ_at : ContDiffAt ℝ ∞ Z t :=
+    (hZ_smooth.contDiffWithinAt ⟨ht_mem_lo.le, ht_mem_hi.le⟩).contDiffAt
+      (Icc_mem_nhds ht_mem_lo ht_mem_hi)
+  have hu_at : ContDiffAt ℝ ∞ u t := by
+    have hfst := hZ_at.fst
+    simpa [hZ_def] using hfst
+  rw [hu_def] at hu_at
+  exact hu_at
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- **`C^∞`-in-time regularity of a moving-foot geodesic (pointwise).**  An
+intrinsic moving-foot geodesic `γ` on an open set `s`, continuous on `s`, is
+`ContMDiffAt 𝓘(ℝ, ℝ) I ∞` at every `t ∈ s`.  Bootstraps the chart-curve `C^∞`
+regularity `chartCurve_contDiffAt_top_of_isGeodesicOn` through the smooth chart
+round-trip `(extChartAt I (γ t)).symm ∘ u = γ`. -/
+theorem isGeodesicOn_contMDiffAt_top
+    (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {s : Set ℝ} {t : ℝ}
+    (hs : IsOpen s) (ht : t ∈ s)
+    (hγ : DifferentialGeometry.Geometry.Riemannian.Geodesic.IsGeodesicOn
+      (I := I) g γ s)
+    (hcont : ContinuousOn γ s) :
+    ContMDiffAt 𝓘(ℝ, ℝ) I ∞ γ t := by
+  classical
+  set α : M := γ t with hα_def
+  set u : ℝ → E := DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve
+    (I := I) α γ with hu_def
+  have hu_cd : ContDiffAt ℝ ∞ u t :=
+    chartCurve_contDiffAt_top_of_isGeodesicOn (I := I) g hs ht hγ hcont
+  have hu_cmd : ContMDiffAt 𝓘(ℝ, ℝ) 𝓘(ℝ, E) ∞ u t := hu_cd.contMDiffAt
+  have hα_src : α ∈ (chartAt H α).source := mem_chart_source H α
+  have hα_ext_src : α ∈ (extChartAt I α).source := by
+    rw [extChartAt_source]; exact hα_src
+  have hut_eq : u t = extChartAt I α α := by
+    rw [hu_def,
+      DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve_def, hα_def]
+  have hut_target : u t ∈ (extChartAt I α).target := by
+    rw [hut_eq]; exact (extChartAt I α).map_source hα_ext_src
+  have htarget_nhds : (extChartAt I α).target ∈ 𝓝 (u t) := by
+    have hut_int : u t ∈ interior (extChartAt I α).target := by
+      rw [hut_eq]
+      exact DifferentialGeometry.Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
+        (I := I) α ((extChartAt I α).map_source hα_ext_src)
+    exact mem_nhds_iff.mpr ⟨interior (extChartAt I α).target, interior_subset,
+      isOpen_interior, hut_int⟩
+  have hsymm_within : ContMDiffWithinAt 𝓘(ℝ, E) I ∞
+      (extChartAt I α).symm (extChartAt I α).target (u t) :=
+    contMDiffWithinAt_extChartAt_symm_target (I := I) α hut_target
+  have hsymm_at : ContMDiffAt 𝓘(ℝ, E) I ∞ (extChartAt I α).symm (u t) :=
+    hsymm_within.contMDiffAt htarget_nhds
+  have hcomp : ContMDiffAt 𝓘(ℝ, ℝ) I ∞ ((extChartAt I α).symm ∘ u) t :=
+    hsymm_at.comp t hu_cmd
+  have hcontAt_t : ContinuousAt γ t := hcont.continuousAt (hs.mem_nhds ht)
+  have hsrc_nhds : (fun s' => γ s') ⁻¹' (chartAt H α).source ∈ 𝓝 t :=
+    hcontAt_t.preimage_mem_nhds ((chartAt H α).open_source.mem_nhds hα_src)
+  have heq : ((extChartAt I α).symm ∘ u) =ᶠ[𝓝 t] γ := by
+    filter_upwards [hsrc_nhds] with s' hs'
+    have hs'_ext : γ s' ∈ (extChartAt I α).source := by
+      rw [extChartAt_source]; exact hs'
+    change (extChartAt I α).symm (u s') = γ s'
+    rw [hu_def,
+      DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve_def]
+    exact (extChartAt I α).left_inv hs'_ext
+  exact hcomp.congr_of_eventuallyEq heq.symm
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- **`C^∞`-in-time regularity of a moving-foot geodesic (on an open set).** -/
+theorem isGeodesicOn_contMDiffOn_top
+    (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {s : Set ℝ}
+    (hs : IsOpen s)
+    (hγ : DifferentialGeometry.Geometry.Riemannian.Geodesic.IsGeodesicOn
+      (I := I) g γ s)
+    (hcont : ContinuousOn γ s) :
+    ContMDiffOn 𝓘(ℝ, ℝ) I ∞ γ s := fun _t ht =>
+  (isGeodesicOn_contMDiffAt_top (I := I) g hs ht hγ hcont).contMDiffWithinAt
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- **`C^∞`-in-time regularity of a complete moving-foot geodesic.**  A complete
+moving-foot geodesic `γ` (geodesic on all of `ℝ`), continuous everywhere, is
+`ContMDiff 𝓘(ℝ, ℝ) I ∞`. -/
+theorem isGeodesic_contMDiff
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M]
+    (g : SmoothRiemannianMetric I M) {γ : ℝ → M}
+    (hγ : DifferentialGeometry.Geometry.Riemannian.Geodesic.IsGeodesic (I := I) g γ)
+    (hcont : Continuous γ) :
+    ContMDiff 𝓘(ℝ, ℝ) I ∞ γ := by
+  rw [← contMDiffOn_univ]
+  exact isGeodesicOn_contMDiffOn_top (I := I) g isOpen_univ
+    (hγ.isGeodesicOn Set.univ) hcont.continuousOn
+
 /-! ## 8. The velocity-identified Hopf–Rinow surjectivity (headline)
 
 The headline assembles the pieces: the `r = 0` base case is discharged outright;
@@ -1132,12 +1352,45 @@ theorem expMapIntrinsic_surjective_dist
     -- sphere intermediate-value identification of the metric sphere with the
     -- intrinsic exponential sphere, and the minimising-broken-path-is-a-geodesic
     -- regularity that aligns the forward radial direction with `γ'(t₀)`) rest on
-    -- the "a length-minimising curve is `C¹`/geodesic" producer
-    -- (`arclength_reparam_is_smooth_geodesic`), which feeds the already-proven
-    -- equality case `normalBall_radial_minimizer_equality` re-based at `γ(t₀)`.
+    -- the "a length-minimising curve is `C¹`/geodesic" producer, which feeds the
+    -- already-proven equality case `normalBall_radial_minimizer_equality` re-based
+    -- at `γ(t₀)`.  The radial ray `γ` is the single smooth unit-speed geodesic
+    -- `intrinsicGeodesic p u` (`intrinsicGeodesic_smul`); its `C^∞` time-regularity
+    -- is now available through `isGeodesic_contMDiff` (proved above), which is the
+    -- regularity the `broken_minimizer_velocity_match` no-corner consumes.
     have ht₀_eq_r : t₀ = r := by
-      by_contra hne
-      have ht₀_lt : t₀ < r := lt_of_le_of_ne ht₀_le hne
+      by_contra hne'
+      have ht₀_lt : t₀ < r := lt_of_le_of_ne ht₀_le hne'
+      -- The moving foot is `c := γ t₀`, with `d(c, q) = ofReal (r - t₀)` (from
+      -- `ht₀_dist` and finiteness `riemannianEDist_ne_top`) and `d(p, c) = ofReal t₀`
+      -- (the ray arc `[0, t₀]` has length `t₀`, plus the triangle at `q`).
+      -- RESIDUAL (the moving-foot sphere-extension).  Choose the sphere-minimiser
+      -- `w₂` at `c` on the intrinsic `δ'`-sphere (`δ' < min (ρ_c) (r - t₀)`); let
+      -- `y₁ := expMapIntrinsic c (δ' • w₂)`.  The two metric facts
+      --   `d(c, y₁) = δ'`  (radial, `radial_riemannianEDist_eq_of_small'`)  and
+      --   `d(y₁, q) = (r - t₀) - δ'`  (sphere-jump:  `≥` by the triangle at `c`;
+      --     `≤` by the path-crosses-the-metric-`δ'`-sphere intermediate-value
+      --     identification of the metric sphere with the intrinsic exponential
+      --     sphere — the single genuinely missing analytic input, requiring the
+      --     metric-ball ⊆ normal-ball Gauss inclusion, not yet available
+      --     `sorry`-free in this project)
+      -- give `d(p, y₁) = t₀ + δ'`.  The unit-speed geodesics `γ` (on `[0, t₀]`) and
+      -- `σ := intrinsicGeodesic c w₂` (on `[0, δ']`) then meet the hypotheses of
+      -- `broken_minimizer_velocity_match` (both `ContMDiff … ∞` by the
+      -- `isGeodesic_contMDiff` regularity proved above, unit-speed by
+      -- `bm_c_gc_constant_speed`, junction `γ t₀ = c = σ 0`, and minimality
+      -- `d(γ 0, σ δ') = ofReal (t₀ + δ')`), whose conclusion
+      -- `mfderiv γ t₀ 1 = mfderiv σ 0 1` identifies the forward radial direction at
+      -- the foot with `w₂`; geodesic uniqueness (`isGeodesic_eq_of_initial`, after a
+      -- foot time-translation of `γ`) then forces `y₁ = γ (t₀ + δ')`.  Hence
+      -- `(riemannianEDist (γ (t₀ + δ')) q).toReal = (r - t₀) - δ' = r - (t₀ + δ')`
+      -- with `t₀ + δ' ∈ [0, r]`, so `t₀ + δ' ∈ A` and `t₀ + δ' ≤ sSup A = t₀`,
+      -- contradicting `δ' > 0`.
+      --
+      -- (This step additionally requires the launch direction `u` to be the
+      -- sphere-minimiser at `p` rather than an arbitrary unit vector, so that the
+      -- base case already places a positive element in `A`; that is the companion
+      -- modification of the `u`-selection above.)
       sorry
     -- `t₀ = r ⟹ (riemannianEDist (γ r) q).toReal = 0 ⟹ riemannianEDist (γ r) q = 0
     --  ⟹ γ r = q` (point separation `riemannianEDist_eq_zero_imp_eq`).
