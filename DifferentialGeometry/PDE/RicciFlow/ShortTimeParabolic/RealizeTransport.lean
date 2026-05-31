@@ -6,6 +6,7 @@ and the spectral→geometric reconciliation at the solution. Skeleton stubs for 
 short-time-existence blueprint (GAP 1, transport layer).
 -/
 import DifferentialGeometry.PDE.RicciFlow.ShortTimeExistence
+import DifferentialGeometry.PDE.RicciFlow.ShortTimeParabolic.LocalWeylInput
 import DifferentialGeometry.PDE.RicciFlow.ShortTimeParabolic.BareLaplacianSpectralMatch
 import DifferentialGeometry.PDE.RicciFlow.HamiltonDeTurckPullbackFlat
 import DifferentialGeometry.PDE.RicciFlow.Pullback.EvaluationFormChainRule
@@ -46,6 +47,95 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+/-! ## The carrier-scale realize-evaluate functional `ℓ_a`
+
+We realize the pointwise symmetric-bilinear evaluation
+`T ↦ ccTensorBilinSymm g_bg T x v w` (a *fixed* base point `x` and tangent
+vectors `v, w`) as a continuous-linear functional on the supercritical
+spectral Sobolev scale `Hᵃ = tensorHs g_bg 0 2 a`, in the eigenbasis
+coordinate model.
+
+The fixed real `eigenRealizeEval g_bg i x v w` is the realize-evaluation of the
+`i`-th smooth eigenvector representative `eigenSmooth g_bg i`. The genuine
+spectral *expansion* of the realize is
+`ccTensorBilinSymm g_bg T x v w = ∑ᵢ (L²-coordinate of T at i) · eᵢ(x,v,w)`,
+and the functional is its Riesz representative against the `Hᵃ` inner product
+(coordinate `eᵢ(x,v,w) · (1+λᵢ)^{-a}`). Both the well-definedness of that
+representative and the expansion rest on the single supercritical
+pointwise on-diagonal local-Weyl reproducing-kernel input recorded below;
+everything else (the Riesz construction, the coordinate `tsum` identity, the
+pinning algebra) is proved outright. -/
+
+/-- The realize-evaluation of the `i`-th smooth eigenvector representative at the
+fixed base point `x` and tangent vectors `v, w`: the symmetric bilinear value
+`ccTensorBilinSymm g_bg (eigenSmooth g_bg i) x v w`. These are the fixed
+spectral coefficients of the carrier-scale realize functional. -/
+private noncomputable def eigenRealizeEval (g_bg : SmoothRiemannianMetric I M)
+    (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g_bg 0 2)
+    (x : M) (v w : TangentSpace I x) : ℝ :=
+  ccTensorBilinSymm (I := I) g_bg (eigenSmooth (I := I) (M := M) g_bg i) x v w
+
+/-- **The supercritical pointwise on-diagonal kernel summability (the single open
+local-Weyl input, part 1).**
+
+At supercritical Sobolev order `2a > dim M + 4` the per-eigenmode realize
+values `eᵢ(x,v,w) = ccTensorBilinSymm g_bg (eigenSmooth g_bg i) x v w` decay
+fast enough that the `Hᵃ`-Riesz weight `eᵢ(x,v,w)² · (1+λᵢ)^{-a}` is summable
+over the eigen-index set. This is exactly the **on-diagonal reproducing-kernel
+estimate** `∑ᵢ ‖bᵢ(x)‖²_g · (1+λᵢ)^{-a} < ∞`, the pointwise (per-point) form of
+the local Weyl law; it is *strictly stronger* than the integrated counting
+bound `EigenvalueCountingBound` (which is its integral over `M`, see
+`SpectralDiagonalCounting.eigenvalueCountingBound_of_pointwiseDiagonalKernelBound`)
+and is the genuine remaining analytic input that the project isolates rather
+than fakes. -/
+private theorem eigenRealizeEval_weight_summable
+    (g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha : 2 * a > Module.finrank ℝ E + 4)
+    (x : M) (v w : TangentSpace I x) :
+    Summable (fun i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+        (I := I) (M := M) g_bg 0 2 =>
+      tensorSobolevWeight (I := I) (M := M) i (a : ℝ) *
+        (eigenRealizeEval (I := I) (M := M) g_bg i x v w *
+          (tensorSobolevWeight (I := I) (M := M) i (a : ℝ))⁻¹) ^ 2) :=
+  -- The supercritical weighted summability of the per-eigenmode realize values is
+  -- exactly the second realize face of the single open pointwise local-Weyl input
+  -- `local_weyl_pointwise_diagonal_kernel_bound`. The summand here unfolds (through
+  -- the `eigenRealizeEval`/`eigenSmooth` abbreviations) to the node's summand
+  -- verbatim.
+  ((local_weyl_pointwise_diagonal_kernel_bound (I := I) (M := M) g_bg 0 2).2 a ha).1 x v w
+
+/-- **The supercritical pointwise realize eigen-expansion (the single open
+local-Weyl input, part 2).**
+
+At supercritical Sobolev order `2a > dim M + 4` the realize-evaluation of a
+smooth compactly-supported `(0,2)`-tensor `T` at the fixed base point `x` and
+tangent vectors `v, w` is the absolutely convergent eigen-series of its
+`L²`-coordinates weighted by the per-eigenmode realize values:
+`ccTensorBilinSymm g_bg T x v w = ∑ᵢ (L²-coeff of T at i) · eᵢ(x,v,w)`.
+
+This is the `C⁰`-convergence of the eigenbasis expansion of `T`'s realize, which
+again rests on the same pointwise on-diagonal local-Weyl kernel control
+(via Cauchy–Schwarz against the `Hᵃ` decay of a smooth tensor's coordinates and
+the `(1+λᵢ)^{-a}` kernel tail). It is isolated as the second half of the single
+open Weyl pointwise input. -/
+private theorem ccTensorBilinSymm_hasSum_eigenRealizeEval
+    (g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha : 2 * a > Module.finrank ℝ E + 4)
+    (T : Integral.L2.SmoothCcTensor g_bg 0 2)
+    (x : M) (v w : TangentSpace I x) :
+    HasSum
+      (fun i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+          (I := I) (M := M) g_bg 0 2 =>
+        tensorL2Coeff_ofCompact (I := I) (M := M) (hCompact (I := I) (M := M) g_bg)
+            (Integral.L2.SmoothCcTensor.toL2 T) i *
+          eigenRealizeEval (I := I) (M := M) g_bg i x v w)
+      (ccTensorBilinSymm (I := I) g_bg T x v w) :=
+  -- The realize eigen-expansion is the third realize face of the single open
+  -- pointwise local-Weyl input. The summand unfolds (through `eigenRealizeEval`/
+  -- `eigenSmooth`) to the node's `coeff · eᵢ` summand verbatim, and the target is
+  -- the realize value `ccTensorBilinSymm g_bg T x v w`.
+  ((local_weyl_pointwise_diagonal_kernel_bound (I := I) (M := M) g_bg 0 2).2 a ha).2 T x v w
+
 set_option linter.unusedVariables false in
 theorem realize_eval_carrier_factorization
     (g_bg : SmoothRiemannianMetric I M) (a : ℕ)
@@ -59,7 +149,47 @@ theorem realize_eval_carrier_factorization
           z.coeff i
             = tensorL2Coeff_ofCompact (I := I) (M := M) (hCompact (I := I) (M := M) g_bg)
                 (Integral.L2.SmoothCcTensor.toL2 T_z) i) →
-          ℓ_a z = ccTensorBilinSymm (I := I) g_bg T_z x v w := sorry
+          ℓ_a z = ccTensorBilinSymm (I := I) g_bg T_z x v w := by
+  classical
+  -- The fixed per-eigenmode realize values `eᵢ(x,v,w)`.
+  set e : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+      (I := I) (M := M) g_bg 0 2 → ℝ :=
+    fun i => eigenRealizeEval (I := I) (M := M) g_bg i x v w with he_def
+  -- The Riesz representative `w_rep ∈ Hᵃ`: coordinate `eᵢ · (1+λᵢ)^{-a}`. Its
+  -- weighted summability is exactly the supercritical on-diagonal kernel input.
+  set w_rep : tensorHs (I := I) (M := M) g_bg 0 2 (a : ℝ) :=
+    { coeff := fun i => e i * (tensorSobolevWeight (I := I) (M := M) i (a : ℝ))⁻¹
+      weighted_summable :=
+        eigenRealizeEval_weight_summable (I := I) (M := M) g_bg a ha x v w } with hw_rep_def
+  -- The carrier-scale functional is the inner product against `w_rep`.
+  refine ⟨innerSL ℝ w_rep, ?_⟩
+  intro T_z z hz
+  -- `ℓ_a z = ⟪w_rep, z⟫ = ∑ᵢ (1+λᵢ)^a · (eᵢ·(1+λᵢ)^{-a}) · z.coeff i = ∑ᵢ eᵢ · z.coeff i`.
+  have hval : (innerSL ℝ w_rep) z = ∑' i, e i * z.coeff i := by
+    rw [innerSL_apply_apply, tensorHs.inner_def]
+    refine tsum_congr (fun i => ?_)
+    have hw_pos : 0 < tensorSobolevWeight (I := I) (M := M) i (a : ℝ) :=
+      tensorSobolevWeight_pos (I := I) (M := M) i (a : ℝ)
+    -- The `Hᵃ` coordinate of `w_rep` is `eᵢ · (1+λᵢ)^{-a}`; the weight cancels.
+    have hwcoeff : w_rep.coeff i
+        = e i * (tensorSobolevWeight (I := I) (M := M) i (a : ℝ))⁻¹ := rfl
+    rw [hwcoeff,
+      show tensorSobolevWeight (I := I) (M := M) i (a : ℝ) *
+          ((e i * (tensorSobolevWeight (I := I) (M := M) i (a : ℝ))⁻¹) * z.coeff i)
+        = (tensorSobolevWeight (I := I) (M := M) i (a : ℝ) *
+            (tensorSobolevWeight (I := I) (M := M) i (a : ℝ))⁻¹) * (e i * z.coeff i) by ring,
+      mul_inv_cancel₀ hw_pos.ne', one_mul]
+  rw [hval]
+  -- The pinning: with `z.coeff i = L²coeff(T_z) i`, the coordinate `tsum`
+  -- becomes the realize eigen-series, which sums to the realize value.
+  have hcoeff : (fun i => e i * z.coeff i)
+      = (fun i => tensorL2Coeff_ofCompact (I := I) (M := M)
+            (hCompact (I := I) (M := M) g_bg)
+            (Integral.L2.SmoothCcTensor.toL2 T_z) i * e i) := by
+    funext i; rw [hz i]; ring
+  rw [hcoeff]
+  exact (ccTensorBilinSymm_hasSum_eigenRealizeEval
+    (I := I) (M := M) g_bg a ha T_z x v w).tsum_eq
 
 theorem pointwise_deriv_through_realize
     (g_bg : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ}
