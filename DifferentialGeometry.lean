@@ -1318,6 +1318,7 @@ import DifferentialGeometry.PDE.RicciFlow.HamiltonDeTurckPullbackFlat
 import DifferentialGeometry.PDE.RicciFlow.Pullback.EvaluationFormChainRule
 import DifferentialGeometry.PDE.RicciFlow.ShortTimeExistence
 -- Ricci-flow short-time existence: interior parabolic DeTurck–Ricci layer
+import DifferentialGeometry.PDE.RicciFlow.ShortTimeParabolic.LocalWeylInput
 import DifferentialGeometry.PDE.RicciFlow.ShortTimeParabolic.DeTurckRicciPde
 import DifferentialGeometry.PDE.RicciFlow.ShortTimeParabolic.HScaleLipschitz
 import DifferentialGeometry.PDE.RicciFlow.ShortTimeParabolic.MildSolutionTimeH1
