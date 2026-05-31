@@ -31,7 +31,7 @@ with the flat metric) can have `injRadius g p = ∞`.
 * `injRadius_eq_top_iff` and related shape lemmas characterise the
   members of the supremum set.
 
-* `injRadius_compact_infimum_pos_of_lowerSemicontinuous` — on a compact
+* `injRadius_iInf_pos_of_compact_of_lowerSemicontinuous` — on a compact
   manifold, when `p ↦ injRadius g p` is lower semicontinuous, the
   infimum is strictly positive. The lower-semicontinuity hypothesis is a
   separable assumption that follows from joint smoothness of the
@@ -80,7 +80,7 @@ section InjectivityRadius
 
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
-/-! ## G.7.1 — Definition
+/-! ## Definition
 
 We define the injectivity-radius set as the family of `r : ℝ≥0∞` for
 which `expMap g p` is injective on the (extended) ball of radius `r`
@@ -208,9 +208,12 @@ lemma exists_pos_mem_injRadiusSet (g : SmoothRiemannianMetric I M) (p : M) :
     rw [Metric.eball_ofReal]
     exact hr₀_inj
 
-/-! ## G.7.2 — Positivity of the injectivity radius -/
+/-! ## Positivity of the injectivity radius -/
 
-/-- **G.7.2 — The injectivity radius is strictly positive.** -/
+/-- The injectivity radius at every point `p : M` is strictly positive,
+`0 < injRadius g p`. This holds unconditionally: `expMap g p` is a local
+diffeomorphism at `0 ∈ T_p M`, hence injective on a ball of some positive
+radius, so that radius witnesses a positive element of `injRadiusSet g p`. -/
 theorem injRadius_pos (g : SmoothRiemannianMetric I M) (p : M) :
     0 < injRadius (I := I) g p := by
   classical
@@ -251,7 +254,7 @@ theorem injOn_expMap_ball_of_ofReal_lt_injRadius
   -- eball 0 (ofReal r₀) = ball 0 r₀.
   rwa [Metric.eball_ofReal] at h
 
-/-! ## G.7.4 — Compact infimum positivity (under lower semicontinuity)
+/-! ## Compact infimum positivity (under lower semicontinuity)
 
 The classical statement is that on a compact manifold the infimum of
 `p ↦ injRadius g p` is strictly positive. The standard proof uses
@@ -265,15 +268,18 @@ place.
 For convenience we also record the trivial direction: pointwise
 positivity holds without any additional hypothesis. -/
 
-/-- **G.7.4 — On a compact manifold, the infimum of the injectivity
-radius is strictly positive, assuming lower semicontinuity.**
+/-- On a compact nonempty manifold, the infimum `⨅ p, injRadius g p` of the
+injectivity radius is strictly positive, under the hypothesis that
+`p ↦ injRadius g p` is lower semicontinuous.
 
-The hypothesis `LowerSemicontinuous (fun p => injRadius g p)` is the
-classical regularity ingredient; on a compact set, a strictly positive
-lower-semicontinuous function attains a positive infimum (in fact the
-infimum is attained, by Bolzano–Weierstrass-style arguments inside
-`LowerSemicontinuous.exists_isMinOn` / `IsCompact.exists_isMinOn`). -/
-theorem injRadius_compact_infimum_pos_of_lowerSemicontinuous
+The lower-semicontinuity hypothesis is a genuine assumption on the statement:
+it is the classical regularity ingredient (it follows from joint smoothness of
+the exponential map in `(p, v)`, which is not yet available at this point in
+the project). Given it, a lower-semicontinuous function on a compact nonempty
+space attains its minimum at some `p₀` (via
+`LowerSemicontinuousOn.exists_isMinOn`), and the infimum equals the pointwise
+value there, which is positive by `injRadius_pos`. -/
+theorem injRadius_iInf_pos_of_compact_of_lowerSemicontinuous
     (g : SmoothRiemannianMetric I M) [CompactSpace M] [Nonempty M]
     (h_lsc : LowerSemicontinuous (fun p : M => injRadius (I := I) g p)) :
     0 < ⨅ p : M, injRadius (I := I) g p := by
@@ -305,7 +311,7 @@ theorem exists_uniform_injectivity_radius_of_lowerSemicontinuous
       InjOn (fun v : E => (expMap (I := I) g p (show TangentSpace I p from v) : M))
         (Metric.ball (0 : E) r₀) := by
   classical
-  have h_inf_pos := injRadius_compact_infimum_pos_of_lowerSemicontinuous
+  have h_inf_pos := injRadius_iInf_pos_of_compact_of_lowerSemicontinuous
     (I := I) g h_lsc
   -- The positive infimum is an extended nonneg real; choose a positive
   -- real strictly below it (if infimum is `∞`, take `1`; otherwise take

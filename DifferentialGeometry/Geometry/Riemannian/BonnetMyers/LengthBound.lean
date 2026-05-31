@@ -51,15 +51,14 @@ open DifferentialGeometry.Geometry.Riemannian.Variation
 
 /-! ## Trace identity: sum of sectional curvatures equals Ricci -/
 
-/-- **trace-identity-sum-sec-curv-equals-ricci.** For a unit vector
-`X ∈ T_x M` and any orthonormal family `e : Fin (Module.finrank ℝ E - 1)
-→ T_x M` orthogonal to `X`,
-`∑_i ⟨R(e_i, X) X, e_i⟩_g = Ric(X, X)`.
+/-- The Ricci curvature `Ric(X, X)` of a unit vector `X ∈ T_x M` equals
+the sum `∑_i ⟨R(e_i, X) X, e_i⟩_g` over any `g`-orthonormal family
+`e : Fin (Module.finrank ℝ E - 1) → T_x M` orthogonal to `X`.
 
 The proof realises the Ricci tensor as the trace of `Z ↦ R(Z, X) X`
 in the orthonormal basis `{X, e_1, …, e_{n-1}}`; the `X`-summand
 `⟨R(X, X) X, X⟩` vanishes by curvature antisymmetry. -/
-theorem trace_identity_sum_sec_curv_equals_ricci
+theorem ricci_eq_sum_sectional_curvature_of_orthonormal_perp_frame
     (g : SmoothRiemannianMetric I M) (x : M) (X : E)
     (hUnit : g.inner x X X = 1)
     (e : Fin (Module.finrank ℝ E - 1) → E)
@@ -223,7 +222,7 @@ At each `t ∈ [0, L]`, the sum of per-`i` index-form integrands for
 Leibniz on `chartCovDerivAlong g (γ t) γ (sin(π·/L) • e_i) t` combined
 with parallelism gives `∇_t V_i = (π/L) cos(πt/L) • e_i`; squaring via
 `hON` gives `‖∇_t V_i‖² = (π/L)² cos²(πt/L)`; the curvature sum
-collapses via `trace_identity_sum_sec_curv_equals_ricci`. -/
+collapses via `ricci_eq_sum_sectional_curvature_of_orthonormal_perp_frame`. -/
 theorem sum_index_form_integrand_eval
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     {L : ℝ} (_hL : 0 < L) (uPrime : ℝ → E)
@@ -531,7 +530,7 @@ theorem sum_index_form_integrand_eval
               ((e i).toFun t) (uPrime t) (uPrime t))
             ((e i).toFun t))
         = ricciTensor (I := I) g (γ t) (uPrime t) (uPrime t) :=
-    trace_identity_sum_sec_curv_equals_ricci (I := I) g (γ t) (uPrime t)
+    ricci_eq_sum_sectional_curvature_of_orthonormal_perp_frame (I := I) g (γ t) (uPrime t)
       h_unit (fun i => (e i).toFun t) h_ON_e h_perp_e
   -- Step 7: Combine. The constant sum equals (n-1) · (piOverL*cosπL)^2.
   -- We bind `nm1 : ℝ` to the canonical real cast (`(n - 1 : ℕ) : ℝ`) so the
@@ -878,11 +877,14 @@ theorem sum_index_form_bound_by_curvature_hypothesis
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **length-bound-contradiction-assembly.** *Bonnet-Myers length
-bound.* For a unit-speed minimising geodesic `γ : [0, L] → M` on a
-Riemannian manifold whose Ricci curvature satisfies
-`(n-1) K · g(v, v) ≤ Ric(v, v)` with `K > 0`, the length `L` is at
-most `π / √K`.
+/-- **Bonnet-Myers length bound.** For a unit-speed minimising geodesic
+`γ : [0, L] → M` on a Riemannian manifold whose Ricci curvature satisfies
+`(n-1) K · g(v, v) ≤ Ric(v, v)` with `K > 0`, the parameter length `L`
+is at most `π / √K`.
+
+The orthonormal perpendicular parallel frame `e` along `γ`, the
+unit-speed velocity data `uPrime`, and the various integrability and
+minimisation hypotheses are supplied as assumptions.
 
 The proof is by contradiction. If `π/√K < L`, then `(π/L)² < K`, so
 `sum_index_form_bound_by_curvature_hypothesis` produces a strictly
@@ -890,7 +892,7 @@ negative sum of index forms. On the other hand
 `minimiser_implies_second_variation_nonneg` applied to each `V_i`
 gives `0 ≤ indexForm g γ 0 L V_i V_i`, hence the sum is non-negative.
 This contradiction forces `L ≤ π / √K`. -/
-theorem length_bound_contradiction_assembly
+theorem bonnet_myers_length_le_of_ricci_bound
     [T2Space (TangentBundle I M)] [ConnectedSpace M]
     [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] [CompleteSpace E]

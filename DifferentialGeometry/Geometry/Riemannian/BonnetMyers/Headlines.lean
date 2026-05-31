@@ -24,13 +24,13 @@ This file assembles the three top-level conclusions of the Bonnet-Myers
 theorem from their supporting children. Under the hypotheses
 `Ric ≥ (n-1) K · g` with `K > 0` and `n ≥ 2`:
 
-* `bonnetMyers_diameter` — the metric diameter is at most `π / √K`.
-* `bonnetMyers_compact` — the manifold is compact.
-* `bonnetMyers_finite_fundamentalGroup` — the fundamental group is finite.
+* `bonnet_myers_diameter_of_ricci_bound` — the metric diameter is at most `π / √K`.
+* `bonnet_myers_compactSpace_of_ricci_bound` — the manifold is compact.
+* `bonnet_myers_finite_fundamentalGroup_of_ricci_bound` — the fundamental group is finite.
 
 Two short supporting children are also stated here:
 
-* `pairwise_edist_bound_from_geodesic` — the uniform pairwise edist bound.
+* `bonnet_myers_pairwise_edist_le_of_ricci_bound` — the uniform pairwise edist bound.
 * The `bm_c_*` compactness sub-leaves
   (`tangent_closedBall_isCompact`, `isCompact_image_closedBall_under_expMap`,
   `isCompact_univ`).
@@ -102,32 +102,22 @@ theorem isCompact_image_closedBall_under_expMap
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **pairwise-edist-bound-from-geodesic.** The uniform pairwise edist
-bound. Direct composition of the intrinsic distance-realising geodesic +
-Myers's length bound + the `IsRiemannianManifold` identity
-`edist = riemannianEDist`.
+/-- The uniform pairwise distance bound underlying Bonnet-Myers: for any two
+points `x y` on a complete connected Riemannian manifold of dimension `n ≥ 2`
+with Ricci curvature bounded below by `(n-1) K` (`K > 0`),
+`edist x y ≤ π / √K`.
 
-The proof routes through three pieces:
-* `expMapIntrinsic_surjective_dist`: produce a launch velocity `v` at `x`
-  whose intrinsic exponential image is `y` and whose `g`-norm equals the
-  intrinsic distance `r := (riemannianEDist I x y).toReal`. Rescaling to a
-  unit vector `u := r⁻¹ • v` (when `r > 0`) gives a globally `C^∞`,
-  unit-speed minimising geodesic `γ := intrinsicGeodesic g hEnorm x u` with
-  `γ 0 = x`, `γ r = y`, parameter length `L := r`.
-* `length_bound_contradiction_assembly`: combine the second-variation
-  index form bound with the Ricci lower bound `(n-1) K · g ≤ Ric`
-  (`K > 0`, `n ≥ 2`) to deduce `L ≤ π/√K`. The smooth parallel
-  perpendicular frame it consumes is supplied by `exists_parallel_perp_frame`.
-* `IsRiemannianManifold.out`: the bundled-distance identity
-  `edist = riemannianEDist` available on a Riemannian manifold.
-
-The `attribute [-instance]` prefix suppresses the `Tensor0SBundle` tangent
-norm diamond so that every fibre `‖·‖ₑ` reduces to the Riemannian norm
-`ofReal (√ g.inner)`; this is the common enorm of `hEnorm`, the intrinsic
-distance spine, and the length-bound assembly, and is what makes the final
-`edist = riemannianEDist = ofReal L` identity hold without a cross-instance
-reconciliation. -/
-theorem pairwise_edist_bound_from_geodesic
+The hypothesis `hEnorm` is the supplied structural identity that the fibre
+extended norm `‖·‖ₑ` equals `ofReal (√ g.inner)` (the Riemannian norm). The
+proof composes three ingredients: a distance-realising launch velocity `v`
+at `x` whose intrinsic exponential is `y` and whose `g`-norm equals the
+intrinsic distance `r`, giving a unit-speed minimising geodesic `γ` of
+parameter length `L = r`; the second-variation index-form length bound,
+which combines with the Ricci lower bound to give `L ≤ π / √K`; and the
+Riemannian-manifold identity `edist = riemannianEDist`. The
+`attribute [-instance]` prefix suppresses the `Tensor0SBundle` tangent-norm
+instance so every fibre `‖·‖ₑ` reduces to the Riemannian norm. -/
+theorem bonnet_myers_pairwise_edist_le_of_ricci_bound
     {M : Type*}
     {I : ModelWithCorners ℝ E H} [I.Boundaryless]
     [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -270,7 +260,7 @@ theorem pairwise_edist_bound_from_geodesic
   -- Adjust the Ricci hypothesis to the form expected by the length-bound
   -- assembly. The headline statement has the bound as
   -- `((Module.finrank ℝ E : ℝ) - 1) * K`, while
-  -- `length_bound_contradiction_assembly` reads
+  -- `bonnet_myers_length_le_of_ricci_bound` reads
   -- `(Module.finrank ℝ E - 1 : ℝ) * K`. These are syntactically equal.
   have hRic' :
       RicciBoundedBelow (I := I) g ((Module.finrank ℝ E - 1 : ℝ) * K) := _hRic
@@ -709,7 +699,7 @@ theorem pairwise_edist_bound_from_geodesic
             (I := I) hγ_smooth hχ_smooth (hEbundle i)
         -- `(smulFun χ (e i)).toFun t = χ t • (e i).toFun t` definitionally.
         exact hprod
-      exact length_bound_contradiction_assembly (I := I) g γ hL_pos hEnorm
+      exact bonnet_myers_length_le_of_ricci_bound (I := I) g γ hL_pos hEnorm
         hγ_smooth hγ_C1 hγ_geoOn _hK _hdim hRic' uPrime huPrimeEq hγ_unit
         e heDiff hParallel hON hPerp hIntegrandSum hRicIntegrable hγ_min hVbundle
   -- Conclude: the goal is `r ≤ π / √K`, and `L = r`, so `hL_le` closes it.
@@ -720,11 +710,12 @@ theorem pairwise_edist_bound_from_geodesic
 set_option linter.deprecated false in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **bonnet-myers-diameter.** *Bonnet-Myers diameter theorem.* On a
-complete connected Riemannian manifold of dimension `n ≥ 2` with Ricci
-curvature bounded below by `(n-1) K` for some `K > 0`, the metric diameter
-is at most `π / √K`. -/
-theorem bonnetMyers_diameter
+/-- **Bonnet-Myers diameter theorem.** On a complete connected Riemannian
+manifold of dimension `n ≥ 2` with Ricci curvature bounded below by
+`(n-1) K` for some `K > 0`, the metric diameter `EMetric.diam univ` is at
+most `π / √K`. The hypothesis `hEnorm` is the supplied structural identity
+that the fibre extended norm equals `ofReal (√ g.inner)`. -/
+theorem bonnet_myers_diameter_of_ricci_bound
     {M : Type*}
     {I : ModelWithCorners ℝ E H} [I.Boundaryless]
     [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -744,7 +735,7 @@ theorem bonnetMyers_diameter
       ENNReal.ofReal (Real.pi / Real.sqrt K) := by
   refine Metric.ediam_le ?_
   intro x _ y _
-  exact pairwise_edist_bound_from_geodesic (E := E) g _hdim _hK _hRic hEnorm x y
+  exact bonnet_myers_pairwise_edist_le_of_ricci_bound (E := E) g _hdim _hK _hRic hEnorm x y
 
 /-! ## Compactness sub-leaf: `univ` is compact -/
 
@@ -752,7 +743,7 @@ set_option linter.deprecated false in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 /-- **bm-c-univ-compact.** The whole space `Set.univ : Set M` is compact.
-Combines the diameter bound (sibling headline `bonnetMyers_diameter`) with
+Combines the diameter bound (sibling headline `bonnet_myers_diameter_of_ricci_bound`) with
 exponential-map surjectivity on the closed ball of radius `π / √K` and
 `IsCompact.of_isClosed_subset` together with `isClosed_univ`. -/
 theorem isCompact_univ
@@ -782,7 +773,7 @@ theorem isCompact_univ
     exact div_nonneg hpi_nn hsqrt_nn
   -- Diameter bound from the proved sibling headline.
   have hdiam : EMetric.diam (Set.univ : Set M) ≤ ENNReal.ofReal R :=
-    bonnetMyers_diameter (E := E) g _hdim _hK _hRic hEnorm
+    bonnet_myers_diameter_of_ricci_bound (E := E) g _hdim _hK _hRic hEnorm
   -- Exponential surjectivity on the closed ball of radius `R`.  The closed-ball
   -- metric here is the one fixed at the surjectivity lemma's elaboration; we let
   -- its type flow rather than re-annotating, so it matches the image-compactness
@@ -800,10 +791,12 @@ theorem isCompact_univ
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **bonnet-myers-compact.** *Bonnet-Myers compactness.* On a complete
-connected Riemannian manifold of dimension `n ≥ 2` with Ricci curvature
-bounded below by `(n-1) K` for some `K > 0`, the manifold is compact. -/
-theorem bonnetMyers_compact
+/-- **Bonnet-Myers compactness theorem.** On a complete connected Riemannian
+manifold of dimension `n ≥ 2` with Ricci curvature bounded below by
+`(n-1) K` for some `K > 0`, the manifold is compact (`CompactSpace M`). The
+hypothesis `hEnorm` is the supplied structural identity that the fibre
+extended norm equals `ofReal (√ g.inner)`. -/
+theorem bonnet_myers_compactSpace_of_ricci_bound
     {M : Type*}
     {I : ModelWithCorners ℝ E H} [I.Boundaryless]
     [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -826,14 +819,21 @@ theorem bonnetMyers_compact
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **bonnet-myers-finite-fundamental-group.** *Bonnet-Myers finiteness of
-the fundamental group.* On a complete connected Riemannian manifold of
-dimension `n ≥ 2` with Ricci curvature bounded below by `(n-1) K` for some
-`K > 0`, the fundamental group `π₁(M, x)` at any base point is finite. The
-proof passes to the universal cover, applies the compactness headline to
-the lifted manifold, and identifies the fibre of the cover with `π₁(M, x)`
-via monodromy. -/
-theorem bonnetMyers_finite_fundamentalGroup
+/-- **Bonnet-Myers finiteness of the fundamental group.** On a complete
+connected Riemannian manifold of dimension `n ≥ 2` with Ricci curvature
+bounded below by `(n-1) K` for some `K > 0`, the fundamental group
+`π₁(M, x)` at any base point is finite. The proof passes to the universal
+cover, pulls back the Ricci bound, applies the compactness theorem to the
+lifted manifold, and identifies the cover fibre over `x` with `π₁(M, x)`
+via monodromy. The hypothesis `hEnormBase` is the supplied structural
+identity that the fibre extended norm on `M` equals `ofReal (√ g.inner)`.
+
+One residual gap remains: the cross-instance norm-diamond bridge reconciling
+the lifted `RiemannianBundle` extended norm with the project `Tensor0SBundle`
+extended norm in the compactness application (the two agree pointwise as the
+square root of the lifted metric, but the explicit identification is left as
+a `sorry`). -/
+theorem bonnet_myers_finite_fundamentalGroup_of_ricci_bound
     {M : Type*}
     {I : ModelWithCorners ℝ E H} [I.Boundaryless]
     [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -982,15 +982,15 @@ theorem bonnetMyers_finite_fundamentalGroup
       T2Space (TangentBundle I
         (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)) :=
     inferInstance
-  -- Apply Headline 2 (`bonnetMyers_compact`) to the lifted Riemannian manifold.
-  -- `bonnetMyers_compact`'s `hEnorm` hypothesis is in the active lifted
+  -- Apply Headline 2 (`bonnet_myers_compactSpace_of_ricci_bound`) to the lifted Riemannian manifold.
+  -- `bonnet_myers_compactSpace_of_ricci_bound`'s `hEnorm` hypothesis is in the active lifted
   -- `RiemannianBundle` enorm (`hRB`), for which the enorm identity is the
   -- already-proven `hEnormCover`.
   haveI hCompactUC :
       CompactSpace
         (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :=
-    bonnetMyers_compact (E := E) gLift _hdim _hK hRicLift (by
-      -- Cross-instance norm-diamond reconciliation: the `bonnetMyers_compact`
+    bonnet_myers_compactSpace_of_ricci_bound (E := E) gLift _hdim _hK hRicLift (by
+      -- Cross-instance norm-diamond reconciliation: the `bonnet_myers_compactSpace_of_ricci_bound`
       -- enorm hypothesis is in the project `Tensor0SBundle` enorm, while
       -- `hEnormCover` provides the same identity for the lifted
       -- `RiemannianBundle` enorm `hRB`. The two enorms agree pointwise (both

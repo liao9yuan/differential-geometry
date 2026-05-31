@@ -29,7 +29,7 @@ The construction is the classical partition-of-unity argument:
 
 ## Main result
 
-* `exists_contMDiffRiemannianMetric` : the tangent bundle of such a manifold carries a smooth
+* `nonempty_contMDiffRiemannianMetric_of_sigmaCompact` : the tangent bundle of such a manifold carries a smooth
   Riemannian metric.
 -/
 
@@ -253,7 +253,7 @@ The metric is built by gluing chart-local pullbacks of the model-fibre inner pro
 smooth partition of unity subordinate to the chart cover. Positive-definiteness survives the
 convex partition-of-unity average, and finite-dimensional coercivity discharges the
 von-Neumann boundedness of the assembled metric. -/
-theorem exists_contMDiffRiemannianMetric
+theorem nonempty_contMDiffRiemannianMetric_of_sigmaCompact
     [SigmaCompactSpace M] [T2Space M] :
     Nonempty (Bundle.ContMDiffRiemannianMetric I ∞ E (TangentSpace I : M → Type _)) := by
   -- Glue the chart-local metrics into a single global smooth fiberwise pos-def symmetric form.
@@ -288,7 +288,7 @@ at smoothness `∞`) is inhabited on such a manifold. -/
 theorem nonempty_smoothRiemannianMetric
     [SigmaCompactSpace M] [T2Space M] :
     Nonempty (Bundle.ContMDiffRiemannianMetric I ∞ E (TangentSpace I : M → Type _)) :=
-  exists_contMDiffRiemannianMetric
+  nonempty_contMDiffRiemannianMetric_of_sigmaCompact
 
 end Geometry
 end DifferentialGeometry

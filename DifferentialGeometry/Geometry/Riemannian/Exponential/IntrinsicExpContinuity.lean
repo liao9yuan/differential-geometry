@@ -20,7 +20,7 @@ small balls because `maximalGeodesic` reverts to its junk value once the
 geodesic leaves the home chart).
 
 This file develops the continuity of `v ↦ expMapIntrinsic g hEnorm p v`.  The
-metric-geometry compactness endpoint (e.g. `bonnetMyers_compact`) consumes it as
+metric-geometry compactness endpoint (e.g. `bonnet_myers_compactSpace_of_ricci_bound`) consumes it as
 "`M = expMapIntrinsic g p '' closedBall` is a continuous image of a compact
 set".
 
@@ -2336,7 +2336,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 manifold the intrinsic exponential map `v ↦ expMapIntrinsic g hEnorm p v` is
 continuous.
 
-The compactness / diameter endpoint (`bonnetMyers_compact`) consumes this as
+The compactness / diameter endpoint (`bonnet_myers_compactSpace_of_ricci_bound`) consumes this as
 "`M = expMapIntrinsic g p '' closedBall` is a continuous image of a compact
 set".
 

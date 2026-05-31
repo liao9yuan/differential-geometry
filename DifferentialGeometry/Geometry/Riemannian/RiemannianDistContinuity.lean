@@ -106,7 +106,7 @@ non-complete manifold. It is, however, continuous on the locus where the
 extended distance is finite, which is what the corollary records: on
 `{q | riemannianEDist I p q ≠ ∞}` the map `q ↦ (riemannianEDist I p q).toReal`
 is continuous. -/
-theorem continuousOn_riemannianEDist_toReal
+theorem continuousOn_riemannianEDist_toReal_on_finite
     (g : SmoothRiemannianMetric I M) (p : M) :
     letI : RiemannianBundle (fun (x : M) ↦ TangentSpace I x) :=
       ⟨g.toRiemannianMetric⟩

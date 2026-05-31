@@ -236,7 +236,7 @@ theorem radial_image_is_open (g : SmoothRiemannianMetric I M)
         Set ↥{q : M | riemannianEDist I p q ≤ ENNReal.ofReal R}) := by
   -- Genuinely hard: relative openness via Gauss-lemma local minimisation
   -- (normal-chart radial unique-minimiser concatenation); needs the
-  -- equality case of `normalBall_radial_unique_minimizer`, still pending.
+  -- equality case of `normalBall_radial_length_le_riemannianEDist`, still pending.
   sorry
 
 /-! ## Closedness of the radial-minimiser set relative to the closed ball -/

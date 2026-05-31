@@ -36,7 +36,7 @@ works.  Otherwise pick `δ ∈ (0, expRadiusGp g p)` and form the **sphere**
 continuous image of the compact `g`-unit sphere, hence compact.  Choose
 `x₀ := expMapIntrinsic g hEnorm p (δ • u)` minimising `q ↦ riemannianEDist · q`
 over `S_δ`.  The triangle inequality plus the Gauss-lemma radial local minimality
-`normalBall_radial_unique_minimizer` give `riemannianEDist x₀ q = r - δ` (the
+`normalBall_radial_length_le_riemannianEDist` give `riemannianEDist x₀ q = r - δ` (the
 "ray jumps onto the sphere" step).  Tracking the unit-speed radial geodesic
 `γ(t) := expMapIntrinsic g hEnorm p (t • u)` (defined for all `t` by
 completeness) and the propagation set
@@ -775,7 +775,7 @@ vector `u` and `0 ≤ δ` with `δ` below the agreement and Gauss radii, the Rie
 distance from `p` to the radial point `expMapIntrinsic g hEnorm p (δ • u)` is
 exactly `δ` (as an `ℝ≥0∞`, `ENNReal.ofReal δ`).  The `≤` direction is the length
 bound `intrinsicGeodesic_riemannianEDist_le`; the `≥` direction is the Gauss-lemma
-radial lower bound `normalBall_radial_unique_minimizer` transported across the
+radial lower bound `normalBall_radial_length_le_riemannianEDist` transported across the
 bridge `exists_expMapIntrinsic_eq_expMap_radius`. -/
 theorem radial_riemannianEDist_eq_of_small
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -823,7 +823,7 @@ theorem radial_riemannianEDist_eq_of_small
   have hlower :
       ENNReal.ofReal (Real.sqrt (g.inner p vE vE)) ≤
         riemannianEDist I p (expMap (I := I) g p (show TangentSpace I p from vE)) :=
-    normalBall_radial_unique_minimizer (I := I) g p hEnorm hvδ_dom hvδ_ball hvE_lt_gp
+    normalBall_radial_length_le_riemannianEDist (I := I) g p hEnorm hvδ_dom hvδ_ball hvE_lt_gp
   -- Upper bound `riemannianEDist p (expMapIntrinsic p vδ) ≤ ofReal δ` (length bound).
   have hupper :
       riemannianEDist I (intrinsicGeodesic (I := I) g hEnorm p vδ 0)
@@ -2353,7 +2353,7 @@ DECOMPOSITION (ray/sphere argument):
       `γ(t) := expMapIntrinsic g hEnorm p (t • u)`.  The `≥` direction is the
       triangle inequality `riemannianEDist p q ≤ riemannianEDist p (γ δ) +
       riemannianEDist (γ δ) q` together with `riemannianEDist p (γ δ) = δ` (the
-      radial local minimality `normalBall_radial_unique_minimizer` plus the
+      radial local minimality `normalBall_radial_length_le_riemannianEDist` plus the
       reverse path bound).  The `≤` direction is that every path `p → q` crosses
       the sphere `S_δ`, so the minimiser realises `r - δ` (intermediate-value /
       path-crosses-sphere on `riemannianEDist`).
