@@ -174,10 +174,12 @@ def formLaplacianScalar [I.Boundaryless] [T2Space M]
     formLaplacianScalar (I := I) g hf y =
       codifferentialOfVectorField (I := I) g (grad_g (I := I) g hf) y := rfl
 
-/-- The form Laplacian of a 0-form equals the negative of the Laplace–Beltrami
-operator: `Δ_H f = -Δ_g f`. This is the standard relation between the Hodge
-Laplacian and the geometer's `div ∘ grad` Laplacian, and follows directly from
-the definitions of both operators in this file and `Geometry/Laplacian.lean`. -/
+/-- At each point `y`, the form Laplacian of a smooth `0`-form `f` equals the
+negative of its Laplace–Beltrami operator: `Δ_H f y = -Δ_g f y`. With the
+project's geometer sign convention `Δ_g = div_g ∘ grad_g`, both sides unfold to
+`-div_g (grad_g f) y`, so the identity holds by definition (`formLaplacianScalar`
+is defined here as `-div_g ∘ grad_g`, and `Δ_g` in `Geometry/Laplacian.lean` as
+`div_g ∘ grad_g`). -/
 theorem formLaplacianScalar_eq_neg_Δ_g [I.Boundaryless] [T2Space M]
     (g : SmoothRiemannianMetric I M) {f : M → ℝ}
     (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (y : M) :

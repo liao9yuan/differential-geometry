@@ -1765,7 +1765,7 @@ $$
   g_x\bigl(R(v, w) Z, W\bigr) = g_x\bigl(R(Z, W) v, w\bigr).
 $$
 The slot order matches the curvature term produced by the second-variation derivation
-(`curvature_identity_on_variation_fixed_chart`), where the curvature operator acts as
+(`chartCovDerivAlong_commutator_eq_riemannOp_on_variation`), where the curvature operator acts as
 `R(v, w) u` via `riemannOp (LeviCivita g) x v w u`. -/
 theorem riemannOp_inner_pair_symm
     (g : SmoothRiemannianMetric I M) (x : M)

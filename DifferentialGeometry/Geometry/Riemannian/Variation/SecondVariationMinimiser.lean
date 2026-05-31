@@ -217,7 +217,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 zero tangent vector.  It agrees with the chart-fixed `expMap g p` on a
 neighbourhood of `0` (`exists_expMapIntrinsic_eq_expMap_radius`), and the latter
 is `ContMDiffAt 𝓘(ℝ, E) I 1` at `0`
-(`expMap_contMDiffAt_zero_truly_unconditional`). -/
+(`expMap_contMDiffAt_zero`). -/
 theorem mdifferentiableAt_expMapIntrinsic_zero
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
@@ -256,24 +256,27 @@ theorem mdifferentiableAt_expMapIntrinsic_zero
     intro v hv
     exact hagree hv
   refine (MDifferentiableAt.congr_of_eventuallyEq ?_ hEvEq)
-  exact (expMap_contMDiffAt_zero_truly_unconditional (I := I) g p).mdifferentiableAt (by norm_num)
+  exact (expMap_contMDiffAt_zero (I := I) g p).mdifferentiableAt (by norm_num)
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 /-- **Exponential-map construction of a smooth endpoint-fixed variation.**
 Given a smooth curve `γ`, a bundle-smooth field of launch directions
 `t ↦ (γ t, V t)` (a smooth section of `TM` along `γ`) vanishing at the endpoints
-`0` and `L`, there is a smooth two-parameter variation `f` whose central curve is
-`γ`, whose `s`-velocity at `s = 0` realises `V` on `[0, L]`, and which keeps both
-endpoints fixed.
+`0` and `L`, there exists a two-parameter variation `f` that is jointly smooth
+(`IsSmoothVariation`), whose central curve is `γ` (`f 0 t = γ t`), whose
+`s`-velocity at `s = 0` realises `V` on `[0, L]`, and which keeps both endpoints
+fixed (`f s 0 = γ 0`, `f s L = γ L`).
 
-The construction follows the intrinsic geodesic exponential map of a cut-off of
-the field, `f s t := exp_{γ t}(η s · χ t · V t)`, where `χ` is a compactly
-supported cut-off equal to `1` on `[0, L]` (giving the carrier a compact `t`-range
-over which the per-point joint smoothness of the exponential map can be uniformised
-by the tube lemma) and `η` is a bounded smooth reparametrisation with `η 0 = 0`,
-`η'(0) = 1` (keeping the launch parameter inside the smallness window everywhere). -/
-theorem exp_variation_construction
+The construction is the intrinsic geodesic exponential map of a cut-off of the
+field, `f s t := exp_{γ t}(η s • χ t • V t)`, where `χ` is a compactly supported
+cut-off equal to `1` on `[0, L]` (giving the carrier a compact `t`-range over which
+the per-point joint smoothness of the exponential map can be uniformised by the
+tube lemma) and `η` is a bounded smooth reparametrisation with `η 0 = 0`,
+`η'(0) = 1` (keeping the launch parameter inside the smallness window everywhere).
+The hypotheses `hV0`, `hVL` (`V` vanishing at the endpoints) are what make the
+endpoints fixed. -/
+theorem exists_variation_realising_field_via_exp
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -463,16 +466,22 @@ theorem exp_variation_construction
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- A length-minimising unit-speed geodesic `γ : [0, L] → M` realises a local
-minimum of arc length on endpoint-fixed smooth variations; consequently the index
-form is non-negative on every endpoint-fixed smooth variation field `V`.
+/-- For a unit-speed geodesic `γ` on `[0, L]` that minimises arc length among `C¹`
+endpoint-fixed competitors, the index form is non-negative on every smooth
+perpendicular endpoint-vanishing variation field `V`: `0 ≤ indexForm g γ 0 L V V`.
 
-`γ` is required to be smooth (a smooth minimising geodesic — produced from the
-intrinsic geodesic completeness via `isGeodesic_contMDiff`) and the variation
-field `V` to be a smooth section of `TM` along `γ` (bundle smoothness `hVbundle`):
-these are the regularity data needed to run the exponential variation
-construction, and they are genuine regularity hypotheses (not the conclusion). -/
-theorem minimiser_implies_second_variation_nonneg
+The hypotheses are the genuine geometric data of the second-variation argument:
+`hγ` makes `γ` a geodesic on `[0, L]`, `hUnit` makes it unit-speed, `hmin` is the
+length-minimising property (arc length of `γ` is `≤` that of any `C¹` curve with
+the same endpoints), `hVperp` makes `V` perpendicular to `γ'`, and `hV0`, `hVL`
+make `V` vanish at the endpoints. `γ` is assumed smooth (`hγ_smooth` — for a
+minimising geodesic this comes from `isGeodesic_contMDiff`) and `V` a bundle-smooth
+section of `TM` along `γ` (`hVbundle`); these are the regularity data needed to
+build the exponential variation realising `V`. The minimising property makes the
+arc-length functional of that variation have a local minimum at `s = 0`; the first
+variation vanishes (geodesic) and the second-derivative test gives the
+non-negativity of the index form. -/
+theorem indexForm_nonneg_of_minimising_geodesic
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -497,12 +506,12 @@ theorem minimiser_implies_second_variation_nonneg
   classical
   -- (1) The exponential variation realising `V` on `[0, L]`, with fixed endpoints.
   obtain ⟨f, hf_smooth, hf0, hf_vel, hf_fix0, hf_fixL⟩ :=
-    exp_variation_construction (I := I) g hEnorm γ V L hγ_smooth hVbundle hV0 hVL
+    exists_variation_realising_field_via_exp (I := I) g hEnorm γ V L hγ_smooth hVbundle hV0 hVL
   -- The arc-length functional of the variation.
   set L_arc : ℝ → ℝ := fun s : ℝ => arcLength (I := I) g (fun t : ℝ => f s t) 0 L with hL_arc
   -- (2) The full longitudinal velocity field of `f`, a section along `γ`.  On `[0, L]`
   -- it agrees with `V` (the variation realises `V` there), and as a field it is exactly
-  -- the velocity, so the `second_variation_derivation` hypothesis `hVeq` is `rfl`.
+  -- the velocity, so the `second_variation_of_arcLength_eq_indexForm` hypothesis `hVeq` is `rfl`.
   set Vfield : ℝ → E :=
     fun t : ℝ => (mfderiv (𝓘(ℝ, ℝ)) I (fun s : ℝ => f s t) 0 (1 : ℝ) : E) with hVfield
   have hVfield_Icc : ∀ t ∈ Set.Icc (0 : ℝ) L, Vfield t = V t := fun t ht => hf_vel t ht
@@ -537,7 +546,7 @@ theorem minimiser_implies_second_variation_nonneg
     rw [hVfield_Icc t ht]; exact hVperp t ht
   have hsecond : HasDerivAt (fun s : ℝ => deriv L_arc s)
       (indexForm (I := I) g γ 0 L Vfield Vfield) 0 :=
-    second_variation_derivation (I := I) g γ f L Vfield hf_smooth hL hγ hf0
+    second_variation_of_arcLength_eq_indexForm (I := I) g γ f L Vfield hf_smooth hL hγ hf0
       (fun t => rfl) hUnit hf_fix0 hf_fixL hperp_field
   -- (6) Second-derivative test: `0 ≤ indexForm g γ 0 L Vfield Vfield`.
   have hnonneg_field : 0 ≤ indexForm (I := I) g γ 0 L Vfield Vfield :=

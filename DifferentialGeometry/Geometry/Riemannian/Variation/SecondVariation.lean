@@ -1342,23 +1342,25 @@ private lemma commute_ds_dt_intrinsic
 
 omit [T2Space M] [SigmaCompactSpace M] in
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong in
-/-- **Intrinsic mixed-covariant commutation at the central curve, `C²`-level
-hypotheses.** For a two-parameter map `f : ℝ → ℝ → M` whose chart-`(f 0 t)`-pullback
-is `ContDiffAt ℝ 2` at `(0, t)` and whose longitudinal / transverse slices are
-`ContMDiffAt 𝓘(ℝ, ℝ) I 2` at the relevant points, the transverse covariant
+/-- **Intrinsic mixed-covariant commutation at the central curve (`C²`
+hypotheses).** For a two-parameter map `f : ℝ → ℝ → M`, the transverse covariant
 derivative of the longitudinal velocity at `s = 0` equals the longitudinal
-covariant derivative of the transverse (variation-field) velocity, both viewed as
-intrinsic `covDerivAlong` vectors at the common foot `f 0 t`:
-`∇_s ∂_t f|_{s = 0} = ∇_t ∂_s f|_{s = 0}`.
+covariant derivative of the transverse (variation-field) velocity, both as intrinsic
+`covDerivAlong` vectors at the common foot `f 0 t`:
+`∇_s ∂_t f|_{s = 0} = ∇_t ∂_s f|_{s = 0}`. The regularity is assumed only at the
+`C²`-level: the chart-`(f 0 t)`-pullback of `f` is `ContDiffAt ℝ 2` at `(0, t)`
+(`hF2`), the longitudinal and transverse slices are eventually
+`ContMDiffAt 𝓘(ℝ, ℝ) I 2` near the relevant points (`hslice_u`, `hslice_v`), and
+the slice basepoints are continuous (`htransverse_cont`, `hcentral_cont`).
 
-This is the `C²`-relaxed sibling of `commute_ds_dt_intrinsic`: the only changes are
-(i) the chain-rule bridge specialises to the `MDifferentiableAt`-level
-`chartCoord_mfderiv_along_curve_eq_fderiv_of_mdifferentiableAt`, and (ii) the
-fixed-chart commutation is supplied directly by `commute_ds_dt_fixed_chart_C2`
-(rather than through the `IsSmoothVariation` wrapper). It is the form consumed by
-the radial geodesic variation behind Gauss's lemma, whose variation is jointly
-`C²` but not known to be jointly `C^∞`. -/
-theorem commute_ds_dt_intrinsic_C2
+This is the `C²`-relaxed sibling of `commute_ds_dt_intrinsic`: the chain-rule bridge
+specialises to the `MDifferentiableAt`-level
+`chartCoord_mfderiv_along_curve_eq_fderiv_of_mdifferentiableAt`, and the fixed-chart
+commutation is supplied directly by `commute_ds_dt_fixed_chart_C2` rather than
+through the `IsSmoothVariation` wrapper. It is the form consumed by the radial
+geodesic variation behind Gauss's lemma, whose variation is jointly `C²` but not
+known to be jointly `C^∞`. -/
+theorem covDerivAlong_commute_transverse_longitudinal_of_variation
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M) (t : ℝ)
     (hF2 : ContDiffAt ℝ 2 (fun p : ℝ × ℝ => extChartAt I (f 0 t) (f p.1 p.2)) (0, t))
     (hslice_u : ∀ᶠ s in 𝓝 (0 : ℝ), ContMDiffAt 𝓘(ℝ, ℝ) I 2 (fun u : ℝ => f s u) t)
@@ -1612,13 +1614,16 @@ private lemma g_inner_along_curve_contMDiff
 
 /-! ## First variation of arc length -/
 
-/-- The first variation of arc length: for a smooth endpoint-fixed
-variation `f` of a unit-speed curve `γ := f 0`, the derivative of
-`s ↦ arcLength g (f s ·) 0 L` at `s = 0` equals minus the integral
-of `⟨V, ∇_t γ'⟩_g`, where `V := ∂_s f|_{s = 0}` is the variation
-field. (The boundary contribution vanishes for endpoint-fixed
-variations and is omitted.) -/
-theorem first_variation_formula
+/-- **First variation of arc length (fixed endpoints).** For a smooth
+endpoint-fixed variation `f` of a unit-speed curve `γ := f 0` on `[0, L]`, the
+derivative of `s ↦ arcLength g (f s ·) 0 L` at `s = 0` equals minus the integral
+of `⟨V, ∇_t γ'⟩_g`, where `V t := ∂_s f|_{s = 0}` is the variation field and
+`γ' t := ∂_t (f 0)` the central velocity. The hypotheses are that `f` is a smooth
+variation (`hf`), the endpoints `f s 0` and `f s L` are independent of `s`
+(`hfix0`, `hfixL`), and the central slice is unit-speed on `[0, L]` (`hUnit`). The
+boundary contribution `⟨V, γ'⟩|_0^L` vanishes because `V 0 = V L = 0` for
+endpoint-fixed variations, so it is absent from the conclusion. -/
+theorem first_variation_of_arcLength_fixed_endpoints
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M) (L : ℝ)
     (hf : IsSmoothVariation (I := I) f) (hL : 0 < L)
     (hfix0 : ∀ s : ℝ, f s 0 = f 0 0) (hfixL : ∀ s : ℝ, f s L = f 0 L)
@@ -1847,15 +1852,16 @@ theorem first_variation_formula
   -- The target value is `-∫ B`; rewrite `B` to the target integrand.
   exact hS2A
 
-/-- **Free-endpoint first variation of arc length.** Same setup as
-`first_variation_formula` but without the endpoint-fixed hypotheses: for a smooth
-unit-speed variation `f` of `γ := f 0`, the derivative of
-`s ↦ arcLength g (f s ·) 0 L` at `s = 0` equals the boundary term
-`⟨V L, γ' L⟩ - ⟨V 0, γ' 0⟩` minus the integral of `⟨V, ∇_t γ'⟩_g`, where
-`V t := ∂_s f|_{s = 0}` is the variation field and `γ' t := ∂_t (f 0)` is the
-central velocity. (When the endpoints are fixed, `V 0 = V L = 0` and the boundary
-term vanishes, recovering `first_variation_formula`.) -/
-theorem first_variation_formula_free_endpoint
+/-- **First variation of arc length (free endpoints).** Same setup as
+`first_variation_of_arcLength_fixed_endpoints` but without the endpoint-fixed hypotheses: for a smooth
+variation `f` of a unit-speed curve `γ := f 0` on `[0, L]` (hypotheses `hf` and the
+unit-speed condition `hUnit`), the derivative of `s ↦ arcLength g (f s ·) 0 L` at
+`s = 0` equals the boundary term `⟨V L, γ' L⟩ - ⟨V 0, γ' 0⟩` minus the integral of
+`⟨V, ∇_t γ'⟩_g`, where `V t := ∂_s f|_{s = 0}` is the variation field and
+`γ' t := ∂_t (f 0)` the central velocity. When the endpoints are fixed,
+`V 0 = V L = 0` and the boundary term vanishes, recovering
+`first_variation_of_arcLength_fixed_endpoints`. -/
+theorem first_variation_of_arcLength_free_endpoints
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M) (L : ℝ)
     (hf : IsSmoothVariation (I := I) f) (hL : 0 < L)
     (hUnit : ∀ t ∈ Set.Icc (0 : ℝ) L,
@@ -2096,7 +2102,7 @@ theorem first_variation_vanishes_for_geodesic
   -- The central curve `f 0 ·` coincides with `γ`.
   have hfγ : (fun v : ℝ => f 0 v) = γ := by funext v; exact hfc v
   -- Apply the first variation formula; its value is `-∫ ⟨V, ∇_t γ'⟩`.
-  have hfv := first_variation_formula (I := I) g f L hf hL
+  have hfv := first_variation_of_arcLength_fixed_endpoints (I := I) g f L hf hL
     (fun s => by rw [hfix0 s, ← hfc 0]) (fun s => by rw [hfixL s, ← hfc L])
     (by
       intro t ht
@@ -2753,7 +2759,7 @@ private theorem commute_ds_dt_curvature_innerS
   have hY_C2 : ContDiffAt ℝ 2 (fun p : ℝ × ℝ => Y p.1 p.2) (0, t) :=
     chartCoord_transverseVelocity_contDiffAt (I := I) f hf t
   -- The fixed-chart curvature identity for `Y` at `(0, t)`.
-  have hfixed := curvature_identity_on_variation_fixed_chart (I := I) g f hf Y 0 t hY_C2
+  have hfixed := chartCovDerivAlong_commutator_eq_riemannOp_on_variation (I := I) g f hf Y 0 t hY_C2
   -- (A) Open neighbourhood facts: `f s t ∈ source β` near `s = 0`, `f 0 v ∈ source β` near `v = t`.
   have hsrcβ : f 0 t ∈ (chartAt H β).source := by rw [hβ]; exact mem_chart_source H (f 0 t)
   have hopenL : IsOpen {s : ℝ | f s t ∈ (chartAt H β).source} :=
@@ -2971,7 +2977,7 @@ private theorem commute_ds_dt_curvature
   have hY_C2 : ContDiffAt ℝ 2 (fun p : ℝ × ℝ => Y p.1 p.2) (0, t) :=
     chartCoord_longitudinalVelocity_contDiffAt (I := I) f hf t
   -- The fixed-chart curvature identity for `Y` at `(0, t)`.
-  have hfixed := curvature_identity_on_variation_fixed_chart (I := I) g f hf Y 0 t hY_C2
+  have hfixed := chartCovDerivAlong_commutator_eq_riemannOp_on_variation (I := I) g f hf Y 0 t hY_C2
   -- (A) Open neighbourhood facts: `f s t ∈ source β` near `s = 0`, `f 0 v ∈ source β` near `v = t`.
   have hsrcβ : f 0 t ∈ (chartAt H β).source := by rw [hβ]; exact mem_chart_source H (f 0 t)
   have hopenL : IsOpen {s : ℝ | f s t ∈ (chartAt H β).source} :=
@@ -3716,18 +3722,18 @@ private theorem S2_diff_under_interval_integral_general
       exact (hslice_deriv s₀ t).sqrt (hΦne s₀ h0 t htIcc))
   exact key.2
 
-/-- **First variation of arc length at a general parameter value `s₀`.** For a
-smooth two-parameter variation `f` whose slice `t ↦ f s₀ t` is regular (positive
-speed) on `[0, L]`, the derivative of `s' ↦ arcLength g (f s' ·) 0 L` at `s = s₀`
-is the interval integral of `g(∇_s ∂_t f, ∂_t f) / √(speedSq g f s₀ t)`, the
-transverse covariant derivative of the longitudinal velocity paired against the
-longitudinal velocity, divided by the slice speed. Unlike
-`first_variation_formula`, this holds at *any* regular `s₀`, where the slice is
-neither unit-speed nor a geodesic; it is obtained by differentiating
-`∫₀^L √(speedSq)` under the integral (`S2_diff_under_interval_integral_general`)
-and identifying the pointwise `s`-derivative of `speedSq` through the
-parameter-shifted metric-compatibility identity. -/
-theorem first_variation_general_s
+/-- **First variation of arc length at a regular parameter `s₀`.** For a smooth
+two-parameter variation `f` (hypothesis `hf`) whose slice `t ↦ f s₀ t` has positive
+speed on `[0, L]` (hypothesis `hpos`), the derivative of
+`s' ↦ arcLength g (f s' ·) 0 L` at `s = s₀` is the interval integral of
+`g(∇_s ∂_t f, ∂_t f) / √(speedSq g f s₀ t)` — the transverse covariant derivative
+of the longitudinal velocity paired against the longitudinal velocity, divided by
+the slice speed. Unlike `first_variation_of_arcLength_fixed_endpoints`, this holds at *any* regular
+`s₀`, where the slice is neither unit-speed nor a geodesic. The proof differentiates
+`∫₀^L √(speedSq)` under the integral (`S2_diff_under_interval_integral_general`) and
+identifies the pointwise `s`-derivative of `speedSq` through the parameter-shifted
+metric-compatibility identity. -/
+theorem first_variation_of_arcLength_at_regular_parameter
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M) (L s₀ : ℝ)
     (hf : IsSmoothVariation (I := I) f) (hL : 0 < L)
     (hpos : ∀ t ∈ Set.Icc (0 : ℝ) L, 0 < speedSq (I := I) g f s₀ t) :
@@ -3876,11 +3882,16 @@ lemma continuousOn_g_inner_along_curve
 
 set_option maxHeartbeats 4000000 in
 set_option synthInstance.maxHeartbeats 4000000 in
-/-- The **second variation of arc length** for a unit-speed geodesic
-`γ` and an endpoint-fixed smooth variation `f` of `γ` with variation
-field `V := ∂_s f|_{s = 0}`:
-`d²/ds²|_{s = 0} arcLength g (f s ·) 0 L = indexForm g γ 0 L V V`. -/
-theorem second_variation_derivation
+/-- **Second variation of arc length.** For a unit-speed geodesic `γ` on `[0, L]`
+and an endpoint-fixed smooth variation `f` of `γ` whose variation field
+`V := ∂_s f|_{s = 0}` is everywhere perpendicular to `γ'` on `[0, L]`, the second
+`s`-derivative of arc length at `s = 0` equals the index form of `V`:
+`d²/ds²|_{s = 0} arcLength g (f s ·) 0 L = indexForm g γ 0 L V V`.
+The hypotheses are supplied explicitly: `γ` is a geodesic on `[0, L]` (`hγ`), the
+central slice `f 0` coincides with `γ` (`hfc`), the slice is unit-speed on `[0, L]`
+(`hUnit`), the endpoints are fixed (`hfix0`, `hfixL`), and `V` is the variation
+field (`hVeq`) and is `g`-orthogonal to the velocity `γ'` on `[0, L]` (`hVperp`). -/
+theorem second_variation_of_arcLength_eq_indexForm
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M) (f : ℝ → ℝ → M) (L : ℝ)
     (V : ℝ → E)
     (hf : IsSmoothVariation (I := I) f) (hL : 0 < L)
@@ -3916,7 +3927,7 @@ theorem second_variation_derivation
     rw [hu]; exact one_pos
   obtain ⟨δ, hδpos, c0, hc0, hposnear⟩ :=
     speed_positivity_near (I := I) (M := M) g f L 0 hf hpos0
-  -- (B) On `Ioo (-δ) δ`, the slice is regular, so `first_variation_general_s` gives the
+  -- (B) On `Ioo (-δ) δ`, the slice is regular, so `first_variation_of_arcLength_at_regular_parameter` gives the
   -- inner `deriv` as the explicit integral `g₁ s`.
   -- The longitudinal velocity section and the transverse covariant derivative.
   set velT : ℝ → ℝ → E := fun s t : ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f s u) t (1 : ℝ)
@@ -3941,7 +3952,7 @@ theorem second_variation_derivation
           exact ⟨by linarith, by linarith⟩) t ht
       have hsqrt_pos : 0 < Real.sqrt (speedSq (I := I) g f s t) := by linarith
       exact (Real.sqrt_pos.mp hsqrt_pos)
-    have hfv := first_variation_general_s (I := I) g f L s hf hL hpos_s
+    have hfv := first_variation_of_arcLength_at_regular_parameter (I := I) g f L s hf hL hpos_s
     rw [hfv.deriv]
   -- (C) `HasDerivAt g₁ (indexForm …) 0`, then transport through `hderiv_eq` on the
   -- neighbourhood.

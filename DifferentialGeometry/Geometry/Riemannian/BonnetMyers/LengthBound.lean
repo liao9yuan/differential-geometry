@@ -299,7 +299,7 @@ theorem sum_index_form_integrand_eval
     -- the chart-`(γ t)`-coordinate representation `chartRepAt γ (e i) t` is
     -- differentiable at `t`.  This is the same "varies differentiably along γ"
     -- regularity that the intrinsic Leibniz rule `covDerivAlong_smulFun`
-    -- requires (cf. `perp_to_velocity_preserved`'s `hVdiff`); it is the frame
+    -- requires (cf. `perp_to_velocity_preserved_of_parallel`'s `hVdiff`); it is the frame
     -- regularity hypothesis `_heDiff`, now stated in chart-representation form.
     have h_chartrep_diff :
         DifferentiableAt ℝ (chartRepAt (I := I) γ (e i).toFun t) t :=
@@ -889,7 +889,7 @@ minimisation hypotheses are supplied as assumptions.
 The proof is by contradiction. If `π/√K < L`, then `(π/L)² < K`, so
 `sum_index_form_bound_by_curvature_hypothesis` produces a strictly
 negative sum of index forms. On the other hand
-`minimiser_implies_second_variation_nonneg` applied to each `V_i`
+`indexForm_nonneg_of_minimising_geodesic` applied to each `V_i`
 gives `0 ≤ indexForm g γ 0 L V_i V_i`, hence the sum is non-negative.
 This contradiction forces `L ≤ π / √K`. -/
 theorem bonnet_myers_length_le_of_ricci_bound
@@ -987,10 +987,10 @@ theorem bonnet_myers_length_le_of_ricci_bound
     sum_index_form_bound_by_curvature_hypothesis (I := I) g γ _hL _hγ _hgeo
       _hRic uPrime _huPrimeEq _hUnit e _heDiff _hParallel _hON _hPerp
       _hIntegrandSum _hRicIntegrable
-  -- Step 6: apply minimiser_implies_second_variation_nonneg pointwise and sum.
+  -- Step 6: apply indexForm_nonneg_of_minimising_geodesic pointwise and sum.
   -- The trial vector field V_i(t) := sin(π t / L) • (e i)(t) vanishes at the
   -- endpoints since sin(0) = sin(π) = 0, so the endpoint conditions for
-  -- `minimiser_implies_second_variation_nonneg` are satisfied for any `e i`.
+  -- `indexForm_nonneg_of_minimising_geodesic` are satisfied for any `e i`.
   have h_each_nonneg : ∀ i : Fin (Module.finrank ℝ E - 1),
       0 ≤ indexForm (I := I) g γ 0 L
         ((SectionAlongCurve.smulFun
@@ -1020,7 +1020,7 @@ theorem bonnet_myers_length_le_of_ricci_bound
             = Real.sin (Real.pi * t / L) • (g.inner (γ t)) ((e i).toFun t) from
           map_smul (g.inner (γ t)) _ _]
       rw [ContinuousLinearMap.smul_apply, smul_eq_mul, _hPerp t ht i, mul_zero]
-    refine minimiser_implies_second_variation_nonneg
+    refine indexForm_nonneg_of_minimising_geodesic
       (I := I) g hEnorm γ L
       (fun t => (SectionAlongCurve.smulFun
         (fun t => Real.sin (Real.pi * t / L)) (e i)).toFun t)

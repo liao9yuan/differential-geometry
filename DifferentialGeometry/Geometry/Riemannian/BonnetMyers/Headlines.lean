@@ -153,7 +153,7 @@ theorem bonnet_myers_pairwise_edist_le_of_ricci_bound
   refine ENNReal.ofReal_le_ofReal ?_
   -- Step 1: the distance-realising launch velocity `v` at `x`.
   obtain ⟨v, hv_exp, hv_len⟩ :=
-    DifferentialGeometry.Geometry.Riemannian.Exponential.expMapIntrinsic_surjective_dist
+    DifferentialGeometry.Geometry.Riemannian.Exponential.hopf_rinow_expMapIntrinsic_surjective_minimizing
       (I := I) g hEnorm x y
   -- `hv_len : √(g.inner x v v) = r`.
   rw [← hr_def] at hv_len
@@ -266,7 +266,7 @@ theorem bonnet_myers_pairwise_edist_le_of_ricci_bound
       RicciBoundedBelow (I := I) g ((Module.finrank ℝ E - 1 : ℝ) * K) := _hRic
   -- Arc-length minimisation property.
   -- Hopf-Rinow gives `riemannianEDist I (γ 0) (γ L) = ENNReal.ofReal L`.
-  -- Combined with `pathELength_eq_arcLength_C1` and the fundamental
+  -- Combined with `pathELength_eq_arcLength` and the fundamental
   -- inequality `riemannianEDist ≤ pathELength`, this yields
   -- `arcLength g γ 0 L ≤ arcLength g η 0 L` for every endpoint-matching
   -- competitor η.
@@ -279,7 +279,7 @@ theorem bonnet_myers_pairwise_edist_le_of_ricci_bound
             (I := I) g η 0 L := by
     -- The chain `arcLength γ = L = riemannianEDist (γ 0)(γ L) ≤
     -- pathELength η = arcLength η` is unfolded as a substantive
-    -- composition of `pathELength_eq_arcLength_C1` and
+    -- composition of `pathELength_eq_arcLength` and
     -- `riemannianEDist_le_pathELength`, using the unit-speed identity
     -- `hγ_unit` to evaluate `arcLength γ 0 L = L`.
     --
@@ -779,7 +779,7 @@ theorem isCompact_univ
   -- its type flow rather than re-annotating, so it matches the image-compactness
   -- lemma's closed ball verbatim.
   have hsurj :=
-    DifferentialGeometry.Geometry.Riemannian.HopfRinow.bm_c_expMap_surjective_on_closedBall
+    DifferentialGeometry.Geometry.Riemannian.HopfRinow.expMap_surjective_on_closedBall_of_ediam_le
       (I := I) g p hR_nn hdiam
   -- The image of the closed ball under `expMap` is compact.
   have himg :=

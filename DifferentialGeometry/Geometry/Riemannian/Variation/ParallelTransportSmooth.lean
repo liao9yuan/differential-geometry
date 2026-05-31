@@ -5,7 +5,7 @@ set_option linter.unusedSectionVars false
 /-!
 # `C^∞`-in-time regularity of parallel transport along a smooth curve
 
-The global parallel-transport section `V` of `exists_global_parallel_transport_on_Icc`
+The global parallel-transport section `V` of `exists_parallel_transport_on_Icc`
 along a smooth curve `γ : ℝ → M` is built from chart-local linear-ODE solutions and
 comes packaged with only `C¹` time-regularity (chart-rep differentiability) plus the
 intrinsic parallelism `covDerivAlong g γ V = 0`. This file upgrades the regularity to
@@ -158,7 +158,7 @@ section `V : ∀ t, T_{γ t} M` along `γ` with `V 0 = v₀`, intrinsic parallel
 `covDerivAlong g γ V = 0` on `Icc 0 L`, and **bundle-`C^∞`** total-space map
 `t ↦ ⟨γ t, V t⟩` on `Icc 0 L`.
 
-The section is the one produced by `exists_global_parallel_transport_on_Icc` (which
+The section is the one produced by `exists_parallel_transport_on_Icc` (which
 supplies the first three clauses); the new content is the bundle smoothness, obtained by
 the ODE bootstrap described in the module docstring. -/
 theorem parallelTransport_section_contMDiffOn [I.Boundaryless]
@@ -175,7 +175,7 @@ theorem parallelTransport_section_contMDiffOn [I.Boundaryless]
   haveI : CompleteSpace E := FiniteDimensional.complete ℝ E
   -- The global parallel-transport section, with its first three clauses.
   obtain ⟨V, hV0, hVdiff, hVpar⟩ :=
-    exists_global_parallel_transport_on_Icc (I := I) g γ hγ hL v₀
+    exists_parallel_transport_on_Icc (I := I) g γ hγ hL v₀
   refine ⟨V, hV0, hVdiff, hVpar, ?_⟩
   -- It remains to prove bundle-`C^∞` of `t ↦ ⟨γ t, V t⟩` on `Icc 0 L`.
   intro t₀ ht₀

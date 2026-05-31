@@ -57,7 +57,7 @@ initial velocity `v` because:
 * `expMapIntrinsic_continuous_of_jointContinuity` — the headline-from-joint
   reduction: given the per-ball joint continuity of the chained flow, the
   intrinsic exponential map is continuous.  This mirrors the chart-fixed
-  `bm_c_expMap_continuity_from_jointFlow` but for the genuine complete geodesic.
+  `expMap_continuous` but for the genuine complete geodesic.
 
 ## Residual (single isolated analytic input)
 
@@ -2281,7 +2281,7 @@ This is the structural reduction: `expMapIntrinsic g hEnorm p v =
 intrinsicGeodesic g hEnorm p v 1` definitionally, and continuity at each `v₀`
 follows from the joint continuity on the neighbourhood `ball v₀ ρ ×ˢ [0, 1]`
 precomposed with the continuous slice map `v ↦ (v, 1)`.  It mirrors the
-chart-fixed `bm_c_expMap_continuity_from_jointFlow` but consumes the *intrinsic*
+chart-fixed `expMap_continuous` but consumes the *intrinsic*
 joint-continuity producer.  Fully unconditional (no `sorry`); the only analytic
 content is delegated to the hypothesis `hjoint`. -/
 theorem expMapIntrinsic_continuous_of_jointContinuity
@@ -2334,14 +2334,18 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 /-- **Continuity of the intrinsic exponential map.** On a complete Riemannian
 manifold the intrinsic exponential map `v ↦ expMapIntrinsic g hEnorm p v` is
-continuous.
+continuous in the tangent vector `v`.
 
-The compactness / diameter endpoint (`bonnet_myers_compactSpace_of_ricci_bound`) consumes this as
-"`M = expMapIntrinsic g p '' closedBall` is a continuous image of a compact
-set".
+The hypothesis `hEnorm` is the supplied compatibility identity stating that the
+tangent bundle's extended norm `‖w‖ₑ` equals `√(g.inner x w w)`, i.e. the bundle
+norm is the Riemannian norm of `g`.
 
-The proof is the reduction `expMapIntrinsic_continuous_of_jointContinuity` fed by
-the joint-continuity producer `intrinsicGeodesic_jointContinuity`. -/
+The compactness / diameter endpoint `bonnet_myers_compactSpace_of_ricci_bound`
+consumes this statement as "`M` is the continuous image of a compact ball under
+the exponential map".
+
+The proof composes the reduction `expMapIntrinsic_continuous_of_jointContinuity`
+with the joint-continuity producer `intrinsicGeodesic_jointContinuity`. -/
 theorem expMapIntrinsic_continuous
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [T2Space (TangentBundle I M)]

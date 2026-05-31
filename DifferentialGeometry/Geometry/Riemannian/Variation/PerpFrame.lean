@@ -13,11 +13,11 @@ file isolates the construction and supporting bridges for a parallel
 orthonormal frame `e : Fin (finrank E - 1) → SectionAlongCurve I M γ` of the
 `g`-orthogonal complement of the velocity `t ↦ dγ_t(1)`:
 
-* `exists_parallel_orthonormal_perp_frame` — existence of the frame: each
+* `exists_parallel_orthonormal_perp_frame_along_geodesic` — existence of the frame: each
   `e i` is differentiable, parallel along `γ` (moving-foot
   `chartCovDerivAlong g (γ t) γ (e i) t = 0`), the frame is `g`-orthonormal
   pointwise, and each `e i` is `g`-orthogonal to the velocity.
-* `perp_to_velocity_preserved` — a parallel section that is `g`-orthogonal to
+* `perp_to_velocity_preserved_of_parallel` — a parallel section that is `g`-orthogonal to
   the velocity at `t = 0` stays `g`-orthogonal to the velocity for all `t`.
 * `chartCovDerivAlong_movingFoot_eq_zero_of_isParallelChart_centered` — the
   foot bridge from `IsParallelChart` to the moving-foot `chartCovDerivAlong`.
@@ -346,27 +346,29 @@ section PerpFrame
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
 set_option linter.unusedVariables false in
-/-- **Perpendicularity to the velocity is preserved.** If a section `V` along a
-`C^∞` geodesic `γ` is parallel (the intrinsic covariant derivative
-`covDerivAlong g γ V` vanishes on `Icc 0 L`) and `V 0` is `g`-orthogonal to the
-velocity `dγ_0(1)` at the basepoint, then `V t` is `g`-orthogonal to the
-velocity `dγ_t(1)` for every `t ∈ Icc 0 L`. The mechanism is constancy of the
-genuine Riemannian inner product `t ↦ g(γ t)(V t, dγ_t(1))`: at every point its
-derivative is computed in the chart pinned at the foot `γ t` by the
-covariant-derivative product rule
-(`chartGramAlongCurve_hasDerivAt_covariant`), and both correction terms vanish
-— the `V`-term because `V` is parallel (the foot-chart covariant derivative is
-the chart-coordinate of `covDerivAlong g γ V`, which is `0`), the velocity-term
-because `γ` is a geodesic (the velocity field is parallel,
-`covDerivAlong_velocity_eq_zero_iff_hasGeodesicEquationAt`).
+/-- A parallel section along a geodesic that starts `g`-orthogonal to the
+velocity stays `g`-orthogonal to the velocity. Concretely: if `V` is a section
+along a `C^∞` geodesic `γ` that is parallel on `Icc 0 L` (the intrinsic
+covariant derivative `covDerivAlong g γ V` vanishes there) and `V 0` is
+`g`-orthogonal to the velocity `dγ_0(1)` at the basepoint, then `V t` is
+`g`-orthogonal to the velocity `dγ_t(1)` for every `t ∈ Icc 0 L`.
 
-The regularity hypothesis `hVdiff` (the chart-coordinate representation
-`chartRepAt γ V t` is differentiable at the foot `t`) is the standard
-"`V` varies differentiably along `γ`" assumption shared with
-`covDerivAlong_add` / `covDerivAlong_smulFun`; without it the chart-Gram form
-is not differentiable and `covDerivAlong = 0` (which reads `deriv` of a possibly
+The mechanism is constancy of the Riemannian inner product
+`t ↦ g(γ t)(V t, dγ_t(1))`: at every point its derivative is computed in the
+chart pinned at the foot `γ t` by the covariant-derivative product rule
+(`chartGramAlongCurve_hasDerivAt_covariant`), and both correction terms vanish —
+the `V`-term because `V` is parallel (its foot-chart covariant derivative is the
+chart coordinate of `covDerivAlong g γ V`, which is `0`), the velocity-term
+because `γ` is a geodesic so its velocity field is parallel
+(`covDerivAlong_velocity_eq_zero_iff_hasGeodesicEquationAt`).
+
+The regularity hypothesis `hVdiff` — the chart-coordinate representation
+`chartRepAt γ V t` is differentiable at the foot `t` — is the standard
+"`V` varies differentiably along `γ`" assumption shared with `covDerivAlong_add`
+/ `covDerivAlong_smulFun`; without it the chart-Gram form is not differentiable
+and `covDerivAlong g γ V = 0` (which reads `deriv` of a possibly
 non-differentiable representation) carries no propagation content. -/
-theorem perp_to_velocity_preserved
+theorem perp_to_velocity_preserved_of_parallel
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) (hgeo : IsGeodesic (I := I) g γ)
     {L : ℝ} (hL : 0 < L) (V : ∀ t, TangentSpace I (γ t))
@@ -572,27 +574,28 @@ theorem perp_to_velocity_preserved
   rw [hft]
   exact hPerp0
 
-/-- **Existence of a parallel orthonormal perpendicular frame.** For a `C^∞`
-unit-speed geodesic `γ` on `Icc 0 L` (`L > 0`), there is a frame
-`e : Fin (finrank E - 1) → SectionAlongCurve I M γ` such that each `e i` is
-differentiable on `Icc 0 L`, parallel along `γ` (the *intrinsic* covariant
+/-- Along a `C^∞` unit-speed geodesic `γ` on `Icc 0 L` (`L > 0`) there exists a
+parallel `g`-orthonormal frame of the velocity's orthogonal complement. Concretely:
+there is a frame `e : Fin (finrank E - 1) → SectionAlongCurve I M γ` such that each
+`e i` is differentiable on `Icc 0 L`, is parallel along `γ` (the intrinsic covariant
 derivative `covDerivAlong g γ (e i) t` vanishes), the frame is pointwise
-`g`-orthonormal, and each frame vector is `g`-orthogonal to the velocity
-`dγ_t(1)`. This is the standalone form of the frame package consumed in the
-Bonnet–Myers second-variation contradiction.
+`g`-orthonormal (`g(γ t)(e i, e j) = if i = j then 1 else 0`), and each frame vector
+is `g`-orthogonal to the velocity `dγ_t(1)`. Unit speed enters only through the
+hypothesis `hUnit`; it is used to make the velocity functional nonzero so its kernel
+has dimension `finrank E - 1`.
 
-The construction is the genuine Gram–Schmidt-of-an-orthonormal-basis-of
-`(γ'(0))^⊥`-then-parallel-transport: seed an orthonormal basis of the
-`g`-orthogonal complement of `dγ_0(1)` at the basepoint `γ 0` and parallel
-transport each seed along `γ` (`parallelTransport`); the transported sections
-are parallel by construction (`parallelTransport_isParallel`, bridged to the
-intrinsic `covDerivAlong` via `covDerivAlong_eq_zero_iff` /
+The construction is Gram–Schmidt of an orthonormal basis of `(γ'(0))^⊥` followed by
+parallel transport: seed an orthonormal basis of the `g`-orthogonal complement of
+`dγ_0(1)` at the basepoint `γ 0` and parallel transport each seed along `γ`
+(`parallelTransport`). The transported sections are parallel by construction
+(`parallelTransport_isParallel`, bridged to the intrinsic `covDerivAlong` via
+`covDerivAlong_eq_zero_iff` /
 `chartCovDerivAlong_movingFoot_eq_zero_of_isParallelChart_centered`),
 `g`-orthonormality is preserved by parallel transport
-(`parallelTransport_preserves_inner_product`), and perpendicularity to the
-velocity is preserved because the velocity field of a geodesic is itself
-parallel (`perp_to_velocity_preserved`). -/
-theorem exists_parallel_orthonormal_perp_frame
+(`parallelTransport_preserves_inner_product`), and perpendicularity to the velocity
+is preserved because a geodesic's velocity field is itself parallel
+(`perp_to_velocity_preserved_of_parallel`). -/
+theorem exists_parallel_orthonormal_perp_frame_along_geodesic
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) (hgeo : IsGeodesic (I := I) g γ)
     {L : ℝ} (hL : 0 < L)
@@ -667,7 +670,7 @@ theorem exists_parallel_orthonormal_perp_frame
       (∀ t ∈ Set.Icc (0 : ℝ) L, DifferentiableAt ℝ (chartRepAt (I := I) γ V t) t) ∧
       (∀ t ∈ Set.Icc (0 : ℝ) L, covDerivAlong (I := I) g γ V t = 0) := by
     intro i
-    exact DifferentialGeometry.Geometry.Riemannian.Variation.exists_global_parallel_transport_on_Icc
+    exact DifferentialGeometry.Geometry.Riemannian.Variation.exists_parallel_transport_on_Icc
       (I := I) g γ hγ hL (seed i)
   choose Vfun hV0 hVdiff hVpar using htransport
   -- The frame: each transported section, wrapped as a `SectionAlongCurve`.
@@ -679,7 +682,7 @@ theorem exists_parallel_orthonormal_perp_frame
   · -- `g`-orthonormality: transport is a `g`-isometry, seed is `g`-orthonormal.
     intro t ht i j
     have hconst :=
-      DifferentialGeometry.Geometry.Riemannian.Variation.global_parallel_transport_preserves_inner
+      DifferentialGeometry.Geometry.Riemannian.Variation.parallel_transport_preserves_inner_product
         (I := I) g γ hγ hL.le (Vfun i) (Vfun j)
         (hVdiff i) (hVdiff j) (hVpar i) (hVpar j) t ht
     -- `g.inner (γ t) (Vi t) (Vj t) = g.inner (γ 0) (seed i) (seed j) = B (seed i)(seed j)`.
@@ -689,10 +692,10 @@ theorem exists_parallel_orthonormal_perp_frame
         from rfl]
     rw [hconst, hV0 i, hV0 j]
     exact hseed_ON i j
-  · -- `g`-perpendicularity to the velocity (from `perp_to_velocity_preserved`).
+  · -- `g`-perpendicularity to the velocity (from `perp_to_velocity_preserved_of_parallel`).
     intro t ht i
     have hperp :=
-      perp_to_velocity_preserved (I := I) g γ hγ hgeo hL (Vfun i)
+      perp_to_velocity_preserved_of_parallel (I := I) g γ hγ hgeo hL (Vfun i)
         (hVdiff i) (hVpar i)
         (by
           -- `g.inner (γ 0) (Vi 0) (dγ_0 1) = B (seed i) u₀ = 0`.
@@ -712,7 +715,7 @@ intrinsic `covDerivAlong g γ (e i) t = 0`), pointwise `g`-orthonormal, and
 `g`-orthogonal to the velocity `uPrime t`.
 
 This is the velocity-field-indexed restatement of
-`exists_parallel_orthonormal_perp_frame`: the only difference is that the
+`exists_parallel_orthonormal_perp_frame_along_geodesic`: the only difference is that the
 perpendicularity clause is phrased against the supplied `uPrime` rather than
 the bare `mfderiv γ t (1)`; the two coincide by `huPrimeEq`, so the result is a
 direct reduction to the underlying frame. -/
@@ -742,7 +745,7 @@ theorem parallel_on_frame_perp_to_geodesic
     intro t ht
     rw [huPrimeEq t ht]; exact hUnit t ht
   obtain ⟨e, hdiff, hpar, hON, hperp⟩ :=
-    exists_parallel_orthonormal_perp_frame (I := I) g γ hγ hgeo hL hUnit'
+    exists_parallel_orthonormal_perp_frame_along_geodesic (I := I) g γ hγ hgeo hL hUnit'
   refine ⟨e, hdiff, hpar, hON, ?_⟩
   -- Transfer the perpendicularity clause: the proven frame is `g`-orthogonal to
   -- `mfderiv γ t 1`; rewrite to `uPrime t` via `huPrimeEq`.
@@ -773,7 +776,7 @@ end PerpFrame
 
 /-! ## Globally-smooth parallel orthonormal perpendicular frame
 
-The previous `exists_parallel_orthonormal_perp_frame` produces a frame whose
+The previous `exists_parallel_orthonormal_perp_frame_along_geodesic` produces a frame whose
 members are *chart-differentiable* and parallel on `Icc 0 L`; it makes no claim
 about bundle-`C^∞` regularity, and indeed the bare parallel-transport sections
 are constructed by chart-gluing and are not even defined as bundle-smooth fields.
@@ -871,7 +874,7 @@ theorem exists_cutoff_one_on_Icc_supported_Ioo {L δ : ℝ} (hδ : 0 < δ) :
 
 set_option linter.unusedVariables false in
 /-- **Perpendicularity to the velocity is preserved (geodesic-on-a-set form).**
-The set-relativised analogue of `perp_to_velocity_preserved`: it only requires
+The set-relativised analogue of `perp_to_velocity_preserved_of_parallel`: it only requires
 `γ` to be a geodesic *on* `Icc 0 L` (not globally), which is exactly the
 hypothesis available in the Bonnet–Myers length bound, and it carries no
 `T2Space (TangentBundle I M)` assumption.  The proof is the same constancy
@@ -1254,7 +1257,7 @@ theorem exists_parallel_perp_frame [RiemannianBundle (fun x : M => TangentSpace 
         (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ) : E) = 1 := by
     intro t ht
     have hconst :=
-      global_parallel_transport_preserves_inner (I := I) g γ hγ hL.le
+      parallel_transport_preserves_inner_product (I := I) g γ hγ hL.le
         (fun s => (mfderiv 𝓘(ℝ, ℝ) I γ s (1 : ℝ) : E))
         (fun s => (mfderiv 𝓘(ℝ, ℝ) I γ s (1 : ℝ) : E))
         hvel_diff hvel_diff hvel_par hvel_par t ht
@@ -1284,7 +1287,7 @@ theorem exists_parallel_perp_frame [RiemannianBundle (fun x : M => TangentSpace 
     have hχj : χ j t = 1 := by have := hχ_one j ht; simpa using this
     rw [hχi, hχj, one_smul, one_smul]
     have hconst :=
-      global_parallel_transport_preserves_inner (I := I) g γ hγ hL.le
+      parallel_transport_preserves_inner_product (I := I) g γ hγ hL.le
         (Vfun i) (Vfun j) (hVdiff i) (hVdiff j) (hVpar i) (hVpar j) t ht
     rw [hconst, hV0 i, hV0 j]
     exact hseed_ON i j

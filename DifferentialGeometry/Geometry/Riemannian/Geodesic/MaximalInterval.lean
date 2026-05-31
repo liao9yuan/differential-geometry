@@ -31,7 +31,7 @@ that realises this geodesic on `I_max(p, v)` (and is junk-valued outside).
   containing `0`.
 
 * `maximalGeodesic g p v`: a `ℝ → M`-curve obtained from
-  `exists_geodesic_at` together with a `Classical.choice` selection of a
+  `exists_geodesic_with_initial_velocity_at` together with a `Classical.choice` selection of a
   geodesic that covers each point of the maximal interval, junk-extended
   to the entire real line by the constant value `p` outside.
 
@@ -53,7 +53,7 @@ picking, for each `t` in the maximal interval, the value of any such
 local geodesic at `t`; the value is junk (= `p`) for `t` outside the
 maximal interval. The headline geodesic predicate is established at the
 pointwise `IsGeodesicAt` level, which is the regularity that the existence
-theorem `exists_geodesic_at` directly delivers. A globalised
+theorem `exists_geodesic_with_initial_velocity_at` directly delivers. A globalised
 `IsGeodesicOn` statement on the maximal interval would require integral
 curves of the chart-fixed vector field to glue across chart changes; that
 requires a moving-chart formulation of the geodesic equation and is
@@ -196,7 +196,7 @@ theorem maximalGeodesicInterval_isOpen
 
 /-! ## Local existence on the maximal interval
 
-We use `exists_geodesic_at` to produce a local geodesic at `0`, which
+We use `exists_geodesic_with_initial_velocity_at` to produce a local geodesic at `0`, which
 gives a small open interval `(-ε, ε)` contained in the maximal interval.
 This automatically places `0` in the maximal interval. -/
 
@@ -204,7 +204,7 @@ section LocalExistence
 
 variable [I.Boundaryless] [CompleteSpace E]
 
-/-- The local geodesic produced by `exists_geodesic_at` provides an open
+/-- The local geodesic produced by `exists_geodesic_with_initial_velocity_at` provides an open
 interval `J ∋ 0` on which a geodesic with initial data `(p, v)` exists.
 This is the basic witness for membership of `0` in the maximal interval. -/
 lemma exists_maximalGeodesicWitness_zero
@@ -398,22 +398,19 @@ section MaximalGeodesicMain
 
 variable [I.Boundaryless] [CompleteSpace E]
 
-/-- **Headline theorem.** For every initial datum `(p, v)`, there exists
-the maximal open interval `I_max := maximalGeodesicInterval g p v` and a
-junk-extended curve `maximalGeodesic g p v : ℝ → M` such that:
+/-- Structural properties of the canonical maximal geodesic with initial
+datum `(p, v)`: writing `I_max := maximalGeodesicInterval g p v` and
+`γ_max := maximalGeodesic g p v`, the set `I_max` is open and contains `0`,
+`γ_max 0 = p`, `γ_max` takes the junk value `p` outside `I_max`, and at
+every `t ∈ I_max` there is a local geodesic `γ` with `γ 0 = p` that is a
+geodesic at both `0` and `t`.
 
-* `I_max` is open and contains `0`;
-* `maximalGeodesic g p v 0 = p`;
-* every `t ∈ I_max` at which every witness keeps its foot in the base
-  chart-source is covered by a local geodesic `γ` with initial data
-  `(p, v)` satisfying `IsGeodesicAt g γ t`;
-* outside `I_max`, the curve takes the junk value `p`.
-
-The foot-in-source hypothesis `hsrc` is the chart-validity clause for the
-chart-`p`-fixed witnesses (see `IsGeodesicOnWithInitial.isGeodesicAt`); it
-is required because, where a witness has left the base chart, the chart-`p`
-geodesic vector field degenerates to the zero section. -/
-theorem exists_maximalGeodesic
+The hypothesis `hsrc` requires every local geodesic witness with initial
+data `(p, v)` to keep its foot in `(chartAt H p).source` at each point of
+`I_max`; it feeds `IsGeodesicOnWithInitial.isGeodesicAt`, and is needed
+because where a witness has left the base chart the chart-`p` geodesic
+vector field degenerates. -/
+theorem maximalGeodesic_structure_of_footInSource
     (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p)
     (hsrc : ∀ t ∈ maximalGeodesicInterval (I := I) g p v,
       ∀ (γ : ℝ → M) (J : Set ℝ),
@@ -592,7 +589,7 @@ on the compact interval (hence integrable by `ContinuousOn.integrableOn_Icc`),
 then transfers to the `mfderiv` form by a.e.-equality on the co-null interior
 `Ioo a b` (where `mfderivWithin = mfderiv`). The singleton case `a = b` is
 handled directly via `integrableOn_singleton_iff`. The `hEnorm` argument is kept
-for signature uniformity with `pathELength_eq_arcLength_C1` and is not needed in
+for signature uniformity with `pathELength_eq_arcLength` and is not needed in
 the proof. -/
 lemma speedSqrt_integrableOn_Icc_of_C1
     (g : SmoothRiemannianMetric I M) {η : ℝ → M} {a b : ℝ} (hab : a ≤ b)
@@ -670,29 +667,27 @@ lemma speedSqrt_integrableOn_Icc_of_C1
       exact hAgree t ht
     exact hIntW.congr hae
 
-/-- **Bridge 3 — `pathELength_eq_arcLength_C1`.**
-
-Equality of Mathlib's `pathELength` and the project's chart-integral
-`arcLength`, for a `C¹` curve `γ` on `Icc a b` with `a ≤ b`, given the
-pointwise enorm-identification on `Icc a b`.
+/-- Mathlib's `pathELength I γ a b` equals `ENNReal.ofReal (arcLength g γ a b)`
+for a curve `γ` on `[a, b]` with `a ≤ b`, given the pointwise enorm
+identification on `Icc a b`.
 
 The hypotheses:
 * `hab : a ≤ b` is the interval orientation.
-* `hγ_int : IntegrableOn F (Set.Icc a b)` is the integrability of the
-  speed function, required to convert `ENNReal.ofReal` of the integral
-  to a Lebesgue-style `lintegral` of `ENNReal.ofReal ∘ F`.
+* `hγ_int : IntegrableOn F (Set.Icc a b)` is integrability of the speed
+  function `F`, used to convert `ENNReal.ofReal` of the integral to a
+  Lebesgue `lintegral` of `ENNReal.ofReal ∘ F`.
 * `hEnorm : ∀ t ∈ Icc a b,
     ‖mfderiv 𝓘(ℝ,ℝ) I γ t 1‖ₑ = ENNReal.ofReal (F t)`,
-  where `F t = Real.sqrt (g.inner (γ t) (γ'(t)) (γ'(t)))`, is the bundle
-  enorm — square-root inner-product identification.
+  where `F t = Real.sqrt (g.inner (γ t) (γ' t) (γ' t))`, is the assumed
+  identification of the tangent-bundle enorm with the square root of the
+  metric inner product.
 
-The conclusion identifies `pathELength I γ a b` with
-`ENNReal.ofReal (arcLength g γ a b)`. The proof is a measurable-rewrite
-applied to `pathELength_eq_lintegral_mfderiv_Icc`, conversion of the
-lintegral of `ENNReal.ofReal ∘ F` to `ENNReal.ofReal` of the corresponding
-Bochner integral over `Icc a b`, and finally identification with the
-interval-integral form via `intervalIntegral.integral_of_le`. -/
-theorem pathELength_eq_arcLength_C1
+The proof rewrites `pathELength` to a lintegral via
+`pathELength_eq_lintegral_mfderiv_Icc`, replaces the integrand by
+`ENNReal.ofReal ∘ F`, converts the lintegral to `ENNReal.ofReal` of the
+Bochner integral over `Icc a b`, and identifies it with the interval
+integral defining `arcLength` via `intervalIntegral.integral_of_le`. -/
+theorem pathELength_eq_arcLength
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {a b : ℝ}
     (hab : a ≤ b)
     (hγ_int : MeasureTheory.IntegrableOn

@@ -8,7 +8,7 @@ import DifferentialGeometry.Geometry.Riemannian.Geodesic.SmoothFlow
 set_option linter.unusedSectionVars false
 
 /-!
-# Closing `expMap_contMDiffAt_zero`
+# Closing `expMap_contMDiffAt_zero_of_uniformChartFlowBridge`
 
 For a smooth Riemannian metric `g` on a boundaryless smooth manifold `M`
 modelled on a complete inner-product space `E`, this file delivers the
@@ -29,7 +29,7 @@ analytic ingredients needed to combine the chart-flow candidate's
   of the chart-flow candidate at time `t' = 1` with `expMap g p` on a
   neighbourhood of `0`. This is the substantive analytic input.
 
-* **Headline**: `expMap_contMDiffAt_zero` is closed via
+* **Headline**: `expMap_contMDiffAt_zero_of_uniformChartFlowBridge` is closed via
   `ContMDiffAt.congr_of_eventuallyEq` applied to the candidate's `C^1`
   smoothness.
 
@@ -49,7 +49,7 @@ uniform bridge as an unconditional theorem is the next downstream step.
 
 * `UniformChartFlowBridge` — packaged uniform-in-`v` identification.
 
-* `expMap_contMDiffAt_zero` — the headline `ContMDiffAt 1` smoothness
+* `expMap_contMDiffAt_zero_of_uniformChartFlowBridge` — the headline `ContMDiffAt 1` smoothness
   of `expMap g p` at `v = 0`, under the uniform-bridge hypothesis.
 -/
 
@@ -193,7 +193,7 @@ end ChartCoordRescaling
 
 /-! ## Packaging the uniform-in-`v` chart-flow bridge
 
-The substantive analytic input for closing `expMap_contMDiffAt_zero`
+The substantive analytic input for closing `expMap_contMDiffAt_zero_of_uniformChartFlowBridge`
 proper is a **uniform-in-`v` identification** of the chart-flow's
 projection (at a fixed time `t'`, suitable after rescaling) with
 `expMap g p` on a neighbourhood of `0`. We package this as a
@@ -231,7 +231,7 @@ The existence of a chart-flow `Φ`, a fixed time `t' > 0`, and a radius
   identification: the chart-flow's value at time `t'` along `(p, v)`
   equals the exponential map at `t' • v`).
 
-This packages the analytic input for closing `expMap_contMDiffAt_zero`
+This packages the analytic input for closing `expMap_contMDiffAt_zero_of_uniformChartFlowBridge`
 via the chain rule: `expMap g p w = chartFlowCandidate Φ p t' (w / t')`
 for `w` near `0`.
 -/
@@ -245,7 +245,7 @@ def UniformChartFlowBridge (g : SmoothRiemannianMetric I M) (p : M) : Prop :=
 
 end UniformBridge
 
-/-! ## Headline: `expMap_contMDiffAt_zero` via `UniformChartFlowBridge`
+/-! ## Headline: `expMap_contMDiffAt_zero_of_uniformChartFlowBridge` via `UniformChartFlowBridge`
 
 Combining the candidate's `ContMDiffAt 1` at `v = 0` with the
 uniform-in-`v` identification on the ball of radius `ρ`, the headline
@@ -257,7 +257,7 @@ section Headline
 variable [I.Boundaryless] [CompleteSpace E]
   [T2Space (TangentBundle I M)]
 
-/-- **`expMap_contMDiffAt_zero` via the uniform chart-flow bridge.**
+/-- **`expMap_contMDiffAt_zero_of_uniformChartFlowBridge` via the uniform chart-flow bridge.**
 The exponential map `expMap g p`, viewed as a function `E → M` (using
 `TangentSpace I p = E` definitionally), is `ContMDiffAt 𝓘(ℝ, E) I 1` at
 the zero vector, provided the uniform-in-`v` bridge at some `t' > 0`
@@ -267,7 +267,7 @@ The proof composes the candidate's `C^1` smoothness with the smooth
 scalar-multiplication `w ↦ w / t'`. Concretely, by the bridge,
 `expMap g p w = chartFlowCandidate Φ p t' (w / t')` on a neighbourhood
 of `w = 0`, and the right-hand side is `C^1` at `w = 0`. -/
-theorem expMap_contMDiffAt_zero
+theorem expMap_contMDiffAt_zero_of_uniformChartFlowBridge
     (g : SmoothRiemannianMetric I M) (p : M)
     (h : UniformChartFlowBridge (I := I) g p) :
     ContMDiffAt 𝓘(ℝ, E) I 1
@@ -352,7 +352,7 @@ theorem expMap_contMDiffAt_zero_exists
     ContMDiffAt 𝓘(ℝ, E) I 1
       (fun v : E => (expMap (I := I) g p (show TangentSpace I p from v) : M))
       (0 : E) :=
-  expMap_contMDiffAt_zero (I := I) (g := g) (p := p) huniform
+  expMap_contMDiffAt_zero_of_uniformChartFlowBridge (I := I) (g := g) (p := p) huniform
 
 end Headline
 

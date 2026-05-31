@@ -7,7 +7,7 @@ set_option linter.unusedSectionVars false
 # Manifold derivative of `expMap g p` at the zero vector
 
 The exponential map `expMap g p : TangentSpace I p → M` is `C^1` at the
-origin (`expMap_contMDiffAt_zero_truly_unconditional`). This file
+origin (`expMap_contMDiffAt_zero`). This file
 computes its manifold derivative at zero and shows it is the identity:
 
 `mfderiv 𝓘(ℝ, E) I (expMap g p) 0 = ContinuousLinearMap.id ℝ (TangentSpace I p)`.
@@ -810,7 +810,7 @@ theorem mfderiv_expMap_at_zero
   -- Now relate to mfderiv of expMap via chain rule.
   -- v ↦ expMap g p (t' • v) = (expMap g p) ∘ (t' •).
   have hexpMap_contMDiffAt :=
-    expMap_contMDiffAt_zero_truly_unconditional (I := I) g p
+    expMap_contMDiffAt_zero (I := I) g p
   have hexpMap_mdiffAt : MDifferentiableAt 𝓘(ℝ, E) I
       (fun v : E => (expMap (I := I) g p (show TangentSpace I p from v) : M))
       (0 : E) :=

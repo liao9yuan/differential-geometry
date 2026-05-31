@@ -67,7 +67,7 @@ identification cleanly so that the manifold lift can be filled in.
 
 * `HasChartFlowGeodesicMatchData` — the named single-predicate input.
 
-* `expMap_contMDiffAt_zero_unconditional` — the headline. The
+* `expMap_contMDiffAt_zero_of_chartFlowGeodesicMatchData` — the headline. The
   exponential map is `ContMDiffAt 𝓘(ℝ, E) I 1` at the zero vector,
   given `HasChartFlowGeodesicMatchData g p`.
 -/
@@ -287,7 +287,7 @@ theorem hasChartFlowGeodesicMatchData_of_match
 
 end ReductionToMatch
 
-/-! ## Headline: `expMap_contMDiffAt_zero_unconditional`
+/-! ## Headline: `expMap_contMDiffAt_zero_of_chartFlowGeodesicMatchData`
 
 The headline `ContMDiffAt 𝓘(ℝ, E) I 1` smoothness of `expMap g p` at the
 zero vector, conditional on `HasChartFlowGeodesicMatchData g p`. -/
@@ -297,17 +297,17 @@ section Headline
 variable [I.Boundaryless] [CompleteSpace E]
   [T2Space (TangentBundle I M)]
 
-/-- **Headline (unconditional modulo the named match-data predicate).**
-For any smooth Riemannian metric `g` and base point `p : M`, given a
-witness of `HasChartFlowGeodesicMatchData g p`, the exponential map is
-`ContMDiffAt 𝓘(ℝ, E) I 1` at the zero vector.
+/-- Given a witness of `HasChartFlowGeodesicMatchData g p`, the exponential
+map `fun v => expMap g p v` is `ContMDiffAt 𝓘(ℝ, E) I 1` at the zero vector,
+for a smooth Riemannian metric `g` on a boundaryless smooth manifold modelled
+on a complete inner-product space and any base point `p : M`.
 
-The named predicate is the **only** input that remains to be discharged
-unconditionally; all other ingredients of the bridge (V.4 joint `C^1`
-flow, zero-section orbit constancy, slice smoothness, the conditional
-headline, the unconditional pointwise base case `expMap_zero`) are
-unconditional. -/
-theorem expMap_contMDiffAt_zero_unconditional
+The named predicate `HasChartFlowGeodesicMatchData g p` is the single
+hypothesis: it packages the chart-flow data and the manifold-side
+chart-flow/geodesic identification. The proof unfolds the predicate to the
+existential it abbreviates and forwards it to
+`expMap_contMDiffAt_zero_of_chartFlowGeodesicMatch`. -/
+theorem expMap_contMDiffAt_zero_of_chartFlowGeodesicMatchData
     (g : SmoothRiemannianMetric I M) (p : M)
     (h : HasChartFlowGeodesicMatchData (I := I) g p) :
     ContMDiffAt 𝓘(ℝ, E) I 1

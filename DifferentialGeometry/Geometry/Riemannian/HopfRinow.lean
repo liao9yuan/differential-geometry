@@ -54,18 +54,18 @@ boundaryless smooth manifold `M` that is metric-complete as a
 
 ## Hopf-Rinow existence of minimisers
 
-* `path_length_infimum_attained` -- the infimum `riemannianEDist I p q`
+* `exists_continuous_path_realizing_riemannianEDist` -- the infimum `riemannianEDist I p q`
   is attained by a continuous curve.
-* `minimiser_is_smooth_geodesic` -- a length-minimising curve coincides
+* `minimizing_path_is_smooth_geodesic` -- a length-minimising curve coincides
   after arclength rescale with a smooth geodesic.
 * `unit_speed_rescale` -- affine reparametrisation rescales a geodesic
   to unit-speed.
-* `unit_speed_minimising_geodesic_from_points` -- existence of a
+* `exists_unit_speed_minimizing_geodesic_between_points` -- existence of a
   unit-speed minimising geodesic between any two points.
 
 ## Exponential surjectivity on the closed ball
 
-* `bm_c_expMap_surjective_on_closedBall` -- under a diameter bound,
+* `expMap_surjective_on_closedBall_of_ediam_le` -- under a diameter bound,
   `expMap g p` surjects onto `M` from a closed ball in `T_p M`.
 
 All thirteen statements are emitted below as `theorem ... := sorry`
@@ -1732,7 +1732,7 @@ The gluing is supplied by `Geodesic.isGeodesicOn_glue_at_limit`, the
 fresh local geodesic by `exists_isGeodesicOn_Ioo_at` below. -/
 
 /-- **Local geodesic existence on an open interval, intrinsic form.**
-From the local existence-of-geodesics theorem (`exists_geodesic_at`,
+From the local existence-of-geodesics theorem (`exists_geodesic_with_initial_velocity_at`,
 which yields an integral curve of the chart-fixed geodesic spray on a
 neighbourhood of `0`), the moving-foot geodesic equation
 `HasGeodesicEquationAt g η t` holds at *every* `t` in a small open
@@ -1752,7 +1752,7 @@ theorem exists_isGeodesicOn_Ioo_at
     ∃ (η : ℝ → M) (δ : ℝ), 0 < δ ∧ η 0 = y ∧
       IsGeodesicOn (I := I) g η (Set.Ioo (-δ) δ) := by
   haveI : CompleteSpace E := FiniteDimensional.complete ℝ E
-  obtain ⟨η, f, hf0, hηproj, hη0, hf_int, _hgeo⟩ := exists_geodesic_at (I := I) g y w
+  obtain ⟨η, f, hf0, hηproj, hη0, hf_int, _hgeo⟩ := exists_geodesic_with_initial_velocity_at (I := I) g y w
   subst hηproj
   -- Pointwise identity `projectCurve f t = (f t).proj`.
   have hηt : ∀ t, projectCurve (I := I) f t = (f t).proj := fun _ => rfl
@@ -1812,7 +1812,7 @@ theorem exists_isGeodesicOn_Ioo_at_velocity
       (∀ t ∈ Set.Ioo (-δ) δ, η t ∈ (chartAt H y).source) ∧
       IsGeodesicOn (I := I) g η (Set.Ioo (-δ) δ) := by
   haveI : CompleteSpace E := FiniteDimensional.complete ℝ E
-  obtain ⟨η, f, hf0, hηproj, hη0, hf_int, _hgeo⟩ := exists_geodesic_at (I := I) g y w
+  obtain ⟨η, f, hf0, hηproj, hη0, hf_int, _hgeo⟩ := exists_geodesic_with_initial_velocity_at (I := I) g y w
   subst hηproj
   -- Pointwise identity `projectCurve f t = (f t).proj`.
   have hηt : ∀ t, projectCurve (I := I) f t = (f t).proj := fun _ => rfl
@@ -2883,24 +2883,21 @@ theorem isGeodesicOn_contMDiffOn_one
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Intrinsic right-completeness from metric completeness.**  A moving-foot
-geodesic `γ₀` on `Iio b₀` (`b₀ > 0`) extends, across charts, to a geodesic
-on all of `Ici 0`, agreeing with `γ₀` below `b₀`.
+/-- **Intrinsic right-completeness from metric completeness.**  A geodesic
+`γ₀` on `Set.Iio b₀` (`b₀ > 0`) on a metrically complete manifold extends,
+across charts, to a geodesic on all of `Set.Ici 0` that agrees with `γ₀`
+below `b₀`.
 
-The hypothesis `hreg` exposes the minimal separable analytic data of any
-geodesic extending `γ₀` past a finite right-endpoint `b`: it is `C¹` in
-time on `Iio b`, and its velocity has constant `g`-speed bounded by a
-nonnegative `c` (both the bundle-enorm bound `hSpeedBound` and the
-inner-product bound `hSpeedSq`).  These are precisely the two facts a
-unit-speed (or constant-speed) geodesic always satisfies; they are *not*
-the extension conclusion (which is the geodesic equation on a strictly
-larger interval).  Metric completeness then furnishes endpoint-continuation
-data at `b` (`hasEndpointContinuation_of_complete`), and the colimit of the
+The hypothesis `hreg` is the per-extension analytic regularity of any
+geodesic extending `γ₀` past a finite right endpoint `b`: such a geodesic is
+`C¹` on `Set.Iio b`, and its velocity has `g`-speed bounded by a nonnegative
+constant `c` (both as a bundle-enorm bound and as an inner-product bound by
+`c ^ 2`).  These are the facts a constant-speed geodesic always satisfies;
+they are NOT the extension conclusion (the geodesic equation on a strictly
+larger interval).  Metric completeness supplies endpoint-continuation data
+at `b` via `hasEndpointContinuation_of_complete`, and the colimit of the
 iterated single-step extensions (`isGeodesicOn_Ici_of_endpointContinuation`)
-assembles the global geodesic.
-
-Both consumed producers are fully proven and axiom-clean; this theorem is
-their structural composition, so it too is axiom-clean. -/
+assembles the global geodesic. -/
 theorem isGeodesicOn_Ici_of_complete
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M) {γ₀ : ℝ → M} {b₀ : ℝ} (hb₀ : 0 < b₀)
@@ -3324,11 +3321,14 @@ private theorem path_length_minimising_sequence
   · -- Upper bound: the strict approximation bound chosen above.
     intro n; rw [hd_def] at hγ_len ⊢; exact hγ_len n
 
-/-- **Path-length infimum is attained.** On a complete connected
-sigma-compact Riemannian manifold, for every `p q : M` there exists a
-continuous curve `\gamma : [0, 1] \to M` from `p` to `q` whose
-`pathELength` realises `riemannianEDist I p q`. -/
-theorem path_length_infimum_attained
+/-- **Path-length infimum is attained.** On a complete Riemannian manifold
+(`IsRiemannianManifold I M`, `CompleteSpace M`), for every `p q : M` there
+is a continuous curve `γ : ℝ → M` with `γ 0 = p`, `γ 1 = q` whose
+`pathELength I γ 0 1` equals `riemannianEDist I p q` (the distance infimum
+over paths is attained). The proof builds a length-minimising sequence of
+`C¹` paths whose lengths converge to `riemannianEDist I p q` and extracts a
+continuous limit curve. -/
+theorem exists_continuous_path_realizing_riemannianEDist
     (g : SmoothRiemannianMetric I M) (p q : M) :
     ∃ γ : ℝ → M,
       Continuous γ ∧ γ 0 = p ∧ γ 1 = q ∧
@@ -3414,16 +3414,15 @@ theorem path_length_infimum_attained
     clear hLen_tendsto
     sorry
 
-/-- **A length minimiser is, after arclength rescale, a smooth
-geodesic.** This consumes the Gauss-lemma cluster from
-`GaussLemma.lean`: at every interior parameter the minimiser is
-locally a radial geodesic in normal coordinates, and overlap
-consistency glues the pieces into a global smooth geodesic on the
-open parameter interval. The parameter `L` is the arclength of `γ`
-and equals the Riemannian distance between the endpoints. The
-reparametrisation preserves the `pathELength`, so
-`pathELength I η 0 L = ENNReal.ofReal L`. -/
-theorem minimiser_is_smooth_geodesic
+/-- **A length minimiser is, after reparametrisation, a smooth geodesic.**
+If a continuous curve `γ` on `[a, b]` is length-minimising
+(`pathELength I γ a b = riemannianEDist I (γ a) (γ b)`), then there is a
+parameter length `L ≥ 0` and a reparametrisation `η : ℝ → M` with the same
+endpoints (`η 0 = γ a`, `η L = γ b`) that is `C^∞` and `IsGeodesicAt` on the
+open interval `(0, L)`, is `C¹` and `IsGeodesicOn` on `[0, L]`, has
+`pathELength I η 0 L = ENNReal.ofReal L`, and whose length parameter realises
+the endpoint distance, `ENNReal.ofReal L = riemannianEDist I (γ a) (γ b)`. -/
+theorem minimizing_path_is_smooth_geodesic
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {a b : ℝ}
     (hab : a ≤ b) (hγ : Continuous γ)
     (hmin : pathELength I γ a b = riemannianEDist I (γ a) (γ b)) :
@@ -3612,13 +3611,15 @@ theorem unit_speed_rescale
     intro t _ht
     sorry
 
-/-- **Hopf-Rinow existence (unit-speed minimising geodesic).** Any two
-points `p q : M` on a complete connected sigma-compact Riemannian
-manifold are joined by a unit-speed `C^1` geodesic whose parameter
-length equals the Riemannian distance. Assembled from
-`path_length_infimum_attained`, `minimiser_is_smooth_geodesic`, and
+/-- **Hopf-Rinow existence (unit-speed minimising geodesic).** On a complete
+Riemannian manifold (`IsRiemannianManifold I M`, `CompleteSpace M`), any two
+points `p q : M` are joined by a curve `γ` and a parameter length `L ≥ 0`
+with `γ 0 = p`, `γ L = q`, where `γ` is `C¹` and `IsGeodesicOn` on `[0, L]`,
+has unit `g`-speed at every `t ∈ [0, L]`, and whose length realises the
+distance, `riemannianEDist I p q = ENNReal.ofReal L`. Assembled from
+`exists_continuous_path_realizing_riemannianEDist`, `minimizing_path_is_smooth_geodesic`, and
 `unit_speed_rescale`. -/
-theorem unit_speed_minimising_geodesic_from_points
+theorem exists_unit_speed_minimizing_geodesic_between_points
     (g : SmoothRiemannianMetric I M) (p q : M) :
     ∃ (γ : ℝ → M) (L : ℝ),
       0 ≤ L ∧ γ 0 = p ∧ γ L = q ∧
@@ -3632,14 +3633,14 @@ theorem unit_speed_minimising_geodesic_from_points
   -- Step 1: obtain a length-minimising continuous curve `α` from `p` to `q`
   -- on `[0, 1]` realising the Riemannian infimum.
   obtain ⟨α, hα_cont, hα0, hα1, hα_len⟩ :=
-    path_length_infimum_attained (I := I) g p q
-  -- Step 2: apply `minimiser_is_smooth_geodesic` to extract a smooth
+    exists_continuous_path_realizing_riemannianEDist (I := I) g p q
+  -- Step 2: apply `minimizing_path_is_smooth_geodesic` to extract a smooth
   -- geodesic reparametrisation on the open interval `(0, L)`.
   have hαlen' : pathELength I α 0 1 = riemannianEDist I (α 0) (α 1) := by
     rw [hα0, hα1]; exact hα_len
   obtain ⟨L, η, hL_nonneg, hη0, hηL, _hη_smooth_int, _hη_geod_int,
       hη_len_min, hL_eq_dist, hη_C1_min, hη_geod_min⟩ :=
-    minimiser_is_smooth_geodesic (I := I) g (γ := α) (a := 0) (b := 1)
+    minimizing_path_is_smooth_geodesic (I := I) g (γ := α) (a := 0) (b := 1)
       zero_le_one hα_cont hαlen'
   -- The candidate γ is η; the parameter length is L. Identify endpoints with
   -- p, q via the substitutions from Step 1.
@@ -3656,14 +3657,14 @@ theorem unit_speed_minimising_geodesic_from_points
   -- The packaging is structural and does not hide axiomatic assumptions
   -- beyond the upstream sorries already present in this file.
   -- Closed-interval geodesic predicate for `η`. Delivered directly by
-  -- `minimiser_is_smooth_geodesic` (closed-interval `IsGeodesicOn` conjunct).
+  -- `minimizing_path_is_smooth_geodesic` (closed-interval `IsGeodesicOn` conjunct).
   have hη_geod_closed : IsGeodesicOn (I := I) g η (Set.Icc 0 L) := hη_geod_min
   -- `C¹` smoothness on the closed interval `[0, L]`. Delivered directly
-  -- by `minimiser_is_smooth_geodesic` (closed-interval `C¹` conjunct).
+  -- by `minimizing_path_is_smooth_geodesic` (closed-interval `C¹` conjunct).
   have hη_C1 : ContMDiffOn 𝓘(ℝ, ℝ) I 1 η (Set.Icc 0 L) := hη_C1_min
   -- Path-length of `η` on `[0, L]` equals `ENNReal.ofReal L`. This is the
   -- "η is a length-minimising reparametrisation" content; needed to feed
-  -- `unit_speed_rescale`. Delivered by `minimiser_is_smooth_geodesic`.
+  -- `unit_speed_rescale`. Delivered by `minimizing_path_is_smooth_geodesic`.
   have hη_len : pathELength I η 0 L = ENNReal.ofReal L := hη_len_min
   -- We now split on the value of `L`.
   rcases (lt_or_eq_of_le hL_nonneg) with hLpos | hLzero
@@ -3681,7 +3682,7 @@ theorem unit_speed_minimising_geodesic_from_points
       -- `C¹` conjunct).
       exact hζ_C1
     · -- `riemannianEDist I p q = ENNReal.ofReal L`. Delivered by the
-      -- strengthened `minimiser_is_smooth_geodesic`: `L` is by construction
+      -- strengthened `minimizing_path_is_smooth_geodesic`: `L` is by construction
       -- the arclength of `α`, and on the minimiser this arclength equals
       -- the Riemannian distance between the endpoints. Combined with
       -- `α 0 = p`, `α 1 = q`, the conclusion follows from `hL_eq_dist`.
@@ -3690,7 +3691,7 @@ theorem unit_speed_minimising_geodesic_from_points
       exact hL_eq_pq.symm
   · -- Case `L = 0`: then `p = q` (since `η 0 = p` and `η L = q` with
     -- `L = 0`). We construct a unit-speed geodesic γ starting at p
-    -- via Picard-Lindelöf (`exists_geodesic_at`) with an initial
+    -- via Picard-Lindelöf (`exists_geodesic_with_initial_velocity_at`) with an initial
     -- velocity v that is g-unit at p; on the singleton interval
     -- `Set.Icc 0 0 = {0}` we only need the unit-speed condition at
     -- `t = 0`, which is delivered by the projection-derivative
@@ -3721,7 +3722,7 @@ theorem unit_speed_minimising_geodesic_from_points
       rw [hs_sq, inv_mul_cancel₀ hc_ne]
     -- Local geodesic via Picard-Lindelöf.
     obtain ⟨γ', f, hf0, hγ'_eq, hγ'_zero, hf_mIC, hγ'_geod⟩ :=
-      exists_geodesic_at (I := I) g p v
+      exists_geodesic_with_initial_velocity_at (I := I) g p v
     -- Provide the existential with L = 0 and curve γ := γ'.
     refine ⟨γ', 0, le_refl 0, hγ'_zero, ?_, ?_, ?_, ?_, ?_⟩
     · -- γ' 0 = q: since p = q.
@@ -3823,13 +3824,15 @@ section ExpMapSurjectivity
 
 variable [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
 
-/-- **`expMap g p` is surjective on `M` from the closed ball
-`Metric.closedBall 0 R \subseteq T_p M`, assuming a diameter bound.**
-For each `q : M`, pick a unit-speed minimising geodesic from `p` to
-`q` of length `L = riemannianDist p q \le R`; its initial velocity
-`L \cdot v_0` lies in the closed ball of radius `R`, and
-`expMap g p (L \cdot v_0) = q`. -/
-theorem bm_c_expMap_surjective_on_closedBall
+/-- **`expMap g p` covers `M` from the closed ball of radius `R` in `T_p M`
+under a diameter bound.** On a complete Riemannian manifold
+(`IsRiemannianManifold I M`, `CompleteSpace M`), if the metric diameter of
+`Set.univ` is at most `ENNReal.ofReal R` (`R ≥ 0`), then `Set.univ` is
+contained in the image of `Metric.closedBall (0 : T_p M) R` under
+`expMap g p`. Intended construction: for each `q`, a unit-speed minimising
+geodesic from `p` to `q` has length `L = riemannianDist p q ≤ R` and initial
+velocity `L • v₀` in the closed ball, with `expMap g p (L • v₀) = q`. -/
+theorem expMap_surjective_on_closedBall_of_ediam_le
     (g : SmoothRiemannianMetric I M) (p : M) {R : ℝ} (hR : 0 ≤ R)
     (hdiam : Metric.ediam (Set.univ : Set M) ≤ ENNReal.ofReal R) :
     (Set.univ : Set M) ⊆

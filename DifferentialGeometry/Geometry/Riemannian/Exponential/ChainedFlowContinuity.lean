@@ -26,7 +26,7 @@ specialising the joint flow to `t = 1`.
 The detailed Lean types of the intermediate joint-flow predicates are
 deferred to the proof phase; here we expose only the propositional
 shells required to record the chain. The headline statement is
-`bm_c_expMap_continuity_from_jointFlow`, whose signature is
+`expMap_continuous`, whose signature is
 `Continuous (expMap g p)`.
 -/
 
@@ -202,7 +202,7 @@ This is the `C¹`-in-`(v, t)` strengthening of
 `bm_c_expMap_chainedFlow_joint_continuity`; restricting it to the
 `t = 1` slice and precomposing with the smooth slice map `w ↦ (w, 1)`
 yields the off-zero exponential-map regularity
-`off_zero_exp_regularity`. -/
+`expMap_contMDiffAt_of_ne_zero`. -/
 theorem bm_c_expMap_chainedFlow_joint_contMDiff
     (g : SmoothRiemannianMetric I M) (p : M) (v₀ : E)
     (hv₀ : (show TangentSpace I p from v₀) ≠ 0) :
@@ -247,15 +247,16 @@ theorem bm_c_expMap_chainedFlow_joint_contMDiff
 
 /-! ## 6. Continuity of `expMap g p` -/
 
-/-- The exponential map `expMap g p` is continuous on `T_p M`.
+/-- The exponential map `expMap g p : T_p M → M` is continuous.
 
-This is obtained from the joint continuity of the chained flow
-(`bm_c_expMap_chainedFlow_joint_continuity`) by restricting to the
-`t = 1` slice: `expMap g p v = maximalGeodesic g p v 1` definitionally,
-and continuity at each `v₀` follows from joint continuity on the
+The proof reduces continuity to `ContinuousAt (expMap g p) v₀` for each `v₀`,
+then restricts the joint continuity of the chained flow
+`bm_c_expMap_chainedFlow_joint_continuity` to the `t = 1` slice: since
+`expMap g p v = maximalGeodesic g p v 1` by definitional unfolding of
+`expMap`, continuity at `v₀` follows from the joint continuity on the
 neighbourhood `ball v₀ ρ ×ˢ Icc 0 1`, precomposed with the continuous
 slice map `v ↦ (v, 1)`. -/
-theorem bm_c_expMap_continuity_from_jointFlow
+theorem expMap_continuous
     (g : SmoothRiemannianMetric I M) (p : M) :
     Continuous (expMap (I := I) g p) := by
   -- Continuity is pointwise: prove `ContinuousAt (expMap g p) v₀` for each `v₀`.

@@ -178,14 +178,17 @@ theorem isGeodesicAt_eventuallyEq
   rw [projectCurve_apply, projectCurve_apply] at ht
   rw [← hproj₁ t, ← hproj₂ t]; exact ht
 
-/-- **Uniqueness of geodesics with matching initial data, lift-level
-formulation.** If `γ₁ t₀ = γ₂ t₀` and the two base curves are witnessed
-by `IsGeodesicAt` with the *same* chart basepoint `α := γ₁ t₀` and lifts
-agreeing at `t₀`, then `γ₁` and `γ₂` agree on a neighbourhood of `t₀`.
+/-- **Uniqueness of geodesics with matching initial data.** If the base
+curves `γ₁, γ₂` are projections of integral curves `f₁, f₂` of the
+chart-fixed geodesic vector field for the chart basepoint `γ₁ t₀`, and the
+lifts agree at `t₀` (`f₁ t₀ = f₂ t₀`, which encodes matching initial point
+*and* initial velocity), then `γ₁` and `γ₂` agree on a neighbourhood of
+`t₀`.
 
-This is the geometrically natural specialisation: the chart basepoint is
-chosen to be the common starting point, which automatically places the
-common starting point in the chart source. -/
+Specialisation of `isGeodesicAt_eventuallyEq` with the chart basepoint
+taken to be the common starting point `γ₁ t₀`; this choice automatically
+places that point in the chart source, so no source-membership hypothesis
+is needed. -/
 theorem isGeodesicAt_eventuallyEq_of_lift_eq
     {g : SmoothRiemannianMetric I M} {γ₁ γ₂ : ℝ → M} {t₀ : ℝ}
     {f₁ f₂ : ℝ → TangentBundle I M}

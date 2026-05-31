@@ -309,7 +309,7 @@ For any `C¹` path `γ` in the universal cover (on `[0,1]`), the projected path
 `mfderiv (proj ∘ γ) t 1` with `mfderiv γ t 1`.  The fibrewise extended norms
 then match: both reduce to `√(g.inner (proj (γ t)) w w)` — the base one via the
 hypothesis `hEnormBase` (the bundle norm — square-root inner-product identity,
-exactly as exposed for `pathELength_eq_arcLength_C1`), the cover one via
+exactly as exposed for `pathELength_eq_arcLength`), the cover one via
 `hEnormCover` together with the lifted-metric definition. -/
 private theorem proj_pathELength_eq
     (g : SmoothRiemannianMetric I M)
@@ -368,7 +368,7 @@ carries the lifted Riemannian-bundle structure.
 
 The two `hEnorm` hypotheses are the bundle-norm — square-root inner-product
 identifications on the base and cover fibres, the same structural fact exposed
-as a hypothesis in `pathELength_eq_arcLength_C1`.
+as a hypothesis in `pathELength_eq_arcLength`.
 
 Proof: for any `C¹` path `γ : [0,1] → UC M` from `x'` to `y'`, the projected
 path `proj ∘ γ` is a `C¹` path from `proj x'` to `proj y'` of equal length

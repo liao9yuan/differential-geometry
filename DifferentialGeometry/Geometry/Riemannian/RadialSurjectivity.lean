@@ -65,7 +65,7 @@ diamond leaking into a public statement.
   `riemannianEDist I p q ≤ ENNReal.ofReal R` is reached by some `v` with
   `g`-velocity-norm `≤ R`.
 
-* `radial_surjective_on_closed_ball` — combining the previous nodes via
+* `expMap_surjective_on_riemannianEDist_closedBall` — combining the previous nodes via
   the preconnected-clopen argument, every `q` at distance `≤ R` is
   reached by a *minimising* radial geodesic of `g`-velocity-norm `≤ R`.
 
@@ -483,28 +483,24 @@ theorem radial_image_T_contains_rieDist_closedBall
 
 /-! ## Radial surjectivity on the closed ball -/
 
-/-- **Radial-surjectivity on the rieDist-closed-ball.** For every `q : M`
-with `riemannianEDist I p q ≤ ENNReal.ofReal R` there is a `v : T_p M`
-with `expMap g p v = q`, `g`-velocity-norm `√(g.inner p v v) ≤ R`, and
-the radial curve `t ↦ expMap g p (t • v)` minimising on `[0, 1]` (it
-realises `riemannianEDist I p q`).
+/-- **Surjectivity of `expMap g p` onto the `riemannianEDist`-closed ball.**
+For every `q : M` with `riemannianEDist I p q ≤ ENNReal.ofReal R` there is a
+`v : T_p M` with `expMap g p v = q`, intrinsic `g`-velocity-norm
+`√(g.inner p v v) ≤ R`, and `ENNReal.ofReal (√(g.inner p v v)) =`
+`riemannianEDist I p q`, i.e. the radial geodesic `t ↦ expMap g p (t • v)`
+minimises and realises the Riemannian distance from `p` to `q`. This is the
+Hopf–Rinow exponential-surjectivity / minimising-geodesic-existence statement
+on the closed ball of radius `R`.
 
 The argument runs the preconnected-clopen step inside the `expMap g p`-image
 `T := expMap g p '' gBall g p R`. `T` is preconnected
 (`radial_image_T_preconnected`); the minimising-radial subset
 `radialMinSet g p ∩ T` is open in `T` (`radial_image_is_open`) and closed in
 `T` (`radial_image_is_closed`), and contains `p` (via the zero vector,
-`p_mem_radialMinSet`); hence `radialMinSet g p ∩ T = T`. The non-circular
-containment `closedBall_rieDist p R ⊆ T` is supplied by
-`radial_image_T_contains_rieDist_closedBall`.
-
-*Downstream bridge.* `HopfRinow.bm_c_expMap_surjective_on_closedBall`
-currently phrases the conclusion with `Metric.closedBall (0 : T_p M) R`
-(sensitive to the fibre-NACG instance). This theorem's intrinsic
-`g`-norm conclusion `√(g.inner p v v) ≤ R` is the diamond-free form; the
-`closedBall ↔ g`-norm identification (whenever the fibre norm is pinned to
-the `g`-derived one) is the residual bridge for re-routing that consumer. -/
-theorem radial_surjective_on_closed_ball
+`p_mem_radialMinSet`); hence `radialMinSet g p ∩ T = T`. The containment
+`{q | riemannianEDist I p q ≤ ENNReal.ofReal R} ⊆ T` is supplied by
+`radial_image_T_contains_rieDist_closedBall`. -/
+theorem expMap_surjective_on_riemannianEDist_closedBall
     (g : SmoothRiemannianMetric I M) (p : M) (R : ℝ) :
     ∀ q : M, riemannianEDist I p q ≤ ENNReal.ofReal R →
       ∃ v : TangentSpace I p,

@@ -45,7 +45,7 @@ The named gap is reduced to a single clean statement:
 > `expMap g p (t' • v)`.
 
 Granted this property at any `Φ, t', ρ` coming from the V.4 flow, the
-bridge is discharged and the headline `expMap_contMDiffAt_zero` is
+bridge is discharged and the headline `expMap_contMDiffAt_zero_of_uniformChartFlowBridge` is
 unconditional. The named identification reduces to: lifting a chart-coord
 solution of the chart-phase ODE back to `TangentBundle I M` as a local
 integral curve of `geodesicVectorFieldChart g p`, then applying the
@@ -551,7 +551,7 @@ theorem uniformChartFlowBridge_of_match
 
 end ConditionalDischarge
 
-/-! ## Headline: unconditional `expMap_contMDiffAt_zero` modulo the
+/-! ## Headline: unconditional `expMap_contMDiffAt_zero_of_uniformChartFlowBridge` modulo the
 named manifold-side match
 
 We package the headline as a theorem that consumes a witness of the
@@ -597,7 +597,7 @@ theorem expMap_contMDiffAt_zero_of_chartFlowGeodesicMatch
       (0 : E) := by
   obtain ⟨Φ, ρ, T, t', ρ', hρ, hT, ht'_pos, ht'_in, hρ'_pos,
     hcd, hval, hval_p, hmatch⟩ := h
-  exact expMap_contMDiffAt_zero (I := I) (g := g) (p := p)
+  exact expMap_contMDiffAt_zero_of_uniformChartFlowBridge (I := I) (g := g) (p := p)
     (uniformChartFlowBridge_of_match (I := I) (g := g) (p := p)
       (Φ := Φ) (ρ := ρ) (T := T) (t' := t') (ρ' := ρ')
       hρ hT ht'_pos ht'_in hρ'_pos hcd hval hval_p hmatch)

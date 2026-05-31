@@ -32,7 +32,7 @@ With this pinned-chart representation:
   derivative of `F`; the Christoffel-contraction terms agree by symmetry of the
   chart-Christoffel contraction. No moving-foot transition correction appears.
 
-* `curvature_identity_on_variation_fixed_chart`: the `∇_s, ∇_t` commutator on a
+* `chartCovDerivAlong_commutator_eq_riemannOp_on_variation`: the `∇_s, ∇_t` commutator on a
   chart-coordinate section `Y` equals the Riemann operator of the Levi-Civita
   connection applied to the two chart-coordinate velocities and `Y`.
 -/
@@ -1301,21 +1301,19 @@ end Aux7
 
 /-! ## Curvature identity on a variation (fixed chart) -/
 
-/-- **Fixed-chart curvature identity on a variation.** For a chart-coordinate
-section `Y : ℝ → ℝ → E` (jointly `C²` at the basepoint) along a smooth
-two-parameter variation `f`, the commutator of the chart-covariant derivatives
-`∇_s` and `∇_t`, with the chart basepoint pinned to `f s t`, equals the Riemann
-curvature operator of the Levi-Civita connection applied to the two
-chart-coordinate velocities and the section value `Y s t`.
+/-- Curvature commutation identity in the fixed chart at `f s t`. For a
+chart-coordinate section `Y : ℝ → ℝ → E` that is jointly `C²` at `(s, t)`, along
+a smooth two-parameter variation `f`, the commutator of the chart-covariant
+derivatives `∇_s` and `∇_t` (with the chart basepoint pinned to `f s t`) equals
+the Riemann curvature operator `riemannOp` of the Levi-Civita connection,
+evaluated on the two chart-pushed velocities and the section value `Y s t`.
 
-The proof identifies the commutator with the chart-Riemann CLM
-(`Aux7.commutator_eq_chartRiemannCLM`: the second-derivative-of-`Y` terms cancel
-by Schwarz symmetry, the second-derivative-of-chart terms cancel likewise, the
-mixed `∂_uY`/`∂_vY` contractions cancel against the inner-derivative cross terms,
-and the surviving `∂Γ` and `Γ·Γ` terms assemble into the chart-Riemann tensor),
-then converts the chart-Riemann CLM to the abstract Riemann operator via the
-unconditional basis-coordinate identity for the Levi-Civita connection. -/
-theorem curvature_identity_on_variation_fixed_chart
+The proof rewrites the commutator as the chart-Riemann CLM via
+`Aux7.commutator_eq_chartRiemannCLM`, then converts that CLM to the abstract
+Riemann operator via `riemannOp_eq_chartRiemannCLM_apply_of_basis_identity`
+fed the Levi-Civita basis-coordinate identity
+`chartRiemannBasisIdentity_LeviCivita`. -/
+theorem chartCovDerivAlong_commutator_eq_riemannOp_on_variation
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M)
     (hf : IsSmoothVariation (I := I) f)
     (Y : ℝ → ℝ → E) (s t : ℝ)

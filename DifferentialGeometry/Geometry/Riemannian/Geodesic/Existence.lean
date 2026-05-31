@@ -28,7 +28,7 @@ The construction proceeds in two steps:
    `IsGeodesicAt g γ 0` packages the integral-curve property of `f` into
    the integral-curve geodesic predicate (with chart basepoint `α := p`).
 
-The headline theorem `exists_geodesic_at` returns `IsGeodesicAt g γ 0` —
+The headline theorem `exists_geodesic_with_initial_velocity_at` returns `IsGeodesicAt g γ 0` —
 the local geodesic predicate at `t = 0`. The chart-`γ(t)` second-derivative
 form `HasGeodesicEquationAt g γ 0` is a separate downstream bridge once the
 chart-derivative properties of the projection are recorded.
@@ -111,23 +111,24 @@ section ChartedPicardLindelof
 
 variable [I.Boundaryless] [CompleteSpace E]
 
-/-- **Local existence of geodesics, integral-curve form.** For a smooth
-Riemannian metric `g`, an initial point `p : M`, and an initial velocity
-`v : T_p M`, there exists a curve `γ : ℝ → M` and a lifted curve
-`f : ℝ → TangentBundle I M` such that
+/-- **Local existence of geodesics with prescribed initial velocity.** For
+a smooth Riemannian metric `g`, an initial point `p : M`, and an initial
+velocity `v : T_p M`, there exists a curve `γ : ℝ → M` through `p`, together
+with a lift `f : ℝ → TangentBundle I M`, such that
 
-* `f 0 = ⟨p, v⟩` (correct initial data on the tangent bundle);
+* `f 0 = ⟨p, v⟩` (the lift carries the prescribed initial data);
 * `γ` is the base projection of `f`;
 * `γ 0 = p`;
 * `f` is a local integral curve of the chart-fixed geodesic vector field
   `geodesicVectorFieldChart g p` at `t = 0`;
 * `IsGeodesicAt g γ 0` holds — `γ` is a local geodesic at the initial
-  time, with chart basepoint `α := p`.
+  time, with chart basepoint `p`.
 
-Globalising the local geodesic property at `0` to `IsGeodesic g γ` (all
-times) requires extension of the integral curve to all of `ℝ`, which is a
+Here `IsGeodesicAt g γ 0` is the integral-curve form of the geodesic
+predicate at `t = 0`; promoting it to a geodesic `IsGeodesic g γ` for all
+times requires extending the integral curve to all of `ℝ`, which is a
 separate downstream step. -/
-theorem exists_geodesic_at
+theorem exists_geodesic_with_initial_velocity_at
     (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p) :
     ∃ γ : ℝ → M, ∃ f : ℝ → TangentBundle I M,
       f 0 = (⟨p, v⟩ : TangentBundle I M) ∧

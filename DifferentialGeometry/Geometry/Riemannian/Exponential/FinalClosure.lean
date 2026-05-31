@@ -9,7 +9,7 @@ set_option linter.unusedSectionVars false
 # Final unconditional closure of `expMap`'s `C^1` smoothness at zero
 
 This file discharges the last remaining hypothesis of
-`expMap_contMDiffAt_zero_unconditional` — the named manifold-side data
+`expMap_contMDiffAt_zero_of_chartFlowGeodesicMatchData` — the named manifold-side data
 predicate `HasChartFlowGeodesicMatchData g p` — using the unified
 chart-flow packaging `exists_unified_chartFlow_data` and the rescaled
 manifold-lift identification
@@ -38,7 +38,7 @@ combining:
 
 * `hasChartFlowGeodesicMatchData_unconditional` — discharges the named
   predicate unconditionally.
-* `expMap_contMDiffAt_zero_truly_unconditional` — the fully
+* `expMap_contMDiffAt_zero` — the fully
   unconditional headline.
 -/
 
@@ -179,16 +179,18 @@ section TrulyUnconditional
 
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
-/-- **The fully unconditional headline.** For a smooth Riemannian metric
-`g` on a boundaryless smooth manifold modelled on a complete inner-product
-space, the exponential map `expMap g p : T_p M → M` is
-`ContMDiffAt 𝓘(ℝ, E) I 1` at the zero vector. No remaining hypothesis. -/
-theorem expMap_contMDiffAt_zero_truly_unconditional
+/-- For a smooth Riemannian metric `g` on a boundaryless smooth manifold `M`
+modelled on a complete inner-product space `E`, the chart-fixed exponential
+map `v ↦ expMap g p v` (read as `E → M` via `TangentSpace I p = E`) is
+`ContMDiffAt 𝓘(ℝ, E) I 1` at the zero vector, i.e. `C^1` at `0`. The
+chart-flow / geodesic match data needed by the conditional version is supplied
+internally, so the statement carries no extra hypothesis beyond `g` and `p`. -/
+theorem expMap_contMDiffAt_zero
     (g : SmoothRiemannianMetric I M) (p : M) :
     ContMDiffAt 𝓘(ℝ, E) I 1
       (fun v : E => (expMap (I := I) g p (show TangentSpace I p from v) : M))
       (0 : E) :=
-  expMap_contMDiffAt_zero_unconditional (I := I) g p
+  expMap_contMDiffAt_zero_of_chartFlowGeodesicMatchData (I := I) g p
     (hasChartFlowGeodesicMatchData_unconditional (I := I) g p)
 
 end TrulyUnconditional

@@ -11,7 +11,7 @@ set_option linter.unusedSectionVars false
 For a smooth Riemannian metric `g` on a boundaryless smooth manifold `M`
 modelled on a complete inner-product space `E`, this file records the
 off-zero (`v ≠ 0`) analogue of the at-zero smoothness lemma
-`expMap_contMDiffAt_zero_unconditional`.
+`expMap_contMDiffAt_zero_of_chartFlowGeodesicMatchData`.
 
 Away from the zero vector the regularity of the exponential map is
 unconditional: the `HasChartFlowGeodesicMatchData` hypothesis required at
@@ -20,7 +20,7 @@ jointly smooth in `(t, v)` along any orbit with non-zero initial velocity.
 
 ## Main result
 
-* `off_zero_exp_regularity` — for `v ≠ 0`, the exponential map
+* `expMap_contMDiffAt_of_ne_zero` — for `v ≠ 0`, the exponential map
   `fun w : E => expMap g p w` is `ContMDiffAt 𝓘(ℝ, E) I 1` at `v`.
 
 ## Single-chart building blocks (M1 / M2)
@@ -54,7 +54,7 @@ remaining content — reaching an arbitrary fixed `v ≠ 0` whose geodesic
 leaves the home chart — is genuinely cross-chart and is supplied by the
 re-basing and chart-cover gluing recorded as separate obligations
 (`Geodesic.bm_c_gc_cross_vf_projection_uniqueness` and the chained-flow
-joint regularity); see the proof of `off_zero_exp_regularity`.
+joint regularity); see the proof of `expMap_contMDiffAt_of_ne_zero`.
 -/
 
 noncomputable section
@@ -1632,15 +1632,19 @@ section OffZero
 variable [I.Boundaryless] [CompleteSpace E]
   [T2Space (TangentBundle I M)]
 
-/-- **Off-zero unconditional regularity.** For any smooth Riemannian metric
-`g`, base point `p : M`, and non-zero tangent vector `v ≠ 0`, the
-exponential map `fun w => expMap g p w` is `ContMDiffAt 𝓘(ℝ, E) I 1` at `v`.
+/-- **Exponential-map regularity away from the zero vector.** For a smooth
+Riemannian metric `g`, base point `p : M`, and a nonzero tangent vector
+`v ≠ 0`, the exponential map `fun w => expMap g p w` is `ContMDiffAt 𝓘(ℝ, E) I 1`
+at `v`.
 
-This is the off-zero analogue of `expMap_contMDiffAt_zero_unconditional`;
-the `HasChartFlowGeodesicMatchData` hypothesis needed at the zero vector is
-dropped, since away from `0` the geodesic flow's joint smoothness in
-`(t, v)` yields the regularity unconditionally. -/
-theorem off_zero_exp_regularity
+This is the off-zero analogue of `expMap_contMDiffAt_zero_of_chartFlowGeodesicMatchData`. At
+the zero vector that statement assumes a `HasChartFlowGeodesicMatchData`
+witness; here no such hypothesis is required, because away from `0` the
+joint `C¹` smoothness in `(w, t)` of the chained geodesic flow yields the
+regularity directly. The proof takes the `t = 1` slice of that joint flow:
+it precomposes the flow `(w, t) ↦ maximalGeodesic g p w t` with the smooth
+slice map `w ↦ (w, 1)` and uses `expMap g p w = maximalGeodesic g p w 1`. -/
+theorem expMap_contMDiffAt_of_ne_zero
     (g : SmoothRiemannianMetric I M) (p : M) {v : E}
     (hv : (show TangentSpace I p from v) ≠ 0) :
     ContMDiffAt 𝓘(ℝ, E) I 1
@@ -1655,9 +1659,9 @@ theorem off_zero_exp_regularity
   -- joint-`C¹` regularity of the chained geodesic flow on a ball around
   -- `(v, 1)` (`bm_c_expMap_chainedFlow_joint_contMDiff`, the `C¹`-in-`(v, t)`
   -- strengthening of the chained-flow joint continuity). Here we carry out
-  -- the `t = 1` slice reduction explicitly: `off_zero_exp_regularity`
+  -- the `t = 1` slice reduction explicitly: `expMap_contMDiffAt_of_ne_zero`
   -- follows by precomposing the joint flow with the smooth slice map
-  -- `w ↦ (w, 1)`, exactly as `bm_c_expMap_continuity_from_jointFlow` does
+  -- `w ↦ (w, 1)`, exactly as `expMap_continuous` does
   -- for continuity.
   classical
   -- Joint `C¹` regularity of `(w, t) ↦ maximalGeodesic g p w t` on a

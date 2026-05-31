@@ -936,7 +936,7 @@ private lemma launchSpeedSq_s_hasDerivAt
 
 /-! ## The smooth bounded clamp
 
-To apply the intrinsic mixed-commutation `commute_ds_dt_intrinsic_C2`, the
+To apply the intrinsic mixed-commutation `covDerivAlong_commute_transverse_longitudinal_of_variation`, the
 transverse slices `u ↦ f s u` of the variation must be `C²` at the working
 parameter `t₀` for **every** `s`.  The naive variation
 `f s t = expMap g p (t • (v + s • w))` only enjoys this near `s = 0` (large
@@ -1128,7 +1128,7 @@ private lemma gauss_phi_hasDerivAt
           (fun s : ℝ => mfderiv 𝓘(ℝ, ℝ) I (fun u : ℝ => F s u) t₀ (1 : ℝ)) 0
         = covDerivAlong (I := I) g (fun u : ℝ => F 0 u)
           (fun u : ℝ => mfderiv 𝓘(ℝ, ℝ) I (fun s : ℝ => F s u) 0 (1 : ℝ)) t₀ :=
-    commute_ds_dt_intrinsic_C2 (I := I) g F t₀ hF2 hslice_u_ev hslice_v_ev
+    covDerivAlong_commute_transverse_longitudinal_of_variation (I := I) g F t₀ hF2 hslice_u_ev hslice_v_ev
       htransverse_cont hcentral_cont
   -- The base curve `γ`, the longitudinal velocity field `V`, the variation field `W`.
   set γ : ℝ → M := fun t : ℝ => F 0 t with hγ
@@ -1535,7 +1535,7 @@ theorem gauss_lemma_pullback
   --             with `φ' = ⟨∇_t ∂_t f, ∂_s f⟩ + ⟨∂_t f, ∇_t ∂_s f⟩`
   --             (`metric_compat_hasDerivAt_inner_of_chartCurveDeriv`), first term `= 0`
   --             (geodesic + `covDerivAlong_velocity_eq_zero_of_hasGeodesicEquationAt_C2`),
-  --             second term `= ⟨∂_t f, ∇_s ∂_t f⟩` (`commute_ds_dt_intrinsic_C2`);
+  --             second term `= ⟨∂_t f, ∇_s ∂_t f⟩` (`covDerivAlong_commute_transverse_longitudinal_of_variation`);
   --       (iii) the constant-speed-in-`s` value
   --             `⟨∂_t f, ∇_s ∂_t f⟩ = ½ ∂_s g.inner_p (v + s•w, v + s•w)|₀ = g.inner_p (v, w)`,
   --             plus `φ 0 = 0` (since `∂_s f (0,0) = 0`) and the endpoint
@@ -1560,7 +1560,7 @@ theorem gauss_lemma_pullback
   --     residual (`HopfRinow.lean`); transfer the geodesic equation from
   --     `maximalGeodesic g p a` to `exp_p (·•a)` on `Ioo (0,1)` via the `[0,1]`
   --     rescaling identity and `HasGeodesicEquationAt.congr_of_eventuallyEq_at`.
-  --     All keystones (`metric_compat_*`, `commute_ds_dt_intrinsic_C2`,
+  --     All keystones (`metric_compat_*`, `covDerivAlong_commute_transverse_longitudinal_of_variation`,
   --     `covDerivAlong_velocity_eq_zero_of_hasGeodesicEquationAt_C2`) live in
   --     `SecondVariation` / `CovariantDerivativeAlong`, which do NOT import this file,
   --     so importing them here is cycle-free.

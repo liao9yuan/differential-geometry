@@ -80,7 +80,7 @@ Inside the headline body, the nonemptiness `0 ∈ A`, the supremum attainment
 
 ## The closed propagation argument
 
-The headline `expMapIntrinsic_surjective_dist` is established unconditionally.  The
+The headline `hopf_rinow_expMapIntrinsic_surjective_minimizing` is established unconditionally.  The
 strict-supremum step `t₀ < r → False` (the "no-corner" moving-foot extension of
 `A` past `t₀`) is the reusable metric-sphere distance drop `sphere_jump` applied at
 the moving foot `c := γ(t₀)`, combined with the broken-geodesic no-corner lemma
@@ -1679,7 +1679,7 @@ private lemma broken_piece_firstVariation
     rw [hslice_eq, hF0 t]
     exact hξunit t ht
   -- (E) Free-endpoint first variation.
-  have hfv := first_variation_formula_free_endpoint (I := I) g Fξ len hsmooth hlen hUnit
+  have hfv := first_variation_of_arcLength_free_endpoints (I := I) g Fξ len hsmooth hlen hUnit
   -- (F) The interior integral vanishes (`ξ` is a geodesic).
   have hslice_eq : (fun v : ℝ => Fξ 0 v) = ξ := funext hF0
   -- `covDerivAlong ξ (velocity ξ) t = 0` on `[0, len]`.
@@ -1914,7 +1914,7 @@ theorem broken_minimizer_velocity_match
   -- *smooth* chart `extChartAt I c`, fixing both far endpoints and pushing the
   -- junction off in the `δ` direction with a bump factor.  Each half is a smooth
   -- variation of a geodesic (`covDerivAlong γ' = 0`, so the interior integral in
-  -- `first_variation_formula_free_endpoint` drops out), whose free-endpoint
+  -- `first_variation_of_arcLength_free_endpoints` drops out), whose free-endpoint
   -- boundary terms sum to `⟨δ, T⁻⟩ - ⟨δ, T⁺⟩ = -‖δ‖²_g`.  Minimality of the
   -- broken arc (`hmin` together with `riemannianEDist_le_pathELength`) makes `0` a
   -- local minimum of the total length `L`, so `L'(0) = 0`, forcing `‖δ‖²_g = 0`.
@@ -2330,75 +2330,45 @@ docstring decomposition). -/
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Velocity-identified Hopf–Rinow surjectivity.** On a complete Riemannian
+/-- **Hopf–Rinow surjectivity with a minimizing witness.** On a complete Riemannian
 manifold, for every `p q : M` there is a tangent vector `v : T_p M` with
 `expMapIntrinsic g hEnorm p v = q` and `g`-speed `√(g_p(v, v))` equal to the
-Riemannian distance `(riemannianEDist I p q).toReal`.
+Riemannian distance `(riemannianEDist I p q).toReal`; i.e. `q` is reached by a
+minimizing intrinsic geodesic out of `p`.
 
-(There is no `riemannianDist` definition in the project; the real Riemannian
-distance is `(riemannianEDist I p q).toReal`.)
+The hypothesis `hEnorm` is the structural identity that the tangent-bundle extended
+norm `‖·‖ₑ` is `√(g_p(·,·))`; the real Riemannian distance is taken as
+`(riemannianEDist I p q).toReal` (the project has no separate `riemannianDist`).
 
-DECOMPOSITION (ray/sphere argument):
+The proof is the ray/sphere Hopf–Rinow argument.
 
-* `r = 0` (i.e. `riemannianEDist I p q = 0`): `q = p` (point separation
-  `riemannianEDist_eq_zero_imp_eq`) and `v := 0` works (`expMapIntrinsic g hEnorm
-  p 0 = p`, the constant-geodesic residual; the `g`-speed of `0` is `0 = r`).
+* `r := (riemannianEDist I p q).toReal = 0`: then `q = p` (point separation
+  `riemannianEDist_eq_zero_imp_eq`) and `v := 0` works (`expMapIntrinsic_zero`;
+  the `g`-speed of `0` is `0 = r`).
 
-* `r > 0`: pick `δ ∈ (0, expRadiusGp g p)`.  Let `u` be the `g`-unit minimiser
-  of `riemannianEDist · q` over the compact intrinsic sphere `S_δ`
-  (`exists_min_riemannianEDist_on_intrinsicSphere`).  The two remaining geometric
-  inputs are:
-
-  1.  **Ray jumps onto the sphere.** `riemannianEDist (γ δ) q = r - δ`, where
-      `γ(t) := expMapIntrinsic g hEnorm p (t • u)`.  The `≥` direction is the
-      triangle inequality `riemannianEDist p q ≤ riemannianEDist p (γ δ) +
-      riemannianEDist (γ δ) q` together with `riemannianEDist p (γ δ) = δ` (the
-      radial local minimality `normalBall_radial_length_le_riemannianEDist` plus the
-      reverse path bound).  The `≤` direction is that every path `p → q` crosses
-      the sphere `S_δ`, so the minimiser realises `r - δ` (intermediate-value /
-      path-crosses-sphere on `riemannianEDist`).
-
-      Sub-lemma signature:
-      ```
-      ray_jumps_onto_sphere :
-        0 < δ → δ < expRadiusGp g p → r = (riemannianEDist I p q).toReal →
-        (∀ w, g.inner p w w = 1 →
-          riemannianEDist I (expMapIntrinsic g hEnorm p (δ • u)) q ≤
-            riemannianEDist I (expMapIntrinsic g hEnorm p (δ • w)) q) →
-        g.inner p u u = 1 →
-        (riemannianEDist I (expMapIntrinsic g hEnorm p (δ • u)) q).toReal = r - δ
-      ```
-
-  2.  **Propagation `sup A = r`.** The set `A := { t ∈ [0, r] |
-      (riemannianEDist I (γ t) q).toReal = r - t }` is closed
-      (`propagationSet_isClosed`), nonempty (`0 ∈ A`, since `γ 0 = p` by
-      `expMapIntrinsic_zero` and `(riemannianEDist p q).toReal = r`), and bounded
-      above by `r`, so the supremum `t₀ := sup A` is *attained*
-      (`IsClosed.csSup_mem`): `t₀ ∈ A`, i.e. `0 ≤ t₀ ≤ r` and
-      `(riemannianEDist (γ t₀) q).toReal = r - t₀`.  The remaining input is that
-      `t₀ = r`: if `t₀ < r`, the sphere argument re-based at the moving foot
-      `γ(t₀)` extends `A` strictly past `t₀`, contradicting the supremum.
-
-  Then (`t₀ = r`) `(riemannianEDist (γ r) q).toReal = 0`, so
+* `r > 0`: a base sphere-jump `sphere_jump` at `p` produces a `g`-unit launch
+  direction `u` along which the radial ray `γ(t) := expMapIntrinsic g hEnorm p (t • u)`
+  heads toward `q`.  The propagation set `A := { t ∈ [0, r] |
+  (riemannianEDist I (γ t) q).toReal = r - t }` is closed (`propagationSet_isClosed`),
+  contains a positive `δ₀` (from the base sphere-jump), and is bounded above by `r`,
+  so its supremum `t₀ := sSup A` is attained (`IsClosed.csSup_mem`): `t₀ ∈ A` with
+  `0 < t₀ ≤ r`.  One shows `t₀ = r`; then `(riemannianEDist (γ r) q).toReal = 0`, so
   `riemannianEDist (γ r) q = 0` (finiteness `riemannianEDist_ne_top`) and `γ r = q`
-  (point separation `riemannianEDist_eq_zero_imp_eq`).  The witness `v := r • u`
-  satisfies `expMapIntrinsic g hEnorm p v = γ r = q` and `√(g_p(r•u, r•u)) =
-  r · √(g_p(u,u)) = r · 1 = r` (`sqrt_gInner_smul_self`, `g.inner p u u = 1`).
+  (point separation).  The witness `v := r • u` satisfies
+  `expMapIntrinsic g hEnorm p v = γ r = q` and
+  `√(g_p(r•u, r•u)) = r · √(g_p(u,u)) = r` (`sqrt_gInner_smul_self`, `g.inner p u u = 1`).
 
 The strict-supremum step `t₀ < r → False` (the "no-corner" moving-foot extension)
-is discharged as follows: the sphere-jump `sphere_jump` at the moving foot
-`c := γ(t₀)` produces a sphere-minimiser `y₁ = expMapIntrinsic c (δ' • w₂)` with
-`d(c, y₁) = δ'` and `d(y₁, q) = (r - t₀) - δ'`, giving `d(p, y₁) = t₀ + δ'`.  The
-two unit-speed geodesics `γ = intrinsicGeodesic p u` (on `[0, t₀]`) and
-`σ := intrinsicGeodesic c w₂` (on `[0, δ']`) then meet the hypotheses of the
-broken-geodesic no-corner lemma `broken_minimizer_velocity_match`, whose conclusion
-`mfderiv γ t₀ 1 = mfderiv σ 0 1 = w₂` identifies the forward radial direction at the
-foot with `w₂`.  The autonomous time-translation continuation
-`intrinsicGeodesic_continuation` then forces `γ(t₀ + δ') = σ δ' = y₁`, so
-`t₀ + δ' ∈ A`, contradicting `δ' > 0` and `t₀ = sSup A`.  The base launch direction
-`u` is itself the sphere-minimiser at `p` (`sphere_jump` at `p`), so `δ₀ ∈ A` is
-nonempty positive from the outset.  The whole theorem is proved unconditionally. -/
-theorem expMapIntrinsic_surjective_dist
+runs as follows: a sphere-jump at the moving foot `c := γ(t₀)` produces a
+sphere-minimiser `y₁ = expMapIntrinsic c (δ' • w₂)` with `d(c, y₁) = δ'`,
+`d(y₁, q) = (r - t₀) - δ'`, and hence `d(p, y₁) = t₀ + δ'`.  The two unit-speed
+geodesics `Γu := intrinsicGeodesic p u` (on `[0, t₀]`) and `σ := intrinsicGeodesic c w₂`
+(on `[0, δ']`) meet the hypotheses of the broken-geodesic no-corner lemma
+`broken_minimizer_velocity_match`, whose conclusion `mfderiv Γu t₀ 1 = mfderiv σ 0 1 = w₂`
+identifies the forward radial direction at the foot with `w₂`.  The autonomous
+time-translation continuation `intrinsicGeodesic_continuation` then forces
+`Γu(t₀ + δ') = σ δ' = y₁`, so `t₀ + δ' ∈ A`, contradicting `δ' > 0` and `t₀ = sSup A`. -/
+theorem hopf_rinow_expMapIntrinsic_surjective_minimizing
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)

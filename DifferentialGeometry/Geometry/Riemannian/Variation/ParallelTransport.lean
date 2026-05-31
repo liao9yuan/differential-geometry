@@ -954,13 +954,14 @@ constancy argument, with both covariant-correction terms vanishing because
 both sections are parallel. -/
 
 set_option linter.unusedVariables false in
-/-- **Global parallel transport preserves the inner product.** If two sections
-`V`, `W` along the smooth curve `γ` have vanishing intrinsic covariant
-derivative `covDerivAlong g γ · = 0` on `Icc lo hi` and differentiable
-chart-`(γ t)`-coordinate representations there, then the genuine Riemannian
-inner product `t ↦ g(γ t)(V t, W t)` is constant on `Icc lo hi` (equal to its
-value at `lo`). -/
-theorem global_parallel_transport_preserves_inner [I.Boundaryless]
+/-- **Parallel transport preserves the inner product.** If two sections `V`, `W`
+along the smooth curve `γ` have vanishing intrinsic covariant derivative
+`covDerivAlong g γ · = 0` on `Icc lo hi` and differentiable
+chart-`(γ t)`-coordinate representations there, then the Riemannian inner
+product `t ↦ g(γ t)(V t, W t)` is constant on `Icc lo hi`, equal to its value at
+`lo`. The two covariant-correction terms cancel by metric compatibility because
+both sections are parallel. -/
+theorem parallel_transport_preserves_inner_product [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) {lo hi : ℝ} (hlohi : lo ≤ hi)
     (V W : ∀ t, TangentSpace I (γ t))
@@ -1085,11 +1086,13 @@ positive-definiteness: the difference `D := V - W` is itself parallel (covariant
 derivative is ℝ-linear), so its squared `g`-length is constant; vanishing at the
 agreement point forces `D ≡ 0`. -/
 
-/-- **Intrinsic uniqueness of parallel transport.** If `V` and `W` are sections
-along the smooth curve `γ` with vanishing intrinsic covariant derivative on
-`Icc lo hi` and differentiable chart representations there, and `V t₀ = W t₀` for
-some `t₀ ∈ Icc lo hi`, then `V t = W t` for every `t ∈ Icc lo hi`. -/
-theorem parallel_transport_unique_of_agree [I.Boundaryless]
+/-- **Uniqueness of parallel transport.** If `V` and `W` are sections along the
+smooth curve `γ` with vanishing intrinsic covariant derivative on `Icc lo hi`
+and differentiable chart representations there, and `V t₀ = W t₀` at some
+`t₀ ∈ Icc lo hi`, then `V t = W t` for every `t ∈ Icc lo hi`. The difference
+`V - W` is parallel, so its squared `g`-length is constant; vanishing at `t₀`
+forces it to vanish everywhere by positive-definiteness of `g`. -/
+theorem parallel_transport_unique_of_eq_at_point [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) {lo hi : ℝ} (hlohi : lo ≤ hi)
     (V W : ∀ t, TangentSpace I (γ t))
@@ -1131,7 +1134,7 @@ theorem parallel_transport_unique_of_agree [I.Boundaryless]
     simp
   -- The squared `g`-length of `D` is constant, hence `0` everywhere (since `D t₀ = 0`).
   have hDt₀ : D t₀ = 0 := by rw [hD_def]; simp only; rw [hagree]; abel
-  have hconst := global_parallel_transport_preserves_inner (I := I) g γ hγ hlohi D D
+  have hconst := parallel_transport_preserves_inner_product (I := I) g γ hγ hlohi D D
     hDdiff hDdiff hDpar hDpar
   intro t ht
   -- `g.inner (γ t) (D t) (D t) = g.inner (γ lo) (D lo) (D lo)`... pin to `t₀`.
@@ -1211,7 +1214,7 @@ theorem exists_uniform_chart_radius
 Assembling the single-chart pieces into one globally-defined parallel section.
 The construction proceeds by induction on the partition: at each step the
 section already built on `[0, sₖ]` is extended over the next chart-piece, the
-overlap pinned by `parallel_transport_unique_of_agree`. Because every point of
+overlap pinned by `parallel_transport_unique_of_eq_at_point`. Because every point of
 `Icc 0 L` lies in the open interior of some chart-piece, the intrinsic
 parallelism and chart-rep differentiability hold at every `t ∈ Icc 0 L`. -/
 
@@ -1224,13 +1227,13 @@ chart-`(γ t)`-coordinate representation is differentiable at every
 The section is glued from single-chart parallel-transport solutions
 (`exists_piece_parallel_section`) across a uniform chart cover of the compact
 curve image (`exists_uniform_chart_radius`), with uniqueness
-(`parallel_transport_unique_of_agree`) ensuring consistency across overlaps.
+(`parallel_transport_unique_of_eq_at_point`) ensuring consistency across overlaps.
 
 The construction is a `Nat.rec` over reach times `c n := min L (n · r/4)`: given
 the section already parallel on the open window `Ioo (-step) (c n + step)`, the
 next step solves a chart-piece centred at `c n` on `[c n - step, c n + 2 step]`
 (within a single chart by the uniform radius), pins the overlap
-`[c n - step/2, c n]` by `parallel_transport_unique_of_agree`, and glues with an
+`[c n - step/2, c n]` by `parallel_transport_unique_of_eq_at_point`, and glues with an
 `if t ≤ c n` cut; the locality of `chartRepAt` / `covDerivAlong` then transfers
 differentiability and parallelism to the extended window. Termination is reached
 once `n · step ≥ L`, where the window covers `Icc 0 L`.
@@ -1238,7 +1241,7 @@ once `n · step ≥ L`, where the window covers `Icc 0 L`.
 This open-window form exposes the genuine domain of the construction: the section
 is parallel and chart-differentiable not merely on the closed interval `Icc 0 L`
 but on an *open neighbourhood* `Ioo (-δ) (L + δ)` of it (`δ > 0`). The closed-form
-`exists_global_parallel_transport_on_Icc` is the immediate corollary. -/
+`exists_parallel_transport_on_Icc` is the immediate corollary. -/
 theorem exists_global_parallel_transport_on_Ioo [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (hγ : ContMDiff 𝓘(ℝ,ℝ) I ∞ γ) {L : ℝ} (hL : 0 < L) (v₀ : TangentSpace I (γ 0)) :
@@ -1352,7 +1355,7 @@ theorem exists_global_parallel_transport_on_Ioo [I.Boundaryless]
         refine ⟨by linarith [hs.1, hstep_pos], by linarith [hs.2, hstep_pos]⟩
       -- Uniqueness on the overlap: `Vn = Vp` there (they agree at `c n`).
       have hagree : ∀ s ∈ Set.Icc ov_lo (c n), Vn s = Vp s := by
-        refine parallel_transport_unique_of_agree (I := I) g γ hγ hov_lo_lt Vn Vp
+        refine parallel_transport_unique_of_eq_at_point (I := I) g γ hγ hov_lo_lt Vn Vp
           (fun s hs => hVn_diff s (hVn_dom hs)) (fun s hs => hVp_diff s (hVp_dom hs))
           (fun s hs => hVn_par s (hVn_dom hs)) (fun s hs => hVp_par s (hVp_dom hs))
           ⟨hov_lo_lt, le_refl _⟩ ?_
@@ -1432,10 +1435,14 @@ theorem exists_global_parallel_transport_on_Ioo [I.Boundaryless]
   · intro t ht
     exact hV_par t ⟨ht.1, ht.2⟩
 
-/-- **Global parallel transport on `Icc 0 L`.** The closed-interval corollary of
-`exists_global_parallel_transport_on_Ioo`: a parallel, chart-differentiable
-section along `γ` with prescribed initial value `v₀ = V 0`, on `Icc 0 L`. -/
-theorem exists_global_parallel_transport_on_Icc [I.Boundaryless]
+/-- **Existence of parallel transport on `Icc 0 L`.** For a smooth curve `γ`,
+`L > 0`, and any initial tangent vector `v₀ ∈ T_{γ 0} M`, there is a section `V`
+along `γ` with `V 0 = v₀` whose chart-`(γ t)`-coordinate representation is
+differentiable at every `t ∈ Icc 0 L` and whose intrinsic covariant derivative
+vanishes on `Icc 0 L`. This is the closed-interval corollary of
+`exists_global_parallel_transport_on_Ioo`, obtained by restricting its open
+window `Ioo (-δ) (L + δ)` to `Icc 0 L`. -/
+theorem exists_parallel_transport_on_Icc [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (hγ : ContMDiff 𝓘(ℝ,ℝ) I ∞ γ) {L : ℝ} (hL : 0 < L) (v₀ : TangentSpace I (γ 0)) :
     ∃ V : ∀ t, TangentSpace I (γ t),

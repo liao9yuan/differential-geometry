@@ -71,7 +71,7 @@ private lemma chartedExpAt_contMDiffAt_zero
   have hexp : ContMDiffAt 𝓘(ℝ, E) I 1
       (fun v : E => (expMap (I := I) g p (show TangentSpace I p from v) : M))
       (0 : E) :=
-    expMap_contMDiffAt_zero_truly_unconditional (I := I) g p
+    expMap_contMDiffAt_zero (I := I) g p
   have hext : ContMDiffAt I 𝓘(ℝ, E) 1 (extChartAt I p)
       (expMap (I := I) g p (show TangentSpace I p from (0 : E))) := by
     have hpt : expMap (I := I) g p (show TangentSpace I p from (0 : E)) = p :=
@@ -95,7 +95,7 @@ private lemma chartedExpAt_hasFDerivAt_zero
   have hexp_mfd : HasMFDerivAt 𝓘(ℝ, E) I
       (fun v : E => (expMap (I := I) g p (show TangentSpace I p from v) : M))
       (0 : E) (ContinuousLinearMap.id ℝ E) := by
-    have hm := ((expMap_contMDiffAt_zero_truly_unconditional (I := I) g p).mdifferentiableAt
+    have hm := ((expMap_contMDiffAt_zero (I := I) g p).mdifferentiableAt
       one_ne_zero).hasMFDerivAt
     rw [mfderiv_expMap_at_zero (I := I) g p] at hm
     exact hm
@@ -217,7 +217,7 @@ private theorem exists_nice_open_nhds
   have hexp : ContMDiffAt 𝓘(ℝ, E) I 1
       (fun v : E => (expMap (I := I) g p (show TangentSpace I p from v) : M))
       (0 : E) :=
-    expMap_contMDiffAt_zero_truly_unconditional (I := I) g p
+    expMap_contMDiffAt_zero (I := I) g p
   haveI : IsManifold I 1 M := by
     have : (1 : WithTop ℕ∞) ≤ ∞ := by exact_mod_cast (by decide : (1 : ℕ∞) ≤ ⊤)
     exact IsManifold.of_le this
