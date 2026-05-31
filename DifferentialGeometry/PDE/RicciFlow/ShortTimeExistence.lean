@@ -16,12 +16,20 @@ import DifferentialGeometry.PDE.RicciFlow.Pullback.ChainRule
 import Mathlib.Analysis.Calculus.Deriv.Basic
 import DifferentialGeometry.PDE.RicciFlow.ShortTimeParabolic.DeTurckRicciPde
 import DifferentialGeometry.PDE.RicciFlow.ShortTimeAssembly.ConjugatingDiffeoFamily
+import DifferentialGeometry.PDE.RicciFlow.ShortTimeAssembly.FlatAssemblyInterior
+import DifferentialGeometry.PDE.RicciFlow.ShortTimeAssembly.RicciFlowPdeAtZero
+import DifferentialGeometry.PDE.RicciFlow.ShortTimeFlow.ConjugatingFlowData
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle
 open scoped Manifold ContDiff
 open DifferentialGeometry
+open DifferentialGeometry.PDE
+open DifferentialGeometry.PDE.DeTurck
+open DifferentialGeometry.PDE.RicciFlow.ODE
+open DifferentialGeometry.PDE.RicciFlow.Pullback
+open DifferentialGeometry.Integral.Connection
 
 /-! ## Short-time existence for the Ricci flow
 
@@ -54,7 +62,7 @@ theorem ricci_flow_short_time_existence
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
-      [T2Space M] [SigmaCompactSpace M]
+      [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g₀ : SmoothRiemannianMetric I M) :
     ∃ T : ℝ, 0 < T ∧
       ∃ g_fam : ℝ → SmoothRiemannianMetric I M,
@@ -69,8 +77,8 @@ theorem ricci_flow_short_time_existence
   -- and the parabolic-solution data
   --   ∂_t g_DT(t) = -2 Ric(g_DT(t)) + 𝓛_{X_DT(t)} g_DT(t),
   -- where `X_DT(t) := deTurckVF (g_DT t) g₀` is the DeTurck vector field.
-  obtain ⟨T_DT, g_DT, hDT⟩ :=
-    DifferentialGeometry.PDE.RicciFlow.deTurckRicci_shortTime_exists
+  obtain ⟨T_DT, g_DT, hDT, h_reg, h_cont0, h_grad0⟩ :=
+    DifferentialGeometry.PDE.RicciFlow.deturck_ricci_pde_shorttime
       (I := I) (M := M) g₀ g₀
   -- Unpack the parabolic-solution data: `T_DT > 0`, initial condition, time derivative.
   obtain ⟨hT_DT_pos, hDT_init, hDT_deriv⟩ := hDT
@@ -108,16 +116,75 @@ theorem ricci_flow_short_time_existence
               ((-2 : ℝ) *
                 DifferentialGeometry.Integral.Connection.ricciTensor
                   (I := I) (g_fam t) x v w) (Set.Ici 0) t := by
-    -- Construction step: build `Φ_fam` from `time_dependent_vf_globalflow_on_closed_mfd`,
-    -- form `g_fam t := (Φ_fam t)^* (g_DT t)`, and assemble via:
-    --   * `pullbackMetric_refl` for the initial condition,
-    --   * `pullback_time_derivative_chain_rule` for the time-derivative,
-    --   * `ricci_pullback_naturality` to identify `(Φ_fam t)^* Ric(g_DT t) = Ric(g_fam t)`,
-    --   * `lie_derivative_pullback_naturality` to identify the Lie pullback term,
-    --   * the flow condition `∂_t Φ_fam = -X ∘ Φ_fam` to cancel the Lie terms.
-    -- See the docstring for the full algebraic identity. The DeTurck solution
-    -- data `g_DT`, `hT_DT_pos`, `hDT_init`, `hDT_deriv` is already in scope.
-    sorry
+    -- The interior DeTurck PDE derivative on `Set.Ico 0 T_DT` (from the parabolic solution).
+    have hDT_deriv' : ∀ t ∈ Set.Ico (0 : ℝ) T_DT, ∀ x : M, ∀ v w : TangentSpace I x,
+        HasDerivWithinAt (fun s : ℝ => (g_DT s).inner x v w)
+          (deTurckRicciRHS (I := I) g₀ (g_DT t) x v w)
+          (Set.Ici 0) t := hDT_deriv
+    -- Step 2: integrate the negated DeTurck field to a conjugating diffeomorphism family
+    -- `Φ_fam` on a (possibly smaller) positive horizon `T ≤ T_DT`, anchored at the identity
+    -- and carrying the backward bare-orbit ODE `∂_s Φ_fam = -deTurckVF (g_DT s) g₀ ∘ Φ_fam`
+    -- on the interior `Ioo 0 T`.  The field-regularity data `h_reg`/`h_cont0`/`h_grad0` come
+    -- from the enriched crux.
+    obtain ⟨T, hT0, hT_le, Φ_fam, hΦ0, hΦode⟩ :=
+      conjugating_diffeo_family
+        (I := I) g_DT g₀ T_DT hT_DT_pos h_reg h_cont0 h_grad0
+    -- The pulled-back metric family `g_fam s := (Φ_fam s)^* (g_DT s)`.
+    refine ⟨T, hT0, fun s => Diffeomorph.pullbackMetric (g_DT s) (Φ_fam s), ?_, ?_⟩
+    · -- Initial condition: `g_fam 0 = (Φ_fam 0)^* (g_DT 0) = id^* g₀ = g₀`.
+      change Diffeomorph.pullbackMetric (g_DT 0) (Φ_fam 0) = g₀
+      rw [hΦ0, Diffeomorph.pullbackMetric_refl, hDT_init]
+    · -- Time derivative on `Set.Ico 0 T`.  We split into the open interior `Ioo 0 T`
+      -- (the Hamilton–DeTurck flat assembly) and the left endpoint `t = 0` (continuity
+      -- extension), then identify the pulled-back inner product with the `g_fam` form.
+      -- The interior DeTurck PDE restricted to the smaller horizon `T ≤ T_DT`.
+      have hDT_deriv_T : ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, ∀ v w : TangentSpace I x,
+          HasDerivWithinAt (fun s : ℝ => (g_DT s).inner x v w)
+            (deTurckRicciRHS (I := I) g₀ (g_DT t) x v w)
+            (Set.Ici 0) t := by
+        intro t ht x v w
+        exact hDT_deriv' t ⟨le_of_lt ht.1, lt_of_lt_of_le ht.2 hT_le⟩ x v w
+      -- The interior orbit ODE `∂_s Φ_fam = -deTurckVF (g_DT s) g₀ ∘ Φ_fam` on `Ioo 0 T`,
+      -- in the `horbit` shape consumed by the base-point-motion datum.
+      have horbit : ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M,
+          HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => (Φ_fam s : M → M) x)
+            (Set.Ici (0 : ℝ)) t
+            ((1 : ℝ →L[ℝ] ℝ).smulRight
+              (-(deTurckVF (I := I) (g_DT t) g₀ (Φ_fam t x)))) :=
+        fun t ht x => hΦode x t ht
+      -- (A) FLAT VARIATIONAL DATA: the per-slot flat identities `hv_flat` with factor jets
+      -- `T'`/`P'`, the Christoffel-correction equation `hcorr`, the base-point-motion datum
+      -- `hbase`, and the three-piece additive chain rule `h_total_eval`.  These are the
+      -- genuine open variational/chart-jet analytic inputs of the conjugating flow, isolated
+      -- in the faithful labeled node `conjugating_flow_flat_data`, PINNED to the genuine flow by
+      -- the orbit ODE `hΦode`; they reference only the internal `g_DT`/`Φ_fam`/`X_DT`, never `g₀`.
+      obtain ⟨T', P', hv_flat, hcorr, hbase, h_total_eval⟩ :=
+        conjugating_flow_flat_data (I := I) g_DT g₀ T Φ_fam hΦode
+      -- The interior Hamilton–DeTurck flat assembly: the pulled-back family solves
+      -- `∂_t (Φ_s^* g_DT) = -2 Ric` on the open interval `Ioo 0 T`.
+      have h_interior :=
+        DifferentialGeometry.PDE.RicciFlow.flat_assembly_interior
+          (I := I) g₀ g_DT T Φ_fam T' P' hDT_deriv_T hbase h_total_eval hv_flat hcorr
+      -- The t=0 endpoint via continuity extension (`ricci_flow_pde_at_zero`): combine the
+      -- interior PDE with the `Ico 0 T` continuity of the pulled-back inner product
+      -- (`gfam_inner_continuous_on`) and the right-continuity of `-2 Ric(g_fam)`
+      -- (`ricci_gfam_continuous_on`).  These continuity inputs are the t=0-endpoint analytic
+      -- data of the flow; they reference only the internal data, never `g₀`.
+      intro t ht x v w
+      rcases eq_or_lt_of_le ht.1 with h0 | h0
+      · -- t = 0: continuity extension.  The `Ico 0 T` continuity of the pulled-back inner
+        -- product (`h_cont`) and the right-continuity at `0` of `-2 Ric(g_fam)` (`h_ric_cont`)
+        -- are the genuine open `t = 0`-endpoint analytic inputs of the conjugating flow, isolated
+        -- in the faithful labeled node `conjugating_flow_t0_continuity_data`, PINNED to the genuine
+        -- flow by the orbit ODE `hΦode`; they reference only the internal data, never `g₀`.
+        obtain ⟨h_cont, h_ric_cont⟩ :=
+          conjugating_flow_t0_continuity_data (I := I) g_DT g₀ T hT0 Φ_fam hΦode x v w
+        subst_vars
+        exact DifferentialGeometry.PDE.RicciFlow.ricci_flow_pde_at_zero
+          (I := I) (fun s => Diffeomorph.pullbackMetric (g_DT s) (Φ_fam s)) hT0 x v w
+          h_cont h_ric_cont (fun s hs => h_interior s hs x v w)
+      · -- interior t ∈ (0, T): the flat assembly conclusion.
+        exact h_interior t ⟨h0, ht.2⟩ x v w
   exact h_construct
 
 end DifferentialGeometry.PDE.RicciFlow

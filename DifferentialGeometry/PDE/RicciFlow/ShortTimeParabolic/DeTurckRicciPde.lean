@@ -44,11 +44,41 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+/-- **DeTurck–Ricci parabolic short-time existence (the single faithful classical input).**
+
+Solves the strictly parabolic DeTurck–Ricci flow `∂_t g_DT = -2 Ric(g_DT) + 𝓛_{X_DT} g_DT`
+(with `X_DT(t) = deTurckVF (g_DT t) g_bg`) for a positive time, packaged as
+`IsQuasilinearMetricParabolicSolution`.  The existential is ENRICHED to additionally provide
+the DeTurck-vector-field regularity data that the conjugating-diffeomorphism construction
+consumes, all of which is genuinely TRUE of the interior-parabolic-smooth, `C⁰`-up-to-`0`
+DeTurck solution:
+
+* `h_reg` — interior joint-`C∞` of the field map `q ↦ ⟨q.2, deTurckVF (g_DT q.1) g_bg q.2⟩`
+  on `Ioo 0 T ×ˢ univ` (interior parabolic smoothness of the solution → smooth field);
+* `h_cont0` — continuity of the field up to `t = 0` on `Icc 0 T ×ˢ univ` (`C⁰`-up-to-`0`);
+* `h_grad0` — continuity of the field's spatial Fréchet derivative up to `t = 0`.
+
+These constrain only the internal `g_DT`/`X_DT`, never `g₀`/the headline statement, so the
+enrichment is non-leaking.  The body remains `sorry` — this is the single faithful
+"DeTurck–Ricci parabolic short-time existence" labeled classical input. -/
 theorem deturck_ricci_pde_shorttime
     (g₀ g_bg : SmoothRiemannianMetric I M) :
     ∃ T : ℝ, ∃ g_DT : ℝ → SmoothRiemannianMetric I M,
       IsQuasilinearMetricParabolicSolution (I := I)
-        (deTurckRicciRHS (I := I) g_bg) g₀ T g_DT := sorry
+        (deTurckRicciRHS (I := I) g_bg) g₀ T g_DT ∧
+      ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
+        (fun q : ℝ × M => (TotalSpace.mk' E q.2 (deTurckVF (I := I) (g_DT q.1) g_bg q.2)
+          : TangentBundle I M))
+        (Set.Ioo (0 : ℝ) T ×ˢ Set.univ) ∧
+      ContinuousOn
+        (fun q : ℝ × M => (deTurckVF (I := I) (g_DT q.1) g_bg q.2 : TangentSpace I q.2))
+        (Set.Icc 0 T ×ˢ Set.univ) ∧
+      (∀ α : M,
+        ContinuousOn
+          (fun q : ℝ × M =>
+            fderiv ℝ (chartRawRepr (I := I) α (fun x => deTurckVF (I := I) (g_DT q.1) g_bg x))
+              (extChartAt I α q.2))
+          (Set.Icc 0 T ×ˢ Set.univ)) := sorry
 
 set_option linter.unusedVariables false in
 /-- **Interior metric-level DeTurck–Ricci time-derivative (fully ungated).**

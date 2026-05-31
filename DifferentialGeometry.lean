@@ -1335,6 +1335,7 @@ import DifferentialGeometry.PDE.RicciFlow.ShortTimeFlow.DeTurckVFSmoothness
 import DifferentialGeometry.PDE.RicciFlow.ShortTimeFlow.ForwardFlow
 import DifferentialGeometry.PDE.RicciFlow.ShortTimeFlow.InteriorLocalFlow
 import DifferentialGeometry.PDE.RicciFlow.ShortTimeFlow.CutoffExtension
+import DifferentialGeometry.PDE.RicciFlow.ShortTimeFlow.ConjugatingFlowData
 -- Ricci-flow short-time existence: Hamilton–DeTurck headline assembly + t=0
 import DifferentialGeometry.PDE.RicciFlow.ShortTimeAssembly.FlatAssemblyInterior
 import DifferentialGeometry.PDE.RicciFlow.ShortTimeAssembly.ConjugatingDiffeoFamily
