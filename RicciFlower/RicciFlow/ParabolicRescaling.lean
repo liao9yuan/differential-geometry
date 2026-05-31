@@ -317,8 +317,17 @@ private theorem metricTracePair0SAt_scaleMetric
     ricciNorm (I := I) (paraSolution (I := I) S τ R hR hτ) =
       fun s x => R⁻¹ * R⁻¹ * ricciNorm (I := I) S (paraTime τ R s) x := by
   funext s x
-  simp [ricciNorm, SolutionOn.family, SolutionOn.ricci, paraSolution, paraFamily,
-    paraSolution_ricci (I := I) S τ R hR hτ, normSq0S_two_scale, mul_assoc]
+  have hRic :
+      (paraSolution (I := I) S τ R hR hτ).ricci s x =
+        S.ricci (paraTime τ R s) x := by
+    have h := paraSolution_ricci (I := I) S τ R hR hτ
+    change ((paraSolution (I := I) S τ R hR hτ).base.ricci s) x =
+      (S.base.ricci (paraTime τ R s)) x
+    exact congrArg (fun A => A x) (congrFun h s)
+  rw [ricciNorm, hRic]
+  simpa [SolutionOn.family, paraSolution, paraFamily, ricciNorm, mul_assoc] using
+    (normSq0S_two_scale (I := I) R hR (S.family.metric (paraTime τ R s))
+      (x := x) (A := S.ricci (paraTime τ R s) x))
 
 private theorem paraRicciNormGrad_eq
     {D : Realized.RealTimeInterval}
@@ -343,8 +352,16 @@ private theorem paraRicciNormGrad_eq
         Realized.gradientFun (I := I)
           (scaleMetric (I := I) R hR (S.family.metric (paraTime τ R s)))
           ((R⁻¹ * R⁻¹) • ricciNorm (I := I) S (paraTime τ R s)) x := by
-          simp [SolutionOn.family, paraSolution, paraFamily, paraSolution_ricciNorm,
-            Pi.smul_apply, smul_eq_mul, mul_assoc]
+          have hfun :
+              ricciNorm (I := I) (paraSolution (I := I) S τ R hR hτ) s =
+                (R⁻¹ * R⁻¹) • ricciNorm (I := I) S (paraTime τ R s) := by
+            funext y
+            have h := congrFun
+              (congrFun (paraSolution_ricciNorm (I := I) S τ R hR hτ) s) y
+            rw [h]
+            simp [Pi.smul_apply, smul_eq_mul, mul_assoc]
+          rw [hfun]
+          simp [SolutionOn.family, paraSolution, paraFamily]
     _ =
         R⁻¹ • Realized.gradientFun (I := I) (S.family.metric (paraTime τ R s))
           ((R⁻¹ * R⁻¹) • ricciNorm (I := I) S (paraTime τ R s)) x := by
@@ -359,7 +376,7 @@ private theorem paraRicciNormGrad_eq
         (R⁻¹ * R⁻¹ * R⁻¹) •
           Realized.gradientFun (I := I) (S.family.metric (paraTime τ R s))
             (ricciNorm (I := I) S (paraTime τ R s)) x := by
-          simp [smul_smul, mul_assoc, mul_comm, mul_left_comm]
+          simp [smul_smul, mul_comm]
 
 private theorem lcConnectionSmooth
     (g : SmoothRiemannianMetric I M) :
@@ -611,8 +628,16 @@ theorem paraSol
         MDifferentiableAt I 𝓘(Real, Real)
           (ricciNorm (I := I) S (paraTime τ R t)) x :=
       hS.ricciNormSpace (paraTime τ R t) ht x
-    have hscaled := hOld.const_mul (R⁻¹ * R⁻¹)
-    simpa [paraSolution_ricciNorm (I := I) S τ R hR hτ, mul_assoc] using hscaled
+    have hscaled := hOld.const_smul (R⁻¹ * R⁻¹)
+    have hfun :
+        ricciNorm (I := I) (paraSolution (I := I) S τ R hR hτ) t =
+          (R⁻¹ * R⁻¹) • ricciNorm (I := I) S (paraTime τ R t) := by
+      funext y
+      have h := congrFun
+        (congrFun (paraSolution_ricciNorm (I := I) S τ R hR hτ) t) y
+      rw [h]
+      simp [Pi.smul_apply, smul_eq_mul, mul_assoc]
+    simpa [hfun] using hscaled
   ricciNormGrad := by
     intro t ht x
     have hOld :
@@ -627,18 +652,37 @@ theorem paraSol
               (ricciNorm (I := I) S (paraTime τ R t)) y) x := by
       simpa [Pi.smul_apply] using
         (mdifferentiableAt_const (I := I) (c := R⁻¹ * R⁻¹ * R⁻¹)).smul_section hOld
-    have hfun :
-        (fun y : M =>
+    have hpt : ∀ y : M,
+        Realized.gradientFun (I := I)
+          ((paraSolution (I := I) S τ R hR hτ).family.metric t)
+          (ricciNorm (I := I) (paraSolution (I := I) S τ R hR hτ) t) y =
+          (R⁻¹ * R⁻¹ * R⁻¹) •
+            Realized.gradientFun (I := I) (S.family.metric (paraTime τ R t))
+              (ricciNorm (I := I) S (paraTime τ R t)) y := by
+      intro y
+      exact paraRicciNormGrad_eq (I := I) S hS τ R hR hτ ht y
+    have htotal :
+        (T% fun y : M =>
           Realized.gradientFun (I := I)
             ((paraSolution (I := I) S τ R hR hτ).family.metric t)
             (ricciNorm (I := I) (paraSolution (I := I) S τ R hR hτ) t) y) =
-          fun y : M =>
+          (T% fun y : M =>
             (R⁻¹ * R⁻¹ * R⁻¹) •
               Realized.gradientFun (I := I) (S.family.metric (paraTime τ R t))
-                (ricciNorm (I := I) S (paraTime τ R t)) y := by
+                (ricciNorm (I := I) S (paraTime τ R t)) y) := by
       funext y
-      exact paraRicciNormGrad_eq (I := I) S hS τ R hR hτ ht y
-    simpa [hfun] using hscaled
+      change
+          TotalSpace.mk' E y
+            (Realized.gradientFun (I := I)
+              ((paraSolution (I := I) S τ R hR hτ).family.metric t)
+              (ricciNorm (I := I) (paraSolution (I := I) S τ R hR hτ) t) y) =
+            TotalSpace.mk' E y
+              ((R⁻¹ * R⁻¹ * R⁻¹) •
+                Realized.gradientFun (I := I) (S.family.metric (paraTime τ R t))
+                  (ricciNorm (I := I) S (paraTime τ R t)) y)
+      rw [hpt y]
+    rw [htotal]
+    exact hscaled
   scalarEvolution := by
     -- Frontier: preserve scalar heat evolution under the canonical scalar and
     -- Laplacian scaling laws for parabolic rescaling.

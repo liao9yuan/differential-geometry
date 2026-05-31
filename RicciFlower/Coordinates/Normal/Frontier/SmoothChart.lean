@@ -415,7 +415,7 @@ theorem expAt_localDiffeomorph
     (g : SmoothRiemannianMetric I M) (x : M) :
     Nonempty (NormalExpLocalDiffeomorphData (I := I) g x) := by
   obtain ⟨R, _hR, τ, _hτ, Ψ, hzero, hreal, hchart,
-    chartLD, hzero_src, hsrc_ball, hchartLD⟩ :=
+    _hmodelData, chartLD, hzero_src, hsrc_ball, hchartLD⟩ :=
     exists_varFlow_smooth_endpoint (I := I) g x
   exact expData_of_chartLD (I := I) g x Ψ hzero hreal hchart
     chartLD hzero_src hsrc_ball hchartLD

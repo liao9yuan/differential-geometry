@@ -497,6 +497,106 @@ theorem jacobi_torsionSwap_smooth
     simpa [HasPBParamCovDerivAt, paramCurve, paramRestrictField, timeField,
       Lecture07.surfaceParamCurve, Lecture07.surfaceTimeField] using h
 
+/-- Local-on-open smooth-surface torsion swap for a torsion-free connection.
+
+This is the local version needed by ball-defined radial exponential variations:
+the surface only has to be smooth on an open source containing the point. -/
+theorem jacobi_torsionSwap_contMDiffOn
+    [IsManifold I 1 M] [IsManifold I 2 M]
+    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    (htf : LeviCivita.IsTorsionFree (I := I) cov)
+    {F : Surface M} {U : Set (Real × Real)} {s t : Real}
+    (hU : IsOpen U)
+    (hF : ContMDiffOn 𝓘(Real, Real × Real) I ∞ F U)
+    (hp : (s, t) ∈ U) :
+    VariationTorsionSwapAt (I := I) cov F s t
+      (fun τ => Lecture07.dsTimeField (I := I) cov F (s, τ)) := by
+  constructor
+  · have h := Lecture07.hasTime_param_eq_dsTime_of_contMDiffOn
+      (I := I) (cov := cov) htf hU hF hp
+    simpa [HasPBTimeCovDerivAt, timeCurve, variationField, paramField,
+      Lecture07.surfaceTimeCurve, Lecture07.surfaceParamField] using h
+  · have h := Lecture07.hasParam_dsTime_of_contMDiffOn
+      (I := I) (cov := cov) hU hF hp
+    simpa [HasPBParamCovDerivAt, paramCurve, paramRestrictField, timeField,
+      Lecture07.surfaceParamCurve, Lecture07.surfaceTimeField] using h
+
+/-- Local-on-open geodesic-variation curvature commutator with the canonical
+`D_s T` field.
+
+This is the local counterpart of `jacobi_curvComm_geodesic`: instead of a
+globally smooth surface and a rectangular geodesic variation, it needs
+smoothness on an open source plus an ordinary geodesic germ near `(s,t)`. -/
+theorem jacobi_curvComm_contMDiffOn_of_geoGerm
+    [T2Space M] [IsManifold I 1 M] [IsManifold I 2 M]
+    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    {hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov ∞}
+    (hcov1 : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
+      (1 : WithTop ℕ∞))
+    {F : Surface M} {U : Set (Real × Real)} {s t : Real}
+    (hU : IsOpen U)
+    (hF : ContMDiffOn 𝓘(Real, Real × Real) I ∞ F U)
+    (hp : (s, t) ∈ U)
+    (hgeo :
+      ∀ᶠ q : Real × Real in 𝓝 (s, t),
+        HasPBCovAccelAt (I := I) cov (timeCurve F q.1) q.2
+          (0 : TangentSpace I (F q))) :
+    VariationCurvCommAt (I := I) cov hcov F s t
+      (fun τ => Lecture07.dsTimeField (I := I) cov F (s, τ)) := by
+  let DtsV : TangentSpace I (F (s, t)) :=
+    Lecture07.dtdsTimeFieldIn (I := I) cov (F (s, t)) F s t
+  have hUevent : ∀ᶠ q : Real × Real in 𝓝 (s, t), q ∈ U :=
+    hU.mem_nhds hp
+  have hVs :
+      ∀ᶠ q : Real × Real in 𝓝 (s, t),
+        HasPBParamCovDerivAt (I := I) cov F (timeField I F)
+          q.1 q.2 (Lecture07.dsTimeField (I := I) cov F q) := by
+    filter_upwards [hUevent] with q hq
+    simpa [timeField, Lecture07.surfaceTimeField] using
+      Lecture07.hasParam_dsTime_of_contMDiffOn
+        (I := I) (cov := cov) hU hF hq
+  have hDts :
+      HasPBTimeCovDerivAt (I := I) cov F
+        (Lecture07.dsTimeField (I := I) cov F)
+        s t DtsV := by
+    simpa [DtsV, Lecture07.HasPBTimeCovDerivAt] using
+      Lecture07.hasTime_dsTime_of_contMDiffOn
+        (I := I) (cov := cov) hcov1 hU hF hp
+  have hjet :
+      HasPBSurfaceCovDeriv2At (I := I) cov F (timeField I F)
+        (Lecture07.dsTimeField (I := I) cov F) (fun _ => 0)
+        s t (0 : TangentSpace I (F (s, t))) DtsV := by
+    refine
+      { has_param_germ := hVs
+        has_time_germ := ?_
+        has_param_time := ?_
+        has_time_param := hDts }
+    · filter_upwards [hgeo] with q hq
+      simpa [HasPBTimeCovDerivAt, HasPBCovAccelAt, timeField,
+        Lecture07.surfaceTimeCurve, timeCurve, velocityAlong] using hq
+    · have hFat : ContMDiffAt 𝓘(Real, Real × Real) I ∞ F (s, t) :=
+        hF.contMDiffAt (hU.mem_nhds hp)
+      have hparam : MDifferentiableAt 𝓘(Real, Real) I
+          (Lecture07.surfaceParamCurve F t) s :=
+        Lecture07.mdiffAt_param_of_contMDiffAt (I := I) hFat
+      exact HasPBParamCovDerivAt.zero (I := I) (cov := cov) hparam
+  let jet := Lecture07.coordSurfJet_of_contMDiffOn
+    (I := I) (cov := cov) hcov1 hU hF hp
+  exact curvComm_surface (I := I) (cov := cov) (hcov := hcov) hcov1
+    hjet
+    (by simpa [jet] using jet.hmem_s)
+    (by simpa [jet] using jet.hmem_t)
+    jet.S jet.T jet.Ts jet.St
+    (by intro i; simpa [jet, paramField] using jet.hS i)
+    (by intro i; simpa [jet, timeField] using jet.hT i)
+    (by intro i; simpa [jet, paramField, timeField] using jet.hTderiv i)
+    (by intro i; simpa [jet, paramField, timeField] using jet.hSderiv i)
+    (by intro i j k; simpa [jet] using jet.hCs i j k)
+    (by intro i j k; simpa [jet] using jet.hCt i j k)
+    jet.hvt_s jet.hvs jet.hvs_t jet.hvt jet.hmix_raw jet.hmix
+
 /-- Smooth geodesic-variation curvature commutator with the canonical
 `D_s T` field. -/
 theorem jacobi_curvComm_geodesic

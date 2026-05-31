@@ -17,7 +17,10 @@ daily work logs.
 
 ## Active Native Frontiers
 
-- Section 10 Hamilton quotient specialization and improved pinching producers.
+- Section 11/12 global inputs: normalized maximal-flow existence, no-local
+  collapsing, Hamilton--Cheeger--Gromov compactness, convergence transfer to
+  the limit, scalar strong maximum principle on the complete limit flow, and
+  final topological handoff.
 
 ## Closed Or Stable Native Results
 

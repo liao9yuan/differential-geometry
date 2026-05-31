@@ -296,7 +296,8 @@ theorem metric_inner_contMDiffAt
     (g : SmoothRiemannianMetric I M)
     {X Y : (p : M) → TangentSpace I p} {x : M} {n : WithTop ℕ∞}
     (hX : ContMDiffAt I (I.prod 𝓘(Real, E)) n (T% X) x)
-    (hY : ContMDiffAt I (I.prod 𝓘(Real, E)) n (T% Y) x) :
+    (hY : ContMDiffAt I (I.prod 𝓘(Real, E)) n (T% Y) x)
+    (hn : n ≤ ∞) :
     ContMDiffAt I 𝓘(Real, Real) n
       (fun y : M => g.inner y (X y) (Y y)) x := by
   have hg :
@@ -307,7 +308,7 @@ theorem metric_inner_contMDiffAt
             (E := fun y : M =>
               TangentSpace I y →L[Real] TangentSpace I y →L[Real] Real)
             y (g.inner y)) x :=
-    (g.contMDiff.contMDiffAt).of_le le_top
+    (g.contMDiff.contMDiffAt).of_le hn
   have htotal :
       ContMDiffAt I (I.prod 𝓘(Real, Real)) n
         (fun y : M =>

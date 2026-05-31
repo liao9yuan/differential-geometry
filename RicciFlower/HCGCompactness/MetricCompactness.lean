@@ -311,6 +311,8 @@ def metricCompactness
     (_hgeom : SeqBoundedGeometry (I := I) X)
     (_hinj : BaseInjBound (I := I) X) :
     MetricCompactnessConclusion (I := I) X := by
+  -- Chapter 4 deep geometric inputs are isolated in
+  -- `RicciFlower.HCGCompactness.GeometricInputs`.
   -- Real frontier: Cheeger--Gromov compactness, direct limits, and smooth
   -- Arzela--Ascoli on the pulled-back metrics.
   sorry

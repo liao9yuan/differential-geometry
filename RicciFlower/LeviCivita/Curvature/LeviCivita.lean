@@ -162,7 +162,8 @@ private theorem contMDiffAt_metric_inner
     (g : SmoothRiemannianMetric I M)
     {X Y : (p : M) -> TangentSpace I p} {x : M} {n : WithTop ℕ∞}
     (hX : ContMDiffAt I (I.prod 𝓘(Real, E)) n (T% X) x)
-    (hY : ContMDiffAt I (I.prod 𝓘(Real, E)) n (T% Y) x) :
+    (hY : ContMDiffAt I (I.prod 𝓘(Real, E)) n (T% Y) x)
+    (hn : n ≤ ∞) :
     ContMDiffAt I 𝓘(Real, Real) n
       (fun y : M => g.inner y (X y) (Y y)) x := by
   have hg :
@@ -173,7 +174,7 @@ private theorem contMDiffAt_metric_inner
             (E := fun y : M =>
               TangentSpace I y →L[Real] TangentSpace I y →L[Real] Real)
             y (g.inner y)) x :=
-    (g.contMDiff.contMDiffAt).of_le le_top
+    (g.contMDiff.contMDiffAt).of_le hn
   have htotal :
       ContMDiffAt I (I.prod 𝓘(Real, Real)) n
         (fun y : M =>
@@ -790,6 +791,9 @@ private theorem connectionRiemannCurvatureField_metric_skew_at_of_metricCompatib
     simpa [Wc] using contMDiffAt_tangentConstAt_self_minTwo (I := I) x W
   have hf2 : ContMDiffAt I 𝓘(Real, Real) (minSmoothness Real 2) f x := by
     simpa [f] using contMDiffAt_metric_inner (I := I) g hZ2 hW2
+      (by
+        simpa [minSmoothness_of_isRCLikeNormedField] using
+          (by decide : (2 : WithTop ℕ∞) <= ∞))
   haveI : IsManifold I (minSmoothness Real 2) M := by
     rw [minSmoothness_of_isRCLikeNormedField]
     exact (inferInstance : IsManifold I 2 M)

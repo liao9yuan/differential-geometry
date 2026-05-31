@@ -160,6 +160,114 @@ theorem SmoothSurface.coordCompAt_contMDiffAt {F : Surface M}
   simpa [surfaceCoordComp] using
     (hlin.contMDiffAt.comp (s, t) hcoord).contDiffAt
 
+/-- Local version of `SmoothSurface.coordAt_contMDiffAt`. -/
+theorem coordAt_contMDiffAt_of_contMDiffAt {F : Surface M}
+    {x₀ : M} {s t : Real}
+    (hF : ContMDiffAt 𝓘(Real, Real × Real) I ∞ F (s, t))
+    (hx : F (s, t) ∈ coordinateFrameSet (I := I) x₀) :
+    ContMDiffAt 𝓘(Real, Real × Real) 𝓘(Real, E) ∞
+      (surfaceCoord (I := I) x₀ F) (s, t) := by
+  have hx_chart : F (s, t) ∈ (chartAt H x₀).source := by
+    simpa [coordinateFrameSet, coordinateTrivializationAt] using hx
+  have hchart : ContMDiffAt I 𝓘(Real, E) ∞
+      (extChartAt I x₀) (F (s, t)) :=
+    contMDiffAt_extChartAt' (I := I) hx_chart
+  simpa [surfaceCoord] using hchart.comp (s, t) hF
+
+/-- Local version of `SmoothSurface.coordCompAt_contMDiffAt`. -/
+theorem coordCompAt_contDiffAt_of_contMDiffAt {F : Surface M}
+    {x₀ : M} {s t : Real}
+    (hF : ContMDiffAt 𝓘(Real, Real × Real) I ∞ F (s, t))
+    (hx : F (s, t) ∈ coordinateFrameSet (I := I) x₀)
+    (i : CoordinateIdx (𝕜 := Real) E) :
+    ContDiffAt Real ∞
+      (fun p : Real × Real => surfaceCoordComp (I := I) x₀ F p i) (s, t) := by
+  have hcoord := coordAt_contMDiffAt_of_contMDiffAt (I := I) hF hx
+  have hlin : ContMDiff 𝓘(Real, E) 𝓘(Real, Real) ∞
+      (fun y : E => (Module.finBasis Real E).repr y i) :=
+    (LinearMap.toContinuousLinearMap
+      ((Module.finBasis Real E).coord i)).contMDiff
+  simpa [surfaceCoordComp] using
+    (hlin.contMDiffAt.comp (s, t) hcoord).contDiffAt
+
+/-- Local smoothness of a fixed-time parameter line. -/
+theorem contMDiffAt_param_of_contMDiffAt {F : Surface M}
+    {s t : Real}
+    (hF : ContMDiffAt 𝓘(Real, Real × Real) I ∞ F (s, t)) :
+    ContMDiffAt 𝓘(Real, Real) I ∞ (surfaceParamCurve F t) s := by
+  have hline :
+      ContMDiffAt 𝓘(Real, Real) 𝓘(Real, Real × Real) ∞
+        (fun σ : Real => (σ, t)) s := by
+    simpa using
+      ((contDiffAt_id.prodMk contDiffAt_const :
+        ContDiffAt Real ∞ (fun σ : Real => (σ, t)) s).contMDiffAt)
+  simpa [surfaceParamCurve] using hF.comp s hline
+
+/-- Local smoothness of a fixed-parameter time line. -/
+theorem contMDiffAt_time_of_contMDiffAt {F : Surface M}
+    {s t : Real}
+    (hF : ContMDiffAt 𝓘(Real, Real × Real) I ∞ F (s, t)) :
+    ContMDiffAt 𝓘(Real, Real) I ∞ (surfaceTimeCurve F s) t := by
+  have hline :
+      ContMDiffAt 𝓘(Real, Real) 𝓘(Real, Real × Real) ∞
+        (fun τ : Real => (s, τ)) t := by
+    simpa using
+      ((contDiffAt_const.prodMk contDiffAt_id :
+        ContDiffAt Real ∞ (fun τ : Real => (s, τ)) t).contMDiffAt)
+  simpa [surfaceTimeCurve] using hF.comp t hline
+
+/-- Local differentiability of a fixed-time parameter line. -/
+theorem mdiffAt_param_of_contMDiffAt {F : Surface M}
+    {s t : Real}
+    (hF : ContMDiffAt 𝓘(Real, Real × Real) I ∞ F (s, t)) :
+    MDifferentiableAt 𝓘(Real, Real) I (surfaceParamCurve F t) s :=
+  (contMDiffAt_param_of_contMDiffAt (I := I) hF).mdifferentiableAt (by simp)
+
+/-- Local differentiability of a fixed-parameter time line. -/
+theorem mdiffAt_time_of_contMDiffAt {F : Surface M}
+    {s t : Real}
+    (hF : ContMDiffAt 𝓘(Real, Real × Real) I ∞ F (s, t)) :
+    MDifferentiableAt 𝓘(Real, Real) I (surfaceTimeCurve F s) t :=
+  (contMDiffAt_time_of_contMDiffAt (I := I) hF).mdifferentiableAt (by simp)
+
+/-- If a locally smooth surface point lies in a fixed coordinate-frame domain,
+nearby points on the parameter line remain there. -/
+theorem coordMem_param_of_mem_of_contMDiffAt {F : Surface M}
+    {x₀ : M} {s t : Real}
+    (hF : ContMDiffAt 𝓘(Real, Real × Real) I ∞ F (s, t))
+    (hx : F (s, t) ∈ coordinateFrameSet (I := I) x₀) :
+    ∀ᶠ σ : Real in 𝓝 s,
+      F (σ, t) ∈ coordinateFrameSet (I := I) x₀ := by
+  have hU : IsOpen (coordinateFrameSet (I := I) x₀) :=
+    coordinateFrameSet_open (I := I) x₀
+  have hline : ContinuousAt (fun σ : Real => (σ, t)) s :=
+    ContinuousAt.prodMk continuousAt_id continuousAt_const
+  have hFst : ContinuousAt F ((fun σ : Real => (σ, t)) s) :=
+    hF.continuousAt
+  have hcomp : ContinuousAt (fun σ : Real => F (σ, t)) s := by
+    simpa [Function.comp_def] using
+      (hFst.comp (f := fun σ : Real => (σ, t)) hline)
+  exact hcomp.eventually_mem (hU.mem_nhds hx)
+
+/-- If a locally smooth surface point lies in a fixed coordinate-frame domain,
+nearby points on the time line remain there. -/
+theorem coordMem_time_of_mem_of_contMDiffAt {F : Surface M}
+    {x₀ : M} {s t : Real}
+    (hF : ContMDiffAt 𝓘(Real, Real × Real) I ∞ F (s, t))
+    (hx : F (s, t) ∈ coordinateFrameSet (I := I) x₀) :
+    ∀ᶠ τ : Real in 𝓝 t,
+      F (s, τ) ∈ coordinateFrameSet (I := I) x₀ := by
+  have hU : IsOpen (coordinateFrameSet (I := I) x₀) :=
+    coordinateFrameSet_open (I := I) x₀
+  have hline : ContinuousAt (fun τ : Real => (s, τ)) t :=
+    ContinuousAt.prodMk continuousAt_const continuousAt_id
+  have hFst : ContinuousAt F ((fun τ : Real => (s, τ)) t) :=
+    hF.continuousAt
+  have hcomp : ContinuousAt (fun τ : Real => F (s, τ)) t := by
+    simpa [Function.comp_def] using
+      (hFst.comp (f := fun τ : Real => (s, τ)) hline)
+  exact hcomp.eventually_mem (hU.mem_nhds hx)
+
 /-- The fixed-center coordinate expression of a smooth surface is smooth along
 a fixed-time parameter line through the chart center. -/
 theorem SmoothSurface.surfaceCoord_param_contMDiffAt {F : Surface M}
@@ -402,6 +510,84 @@ theorem SmoothSurface.paramFrameCoeff_eq_coordDeriv {F : Surface M}
   rw [hchain]
   rfl
 
+/-- Local version of `SmoothSurface.timeFrameCoeff_eq_coordDeriv`. -/
+theorem timeFrameCoeff_eq_coordDeriv_of_contMDiffAt {F : Surface M}
+    {x₀ : M} {s t : Real}
+    (hF : ContMDiffAt 𝓘(Real, Real × Real) I ∞ F (s, t))
+    (hx : F (s, t) ∈ coordinateFrameSet (I := I) x₀)
+    (i : CoordinateIdx (𝕜 := Real) E) :
+    timeFrameCoeff (I := I) x₀ F s t i =
+      (Module.finBasis Real E).repr
+        ((mfderiv 𝓘(Real, Real) 𝓘(Real, E)
+          (fun τ : Real => surfaceCoord (I := I) x₀ F (s, τ)) t)
+          (1 : TangentSpace 𝓘(Real, Real) t)) i := by
+  have hx_chart : F (s, t) ∈ (chartAt H x₀).source := by
+    simpa [coordinateFrameSet, coordinateTrivializationAt] using hx
+  have hchart : MDifferentiableAt I 𝓘(Real, E) (extChartAt I x₀) (F (s, t)) :=
+    mdifferentiableAt_extChartAt (I := I) (x := x₀) hx_chart
+  have hline : MDifferentiableAt 𝓘(Real, Real) I (surfaceTimeCurve F s) t :=
+    mdiffAt_time_of_contMDiffAt (I := I) hF
+  have hchain :
+      mfderiv 𝓘(Real, Real) 𝓘(Real, E)
+          ((extChartAt I x₀) ∘ surfaceTimeCurve F s) t =
+        (mfderiv I 𝓘(Real, E) (extChartAt I x₀) (F (s, t))).comp
+          (mfderiv 𝓘(Real, Real) I (surfaceTimeCurve F s) t) := by
+    simpa [surfaceTimeCurve] using
+      (mfderiv_comp (I := 𝓘(Real, Real)) (I' := I) (I'' := 𝓘(Real, E))
+        (x := t) hchart hline)
+  rw [timeFrameCoeff, surfaceTimeField, curveVelocity]
+  rw [coordCoeff_eq_chart (I := I) hx]
+  change
+    (Module.finBasis Real E).repr
+        ((mfderiv I 𝓘(Real, E) (extChartAt I x₀) (F (s, t)))
+          ((mfderiv 𝓘(Real, Real) I (surfaceTimeCurve F s) t)
+            (1 : TangentSpace 𝓘(Real, Real) t))) i =
+      (Module.finBasis Real E).repr
+        ((mfderiv 𝓘(Real, Real) 𝓘(Real, E)
+          ((extChartAt I x₀) ∘ surfaceTimeCurve F s) t)
+          (1 : TangentSpace 𝓘(Real, Real) t)) i
+  rw [hchain]
+  rfl
+
+/-- Local version of `SmoothSurface.paramFrameCoeff_eq_coordDeriv`. -/
+theorem paramFrameCoeff_eq_coordDeriv_of_contMDiffAt {F : Surface M}
+    {x₀ : M} {s t : Real}
+    (hF : ContMDiffAt 𝓘(Real, Real × Real) I ∞ F (s, t))
+    (hx : F (s, t) ∈ coordinateFrameSet (I := I) x₀)
+    (i : CoordinateIdx (𝕜 := Real) E) :
+    paramFrameCoeff (I := I) x₀ F s t i =
+      (Module.finBasis Real E).repr
+        ((mfderiv 𝓘(Real, Real) 𝓘(Real, E)
+          (fun σ : Real => surfaceCoord (I := I) x₀ F (σ, t)) s)
+          (1 : TangentSpace 𝓘(Real, Real) s)) i := by
+  have hx_chart : F (s, t) ∈ (chartAt H x₀).source := by
+    simpa [coordinateFrameSet, coordinateTrivializationAt] using hx
+  have hchart : MDifferentiableAt I 𝓘(Real, E) (extChartAt I x₀) (F (s, t)) :=
+    mdifferentiableAt_extChartAt (I := I) (x := x₀) hx_chart
+  have hline : MDifferentiableAt 𝓘(Real, Real) I (surfaceParamCurve F t) s :=
+    mdiffAt_param_of_contMDiffAt (I := I) hF
+  have hchain :
+      mfderiv 𝓘(Real, Real) 𝓘(Real, E)
+          ((extChartAt I x₀) ∘ surfaceParamCurve F t) s =
+        (mfderiv I 𝓘(Real, E) (extChartAt I x₀) (F (s, t))).comp
+          (mfderiv 𝓘(Real, Real) I (surfaceParamCurve F t) s) := by
+    simpa [surfaceParamCurve] using
+      (mfderiv_comp (I := 𝓘(Real, Real)) (I' := I) (I'' := 𝓘(Real, E))
+        (x := s) hchart hline)
+  rw [paramFrameCoeff, surfaceParamField, curveVelocity]
+  rw [coordCoeff_eq_chart (I := I) hx]
+  change
+    (Module.finBasis Real E).repr
+        ((mfderiv I 𝓘(Real, E) (extChartAt I x₀) (F (s, t)))
+          ((mfderiv 𝓘(Real, Real) I (surfaceParamCurve F t) s)
+            (1 : TangentSpace 𝓘(Real, Real) s))) i =
+      (Module.finBasis Real E).repr
+        ((mfderiv 𝓘(Real, Real) 𝓘(Real, E)
+          ((extChartAt I x₀) ∘ surfaceParamCurve F t) s)
+          (1 : TangentSpace 𝓘(Real, Real) s)) i
+  rw [hchain]
+  rfl
+
 /-- In a fixed coordinate frame, the time-velocity coefficient is the vertical
 partial derivative of the fixed-center coordinate component. -/
 theorem SmoothSurface.timeFrameCoeff_eq_coordTimeDeriv {F : Surface M}
@@ -552,6 +738,344 @@ theorem SmoothSurface.paramFrameCoeff_eq_coordParamDeriv {F : Surface M}
   rw [← hcomp]
   exact hmf_apply
 
+/-- Local version of `SmoothSurface.timeFrameCoeff_eq_coordTimeDeriv`. -/
+theorem timeFrameCoeff_eq_coordTimeDeriv_of_contMDiffAt {F : Surface M}
+    {x₀ : M} {s t : Real}
+    (hF : ContMDiffAt 𝓘(Real, Real × Real) I ∞ F (s, t))
+    (hx : F (s, t) ∈ coordinateFrameSet (I := I) x₀)
+    (i : CoordinateIdx (𝕜 := Real) E) :
+    timeFrameCoeff (I := I) x₀ F s t i =
+      coordTimeDeriv (I := I) x₀ F s t i := by
+  let L : E →L[Real] Real :=
+    LinearMap.toContinuousLinearMap ((Module.finBasis Real E).coord i)
+  let g : Real -> E := fun τ => surfaceCoord (I := I) x₀ F (s, τ)
+  have hL_smooth : ContMDiff 𝓘(Real, E) 𝓘(Real, Real) ∞
+      (fun y : E => L y) :=
+    L.contMDiff
+  have hL : MDifferentiableAt 𝓘(Real, E) 𝓘(Real, Real)
+      (fun y : E => L y) (g t) :=
+    hL_smooth.contMDiffAt.mdifferentiableAt
+      (by simp : (∞ : WithTop ℕ∞) ≠ 0)
+  have hline : ContMDiffAt 𝓘(Real, Real)
+      𝓘(Real, Real × Real) ∞
+      (fun τ : Real => (s, τ)) t := by
+    simpa using
+      ((contDiffAt_const.prodMk contDiffAt_id :
+        ContDiffAt Real ∞ (fun τ : Real => (s, τ)) t).contMDiffAt)
+  have hg : MDifferentiableAt 𝓘(Real, Real) 𝓘(Real, E) g t := by
+    have hcomp := (coordAt_contMDiffAt_of_contMDiffAt (I := I) hF hx).comp t hline
+    exact hcomp.mdifferentiableAt (by simp)
+  have hscalar : HasDerivAt
+      (fun τ : Real => surfaceCoordComp (I := I) x₀ F (s, τ) i)
+      (coordTimeDeriv (I := I) x₀ F s t i) t := by
+    have hdiff : DifferentiableAt Real
+        (fun p : Real × Real => surfaceCoordComp (I := I) x₀ F p i) (s, t) :=
+      (coordCompAt_contDiffAt_of_contMDiffAt (I := I) hF hx i).differentiableAt
+        (by simp)
+    exact modelLine_snd_hasDerivAt (A := fun p : Real × Real =>
+      surfaceCoordComp (I := I) x₀ F p i) hdiff
+  have hmf := hscalar.hasFDerivAt.hasMFDerivAt.mfderiv
+  have hmf_apply :
+      (mfderiv 𝓘(Real, Real) 𝓘(Real, Real)
+        (fun τ : Real => surfaceCoordComp (I := I) x₀ F (s, τ) i) t)
+          (1 : TangentSpace 𝓘(Real, Real) t) =
+        coordTimeDeriv (I := I) x₀ F s t i := by
+    rw [hmf]
+    exact ContinuousLinearMap.toSpanSingleton_apply_one
+      (R₁ := Real) (x := coordTimeDeriv (I := I) x₀ F s t i)
+  have hcomp :
+      (mfderiv 𝓘(Real, Real) 𝓘(Real, Real)
+        (fun τ : Real => surfaceCoordComp (I := I) x₀ F (s, τ) i) t)
+          (1 : TangentSpace 𝓘(Real, Real) t) =
+        (Module.finBasis Real E).repr
+          ((mfderiv 𝓘(Real, Real) 𝓘(Real, E) g t)
+            (1 : TangentSpace 𝓘(Real, Real) t)) i := by
+    have h :=
+      mfderiv_comp_apply
+        (I := 𝓘(Real, Real)) (I' := 𝓘(Real, E))
+        (I'' := 𝓘(Real, Real))
+        (g := fun y : E => L y) (f := g)
+        (x := t) (v := (1 : TangentSpace 𝓘(Real, Real) t))
+        hL hg
+    have heq :
+        (fun τ : Real => surfaceCoordComp (I := I) x₀ F (s, τ) i) =
+          (fun y : E => L y) ∘ g := by
+      funext τ
+      simp [L, g, surfaceCoordComp]
+    rw [heq]
+    have hLmf :
+        mfderiv 𝓘(Real, E) 𝓘(Real, Real) (fun y : E => L y) (g t) = L := by
+      rw [mfderiv_eq_fderiv (𝕜 := Real) (f := fun y : E => L y) (x := g t)]
+      exact ContinuousLinearMap.fderiv L
+    rw [hLmf] at h
+    simpa [L] using h
+  rw [timeFrameCoeff_eq_coordDeriv_of_contMDiffAt (I := I) hF hx i]
+  rw [← hcomp]
+  exact hmf_apply
+
+/-- Local version of `SmoothSurface.paramFrameCoeff_eq_coordParamDeriv`. -/
+theorem paramFrameCoeff_eq_coordParamDeriv_of_contMDiffAt {F : Surface M}
+    {x₀ : M} {s t : Real}
+    (hF : ContMDiffAt 𝓘(Real, Real × Real) I ∞ F (s, t))
+    (hx : F (s, t) ∈ coordinateFrameSet (I := I) x₀)
+    (i : CoordinateIdx (𝕜 := Real) E) :
+    paramFrameCoeff (I := I) x₀ F s t i =
+      coordParamDeriv (I := I) x₀ F s t i := by
+  let L : E →L[Real] Real :=
+    LinearMap.toContinuousLinearMap ((Module.finBasis Real E).coord i)
+  let g : Real -> E := fun σ => surfaceCoord (I := I) x₀ F (σ, t)
+  have hL_smooth : ContMDiff 𝓘(Real, E) 𝓘(Real, Real) ∞
+      (fun y : E => L y) :=
+    L.contMDiff
+  have hL : MDifferentiableAt 𝓘(Real, E) 𝓘(Real, Real)
+      (fun y : E => L y) (g s) :=
+    hL_smooth.contMDiffAt.mdifferentiableAt
+      (by simp : (∞ : WithTop ℕ∞) ≠ 0)
+  have hline : ContMDiffAt 𝓘(Real, Real)
+      𝓘(Real, Real × Real) ∞
+      (fun σ : Real => (σ, t)) s := by
+    simpa using
+      ((contDiffAt_id.prodMk contDiffAt_const :
+        ContDiffAt Real ∞ (fun σ : Real => (σ, t)) s).contMDiffAt)
+  have hg : MDifferentiableAt 𝓘(Real, Real) 𝓘(Real, E) g s := by
+    have hcomp := (coordAt_contMDiffAt_of_contMDiffAt (I := I) hF hx).comp s hline
+    exact hcomp.mdifferentiableAt (by simp)
+  have hscalar : HasDerivAt
+      (fun σ : Real => surfaceCoordComp (I := I) x₀ F (σ, t) i)
+      (coordParamDeriv (I := I) x₀ F s t i) s := by
+    have hdiff : DifferentiableAt Real
+        (fun p : Real × Real => surfaceCoordComp (I := I) x₀ F p i) (s, t) :=
+      (coordCompAt_contDiffAt_of_contMDiffAt (I := I) hF hx i).differentiableAt
+        (by simp)
+    exact modelLine_fst_hasDerivAt (A := fun p : Real × Real =>
+      surfaceCoordComp (I := I) x₀ F p i) hdiff
+  have hmf := hscalar.hasFDerivAt.hasMFDerivAt.mfderiv
+  have hmf_apply :
+      (mfderiv 𝓘(Real, Real) 𝓘(Real, Real)
+        (fun σ : Real => surfaceCoordComp (I := I) x₀ F (σ, t) i) s)
+          (1 : TangentSpace 𝓘(Real, Real) s) =
+        coordParamDeriv (I := I) x₀ F s t i := by
+    rw [hmf]
+    exact ContinuousLinearMap.toSpanSingleton_apply_one
+      (R₁ := Real) (x := coordParamDeriv (I := I) x₀ F s t i)
+  have hcomp :
+      (mfderiv 𝓘(Real, Real) 𝓘(Real, Real)
+        (fun σ : Real => surfaceCoordComp (I := I) x₀ F (σ, t) i) s)
+          (1 : TangentSpace 𝓘(Real, Real) s) =
+        (Module.finBasis Real E).repr
+          ((mfderiv 𝓘(Real, Real) 𝓘(Real, E) g s)
+            (1 : TangentSpace 𝓘(Real, Real) s)) i := by
+    have h :=
+      mfderiv_comp_apply
+        (I := 𝓘(Real, Real)) (I' := 𝓘(Real, E))
+        (I'' := 𝓘(Real, Real))
+        (g := fun y : E => L y) (f := g)
+        (x := s) (v := (1 : TangentSpace 𝓘(Real, Real) s))
+        hL hg
+    have heq :
+        (fun σ : Real => surfaceCoordComp (I := I) x₀ F (σ, t) i) =
+          (fun y : E => L y) ∘ g := by
+      funext σ
+      simp [L, g, surfaceCoordComp]
+    rw [heq]
+    have hLmf :
+        mfderiv 𝓘(Real, E) 𝓘(Real, Real) (fun y : E => L y) (g s) = L := by
+      rw [mfderiv_eq_fderiv (𝕜 := Real) (f := fun y : E => L y) (x := g s)]
+      exact ContinuousLinearMap.fderiv L
+    rw [hLmf] at h
+    simpa [L] using h
+  rw [paramFrameCoeff_eq_coordDeriv_of_contMDiffAt (I := I) hF hx i]
+  rw [← hcomp]
+  exact hmf_apply
+
+/-- Local-on-open version of
+`SmoothSurface.timeFrameCoeff_param_hasDerivAt_of_mem`. -/
+theorem timeFrameCoeff_param_hasDerivAt_of_mem_on {F : Surface M}
+    {U : Set (Real × Real)} (hU : IsOpen U)
+    (hF : ContMDiffOn 𝓘(Real, Real × Real) I ∞ F U)
+    {x₀ : M} {s t : Real} (hp : (s, t) ∈ U)
+    (hx : F (s, t) ∈ coordinateFrameSet (I := I) x₀)
+    (i : CoordinateIdx (𝕜 := Real) E) :
+    HasDerivAt
+      (fun σ : Real => timeFrameCoeff (I := I) x₀ F σ t i)
+      (coordTs (I := I) x₀ F s t i) s := by
+  let φ : Real × Real -> Real :=
+    fun p => surfaceCoordComp (I := I) x₀ F p i
+  let A : Real × Real -> Real :=
+    fun p => coordTimeDeriv (I := I) x₀ F p.1 p.2 i
+  have hFat : ContMDiffAt 𝓘(Real, Real × Real) I ∞ F (s, t) :=
+    hF.contMDiffAt (hU.mem_nhds hp)
+  have hφ : ContDiffAt Real ∞ φ (s, t) := by
+    simpa [φ] using coordCompAt_contDiffAt_of_contMDiffAt (I := I) hFat hx i
+  have hA : ContDiffAt Real ∞ A (s, t) := by
+    have hD : ContDiffAt Real ∞
+        (fun p : Real × Real =>
+          (fderiv Real φ p) (0, (1 : Real))) (s, t) := by
+      have hfder := hφ.fderiv_right (m := ∞) (by rw [ENat.coe_top_add_one])
+      exact hfder.clm_apply contDiffAt_const
+    simpa [A, φ, coordTimeDeriv] using hD
+  have hderiv :
+      HasDerivAt (fun σ : Real => A (σ, t))
+        (coordTs (I := I) x₀ F s t i) s := by
+    have hdiff : DifferentiableAt Real A (s, t) :=
+      hA.differentiableAt (by simp : (∞ : WithTop ℕ∞) ≠ 0)
+    simpa [A, coordTs] using
+      modelLine_fst_hasDerivAt (A := A) (s := s) (t := t) hdiff
+  have hline_mem : ∀ᶠ σ : Real in 𝓝 s, (σ, t) ∈ U := by
+    have hline : ContinuousAt (fun σ : Real => (σ, t)) s :=
+      ContinuousAt.prodMk continuousAt_id continuousAt_const
+    have hcomp : ContinuousAt (fun σ : Real => (σ, t)) s := hline
+    exact hcomp.eventually_mem (hU.mem_nhds hp)
+  have heq :
+      (fun σ : Real => timeFrameCoeff (I := I) x₀ F σ t i)
+        =ᶠ[𝓝 s] fun σ : Real => A (σ, t) := by
+    filter_upwards
+      [coordMem_param_of_mem_of_contMDiffAt (I := I) hFat hx, hline_mem]
+      with σ hσ hσU
+    have hFσ : ContMDiffAt 𝓘(Real, Real × Real) I ∞ F (σ, t) :=
+      hF.contMDiffAt (hU.mem_nhds hσU)
+    simpa [A] using
+      timeFrameCoeff_eq_coordTimeDeriv_of_contMDiffAt (I := I) hFσ hσ i
+  exact hderiv.congr_of_eventuallyEq heq
+
+/-- Local-on-open version of
+`SmoothSurface.paramFrameCoeff_time_hasDerivAt`. -/
+theorem paramFrameCoeff_time_hasDerivAt_of_mem_on {F : Surface M}
+    {U : Set (Real × Real)} (hU : IsOpen U)
+    (hF : ContMDiffOn 𝓘(Real, Real × Real) I ∞ F U)
+    {x₀ : M} {s t : Real} (hp : (s, t) ∈ U)
+    (hx : F (s, t) ∈ coordinateFrameSet (I := I) x₀)
+    (i : CoordinateIdx (𝕜 := Real) E) :
+    HasDerivAt
+      (fun τ : Real => paramFrameCoeff (I := I) x₀ F s τ i)
+      (coordSt (I := I) x₀ F s t i) t := by
+  let φ : Real × Real -> Real :=
+    fun p => surfaceCoordComp (I := I) x₀ F p i
+  let A : Real × Real -> Real :=
+    fun p => coordParamDeriv (I := I) x₀ F p.1 p.2 i
+  have hFat : ContMDiffAt 𝓘(Real, Real × Real) I ∞ F (s, t) :=
+    hF.contMDiffAt (hU.mem_nhds hp)
+  have hφ : ContDiffAt Real ∞ φ (s, t) := by
+    simpa [φ] using coordCompAt_contDiffAt_of_contMDiffAt (I := I) hFat hx i
+  have hA : ContDiffAt Real ∞ A (s, t) := by
+    have hD : ContDiffAt Real ∞
+        (fun p : Real × Real =>
+          (fderiv Real φ p) ((1 : Real), 0)) (s, t) := by
+      have hfder := hφ.fderiv_right (m := ∞) (by rw [ENat.coe_top_add_one])
+      exact hfder.clm_apply contDiffAt_const
+    simpa [A, φ, coordParamDeriv] using hD
+  have hderiv :
+      HasDerivAt (fun τ : Real => A (s, τ))
+        (coordSt (I := I) x₀ F s t i) t := by
+    have hdiff : DifferentiableAt Real A (s, t) :=
+      hA.differentiableAt (by simp : (∞ : WithTop ℕ∞) ≠ 0)
+    simpa [A, coordSt] using
+      modelLine_snd_hasDerivAt (A := A) (s := s) (t := t) hdiff
+  have hline_mem : ∀ᶠ τ : Real in 𝓝 t, (s, τ) ∈ U := by
+    have hline : ContinuousAt (fun τ : Real => (s, τ)) t :=
+      ContinuousAt.prodMk continuousAt_const continuousAt_id
+    exact hline.eventually_mem (hU.mem_nhds hp)
+  have heq :
+      (fun τ : Real => paramFrameCoeff (I := I) x₀ F s τ i)
+        =ᶠ[𝓝 t] fun τ : Real => A (s, τ) := by
+    filter_upwards
+      [coordMem_time_of_mem_of_contMDiffAt (I := I) hFat hx, hline_mem]
+      with τ hτ hτU
+    have hFτ : ContMDiffAt 𝓘(Real, Real × Real) I ∞ F (s, τ) :=
+      hF.contMDiffAt (hU.mem_nhds hτU)
+    simpa [A] using
+      paramFrameCoeff_eq_coordParamDeriv_of_contMDiffAt (I := I) hFτ hτ i
+  exact hderiv.congr_of_eventuallyEq heq
+
+/-- Local-on-open version of
+`SmoothSurface.timeFrameCoeff_time_hasDerivAt_of_mem`. -/
+theorem timeFrameCoeff_time_hasDerivAt_of_mem_on {F : Surface M}
+    {U : Set (Real × Real)} (hU : IsOpen U)
+    (hF : ContMDiffOn 𝓘(Real, Real × Real) I ∞ F U)
+    {x₀ : M} {s t : Real} (hp : (s, t) ∈ U)
+    (hx : F (s, t) ∈ coordinateFrameSet (I := I) x₀)
+    (i : CoordinateIdx (𝕜 := Real) E) :
+    HasDerivAt
+      (fun τ : Real => timeFrameCoeff (I := I) x₀ F s τ i)
+      (coordTt (I := I) x₀ F s t i) t := by
+  let φ : Real × Real -> Real :=
+    fun p => surfaceCoordComp (I := I) x₀ F p i
+  let A : Real × Real -> Real :=
+    fun p => coordTimeDeriv (I := I) x₀ F p.1 p.2 i
+  have hFat : ContMDiffAt 𝓘(Real, Real × Real) I ∞ F (s, t) :=
+    hF.contMDiffAt (hU.mem_nhds hp)
+  have hφ : ContDiffAt Real ∞ φ (s, t) := by
+    simpa [φ] using coordCompAt_contDiffAt_of_contMDiffAt (I := I) hFat hx i
+  have hA : ContDiffAt Real ∞ A (s, t) := by
+    have hD : ContDiffAt Real ∞
+        (fun p : Real × Real =>
+          (fderiv Real φ p) (0, (1 : Real))) (s, t) := by
+      have hfder := hφ.fderiv_right (m := ∞) (by rw [ENat.coe_top_add_one])
+      exact hfder.clm_apply contDiffAt_const
+    simpa [A, φ, coordTimeDeriv] using hD
+  have hderiv :
+      HasDerivAt (fun τ : Real => A (s, τ))
+        (coordTt (I := I) x₀ F s t i) t := by
+    have hdiff : DifferentiableAt Real A (s, t) :=
+      hA.differentiableAt (by simp : (∞ : WithTop ℕ∞) ≠ 0)
+    simpa [A, coordTt] using
+      modelLine_snd_hasDerivAt (A := A) (s := s) (t := t) hdiff
+  have hline_mem : ∀ᶠ τ : Real in 𝓝 t, (s, τ) ∈ U := by
+    have hline : ContinuousAt (fun τ : Real => (s, τ)) t :=
+      ContinuousAt.prodMk continuousAt_const continuousAt_id
+    exact hline.eventually_mem (hU.mem_nhds hp)
+  have heq :
+      (fun τ : Real => timeFrameCoeff (I := I) x₀ F s τ i)
+        =ᶠ[𝓝 t] fun τ : Real => A (s, τ) := by
+    filter_upwards
+      [coordMem_time_of_mem_of_contMDiffAt (I := I) hFat hx, hline_mem]
+      with τ hτ hτU
+    have hFτ : ContMDiffAt 𝓘(Real, Real × Real) I ∞ F (s, τ) :=
+      hF.contMDiffAt (hU.mem_nhds hτU)
+    simpa [A] using
+      timeFrameCoeff_eq_coordTimeDeriv_of_contMDiffAt (I := I) hFτ hτ i
+  exact hderiv.congr_of_eventuallyEq heq
+
+/-- Local version of `SmoothSurface.coordTs_eq_coordSt`. -/
+theorem coordTs_eq_coordSt_of_contMDiffAt {F : Surface M}
+    {x₀ : M} {s t : Real}
+    (hF : ContMDiffAt 𝓘(Real, Real × Real) I ∞ F (s, t))
+    (hx : F (s, t) ∈ coordinateFrameSet (I := I) x₀)
+    (i : CoordinateIdx (𝕜 := Real) E) :
+    coordTs (I := I) x₀ F s t i =
+      coordSt (I := I) x₀ F s t i := by
+  let φ : Real × Real -> Real :=
+    fun p => surfaceCoordComp (I := I) x₀ F p i
+  have hφTop : ContDiffAt Real ∞ φ (s, t) := by
+    simpa [φ] using coordCompAt_contDiffAt_of_contMDiffAt (I := I) hF hx i
+  have hφ2 : ContDiffAt Real 2 φ (s, t) :=
+    hφTop.of_le (by
+      change ((2 : ℕ∞) : WithTop ℕ∞) ≤ ((⊤ : ℕ∞) : WithTop ℕ∞)
+      exact WithTop.coe_le_coe.2
+        (show (2 : ℕ∞) ≤ (⊤ : ℕ∞) from le_top))
+  simpa [φ, coordTs, coordSt, coordTimeDeriv, coordParamDeriv] using
+    modelMix2 (φ := φ) (s := s) (t := t) hφ2
+
+/-- Local version of `SmoothSurface.coordVst_eq_coordVts`. -/
+theorem coordVst_eq_coordVts_of_contMDiffAt {F : Surface M}
+    {x₀ : M} {s t : Real}
+    (hF : ContMDiffAt 𝓘(Real, Real × Real) I ∞ F (s, t))
+    (hx : F (s, t) ∈ coordinateFrameSet (I := I) x₀)
+    (i : CoordinateIdx (𝕜 := Real) E) :
+    coordVst (I := I) x₀ F s t i =
+      coordVts (I := I) x₀ F s t i := by
+  let φ : Real × Real -> Real :=
+    fun p => surfaceCoordComp (I := I) x₀ F p i
+  have hφTop : ContDiffAt Real ∞ φ (s, t) := by
+    simpa [φ] using coordCompAt_contDiffAt_of_contMDiffAt (I := I) hF hx i
+  have hφ3 : ContDiffAt Real 3 φ (s, t) :=
+    hφTop.of_le (by
+      change ((3 : ℕ∞) : WithTop ℕ∞) ≤ ((⊤ : ℕ∞) : WithTop ℕ∞)
+      exact WithTop.coe_le_coe.2
+        (show (3 : ℕ∞) ≤ (⊤ : ℕ∞) from le_top))
+  simpa [φ, coordVst, coordVts, coordTt, coordTs, coordTimeDeriv] using
+    modelMix3 (φ := φ) (s := s) (t := t) hφ3
+
 section ChristoffelChain
 
 variable [IsManifold I 1 M] [IsManifold I 2 M]
@@ -647,6 +1171,134 @@ theorem SmoothSurface.christoffel_time_hasDerivAt
   have hcurve : MDifferentiableAt 𝓘(Real, Real) I
       (surfaceTimeCurve F s) t :=
     hF.mdiffAt_time s t
+  have hderiv :
+      HasDerivAt (fun τ : Real => f (surfaceTimeCurve F s τ))
+        (extDerivFun (I := I) f x v) t := by
+    simpa [f, x, v, surfaceTimeCurve] using
+      extDerivFun_along_curve_eq_deriv (I := I) (f := f)
+        (gamma := surfaceTimeCurve F s) (t := t) hf hcurve
+  have hrepr : ∀ a : CoordinateIdx (𝕜 := Real) E, b.repr v a = T a := by
+    intro a
+    rw [← hT a]
+    simpa [b, v, x, timeFrameCoeff, surfaceTimeField, surfaceTimeCurve] using
+      (coordinateFrameAt_coeff_eq_toBasis_coord (I := I) x v a).symm
+  have hv :
+      v = ∑ a : CoordinateIdx (𝕜 := Real) E,
+        T a • coordinateFrameAt (I := I) x a x := by
+    calc
+      v = ∑ a : CoordinateIdx (𝕜 := Real) E, b.repr v a • b a := by
+        exact (b.sum_repr v).symm
+      _ = ∑ a : CoordinateIdx (𝕜 := Real) E,
+          T a • coordinateFrameAt (I := I) x a x := by
+        refine Finset.sum_congr rfl fun a _ => ?_
+        rw [hrepr a]
+        simp [b, coordinateFrameAt_toBasis_apply]
+  have hvalue :
+      extDerivFun (I := I) f x v =
+        ∑ a : CoordinateIdx (𝕜 := Real) E,
+          T a * Realized.christoffelCoordDerivAt (I := I) cov x a i j k := by
+    rw [hv]
+    simp [f, Realized.christoffelCoordDerivAt, extDerivFun, map_sum,
+      map_smul, smul_eq_mul]
+  simpa [f, x, surfaceTimeCurve, hvalue] using hderiv
+
+/-- Local-on-open version of `SmoothSurface.christoffel_param_hasDerivAt`. -/
+theorem christoffel_param_hasDerivAt_of_mem_on
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
+      (1 : WithTop ℕ∞))
+    {F : Surface M} {U : Set (Real × Real)}
+    (hU : IsOpen U)
+    (hF : ContMDiffOn 𝓘(Real, Real × Real) I ∞ F U)
+    {s t : Real} (hp : (s, t) ∈ U)
+    (S : CoordinateIdx (𝕜 := Real) E -> Real)
+    (hS : ∀ a : CoordinateIdx (𝕜 := Real) E,
+      paramFrameCoeff (I := I) (F (s, t)) F s t a = S a)
+    (i j k : CoordinateIdx (𝕜 := Real) E) :
+    HasDerivAt
+      (fun σ : Real =>
+        Realized.christoffelCoordFun (I := I) cov (F (s, t)) i j k (F (σ, t)))
+      (∑ a : CoordinateIdx (𝕜 := Real) E,
+        S a * Realized.christoffelCoordDerivAt (I := I) cov
+          (F (s, t)) a i j k) s := by
+  classical
+  let x : M := F (s, t)
+  let f : M -> Real :=
+    Realized.christoffelCoordFun (I := I) cov x i j k
+  let v : TangentSpace I x := curveVelocity I (surfaceParamCurve F t) s
+  let b := coordinateFrameAt_toBasis (I := I) x
+  have hf : MDifferentiableAt I 𝓘(Real, Real) f x := by
+    simpa [f, x] using
+      Realized.christoffelCoordFun_mdiffAt_one (I := I) cov hcov x i j k
+  have hFat : ContMDiffAt 𝓘(Real, Real × Real) I ∞ F (s, t) :=
+    hF.contMDiffAt (hU.mem_nhds hp)
+  have hcurve : MDifferentiableAt 𝓘(Real, Real) I
+      (surfaceParamCurve F t) s :=
+    mdiffAt_param_of_contMDiffAt (I := I) hFat
+  have hderiv :
+      HasDerivAt (fun σ : Real => f (surfaceParamCurve F t σ))
+        (extDerivFun (I := I) f x v) s := by
+    simpa [f, x, v, surfaceParamCurve] using
+      extDerivFun_along_curve_eq_deriv (I := I) (f := f)
+        (gamma := surfaceParamCurve F t) (t := s) hf hcurve
+  have hrepr : ∀ a : CoordinateIdx (𝕜 := Real) E, b.repr v a = S a := by
+    intro a
+    rw [← hS a]
+    simpa [b, v, x, paramFrameCoeff, surfaceParamField, surfaceParamCurve] using
+      (coordinateFrameAt_coeff_eq_toBasis_coord (I := I) x v a).symm
+  have hv :
+      v = ∑ a : CoordinateIdx (𝕜 := Real) E,
+        S a • coordinateFrameAt (I := I) x a x := by
+    calc
+      v = ∑ a : CoordinateIdx (𝕜 := Real) E, b.repr v a • b a := by
+        exact (b.sum_repr v).symm
+      _ = ∑ a : CoordinateIdx (𝕜 := Real) E,
+          S a • coordinateFrameAt (I := I) x a x := by
+        refine Finset.sum_congr rfl fun a _ => ?_
+        rw [hrepr a]
+        simp [b, coordinateFrameAt_toBasis_apply]
+  have hvalue :
+      extDerivFun (I := I) f x v =
+        ∑ a : CoordinateIdx (𝕜 := Real) E,
+          S a * Realized.christoffelCoordDerivAt (I := I) cov x a i j k := by
+    rw [hv]
+    simp [f, Realized.christoffelCoordDerivAt, extDerivFun, map_sum,
+      map_smul, smul_eq_mul]
+  simpa [f, x, surfaceParamCurve, hvalue] using hderiv
+
+/-- Local-on-open version of `SmoothSurface.christoffel_time_hasDerivAt`. -/
+theorem christoffel_time_hasDerivAt_of_mem_on
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
+      (1 : WithTop ℕ∞))
+    {F : Surface M} {U : Set (Real × Real)}
+    (hU : IsOpen U)
+    (hF : ContMDiffOn 𝓘(Real, Real × Real) I ∞ F U)
+    {s t : Real} (hp : (s, t) ∈ U)
+    (T : CoordinateIdx (𝕜 := Real) E -> Real)
+    (hT : ∀ a : CoordinateIdx (𝕜 := Real) E,
+      timeFrameCoeff (I := I) (F (s, t)) F s t a = T a)
+    (i j k : CoordinateIdx (𝕜 := Real) E) :
+    HasDerivAt
+      (fun τ : Real =>
+        Realized.christoffelCoordFun (I := I) cov (F (s, t)) i j k (F (s, τ)))
+      (∑ a : CoordinateIdx (𝕜 := Real) E,
+        T a * Realized.christoffelCoordDerivAt (I := I) cov
+          (F (s, t)) a i j k) t := by
+  classical
+  let x : M := F (s, t)
+  let f : M -> Real :=
+    Realized.christoffelCoordFun (I := I) cov x i j k
+  let v : TangentSpace I x := curveVelocity I (surfaceTimeCurve F s) t
+  let b := coordinateFrameAt_toBasis (I := I) x
+  have hf : MDifferentiableAt I 𝓘(Real, Real) f x := by
+    simpa [f, x] using
+      Realized.christoffelCoordFun_mdiffAt_one (I := I) cov hcov x i j k
+  have hFat : ContMDiffAt 𝓘(Real, Real × Real) I ∞ F (s, t) :=
+    hF.contMDiffAt (hU.mem_nhds hp)
+  have hcurve : MDifferentiableAt 𝓘(Real, Real) I
+      (surfaceTimeCurve F s) t :=
+    mdiffAt_time_of_contMDiffAt (I := I) hFat
   have hderiv :
       HasDerivAt (fun τ : Real => f (surfaceTimeCurve F s τ))
         (extDerivFun (I := I) f x v) t := by
@@ -1298,6 +1950,275 @@ theorem SmoothSurface.coordTs_time_hasDerivAt_of_mem {F : Surface M}
     hB.differentiableAt (by simp : (∞ : WithTop ℕ∞) ≠ 0)
   simpa [B, coordVts] using
     modelLine_snd_hasDerivAt (A := B) (s := s) (t := t) hdiff
+
+/-- Local-on-open version of `SmoothSurface.coordTt_param_hasDerivAt_of_mem`. -/
+theorem coordTt_param_hasDerivAt_of_mem_on {F : Surface M}
+    {U : Set (Real × Real)} (hU : IsOpen U)
+    (hF : ContMDiffOn 𝓘(Real, Real × Real) I ∞ F U)
+    {x₀ : M} {s t : Real} (hp : (s, t) ∈ U)
+    (hx : F (s, t) ∈ coordinateFrameSet (I := I) x₀)
+    (i : CoordinateIdx (𝕜 := Real) E) :
+    HasDerivAt
+      (fun σ : Real => coordTt (I := I) x₀ F σ t i)
+      (coordVst (I := I) x₀ F s t i) s := by
+  let φ : Real × Real -> Real :=
+    fun p => surfaceCoordComp (I := I) x₀ F p i
+  let A : Real × Real -> Real :=
+    fun p => coordTimeDeriv (I := I) x₀ F p.1 p.2 i
+  let B : Real × Real -> Real :=
+    fun p => coordTt (I := I) x₀ F p.1 p.2 i
+  have hFat : ContMDiffAt 𝓘(Real, Real × Real) I ∞ F (s, t) :=
+    hF.contMDiffAt (hU.mem_nhds hp)
+  have hφ : ContDiffAt Real ∞ φ (s, t) := by
+    simpa [φ] using coordCompAt_contDiffAt_of_contMDiffAt (I := I) hFat hx i
+  have hA : ContDiffAt Real ∞ A (s, t) := by
+    have hD : ContDiffAt Real ∞
+        (fun p : Real × Real =>
+          (fderiv Real φ p) (0, (1 : Real))) (s, t) := by
+      have hfder := hφ.fderiv_right (m := ∞) (by rw [ENat.coe_top_add_one])
+      exact hfder.clm_apply contDiffAt_const
+    simpa [A, φ, coordTimeDeriv] using hD
+  have hB : ContDiffAt Real ∞ B (s, t) := by
+    have hD : ContDiffAt Real ∞
+        (fun p : Real × Real =>
+          (fderiv Real A p) (0, (1 : Real))) (s, t) := by
+      have hfder := hA.fderiv_right (m := ∞) (by rw [ENat.coe_top_add_one])
+      exact hfder.clm_apply contDiffAt_const
+    simpa [B, A, coordTt] using hD
+  have hdiff : DifferentiableAt Real B (s, t) :=
+    hB.differentiableAt (by simp : (∞ : WithTop ℕ∞) ≠ 0)
+  simpa [B, coordVst] using
+    modelLine_fst_hasDerivAt (A := B) (s := s) (t := t) hdiff
+
+/-- Local-on-open version of `SmoothSurface.coordTs_time_hasDerivAt_of_mem`. -/
+theorem coordTs_time_hasDerivAt_of_mem_on {F : Surface M}
+    {U : Set (Real × Real)} (hU : IsOpen U)
+    (hF : ContMDiffOn 𝓘(Real, Real × Real) I ∞ F U)
+    {x₀ : M} {s t : Real} (hp : (s, t) ∈ U)
+    (hx : F (s, t) ∈ coordinateFrameSet (I := I) x₀)
+    (i : CoordinateIdx (𝕜 := Real) E) :
+    HasDerivAt
+      (fun τ : Real => coordTs (I := I) x₀ F s τ i)
+      (coordVts (I := I) x₀ F s t i) t := by
+  let φ : Real × Real -> Real :=
+    fun p => surfaceCoordComp (I := I) x₀ F p i
+  let A : Real × Real -> Real :=
+    fun p => coordTimeDeriv (I := I) x₀ F p.1 p.2 i
+  let B : Real × Real -> Real :=
+    fun p => coordTs (I := I) x₀ F p.1 p.2 i
+  have hFat : ContMDiffAt 𝓘(Real, Real × Real) I ∞ F (s, t) :=
+    hF.contMDiffAt (hU.mem_nhds hp)
+  have hφ : ContDiffAt Real ∞ φ (s, t) := by
+    simpa [φ] using coordCompAt_contDiffAt_of_contMDiffAt (I := I) hFat hx i
+  have hA : ContDiffAt Real ∞ A (s, t) := by
+    have hD : ContDiffAt Real ∞
+        (fun p : Real × Real =>
+          (fderiv Real φ p) (0, (1 : Real))) (s, t) := by
+      have hfder := hφ.fderiv_right (m := ∞) (by rw [ENat.coe_top_add_one])
+      exact hfder.clm_apply contDiffAt_const
+    simpa [A, φ, coordTimeDeriv] using hD
+  have hB : ContDiffAt Real ∞ B (s, t) := by
+    have hD : ContDiffAt Real ∞
+        (fun p : Real × Real =>
+          (fderiv Real A p) ((1 : Real), 0)) (s, t) := by
+      have hfder := hA.fderiv_right (m := ∞) (by rw [ENat.coe_top_add_one])
+      exact hfder.clm_apply contDiffAt_const
+    simpa [B, A, coordTs] using hD
+  have hdiff : DifferentiableAt Real B (s, t) :=
+    hB.differentiableAt (by simp : (∞ : WithTop ℕ∞) ≠ 0)
+  simpa [B, coordVts] using
+    modelLine_snd_hasDerivAt (A := B) (s := s) (t := t) hdiff
+
+/-- Local-on-open vector-valued parameter derivative of the fixed-frame time
+field coefficients. -/
+theorem frameVec_time_param_hasDerivAt_of_mem_on {F : Surface M}
+    {U : Set (Real × Real)} (hU : IsOpen U)
+    (hF : ContMDiffOn 𝓘(Real, Real × Real) I ∞ F U)
+    {x₀ : M} {s t : Real} (hp : (s, t) ∈ U)
+    (hx : F (s, t) ∈ coordinateFrameSet (I := I) x₀) :
+    HasDerivAt
+      (fun σ : Real =>
+        frameVec (I := I) (coordinateTrivializationAt (I := I) x₀)
+          (Module.finBasis Real E) (surfaceTimeField (I := I) F (σ, t)))
+      (coordTs (I := I) x₀ F s t) s := by
+  let e := coordinateTrivializationAt (I := I) x₀
+  rw [hasDerivAt_pi]
+  intro i
+  have hscalar := timeFrameCoeff_param_hasDerivAt_of_mem_on
+    (I := I) (F := F) hU hF hp hx i
+  have hFat : ContMDiffAt 𝓘(Real, Real × Real) I ∞ F (s, t) :=
+    hF.contMDiffAt (hU.mem_nhds hp)
+  have heq :
+      (fun σ : Real =>
+        frameVec (I := I) e (Module.finBasis Real E)
+          (surfaceTimeField (I := I) F (σ, t)) i)
+        =ᶠ[𝓝 s]
+      (fun σ : Real => timeFrameCoeff (I := I) x₀ F σ t i) := by
+    filter_upwards [coordMem_param_of_mem_of_contMDiffAt (I := I) hFat hx] with σ hσ
+    exact congrFun (frameVec_timeField_eq (I := I) x₀ hσ) i
+  exact hscalar.congr_of_eventuallyEq heq.symm
+
+/-- Local-on-open vector-valued time derivative of the fixed-frame time field
+coefficients. -/
+theorem frameVec_time_time_hasDerivAt_of_mem_on {F : Surface M}
+    {U : Set (Real × Real)} (hU : IsOpen U)
+    (hF : ContMDiffOn 𝓘(Real, Real × Real) I ∞ F U)
+    {x₀ : M} {s t : Real} (hp : (s, t) ∈ U)
+    (hx : F (s, t) ∈ coordinateFrameSet (I := I) x₀) :
+    HasDerivAt
+      (fun τ : Real =>
+        frameVec (I := I) (coordinateTrivializationAt (I := I) x₀)
+          (Module.finBasis Real E) (surfaceTimeField (I := I) F (s, τ)))
+      (coordTt (I := I) x₀ F s t) t := by
+  let e := coordinateTrivializationAt (I := I) x₀
+  rw [hasDerivAt_pi]
+  intro i
+  have hscalar := timeFrameCoeff_time_hasDerivAt_of_mem_on
+    (I := I) (F := F) hU hF hp hx i
+  have hFat : ContMDiffAt 𝓘(Real, Real × Real) I ∞ F (s, t) :=
+    hF.contMDiffAt (hU.mem_nhds hp)
+  have heq :
+      (fun τ : Real =>
+        frameVec (I := I) e (Module.finBasis Real E)
+          (surfaceTimeField (I := I) F (s, τ)) i)
+        =ᶠ[𝓝 t]
+      (fun τ : Real => timeFrameCoeff (I := I) x₀ F s τ i) := by
+    filter_upwards [coordMem_time_of_mem_of_contMDiffAt (I := I) hFat hx] with τ hτ
+    exact congrFun (frameVec_timeField_eq (I := I) x₀ hτ) i
+  exact hscalar.congr_of_eventuallyEq heq.symm
+
+/-- Local-on-open parameter derivative of the time-direction `frameDerivVec`. -/
+theorem frameDeriv_time_param_hasDerivAt_of_mem_on {F : Surface M}
+    {U : Set (Real × Real)} (hU : IsOpen U)
+    (hF : ContMDiffOn 𝓘(Real, Real × Real) I ∞ F U)
+    {x₀ : M} {s t : Real} (hp : (s, t) ∈ U)
+    (hx : F (s, t) ∈ coordinateFrameSet (I := I) x₀) :
+    HasDerivAt
+      (fun σ : Real =>
+        frameDerivVec (I := I) (I' := 𝓘(Real, Real)) (M := M)
+          (coordinateTrivializationAt (I := I) x₀)
+          (Module.finBasis Real E) (surfaceTimeCurve F σ)
+          (fun τ => surfaceTimeField (I := I) F (σ, τ)) t
+          (1 : TangentSpace 𝓘(Real, Real) t))
+      (coordVst (I := I) x₀ F s t) s := by
+  let e := coordinateTrivializationAt (I := I) x₀
+  have hcoord :
+      HasDerivAt (fun σ : Real => coordTt (I := I) x₀ F σ t)
+        (coordVst (I := I) x₀ F s t) s := by
+    rw [hasDerivAt_pi]
+    intro i
+    exact coordTt_param_hasDerivAt_of_mem_on (I := I) (F := F) hU hF hp hx i
+  have hFat : ContMDiffAt 𝓘(Real, Real × Real) I ∞ F (s, t) :=
+    hF.contMDiffAt (hU.mem_nhds hp)
+  have heq :
+      (fun σ : Real =>
+        frameDerivVec (I := I) (I' := 𝓘(Real, Real)) (M := M)
+          e (Module.finBasis Real E) (surfaceTimeCurve F σ)
+          (fun τ => surfaceTimeField (I := I) F (σ, τ)) t
+          (1 : TangentSpace 𝓘(Real, Real) t))
+        =ᶠ[𝓝 s]
+      (fun σ : Real => coordTt (I := I) x₀ F σ t) := by
+    have hlineU : ∀ᶠ σ : Real in 𝓝 s, (σ, t) ∈ U := by
+      have hline : ContinuousAt (fun σ : Real => (σ, t)) s :=
+        ContinuousAt.prodMk continuousAt_id continuousAt_const
+      exact hline.eventually_mem (hU.mem_nhds hp)
+    filter_upwards [coordMem_param_of_mem_of_contMDiffAt (I := I) hFat hx,
+      hlineU] with σ hσ hσU
+    have hvec :
+        HasDerivAt
+          (fun τ : Real =>
+            frameVec (I := I) e (Module.finBasis Real E)
+              (surfaceTimeField (I := I) F (σ, τ)))
+          (coordTt (I := I) x₀ F σ t) t := by
+      rw [hasDerivAt_pi]
+      intro i
+      have hline :
+          (fun τ : Real =>
+            frameVec (I := I) e (Module.finBasis Real E)
+              (surfaceTimeField (I := I) F (σ, τ)) i)
+            =ᶠ[𝓝 t]
+          (fun τ : Real => timeFrameCoeff (I := I) x₀ F σ τ i) := by
+        filter_upwards [coordMem_time_of_mem_of_contMDiffAt
+          (I := I) (hF.contMDiffAt (hU.mem_nhds hσU)) hσ] with τ hτ
+        exact congrFun (frameVec_timeField_eq (I := I) x₀ hτ) i
+      have hscalar :
+          HasDerivAt
+            (fun τ : Real => timeFrameCoeff (I := I) x₀ F σ τ i)
+            (coordTt (I := I) x₀ F σ t i) t := by
+        exact timeFrameCoeff_time_hasDerivAt_of_mem_on
+          (I := I) (F := F) hU hF hσU hσ i
+      exact hscalar.congr_of_eventuallyEq hline.symm
+    exact frameDerivVec_eq_of_hasDerivAt (I := I) e (Module.finBasis Real E)
+      (gamma := surfaceTimeCurve F σ)
+      (S := fun τ => surfaceTimeField (I := I) F (σ, τ)) hvec
+  exact hcoord.congr_of_eventuallyEq heq
+
+/-- Local-on-open time derivative of the parameter-direction `frameDerivVec`
+for the time field. -/
+theorem frameDeriv_param_time_hasDerivAt_of_mem_on {F : Surface M}
+    {U : Set (Real × Real)} (hU : IsOpen U)
+    (hF : ContMDiffOn 𝓘(Real, Real × Real) I ∞ F U)
+    {x₀ : M} {s t : Real} (hp : (s, t) ∈ U)
+    (hx : F (s, t) ∈ coordinateFrameSet (I := I) x₀) :
+    HasDerivAt
+      (fun τ : Real =>
+        frameDerivVec (I := I) (I' := 𝓘(Real, Real)) (M := M)
+          (coordinateTrivializationAt (I := I) x₀)
+          (Module.finBasis Real E) (surfaceParamCurve F τ)
+          (fun σ => surfaceTimeField (I := I) F (σ, τ)) s
+          (1 : TangentSpace 𝓘(Real, Real) s))
+      (coordVts (I := I) x₀ F s t) t := by
+  let e := coordinateTrivializationAt (I := I) x₀
+  have hcoord :
+      HasDerivAt (fun τ : Real => coordTs (I := I) x₀ F s τ)
+        (coordVts (I := I) x₀ F s t) t := by
+    rw [hasDerivAt_pi]
+    intro i
+    exact coordTs_time_hasDerivAt_of_mem_on (I := I) (F := F) hU hF hp hx i
+  have hFat : ContMDiffAt 𝓘(Real, Real × Real) I ∞ F (s, t) :=
+    hF.contMDiffAt (hU.mem_nhds hp)
+  have heq :
+      (fun τ : Real =>
+        frameDerivVec (I := I) (I' := 𝓘(Real, Real)) (M := M)
+          e (Module.finBasis Real E) (surfaceParamCurve F τ)
+          (fun σ => surfaceTimeField (I := I) F (σ, τ)) s
+          (1 : TangentSpace 𝓘(Real, Real) s))
+        =ᶠ[𝓝 t]
+      (fun τ : Real => coordTs (I := I) x₀ F s τ) := by
+    have hlineU : ∀ᶠ τ : Real in 𝓝 t, (s, τ) ∈ U := by
+      have hline : ContinuousAt (fun τ : Real => (s, τ)) t :=
+        ContinuousAt.prodMk continuousAt_const continuousAt_id
+      exact hline.eventually_mem (hU.mem_nhds hp)
+    filter_upwards [coordMem_time_of_mem_of_contMDiffAt (I := I) hFat hx,
+      hlineU] with τ hτ hτU
+    have hvec :
+        HasDerivAt
+          (fun σ : Real =>
+            frameVec (I := I) e (Module.finBasis Real E)
+              (surfaceTimeField (I := I) F (σ, τ)))
+          (coordTs (I := I) x₀ F s τ) s := by
+      rw [hasDerivAt_pi]
+      intro i
+      have hline :
+          (fun σ : Real =>
+            frameVec (I := I) e (Module.finBasis Real E)
+              (surfaceTimeField (I := I) F (σ, τ)) i)
+            =ᶠ[𝓝 s]
+          (fun σ : Real => timeFrameCoeff (I := I) x₀ F σ τ i) := by
+        filter_upwards [coordMem_param_of_mem_of_contMDiffAt
+          (I := I) (hF.contMDiffAt (hU.mem_nhds hτU)) hτ] with σ hσ
+        exact congrFun (frameVec_timeField_eq (I := I) x₀ hσ) i
+      have hscalar :
+          HasDerivAt
+            (fun σ : Real => timeFrameCoeff (I := I) x₀ F σ τ i)
+            (coordTs (I := I) x₀ F s τ i) s := by
+        exact timeFrameCoeff_param_hasDerivAt_of_mem_on
+          (I := I) (F := F) hU hF hτU hτ i
+      exact hscalar.congr_of_eventuallyEq hline.symm
+    exact frameDerivVec_eq_of_hasDerivAt (I := I) e (Module.finBasis Real E)
+      (gamma := surfaceParamCurve F τ)
+      (S := fun σ => surfaceTimeField (I := I) F (σ, τ)) hvec
+  exact hcoord.congr_of_eventuallyEq heq
 
 /-- Vector-valued parameter derivative of the fixed-frame time field
 coefficients. -/

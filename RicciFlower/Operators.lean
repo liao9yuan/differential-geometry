@@ -314,8 +314,9 @@ theorem extDerivFun_rpow
         NormedSpace.fromTangentSpace (𝕜 := Real) (f x)
           ((mfderiv I 𝓘(Real, Real) f x) v)
   rw [ContinuousLinearMap.comp_apply, ContinuousLinearMap.toSpanSingleton_apply]
-  simp [NormedSpace.fromTangentSpace, coeff, smul_eq_mul, mul_comm]
-  left
+  simp only [NormedSpace.fromTangentSpace, ContinuousLinearEquiv.coe_mk,
+    LinearEquiv.coe_mk, LinearMap.coe_mk, AddHom.coe_mk, smul_eq_mul]
+  rw [mul_comm]
   rfl
 
 /-- Differentiability of a real-power composite at a positive point. -/
@@ -384,7 +385,7 @@ theorem mfderiv_mul_self_toLinearMap
         (2 * f x) • ((mfderiv I 𝓘(Real, Real) f x).toLinearMap v)
   rw [← add_smul]
   congr 1
-  ring
+  ring_nf
 
 /-- Gradient of a scalar square. -/
 theorem gradientFun_mul_self
@@ -688,7 +689,7 @@ theorem laplacian_mul
               (gradientFun (I := I) g h x) := by
           rw [g.symm x (gradientFun (I := I) g h x)
             (gradientFun (I := I) g f x)]
-          ring
+          ring_nf
 
 /-- Scalar real-power rule for the Laplacian:
 `Δ(f^p) = p f^(p-1) Δf + p(p-1) f^(p-2) |∇f|²`,
@@ -757,7 +758,7 @@ theorem laplacian_rpow
           g.inner x (gradientFun (I := I) g f x)
             (gradientFun (I := I) g f x) := by
             rw [hfinner]
-            ring
+            ring_nf
   calc
     laplacian (I := I) cov g (fun y : M => f y ^ p) x =
         divergence (I := I) cov
@@ -808,7 +809,7 @@ theorem half_laplacian_mul_self_eq_divergence_smul_gradientFun
       rw [divergence_const_smul (I := I) cov (2 : Real) hfg]
     _ = divergence (I := I) cov
         (f • fun y : M => gradientFun (I := I) g f y) x := by
-      ring
+      ring_nf
 
 /-- Scalar square Laplacian formula:
 `(1 / 2) Δ(f^2) = f Δf + |∇f|^2`. -/

@@ -28,6 +28,16 @@ variable {x : M}
 This submodule is part of the split `RicciFlower.Curvature.Components` API.
 -/
 
+/-- In an orthonormal tangent basis, the identity matrix is the inverse metric. -/
+theorem metricInverseInBasis_of_orthonormal
+    (g : SmoothRiemannianMetric I M) {x : M}
+    (basis : Module.Basis Idx Real (TangentSpace I x))
+    (hON : forall i j, g.inner x (basis i) (basis j) = if i = j then 1 else 0) :
+    MetricInverseInBasis (I := I) g x basis (fun a k => if a = k then 1 else 0) := by
+  classical
+  intro i j
+  constructor <;> simp [hON]
+
 /-- Coordinate form of `Ric(Y,Z) = trace (X |-> R(X,Y)Z)`, rewritten through a
 lowered `(0,4)` Riemann tensor. With the standard convention
 `Rm04(X,Y,Z,W) = <R(X,Y)Z,W>`, the traced component is
@@ -102,6 +112,30 @@ theorem ricciComp_eq_rm04_trace_of_rm13_section
         gInv a k * rm04CompAt (I := I) basis (Rm04 x) a i j k := by
   exact ricciComp_eq_rm04_trace_of_rm13 (I := I) g basis gInv hinv (Ric x) (Rm13 x)
     (Rm04 x) (hRic x) hLower i j
+
+/-- In an orthonormal basis, the diagonal inverse-metric contraction in the
+Ricci trace reduces to a single sum over lowered Riemann components. -/
+theorem ricci_diag_eq_sum_rm04_diag_of_orthonormal
+    (g : SmoothRiemannianMetric I M) {x : M}
+    (basis : Module.Basis Idx Real (TangentSpace I x))
+    (Ric : Tensor02Section (I := I) (M := M))
+    (Rm13 : Tensor13Section (I := I) (M := M))
+    (Rm04 : Tensor04Section (I := I) (M := M))
+    (hRic : RicciTensorRealizesRm13Trace (I := I) Ric Rm13)
+    (hLower : Rm04LowersRm13At (I := I) g x (Rm13 x) (Rm04 x))
+    (hON : forall i j, g.inner x (basis i) (basis j) = if i = j then 1 else 0)
+    (i j : Idx) :
+    Ric x (vec2 (basis i) (basis j)) =
+      ∑ a, Rm04 x (vec4 (basis a) (basis i) (basis j) (basis a)) := by
+  classical
+  have hinv : MetricInverseInBasis (I := I) g x basis
+      (fun a k => if a = k then 1 else 0) :=
+    metricInverseInBasis_of_orthonormal (I := I) g basis hON
+  have hcomp :=
+    ricciComp_eq_rm04_trace_of_rm13_section
+      (I := I) g basis (fun a k => if a = k then 1 else 0) hinv
+      Ric Rm13 Rm04 hRic hLower i j
+  simpa [ricciCompAt_apply, rm04CompAt_apply] using hcomp
 
 theorem ricciCompAt_eq_contractTrace_of_realizes
     (basis : Module.Basis Idx Real (TangentSpace I x))

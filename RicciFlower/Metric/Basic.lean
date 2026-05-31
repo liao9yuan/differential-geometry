@@ -22,7 +22,7 @@ variable {H : Type*} [TopologicalSpace H]
 abbrev SmoothRiemannianMetric
     (I : ModelWithCorners Real E H) (M : Type*)
     [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] : Type _ :=
-  Bundle.ContMDiffRiemannianMetric I ⊤ E (TangentSpace I : M -> Type _)
+  Bundle.ContMDiffRiemannianMetric I ∞ E (TangentSpace I : M -> Type _)
 
 /-! ## Metric-space ball helpers -/
 

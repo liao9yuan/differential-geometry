@@ -101,6 +101,34 @@ theorem exists_varFlow_smooth_endpoint
             extChartAt I x
               (manifoldEnd (I := I) (varModelFlow (E := E) Ψ) τ x v) =
                 chartEnd (I := I) (varModelFlow (E := E) Ψ) τ x v) ∧
+          (∃ (a r : NNReal), 0 < r ∧
+            (∀ z ∈ Metric.closedBall
+                (extChartAt I.tangent (phaseZero (I := I) x)
+                  (phaseZero (I := I) x)) r,
+              varModelFlow (E := E) Ψ z 0 = z ∧
+                ∀ t ∈ Set.Icc (-(2 * τ)) (2 * τ),
+                  HasDerivWithinAt
+                    (varModelFlow (E := E) Ψ z)
+                    (modelSpray (I := I) g x
+                      (varModelFlow (E := E) Ψ z t))
+                    (Set.Icc (-(2 * τ)) (2 * τ)) t) ∧
+            (∀ z ∈ Metric.closedBall
+                (extChartAt I.tangent (phaseZero (I := I) x)
+                  (phaseZero (I := I) x)) r,
+              ∀ t : Real,
+                varModelFlow (E := E) Ψ z t ∈
+                  Metric.closedBall
+                    (extChartAt I.tangent (phaseZero (I := I) x)
+                      (phaseZero (I := I) x)) a) ∧
+            (∀ z ∈ Metric.closedBall
+                (extChartAt I.tangent (phaseZero (I := I) x)
+                  (phaseZero (I := I) x)) r,
+              ∀ t ∈ Set.Icc (-(2 * τ)) (2 * τ),
+                varModelFlow (E := E) Ψ z t ∈
+                  (extChartAt I.tangent (phaseZero (I := I) x)).target ∧
+                  (phaseOfModel (I := I) x
+                    (varModelFlow (E := E) Ψ z t)).proj ∈
+                    (extChartAt I x).source)) ∧
           ∃ chartLD :
             PartialDiffeomorph
               (modelWithCornersSelf Real (TangentSpace I x))
@@ -426,7 +454,18 @@ theorem exists_varFlow_smooth_endpoint
       (scaledBaseEnd_deriv0 (I := I) (E := E) (Ψ := Ψ) (x := x)
         (b := τ) hτ.ne'
         (hBaseDeriv τ ⟨le_of_lt hτ, le_trans hτδ hδδ0⟩))
-  refine ⟨R, hR, τ, hτ, Ψ, hzero, hreal, hchart, ?_⟩
+  have hboundSmall :
+      ∀ z ∈ Metric.closedBall
+          (extChartAt I.tangent (phaseZero (I := I) x)
+            (phaseZero (I := I) x)) rModel,
+        ∀ t : Real,
+          varModelFlow (E := E) Ψ z t ∈
+            Metric.closedBall
+              (extChartAt I.tangent (phaseZero (I := I) x)
+                (phaseZero (I := I) x)) a :=
+    varModelFlow_bound (I := I) (E := E) x hbound
+  refine ⟨R, hR, τ, hτ, Ψ, hzero, hreal, hchart, ?_, ?_⟩
+  · exact ⟨a, rModel, hrModel, hflowSmall, hboundSmall, hsrcSmall⟩
   let chartExp : TangentSpace I x -> TangentSpace I x :=
     chartEnd (I := I) (varModelFlow (E := E) Ψ) τ x
   obtain ⟨w, hwOpen, h0w, _hwSub, hbaseSmooth⟩ :=

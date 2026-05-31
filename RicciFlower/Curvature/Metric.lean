@@ -126,6 +126,43 @@ noncomputable def metricRicci (g : SmoothRiemannianMetric I M) :
       metricRm04At (I := I) (M := M) g x (vec4 X Y Z W) := by
   rfl
 
+/-- The last-slot covector `W -> Rm04(X,Y,Z,W)` for the canonical metric
+curvature. -/
+noncomputable def metricRm04LastDualAt
+    (g : SmoothRiemannianMetric I M) (x : M)
+    (X Y Z : TangentSpace I x) :
+    Module.Dual Real (TangentSpace I x) where
+  toFun W := metricRm04StdAt (I := I) (M := M) g x X Y Z W
+  map_add' W W' := by
+    have h :=
+      (metricRm04At (I := I) (M := M) g x).map_update_add
+        (vec4 (I := I) X Y Z 0) (3 : Fin 4) W W'
+    change
+      metricRm04At (I := I) (M := M) g x
+          (vec4 (I := I) X Y Z (W + W')) =
+        metricRm04At (I := I) (M := M) g x
+            (vec4 (I := I) X Y Z W) +
+          metricRm04At (I := I) (M := M) g x
+            (vec4 (I := I) X Y Z W')
+    convert h using 1
+  map_smul' c W := by
+    have h :=
+      (metricRm04At (I := I) (M := M) g x).map_update_smul
+        (vec4 (I := I) X Y Z 0) (3 : Fin 4) c W
+    change
+      metricRm04At (I := I) (M := M) g x
+          (vec4 (I := I) X Y Z (c • W)) =
+        c * metricRm04At (I := I) (M := M) g x
+            (vec4 (I := I) X Y Z W)
+    convert h using 1
+
+@[simp] theorem metricRm04LastDualAt_apply
+    (g : SmoothRiemannianMetric I M) (x : M)
+    (X Y Z W : TangentSpace I x) :
+    metricRm04LastDualAt (I := I) (M := M) g x X Y Z W =
+      metricRm04StdAt (I := I) (M := M) g x X Y Z W := by
+  rfl
+
 @[simp] theorem metricRm04Std_apply
     (g : SmoothRiemannianMetric I M) (x : M)
     (X Y Z W : TangentSpace I x) :
@@ -518,6 +555,103 @@ theorem metricRicciSymm
       (metricRm04At (I := I) (M := M) g x)
       hTrace hPair hOutput hInput
       (invMetric_symm (I := I) (M := M) g x basis gInv hinv) i j
+
+/-- Velocity-frame Ricci trace for the canonical metric curvature.
+
+This is only a metric-level adapter around the existing orthonormal-basis trace
+theorem.  The caller supplies the full orthonormal basis, with the velocity in
+slot `0` and the transverse frame in successor slots. -/
+theorem metricRicci_velocity_eq_sum_rm04_frame
+    (g : SmoothRiemannianMetric I M) {m : Nat} {x : M}
+    (basis : Module.Basis (Fin (m + 1)) Real (TangentSpace I x))
+    (hON : forall a b,
+      g.inner x (basis a) (basis b) = if a = b then 1 else 0)
+    {T : TangentSpace I x} {E : Fin m -> TangentSpace I x}
+    (h0 : basis 0 = T)
+    (hSucc : forall i : Fin m, basis i.succ = E i) :
+    metricRicci (I := I) (M := M) g x (vec2 (I := I) T T) =
+      ∑ i, metricRm04StdAt (I := I) (M := M) g x (E i) T T (E i) := by
+  classical
+  let K := metricCurvData (I := I) (M := M) g
+  have hLower :
+      Realized.Rm04LowersRm13At (I := I) g x
+        (metricRm13 (I := I) (M := M) g x)
+        (metricRm04 (I := I) (M := M) g x) :=
+    Realized.rm04LowersRm13At_of_realizes
+      (I := I) g (metricCov (I := I) (M := M) g)
+      (metricRm13 (I := I) (M := M) g)
+      (metricRm04 (I := I) (M := M) g)
+      K.h_rm13 K.h_rm04 x
+  have hTrace :=
+    Realized.ricci_diag_eq_sum_rm04_diag_of_orthonormal
+      (I := I) (M := M) (Idx := Fin (m + 1)) g basis
+      (metricRicci (I := I) (M := M) g)
+      (metricRm13 (I := I) (M := M) g)
+      (metricRm04 (I := I) (M := M) g)
+      K.h_ricci13 hLower hON
+      (0 : Fin (m + 1)) (0 : Fin (m + 1))
+  have hTraceSplit :
+      metricRicci (I := I) (M := M) g x
+          (Realized.vec2 (I := I) (basis 0) (basis 0)) =
+        metricRm04 (I := I) (M := M) g x
+            (Realized.vec4 (I := I) (basis 0) (basis 0) (basis 0) (basis 0)) +
+          ∑ i : Fin m,
+            metricRm04 (I := I) (M := M) g x
+              (Realized.vec4 (I := I)
+                (basis i.succ) (basis 0) (basis 0) (basis i.succ)) := by
+    simpa [Fin.sum_univ_succ] using hTrace
+  have hInput :
+      forall X Y Z W : TangentSpace I x,
+        metricRm04At (I := I) (M := M) g x
+            (Realized.vec4 (I := I) Y X Z W) =
+          -metricRm04At (I := I) (M := M) g x
+            (Realized.vec4 (I := I) X Y Z W) := by
+    simpa using
+      (LeviCivita.rm04InputSkewAt_of_leviCivita_realizes
+        (I := I) g (metricRm04 (I := I) (M := M) g) K.h_rm04
+        (x := x))
+  have hzero :
+      metricRm04 (I := I) (M := M) g x
+          (Realized.vec4 (I := I) (basis 0) (basis 0) (basis 0) (basis 0)) =
+        0 := by
+    have hself :
+        metricRm04At (I := I) (M := M) g x
+            (Realized.vec4 (I := I) (basis 0) (basis 0) (basis 0) (basis 0)) =
+          -metricRm04At (I := I) (M := M) g x
+            (Realized.vec4 (I := I) (basis 0) (basis 0) (basis 0) (basis 0)) :=
+      hInput (basis 0) (basis 0) (basis 0) (basis 0)
+    have hzeroAt :
+        metricRm04At (I := I) (M := M) g x
+            (Realized.vec4 (I := I) (basis 0) (basis 0) (basis 0) (basis 0)) =
+          0 := by
+      linarith
+    simpa [metricRm04_apply] using hzeroAt
+  have hTail := hTraceSplit
+  rw [hzero, zero_add] at hTail
+  simpa [h0, hSucc, metricRm04_apply, metricRm04StdAt_apply,
+    vec2, vec4, Realized.vec2, Realized.vec4] using hTail
+
+/-- Velocity-frame Ricci trace written with the metric sharp of the curvature
+covector `W -> Rm04(E_i,T,T,W)`. -/
+theorem metricRicci_velocity_eq_sum_inner_curv_frame
+    (g : SmoothRiemannianMetric I M) {m : Nat} {x : M}
+    (basis : Module.Basis (Fin (m + 1)) Real (TangentSpace I x))
+    (hON : forall a b,
+      g.inner x (basis a) (basis b) = if a = b then 1 else 0)
+    {T : TangentSpace I x} {E : Fin m -> TangentSpace I x}
+    (h0 : basis 0 = T)
+    (hSucc : forall i : Fin m, basis i.succ = E i) :
+    metricRicci (I := I) (M := M) g x (vec2 (I := I) T T) =
+      ∑ i, g.inner x
+        (Realized.metricSharp (I := I) g x
+          (metricRm04LastDualAt (I := I) (M := M) g x (E i) T T))
+        (E i) := by
+  rw [metricRicci_velocity_eq_sum_rm04_frame
+    (I := I) (M := M) g basis hON h0 hSucc]
+  refine Finset.sum_congr rfl ?_
+  intro i _
+  rw [Realized.inner_metricSharp]
+  rfl
 
 end Curvature
 end RicciFlower

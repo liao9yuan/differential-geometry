@@ -1,3 +1,4 @@
+import Mathlib.Analysis.InnerProductSpace.Spectrum
 import RicciFlower.Tensor.RSTensor.Tensor0SRiemannian.Coordinate
 
 set_option autoImplicit false
@@ -299,6 +300,246 @@ theorem normSq0S_diag_le
   exact coordInner0S_diagonal_le_pow_identity (I := I) (x := x) s μ C hμ_nonneg hμ_le A basis
 
 end DiagonalCoordinate
+
+section MetricEquiv
+
+/-- Pointwise diagonal inverse-metric data produced by two-sided tangent metric
+equivalence.
+
+Relative to a `g`-orthonormal eigenbasis of the `g`-self-adjoint operator
+`g^{-1} h`, the inverse components of `h` are diagonal and bounded above by the
+same equivalence constant. -/
+theorem exists_diagInv_of_equiv
+    (g h : SmoothMetric I M) (x : M) {C : Real}
+    (hC : 1 <= C)
+    (hequiv :
+      forall v : TangentSpace I x,
+        C⁻¹ * g.inner x v v <= h.inner x v v /\
+          h.inner x v v <= C * g.inner x v v) :
+    exists mu : Fin (Module.finrank Real (TangentSpace I x)) -> Real,
+    exists basis :
+      Module.Basis (Fin (Module.finrank Real (TangentSpace I x))) Real
+        (TangentSpace I x),
+      MetricInverseInBasis
+        (I := I) g x basis
+        (identityInvMetric
+          (Idx := Fin (Module.finrank Real (TangentSpace I x)))) /\
+      MetricInverseInBasis
+        (I := I) h x basis (diagonalInvMetric mu) /\
+      (forall i : Fin (Module.finrank Real (TangentSpace I x)), 0 <= mu i) /\
+      (forall i : Fin (Module.finrank Real (TangentSpace I x)), mu i <= C) := by
+  classical
+  let D := (tangentMetricData (I := I) g x).metric
+  letI : InnerProductSpace.Core Real (TangentSpace I x) := D.toCore
+  letI : NormedAddCommGroup (TangentSpace I x) :=
+    @InnerProductSpace.Core.toNormedAddCommGroup Real (TangentSpace I x) _ _ _
+      D.toCore
+  letI : InnerProductSpace Real (TangentSpace I x) :=
+    @InnerProductSpace.ofCore Real (TangentSpace I x) _ _ _ D.toCore.toCore
+  let T : TangentSpace I x →ₗ[Real] TangentSpace I x :=
+    ((tangentFlatEquiv (I := I) g x).symm.toLinearMap).comp
+      (tangentFlatEquiv (I := I) h x).toLinearMap
+  have hTg (X Y : TangentSpace I x) :
+      g.inner x (T X) Y = h.inner x X Y := by
+    change (tangentFlatEquiv (I := I) g x
+        ((tangentFlatEquiv (I := I) g x).symm
+          ((tangentFlatEquiv (I := I) h x) X))) Y =
+      h.inner x X Y
+    rw [(tangentFlatEquiv (I := I) g x).apply_symm_apply]
+    rfl
+  have hT : T.IsSymmetric := by
+    intro X Y
+    rw [MetricFiberData.toCore_inner D (T X) Y,
+      MetricFiberData.toCore_inner D X (T Y)]
+    calc
+      g.inner x (T X) Y = h.inner x X Y := hTg X Y
+      _ = h.inner x Y X := h.symm x X Y
+      _ = g.inner x (T Y) X := (hTg Y X).symm
+      _ = g.inner x X (T Y) := g.symm x (T Y) X
+  let n := Module.finrank Real (TangentSpace I x)
+  have hn : Module.finrank Real (TangentSpace I x) = n := rfl
+  let ob := hT.eigenvectorBasis hn
+  let basis : Module.Basis (Fin n) Real (TangentSpace I x) := ob.toBasis
+  let lam : Fin n -> Real := fun i => hT.eigenvalues hn i
+  let mu : Fin n -> Real := fun i => (lam i)⁻¹
+  have hg_orth :
+      forall i j : Fin n,
+        g.inner x (basis i) (basis j) = if i = j then 1 else 0 := by
+    intro i j
+    have hij := ob.inner_eq_ite i j
+    have hinner :
+        Inner.inner Real (ob i) (ob j) = D.inner (ob i) (ob j) :=
+      MetricFiberData.toCore_inner D (ob i) (ob j)
+    simpa [basis, MetricFiberData.inner, tangentMetricData]
+      using hinner.symm.trans hij
+  have hT_eig (i : Fin n) :
+      T (basis i) = lam i • basis i := by
+    simp [basis, lam, ob, hT.apply_eigenvectorBasis hn i]
+  have hh_diag :
+      forall i j : Fin n,
+        h.inner x (basis i) (basis j) = if i = j then lam i else 0 := by
+    intro i j
+    calc
+      h.inner x (basis i) (basis j) =
+          g.inner x (T (basis i)) (basis j) := (hTg (basis i) (basis j)).symm
+      _ = g.inner x (lam i • basis i) (basis j) := by rw [hT_eig i]
+      _ = if i = j then lam i else 0 := by
+          by_cases hij : i = j
+          · simp [hij, hg_orth]
+          · simp [hij, hg_orth]
+  have hginv :
+      MetricInverseInBasis
+        (I := I) g x basis (identityInvMetric (Idx := Fin n)) := by
+    intro i j
+    constructor
+    · simp [identityInvMetric, diagonalInvMetric, hg_orth]
+    · simp [identityInvMetric, diagonalInvMetric, hg_orth]
+  have hlam_pos : forall i : Fin n, 0 < lam i := by
+    intro i
+    have hne : basis i ≠ 0 := by
+      simpa [basis] using ob.orthonormal.ne_zero i
+    have hpos : 0 < h.inner x (basis i) (basis i) := h.pos x (basis i) hne
+    have hii := hh_diag i i
+    rw [hii] at hpos
+    simpa using hpos
+  have hC_pos : 0 < C := lt_of_lt_of_le zero_lt_one hC
+  have hlam_lower : forall i : Fin n, C⁻¹ <= lam i := by
+    intro i
+    have hlow := (hequiv (basis i)).1
+    have hgii := hg_orth i i
+    have hhii := hh_diag i i
+    simpa [hgii, hhii] using hlow
+  have hmu_nonneg : forall i : Fin n, 0 <= mu i := by
+    intro i
+    exact le_of_lt (inv_pos.mpr (hlam_pos i))
+  have hmu_le : forall i : Fin n, mu i <= C := by
+    intro i
+    have h :=
+      (one_div_le (hlam_pos i) hC_pos).mpr (by
+        simpa [one_div] using hlam_lower i)
+    simpa [mu, one_div] using h
+  have hhinv :
+      MetricInverseInBasis
+        (I := I) h x basis (diagonalInvMetric mu) := by
+    intro i j
+    have hmulam (i : Fin n) : mu i * lam i = 1 := by
+      simpa [mu] using inv_mul_cancel₀ (ne_of_gt (hlam_pos i))
+    have hlammu (i : Fin n) : lam i * mu i = 1 := by
+      simpa [mu] using mul_inv_cancel₀ (ne_of_gt (hlam_pos i))
+    constructor
+    · rw [Finset.sum_eq_single i]
+      · by_cases hij : i = j
+        · subst j
+          simp [diagonalInvMetric, hh_diag, hmulam]
+        · simp [diagonalInvMetric, hh_diag, hij]
+      · intro k _ hk
+        simp [diagonalInvMetric, Ne.symm hk]
+      · intro hi
+        exact False.elim (hi (Finset.mem_univ i))
+    · rw [Finset.sum_eq_single j]
+      · by_cases hij : i = j
+        · subst j
+          simp [diagonalInvMetric, hh_diag, hlammu]
+        · simp [diagonalInvMetric, hh_diag, hij]
+      · intro k _ hk
+        simp [diagonalInvMetric, hk]
+      · intro hj
+        exact False.elim (hj (Finset.mem_univ j))
+  exact ⟨mu, basis, hginv, hhinv, hmu_nonneg, hmu_le⟩
+
+/-- Pointwise tangent metric equivalence is symmetric with the same constant. -/
+theorem metric_equiv_symm
+    (g h : SmoothMetric I M) (x : M) {C : Real}
+    (hC : 1 <= C)
+    (hequiv :
+      forall v : TangentSpace I x,
+        C⁻¹ * g.inner x v v <= h.inner x v v /\
+          h.inner x v v <= C * g.inner x v v) :
+    forall v : TangentSpace I x,
+      C⁻¹ * h.inner x v v <= g.inner x v v /\
+        g.inner x v v <= C * h.inner x v v := by
+  intro v
+  have hC_pos : 0 < C := lt_of_lt_of_le zero_lt_one hC
+  have hC_nonneg : 0 <= C := le_of_lt hC_pos
+  have hCinv_nonneg : 0 <= C⁻¹ := inv_nonneg.mpr hC_nonneg
+  have hlow := (hequiv v).1
+  have hhigh := (hequiv v).2
+  constructor
+  · calc
+      C⁻¹ * h.inner x v v <= C⁻¹ * (C * g.inner x v v) :=
+        mul_le_mul_of_nonneg_left hhigh hCinv_nonneg
+      _ = g.inner x v v := by
+        field_simp [hC_pos.ne']
+  · calc
+      g.inner x v v = C * (C⁻¹ * g.inner x v v) := by
+        field_simp [hC_pos.ne']
+      _ <= C * h.inner x v v :=
+        mul_le_mul_of_nonneg_left hlow hC_nonneg
+
+/-- Upper squared-norm comparison for covariant tensors under pointwise metric
+equivalence. -/
+theorem normSq0S_upper_le_of_equiv
+    (g h : SmoothMetric I M) (x : M) (s : Nat) {C : Real}
+    (hC : 1 <= C)
+    (hequiv :
+      forall v : TangentSpace I x,
+        C⁻¹ * g.inner x v v <= h.inner x v v /\
+          h.inner x v v <= C * g.inner x v v)
+    (T : Tensor0SSpace s I x) :
+    normSq0S (I := I) h x s T <=
+      C ^ s * normSq0S (I := I) g x s T := by
+  obtain ⟨mu, basis, hginv, hhinv, hmu_nonneg, hmu_le⟩ :=
+    exists_diagInv_of_equiv (I := I) g h x hC hequiv
+  exact normSq0S_diag_le
+    (I := I) (g := g) (h := h) (x := x) (s := s)
+    basis mu C hginv hhinv hmu_nonneg hmu_le T
+
+/-- Lower squared-norm comparison for covariant tensors under pointwise metric
+equivalence. -/
+theorem normSq0S_lower_le_of_equiv
+    (g h : SmoothMetric I M) (x : M) (s : Nat) {C : Real}
+    (hC : 1 <= C)
+    (hequiv :
+      forall v : TangentSpace I x,
+        C⁻¹ * g.inner x v v <= h.inner x v v /\
+          h.inner x v v <= C * g.inner x v v)
+    (T : Tensor0SSpace s I x) :
+    (C ^ s)⁻¹ * normSq0S (I := I) g x s T <=
+      normSq0S (I := I) h x s T := by
+  have hsymm := metric_equiv_symm (I := I) g h x hC hequiv
+  have hupper :=
+    normSq0S_upper_le_of_equiv
+      (I := I) h g x s hC hsymm T
+  have hC_pos : 0 < C := lt_of_lt_of_le zero_lt_one hC
+  have hpow_pos : 0 < C ^ s := pow_pos hC_pos s
+  rw [inv_mul_le_iff₀ hpow_pos]
+  exact hupper
+
+/-- Two-sided squared-norm comparison for covariant tensors under pointwise
+metric equivalence. -/
+theorem normSq0S_le_of_metric_equiv
+    (g h : SmoothMetric I M) (x : M) (s : Nat) {C : Real}
+    (hC : 1 <= C)
+    (hequiv :
+      forall v : TangentSpace I x,
+        C⁻¹ * g.inner x v v <= h.inner x v v /\
+          h.inner x v v <= C * g.inner x v v)
+    (T : Tensor0SSpace s I x) :
+    C ^ (-(s : Int)) * normSq0S (I := I) g x s T <=
+      normSq0S (I := I) h x s T /\
+    normSq0S (I := I) h x s T <=
+      C ^ (s : Int) * normSq0S (I := I) g x s T := by
+  have hlower :=
+    normSq0S_lower_le_of_equiv
+      (I := I) g h x s hC hequiv T
+  have hupper :=
+    normSq0S_upper_le_of_equiv
+      (I := I) g h x s hC hequiv T
+  constructor
+  · simpa using hlower
+  · simpa using hupper
+
+end MetricEquiv
 
 end
 

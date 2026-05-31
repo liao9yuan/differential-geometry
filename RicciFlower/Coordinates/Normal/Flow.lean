@@ -476,6 +476,780 @@ theorem plFlow_eq_of_solution_at
   intro t ht
   exact hEq ht
 
+/-- A controlled Picard-Lindelof flow cannot move faster than the vector-field
+norm bound `L`.
+
+If the initial point lies in the PL initial ball of radius `r`, then at time
+`t` the chosen flow is within `r + L * |t - t0|` of the center. -/
+theorem plFlow_dist_le
+    {F : Type*} [NormedAddCommGroup F] [NormedSpace Real F] [CompleteSpace F]
+    {f : Real -> F -> F} {tmin tmax : Real}
+    {t0 : Set.Icc tmin tmax} {x0 x : F} {a r L K : NNReal}
+    (hf : IsPicardLindelof f t0 x0 a r L K)
+    {alpha : F -> Real -> F}
+    (hflow : ∀ y ∈ Metric.closedBall x0 r,
+      alpha y t0 = y ∧
+        ∀ t ∈ Set.Icc tmin tmax,
+          HasDerivWithinAt (alpha y) (f t (alpha y t))
+            (Set.Icc tmin tmax) t)
+    (hbound : ∀ y ∈ Metric.closedBall x0 r, ∀ t : Real,
+      alpha y t ∈ Metric.closedBall x0 a)
+    (hx : x ∈ Metric.closedBall x0 r)
+    {t : Real} (ht : t ∈ Set.Icc tmin tmax) :
+    dist (alpha x t) x0 ≤ (r : Real) + (L : Real) * |t - (t0 : Real)| := by
+  let t0r : Real := (t0 : Real)
+  have hinit : alpha x t0r = x := by
+    simpa [t0r] using (hflow x hx).1
+  have hxnorm : ‖x - x0‖ ≤ (r : Real) := by
+    simpa [dist_eq_norm] using (Metric.mem_closedBall.mp hx)
+  have hstart : ‖alpha x t0r - x0‖ ≤ (r : Real) := by
+    simpa [hinit] using hxnorm
+  have hmove :
+      ‖alpha x t - alpha x t0r‖ ≤ (L : Real) * |t - t0r| := by
+    rcases le_or_gt t0r t with hle | hlt
+    · have hsub : Set.Icc t0r t ⊆ Set.Icc tmin tmax := by
+        intro u hu
+        exact ⟨le_trans t0.2.1 hu.1, le_trans hu.2 ht.2⟩
+      have hderiv : ∀ u ∈ Set.Icc t0r t,
+          HasDerivWithinAt (alpha x) (f u (alpha x u)) (Set.Icc t0r t) u := by
+        intro u hu
+        exact ((hflow x hx).2 u (hsub hu)).mono hsub
+      have hnorm : ∀ u ∈ Set.Ico t0r t,
+          ‖f u (alpha x u)‖ ≤ (L : Real) := by
+        intro u hu
+        have huIcc : u ∈ Set.Icc t0r t := ⟨hu.1, le_of_lt hu.2⟩
+        exact hf.norm_le u (hsub huIcc) (alpha x u) (hbound x hx u)
+      have hmvt :=
+        norm_image_sub_le_of_norm_deriv_le_segment'
+          (f := alpha x) (f' := fun u => f u (alpha x u))
+          (C := (L : Real)) (a := t0r) (b := t)
+          hderiv hnorm t (Set.right_mem_Icc.mpr hle)
+      calc
+        ‖alpha x t - alpha x t0r‖ ≤ (L : Real) * (t - t0r) := hmvt
+        _ = (L : Real) * |t - t0r| := by
+          rw [abs_of_nonneg (sub_nonneg.mpr hle)]
+    · have hle' : t ≤ t0r := le_of_lt hlt
+      have hsub : Set.Icc t t0r ⊆ Set.Icc tmin tmax := by
+        intro u hu
+        exact ⟨le_trans ht.1 hu.1, le_trans hu.2 t0.2.2⟩
+      have hderiv : ∀ u ∈ Set.Icc t t0r,
+          HasDerivWithinAt (alpha x) (f u (alpha x u)) (Set.Icc t t0r) u := by
+        intro u hu
+        exact ((hflow x hx).2 u (hsub hu)).mono hsub
+      have hnorm : ∀ u ∈ Set.Ico t t0r,
+          ‖f u (alpha x u)‖ ≤ (L : Real) := by
+        intro u hu
+        have huIcc : u ∈ Set.Icc t t0r := ⟨hu.1, le_of_lt hu.2⟩
+        exact hf.norm_le u (hsub huIcc) (alpha x u) (hbound x hx u)
+      have hmvt :=
+        norm_image_sub_le_of_norm_deriv_le_segment'
+          (f := alpha x) (f' := fun u => f u (alpha x u))
+          (C := (L : Real)) (a := t) (b := t0r)
+          hderiv hnorm t0r (Set.right_mem_Icc.mpr hle')
+      calc
+        ‖alpha x t - alpha x t0r‖ = ‖alpha x t0r - alpha x t‖ := by
+          rw [norm_sub_rev]
+        _ ≤ (L : Real) * (t0r - t) := hmvt
+        _ = (L : Real) * |t - t0r| := by
+          rw [abs_of_neg (sub_neg.mpr hlt)]
+          ring
+  rw [dist_eq_norm]
+  calc
+    ‖alpha x t - x0‖
+        = ‖(alpha x t - alpha x t0r) + (alpha x t0r - x0)‖ := by
+          congr 1
+          abel
+    _ ≤ ‖alpha x t - alpha x t0r‖ + ‖alpha x t0r - x0‖ :=
+          norm_add_le _ _
+    _ ≤ (L : Real) * |t - t0r| + (r : Real) :=
+          add_le_add hmove hstart
+    _ = (r : Real) + (L : Real) * |t - t0r| := by ring
+
+/-- Closed-ball corollary of `plFlow_dist_le` on a time window of radius `T`. -/
+theorem plFlow_mem_closedBall
+    {F : Type*} [NormedAddCommGroup F] [NormedSpace Real F] [CompleteSpace F]
+    {f : Real -> F -> F} {tmin tmax : Real}
+    {t0 : Set.Icc tmin tmax} {x0 x : F} {a r L K ρ : NNReal}
+    (hf : IsPicardLindelof f t0 x0 a r L K)
+    {alpha : F -> Real -> F}
+    (hflow : ∀ y ∈ Metric.closedBall x0 r,
+      alpha y t0 = y ∧
+        ∀ t ∈ Set.Icc tmin tmax,
+          HasDerivWithinAt (alpha y) (f t (alpha y t))
+            (Set.Icc tmin tmax) t)
+    (hbound : ∀ y ∈ Metric.closedBall x0 r, ∀ t : Real,
+      alpha y t ∈ Metric.closedBall x0 a)
+    (hx : x ∈ Metric.closedBall x0 r)
+    {T : Real} (_hT : 0 ≤ T)
+    (hρ : (r : Real) + (L : Real) * T ≤ (ρ : Real))
+    {t : Real} (ht : t ∈ Set.Icc ((t0 : Real) - T) ((t0 : Real) + T))
+    (htbig : t ∈ Set.Icc tmin tmax) :
+    alpha x t ∈ Metric.closedBall x0 ρ := by
+  have hdist := plFlow_dist_le hf hflow hbound hx htbig
+  have habs : |t - (t0 : Real)| ≤ T := by
+    rw [abs_le]
+    exact ⟨by linarith [ht.1], by linarith [ht.2]⟩
+  have hboundρ :
+      dist (alpha x t) x0 ≤ (ρ : Real) := by
+    calc
+      dist (alpha x t) x0
+          ≤ (r : Real) + (L : Real) * |t - (t0 : Real)| := hdist
+      _ ≤ (r : Real) + (L : Real) * T := by
+            gcongr
+      _ ≤ (ρ : Real) := hρ
+  exact Metric.mem_closedBall.mpr hboundρ
+
+/-- Homogeneous rescaling of a controlled model-flow trajectory agrees with
+the controlled flow from the rescaled initial phase.
+
+This packages the ODE-uniqueness part of the geodesic scaling argument.  The
+remaining analytic input is the explicit bound that the rescaled trajectory
+stays in the Picard-Lindelof controlling closed ball. -/
+theorem modelFlow_scale_eq
+    [I.Boundaryless] [CompleteSpace E]
+    (g : SmoothRiemannianMetric I M) (x : M)
+    {ε : Real} (hε : 0 < ε) {a r L K : NNReal}
+    (hpl : IsPicardLindelof
+      (fun _ : Real => modelSpray (I := I) g x)
+      (tmin := 0 - ε) (tmax := 0 + ε)
+      ⟨0, by simp [le_of_lt hε]⟩
+      (extChartAt I.tangent (phaseZero (I := I) x)
+        (phaseZero (I := I) x))
+      a r L K)
+    {α : E × E -> Real -> E × E}
+    (hflow : ∀ z ∈ Metric.closedBall
+        (extChartAt I.tangent (phaseZero (I := I) x)
+          (phaseZero (I := I) x)) r,
+      α z 0 = z ∧
+        ∀ t ∈ Set.Icc (-ε) ε,
+          HasDerivWithinAt (α z)
+            (modelSpray (I := I) g x (α z t))
+            (Set.Icc (-ε) ε) t)
+    (hbound : ∀ z ∈ Metric.closedBall
+        (extChartAt I.tangent (phaseZero (I := I) x)
+          (phaseZero (I := I) x)) r,
+      ∀ t : Real,
+        α z t ∈ Metric.closedBall
+          (extChartAt I.tangent (phaseZero (I := I) x)
+            (phaseZero (I := I) x)) a)
+    (hsrc : ∀ z ∈ Metric.closedBall
+        (extChartAt I.tangent (phaseZero (I := I) x)
+          (phaseZero (I := I) x)) r,
+      ∀ t ∈ Set.Icc (-ε) ε,
+        α z t ∈ (extChartAt I.tangent (phaseZero (I := I) x)).target ∧
+          (phaseOfModel (I := I) x (α z t)).proj ∈
+            (extChartAt I x).source)
+    {z : E × E} {c : Real}
+    (hz : z ∈ Metric.closedBall
+        (extChartAt I.tangent (phaseZero (I := I) x)
+          (phaseZero (I := I) x)) r)
+    (hzc : (z.1, c • z.2) ∈ Metric.closedBall
+        (extChartAt I.tangent (phaseZero (I := I) x)
+          (phaseZero (I := I) x)) r)
+    (hctIcc : ∀ t ∈ Set.Icc (-ε) ε, c * t ∈ Set.Icc (-ε) ε)
+    (hctIoo : ∀ t ∈ Set.Ioo (-ε) ε, c * t ∈ Set.Ioo (-ε) ε)
+    (hscale_bound : ∀ t ∈ Set.Icc (-ε) ε,
+      modelRescale (α z) c t ∈ Metric.closedBall
+        (extChartAt I.tangent (phaseZero (I := I) x)
+          (phaseZero (I := I) x)) a) :
+    ∀ t ∈ Set.Icc (-ε) ε,
+      α (z.1, c • z.2) t = modelRescale (α z) c t := by
+  let z0 : E × E :=
+    extChartAt I.tangent (phaseZero (I := I) x)
+      (phaseZero (I := I) x)
+  have ht0 : ((⟨0, by simp [le_of_lt hε]⟩ :
+      Set.Icc (0 - ε) (0 + ε)) : Real) ∈
+      Set.Ioo (0 - ε) (0 + ε) := by
+    simpa using hε
+  have hflow' :
+      ∀ y ∈ Metric.closedBall z0 r,
+        α y (⟨0, by simp [le_of_lt hε]⟩ :
+            Set.Icc (0 - ε) (0 + ε)) = y ∧
+          ∀ t ∈ Set.Icc (0 - ε) (0 + ε),
+            HasDerivWithinAt (α y)
+              ((fun _ : Real => modelSpray (I := I) g x) t (α y t))
+              (Set.Icc (0 - ε) (0 + ε)) t := by
+    intro y hy
+    have hy' : y ∈ Metric.closedBall
+        (extChartAt I.tangent (phaseZero (I := I) x)
+          (phaseZero (I := I) x)) r := by
+      simpa [z0] using hy
+    refine ⟨(hflow y hy').1, ?_⟩
+    intro t ht
+    have ht' : t ∈ Set.Icc (-ε) ε := by simpa using ht
+    simpa using (hflow y hy').2 t ht'
+  have hbound' :
+      ∀ y ∈ Metric.closedBall z0 r, ∀ t : Real,
+        α y t ∈ Metric.closedBall z0 a := by
+    intro y hy t
+    have hy' : y ∈ Metric.closedBall
+        (extChartAt I.tangent (phaseZero (I := I) x)
+          (phaseZero (I := I) x)) r := by
+      simpa [z0] using hy
+    simpa [z0] using hbound y hy' t
+  have hβ0 :
+      modelRescale (α z) c
+          (⟨0, by simp [le_of_lt hε]⟩ :
+            Set.Icc (0 - ε) (0 + ε)) =
+        (z.1, c • z.2) := by
+    calc
+      modelRescale (α z) c 0 = ((α z 0).1, c • (α z 0).2) := by
+        simp [modelRescale]
+      _ = (z.1, c • z.2) := by
+        rw [(hflow z hz).1]
+  have hαcont : ContinuousOn (α z) (Set.Icc (-ε) ε) := by
+    exact HasDerivWithinAt.continuousOn
+      (fun t ht => (hflow z hz).2 t ht)
+  have hscale_cont : ContinuousOn (fun t : Real => c * t) (Set.Icc (-ε) ε) :=
+    (continuous_const.mul continuous_id).continuousOn
+  have hcomp : ContinuousOn (fun t : Real => α z (c * t)) (Set.Icc (-ε) ε) :=
+    hαcont.comp hscale_cont hctIcc
+  have hβcont_raw :
+      ContinuousOn (modelRescale (α z) c) (Set.Icc (-ε) ε) := by
+    simpa [modelRescale] using
+      hcomp.fst.prodMk (hcomp.snd.const_smul c)
+  have hβcont :
+      ContinuousOn (modelRescale (α z) c) (Set.Icc (0 - ε) (0 + ε)) := by
+    simpa using hβcont_raw
+  have hαderiv : ∀ t ∈ Set.Ioo (-ε) ε,
+      HasDerivAt (α z) (modelSpray (I := I) g x (α z t)) t := by
+    intro t ht
+    have hwithin := (hflow z hz).2 t (Set.Ioo_subset_Icc_self ht)
+    have hIcc_mem : Set.Icc (-ε) ε ∈ 𝓝 t := by
+      simpa using Icc_mem_nhds ht.1 ht.2
+    exact hwithin.hasDerivAt hIcc_mem
+  have hsrc_z : ∀ t ∈ Set.Icc (-ε) ε,
+      α z t ∈ (extChartAt I.tangent (phaseZero (I := I) x)).target ∧
+        (phaseOfModel (I := I) x (α z t)).proj ∈
+          (extChartAt I x).source := hsrc z hz
+  have hβderiv_raw : ∀ t ∈ Set.Ioo (-ε) ε,
+      HasDerivAt (modelRescale (α z) c)
+        (modelSpray (I := I) g x (modelRescale (α z) c t)) t := by
+    intro t ht
+    exact modelRescale_deriv (I := I) g x hαderiv hsrc_z
+      (hctIoo t ht)
+  have hβderiv : ∀ t ∈ Set.Ioo (0 - ε) (0 + ε),
+      HasDerivAt (modelRescale (α z) c)
+        ((fun _ : Real => modelSpray (I := I) g x) t
+          (modelRescale (α z) c t)) t := by
+    intro t ht
+    have ht' : t ∈ Set.Ioo (-ε) ε := by simpa using ht
+    simpa using hβderiv_raw t ht'
+  have hβbound : ∀ t ∈ Set.Icc (0 - ε) (0 + ε),
+      modelRescale (α z) c t ∈ Metric.closedBall z0 a := by
+    intro t ht
+    have ht' : t ∈ Set.Icc (-ε) ε := by simpa using ht
+    simpa [z0] using hscale_bound t ht'
+  have hEq := plFlow_eq_of_solution_at
+    (F := E × E)
+    (f := fun _ : Real => modelSpray (I := I) g x)
+    (tmin := 0 - ε) (tmax := 0 + ε)
+    (t0 := ⟨0, by simp [le_of_lt hε]⟩)
+    (x0 := z0) (x := (z.1, c • z.2)) (a := a) (r := r)
+    (L := L) (K := K)
+    hpl ht0 (by simpa [z0] using hzc)
+    (alpha := α) hflow' hbound'
+    (beta := modelRescale (α z) c) hβ0 hβcont hβderiv hβbound
+  intro t ht
+  have ht' : t ∈ Set.Icc (0 - ε) (0 + ε) := by simpa using ht
+  exact hEq t ht'
+
+/-- Local homogeneous rescaling of a controlled model-flow trajectory.
+
+This is the version needed for open-time radial germs: the comparison only runs
+on a smaller interval `[-T,T]`, while the original Picard flow remains
+controlled on `[-ε,ε]`.  The remaining input is still the explicit closed-ball
+bound for the rescaled trajectory on the smaller interval. -/
+theorem modelFlow_scaleOn
+    [I.Boundaryless] [CompleteSpace E]
+    (g : SmoothRiemannianMetric I M) (x : M)
+    {ε T : Real} (hε : 0 < ε) (hT : 0 < T) {a r L K : NNReal}
+    (hpl : IsPicardLindelof
+      (fun _ : Real => modelSpray (I := I) g x)
+      (tmin := 0 - ε) (tmax := 0 + ε)
+      ⟨0, by simp [le_of_lt hε]⟩
+      (extChartAt I.tangent (phaseZero (I := I) x)
+        (phaseZero (I := I) x))
+      a r L K)
+    {α : E × E -> Real -> E × E}
+    (hflow : ∀ z ∈ Metric.closedBall
+        (extChartAt I.tangent (phaseZero (I := I) x)
+          (phaseZero (I := I) x)) r,
+      α z 0 = z ∧
+        ∀ t ∈ Set.Icc (-ε) ε,
+          HasDerivWithinAt (α z)
+            (modelSpray (I := I) g x (α z t))
+            (Set.Icc (-ε) ε) t)
+    (hbound : ∀ z ∈ Metric.closedBall
+        (extChartAt I.tangent (phaseZero (I := I) x)
+          (phaseZero (I := I) x)) r,
+      ∀ t : Real,
+        α z t ∈ Metric.closedBall
+          (extChartAt I.tangent (phaseZero (I := I) x)
+            (phaseZero (I := I) x)) a)
+    (hsrc : ∀ z ∈ Metric.closedBall
+        (extChartAt I.tangent (phaseZero (I := I) x)
+          (phaseZero (I := I) x)) r,
+      ∀ t ∈ Set.Icc (-ε) ε,
+        α z t ∈ (extChartAt I.tangent (phaseZero (I := I) x)).target ∧
+          (phaseOfModel (I := I) x (α z t)).proj ∈
+            (extChartAt I x).source)
+    {z : E × E} {c : Real}
+    (hz : z ∈ Metric.closedBall
+        (extChartAt I.tangent (phaseZero (I := I) x)
+          (phaseZero (I := I) x)) r)
+    (hzc : (z.1, c • z.2) ∈ Metric.closedBall
+        (extChartAt I.tangent (phaseZero (I := I) x)
+          (phaseZero (I := I) x)) r)
+    (hTsub : Set.Icc (-T) T ⊆ Set.Icc (-ε) ε)
+    (hTsubIoo : Set.Ioo (-T) T ⊆ Set.Ioo (-ε) ε)
+    (hctIcc : ∀ t ∈ Set.Icc (-T) T, c * t ∈ Set.Icc (-ε) ε)
+    (hctIoo : ∀ t ∈ Set.Ioo (-T) T, c * t ∈ Set.Ioo (-ε) ε)
+    (hscale_bound : ∀ t ∈ Set.Icc (-T) T,
+      modelRescale (α z) c t ∈ Metric.closedBall
+        (extChartAt I.tangent (phaseZero (I := I) x)
+          (phaseZero (I := I) x)) a) :
+    ∀ t ∈ Set.Icc (-T) T,
+      α (z.1, c • z.2) t = modelRescale (α z) c t := by
+  let z0 : E × E :=
+    extChartAt I.tangent (phaseZero (I := I) x)
+      (phaseZero (I := I) x)
+  let y : E × E := (z.1, c • z.2)
+  have hαy_cont : ContinuousOn (α y) (Set.Icc (-T) T) := by
+    exact HasDerivWithinAt.continuousOn
+      (fun t ht => ((hflow y hzc).2 t (hTsub ht)).mono hTsub)
+  have hαy_deriv : ∀ t ∈ Set.Ioo (-T) T,
+      HasDerivAt (α y) (modelSpray (I := I) g x (α y t)) t := by
+    intro t ht
+    have htε : t ∈ Set.Ioo (-ε) ε := hTsubIoo ht
+    have hwithin := (hflow y hzc).2 t (Set.Ioo_subset_Icc_self htε)
+    have hIcc_mem : Set.Icc (-ε) ε ∈ 𝓝 t := by
+      simpa using Icc_mem_nhds htε.1 htε.2
+    exact hwithin.hasDerivAt hIcc_mem
+  have hαcont : ContinuousOn (α z) (Set.Icc (-ε) ε) := by
+    exact HasDerivWithinAt.continuousOn
+      (fun t ht => (hflow z hz).2 t ht)
+  have hscale_cont : ContinuousOn (fun t : Real => c * t) (Set.Icc (-T) T) :=
+    (continuous_const.mul continuous_id).continuousOn
+  have hcomp : ContinuousOn (fun t : Real => α z (c * t)) (Set.Icc (-T) T) :=
+    hαcont.comp hscale_cont hctIcc
+  have hβcont :
+      ContinuousOn (modelRescale (α z) c) (Set.Icc (-T) T) := by
+    simpa [modelRescale] using
+      hcomp.fst.prodMk (hcomp.snd.const_smul c)
+  have hαderiv : ∀ t ∈ Set.Ioo (-ε) ε,
+      HasDerivAt (α z) (modelSpray (I := I) g x (α z t)) t := by
+    intro t ht
+    have hwithin := (hflow z hz).2 t (Set.Ioo_subset_Icc_self ht)
+    have hIcc_mem : Set.Icc (-ε) ε ∈ 𝓝 t := by
+      simpa using Icc_mem_nhds ht.1 ht.2
+    exact hwithin.hasDerivAt hIcc_mem
+  have hsrc_z : ∀ t ∈ Set.Icc (-ε) ε,
+      α z t ∈ (extChartAt I.tangent (phaseZero (I := I) x)).target ∧
+        (phaseOfModel (I := I) x (α z t)).proj ∈
+          (extChartAt I x).source := hsrc z hz
+  have hβderiv : ∀ t ∈ Set.Ioo (-T) T,
+      HasDerivAt (modelRescale (α z) c)
+        (modelSpray (I := I) g x (modelRescale (α z) c t)) t := by
+    intro t ht
+    exact modelRescale_deriv (I := I) g x hαderiv hsrc_z
+      (hctIoo t ht)
+  have hinit : α y 0 = modelRescale (α z) c 0 := by
+    calc
+      α y 0 = y := (hflow y hzc).1
+      _ = modelRescale (α z) c 0 := by
+        simp [y, modelRescale, (hflow z hz).1]
+  have ht0 : (0 : Real) ∈ Set.Ioo (-T) T := by
+    constructor <;> linarith
+  have hEq : Set.EqOn (α y) (modelRescale (α z) c) (Set.Icc (-T) T) := by
+    exact ODE_solution_unique_of_mem_Icc
+      (v := fun _ : Real => modelSpray (I := I) g x)
+      (s := fun _ : Real => Metric.closedBall z0 a)
+      (K := K) (t₀ := (0 : Real)) (a := -T) (b := T)
+      (fun t ht => by
+        have htεoo : t ∈ Set.Ioo (0 - ε) (0 + ε) := by
+          simpa using hTsubIoo ht
+        have htε : t ∈ Set.Icc (0 - ε) (0 + ε) :=
+          Set.Ioo_subset_Icc_self htεoo
+        simpa using hpl.lipschitzOnWith t htε)
+      ht0 hαy_cont hαy_deriv
+      (fun _ _ => by
+        simpa [z0, y] using hbound y hzc _)
+      hβcont hβderiv
+      (fun t ht => by
+        simpa [z0] using hscale_bound t (Set.Ioo_subset_Icc_self ht))
+      hinit
+  intro t ht
+  exact hEq ht
+
+/-- Local homogeneous rescaling with scalar interval bounds packaged by
+absolute values.
+
+The remaining nontrivial hypothesis is still `hscale_bound`: the rescaled
+trajectory must stay in the Picard-Lindelof closed ball on `[-T,T]`. -/
+theorem modelFlow_scaleAbs
+    [I.Boundaryless] [CompleteSpace E]
+    (g : SmoothRiemannianMetric I M) (x : M)
+    {ε T : Real} (hε : 0 < ε) (hT : 0 < T) {a r L K : NNReal}
+    (hpl : IsPicardLindelof
+      (fun _ : Real => modelSpray (I := I) g x)
+      (tmin := 0 - ε) (tmax := 0 + ε)
+      ⟨0, by simp [le_of_lt hε]⟩
+      (extChartAt I.tangent (phaseZero (I := I) x)
+        (phaseZero (I := I) x))
+      a r L K)
+    {α : E × E -> Real -> E × E}
+    (hflow : ∀ z ∈ Metric.closedBall
+        (extChartAt I.tangent (phaseZero (I := I) x)
+          (phaseZero (I := I) x)) r,
+      α z 0 = z ∧
+        ∀ t ∈ Set.Icc (-ε) ε,
+          HasDerivWithinAt (α z)
+            (modelSpray (I := I) g x (α z t))
+            (Set.Icc (-ε) ε) t)
+    (hbound : ∀ z ∈ Metric.closedBall
+        (extChartAt I.tangent (phaseZero (I := I) x)
+          (phaseZero (I := I) x)) r,
+      ∀ t : Real,
+        α z t ∈ Metric.closedBall
+          (extChartAt I.tangent (phaseZero (I := I) x)
+            (phaseZero (I := I) x)) a)
+    (hsrc : ∀ z ∈ Metric.closedBall
+        (extChartAt I.tangent (phaseZero (I := I) x)
+          (phaseZero (I := I) x)) r,
+      ∀ t ∈ Set.Icc (-ε) ε,
+        α z t ∈ (extChartAt I.tangent (phaseZero (I := I) x)).target ∧
+          (phaseOfModel (I := I) x (α z t)).proj ∈
+            (extChartAt I x).source)
+    {z : E × E} {c : Real}
+    (hz : z ∈ Metric.closedBall
+        (extChartAt I.tangent (phaseZero (I := I) x)
+          (phaseZero (I := I) x)) r)
+    (hzc : (z.1, c • z.2) ∈ Metric.closedBall
+        (extChartAt I.tangent (phaseZero (I := I) x)
+          (phaseZero (I := I) x)) r)
+    (hTε : T ≤ ε)
+    (hcT : |c| * T < ε)
+    (hscale_bound : ∀ t ∈ Set.Icc (-T) T,
+      modelRescale (α z) c t ∈ Metric.closedBall
+        (extChartAt I.tangent (phaseZero (I := I) x)
+          (phaseZero (I := I) x)) a) :
+    ∀ t ∈ Set.Icc (-T) T,
+      α (z.1, c • z.2) t = modelRescale (α z) c t := by
+  have hTsub : Set.Icc (-T) T ⊆ Set.Icc (-ε) ε := by
+    intro t ht
+    have ht_abs : |t| ≤ T := abs_le.mpr ht
+    exact abs_le.mp (le_trans ht_abs hTε)
+  have hTsubIoo : Set.Ioo (-T) T ⊆ Set.Ioo (-ε) ε := by
+    intro t ht
+    have ht_abs : |t| < T := abs_lt.mpr ht
+    exact abs_lt.mp (lt_of_lt_of_le ht_abs hTε)
+  have hctIcc : ∀ t ∈ Set.Icc (-T) T, c * t ∈ Set.Icc (-ε) ε := by
+    intro t ht
+    have ht_abs : |t| ≤ T := abs_le.mpr ht
+    have hct_abs : |c * t| ≤ ε := by
+      rw [abs_mul]
+      exact le_of_lt (lt_of_le_of_lt
+        (mul_le_mul_of_nonneg_left ht_abs (abs_nonneg c)) hcT)
+    exact abs_le.mp hct_abs
+  have hctIoo : ∀ t ∈ Set.Ioo (-T) T, c * t ∈ Set.Ioo (-ε) ε := by
+    intro t ht
+    have ht_abs : |t| < T := abs_lt.mpr ht
+    have hct_abs : |c * t| < ε := by
+      rw [abs_mul]
+      by_cases hc0 : |c| = 0
+      · rw [hc0, zero_mul]
+        exact hε
+      · have hcpos : 0 < |c| := lt_of_le_of_ne (abs_nonneg c) (Ne.symm hc0)
+        exact lt_trans (mul_lt_mul_of_pos_left ht_abs hcpos) hcT
+    exact abs_lt.mp hct_abs
+  exact modelFlow_scaleOn (I := I) g x hε hT hpl hflow hbound hsrc
+    hz hzc hTsub hTsubIoo hctIcc hctIoo hscale_bound
+
+/-- Scaling the velocity coordinate preserves a larger closed ball when the
+original point is known to lie in a smaller closed ball with enough radius
+margin. -/
+theorem modelRescale_memBall
+    {z0 p : E × E} {ρ a : NNReal} {c : Real}
+    (hp : p ∈ Metric.closedBall z0 ρ)
+    (hz0 : z0.2 = 0)
+    (hρa : (ρ : Real) ≤ (a : Real))
+    (hcρ : |c| * (ρ : Real) ≤ (a : Real)) :
+    (p.1, c • p.2) ∈ Metric.closedBall z0 a := by
+  rcases z0 with ⟨z₁, z₂⟩
+  rcases p with ⟨p₁, p₂⟩
+  rw [Metric.mem_closedBall, dist_eq_norm] at hp ⊢
+  dsimp at hz0
+  rw [hz0] at hp ⊢
+  change max ‖p₁ - z₁‖ ‖p₂ - 0‖ ≤ (ρ : Real) at hp
+  change max ‖p₁ - z₁‖ ‖c • p₂ - 0‖ ≤ (a : Real)
+  rw [sub_zero] at hp ⊢
+  refine max_le ?_ ?_
+  · exact le_trans (le_trans (le_max_left _ _) hp) hρa
+  · calc
+      ‖c • p₂‖ = |c| * ‖p₂‖ := norm_smul c p₂
+      _ ≤ |c| * (ρ : Real) := by
+            exact mul_le_mul_of_nonneg_left
+              (le_trans (le_max_right _ _) hp) (abs_nonneg c)
+      _ ≤ (a : Real) := hcρ
+
+/-- Bound the rescaled trajectory on a short time interval from a sharper
+trajectory bound and a product-norm radius margin. -/
+theorem modelRescale_bound
+    [I.Boundaryless] [CompleteSpace E]
+    (g : SmoothRiemannianMetric I M) (x : M)
+    {ε T : Real} (hε : 0 < ε) (hT : 0 ≤ T) {a r L K ρ : NNReal}
+    (hpl : IsPicardLindelof
+      (fun _ : Real => modelSpray (I := I) g x)
+      (tmin := 0 - ε) (tmax := 0 + ε)
+      ⟨0, by simp [le_of_lt hε]⟩
+      (extChartAt I.tangent (phaseZero (I := I) x)
+        (phaseZero (I := I) x))
+      a r L K)
+    {α : E × E -> Real -> E × E}
+    (hflow : ∀ z ∈ Metric.closedBall
+        (extChartAt I.tangent (phaseZero (I := I) x)
+          (phaseZero (I := I) x)) r,
+      α z 0 = z ∧
+        ∀ t ∈ Set.Icc (-ε) ε,
+          HasDerivWithinAt (α z)
+            (modelSpray (I := I) g x (α z t))
+            (Set.Icc (-ε) ε) t)
+    (hbound : ∀ z ∈ Metric.closedBall
+        (extChartAt I.tangent (phaseZero (I := I) x)
+          (phaseZero (I := I) x)) r,
+      ∀ t : Real,
+        α z t ∈ Metric.closedBall
+          (extChartAt I.tangent (phaseZero (I := I) x)
+            (phaseZero (I := I) x)) a)
+    {z : E × E} {c : Real}
+    (hz : z ∈ Metric.closedBall
+        (extChartAt I.tangent (phaseZero (I := I) x)
+          (phaseZero (I := I) x)) r)
+    (hctIcc : ∀ t ∈ Set.Icc (-T) T, c * t ∈ Set.Icc (-ε) ε)
+    (hρ : (r : Real) + (L : Real) * (|c| * T) ≤ (ρ : Real))
+    (hρa : (ρ : Real) ≤ (a : Real))
+    (hcρ : |c| * (ρ : Real) ≤ (a : Real)) :
+    ∀ t ∈ Set.Icc (-T) T,
+      modelRescale (α z) c t ∈ Metric.closedBall
+        (extChartAt I.tangent (phaseZero (I := I) x)
+          (phaseZero (I := I) x)) a := by
+  let z0 : E × E :=
+    extChartAt I.tangent (phaseZero (I := I) x)
+      (phaseZero (I := I) x)
+  have hz0snd : z0.2 = 0 := by
+    simpa [z0] using congrArg Prod.snd (phaseZero_pair (I := I) x)
+  intro t ht
+  have ht_abs : |t| ≤ T := abs_le.mpr ht
+  have hct_abs : |c * t| ≤ |c| * T := by
+    rw [abs_mul]
+    exact mul_le_mul_of_nonneg_left ht_abs (abs_nonneg c)
+  have hct_short :
+      c * t ∈ Set.Icc
+        (((⟨0, by simp [le_of_lt hε]⟩ :
+          Set.Icc (0 - ε) (0 + ε)) : Real) - |c| * T)
+        (((⟨0, by simp [le_of_lt hε]⟩ :
+          Set.Icc (0 - ε) (0 + ε)) : Real) + |c| * T) := by
+    have h := abs_le.mp hct_abs
+    simpa using h
+  have hpρ :
+      α z (c * t) ∈ Metric.closedBall z0 ρ := by
+    simpa [z0] using
+      plFlow_mem_closedBall
+        (F := E × E)
+        (f := fun _ : Real => modelSpray (I := I) g x)
+        (tmin := 0 - ε) (tmax := 0 + ε)
+        (t0 := ⟨0, by simp [le_of_lt hε]⟩)
+        (x0 := z0) (x := z) (a := a) (r := r) (L := L)
+        (K := K) (ρ := ρ)
+        hpl
+        (by
+          intro y hy
+          simpa [z0] using hflow y hy)
+        (by
+          intro y hy s
+          simpa [z0] using hbound y hy s)
+        (by simpa [z0] using hz)
+        (mul_nonneg (abs_nonneg c) hT) hρ hct_short
+        (by simpa using hctIcc t ht)
+  simpa [modelRescale, z0] using
+    modelRescale_memBall (E := E) (z0 := z0) (p := α z (c * t))
+      (a := a) (ρ := ρ) (c := c) hpρ hz0snd hρa hcρ
+
+/-- Near-identity homogeneous scaling on a short interval, with the closed-ball
+bound discharged from an explicit trajectory-radius margin. -/
+theorem modelFlow_scaleNear
+    [I.Boundaryless] [CompleteSpace E]
+    (g : SmoothRiemannianMetric I M) (x : M)
+    {ε T : Real} (hε : 0 < ε) (hT : 0 < T) {a r L K ρ : NNReal}
+    (hpl : IsPicardLindelof
+      (fun _ : Real => modelSpray (I := I) g x)
+      (tmin := 0 - ε) (tmax := 0 + ε)
+      ⟨0, by simp [le_of_lt hε]⟩
+      (extChartAt I.tangent (phaseZero (I := I) x)
+        (phaseZero (I := I) x))
+      a r L K)
+    {α : E × E -> Real -> E × E}
+    (hflow : ∀ z ∈ Metric.closedBall
+        (extChartAt I.tangent (phaseZero (I := I) x)
+          (phaseZero (I := I) x)) r,
+      α z 0 = z ∧
+        ∀ t ∈ Set.Icc (-ε) ε,
+          HasDerivWithinAt (α z)
+            (modelSpray (I := I) g x (α z t))
+            (Set.Icc (-ε) ε) t)
+    (hbound : ∀ z ∈ Metric.closedBall
+        (extChartAt I.tangent (phaseZero (I := I) x)
+          (phaseZero (I := I) x)) r,
+      ∀ t : Real,
+        α z t ∈ Metric.closedBall
+          (extChartAt I.tangent (phaseZero (I := I) x)
+            (phaseZero (I := I) x)) a)
+    (hsrc : ∀ z ∈ Metric.closedBall
+        (extChartAt I.tangent (phaseZero (I := I) x)
+          (phaseZero (I := I) x)) r,
+      ∀ t ∈ Set.Icc (-ε) ε,
+        α z t ∈ (extChartAt I.tangent (phaseZero (I := I) x)).target ∧
+          (phaseOfModel (I := I) x (α z t)).proj ∈
+            (extChartAt I x).source)
+    {z : E × E} {c : Real}
+    (hz : z ∈ Metric.closedBall
+        (extChartAt I.tangent (phaseZero (I := I) x)
+          (phaseZero (I := I) x)) r)
+    (hzc : (z.1, c • z.2) ∈ Metric.closedBall
+        (extChartAt I.tangent (phaseZero (I := I) x)
+          (phaseZero (I := I) x)) r)
+    (hTε : T ≤ ε)
+    (hcT : |c| * T < ε)
+    (hρ : (r : Real) + (L : Real) * (|c| * T) ≤ (ρ : Real))
+    (hρa : (ρ : Real) ≤ (a : Real))
+    (hcρ : |c| * (ρ : Real) ≤ (a : Real)) :
+    ∀ t ∈ Set.Icc (-T) T,
+      α (z.1, c • z.2) t = modelRescale (α z) c t := by
+  have hscale_bound :
+      ∀ t ∈ Set.Icc (-T) T,
+        modelRescale (α z) c t ∈ Metric.closedBall
+          (extChartAt I.tangent (phaseZero (I := I) x)
+            (phaseZero (I := I) x)) a :=
+    modelRescale_bound (I := I) g x hε (le_of_lt hT) hpl hflow hbound
+      hz (by
+        intro t ht
+        have ht_abs : |t| ≤ T := abs_le.mpr ht
+        have hct_abs : |c * t| ≤ ε := by
+          rw [abs_mul]
+          exact le_of_lt (lt_of_le_of_lt
+            (mul_le_mul_of_nonneg_left ht_abs (abs_nonneg c)) hcT)
+        exact abs_le.mp hct_abs)
+      hρ hρa hcρ
+  exact modelFlow_scaleAbs (I := I) g x hε hT hpl hflow hbound hsrc
+    hz hzc hTε hcT hscale_bound
+
+/-- Scaling the velocity coordinate by a scalar of norm at most one preserves a
+closed ball centered at a point with zero velocity coordinate. -/
+theorem modelRescale_mem_closedBall
+    {z0 p : E × E} {a : NNReal} {c : Real}
+    (hp : p ∈ Metric.closedBall z0 a)
+    (hz0 : z0.2 = 0)
+    (hc : |c| ≤ 1) :
+    (p.1, c • p.2) ∈ Metric.closedBall z0 a := by
+  rcases z0 with ⟨z₁, z₂⟩
+  rcases p with ⟨p₁, p₂⟩
+  rw [Metric.mem_closedBall, dist_eq_norm] at hp ⊢
+  dsimp at hz0
+  rw [hz0] at hp ⊢
+  change max ‖p₁ - z₁‖ ‖p₂ - 0‖ ≤ (a : Real) at hp
+  change max ‖p₁ - z₁‖ ‖c • p₂ - 0‖ ≤ (a : Real)
+  rw [sub_zero] at hp ⊢
+  refine max_le ?_ ?_
+  · exact le_trans (le_max_left _ _) hp
+  · calc
+      ‖c • p₂‖ = |c| * ‖p₂‖ := norm_smul c p₂
+      _ ≤ 1 * ‖p₂‖ := mul_le_mul_of_nonneg_right hc (norm_nonneg p₂)
+      _ = ‖p₂‖ := one_mul _
+      _ ≤ (a : Real) := le_trans (le_max_right _ _) hp
+
+/-- Homogeneous rescaling of a controlled model flow by `|c| ≤ 1`.
+
+This is the common radial-segment case of `modelFlow_scale_eq`; the rescaled
+trajectory stays in the same controlling closed ball because only the velocity
+coordinate is contracted. -/
+theorem modelFlow_scale_le
+    [I.Boundaryless] [CompleteSpace E]
+    (g : SmoothRiemannianMetric I M) (x : M)
+    {ε : Real} (hε : 0 < ε) {a r L K : NNReal}
+    (hpl : IsPicardLindelof
+      (fun _ : Real => modelSpray (I := I) g x)
+      (tmin := 0 - ε) (tmax := 0 + ε)
+      ⟨0, by simp [le_of_lt hε]⟩
+      (extChartAt I.tangent (phaseZero (I := I) x)
+        (phaseZero (I := I) x))
+      a r L K)
+    {α : E × E -> Real -> E × E}
+    (hflow : ∀ z ∈ Metric.closedBall
+        (extChartAt I.tangent (phaseZero (I := I) x)
+          (phaseZero (I := I) x)) r,
+      α z 0 = z ∧
+        ∀ t ∈ Set.Icc (-ε) ε,
+          HasDerivWithinAt (α z)
+            (modelSpray (I := I) g x (α z t))
+            (Set.Icc (-ε) ε) t)
+    (hbound : ∀ z ∈ Metric.closedBall
+        (extChartAt I.tangent (phaseZero (I := I) x)
+          (phaseZero (I := I) x)) r,
+      ∀ t : Real,
+        α z t ∈ Metric.closedBall
+          (extChartAt I.tangent (phaseZero (I := I) x)
+            (phaseZero (I := I) x)) a)
+    (hsrc : ∀ z ∈ Metric.closedBall
+        (extChartAt I.tangent (phaseZero (I := I) x)
+          (phaseZero (I := I) x)) r,
+      ∀ t ∈ Set.Icc (-ε) ε,
+        α z t ∈ (extChartAt I.tangent (phaseZero (I := I) x)).target ∧
+          (phaseOfModel (I := I) x (α z t)).proj ∈
+            (extChartAt I x).source)
+    {z : E × E} {c : Real}
+    (hz : z ∈ Metric.closedBall
+        (extChartAt I.tangent (phaseZero (I := I) x)
+          (phaseZero (I := I) x)) r)
+    (hzc : (z.1, c • z.2) ∈ Metric.closedBall
+        (extChartAt I.tangent (phaseZero (I := I) x)
+          (phaseZero (I := I) x)) r)
+    (hc : |c| ≤ 1) :
+    ∀ t ∈ Set.Icc (-ε) ε,
+      α (z.1, c • z.2) t = modelRescale (α z) c t := by
+  let z0 : E × E :=
+    extChartAt I.tangent (phaseZero (I := I) x)
+      (phaseZero (I := I) x)
+  have hz0snd : z0.2 = 0 := by
+    simpa [z0] using congrArg Prod.snd (phaseZero_pair (I := I) x)
+  have hctIcc : ∀ t ∈ Set.Icc (-ε) ε, c * t ∈ Set.Icc (-ε) ε := by
+    intro t ht
+    have ht_abs : |t| ≤ ε := abs_le.mpr ht
+    have hct_abs : |c * t| ≤ ε := by
+      rw [abs_mul]
+      calc
+        |c| * |t| ≤ 1 * |t| :=
+          mul_le_mul_of_nonneg_right hc (abs_nonneg t)
+        _ = |t| := one_mul _
+        _ ≤ ε := ht_abs
+    exact abs_le.mp hct_abs
+  have hctIoo : ∀ t ∈ Set.Ioo (-ε) ε, c * t ∈ Set.Ioo (-ε) ε := by
+    intro t ht
+    have ht_abs : |t| < ε := abs_lt.mpr ht
+    have hct_abs : |c * t| < ε := by
+      rw [abs_mul]
+      calc
+        |c| * |t| ≤ 1 * |t| :=
+          mul_le_mul_of_nonneg_right hc (abs_nonneg t)
+        _ = |t| := one_mul _
+        _ < ε := ht_abs
+    exact abs_lt.mp hct_abs
+  refine modelFlow_scale_eq (I := I) g x hε hpl hflow hbound hsrc hz hzc
+    hctIcc hctIoo ?_
+  intro t ht
+  exact modelRescale_mem_closedBall
+    (hbound z hz (c * t)) hz0snd hc
+
 /-- Picard-Lindelof vector fields are interval-integrable along a controlled
 continuous trajectory. -/
 lemma pl_int

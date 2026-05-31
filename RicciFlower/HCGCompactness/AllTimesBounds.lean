@@ -1,4 +1,6 @@
 import Mathlib.Analysis.Calculus.MeanValue
+import Mathlib.Analysis.Calculus.IteratedDeriv.Defs
+import Mathlib.Analysis.InnerProductSpace.Calculus
 import Mathlib.Analysis.InnerProductSpace.PiL2
 import Mathlib.Analysis.InnerProductSpace.Spectrum
 import Mathlib.Analysis.SpecialFunctions.Log.Deriv
@@ -98,6 +100,80 @@ theorem exp_bounds_of_log_deriv_bound
   simpa [neg_mul] using
     exp_bounds_of_abs_log_sub_le (hf_pos a Set.left_mem_uIcc)
       (hf_pos b Set.right_mem_uIcc) hlog
+
+/-- Affine Grönwall estimate for the higher-order part of MSM135 Lemma 3.11
+(Phase 1, sub-task 1A).  If a nonnegative scalar `U` obeys the two-sided
+differential inequality `|U' s| <= alpha * U s + beta` (with `alpha, beta > 0`)
+on the interval between `t0` and `t`, then `U` grows at most exponentially from
+its value at `t0`:
+`U t <= exp (alpha * |t - t0|) * (U t0 + beta / alpha)`.
+
+The proof shifts `U` by the constant `beta / alpha` and applies the
+multiplicative log-derivative estimate `exp_bounds_of_log_deriv_bound`. -/
+theorem affineGronwall_of_abs_deriv_le
+    (U U' : Real -> Real) {t0 t alpha beta : Real}
+    (halpha : 0 < alpha) (hbeta : 0 < beta)
+    (hU_nonneg : forall s : Real, s ∈ Set.uIcc t0 t -> 0 <= U s)
+    (hU_deriv :
+      forall s : Real, s ∈ Set.uIcc t0 t -> HasDerivAt U (U' s) s)
+    (hbound :
+      forall s : Real, s ∈ Set.uIcc t0 t -> |U' s| <= alpha * U s + beta) :
+    U t <= Real.exp (alpha * |t - t0|) * (U t0 + beta / alpha) := by
+  have ha0 : alpha ≠ 0 := ne_of_gt halpha
+  have hbpos : 0 < beta / alpha := div_pos hbeta halpha
+  have hcancel : alpha * (beta / alpha) = beta := by field_simp
+  set W : Real -> Real := fun s => U s + beta / alpha with hW
+  have hW_pos : forall s : Real, s ∈ Set.uIcc t0 t -> 0 < W s := by
+    intro s hs
+    have h1 := hU_nonneg s hs
+    have h2 : (0 : Real) < U s + beta / alpha := by linarith
+    simpa [hW] using h2
+  have hW_deriv :
+      forall s : Real, s ∈ Set.uIcc t0 t -> HasDerivAt W (U' s) s := by
+    intro s hs
+    simpa [hW] using (hU_deriv s hs).add_const (beta / alpha)
+  have hW_bound :
+      forall s : Real, s ∈ Set.uIcc t0 t -> |U' s / W s| <= alpha := by
+    intro s hs
+    have hWs : 0 < W s := hW_pos s hs
+    rw [abs_div, abs_of_pos hWs, div_le_iff₀ hWs]
+    calc |U' s| <= alpha * U s + beta := hbound s hs
+      _ = alpha * (U s + beta / alpha) := by rw [mul_add, hcancel]
+      _ = alpha * W s := by rw [hW]
+  have hmain :=
+    (exp_bounds_of_log_deriv_bound W U' hW_pos hW_deriv hW_bound).2
+  simp only [hW] at hmain
+  linarith [hbpos]
+
+open scoped RealInnerProductSpace in
+/-- Squared-norm evolution with a Young bound (Phase 1, sub-task 1B), the
+analytic core of the higher-order metric estimate in MSM135 Lemma 3.11.  For a
+differentiable curve `c` in a real inner product space, the squared norm
+`‖c‖ ^ 2` is differentiable and the absolute value of its derivative is
+controlled by `‖c t‖ ^ 2 + ‖c'‖ ^ 2`.
+
+The geometric instantiation `c t = nabla^p g(t)` (with `c' = -2 nabla^p Rc`)
+turns this into the differential inequality `|d/dt |nabla^p g|^2| <=
+|nabla^p g|^2 + 4 |nabla^p Rc|^2` consumed, together with `1A`, in the
+order-`p` assembly. -/
+theorem hasDerivAt_normSq_abs_deriv_le
+    {F : Type*} [NormedAddCommGroup F] [InnerProductSpace Real F]
+    {c : Real -> F} {c' : F} {t : Real}
+    (hc : HasDerivAt c c' t) :
+    exists d : Real,
+      HasDerivAt (fun s : Real => ‖c s‖ ^ 2) d t ∧
+        |d| <= ‖c t‖ ^ 2 + ‖c'‖ ^ 2 := by
+  have hbnd : |2 * ⟪c t, c'⟫| <= ‖c t‖ ^ 2 + ‖c'‖ ^ 2 := by
+    have hCS : |⟪c t, c'⟫| <= ‖c t‖ * ‖c'‖ := abs_real_inner_le_norm (c t) c'
+    have hyoung : 2 * ‖c t‖ * ‖c'‖ <= ‖c t‖ ^ 2 + ‖c'‖ ^ 2 :=
+      two_mul_le_add_sq _ _
+    calc |2 * ⟪c t, c'⟫|
+        = 2 * |⟪c t, c'⟫| := by rw [abs_mul, abs_two]
+      _ <= 2 * (‖c t‖ * ‖c'‖) :=
+            mul_le_mul_of_nonneg_left hCS (by norm_num)
+      _ = 2 * ‖c t‖ * ‖c'‖ := by ring
+      _ <= ‖c t‖ ^ 2 + ‖c'‖ ^ 2 := hyoung
+  exact ⟨_, hc.norm_sq, hbnd⟩
 
 /-- Vector-valued endpoint estimate used in the Christoffel part of MSM135
 Lemma 3.11: a uniform derivative bound on the interval controls the change
@@ -528,6 +604,30 @@ def MetricUniformEquivalentOnWindow
   forall i : Nat, forall t : Real, t ∈ Set.Icc β ψ ->
     MetricUniformEquivalentOn (I := I) K gRef (gSeq i t) (B t)
 
+/-- A uniform metric-equivalence constant may be enlarged. -/
+theorem metricUniformEquivalentOn_of_le
+    {K : Set M} {gRef h : SmoothRiemannianMetric I M} {C C' : Real}
+    (hEq : MetricUniformEquivalentOn (I := I) K gRef h C)
+    (hCC' : C <= C') :
+    MetricUniformEquivalentOn (I := I) K gRef h C' := by
+  constructor
+  · exact le_trans hEq.1 hCC'
+  · intro x hx v
+    have hC_pos : 0 < C := lt_of_lt_of_le zero_lt_one hEq.1
+    have hgin_nonneg : 0 <= gRef.inner x v v := by
+      by_cases hv : v = 0
+      · subst v
+        simp
+      · exact le_of_lt (gRef.pos x v hv)
+    have hinv_le : C'⁻¹ <= C⁻¹ := by
+      simpa [one_div] using one_div_le_one_div_of_le hC_pos hCC'
+    constructor
+    · exact le_trans
+        (mul_le_mul_of_nonneg_right hinv_le hgin_nonneg)
+        (hEq.2 x hx v).1
+    · exact le_trans (hEq.2 x hx v).2
+        (mul_le_mul_of_nonneg_right hCC' hgin_nonneg)
+
 /-- The exponential factor appearing in MSM135 Lemma 3.11, equation (3.3),
 once a Ricci quadratic bound with coefficient `A` is available. -/
 def metricEquivalenceFactor (C A t t0 : Real) : Real :=
@@ -707,6 +807,41 @@ theorem metricCovWindow_of_pointwise
   exact
     metricCovBound_of_pointwise (I := I) K p (gSeq i t) gRef (C p)
       (hC p) (hpoint i t ht p)
+
+/-- Cumulative constant obtained by taking the maximum of exact-order
+constants through order `p`. -/
+noncomputable def metricCovCumulativeConstant
+    (C : Nat -> Real) (p : Nat) : Real :=
+  (Finset.range (p + 1)).sup' (by
+    refine ⟨0, ?_⟩
+    simp) C
+
+/-- Exact-order window bounds imply the cumulative window bound used by
+`MetricCovDerivBoundsOnWindow`, with the cumulative constant chosen as the
+finite maximum of the exact-order constants up to order `p`. -/
+theorem metricCovBoundsWindow_of_orderBounds
+    (K : Set M) (β ψ : Real)
+    (gSeq : Nat -> Real -> SmoothRiemannianMetric I M)
+    (gRef : SmoothRiemannianMetric I M)
+    (C : Nat -> Real)
+    (hC : forall a : Nat, 0 <= C a)
+    (horder :
+      forall a : Nat,
+        MetricCovDerivOrderBoundOnWindow (I := I) K β ψ gSeq gRef a
+          (C a)) :
+    MetricCovDerivBoundsOnWindow (I := I) K β ψ gSeq gRef
+      (metricCovCumulativeConstant C) := by
+  refine
+    metricCovWindow_of_pointwise (I := I) K β ψ gSeq gRef
+      (metricCovCumulativeConstant C) ?_ ?_
+  · intro p
+    have h0mem : 0 ∈ Finset.range (p + 1) := by
+      simp
+    exact le_trans (hC 0) (Finset.le_sup' C h0mem)
+  · intro i t ht p a ha x hx
+    have hamem : a ∈ Finset.range (p + 1) := by
+      exact Finset.mem_range.mpr (Nat.lt_succ_of_le ha)
+    exact le_trans (horder a i t ht x hx) (Finset.le_sup' C hamem)
 
 /-- Ricci-flow Christoffel evolution integrated in the component `l^2` norm.
 
@@ -1198,8 +1333,8 @@ theorem sqrt_normSq0S_three_le_of_metricUniformEquivalentOn
       (hC := le_trans zero_le_one hEq.1) basis μ C
       hginv hhinv hμ_nonneg hμ_le A
 
-/-- Reverse `(0,3)` tensor norm comparison under the same equivalence
-constant.  This is the direction used in MSM135 equation (3.11):
+/-- Reverse `(0,3)` tensor norm comparison under the same equivalence constant.
+This is the direction used in MSM135 equation (3.11):
 `|T|_g <= B^(3/2) |T|_{g_k}`. -/
 theorem sqrt_normSq0S_three_le_of_metricUniformEquivalentOn_symm
     {K : Set M} {g h : SmoothRiemannianMetric I M} {C : Real}
@@ -2743,9 +2878,8 @@ structure MetricAllTimesBoundsInput
 
 /-- The spatial part of the expected conclusion of MSM135 Lemma 3.11.
 
-The full mixed time-spatial derivative conclusion is not stated here yet,
-because the project still needs a canonical tensor-valued API for
-`partial_t^q nabla^p g(t)`. -/
+The full mixed time-spatial derivative conclusion is stated separately below;
+this structure is kept for consumers that only need the spatial package. -/
 structure MetricAllTimesSpatialConclusion
     (K : Set M) (β ψ : Real)
     (gSeq : Nat -> Real -> SmoothRiemannianMetric I M)
@@ -2756,6 +2890,995 @@ structure MetricAllTimesSpatialConclusion
   metricC : Nat -> Real
   metric_on_window :
     MetricCovDerivBoundsOnWindow (I := I) K β ψ gSeq gRef metricC
+
+/-- Honest glue input for the spatial part of MSM135 Lemma 3.11 after exact
+order estimates have been produced.  The order-one estimate may come from
+`metricCovOrderOneWindow_of_christoffel`, and higher orders from
+`metricCovOrderWindow_of_evolution`; this structure only assembles them into
+the cumulative theorem-facing conclusion. -/
+structure MetricAllTimesSpatialInput
+    (K : Set M) (β ψ : Real)
+    (gSeq : Nat -> Real -> SmoothRiemannianMetric I M)
+    (gRef : SmoothRiemannianMetric I M) where
+  B : Real -> Real
+  equiv_on_window :
+    MetricUniformEquivalentOnWindow (I := I) K β ψ gRef gSeq B
+  orderC : Nat -> Real
+  orderC_nonneg : forall a : Nat, 0 <= orderC a
+  order_on_window :
+    forall a : Nat,
+      MetricCovDerivOrderBoundOnWindow (I := I) K β ψ gSeq gRef a
+        (orderC a)
+
+/-- Spatial assembly of MSM135 Lemma 3.11: an equivalence window and
+exact-order metric-derivative bounds give the cumulative spatial conclusion. -/
+noncomputable def metricAllTimes_spatial
+    {K : Set M} {β ψ : Real}
+    {gSeq : Nat -> Real -> SmoothRiemannianMetric I M}
+    {gRef : SmoothRiemannianMetric I M}
+    (H : MetricAllTimesSpatialInput (I := I) K β ψ gSeq gRef) :
+    MetricAllTimesSpatialConclusion (I := I) K β ψ gSeq gRef where
+  B := H.B
+  equiv_on_window := H.equiv_on_window
+  metricC := metricCovCumulativeConstant H.orderC
+  metric_on_window :=
+    metricCovBoundsWindow_of_orderBounds (I := I) K β ψ gSeq gRef
+      H.orderC H.orderC_nonneg H.order_on_window
+
+/-- Mixed space-time metric derivative `partial_t^q nabla^p g(t)`.
+
+For fixed `x`, `metricCovDeriv (h s) gRef p x` lives in the fixed tensor
+fiber over `x`.  The iterated time derivative uses the existing tensor-space
+topology; the `gRef`-metric tensor norm is applied separately in
+`metricMixedDerivNorm`. -/
+noncomputable def metricMixedDeriv
+    (p q : Nat) (h : Real -> SmoothRiemannianMetric I M)
+    (gRef : SmoothRiemannianMetric I M) (x : M) (t : Real) :
+    Tensor0SBundle.Tensor0SSpace
+      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) (p + 2) x :=
+  let F :=
+    Tensor0SBundle.Tensor0SSpace
+      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) (p + 2) x
+  let Dfiber := Tensor0SBundle.tensor0SMetricData (I := I) gRef x (p + 2)
+  letI : PreInnerProductSpace.Core Real F := Dfiber.toCore.toCore
+  letI : SeminormedAddCommGroup F :=
+    InnerProductSpace.Core.toSeminormedAddCommGroup (𝕜 := Real) (F := F)
+  letI : InnerProductSpace.Core Real F := Dfiber.toCore
+  letI : NormedAddCommGroup F :=
+    InnerProductSpace.Core.toNormedAddCommGroup (𝕜 := Real) (F := F)
+  letI : NormedSpace Real F :=
+    InnerProductSpace.Core.toNormedSpace (𝕜 := Real) (F := F)
+  iteratedDeriv (𝕜 := Real) (F := F) q
+    (fun s : Real => metricCovDeriv (I := I) (h s) gRef p x) t
+
+/-- Pointwise `gRef`-norm of `partial_t^q nabla^p g(t)`. -/
+noncomputable def metricMixedDerivNorm
+    (p q : Nat) (h : Real -> SmoothRiemannianMetric I M)
+    (gRef : SmoothRiemannianMetric I M) (x : M) (t : Real) : Real :=
+  Real.sqrt
+    (Tensor0SBundle.normSq0S (I := I) gRef x (p + 2)
+      (metricMixedDeriv (I := I) p q h gRef x t))
+
+@[simp]
+theorem metricMixedDerivNorm_zero
+    (p : Nat) (h : Real -> SmoothRiemannianMetric I M)
+    (gRef : SmoothRiemannianMetric I M) (x : M) (t : Real) :
+    metricMixedDerivNorm (I := I) p 0 h gRef x t =
+      metricCovDerivNorm (I := I) p (h t) gRef x := by
+  simp [metricMixedDerivNorm, metricMixedDeriv, metricCovDerivNorm]
+
+/-- Exact mixed space-time derivative bound throughout a time window. -/
+def MetricMixedDerivBoundOnWindow
+    (K : Set M) (β ψ : Real)
+    (gSeq : Nat -> Real -> SmoothRiemannianMetric I M)
+    (gRef : SmoothRiemannianMetric I M)
+    (p q : Nat) (C : Real) : Prop :=
+  forall i : Nat, forall t : Real, t ∈ Set.Icc β ψ ->
+    forall x : M, x ∈ K ->
+      metricMixedDerivNorm (I := I) p q (gSeq i) gRef x t <= C
+
+/-- Cumulative mixed space-time derivative bounds throughout a time window. -/
+def MetricMixedDerivBoundsOnWindow
+    (K : Set M) (β ψ : Real)
+    (gSeq : Nat -> Real -> SmoothRiemannianMetric I M)
+    (gRef : SmoothRiemannianMetric I M)
+    (C : Nat -> Nat -> Real) : Prop :=
+  forall i : Nat, forall t : Real, t ∈ Set.Icc β ψ ->
+    forall p q : Nat,
+      forall a : Nat, a <= p ->
+        forall b : Nat, b <= q ->
+          forall x : M, x ∈ K ->
+            metricMixedDerivNorm (I := I) a b (gSeq i) gRef x t <= C p q
+
+/-- Pointwise exact mixed estimates imply the exact mixed window predicate. -/
+theorem metricMixedWindow_of_pointwise
+    (K : Set M) (β ψ : Real)
+    (gSeq : Nat -> Real -> SmoothRiemannianMetric I M)
+    (gRef : SmoothRiemannianMetric I M)
+    (p q : Nat) (C : Real)
+    (hpoint :
+      forall i : Nat, forall t : Real, t ∈ Set.Icc β ψ ->
+        forall x : M, x ∈ K ->
+          metricMixedDerivNorm (I := I) p q (gSeq i) gRef x t <= C) :
+    MetricMixedDerivBoundOnWindow (I := I) K β ψ gSeq gRef p q C := by
+  intro i t ht x hx
+  exact hpoint i t ht x hx
+
+/-- Pointwise cumulative mixed estimates imply the mixed window package. -/
+theorem metricMixedBoundsWindow_of_pointwise
+    (K : Set M) (β ψ : Real)
+    (gSeq : Nat -> Real -> SmoothRiemannianMetric I M)
+    (gRef : SmoothRiemannianMetric I M)
+    (C : Nat -> Nat -> Real)
+    (hpoint :
+      forall i : Nat, forall t : Real, t ∈ Set.Icc β ψ ->
+        forall p q : Nat,
+          forall a : Nat, a <= p ->
+            forall b : Nat, b <= q ->
+              forall x : M, x ∈ K ->
+                metricMixedDerivNorm (I := I) a b (gSeq i) gRef x t <= C p q) :
+    MetricMixedDerivBoundsOnWindow (I := I) K β ψ gSeq gRef C := by
+  intro i t ht p q a ha b hb x hx
+  exact hpoint i t ht p q a ha b hb x hx
+
+/-- Squared `gRef`-metric norm of a scaled covariant tensor. -/
+theorem normSq0S_smul
+    (gRef : SmoothRiemannianMetric I M) (x : M) (s : Nat)
+    (c : Real)
+    (A :
+      Tensor0SBundle.Tensor0SSpace
+        (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s x) :
+    Tensor0SBundle.normSq0S (I := I) gRef x s (c • A) =
+      c ^ 2 * Tensor0SBundle.normSq0S (I := I) gRef x s A := by
+  unfold Tensor0SBundle.normSq0S Tensor0SBundle.inner0S
+    Tensor0SBundle.MetricFiberData.inner
+  rw [((Tensor0SBundle.tensor0SMetricData (I := I) gRef x s).flat.map_smul c A)]
+  simp [pow_two, mul_assoc]
+
+/-- `gRef`-metric norm of a scaled covariant tensor. -/
+theorem sqrt_normSq0S_smul
+    (gRef : SmoothRiemannianMetric I M) (x : M) (s : Nat)
+    (c : Real)
+    (A :
+      Tensor0SBundle.Tensor0SSpace
+        (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s x) :
+    Real.sqrt (Tensor0SBundle.normSq0S (I := I) gRef x s (c • A)) =
+      |c| * Real.sqrt (Tensor0SBundle.normSq0S (I := I) gRef x s A) := by
+  rw [normSq0S_smul]
+  rw [Real.sqrt_mul (sq_nonneg c)]
+  rw [Real.sqrt_sq_eq_abs]
+
+/-- The first time derivative realization used by the q=1 mixed estimate.
+
+This is an explicit producer input for the mixed derivative used below.  The
+Ricci-flow backend is responsible for proving this equality from the actual
+time-derivative equation in the normed fiber structure used by
+`metricMixedDeriv`. -/
+def MetricMixedDerivOneEvolutionOn
+    (K : Set M) (β ψ : Real)
+    (gSeq : Nat -> Real -> SmoothRiemannianMetric I M)
+    (gRef : SmoothRiemannianMetric I M) (p : Nat)
+    (nablaRic :
+      Nat -> Real -> (x : M) ->
+        Tensor0SBundle.Tensor0SSpace
+          (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) (p + 2) x) :
+    Prop :=
+  forall i : Nat, forall x : M, x ∈ K -> forall t : Real, t ∈ Set.Icc β ψ ->
+    metricMixedDeriv (I := I) p 1 (gSeq i) gRef x t =
+      (-2 : Real) • nablaRic i t x
+
+/-- The q=1 mixed tensor derivative is the supplied Ricci evolution tensor. -/
+theorem metricMixedDeriv_one_eq_of_evolution
+    {K : Set M} {β ψ : Real}
+    {gSeq : Nat -> Real -> SmoothRiemannianMetric I M}
+    {gRef : SmoothRiemannianMetric I M} {p : Nat}
+    {nablaRic :
+      Nat -> Real -> (x : M) ->
+        Tensor0SBundle.Tensor0SSpace
+          (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) (p + 2) x}
+    (hmixed :
+      MetricMixedDerivOneEvolutionOn (I := I) K β ψ gSeq gRef p nablaRic)
+    {i : Nat} {x : M} (hx : x ∈ K) {t : Real} (ht : t ∈ Set.Icc β ψ) :
+    metricMixedDeriv (I := I) p 1 (gSeq i) gRef x t =
+      (-2 : Real) • nablaRic i t x := by
+  exact hmixed i x hx t ht
+
+/-- Explicit q=1 mixed constant from MSM135 Lemma 3.11. -/
+def metricMixedOneConstant (Cpp Csp0 Cppp : Real) : Real :=
+  2 * (Cpp * Csp0 + Cppp)
+
+/-- q=1 mixed estimate in MSM135 Lemma 3.11.
+
+The input `hmixed` supplies the norm-compatible realization of
+`partial_t nabla^p g = -2 nabla^p Rc`; the constants and Ricci schematic
+estimate come from the order-`p` evolution input, while `hspatial` is the
+already-proved q=0 spatial window bound. -/
+theorem metricMixedOneWindow_of_ric_bound
+    {K : Set M} {β ψ : Real}
+    {gSeq : Nat -> Real -> SmoothRiemannianMetric I M}
+    {gRef : SmoothRiemannianMetric I M} {p : Nat} {Csp0 : Real}
+    {nablaRic :
+      Nat -> Real -> (x : M) ->
+        Tensor0SBundle.Tensor0SSpace
+          (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) (p + 2) x}
+    (Cpp Cppp : Real)
+    (Cpp_nonneg : 0 <= Cpp)
+    (ric_bound :
+      forall i : Nat, forall t : Real, t ∈ Set.Icc β ψ ->
+        forall x : M, x ∈ K ->
+          Real.sqrt
+            (Tensor0SBundle.normSq0S (I := I) gRef x (p + 2)
+              (nablaRic i t x)) <=
+            Cpp * metricCovDerivNorm (I := I) p (gSeq i t) gRef x + Cppp)
+    (hmixed :
+      MetricMixedDerivOneEvolutionOn (I := I) K β ψ gSeq gRef p nablaRic)
+    (hspatial :
+      MetricCovDerivOrderBoundOnWindow (I := I) K β ψ gSeq gRef p Csp0) :
+    MetricMixedDerivBoundOnWindow (I := I) K β ψ gSeq gRef p 1
+      (metricMixedOneConstant Cpp Csp0 Cppp) := by
+  refine
+    metricMixedWindow_of_pointwise (I := I) K β ψ gSeq gRef p 1
+      (metricMixedOneConstant Cpp Csp0 Cppp) ?_
+  intro i t ht x hx
+  have hmixed_eq :
+      metricMixedDeriv (I := I) p 1 (gSeq i) gRef x t =
+        (-2 : Real) • nablaRic i t x :=
+    metricMixedDeriv_one_eq_of_evolution (I := I)
+      (K := K) (β := β) (ψ := ψ) (gSeq := gSeq) (gRef := gRef)
+      (p := p) (nablaRic := nablaRic) hmixed hx ht
+  have hnorm_eq :
+      metricMixedDerivNorm (I := I) p 1 (gSeq i) gRef x t =
+        2 *
+          Real.sqrt
+            (Tensor0SBundle.normSq0S (I := I) gRef x (p + 2)
+              (nablaRic i t x)) := by
+    unfold metricMixedDerivNorm
+    rw [hmixed_eq]
+    rw [sqrt_normSq0S_smul]
+    norm_num
+  have hric :
+      Real.sqrt
+          (Tensor0SBundle.normSq0S (I := I) gRef x (p + 2)
+            (nablaRic i t x)) <=
+        Cpp * metricCovDerivNorm (I := I) p (gSeq i t) gRef x + Cppp :=
+    ric_bound i t ht x hx
+  have hsp :
+      metricCovDerivNorm (I := I) p (gSeq i t) gRef x <= Csp0 :=
+    hspatial i t ht x hx
+  have hric_sp :
+      Real.sqrt
+          (Tensor0SBundle.normSq0S (I := I) gRef x (p + 2)
+            (nablaRic i t x)) <=
+        Cpp * Csp0 + Cppp := by
+    have hmul :
+        Cpp * metricCovDerivNorm (I := I) p (gSeq i t) gRef x <=
+          Cpp * Csp0 :=
+      mul_le_mul_of_nonneg_left hsp Cpp_nonneg
+    exact le_trans hric (by linarith)
+  have hmain :
+      2 *
+          Real.sqrt
+            (Tensor0SBundle.normSq0S (I := I) gRef x (p + 2)
+              (nablaRic i t x)) <=
+        metricMixedOneConstant Cpp Csp0 Cppp := by
+    unfold metricMixedOneConstant
+    exact mul_le_mul_of_nonneg_left hric_sp (by norm_num : (0 : Real) <= 2)
+  simpa [hnorm_eq] using hmain
+
+/-- Full mixed space-time conclusion of MSM135 Lemma 3.11. -/
+structure MetricAllTimesConclusion
+    (K : Set M) (β ψ : Real)
+    (gSeq : Nat -> Real -> SmoothRiemannianMetric I M)
+    (gRef : SmoothRiemannianMetric I M) where
+  B : Real -> Real
+  equiv_on_window :
+    MetricUniformEquivalentOnWindow (I := I) K β ψ gRef gSeq B
+  metricC : Nat -> Nat -> Real
+  mixed_on_window :
+    MetricMixedDerivBoundsOnWindow (I := I) K β ψ gSeq gRef metricC
+
+/-- Uniform first-order constant produced by the Phase 0 assembly of
+MSM135 Lemma 3.11.  The variables correspond respectively to the initial
+equivalence constant, a uniform window-equivalence constant, the `|nabla Ric|`
+component bound, a uniform time-window radius, and the initial
+`|nabla g(t0)|` bound. -/
+def metricFirstOrderConstant
+    (Ca Cb R timeRadius M0 : Real) : Real :=
+  Real.sqrt (Cb ^ 3) *
+    (2 *
+      (3 * R * timeRadius +
+        (3 / 2 : Real) * (Real.sqrt (Ca ^ 3) * M0)))
+
+/-- The concrete one-frame input package for the first-order part of MSM135
+Lemma 3.11.
+
+This is intentionally only a Phase 0 package: the `nabla Ric` component bound,
+the local frame covering `K`, and the inverse-metric component hypotheses are
+inputs.  Producing them from curvature bounds and good-ball covers belongs to
+later stages. -/
+structure MetricAllTimesFirstOrderInput
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    (K u : Set M) (β ψ t0 : Real)
+    {D : Realized.RealTimeInterval}
+    (SSeq : Nat -> RicciFlow.SolutionOn (I := I) (M := M) D)
+    (gRef : SmoothRiemannianMetric I M)
+    (T :
+      forall _i : Nat, Real -> forall x : M,
+        Tensor0SBundle.Tensor0SSpace (𝕜 := Real) (E := E) (H := H)
+          (I := I) (M := M) 2 x)
+    (A : Real) where
+  base :
+    MetricAllTimesBoundsInput (I := I) K β ψ t0
+      (fun i t => (SSeq i).family.metric t) gRef
+  log_input :
+    MetricLogDerivativeInput (I := I) K β ψ t0
+      (fun i t => (SSeq i).family.metric t) T A
+  frame : Idx -> (x : M) -> TangentSpace I x
+  hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u
+  hu : IsOpen u
+  K_subset_u : K ⊆ u
+  subset_carrier : Set.Icc β ψ ⊆ D.carrier
+  regular_on_window : forall s : Real, s ∈ Set.Icc β ψ -> s ∈ D.regular
+  gInv : Nat -> Real -> Realized.InverseMetricComponents M Idx
+  nablaRic : Nat -> Real -> M -> Idx -> Idx -> Idx -> Real
+  hinv_id :
+    forall i : Nat, forall s : Real, s ∈ Set.Icc β ψ ->
+      forall x : M, x ∈ K ->
+        forall e l : Idx, gInv i s x e l = if e = l then 1 else 0
+  hinv_frame :
+    forall i : Nat, forall s : Real, s ∈ Set.Icc β ψ ->
+      Curvature.InverseMetricComponentsInFrame
+        (I := I) ((SSeq i).family.metric s) (gInv i s) frame
+  hevol :
+    forall i : Nat,
+      RicciFlow.ChristoffelEvolutionEquationInFrameOn
+        (I := I) (SSeq i) (gInv i) frame
+        (localFrameOneOfInf (I := I) frame hframe) (nablaRic i)
+  R : Real
+  R_nonneg : 0 <= R
+  nablaRic_bound :
+    forall i : Nat, forall s : Real, s ∈ Set.Icc β ψ ->
+      forall x : M, x ∈ K ->
+        Real.sqrt
+          (LeviCivita.componentL2Sq3
+            (fun a b c : Idx => nablaRic i s x a b c)) <= R
+  initialOneC : Real
+  initial_one_bound :
+    forall i : Nat, forall x : M, x ∈ K ->
+      metricCovDerivNorm (I := I) 1 ((SSeq i).family.metric t0) gRef x <=
+        initialOneC
+  Bmax : Real
+  B_le_Bmax :
+    forall t : Real, t ∈ Set.Icc β ψ ->
+      metricEquivalenceFactor base.equivC A t t0 <= Bmax
+  timeRadius : Real
+  time_abs_le :
+    forall t : Real, t ∈ Set.Icc β ψ -> |t - t0| <= timeRadius
+
+/-- First-order output package for the Phase 0 assembly of MSM135 Lemma 3.11.
+
+This records the metric-equivalence window from equation (3.3) and the exact
+order-one spatial derivative bound.  It does not claim the full cumulative
+`C^1` or mixed time-spatial estimate. -/
+structure MetricAllTimesFirstOrderConclusion
+    {D : Realized.RealTimeInterval}
+    (K : Set M) (β ψ : Real)
+    (SSeq : Nat -> RicciFlow.SolutionOn (I := I) (M := M) D)
+    (gRef : SmoothRiemannianMetric I M) where
+  B : Real -> Real
+  equiv_on_window :
+    MetricUniformEquivalentOnWindow (I := I) K β ψ gRef
+      (fun i t => (SSeq i).family.metric t) B
+  C1 : Real
+  order_one_bound :
+    MetricCovDerivOrderBoundOnWindow (I := I) K β ψ
+      (fun i t => (SSeq i).family.metric t) gRef 1 C1
+
+/-- Window-level packaging of `covOne_le_init`: under one local frame covering
+`K`, the pointwise first-order estimate becomes an exact-order window bound. -/
+theorem metricCovOrderOneWindow_of_christoffel
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    {K u : Set M} {β ψ t0 : Real} {D : Realized.RealTimeInterval}
+    {SSeq : Nat -> RicciFlow.SolutionOn (I := I) (M := M) D}
+    {gRef : SmoothRiemannianMetric I M}
+    {T :
+      forall _i : Nat, Real -> forall x : M,
+        Tensor0SBundle.Tensor0SSpace (𝕜 := Real) (E := E) (H := H)
+          (I := I) (M := M) 2 x}
+    {A : Real}
+    (H :
+      MetricAllTimesFirstOrderInput (I := I) (Idx := Idx) K u β ψ t0
+        (D := D) SSeq gRef T A) :
+    MetricCovDerivOrderBoundOnWindow (I := I) K β ψ
+      (fun i t => (SSeq i).family.metric t) gRef 1
+      (metricFirstOrderConstant
+        H.base.equivC H.Bmax H.R H.timeRadius H.initialOneC) := by
+  have hEquivC : 1 <= H.base.equivC := (H.base.equiv_at_t0 0).1
+  have hequiv_window :
+      MetricUniformEquivalentOnWindow (I := I) K β ψ gRef
+        (fun i t => (SSeq i).family.metric t)
+        (fun t : Real => metricEquivalenceFactor H.base.equivC A t t0) :=
+    metricUniformEquivalentOnWindow_of_logDerivativeInput
+      (I := I) K β ψ t0 H.base.equivC A gRef
+      (fun i t => (SSeq i).family.metric t) T
+      H.base.t0_mem hEquivC H.base.equiv_at_t0 H.log_input
+  refine
+    metricCovOrderWindow_of_pointwise (I := I) K β ψ
+      (fun i t => (SSeq i).family.metric t) gRef 1
+      (metricFirstOrderConstant
+        H.base.equivC H.Bmax H.R H.timeRadius H.initialOneC) ?_
+  intro i t ht x hxK
+  have hsegment : Set.uIcc t0 t ⊆ Set.Icc β ψ :=
+    Set.uIcc_subset_Icc H.base.t0_mem ht
+  have hsub : Set.uIcc t0 t ⊆ D.carrier := fun s hs =>
+    H.subset_carrier (hsegment hs)
+  have hregular :
+      forall s : Real, s ∈ Set.uIcc t0 t -> s ∈ D.regular := fun s hs =>
+    H.regular_on_window s (hsegment hs)
+  have hEq_t :
+      MetricUniformEquivalentOn
+        (I := I) K gRef ((SSeq i).family.metric t) H.Bmax :=
+    metricUniformEquivalentOn_of_le
+      (I := I) (hequiv_window i t ht) (H.B_le_Bmax t ht)
+  have hraw :
+      metricCovDerivNorm (I := I) 1 ((SSeq i).family.metric t) gRef x <=
+        Real.sqrt (H.Bmax ^ 3) *
+          (2 *
+            (3 * H.R * |t - t0| +
+              (3 / 2 : Real) *
+                (Real.sqrt (H.base.equivC ^ 3) * H.initialOneC))) :=
+    covOne_le_init
+      (I := I) (K := K) (u := u) (SSeq i) gRef (H.gInv i)
+      H.frame H.hframe H.hu (H.K_subset_u hxK) hxK (H.nablaRic i)
+      hsub hregular
+      (fun s hs e l => H.hinv_id i s (hsegment hs) x hxK e l)
+      (H.hevol i)
+      (fun s hs => H.nablaRic_bound i s (hsegment hs) x hxK)
+      hEq_t (H.hinv_frame i t ht) (H.base.equiv_at_t0 i)
+      (H.hinv_frame i t0 H.base.t0_mem)
+      (H.initial_one_bound i x hxK)
+  have htime :
+      3 * H.R * |t - t0| <= 3 * H.R * H.timeRadius := by
+    nlinarith [H.R_nonneg, H.time_abs_le t ht]
+  have hinside :
+      3 * H.R * |t - t0| +
+          (3 / 2 : Real) *
+            (Real.sqrt (H.base.equivC ^ 3) * H.initialOneC) <=
+        3 * H.R * H.timeRadius +
+          (3 / 2 : Real) *
+            (Real.sqrt (H.base.equivC ^ 3) * H.initialOneC) :=
+    by
+      simpa [add_comm, add_left_comm, add_assoc] using
+        add_le_add_right htime
+          ((3 / 2 : Real) *
+            (Real.sqrt (H.base.equivC ^ 3) * H.initialOneC))
+  have hconst :
+      Real.sqrt (H.Bmax ^ 3) *
+          (2 *
+            (3 * H.R * |t - t0| +
+              (3 / 2 : Real) *
+                (Real.sqrt (H.base.equivC ^ 3) * H.initialOneC))) <=
+        metricFirstOrderConstant
+          H.base.equivC H.Bmax H.R H.timeRadius H.initialOneC := by
+    unfold metricFirstOrderConstant
+    exact
+      mul_le_mul_of_nonneg_left
+        (mul_le_mul_of_nonneg_left hinside (by norm_num : (0 : Real) <= 2))
+        (Real.sqrt_nonneg _)
+  exact le_trans hraw hconst
+
+/-- Phase 0 assembly of MSM135 Lemma 3.11: equation (3.3) supplies the
+metric-equivalence window and `covOne_le_init` supplies the uniform exact
+first-order spatial derivative bound. -/
+def metricAllTimes_firstOrder
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    {K u : Set M} {β ψ t0 : Real} {D : Realized.RealTimeInterval}
+    {SSeq : Nat -> RicciFlow.SolutionOn (I := I) (M := M) D}
+    {gRef : SmoothRiemannianMetric I M}
+    {T :
+      forall _i : Nat, Real -> forall x : M,
+        Tensor0SBundle.Tensor0SSpace (𝕜 := Real) (E := E) (H := H)
+          (I := I) (M := M) 2 x}
+    {A : Real}
+    (H :
+      MetricAllTimesFirstOrderInput (I := I) (Idx := Idx) K u β ψ t0
+        (D := D) SSeq gRef T A) :
+    MetricAllTimesFirstOrderConclusion (I := I) K β ψ SSeq gRef where
+  B := fun t : Real => metricEquivalenceFactor H.base.equivC A t t0
+  equiv_on_window := by
+    have hEquivC : 1 <= H.base.equivC := (H.base.equiv_at_t0 0).1
+    exact
+      metricUniformEquivalentOnWindow_of_logDerivativeInput
+        (I := I) K β ψ t0 H.base.equivC A gRef
+        (fun i t => (SSeq i).family.metric t) T
+        H.base.t0_mem hEquivC H.base.equiv_at_t0 H.log_input
+  C1 :=
+    metricFirstOrderConstant
+      H.base.equivC H.Bmax H.R H.timeRadius H.initialOneC
+  order_one_bound :=
+    metricCovOrderOneWindow_of_christoffel (I := I) (Idx := Idx) H
+
+/-- The coefficient multiplying `|nabla^p g|^2` in the analytic order-`p`
+Gronwall step of MSM135 Lemma 3.11. -/
+def metricCovOrderEvolutionAlpha (Cpp : Real) : Real :=
+  1 + 8 * Cpp ^ 2
+
+/-- Positive affine term used in the analytic order-`p` Gronwall step.
+
+The `+ 1` is not part of the textbook optimal constant; it makes the input to
+`affineGronwall_of_abs_deriv_le` strictly positive without adding a separate
+case split. -/
+def metricCovOrderEvolutionBeta (Cppp : Real) : Real :=
+  8 * Cppp ^ 2 + 1
+
+/-- Explicit all-times exact-order constant produced by the order-`p`
+analytic assembly. -/
+def metricCovOrderEvolutionConstant
+    (Cpp Cppp timeRadius initC : Real) : Real :=
+  Real.sqrt
+    (Real.exp (metricCovOrderEvolutionAlpha Cpp * timeRadius) *
+      (initC ^ 2 +
+        metricCovOrderEvolutionBeta Cppp /
+          metricCovOrderEvolutionAlpha Cpp))
+
+/-- Higher-order evolution hypothesis for the analytic order-`p` assembly.
+
+This is the tensor-valued black-box evolution statement.  The theorem below
+uses the accompanying squared-metric-norm bridge, because `Tensor0SSpace` also
+has a default operator norm and the bridge from this tensor evolution to the
+`gRef`-metric norm is a separate producer. -/
+def MetricCovOrderEvolutionOn
+    (K : Set M) (β ψ : Real)
+    (gSeq : Nat -> Real -> SmoothRiemannianMetric I M)
+    (gRef : SmoothRiemannianMetric I M) (p : Nat)
+    (nablaRic :
+      Nat -> Real -> (x : M) ->
+        Tensor0SBundle.Tensor0SSpace
+          (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) (p + 2) x) :
+    Prop :=
+  forall i : Nat, forall x : M, x ∈ K -> forall s : Real, s ∈ Set.Icc β ψ ->
+      HasDerivAt
+        (fun r : Real => metricCovDeriv (I := I) (gSeq i r) gRef p x)
+        ((-2 : Real) • nablaRic i s x) s
+
+/-- Squared `gRef`-metric norm evolution bridge for the analytic order-`p`
+assembly.
+
+This is the exact producer output obtained from `MetricCovOrderEvolutionOn`,
+the fixed-fiber inner product induced by `gRef`, and
+`hasDerivAt_normSq_abs_deriv_le`.  It is kept as an explicit field until that
+metric-norm realization bridge is available as a reusable theorem. -/
+def MetricCovOrderNormSqEvolutionOn
+    (K : Set M) (β ψ : Real)
+    (gSeq : Nat -> Real -> SmoothRiemannianMetric I M)
+    (gRef : SmoothRiemannianMetric I M) (p : Nat)
+    (nablaRic :
+      Nat -> Real -> (x : M) ->
+        Tensor0SBundle.Tensor0SSpace
+          (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) (p + 2) x) :
+    Prop :=
+  forall i : Nat, forall x : M, x ∈ K -> forall s : Real, s ∈ Set.Icc β ψ ->
+    exists d : Real,
+      HasDerivAt
+        (fun r : Real =>
+          metricCovDerivNorm (I := I) p (gSeq i r) gRef x ^ 2) d s ∧
+        |d| <=
+          metricCovDerivNorm (I := I) p (gSeq i s) gRef x ^ 2 +
+            (2 *
+              Real.sqrt
+                (Tensor0SBundle.normSq0S (I := I) gRef x (p + 2)
+                  (nablaRic i s x))) ^ 2
+
+/-- Honest-input package for the order-`p` analytic assembly in MSM135 Lemma
+3.11.
+
+The fields `hevol` and `ric_bound` are the intended future producers from the
+higher-order Ricci-flow calculation and the schematic induction estimate.  This
+record only packages the analytic Gronwall inputs. -/
+structure MetricCovOrderEvolutionInput
+    (K : Set M) (β ψ t0 : Real)
+    (gSeq : Nat -> Real -> SmoothRiemannianMetric I M)
+    (gRef : SmoothRiemannianMetric I M) (p : Nat) where
+  t0_mem : t0 ∈ Set.Icc β ψ
+  nablaRic :
+    Nat -> Real -> (x : M) ->
+      Tensor0SBundle.Tensor0SSpace
+        (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) (p + 2) x
+  hevol :
+    MetricCovOrderEvolutionOn (I := I) K β ψ gSeq gRef p nablaRic
+  normsq_evol :
+    MetricCovOrderNormSqEvolutionOn (I := I) K β ψ gSeq gRef p nablaRic
+  Cpp : Real
+  Cppp : Real
+  Cpp_nonneg : 0 <= Cpp
+  Cppp_nonneg : 0 <= Cppp
+  ric_bound :
+    forall i : Nat, forall s : Real, s ∈ Set.Icc β ψ ->
+      forall x : M, x ∈ K ->
+        Real.sqrt
+          (Tensor0SBundle.normSq0S (I := I) gRef x (p + 2)
+            (nablaRic i s x)) <=
+          Cpp * metricCovDerivNorm (I := I) p (gSeq i s) gRef x + Cppp
+  initC : Real
+  initC_nonneg : 0 <= initC
+  init_bound :
+    forall i : Nat, forall x : M, x ∈ K ->
+      metricCovDerivNorm (I := I) p (gSeq i t0) gRef x <= initC
+  timeRadius : Real
+  time_abs_le :
+    forall t : Real, t ∈ Set.Icc β ψ -> |t - t0| <= timeRadius
+
+/-- MSM135 Lemma 3.11, order-`p` analytic assembly: supplied higher-order
+metric evolution and the schematic `nabla^p Rc` estimate imply a uniform
+exact-order metric derivative bound on the whole time window. -/
+theorem metricCovOrderWindow_of_evolution
+    {K : Set M} {β ψ t0 : Real}
+    {gSeq : Nat -> Real -> SmoothRiemannianMetric I M}
+    {gRef : SmoothRiemannianMetric I M} {p : Nat}
+    (Hin :
+      MetricCovOrderEvolutionInput (I := I) K β ψ t0 gSeq gRef p) :
+    MetricCovDerivOrderBoundOnWindow (I := I) K β ψ gSeq gRef p
+      (metricCovOrderEvolutionConstant
+        Hin.Cpp Hin.Cppp Hin.timeRadius Hin.initC) := by
+  refine
+    metricCovOrderWindow_of_pointwise (I := I) K β ψ gSeq gRef p
+      (metricCovOrderEvolutionConstant
+        Hin.Cpp Hin.Cppp Hin.timeRadius Hin.initC) ?_
+  intro i t ht x hxK
+  let U : Real -> Real := fun s =>
+    metricCovDerivNorm (I := I) p (gSeq i s) gRef x ^ 2
+  have hsegment : Set.uIcc t0 t ⊆ Set.Icc β ψ :=
+    Set.uIcc_subset_Icc Hin.t0_mem ht
+  let derivData :
+      forall s : Real, s ∈ Set.Icc β ψ ->
+        exists d : Real, HasDerivAt U d s ∧
+          |d| <= U s +
+            (2 *
+              Real.sqrt
+                (Tensor0SBundle.normSq0S (I := I) gRef x (p + 2)
+                  (Hin.nablaRic i s x))) ^ 2 := fun s hs =>
+    by
+      simpa [U] using Hin.normsq_evol i x hxK s hs
+  let U' : Real -> Real := fun s =>
+    if hs : s ∈ Set.Icc β ψ then Classical.choose (derivData s hs) else 0
+  have hU_nonneg : forall s : Real, s ∈ Set.uIcc t0 t -> 0 <= U s := by
+    intro s hs
+    exact sq_nonneg _
+  have hU_deriv :
+      forall s : Real, s ∈ Set.uIcc t0 t -> HasDerivAt U (U' s) s := by
+    intro s hs
+    have hswin : s ∈ Set.Icc β ψ := hsegment hs
+    have hspec := Classical.choose_spec (derivData s hswin)
+    have hchoose : U' s = Classical.choose (derivData s hswin) := by
+      dsimp [U']
+      exact dif_pos hswin
+    simpa [hchoose] using hspec.1
+  have halpha_pos : 0 < metricCovOrderEvolutionAlpha Hin.Cpp := by
+    unfold metricCovOrderEvolutionAlpha
+    nlinarith [sq_nonneg Hin.Cpp]
+  have hbeta_pos : 0 < metricCovOrderEvolutionBeta Hin.Cppp := by
+    unfold metricCovOrderEvolutionBeta
+    nlinarith [sq_nonneg Hin.Cppp]
+  have hbound :
+      forall s : Real, s ∈ Set.uIcc t0 t ->
+        |U' s| <=
+          metricCovOrderEvolutionAlpha Hin.Cpp * U s +
+            metricCovOrderEvolutionBeta Hin.Cppp := by
+    intro s hs
+    have hswin : s ∈ Set.Icc β ψ := hsegment hs
+    have hspec := Classical.choose_spec (derivData s hswin)
+    have hchoose : U' s = Classical.choose (derivData s hswin) := by
+      dsimp [U']
+      exact dif_pos hswin
+    have hbase :
+        |U' s| <=
+          U s +
+            (2 *
+              Real.sqrt
+                (Tensor0SBundle.normSq0S (I := I) gRef x (p + 2)
+                  (Hin.nablaRic i s x))) ^ 2 := by
+      simpa [hchoose] using hspec.2
+    let q : Real :=
+      Real.sqrt
+        (Tensor0SBundle.normSq0S (I := I) gRef x (p + 2)
+          (Hin.nablaRic i s x))
+    let y : Real := metricCovDerivNorm (I := I) p (gSeq i s) gRef x
+    have hq_nonneg : 0 <= q := by
+      exact Real.sqrt_nonneg _
+    have hy_nonneg : 0 <= y := by
+      exact Real.sqrt_nonneg _
+    have hRic_le :
+        q <= Hin.Cpp * y + Hin.Cppp := by
+      simpa [q, y] using Hin.ric_bound i s hswin x hxK
+    have hRhs_nonneg : 0 <= Hin.Cpp * y + Hin.Cppp := by
+      exact add_nonneg (mul_nonneg Hin.Cpp_nonneg hy_nonneg) Hin.Cppp_nonneg
+    have hRic_sq :
+        q ^ 2 <= (Hin.Cpp * y + Hin.Cppp) ^ 2 := by
+      exact (sq_le_sq₀ hq_nonneg hRhs_nonneg).2 hRic_le
+    have hYoung :
+        (Hin.Cpp * y + Hin.Cppp) ^ 2 <=
+          2 * (Hin.Cpp * y) ^ 2 + 2 * Hin.Cppp ^ 2 := by
+      nlinarith [sq_nonneg (Hin.Cpp * y - Hin.Cppp)]
+    have htwo_sq :
+        (2 * q) ^ 2 <=
+          8 * Hin.Cpp ^ 2 * U s + 8 * Hin.Cppp ^ 2 := by
+      have hmain :
+          (2 * q) ^ 2 <=
+            8 * Hin.Cpp ^ 2 * y ^ 2 + 8 * Hin.Cppp ^ 2 := by
+        nlinarith [hRic_sq, hYoung]
+      simpa [U, y, pow_two, mul_assoc, mul_left_comm, mul_comm] using hmain
+    have hbase' :
+        |U' s| <= U s + (2 * q) ^ 2 := by
+      simpa [q] using hbase
+    calc
+      |U' s| <= U s + (2 * q) ^ 2 := hbase'
+      _ <= U s + (8 * Hin.Cpp ^ 2 * U s + 8 * Hin.Cppp ^ 2) := by
+            simpa [U, add_comm, add_left_comm, add_assoc] using
+              add_le_add_left htwo_sq (U s)
+      _ <= metricCovOrderEvolutionAlpha Hin.Cpp * U s +
+            metricCovOrderEvolutionBeta Hin.Cppp := by
+            unfold metricCovOrderEvolutionAlpha metricCovOrderEvolutionBeta U
+            ring_nf
+            nlinarith [sq_nonneg y]
+  have hgronwall :
+      U t <=
+        Real.exp (metricCovOrderEvolutionAlpha Hin.Cpp * |t - t0|) *
+          (U t0 +
+            metricCovOrderEvolutionBeta Hin.Cppp /
+              metricCovOrderEvolutionAlpha Hin.Cpp) :=
+    affineGronwall_of_abs_deriv_le U U'
+      halpha_pos hbeta_pos hU_nonneg hU_deriv hbound
+  have hU0 :
+      U t0 <= Hin.initC ^ 2 := by
+    have hinit := Hin.init_bound i x hxK
+    have hnorm_nonneg :
+        0 <= metricCovDerivNorm (I := I) p (gSeq i t0) gRef x :=
+      Real.sqrt_nonneg _
+    have hsquare :
+        (metricCovDerivNorm (I := I) p (gSeq i t0) gRef x) ^ 2 <=
+          Hin.initC ^ 2 :=
+      (sq_le_sq₀ hnorm_nonneg Hin.initC_nonneg).2 hinit
+    simpa [U] using hsquare
+  have hshift_nonneg :
+      0 <=
+        metricCovOrderEvolutionBeta Hin.Cppp /
+          metricCovOrderEvolutionAlpha Hin.Cpp :=
+    le_of_lt (div_pos hbeta_pos halpha_pos)
+  have hbracket :
+      U t0 +
+          metricCovOrderEvolutionBeta Hin.Cppp /
+            metricCovOrderEvolutionAlpha Hin.Cpp <=
+        Hin.initC ^ 2 +
+          metricCovOrderEvolutionBeta Hin.Cppp /
+            metricCovOrderEvolutionAlpha Hin.Cpp := by
+    simpa [add_comm, add_left_comm, add_assoc] using
+      add_le_add_right hU0
+        (metricCovOrderEvolutionBeta Hin.Cppp /
+          metricCovOrderEvolutionAlpha Hin.Cpp)
+  have hafter_init :
+      U t <=
+        Real.exp (metricCovOrderEvolutionAlpha Hin.Cpp * |t - t0|) *
+          (Hin.initC ^ 2 +
+            metricCovOrderEvolutionBeta Hin.Cppp /
+              metricCovOrderEvolutionAlpha Hin.Cpp) :=
+    le_trans hgronwall
+      (mul_le_mul_of_nonneg_left hbracket
+        (le_of_lt (Real.exp_pos _)))
+  have htime_exp :
+      Real.exp (metricCovOrderEvolutionAlpha Hin.Cpp * |t - t0|) <=
+        Real.exp (metricCovOrderEvolutionAlpha Hin.Cpp * Hin.timeRadius) :=
+    Real.exp_le_exp.mpr (by
+      nlinarith [le_of_lt halpha_pos, Hin.time_abs_le t ht])
+  have hbracket_nonneg :
+      0 <=
+        Hin.initC ^ 2 +
+          metricCovOrderEvolutionBeta Hin.Cppp /
+            metricCovOrderEvolutionAlpha Hin.Cpp :=
+    add_nonneg (sq_nonneg Hin.initC) hshift_nonneg
+  have hfinal_sq :
+      U t <=
+        Real.exp (metricCovOrderEvolutionAlpha Hin.Cpp * Hin.timeRadius) *
+          (Hin.initC ^ 2 +
+            metricCovOrderEvolutionBeta Hin.Cppp /
+              metricCovOrderEvolutionAlpha Hin.Cpp) :=
+    le_trans hafter_init
+      (mul_le_mul_of_nonneg_right htime_exp hbracket_nonneg)
+  have htarget_nonneg :
+      0 <=
+        Real.exp (metricCovOrderEvolutionAlpha Hin.Cpp * Hin.timeRadius) *
+          (Hin.initC ^ 2 +
+            metricCovOrderEvolutionBeta Hin.Cppp /
+              metricCovOrderEvolutionAlpha Hin.Cpp) :=
+    mul_nonneg (le_of_lt (Real.exp_pos _)) hbracket_nonneg
+  have hnorm_le :
+      metricCovDerivNorm (I := I) p (gSeq i t) gRef x <=
+        metricCovOrderEvolutionConstant Hin.Cpp Hin.Cppp Hin.timeRadius Hin.initC := by
+    unfold metricCovOrderEvolutionConstant
+    refine
+      (sq_le_sq₀ (Real.sqrt_nonneg _) (Real.sqrt_nonneg _)).1 ?_
+    rw [Real.sq_sqrt htarget_nonneg]
+    simpa [U] using hfinal_sq
+  exact hnorm_le
+
+/-- q=1 mixed estimate packaged directly from the order-`p` evolution input.
+
+The additional `hmixed` hypothesis is the norm-compatible realization of the
+tensor evolution equation for the `metricMixedDeriv` fiber topology; the
+schematic Ricci estimate and constants are read from `Hin`. -/
+theorem metricMixedOneWindow_of_evolution
+    {K : Set M} {β ψ t0 : Real}
+    {gSeq : Nat -> Real -> SmoothRiemannianMetric I M}
+    {gRef : SmoothRiemannianMetric I M} {p : Nat} {Csp0 : Real}
+    (Hin :
+      MetricCovOrderEvolutionInput (I := I) K β ψ t0 gSeq gRef p)
+    (hmixed :
+      MetricMixedDerivOneEvolutionOn (I := I) K β ψ gSeq gRef p Hin.nablaRic)
+    (hspatial :
+      MetricCovDerivOrderBoundOnWindow (I := I) K β ψ gSeq gRef p Csp0) :
+    MetricMixedDerivBoundOnWindow (I := I) K β ψ gSeq gRef p 1
+      (metricMixedOneConstant Hin.Cpp Csp0 Hin.Cppp) := by
+  exact
+    metricMixedOneWindow_of_ric_bound (I := I)
+      (K := K) (β := β) (ψ := ψ) (gSeq := gSeq) (gRef := gRef)
+      (p := p) (Csp0 := Csp0) (nablaRic := Hin.nablaRic)
+      Hin.Cpp Hin.Cppp Hin.Cpp_nonneg Hin.ric_bound hmixed hspatial
+
+/-- Honest layer-evolution input for the general q >= 1 mixed estimate.
+
+The supplied `layer` is the tensor standing for `nabla^p partial_t^(q-1) Rc`.
+The Ricci-flow backend is responsible for proving this direct equality from the
+time-differentiated evolution equation and the fixed `gRef` connection. -/
+def MetricMixedDerivLayerEvolutionOn
+    (K : Set M) (β ψ : Real)
+    (gSeq : Nat -> Real -> SmoothRiemannianMetric I M)
+    (gRef : SmoothRiemannianMetric I M) (p q : Nat)
+    (layer :
+      Nat -> Real -> (x : M) ->
+        Tensor0SBundle.Tensor0SSpace
+          (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) (p + 2) x) :
+    Prop :=
+  forall i : Nat, forall x : M, x ∈ K -> forall t : Real, t ∈ Set.Icc β ψ ->
+    metricMixedDeriv (I := I) p q (gSeq i) gRef x t =
+      (-2 : Real) • layer i t x
+
+/-- General mixed q >= 1 constant from a schematic layer bound. -/
+def metricMixedQConstant (Cpq : Real) : Real :=
+  2 * Cpq
+
+/-- General honest-input mixed estimate for MSM135 Lemma 3.11, equation (3.41).
+
+All q >= 1 Ricci-flow/Shi/schematic product content is isolated in the layer
+evolution equation and the pointwise layer norm bound. -/
+theorem metricMixedQWindow_of_evolution
+    {K : Set M} {β ψ : Real}
+    {gSeq : Nat -> Real -> SmoothRiemannianMetric I M}
+    {gRef : SmoothRiemannianMetric I M} {p q : Nat}
+    {layer :
+      Nat -> Real -> (x : M) ->
+        Tensor0SBundle.Tensor0SSpace
+          (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) (p + 2) x}
+    (Cpq : Real)
+    (hmixed :
+      MetricMixedDerivLayerEvolutionOn (I := I) K β ψ gSeq gRef p q layer)
+    (layer_bound :
+      forall i : Nat, forall t : Real, t ∈ Set.Icc β ψ ->
+        forall x : M, x ∈ K ->
+          Real.sqrt
+            (Tensor0SBundle.normSq0S (I := I) gRef x (p + 2)
+              (layer i t x)) <= Cpq) :
+    MetricMixedDerivBoundOnWindow (I := I) K β ψ gSeq gRef p q
+      (metricMixedQConstant Cpq) := by
+  refine
+    metricMixedWindow_of_pointwise (I := I) K β ψ gSeq gRef p q
+      (metricMixedQConstant Cpq) ?_
+  intro i t ht x hx
+  have heq :
+      metricMixedDeriv (I := I) p q (gSeq i) gRef x t =
+        (-2 : Real) • layer i t x :=
+    hmixed i x hx t ht
+  have hnorm :
+      metricMixedDerivNorm (I := I) p q (gSeq i) gRef x t =
+        2 *
+          Real.sqrt
+            (Tensor0SBundle.normSq0S (I := I) gRef x (p + 2)
+              (layer i t x)) := by
+    unfold metricMixedDerivNorm
+    rw [heq, sqrt_normSq0S_smul]
+    norm_num
+  have hlayer :=
+    layer_bound i t ht x hx
+  have hscaled :
+      2 *
+          Real.sqrt
+            (Tensor0SBundle.normSq0S (I := I) gRef x (p + 2)
+              (layer i t x)) <=
+        2 * Cpq :=
+    mul_le_mul_of_nonneg_left hlayer (by norm_num : (0 : Real) <= 2)
+  simpa [hnorm, metricMixedQConstant] using hscaled
+
+/-- Spatial exact-order bounds are the `q = 0` mixed bounds. -/
+theorem metricMixedZeroWindow_of_spatial
+    {K : Set M} {β ψ : Real}
+    {gSeq : Nat -> Real -> SmoothRiemannianMetric I M}
+    {gRef : SmoothRiemannianMetric I M}
+    (a : Nat) (C : Real)
+    (h :
+      MetricCovDerivOrderBoundOnWindow (I := I) K β ψ gSeq gRef a C) :
+    MetricMixedDerivBoundOnWindow (I := I) K β ψ gSeq gRef a 0 C := by
+  refine metricMixedWindow_of_pointwise (I := I) K β ψ gSeq gRef a 0 C ?_
+  intro i t ht x hx
+  simpa using h i t ht x hx
+
+/-- Cumulative mixed constant over the finite grid `a <= p`, `b <= q`. -/
+noncomputable def metricMixedCumulativeConstant
+    (D : Nat -> Nat -> Real) (p q : Nat) : Real :=
+  (Finset.range (p + 1) ×ˢ Finset.range (q + 1)).sup' (by
+    refine ⟨(0, 0), ?_⟩
+    exact Finset.mem_product.mpr ⟨by simp, by simp⟩)
+    (fun ab : Nat × Nat => D ab.1 ab.2)
+
+/-- Exact mixed layer bounds imply the cumulative mixed window package. -/
+theorem metricMixedBoundsWindow_of_layerBounds
+    {K : Set M} {β ψ : Real}
+    {gSeq : Nat -> Real -> SmoothRiemannianMetric I M}
+    {gRef : SmoothRiemannianMetric I M}
+    (D : Nat -> Nat -> Real)
+    (hD : forall a b : Nat, 0 <= D a b)
+    (hlayer :
+      forall a b : Nat,
+        MetricMixedDerivBoundOnWindow (I := I) K β ψ gSeq gRef a b
+          (D a b)) :
+    MetricMixedDerivBoundsOnWindow (I := I) K β ψ gSeq gRef
+      (metricMixedCumulativeConstant D) := by
+  refine
+    metricMixedBoundsWindow_of_pointwise (I := I) K β ψ gSeq gRef
+      (metricMixedCumulativeConstant D) ?_
+  intro i t ht p q a ha b hb x hx
+  have hmem :
+      (a, b) ∈ Finset.range (p + 1) ×ˢ Finset.range (q + 1) := by
+    exact Finset.mem_product.mpr
+      ⟨Finset.mem_range.mpr (Nat.lt_succ_of_le ha),
+        Finset.mem_range.mpr (Nat.lt_succ_of_le hb)⟩
+  have hsup : D a b <= metricMixedCumulativeConstant D p q := by
+    unfold metricMixedCumulativeConstant
+    exact Finset.le_sup' (fun ab : Nat × Nat => D ab.1 ab.2) hmem
+  have _hcum_nonneg : 0 <= metricMixedCumulativeConstant D p q :=
+    le_trans (hD a b) hsup
+  exact le_trans (hlayer a b i t ht x hx) hsup
+
+/-- Honest input package for the full all-times mixed conclusion.
+
+The fields are exactly the completed bound-side data: a metric-equivalence
+window and exact mixed `(a,b)` layer bounds.  The hard producer facts for those
+exact bounds, including `q = 0` spatial estimates and `q >= 1` layer estimates,
+remain external inputs. -/
+structure MetricAllTimesInput
+    (K : Set M) (β ψ : Real)
+    (gSeq : Nat -> Real -> SmoothRiemannianMetric I M)
+    (gRef : SmoothRiemannianMetric I M) where
+  B : Real -> Real
+  equiv_on_window :
+    MetricUniformEquivalentOnWindow (I := I) K β ψ gRef gSeq B
+  layerC : Nat -> Nat -> Real
+  layerC_nonneg : forall a b : Nat, 0 <= layerC a b
+  layer_on_window :
+    forall a b : Nat,
+      MetricMixedDerivBoundOnWindow (I := I) K β ψ gSeq gRef a b
+        (layerC a b)
+
+/-- Final bound-side assembly of MSM135 Lemma 3.11. -/
+noncomputable def metricAllTimes
+    {K : Set M} {β ψ : Real}
+    {gSeq : Nat -> Real -> SmoothRiemannianMetric I M}
+    {gRef : SmoothRiemannianMetric I M}
+    (H : MetricAllTimesInput (I := I) K β ψ gSeq gRef) :
+    MetricAllTimesConclusion (I := I) K β ψ gSeq gRef where
+  B := H.B
+  equiv_on_window := H.equiv_on_window
+  metricC := metricMixedCumulativeConstant H.layerC
+  mixed_on_window :=
+    metricMixedBoundsWindow_of_layerBounds (I := I)
+      H.layerC H.layerC_nonneg H.layer_on_window
 
 end FixedDomain
 

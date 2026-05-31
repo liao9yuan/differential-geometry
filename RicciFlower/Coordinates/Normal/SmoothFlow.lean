@@ -4348,6 +4348,47 @@ theorem varModelFlow_flow
     exact varBaseFlow_hasDerivWithinAt (I := I) (E := E) g x
       ((hflow _ hp).2 t ht)
 
+/-- A closed-ball-bounded augmented variational flow projects to a
+closed-ball-bounded model flow. -/
+theorem varModelFlow_bound
+    {Ψ :
+      (ModelPhase (E := E) × ModelLin (E := E)) -> Real ->
+        ModelPhase (E := E) × ModelLin (E := E)}
+    (x : M) {a r : NNReal}
+    (hbound :
+      ∀ p ∈ Metric.closedBall (varPhaseZero (I := I) (E := E) x) r,
+        ∀ t : Real,
+          Ψ p t ∈ Metric.closedBall (varPhaseZero (I := I) (E := E) x) a) :
+    ∀ z ∈ Metric.closedBall
+        (extChartAt I.tangent (phaseZero (I := I) x)
+          (phaseZero (I := I) x)) r,
+      ∀ t : Real,
+        varModelFlow (E := E) Ψ z t ∈
+          Metric.closedBall
+            (extChartAt I.tangent (phaseZero (I := I) x)
+              (phaseZero (I := I) x)) a := by
+  intro z hz t
+  have hp :
+      (z, ContinuousLinearMap.id Real (ModelPhase (E := E))) ∈
+        Metric.closedBall (varPhaseZero (I := I) (E := E) x) r :=
+    varPhase_mem_closedBall_of_base_mem (I := I) (E := E) hz
+  have hq := hbound _ hp t
+  rw [Metric.mem_closedBall] at hq ⊢
+  let z0 : ModelPhase (E := E) :=
+    extChartAt I.tangent (phaseZero (I := I) x)
+      (phaseZero (I := I) x)
+  have hfst :
+      dist (varModelFlow (E := E) Ψ z t) z0 ≤
+        dist (Ψ (z, ContinuousLinearMap.id Real (ModelPhase (E := E))) t)
+          (varPhaseZero (I := I) (E := E) x) := by
+    change
+      dist (Ψ (z, ContinuousLinearMap.id Real (ModelPhase (E := E))) t).1 z0 ≤
+        dist (Ψ (z, ContinuousLinearMap.id Real (ModelPhase (E := E))) t)
+          (z0, ContinuousLinearMap.id Real (ModelPhase (E := E)))
+    rw [Prod.dist_eq]
+    exact le_max_left _ _
+  exact hfst.trans hq
+
 /-- Source control for the projected model flow extracted from an augmented
 closed-ball-bounded variational flow. -/
 theorem varModelFlow_src
@@ -6651,6 +6692,83 @@ theorem varFlow_chartEndDeriv0
     simpa [varModelFlow, varZeroPhaseLin, varPhaseZero] using congrArg Prod.fst h
   refine ⟨ε, hε, δ, hδ, r, hr, Ψ, ?_, ?_, hmodelZero, L', hLip, ?_⟩
   · exact varModelFlow_flow (I := I) (E := E) g x hflow
+  · exact varModelFlow_src (I := I) (E := E) x hbound hsrc
+  · intro b hb
+    exact chartEnd_varModelFlow_deriv0 (I := I) (E := E) (Ψ := Ψ)
+      (x := x) (b := b) (hderiv b hb)
+
+/-- Flow-retaining endpoint package for the projected augmented flow.
+
+Compared with `varFlow_chartEndDeriv0`, this keeps the projected closed-ball
+bound for `varModelFlow`.  That control is needed by the homogeneous scaling
+lemmas used to build radial exponential geodesic germs. -/
+theorem varFlow_modelData
+    [I.Boundaryless] [CompleteSpace E]
+    (g : SmoothRiemannianMetric I M) (x : M) :
+    ∃ (ε : Real), ∃ (_hε : 0 < ε), ∃ (δ : Real), ∃ (_hδ : 0 < δ),
+      ∃ (a r : NNReal), ∃ (_hr : 0 < r),
+      ∃ Ψ :
+          (ModelPhase (E := E) × ModelLin (E := E)) -> Real ->
+            ModelPhase (E := E) × ModelLin (E := E),
+        (∀ z ∈ Metric.closedBall
+            (extChartAt I.tangent (phaseZero (I := I) x)
+              (phaseZero (I := I) x)) r,
+          varModelFlow (E := E) Ψ z 0 = z ∧
+            ∀ t ∈ Set.Icc (-ε) ε,
+              HasDerivWithinAt
+                (varModelFlow (E := E) Ψ z)
+                (modelSpray (I := I) g x
+                  (varModelFlow (E := E) Ψ z t))
+                (Set.Icc (-ε) ε) t) ∧
+          (∀ z ∈ Metric.closedBall
+              (extChartAt I.tangent (phaseZero (I := I) x)
+                (phaseZero (I := I) x)) r,
+            ∀ t : Real,
+              varModelFlow (E := E) Ψ z t ∈
+                Metric.closedBall
+                  (extChartAt I.tangent (phaseZero (I := I) x)
+                    (phaseZero (I := I) x)) a) ∧
+          (∀ z ∈ Metric.closedBall
+              (extChartAt I.tangent (phaseZero (I := I) x)
+                (phaseZero (I := I) x)) r,
+            ∀ t ∈ Set.Icc (-ε) ε,
+              varModelFlow (E := E) Ψ z t ∈
+                (extChartAt I.tangent (phaseZero (I := I) x)).target ∧
+                (phaseOfModel (I := I) x
+                  (varModelFlow (E := E) Ψ z t)).proj ∈
+                  (extChartAt I x).source) ∧
+          (∀ t ∈ Set.Icc (-δ) δ,
+            varModelFlow (E := E) Ψ
+              (extChartAt I.tangent (phaseZero (I := I) x)
+                (phaseZero (I := I) x)) t =
+              extChartAt I.tangent (phaseZero (I := I) x)
+                (phaseZero (I := I) x)) ∧
+          (∃ L' : NNReal,
+            (∀ t ∈ Set.Icc (-ε) ε,
+              LipschitzOnWith L'
+                (fun p => Ψ p t)
+                (Metric.closedBall (varPhaseZero (I := I) (E := E) x) r)) ∧
+            ∀ b ∈ Set.Ioc (0 : Real) δ,
+              HasFDerivAt
+                (chartEnd (I := I) (varModelFlow (E := E) Ψ) b x)
+                (ContinuousLinearMap.id Real (TangentSpace I x))
+                0) := by
+  obtain ⟨ε, hε, δ, hδ, a, r, hr, Ψ, hflow, hbound, hsrc, hzero, L', hLip,
+      hderiv⟩ :=
+    varFlow_scaledDeriv0 (I := I) g x
+  have hmodelZero :
+      ∀ t ∈ Set.Icc (-δ) δ,
+        varModelFlow (E := E) Ψ
+          (extChartAt I.tangent (phaseZero (I := I) x)
+            (phaseZero (I := I) x)) t =
+          extChartAt I.tangent (phaseZero (I := I) x)
+            (phaseZero (I := I) x) := by
+    intro t ht
+    have h := hzero t ht
+    simpa [varModelFlow, varZeroPhaseLin, varPhaseZero] using congrArg Prod.fst h
+  refine ⟨ε, hε, δ, hδ, a, r, hr, Ψ, ?_, ?_, ?_, hmodelZero, L', hLip, ?_⟩
+  · exact varModelFlow_flow (I := I) (E := E) g x hflow
+  · exact varModelFlow_bound (I := I) (E := E) x hbound
   · exact varModelFlow_src (I := I) (E := E) x hbound hsrc
   · intro b hb
     exact chartEnd_varModelFlow_deriv0 (I := I) (E := E) (Ψ := Ψ)

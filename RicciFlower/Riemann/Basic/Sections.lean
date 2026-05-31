@@ -485,7 +485,7 @@ private theorem riemannCurvature04At_contMDiff
       curvField_contMDiffAt (I := I) cov hcov Xs Ys Zs x₀
   have hscalar : ContMDiffAt I 𝓘(Real, Real) (∞ : WithTop ℕ∞)
       (fun p : M => g.inner p (Ws p) (Rsec p)) x₀ :=
-    metric_inner_contMDiffAt (I := I) g hW hR
+    metric_inner_contMDiffAt (I := I) g hW hR (by simp)
   refine hscalar.congr_of_eventuallyEq ?_
   filter_upwards [eTan.open_baseSet.mem_nhds hx₀Tan, hs'] with p hpTan hs'p
   have hbasis : ∀ i : Fin d,

@@ -1,8 +1,11 @@
 import RicciFlower.GlobalGeometry.Jacobi
 import RicciFlower.GlobalGeometry.Lecture07.CoordinateEquation
+import RicciFlower.GlobalGeometry.Lecture07.SurfaceCalculus
 import RicciFlower.Coordinates.MetricCompatibility
 import RicciFlower.LeviCivita.Torsion
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
+import Mathlib.Analysis.Calculus.ParametricIntervalIntegral
+import Mathlib.Analysis.SpecialFunctions.Sqrt
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -15,8 +18,8 @@ This file adds the book-facing arc-length and energy interfaces for Lecture 7.4.
 The actual first-variation formula is represented by predicates whose right
 hand sides use the pullback covariant-derivative API from Lecture 7.3.  Formal
 fixed-endpoint and geodesic corollaries are proved here; the remaining analytic
-producer is the metric-compatible product rule along a smooth variation plus
-differentiation under the interval integral.
+producer is differentiating the speed integral on a compact parameter tube and
+performing the final integration-by-parts assembly.
 -/
 
 noncomputable section
@@ -55,8 +58,8 @@ private theorem inner_eq_sum_frame
         frameVec (I := I) e b u i • e.localFrame b i x := by
     calc
       u = ∑ i : ι, (e.basisAt b hx).repr u i • e.localFrame b i x := by
-        simpa [e.localFrame_apply_of_mem_baseSet b hx] using
-          ((e.basisAt b hx).sum_repr u).symm
+        rw [← (e.basisAt b hx).sum_repr u]
+        simp [e.localFrame_apply_of_mem_baseSet b hx]
       _ = ∑ i : ι, frameVec (I := I) e b u i • e.localFrame b i x := by
         refine Finset.sum_congr rfl ?_
         intro i _hi
@@ -66,8 +69,8 @@ private theorem inner_eq_sum_frame
         frameVec (I := I) e b v j • e.localFrame b j x := by
     calc
       v = ∑ j : ι, (e.basisAt b hx).repr v j • e.localFrame b j x := by
-        simpa [e.localFrame_apply_of_mem_baseSet b hx] using
-          ((e.basisAt b hx).sum_repr v).symm
+        rw [← (e.basisAt b hx).sum_repr v]
+        simp [e.localFrame_apply_of_mem_baseSet b hx]
       _ = ∑ j : ι, frameVec (I := I) e b v j • e.localFrame b j x := by
         refine Finset.sum_congr rfl ?_
         intro j _hj
@@ -447,6 +450,1116 @@ theorem unitTangentAlong_eq_velocityAlong_of_unitSpeed
   funext t
   simp [unitTangentAlong, velocityAlong, pathSpeed_eq_one_of_unitSpeed (I := I) h t]
 
+private theorem coordTimeDeriv_continuousAt_of_mem
+    {F : Surface M} (hF : SmoothSurface (I := I) F)
+    {x0 : M} {s t : Real}
+    (hx : F (s, t) ∈ Coordinates.coordinateFrameSet (I := I) x0)
+    (i : RicciFlower.Coordinates.CoordinateIdx (𝕜 := Real) E) :
+    ContinuousAt
+      (fun p : Real × Real => coordTimeDeriv (I := I) x0 F p.1 p.2 i)
+      (s, t) := by
+  let φ : Real × Real → Real :=
+    fun p => surfaceCoordComp (I := I) x0 F p i
+  have hφ : ContDiffAt Real ∞ φ (s, t) := by
+    simpa [φ] using hF.coordCompAt_contMDiffAt (I := I) hx i
+  have hD : ContDiffAt Real (0 : WithTop ℕ∞) (fderiv Real φ) (s, t) :=
+    hφ.fderiv_right (m := (0 : WithTop ℕ∞)) (by simp)
+  have happly :
+      ContDiffAt Real (0 : WithTop ℕ∞)
+        (fun p : Real × Real => (fderiv Real φ p) (0, (1 : Real))) (s, t) :=
+    hD.clm_apply contDiffAt_const
+  simpa [φ, coordTimeDeriv] using happly.continuousAt
+
+private theorem coordParamDeriv_continuousAt_of_mem
+    {F : Surface M} (hF : SmoothSurface (I := I) F)
+    {x0 : M} {s t : Real}
+    (hx : F (s, t) ∈ Coordinates.coordinateFrameSet (I := I) x0)
+    (i : RicciFlower.Coordinates.CoordinateIdx (𝕜 := Real) E) :
+    ContinuousAt
+      (fun p : Real × Real => coordParamDeriv (I := I) x0 F p.1 p.2 i)
+      (s, t) := by
+  let φ : Real × Real → Real :=
+    fun p => surfaceCoordComp (I := I) x0 F p i
+  have hφ : ContDiffAt Real ∞ φ (s, t) := by
+    simpa [φ] using hF.coordCompAt_contMDiffAt (I := I) hx i
+  have hD : ContDiffAt Real (0 : WithTop ℕ∞) (fderiv Real φ) (s, t) :=
+    hφ.fderiv_right (m := (0 : WithTop ℕ∞)) (by simp)
+  have happly :
+      ContDiffAt Real (0 : WithTop ℕ∞)
+        (fun p : Real × Real => (fderiv Real φ p) ((1 : Real), 0)) (s, t) :=
+    hD.clm_apply contDiffAt_const
+  simpa [φ, coordParamDeriv] using happly.continuousAt
+
+private theorem coordTs_continuousAt_of_mem
+    {F : Surface M} (hF : SmoothSurface (I := I) F)
+    {x0 : M} {s t : Real}
+    (hx : F (s, t) ∈ Coordinates.coordinateFrameSet (I := I) x0)
+    (i : RicciFlower.Coordinates.CoordinateIdx (𝕜 := Real) E) :
+    ContinuousAt
+      (fun p : Real × Real => coordTs (I := I) x0 F p.1 p.2 i)
+      (s, t) := by
+  let φ : Real × Real → Real :=
+    fun p => surfaceCoordComp (I := I) x0 F p i
+  let A : Real × Real → Real :=
+    fun p => coordTimeDeriv (I := I) x0 F p.1 p.2 i
+  have hφ : ContDiffAt Real ∞ φ (s, t) := by
+    simpa [φ] using hF.coordCompAt_contMDiffAt (I := I) hx i
+  have hA : ContDiffAt Real ∞ A (s, t) := by
+    have hD : ContDiffAt Real ∞
+        (fun p : Real × Real =>
+          (fderiv Real φ p) (0, (1 : Real))) (s, t) := by
+      have hfder := hφ.fderiv_right (m := ∞) (by rw [ENat.coe_top_add_one])
+      exact hfder.clm_apply contDiffAt_const
+    simpa [A, φ, coordTimeDeriv] using hD
+  have hD : ContDiffAt Real (0 : WithTop ℕ∞) (fderiv Real A) (s, t) :=
+    hA.fderiv_right (m := (0 : WithTop ℕ∞)) (by simp)
+  have happly :
+      ContDiffAt Real (0 : WithTop ℕ∞)
+        (fun p : Real × Real => (fderiv Real A p) ((1 : Real), 0)) (s, t) :=
+    hD.clm_apply contDiffAt_const
+  simpa [A, coordTs] using happly.continuousAt
+
+private theorem coordTt_continuousAt_of_mem
+    {F : Surface M} (hF : SmoothSurface (I := I) F)
+    {x0 : M} {s t : Real}
+    (hx : F (s, t) ∈ Coordinates.coordinateFrameSet (I := I) x0)
+    (i : RicciFlower.Coordinates.CoordinateIdx (𝕜 := Real) E) :
+    ContinuousAt
+      (fun p : Real × Real => coordTt (I := I) x0 F p.1 p.2 i)
+      (s, t) := by
+  let φ : Real × Real → Real :=
+    fun p => surfaceCoordComp (I := I) x0 F p i
+  let A : Real × Real → Real :=
+    fun p => coordTimeDeriv (I := I) x0 F p.1 p.2 i
+  have hφ : ContDiffAt Real ∞ φ (s, t) := by
+    simpa [φ] using hF.coordCompAt_contMDiffAt (I := I) hx i
+  have hA : ContDiffAt Real ∞ A (s, t) := by
+    have hD : ContDiffAt Real ∞
+        (fun p : Real × Real =>
+          (fderiv Real φ p) (0, (1 : Real))) (s, t) := by
+      have hfder := hφ.fderiv_right (m := ∞) (by rw [ENat.coe_top_add_one])
+      exact hfder.clm_apply contDiffAt_const
+    simpa [A, φ, coordTimeDeriv] using hD
+  have hD : ContDiffAt Real (0 : WithTop ℕ∞) (fderiv Real A) (s, t) :=
+    hA.fderiv_right (m := (0 : WithTop ℕ∞)) (by simp)
+  have happly :
+      ContDiffAt Real (0 : WithTop ℕ∞)
+        (fun p : Real × Real => (fderiv Real A p) (0, (1 : Real))) (s, t) :=
+    hD.clm_apply contDiffAt_const
+  simpa [A, coordTt] using happly.continuousAt
+
+private theorem frameVec_timeField_continuousAt_of_mem
+    {F : Surface M} (hF : SmoothSurface (I := I) F)
+    {x0 : M} {s t : Real}
+    (hx : F (s, t) ∈ Coordinates.coordinateFrameSet (I := I) x0) :
+    ContinuousAt
+      (fun p : Real × Real =>
+        frameVec (I := I) (Coordinates.coordinateTrivializationAt (I := I) x0)
+          (Module.finBasis Real E) (timeField I F p))
+      (s, t) := by
+  rw [continuousAt_pi]
+  intro i
+  have hcoord := coordTimeDeriv_continuousAt_of_mem (I := I) hF hx i
+  have heq :
+      (fun p : Real × Real =>
+        frameVec (I := I) (Coordinates.coordinateTrivializationAt (I := I) x0)
+          (Module.finBasis Real E) (timeField I F p) i)
+        =ᶠ[𝓝 (s, t)]
+      (fun p : Real × Real => coordTimeDeriv (I := I) x0 F p.1 p.2 i) := by
+    have hU : IsOpen (Coordinates.coordinateFrameSet (I := I) x0) :=
+      Coordinates.coordinateFrameSet_open (I := I) x0
+    have hmem : ∀ᶠ p : Real × Real in 𝓝 (s, t),
+        F p ∈ Coordinates.coordinateFrameSet (I := I) x0 :=
+      (hF.continuousAt (I := I) (s, t)).eventually_mem (hU.mem_nhds hx)
+    filter_upwards [hmem] with p hp
+    have hframe := congrFun (frameVec_timeField_eq (I := I) x0 hp) i
+    have hcoordEq := hF.timeFrameCoeff_eq_coordTimeDeriv (I := I) hp i
+    simpa [timeField, surfaceTimeField] using hframe.trans hcoordEq
+  exact hcoord.congr_of_eventuallyEq heq
+
+private theorem frameVec_paramField_continuousAt_of_mem
+    {F : Surface M} (hF : SmoothSurface (I := I) F)
+    {x0 : M} {s t : Real}
+    (hx : F (s, t) ∈ Coordinates.coordinateFrameSet (I := I) x0) :
+    ContinuousAt
+      (fun p : Real × Real =>
+        frameVec (I := I) (Coordinates.coordinateTrivializationAt (I := I) x0)
+          (Module.finBasis Real E) (paramField I F p))
+      (s, t) := by
+  rw [continuousAt_pi]
+  intro i
+  have hcoord := coordParamDeriv_continuousAt_of_mem (I := I) hF hx i
+  have heq :
+      (fun p : Real × Real =>
+        frameVec (I := I) (Coordinates.coordinateTrivializationAt (I := I) x0)
+          (Module.finBasis Real E) (paramField I F p) i)
+        =ᶠ[𝓝 (s, t)]
+      (fun p : Real × Real => coordParamDeriv (I := I) x0 F p.1 p.2 i) := by
+    have hU : IsOpen (Coordinates.coordinateFrameSet (I := I) x0) :=
+      Coordinates.coordinateFrameSet_open (I := I) x0
+    have hmem : ∀ᶠ p : Real × Real in 𝓝 (s, t),
+        F p ∈ Coordinates.coordinateFrameSet (I := I) x0 :=
+      (hF.continuousAt (I := I) (s, t)).eventually_mem (hU.mem_nhds hx)
+    filter_upwards [hmem] with p hp
+    have hframe := congrFun (frameVec_paramField_eq (I := I) x0 hp) i
+    have hcoordEq := hF.paramFrameCoeff_eq_coordParamDeriv (I := I) hp i
+    simpa [paramField, surfaceParamField] using hframe.trans hcoordEq
+  exact hcoord.congr_of_eventuallyEq heq
+
+private theorem timeFrameCoeff_continuousAt_of_mem
+    {F : Surface M} (hF : SmoothSurface (I := I) F)
+    {x0 : M} {s t : Real}
+    (hx : F (s, t) ∈ Coordinates.coordinateFrameSet (I := I) x0)
+    (i : RicciFlower.Coordinates.CoordinateIdx (𝕜 := Real) E) :
+    ContinuousAt
+      (fun p : Real × Real => timeFrameCoeff (I := I) x0 F p.1 p.2 i)
+      (s, t) := by
+  have hcoord := coordTimeDeriv_continuousAt_of_mem (I := I) hF hx i
+  have heq :
+      (fun p : Real × Real => timeFrameCoeff (I := I) x0 F p.1 p.2 i)
+        =ᶠ[𝓝 (s, t)]
+      (fun p : Real × Real => coordTimeDeriv (I := I) x0 F p.1 p.2 i) := by
+    have hU : IsOpen (Coordinates.coordinateFrameSet (I := I) x0) :=
+      Coordinates.coordinateFrameSet_open (I := I) x0
+    have hmem : ∀ᶠ p : Real × Real in 𝓝 (s, t),
+        F p ∈ Coordinates.coordinateFrameSet (I := I) x0 :=
+      (hF.continuousAt (I := I) (s, t)).eventually_mem (hU.mem_nhds hx)
+    filter_upwards [hmem] with p hp
+    exact hF.timeFrameCoeff_eq_coordTimeDeriv (I := I) hp i
+  exact hcoord.congr_of_eventuallyEq heq
+
+private theorem paramFrameCoeff_continuousAt_of_mem
+    {F : Surface M} (hF : SmoothSurface (I := I) F)
+    {x0 : M} {s t : Real}
+    (hx : F (s, t) ∈ Coordinates.coordinateFrameSet (I := I) x0)
+    (i : RicciFlower.Coordinates.CoordinateIdx (𝕜 := Real) E) :
+    ContinuousAt
+      (fun p : Real × Real => paramFrameCoeff (I := I) x0 F p.1 p.2 i)
+      (s, t) := by
+  have hcoord := coordParamDeriv_continuousAt_of_mem (I := I) hF hx i
+  have heq :
+      (fun p : Real × Real => paramFrameCoeff (I := I) x0 F p.1 p.2 i)
+        =ᶠ[𝓝 (s, t)]
+      (fun p : Real × Real => coordParamDeriv (I := I) x0 F p.1 p.2 i) := by
+    have hU : IsOpen (Coordinates.coordinateFrameSet (I := I) x0) :=
+      Coordinates.coordinateFrameSet_open (I := I) x0
+    have hmem : ∀ᶠ p : Real × Real in 𝓝 (s, t),
+        F p ∈ Coordinates.coordinateFrameSet (I := I) x0 :=
+      (hF.continuousAt (I := I) (s, t)).eventually_mem (hU.mem_nhds hx)
+    filter_upwards [hmem] with p hp
+    exact hF.paramFrameCoeff_eq_coordParamDeriv (I := I) hp i
+  exact hcoord.congr_of_eventuallyEq heq
+
+private theorem frameGammaMat_time_continuousAt
+    [IsManifold I 1 M]
+    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally
+      (I := I) cov (1 : WithTop ℕ∞))
+    {F : Surface M} (hF : SmoothSurface (I := I) F) (s t : Real)
+    (j k : RicciFlower.Coordinates.CoordinateIdx (𝕜 := Real) E) :
+    ContinuousAt
+      (fun p : Real × Real =>
+        frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov
+          (Coordinates.coordinateTrivializationAt (I := I) (F (s, t)))
+          (Module.finBasis Real E) (surfaceTimeCurve F p.1) p.2
+          (1 : TangentSpace 𝓘(Real, Real) p.2) k j)
+      (s, t) := by
+  classical
+  let x0 : M := F (s, t)
+  have hx : F (s, t) ∈ Coordinates.coordinateFrameSet (I := I) x0 := by
+    simpa [x0] using Coordinates.coordinateFrameAt_mem (I := I) (F (s, t))
+  let rhs : Real × Real → Real := fun p =>
+    ∑ i : RicciFlower.Coordinates.CoordinateIdx (𝕜 := Real) E,
+      timeFrameCoeff (I := I) x0 F p.1 p.2 i *
+        Realized.christoffelCoordFun (I := I) cov x0 i j k (F p)
+  have hrhs : ContinuousAt rhs (s, t) := by
+    refine tendsto_finset_sum _ fun i _ => ?_
+    have hT := timeFrameCoeff_continuousAt_of_mem (I := I) hF hx i
+    have hΓ : ContinuousAt
+        (fun p : Real × Real =>
+          Realized.christoffelCoordFun (I := I) cov x0 i j k (F p)) (s, t) := by
+      have hΓmd :
+          MDifferentiableAt I 𝓘(Real, Real)
+            (Realized.christoffelCoordFun (I := I) cov x0 i j k)
+            (F (s, t)) := by
+        simpa [x0] using
+          Realized.christoffelCoordFun_mdiffAt_one (I := I) cov hcov x0 i j k
+      exact hΓmd.continuousAt.comp (hF.continuousAt (I := I) (s, t))
+    exact hT.mul hΓ
+  have heq :
+      (fun p : Real × Real =>
+        frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov
+          (Coordinates.coordinateTrivializationAt (I := I) (F (s, t)))
+          (Module.finBasis Real E) (surfaceTimeCurve F p.1) p.2
+          (1 : TangentSpace 𝓘(Real, Real) p.2) k j)
+        =ᶠ[𝓝 (s, t)] rhs := by
+    have hU : IsOpen (Coordinates.coordinateFrameSet (I := I) x0) :=
+      Coordinates.coordinateFrameSet_open (I := I) x0
+    have hmem : ∀ᶠ p : Real × Real in 𝓝 (s, t),
+        F p ∈ Coordinates.coordinateFrameSet (I := I) x0 :=
+      (hF.continuousAt (I := I) (s, t)).eventually_mem (hU.mem_nhds hx)
+    filter_upwards [hmem] with p hp
+    simpa [rhs, x0] using
+      frameGammaMat_time (I := I) cov x0 F p.1 p.2 hp j k
+  exact hrhs.congr_of_eventuallyEq heq
+
+private theorem frameGammaMat_param_continuousAt
+    [IsManifold I 1 M]
+    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally
+      (I := I) cov (1 : WithTop ℕ∞))
+    {F : Surface M} (hF : SmoothSurface (I := I) F) (s t : Real)
+    (j k : RicciFlower.Coordinates.CoordinateIdx (𝕜 := Real) E) :
+    ContinuousAt
+      (fun p : Real × Real =>
+        frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov
+          (Coordinates.coordinateTrivializationAt (I := I) (F (s, t)))
+          (Module.finBasis Real E) (surfaceParamCurve F p.2) p.1
+          (1 : TangentSpace 𝓘(Real, Real) p.1) k j)
+      (s, t) := by
+  classical
+  let x0 : M := F (s, t)
+  have hx : F (s, t) ∈ Coordinates.coordinateFrameSet (I := I) x0 := by
+    simpa [x0] using Coordinates.coordinateFrameAt_mem (I := I) (F (s, t))
+  let rhs : Real × Real → Real := fun p =>
+    ∑ i : RicciFlower.Coordinates.CoordinateIdx (𝕜 := Real) E,
+      paramFrameCoeff (I := I) x0 F p.1 p.2 i *
+        Realized.christoffelCoordFun (I := I) cov x0 i j k (F p)
+  have hrhs : ContinuousAt rhs (s, t) := by
+    refine tendsto_finset_sum _ fun i _ => ?_
+    have hS := paramFrameCoeff_continuousAt_of_mem (I := I) hF hx i
+    have hΓ : ContinuousAt
+        (fun p : Real × Real =>
+          Realized.christoffelCoordFun (I := I) cov x0 i j k (F p)) (s, t) := by
+      have hΓmd :
+          MDifferentiableAt I 𝓘(Real, Real)
+            (Realized.christoffelCoordFun (I := I) cov x0 i j k)
+            (F (s, t)) := by
+        simpa [x0] using
+          Realized.christoffelCoordFun_mdiffAt_one (I := I) cov hcov x0 i j k
+      exact hΓmd.continuousAt.comp (hF.continuousAt (I := I) (s, t))
+    exact hS.mul hΓ
+  have heq :
+      (fun p : Real × Real =>
+        frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov
+          (Coordinates.coordinateTrivializationAt (I := I) (F (s, t)))
+          (Module.finBasis Real E) (surfaceParamCurve F p.2) p.1
+          (1 : TangentSpace 𝓘(Real, Real) p.1) k j)
+        =ᶠ[𝓝 (s, t)] rhs := by
+    have hU : IsOpen (Coordinates.coordinateFrameSet (I := I) x0) :=
+      Coordinates.coordinateFrameSet_open (I := I) x0
+    have hmem : ∀ᶠ p : Real × Real in 𝓝 (s, t),
+        F p ∈ Coordinates.coordinateFrameSet (I := I) x0 :=
+      (hF.continuousAt (I := I) (s, t)).eventually_mem (hU.mem_nhds hx)
+    filter_upwards [hmem] with p hp
+    simpa [rhs, x0] using
+      frameGammaMat_param (I := I) cov x0 F p.1 p.2 hp j k
+  exact hrhs.congr_of_eventuallyEq heq
+
+private theorem dsTimeCoeffIn_continuousAt
+    [IsManifold I 1 M]
+    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally
+      (I := I) cov (1 : WithTop ℕ∞))
+    {F : Surface M} (hF : SmoothSurface (I := I) F) (s t : Real) :
+    ContinuousAt
+      (fun p : Real × Real =>
+        dsTimeCoeffIn (I := I) cov (F (s, t)) F p.1 p.2)
+      (s, t) := by
+  rw [continuousAt_pi]
+  intro k
+  have hTs := coordTs_continuousAt_of_mem (I := I) hF
+    (by simpa using Coordinates.coordinateFrameAt_mem (I := I) (F (s, t))) k
+  have hsum : ContinuousAt
+      (fun p : Real × Real =>
+        ∑ j : RicciFlower.Coordinates.CoordinateIdx (𝕜 := Real) E,
+          frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov
+            (Coordinates.coordinateTrivializationAt (I := I) (F (s, t)))
+            (Module.finBasis Real E) (surfaceParamCurve F p.2) p.1
+            (1 : TangentSpace 𝓘(Real, Real) p.1) k j *
+          frameVec (I := I) (Coordinates.coordinateTrivializationAt (I := I) (F (s, t)))
+            (Module.finBasis Real E) (timeField I F p) j) (s, t) := by
+    refine tendsto_finset_sum _ fun j _ => ?_
+    exact (frameGammaMat_param_continuousAt (I := I) hcov hF s t j k).mul
+      (by
+        have hx : F (s, t) ∈ Coordinates.coordinateFrameSet (I := I) (F (s, t)) :=
+          Coordinates.coordinateFrameAt_mem (I := I) (F (s, t))
+        exact (continuousAt_pi.mp
+          (frameVec_timeField_continuousAt_of_mem (I := I) hF hx) j))
+  have htotal := hTs.add hsum
+  simpa [dsTimeCoeffIn, coeffCov, Matrix.mulVec, dotProduct] using htotal
+
+private theorem dtTimeCoeffIn_continuousAt
+    [IsManifold I 1 M]
+    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally
+      (I := I) cov (1 : WithTop ℕ∞))
+    {F : Surface M} (hF : SmoothSurface (I := I) F) (s t : Real) :
+    ContinuousAt
+      (fun p : Real × Real =>
+        dtTimeCoeffIn (I := I) cov (F (s, t)) F p.1 p.2)
+      (s, t) := by
+  rw [continuousAt_pi]
+  intro k
+  have hTt := coordTt_continuousAt_of_mem (I := I) hF
+    (by simpa using Coordinates.coordinateFrameAt_mem (I := I) (F (s, t))) k
+  have hsum : ContinuousAt
+      (fun p : Real × Real =>
+        ∑ j : RicciFlower.Coordinates.CoordinateIdx (𝕜 := Real) E,
+          frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov
+            (Coordinates.coordinateTrivializationAt (I := I) (F (s, t)))
+            (Module.finBasis Real E) (surfaceTimeCurve F p.1) p.2
+            (1 : TangentSpace 𝓘(Real, Real) p.2) k j *
+          frameVec (I := I) (Coordinates.coordinateTrivializationAt (I := I) (F (s, t)))
+            (Module.finBasis Real E) (timeField I F p) j) (s, t) := by
+    refine tendsto_finset_sum _ fun j _ => ?_
+    exact (frameGammaMat_time_continuousAt (I := I) hcov hF s t j k).mul
+      (by
+        have hx : F (s, t) ∈ Coordinates.coordinateFrameSet (I := I) (F (s, t)) :=
+          Coordinates.coordinateFrameAt_mem (I := I) (F (s, t))
+        exact (continuousAt_pi.mp
+          (frameVec_timeField_continuousAt_of_mem (I := I) hF hx) j))
+  have htotal := hTt.add hsum
+  simpa [dtTimeCoeffIn, coeffCov, Matrix.mulVec, dotProduct] using htotal
+
+private theorem metricComp_center_continuousAt
+    (g : SmoothRiemannianMetric I M)
+    {F : Surface M} (hF : SmoothSurface (I := I) F) (s t : Real)
+    (i j : RicciFlower.Coordinates.CoordinateIdx (𝕜 := Real) E) :
+    ContinuousAt
+      (fun p : Real × Real =>
+        Coordinates.metricCompForMetricInFrame (I := I) g
+          (Coordinates.coordinateFrameAt (I := I) (F (s, t))) (F p) i j)
+      (s, t) := by
+  let x0 : M := F (s, t)
+  have hx : F (s, t) ∈ Coordinates.coordinateFrameSet (I := I) x0 := by
+    simpa [x0] using Coordinates.coordinateFrameAt_mem (I := I) (F (s, t))
+  have hmetric :
+      MDifferentiableAt I 𝓘(Real, Real)
+        (fun y : M =>
+          Coordinates.metricCompForMetricInFrame (I := I) g
+            (Coordinates.coordinateFrameAt (I := I) x0) y i j) (F (s, t)) := by
+    simpa [x0] using
+      Coordinates.metricComp_mdiffAt (I := I) g
+        (Coordinates.coordinateFrameAt (I := I) x0)
+        (Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) x0)
+        (Coordinates.coordinateFrameSet_open (I := I) x0) hx i j
+  exact hmetric.continuousAt.comp (hF.continuousAt (I := I) (s, t))
+
+private theorem dsTime_time_inner_continuousAt
+    [IsManifold I 1 M]
+    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    (g : SmoothRiemannianMetric I M)
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally
+      (I := I) cov (1 : WithTop ℕ∞))
+    {F : Surface M} (hF : SmoothSurface (I := I) F) (s t : Real) :
+    ContinuousAt
+      (fun p : Real × Real =>
+        g.inner (F p) (dsTimeField (I := I) cov F p) (timeField I F p))
+      (s, t) := by
+  classical
+  let x0 : M := F (s, t)
+  let e := Coordinates.coordinateTrivializationAt (I := I) x0
+  let b : Module.Basis (Coordinates.CoordinateIdx (𝕜 := Real) E) Real E :=
+    Module.finBasis Real E
+  let rhs : Real × Real -> Real := fun p =>
+    ∑ i : Coordinates.CoordinateIdx (𝕜 := Real) E,
+      ∑ j : Coordinates.CoordinateIdx (𝕜 := Real) E,
+        dsTimeCoeffIn (I := I) cov x0 F p.1 p.2 i *
+          timeFrameCoeff (I := I) x0 F p.1 p.2 j *
+            Coordinates.metricCompForMetricInFrame (I := I) g
+              (Coordinates.coordinateFrameAt (I := I) x0) (F p) i j
+  have hmetric : ∀ i j : Coordinates.CoordinateIdx (𝕜 := Real) E,
+      ContinuousAt
+        (fun p : Real × Real =>
+          Coordinates.metricCompForMetricInFrame (I := I) g
+            (Coordinates.coordinateFrameAt (I := I) x0) (F p) i j) (s, t) := by
+    intro i j
+    simpa [x0] using metricComp_center_continuousAt (I := I) g hF s t i j
+  have hrhs : ContinuousAt rhs (s, t) := by
+    refine tendsto_finset_sum _ fun i _ => ?_
+    refine tendsto_finset_sum _ fun j _ => ?_
+    have hds := continuousAt_pi.mp
+      (dsTimeCoeffIn_continuousAt (I := I) hcov hF s t) i
+    have htcoeff := timeFrameCoeff_continuousAt_of_mem (I := I) hF
+      (by simpa [x0] using Coordinates.coordinateFrameAt_mem (I := I) (F (s, t))) j
+    exact (hds.mul htcoeff).mul (hmetric i j)
+  have heq :
+      (fun p : Real × Real =>
+        g.inner (F p) (dsTimeField (I := I) cov F p) (timeField I F p))
+        =ᶠ[𝓝 (s, t)] rhs := by
+    have hU : IsOpen (Coordinates.coordinateFrameSet (I := I) x0) :=
+      Coordinates.coordinateFrameSet_open (I := I) x0
+    have hx : F (s, t) ∈ Coordinates.coordinateFrameSet (I := I) x0 := by
+      simpa [x0] using Coordinates.coordinateFrameAt_mem (I := I) (F (s, t))
+    have hmem : ∀ᶠ p : Real × Real in 𝓝 (s, t),
+        F p ∈ Coordinates.coordinateFrameSet (I := I) x0 :=
+      (hF.continuousAt (I := I) (s, t)).eventually_mem (hU.mem_nhds hx)
+    have hdsEq := SmoothSurface.dsTimeField_eq_fixed_eventually_prod
+      (I := I) (cov := cov) hF s t
+    filter_upwards [hmem, hdsEq] with p hp hdsFixed
+    have hpE : F p ∈ e.baseSet := by
+      simpa [e, x0, Coordinates.coordinateFrameSet,
+        Coordinates.coordinateTrivializationAt] using hp
+    have hdsFrame :
+        frameVec (I := I) e b (dsTimeField (I := I) cov F p) =
+          dsTimeCoeffIn (I := I) cov x0 F p.1 p.2 := by
+      rw [hdsFixed]
+      simpa [e, x0, dsTimeFieldIn] using
+        frameVec_frameSum (I := I) e b hpE
+          (dsTimeCoeffIn (I := I) cov x0 F p.1 p.2)
+    have htimeFrame :
+        frameVec (I := I) e b (timeField I F p) =
+          fun i : Coordinates.CoordinateIdx (𝕜 := Real) E =>
+            timeFrameCoeff (I := I) x0 F p.1 p.2 i := by
+      have h := frameVec_timeField_eq (I := I) x0 hp
+      simpa [e, b, x0, timeField, surfaceTimeField] using h
+    calc
+      g.inner (F p) (dsTimeField (I := I) cov F p) (timeField I F p)
+          =
+          ∑ i : Coordinates.CoordinateIdx (𝕜 := Real) E,
+            ∑ j : Coordinates.CoordinateIdx (𝕜 := Real) E,
+              frameVec (I := I) e b (dsTimeField (I := I) cov F p) i *
+                frameVec (I := I) e b (timeField I F p) j *
+                  Coordinates.metricCompForMetricInFrame (I := I) g
+                    (e.localFrame b) (F p) i j := by
+            simpa [e, b] using
+              inner_eq_sum_frame (I := I) g e b hpE
+                (dsTimeField (I := I) cov F p) (timeField I F p)
+      _ = rhs p := by
+            simp [rhs, hdsFrame, htimeFrame, e, b, x0,
+              Coordinates.coordinateFrameAt, Coordinates.coordinateTrivializationAt]
+  exact hrhs.congr_of_eventuallyEq heq
+
+private theorem time_time_inner_continuousAt
+    (g : SmoothRiemannianMetric I M)
+    {F : Surface M} (hF : SmoothSurface (I := I) F) (s t : Real) :
+    ContinuousAt
+      (fun p : Real × Real =>
+        g.inner (F p) (timeField I F p) (timeField I F p))
+      (s, t) := by
+  classical
+  let x0 : M := F (s, t)
+  let e := Coordinates.coordinateTrivializationAt (I := I) x0
+  let b : Module.Basis (Coordinates.CoordinateIdx (𝕜 := Real) E) Real E :=
+    Module.finBasis Real E
+  let rhs : Real × Real -> Real := fun p =>
+    ∑ i : Coordinates.CoordinateIdx (𝕜 := Real) E,
+      ∑ j : Coordinates.CoordinateIdx (𝕜 := Real) E,
+        timeFrameCoeff (I := I) x0 F p.1 p.2 i *
+          timeFrameCoeff (I := I) x0 F p.1 p.2 j *
+            Coordinates.metricCompForMetricInFrame (I := I) g
+              (Coordinates.coordinateFrameAt (I := I) x0) (F p) i j
+  have hmetric : ∀ i j : Coordinates.CoordinateIdx (𝕜 := Real) E,
+      ContinuousAt
+        (fun p : Real × Real =>
+          Coordinates.metricCompForMetricInFrame (I := I) g
+            (Coordinates.coordinateFrameAt (I := I) x0) (F p) i j) (s, t) := by
+    intro i j
+    simpa [x0] using metricComp_center_continuousAt (I := I) g hF s t i j
+  have hrhs : ContinuousAt rhs (s, t) := by
+    refine tendsto_finset_sum _ fun i _ => ?_
+    refine tendsto_finset_sum _ fun j _ => ?_
+    have hicoeff := timeFrameCoeff_continuousAt_of_mem (I := I) hF
+      (by simpa [x0] using Coordinates.coordinateFrameAt_mem (I := I) (F (s, t))) i
+    have hjcoeff := timeFrameCoeff_continuousAt_of_mem (I := I) hF
+      (by simpa [x0] using Coordinates.coordinateFrameAt_mem (I := I) (F (s, t))) j
+    exact (hicoeff.mul hjcoeff).mul (hmetric i j)
+  have heq :
+      (fun p : Real × Real =>
+        g.inner (F p) (timeField I F p) (timeField I F p))
+        =ᶠ[𝓝 (s, t)] rhs := by
+    have hU : IsOpen (Coordinates.coordinateFrameSet (I := I) x0) :=
+      Coordinates.coordinateFrameSet_open (I := I) x0
+    have hx : F (s, t) ∈ Coordinates.coordinateFrameSet (I := I) x0 := by
+      simpa [x0] using Coordinates.coordinateFrameAt_mem (I := I) (F (s, t))
+    have hmem : ∀ᶠ p : Real × Real in 𝓝 (s, t),
+        F p ∈ Coordinates.coordinateFrameSet (I := I) x0 :=
+      (hF.continuousAt (I := I) (s, t)).eventually_mem (hU.mem_nhds hx)
+    filter_upwards [hmem] with p hp
+    have hpE : F p ∈ e.baseSet := by
+      simpa [e, x0, Coordinates.coordinateFrameSet,
+        Coordinates.coordinateTrivializationAt] using hp
+    have htimeFrame :
+        frameVec (I := I) e b (timeField I F p) =
+          fun i : Coordinates.CoordinateIdx (𝕜 := Real) E =>
+            timeFrameCoeff (I := I) x0 F p.1 p.2 i := by
+      have h := frameVec_timeField_eq (I := I) x0 hp
+      simpa [e, b, x0, timeField, surfaceTimeField] using h
+    calc
+      g.inner (F p) (timeField I F p) (timeField I F p)
+          =
+          ∑ i : Coordinates.CoordinateIdx (𝕜 := Real) E,
+            ∑ j : Coordinates.CoordinateIdx (𝕜 := Real) E,
+              frameVec (I := I) e b (timeField I F p) i *
+                frameVec (I := I) e b (timeField I F p) j *
+                  Coordinates.metricCompForMetricInFrame (I := I) g
+                    (e.localFrame b) (F p) i j := by
+            simpa [e, b] using
+              inner_eq_sum_frame (I := I) g e b hpE
+                (timeField I F p) (timeField I F p)
+      _ = rhs p := by
+            simp [rhs, htimeFrame, e, b, x0,
+              Coordinates.coordinateFrameAt, Coordinates.coordinateTrivializationAt]
+  exact hrhs.congr_of_eventuallyEq heq
+
+private theorem param_dtTime_inner_continuousAt
+    [IsManifold I 1 M]
+    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    (g : SmoothRiemannianMetric I M)
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally
+      (I := I) cov (1 : WithTop ℕ∞))
+    {F : Surface M} (hF : SmoothSurface (I := I) F) (s t : Real) :
+    ContinuousAt
+      (fun p : Real × Real =>
+        g.inner (F p) (paramField I F p) (dtTimeField (I := I) cov F p))
+      (s, t) := by
+  classical
+  let x0 : M := F (s, t)
+  let e := Coordinates.coordinateTrivializationAt (I := I) x0
+  let b : Module.Basis (Coordinates.CoordinateIdx (𝕜 := Real) E) Real E :=
+    Module.finBasis Real E
+  let rhs : Real × Real -> Real := fun p =>
+    ∑ i : Coordinates.CoordinateIdx (𝕜 := Real) E,
+      ∑ j : Coordinates.CoordinateIdx (𝕜 := Real) E,
+        paramFrameCoeff (I := I) x0 F p.1 p.2 i *
+          dtTimeCoeffIn (I := I) cov x0 F p.1 p.2 j *
+            Coordinates.metricCompForMetricInFrame (I := I) g
+              (Coordinates.coordinateFrameAt (I := I) x0) (F p) i j
+  have hmetric : ∀ i j : Coordinates.CoordinateIdx (𝕜 := Real) E,
+      ContinuousAt
+        (fun p : Real × Real =>
+          Coordinates.metricCompForMetricInFrame (I := I) g
+            (Coordinates.coordinateFrameAt (I := I) x0) (F p) i j) (s, t) := by
+    intro i j
+    simpa [x0] using metricComp_center_continuousAt (I := I) g hF s t i j
+  have hrhs : ContinuousAt rhs (s, t) := by
+    refine tendsto_finset_sum _ fun i _ => ?_
+    refine tendsto_finset_sum _ fun j _ => ?_
+    have hpcoeff := paramFrameCoeff_continuousAt_of_mem (I := I) hF
+      (by simpa [x0] using Coordinates.coordinateFrameAt_mem (I := I) (F (s, t))) i
+    have hdt := continuousAt_pi.mp
+      (dtTimeCoeffIn_continuousAt (I := I) hcov hF s t) j
+    exact (hpcoeff.mul hdt).mul (hmetric i j)
+  have heq :
+      (fun p : Real × Real =>
+        g.inner (F p) (paramField I F p) (dtTimeField (I := I) cov F p))
+        =ᶠ[𝓝 (s, t)] rhs := by
+    have hU : IsOpen (Coordinates.coordinateFrameSet (I := I) x0) :=
+      Coordinates.coordinateFrameSet_open (I := I) x0
+    have hx : F (s, t) ∈ Coordinates.coordinateFrameSet (I := I) x0 := by
+      simpa [x0] using Coordinates.coordinateFrameAt_mem (I := I) (F (s, t))
+    have hmem : ∀ᶠ p : Real × Real in 𝓝 (s, t),
+        F p ∈ Coordinates.coordinateFrameSet (I := I) x0 :=
+      (hF.continuousAt (I := I) (s, t)).eventually_mem (hU.mem_nhds hx)
+    have hdtEq := SmoothSurface.dtTimeField_eq_fixed_eventually_prod
+      (I := I) (cov := cov) hF s t
+    filter_upwards [hmem, hdtEq] with p hp hdtFixed
+    have hpE : F p ∈ e.baseSet := by
+      simpa [e, x0, Coordinates.coordinateFrameSet,
+        Coordinates.coordinateTrivializationAt] using hp
+    have hparamFrame :
+        frameVec (I := I) e b (paramField I F p) =
+          fun i : Coordinates.CoordinateIdx (𝕜 := Real) E =>
+            paramFrameCoeff (I := I) x0 F p.1 p.2 i := by
+      have h := frameVec_paramField_eq (I := I) x0 hp
+      simpa [e, b, x0, paramField, surfaceParamField] using h
+    have hdtFrame :
+        frameVec (I := I) e b (dtTimeField (I := I) cov F p) =
+          dtTimeCoeffIn (I := I) cov x0 F p.1 p.2 := by
+      rw [hdtFixed]
+      simpa [e, x0, dtTimeFieldIn] using
+        frameVec_frameSum (I := I) e b hpE
+          (dtTimeCoeffIn (I := I) cov x0 F p.1 p.2)
+    calc
+      g.inner (F p) (paramField I F p) (dtTimeField (I := I) cov F p)
+          =
+          ∑ i : Coordinates.CoordinateIdx (𝕜 := Real) E,
+            ∑ j : Coordinates.CoordinateIdx (𝕜 := Real) E,
+              frameVec (I := I) e b (paramField I F p) i *
+                frameVec (I := I) e b (dtTimeField (I := I) cov F p) j *
+                  Coordinates.metricCompForMetricInFrame (I := I) g
+                    (e.localFrame b) (F p) i j := by
+            simpa [e, b] using
+              inner_eq_sum_frame (I := I) g e b hpE
+                (paramField I F p) (dtTimeField (I := I) cov F p)
+      _ = rhs p := by
+            simp [rhs, hparamFrame, hdtFrame, e, b, x0,
+              Coordinates.coordinateFrameAt, Coordinates.coordinateTrivializationAt]
+  exact hrhs.congr_of_eventuallyEq heq
+
+private theorem dsTime_time_inner_intervalIntegrable
+    [IsManifold I 1 M]
+    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    (g : SmoothRiemannianMetric I M)
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally
+      (I := I) cov (1 : WithTop ℕ∞))
+    {F : Surface M} (hF : SmoothSurface (I := I) F)
+    (s0 a b : Real) :
+    IntervalIntegrable
+      (fun t : Real =>
+        g.inner (F (s0, t))
+          (dsTimeField (I := I) cov F (s0, t))
+          (velocityAlong I (timeCurve F s0) t))
+      MeasureTheory.volume a b := by
+  have hcont : ContinuousOn
+      (fun t : Real =>
+        g.inner (F (s0, t))
+          (dsTimeField (I := I) cov F (s0, t))
+          (velocityAlong I (timeCurve F s0) t))
+      (Set.uIcc a b) := by
+    refine continuousOn_of_forall_continuousAt fun t _ht => ?_
+    have hp := dsTime_time_inner_continuousAt (I := I) g hcov hF s0 t
+    have hline : ContinuousAt (fun τ : Real => (s0, τ)) t :=
+      ContinuousAt.prodMk continuousAt_const continuousAt_id
+    simpa [timeCurve, timeField, surfaceTimeField, velocityAlong] using
+      hp.comp hline
+  exact hcont.intervalIntegrable
+
+private theorem pathSpeed_intervalIntegrable
+    (g : SmoothRiemannianMetric I M)
+    {F : Surface M} (hF : SmoothSurface (I := I) F)
+    (s a b : Real) :
+    IntervalIntegrable
+      (fun t : Real => pathSpeed (I := I) g (timeCurve F s) t)
+      MeasureTheory.volume a b := by
+  have hcont : ContinuousOn
+      (fun t : Real => pathSpeed (I := I) g (timeCurve F s) t)
+      (Set.uIcc a b) := by
+    refine continuousOn_of_forall_continuousAt fun t _ht => ?_
+    have hp := time_time_inner_continuousAt (I := I) g hF s t
+    have hline : ContinuousAt (fun τ : Real => (s, τ)) t :=
+      ContinuousAt.prodMk continuousAt_const continuousAt_id
+    have hsq := hp.comp hline
+    exact Real.continuous_sqrt.continuousAt.comp (by
+      simpa [pathSpeed, speedSq, timeCurve, timeField, surfaceTimeField,
+        velocityAlong] using hsq)
+  exact hcont.intervalIntegrable
+
+private theorem speedSq_surface_continuous
+    (g : SmoothRiemannianMetric I M)
+    {F : Surface M} (hF : SmoothSurface (I := I) F) :
+    Continuous
+      (fun p : Real × Real => speedSq (I := I) g (timeCurve F p.1) p.2) := by
+  rw [continuous_iff_continuousAt]
+  intro p
+  have h := time_time_inner_continuousAt (I := I) g hF p.1 p.2
+  simpa [speedSq, timeCurve, timeField, surfaceTimeField, velocityAlong] using h
+
+private theorem speedSq_pos_tube
+    (g : SmoothRiemannianMetric I M)
+    {F : Surface M} (hF : SmoothSurface (I := I) F)
+    {s0 a b : Real}
+    (hunit : IsUnitSpeed (I := I) g (timeCurve F s0)) :
+    ∃ δ : Real, 0 < δ ∧
+      ∀ s ∈ Set.Icc (s0 - δ) (s0 + δ),
+        ∀ t ∈ Set.uIcc a b,
+          (1 / 2 : Real) < speedSq (I := I) g (timeCurve F s) t := by
+  classical
+  let U : Set (Real × Real) :=
+    {p | (1 / 2 : Real) < speedSq (I := I) g (timeCurve F p.1) p.2}
+  have hUopen : IsOpen U := by
+    have hcont := speedSq_surface_continuous (I := I) g hF
+    simpa [U] using (isOpen_lt continuous_const hcont)
+  have hslice : ({s0} : Set Real) ×ˢ Set.uIcc a b ⊆ U := by
+    intro p hp
+    rcases hp with ⟨hs, ht⟩
+    have hp1 : p.1 = s0 := by simpa using hs
+    change (1 / 2 : Real) < speedSq (I := I) g (timeCurve F p.1) p.2
+    rw [hp1, hunit p.2]
+    norm_num
+  obtain ⟨u, v, huopen, _hvopen, hsu, htv, huv⟩ :=
+    generalized_tube_lemma isCompact_singleton (t := Set.uIcc a b)
+      isCompact_uIcc hUopen hslice
+  have hs0u : s0 ∈ u := hsu (by simp)
+  obtain ⟨ε, hεpos, hεsub⟩ := Metric.mem_nhds_iff.mp (huopen.mem_nhds hs0u)
+  refine ⟨ε / 2, by positivity, ?_⟩
+  intro s hs t ht
+  have hsu' : s ∈ u := by
+    apply hεsub
+    rw [Metric.mem_ball, Real.dist_eq]
+    rw [abs_sub_lt_iff]
+    constructor <;> linarith [hs.1, hs.2, hεpos]
+  have htv' : t ∈ v := htv ht
+  have hpU : (s, t) ∈ U := huv ⟨hsu', htv'⟩
+  simpa [U] using hpU
+
+private theorem speedParamDerivIntegrand_continuousAt_of_pos
+    [IsManifold I 1 M]
+    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    (g : SmoothRiemannianMetric I M)
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally
+      (I := I) cov (1 : WithTop ℕ∞))
+    {F : Surface M} (hF : SmoothSurface (I := I) F) {s t : Real}
+    (hpos : 0 < speedSq (I := I) g (timeCurve F s) t) :
+    ContinuousAt
+      (fun p : Real × Real =>
+        (pathSpeed (I := I) g (timeCurve F p.1) p.2)⁻¹ *
+          g.inner (F p)
+            (dsTimeField (I := I) cov F p)
+            (timeField I F p))
+      (s, t) := by
+  have hsq_cont := (speedSq_surface_continuous (I := I) g hF).continuousAt
+    (x := (s, t))
+  have hpath_cont : ContinuousAt
+      (fun p : Real × Real =>
+        pathSpeed (I := I) g (timeCurve F p.1) p.2) (s, t) := by
+    exact Real.continuous_sqrt.continuousAt.comp (by
+      simpa [pathSpeed] using hsq_cont)
+  have hpath_ne :
+      pathSpeed (I := I) g (timeCurve F s) t ≠ 0 := by
+    have hsqrt_pos : 0 < Real.sqrt (speedSq (I := I) g (timeCurve F s) t) :=
+      Real.sqrt_pos.2 hpos
+    simpa [pathSpeed] using ne_of_gt hsqrt_pos
+  exact (hpath_cont.inv₀ hpath_ne).mul
+    (dsTime_time_inner_continuousAt (I := I) g hcov hF s t)
+
+private theorem param_dtTime_inner_intervalIntegrable
+    [IsManifold I 1 M]
+    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    (g : SmoothRiemannianMetric I M)
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally
+      (I := I) cov (1 : WithTop ℕ∞))
+    {F : Surface M} (hF : SmoothSurface (I := I) F)
+    (s0 a b : Real) :
+    IntervalIntegrable
+      (fun t : Real =>
+        g.inner (F (s0, t))
+          (variationField I F s0 t)
+          (dtTimeField (I := I) cov F (s0, t)))
+      MeasureTheory.volume a b := by
+  have hcont : ContinuousOn
+      (fun t : Real =>
+        g.inner (F (s0, t))
+          (variationField I F s0 t)
+          (dtTimeField (I := I) cov F (s0, t)))
+      (Set.uIcc a b) := by
+    refine continuousOn_of_forall_continuousAt fun t _ht => ?_
+    have hp := param_dtTime_inner_continuousAt (I := I) g hcov hF s0 t
+    have hline : ContinuousAt (fun τ : Real => (s0, τ)) t :=
+      ContinuousAt.prodMk continuousAt_const continuousAt_id
+    simpa [variationField, paramField] using hp.comp hline
+  exact hcont.intervalIntegrable
+
+/-! ## Pointwise first-variation producers -/
+
+/-- Pointwise parameter derivative of the squared speed of a smooth variation.
+
+This is the pointwise product-rule part of the first variation formula:
+metric compatibility gives the derivative of `⟨T,T⟩` in the variation
+parameter.  The later torsion-free step rewrites this field as `D_t V`. -/
+private theorem speedSq_param_hasDerivAt
+    [IsManifold I 1 M] [IsManifold I 2 M]
+    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    (g : SmoothRiemannianMetric I M)
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    (hmc : RicciFlower.Connection.IsMetricCompatible (I := I) cov g)
+    {F : Surface M} (hF : SmoothSurface (I := I) F) (s t : Real) :
+    HasDerivAt
+      (fun σ : Real => speedSq (I := I) g (timeCurve F σ) t)
+      (2 * g.inner (F (s, t))
+        (dsTimeField (I := I) cov F (s, t))
+        (timeField I F (s, t))) s := by
+  have hDsT :
+      HasPBCovAlongAt (I := I) cov (paramCurve F t)
+        (fun σ : Real => timeField I F (σ, t)) s
+        (dsTimeField (I := I) cov F (s, t)) := by
+    have h := SmoothSurface.hasParam_dsTime (I := I) (cov := cov) hF s t
+    simpa [HasPBParamCovDerivAt, paramCurve, timeField, surfaceParamCurve,
+      surfaceTimeField] using h
+  have hinner :=
+    inner_hasDerivAt_of_pbCov (I := I) g hmc
+      (gamma := paramCurve F t)
+      (S := fun σ : Real => timeField I F (σ, t))
+      (T := fun σ : Real => timeField I F (σ, t))
+      (t := s) hDsT hDsT
+  have htarget :
+      g.inner (F (s, t)) (dsTimeField (I := I) cov F (s, t))
+          (curveVelocity I (timeCurve F s) t) +
+        g.inner (F (s, t)) (curveVelocity I (timeCurve F s) t)
+          (dsTimeField (I := I) cov F (s, t)) =
+      2 * g.inner (F (s, t))
+        (dsTimeField (I := I) cov F (s, t))
+        (curveVelocity I (timeCurve F s) t) := by
+    have hsymm :
+        g.inner (F (s, t)) (curveVelocity I (timeCurve F s) t)
+            (dsTimeField (I := I) cov F (s, t)) =
+          g.inner (F (s, t)) (dsTimeField (I := I) cov F (s, t))
+            (curveVelocity I (timeCurve F s) t) := by
+      exact g.symm (F (s, t)) (curveVelocity I (timeCurve F s) t)
+        (dsTimeField (I := I) cov F (s, t))
+    rw [hsymm]
+    ring
+  change
+    HasDerivAt
+      (fun σ : Real =>
+        g.inner (F (σ, t)) (curveVelocity I (timeCurve F σ) t)
+          (curveVelocity I (timeCurve F σ) t))
+      (2 * g.inner (F (s, t))
+        (dsTimeField (I := I) cov F (s, t))
+        (curveVelocity I (timeCurve F s) t)) s
+  convert hinner using 1
+  simpa [paramCurve, timeField] using htarget.symm
+
+/-- Pointwise parameter derivative of speed at a nonzero-speed point. -/
+private theorem pathSpeed_param_hasDerivAt_of_ne
+    [IsManifold I 1 M] [IsManifold I 2 M]
+    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    (g : SmoothRiemannianMetric I M)
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    (hmc : RicciFlower.Connection.IsMetricCompatible (I := I) cov g)
+    {F : Surface M} (hF : SmoothSurface (I := I) F) {s t : Real}
+    (hnez : speedSq (I := I) g (timeCurve F s) t ≠ 0) :
+    HasDerivAt
+      (fun σ : Real => pathSpeed (I := I) g (timeCurve F σ) t)
+      ((pathSpeed (I := I) g (timeCurve F s) t)⁻¹ *
+        g.inner (F (s, t))
+          (dsTimeField (I := I) cov F (s, t))
+          (timeField I F (s, t))) s := by
+  have hsq :=
+    speedSq_param_hasDerivAt (I := I) g hmc hF s t
+  have hsqrt := hsq.sqrt hnez
+  have hderiv :
+      HasDerivAt
+        (fun σ : Real => pathSpeed (I := I) g (timeCurve F σ) t)
+        ((2 * g.inner (F (s, t))
+          (dsTimeField (I := I) cov F (s, t))
+          (timeField I F (s, t))) /
+            (2 * pathSpeed (I := I) g (timeCurve F s) t)) s := by
+    simpa [pathSpeed, timeField] using hsqrt
+  convert hderiv using 1
+  ring_nf
+
+/-- Pointwise parameter derivative of speed along a unit-speed base curve. -/
+private theorem pathSpeed_param_hasDerivAt_of_unitSpeed
+    [IsManifold I 1 M] [IsManifold I 2 M]
+    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    (g : SmoothRiemannianMetric I M)
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    (hmc : RicciFlower.Connection.IsMetricCompatible (I := I) cov g)
+    {F : Surface M} (hF : SmoothSurface (I := I) F) {s0 : Real}
+    (hunit : IsUnitSpeed (I := I) g (timeCurve F s0)) (t : Real) :
+    HasDerivAt
+      (fun s : Real => pathSpeed (I := I) g (timeCurve F s) t)
+      (g.inner (F (s0, t))
+        (dsTimeField (I := I) cov F (s0, t))
+        (timeField I F (s0, t))) s0 := by
+  have hnonzero :
+      speedSq (I := I) g (timeCurve F s0) t ≠ 0 := by
+    simp [hunit t]
+  have h :=
+    pathSpeed_param_hasDerivAt_of_ne (I := I) g hmc hF
+      (s := s0) (t := t) hnonzero
+  simpa [pathSpeed, hunit t] using h
+
+/-- Time derivative of the boundary pairing `⟨V,T⟩` along a variation.
+
+The torsion-free mixed-derivative identity supplies `D_t V = D_s T`; the
+acceleration input supplies `D_t T = A`. -/
+private theorem boundaryPairing_hasDerivAt
+    [IsManifold I 1 M] [IsManifold I 2 M]
+    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    (g : SmoothRiemannianMetric I M)
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    (hmc : RicciFlower.Connection.IsMetricCompatible (I := I) cov g)
+    (htf : RicciFlower.LeviCivita.IsTorsionFree (I := I) cov)
+    {F : Surface M} (hF : SmoothSurface (I := I) F) {s0 : Real}
+    {A : VectorFieldAlong I (timeCurve F s0)} {t : Real}
+    (hA : HasPBCovAccelAt (I := I) cov (timeCurve F s0) t (A t)) :
+    HasDerivAt
+      (fun τ : Real =>
+        g.inner (F (s0, τ)) (variationField I F s0 τ)
+          (velocityAlong I (timeCurve F s0) τ))
+      (g.inner (F (s0, t))
+          (dsTimeField (I := I) cov F (s0, t))
+          (velocityAlong I (timeCurve F s0) t) +
+        g.inner (F (s0, t)) (variationField I F s0 t) (A t)) t := by
+  have hDtV :
+      HasPBCovAlongAt (I := I) cov (timeCurve F s0)
+        (variationField I F s0) t
+        (dsTimeField (I := I) cov F (s0, t)) := by
+    have h := SmoothSurface.hasTime_param_eq_dsTime
+      (I := I) (cov := cov) htf hF s0 t
+    simpa [HasPBTimeCovDerivAt, timeCurve, variationField, paramField,
+      surfaceTimeCurve, surfaceParamField] using h
+  simpa [timeCurve] using
+    inner_hasDerivAt_of_pbCov (I := I) g hmc
+      (gamma := timeCurve F s0)
+      (S := variationField I F s0)
+      (T := velocityAlong I (timeCurve F s0))
+      (t := t) hDtV hA
+
+/-- The supplied acceleration field agrees pointwise with the canonical
+surface time-acceleration field. -/
+private theorem accel_eq_dtTimeField
+    [IsManifold I 1 M] [IsManifold I 2 M]
+    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    {F : Surface M} (hF : SmoothSurface (I := I) F) {s0 t : Real}
+    {A : VectorFieldAlong I (timeCurve F s0)}
+    (hA : HasPBCovAccelAt (I := I) cov (timeCurve F s0) t (A t)) :
+    A t = dtTimeField (I := I) cov F (s0, t) := by
+  have hcanon :
+      HasPBCovAccelAt (I := I) cov (timeCurve F s0) t
+        (dtTimeField (I := I) cov F (s0, t)) := by
+    have h := SmoothSurface.hasTime_time (I := I) (cov := cov) hF s0 t
+    simpa [HasPBTimeCovDerivAt, HasPBCovAccelAt, HasPBCovAlongAt,
+      timeCurve, surfaceTimeCurve, surfaceTimeField, velocityAlong] using h
+  exact HasPBCovDerivAt.unique (I := I) (I' := 𝓘(Real, Real)) hA hcanon
+
+private theorem variation_accel_inner_intervalIntegrable
+    [IsManifold I 1 M] [IsManifold I 2 M]
+    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    (g : SmoothRiemannianMetric I M)
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally
+      (I := I) cov (1 : WithTop ℕ∞))
+    {F : Surface M} {s0 a b : Real}
+    {A : VectorFieldAlong I (timeCurve F s0)}
+    (hF : SmoothSurface (I := I) F)
+    (hA : ∀ t ∈ Set.uIcc a b,
+      HasPBCovAccelAt (I := I) cov (timeCurve F s0) t (A t)) :
+    IntervalIntegrable
+      (fun t : Real =>
+        g.inner (F (s0, t)) (variationField I F s0 t) (A t))
+      MeasureTheory.volume a b := by
+  have hcanon := param_dtTime_inner_intervalIntegrable (I := I) g hcov hF s0 a b
+  refine hcanon.congr ?_
+  intro t ht
+  have htu : t ∈ Set.uIcc a b := Set.uIoc_subset_uIcc ht
+  have hAeq := accel_eq_dtTimeField (I := I) (cov := cov) hF (hA t htu)
+  change
+    g.inner (F (s0, t)) (variationField I F s0 t)
+        (dtTimeField (I := I) cov F (s0, t)) =
+      g.inner (F (s0, t)) (variationField I F s0 t) (A t)
+  rw [← hAeq]
+
+private theorem variationLength_hasDerivAt_integral
+    [IsManifold I 1 M] [IsManifold I 2 M]
+    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    (g : SmoothRiemannianMetric I M)
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally
+      (I := I) cov (1 : WithTop ℕ∞))
+    (hmc : RicciFlower.Connection.IsMetricCompatible (I := I) cov g)
+    {F : Surface M} {s0 a b : Real}
+    (hF : SmoothSurface (I := I) F)
+    (hunit : IsUnitSpeed (I := I) g (timeCurve F s0)) :
+    HasDerivAt (fun s => variationLength (I := I) g F a b s)
+      (∫ t in a..b,
+        g.inner (F (s0, t))
+          (dsTimeField (I := I) cov F (s0, t))
+          (velocityAlong I (timeCurve F s0) t)) s0 := by
+  classical
+  obtain ⟨δ, hδpos, hδtube⟩ :=
+    speedSq_pos_tube (I := I) g hF (s0 := s0) (a := a) (b := b) hunit
+  let S : Set Real := Set.Icc (s0 - δ) (s0 + δ)
+  let Fspeed : Real -> Real -> Real := fun s t =>
+    pathSpeed (I := I) g (timeCurve F s) t
+  let Fprime : Real -> Real -> Real := fun s t =>
+    (pathSpeed (I := I) g (timeCurve F s) t)⁻¹ *
+      g.inner (F (s, t))
+        (dsTimeField (I := I) cov F (s, t))
+        (timeField I F (s, t))
+  have hS_nhds : S ∈ 𝓝 s0 := by
+    have hleft : s0 - δ < s0 := sub_lt_self s0 hδpos
+    have hright : s0 < s0 + δ := lt_add_of_pos_right s0 hδpos
+    simpa [S] using Icc_mem_nhds hleft hright
+  have hF_meas :
+      ∀ᶠ s in 𝓝 s0,
+        MeasureTheory.AEStronglyMeasurable
+          (Fspeed s) (MeasureTheory.volume.restrict (Set.uIoc a b)) := by
+    refine Filter.Eventually.of_forall fun s => ?_
+    exact (pathSpeed_intervalIntegrable (I := I) g hF s a b).aestronglyMeasurable_restrict_uIoc
+  have hF_int : IntervalIntegrable (Fspeed s0) MeasureTheory.volume a b := by
+    simpa [Fspeed] using pathSpeed_intervalIntegrable (I := I) g hF s0 a b
+  have hFprime_cont0 : ContinuousOn (Fprime s0) (Set.uIcc a b) := by
+    refine continuousOn_of_forall_continuousAt fun t _ht => ?_
+    have hpos : 0 < speedSq (I := I) g (timeCurve F s0) t := by
+      rw [hunit t]
+      norm_num
+    have hp := speedParamDerivIntegrand_continuousAt_of_pos
+      (I := I) g hcov hF (s := s0) (t := t) hpos
+    have hline : ContinuousAt (fun τ : Real => (s0, τ)) t :=
+      ContinuousAt.prodMk continuousAt_const continuousAt_id
+    simpa [Fprime, timeCurve, timeField, surfaceTimeField, velocityAlong] using
+      hp.comp hline
+  have hFprime_int0 :
+      IntervalIntegrable (Fprime s0) MeasureTheory.volume a b :=
+    hFprime_cont0.intervalIntegrable
+  have hFprime_meas :
+      MeasureTheory.AEStronglyMeasurable
+        (Fprime s0) (MeasureTheory.volume.restrict (Set.uIoc a b)) :=
+    hFprime_int0.aestronglyMeasurable_restrict_uIoc
+  let K : Set (Real × Real) := S ×ˢ Set.uIcc a b
+  have hK_compact : IsCompact K := by
+    simpa [K, S] using (isCompact_Icc.prod (isCompact_uIcc : IsCompact (Set.uIcc a b)))
+  have hFprime_contK : ContinuousOn (fun p : Real × Real => Fprime p.1 p.2) K := by
+    refine continuousOn_of_forall_continuousAt fun p hp => ?_
+    have hpS : p.1 ∈ S := hp.1
+    have hpt : p.2 ∈ Set.uIcc a b := hp.2
+    have hpos_half :
+        (1 / 2 : Real) < speedSq (I := I) g (timeCurve F p.1) p.2 := by
+      exact hδtube p.1 (by simpa [S] using hpS) p.2 hpt
+    have hpos : 0 < speedSq (I := I) g (timeCurve F p.1) p.2 := by
+      linarith
+    simpa [Fprime] using
+      speedParamDerivIntegrand_continuousAt_of_pos
+        (I := I) g hcov hF (s := p.1) (t := p.2) hpos
+  obtain ⟨C, hC⟩ := hK_compact.exists_bound_of_continuousOn hFprime_contK
+  have hbound :
+      ∀ᵐ t ∂MeasureTheory.volume, t ∈ Set.uIoc a b →
+        ∀ s ∈ S, ‖Fprime s t‖ ≤ (fun _ : Real => C) t := by
+    refine Filter.Eventually.of_forall fun t ht s hs => ?_
+    exact hC (s, t) ⟨hs, Set.uIoc_subset_uIcc ht⟩
+  have hbound_int :
+      IntervalIntegrable (fun _ : Real => C) MeasureTheory.volume a b :=
+    intervalIntegrable_const
+  have hdiff :
+      ∀ᵐ t ∂MeasureTheory.volume, t ∈ Set.uIoc a b →
+        ∀ s ∈ S, HasDerivAt (fun σ => Fspeed σ t) (Fprime s t) s := by
+    refine Filter.Eventually.of_forall fun t ht s hs => ?_
+    have htu : t ∈ Set.uIcc a b := Set.uIoc_subset_uIcc ht
+    have hpos_half :
+        (1 / 2 : Real) < speedSq (I := I) g (timeCurve F s) t := by
+      exact hδtube s (by simpa [S] using hs) t htu
+    have hne : speedSq (I := I) g (timeCurve F s) t ≠ 0 := by
+      have hpos : 0 < speedSq (I := I) g (timeCurve F s) t := by linarith
+      exact ne_of_gt hpos
+    simpa [Fspeed, Fprime, timeField, surfaceTimeField, velocityAlong] using
+      pathSpeed_param_hasDerivAt_of_ne (I := I) g hmc hF
+        (s := s) (t := t) hne
+  have hLeibniz :=
+    intervalIntegral.hasDerivAt_integral_of_dominated_loc_of_deriv_le
+      (μ := MeasureTheory.volume) (a := a) (b := b)
+      (F := Fspeed) (F' := Fprime) (x₀ := s0) (s := S)
+      hS_nhds hF_meas hF_int hFprime_meas hbound hbound_int hdiff
+  have hderiv_raw :
+      HasDerivAt (fun s => variationLength (I := I) g F a b s)
+        (∫ t in a..b, Fprime s0 t) s0 := by
+    simpa [variationLength, pathLength, Fspeed] using hLeibniz.2
+  have hvalue :
+      (∫ t in a..b, Fprime s0 t) =
+        ∫ t in a..b,
+          g.inner (F (s0, t))
+            (dsTimeField (I := I) cov F (s0, t))
+            (velocityAlong I (timeCurve F s0) t) := by
+    refine intervalIntegral.integral_congr ?_
+    intro t _ht
+    have hspeed : pathSpeed (I := I) g (timeCurve F s0) t = 1 :=
+      pathSpeed_eq_one_of_unitSpeed (I := I) hunit t
+    simp [Fprime, hspeed, timeField, velocityAlong]
+  rwa [hvalue] at hderiv_raw
+
 /-! ## Boundary and first-variation right hand sides -/
 
 /-- Boundary term `⟨V,U⟩|_a^b` for a variation field `V` and a chosen field `U`
@@ -519,17 +1632,91 @@ def HasUnitSpeedLengthFirstVariationAt
   ∃ A : VectorFieldAlong I (timeCurve F s0),
     HasUnitSpeedLengthFirstVariationAtWith (I := I) g cov F s0 a b A
 
+private theorem firstVariation_unitSpeed_of_length_deriv_integral
+    [IsManifold I 1 M] [IsManifold I 2 M]
+    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    (g : SmoothRiemannianMetric I M)
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    (hmc : RicciFlower.Connection.IsMetricCompatible (I := I) cov g)
+    (htf : RicciFlower.LeviCivita.IsTorsionFree (I := I) cov)
+    {F : Surface M} {s0 a b : Real}
+    {A : VectorFieldAlong I (timeCurve F s0)}
+    (hF : SmoothSurface (I := I) F)
+    (hA : ∀ t ∈ Set.uIcc a b,
+      HasPBCovAccelAt (I := I) cov (timeCurve F s0) t (A t))
+    (hDint : IntervalIntegrable
+      (fun t : Real =>
+        g.inner (F (s0, t))
+          (dsTimeField (I := I) cov F (s0, t))
+          (velocityAlong I (timeCurve F s0) t))
+      MeasureTheory.volume a b)
+    (hVAint : IntervalIntegrable
+      (fun t : Real =>
+        g.inner (F (s0, t)) (variationField I F s0 t) (A t))
+      MeasureTheory.volume a b)
+    (hlen : HasDerivAt (fun s => variationLength (I := I) g F a b s)
+      (∫ t in a..b,
+        g.inner (F (s0, t))
+          (dsTimeField (I := I) cov F (s0, t))
+          (velocityAlong I (timeCurve F s0) t)) s0) :
+    HasDerivAt (fun s => variationLength (I := I) g F a b s)
+      (unitSpeedLengthFirstVariationRHS (I := I) g F s0 a b A) s0 := by
+  let D : Real → Real := fun t =>
+    g.inner (F (s0, t))
+      (dsTimeField (I := I) cov F (s0, t))
+      (velocityAlong I (timeCurve F s0) t)
+  let VA : Real → Real := fun t =>
+    g.inner (F (s0, t)) (variationField I F s0 t) (A t)
+  let B : Real → Real := fun t =>
+    g.inner (F (s0, t)) (variationField I F s0 t)
+      (velocityAlong I (timeCurve F s0) t)
+  have hBderiv : ∀ t ∈ Set.uIcc a b, HasDerivAt B (D t + VA t) t := by
+    intro t ht
+    simpa [B, D, VA] using
+      boundaryPairing_hasDerivAt (I := I) g hmc htf hF (hA t ht)
+  have hDVAint : IntervalIntegrable (fun t : Real => D t + VA t)
+      MeasureTheory.volume a b := hDint.add hVAint
+  have hFTC :
+      ∫ t in a..b, (D t + VA t) = B b - B a :=
+    intervalIntegral.integral_eq_sub_of_hasDerivAt hBderiv hDVAint
+  have hsplit :
+      ∫ t in a..b, (D t + VA t) =
+        (∫ t in a..b, D t) + ∫ t in a..b, VA t := by
+    simpa using intervalIntegral.integral_add hDint hVAint
+  have hsum :
+      (∫ t in a..b, D t) + ∫ t in a..b, VA t = B b - B a :=
+    hsplit.symm.trans hFTC
+  have hD_eq :
+      ∫ t in a..b, D t =
+        (-∫ t in a..b, VA t) + (B b - B a) := by
+    calc
+      ∫ t in a..b, D t =
+          ((∫ t in a..b, D t) + ∫ t in a..b, VA t) -
+            ∫ t in a..b, VA t := by ring
+      _ = (B b - B a) - ∫ t in a..b, VA t := by rw [hsum]
+      _ = (-∫ t in a..b, VA t) + (B b - B a) := by ring
+  have hvalue :
+      (∫ t in a..b,
+        g.inner (F (s0, t))
+          (dsTimeField (I := I) cov F (s0, t))
+          (velocityAlong I (timeCurve F s0) t)) =
+        unitSpeedLengthFirstVariationRHS (I := I) g F s0 a b A := by
+    simpa [unitSpeedLengthFirstVariationRHS, lengthInteriorTerm,
+      lengthBoundaryTerm, D, VA, B] using hD_eq
+  exact hvalue ▸ hlen
+
 /-- Unit-speed first variation of arc length.
 
 The checked geometric input now includes the pullback metric-compatible product
-rule `inner_hasDerivAt_of_pbCov`.  The remaining proof content is the analytic
-step differentiating the interval integral of the speed in the variation
-parameter. -/
+rule `inner_hasDerivAt_of_pbCov`.  The smoothness of `cov` is needed for the
+analytic regularity of the canonical acceleration and compact-tube integrands. -/
 theorem firstVariation_unitSpeed
     [IsManifold I 1 M] [IsManifold I 2 M]
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
     (g : SmoothRiemannianMetric I M)
     {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally
+      (I := I) cov (1 : WithTop ℕ∞))
     (hmc : RicciFlower.Connection.IsMetricCompatible (I := I) cov g)
     (htf : RicciFlower.LeviCivita.IsTorsionFree (I := I) cov)
     {F : Surface M} {s0 a b : Real}
@@ -540,14 +1727,14 @@ theorem firstVariation_unitSpeed
       HasPBCovAccelAt (I := I) cov (timeCurve F s0) t (A t)) :
     HasUnitSpeedLengthFirstVariationAtWith (I := I) g cov F s0 a b A := by
   refine ⟨hunit, hA, ?_⟩
-  /-
-  Remaining analytic bridge:
-  for the smooth two-parameter speed integrand, differentiate
-  `s ↦ ∫ t in a..b, sqrt (speedSq g (timeCurve F s) t)` at `s0`;
-  use `inner_hasDerivAt_of_pbCov`, `hF.hasTime_param_eq_dsTime htf`,
-  unit speed, and integration by parts in `t`.
-  -/
-  sorry
+  have hDint := dsTime_time_inner_intervalIntegrable
+    (I := I) g hcov hF s0 a b
+  have hVAint := variation_accel_inner_intervalIntegrable
+    (I := I) g hcov hF hA
+  have hlen := variationLength_hasDerivAt_integral
+    (I := I) (a := a) (b := b) g hcov hmc hF hunit
+  exact firstVariation_unitSpeed_of_length_deriv_integral
+    (I := I) g hmc htf hF hA hDint hVAint hlen
 
 theorem HasLengthFirstVariationAtWith.unitSpeed
     {g : SmoothRiemannianMetric I M}
