@@ -580,7 +580,7 @@ chart source `(chartAt H q).source` throughout `O`, then the chart-`q`-phase
 curve `c(s) = (chartCurve q γ s, deriv (chartCurve q γ) s)` satisfies, eventually
 as `s → t`, the chart-phase geodesic ODE `HasDerivAt c (chartPhaseVF g q (c s)) s`
 with `c s` staying inside the chart-target interior product. -/
-private theorem chartPhase_eventually_of_geodesicOn
+theorem chartPhase_eventually_of_geodesicOn
     (g : SmoothRiemannianMetric I M) (q : M) {γ : ℝ → M} {O : Set ℝ} {t : ℝ}
     (hO_open : IsOpen O) (htO : t ∈ O)
     (hγ_cont : ContinuousOn γ O)
@@ -649,7 +649,7 @@ neighbourhood-of-`0` chart-coordinate ODE uniqueness
 by the time-shift `s ↦ s + t`.  Two chart-phase ODE solutions agreeing at `t` and
 staying in the chart-target interior product near `t` agree on a neighbourhood of
 `t`. -/
-private theorem chartPhaseVF_orbit_uniqueness_at
+theorem chartPhaseVF_orbit_uniqueness_at
     {g : SmoothRiemannianMetric I M} {q : M}
     {c₁ c₂ : ℝ → E × E} {z₀ : E × E} {t : ℝ}
     (hz₀ : z₀ ∈ (interior (extChartAt I q).target) ×ˢ (Set.univ : Set E))
@@ -773,7 +773,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 `MDifferentiableAt 𝓘(ℝ,ℝ) I` at `0`, has foot `γ 0 = q`, and launch velocity
 `(mfderiv 𝓘(ℝ,ℝ) I γ 0 1 : E) = v`, then its chart-`q`-velocity at `0` is the
 trivialization-`q` coordinate of `v`, a quantity depending only on `q` and `v`. -/
-private theorem chartCurve_deriv_zero_eq
+theorem chartCurve_deriv_zero_eq
     (q : M) {γ : ℝ → M} {v : E}
     (hγ_mdiff : MDifferentiableAt 𝓘(ℝ, ℝ) I γ 0)
     (hγ0 : γ 0 = q) (hv : (mfderiv 𝓘(ℝ, ℝ) I γ 0 (1 : ℝ) : E) = v) :

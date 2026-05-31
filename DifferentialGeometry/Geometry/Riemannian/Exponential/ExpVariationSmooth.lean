@@ -27,22 +27,24 @@ velocity)`, and the chart position of the geodesic at the fixed time `t'` is
 yields a candidate manifold map.
 
 The identification of this chart-`α` flow projection with `expMapIntrinsic q w`
-for a moving basepoint `q ≠ α` is the **chart-independence of geodesics** — the
-statement that the base orbit of an integral curve of the chart-`α` phase-space
-field `chartPhaseVF g α` is the unique geodesic determined by its initial data,
-independently of the chart center `α`.  That identification is the genuine
-cross-chart input flagged in `Exponential/OffZeroRegularity.lean` (the
-"moving-chart geodesic equation"); it is the single residual of this file,
-isolated as `expMapIntrinsic_eq_chartFlow_proj_residual`.  Everything built on
-top of it — the smooth chart-coordinate coordinatisation, the `t`-local joint
-`ContMDiff`, and the local-agreement gluing across the basepoint chart cover —
-is proved unconditionally.
+for a moving basepoint `q ≠ α` is the **chart-independence of geodesics**.  It is
+proved entirely *inside the fixed chart `α`*: the flow orbit's tangent-bundle lift
+is an integral curve of `geodesicVectorFieldChart g α` (its foot stays in `α`'s
+chart-target interior for free), and so is the chart-`α` velocity lift of the
+intrinsic geodesic from `(q, vq)`; single-chart integral-curve uniqueness
+(`isMIntegralCurveOn_eq_of_isPreconnected`) identifies them on `[0, t']`, with a
+clopen/boundary argument supplying the confinement.  Spray homogeneity
+(`intrinsicGeodesic_smul`) absorbs the fixed evaluation time `t'`.  No moving
+chart and no small-velocity exponential-radius input are used.  Everything built
+on top of it — the smooth chart-coordinate coordinatisation, the `t`-local joint
+`ContMDiff`, and the local-agreement gluing across the basepoint chart cover — is
+proved unconditionally.
 
 ## Main results
 
-* `expMapIntrinsic_eq_chartFlow_proj_residual` — the chart-independence bridge
-  (residual): for `q` in chart `α`'s source and small `w`, the intrinsic
-  exponential is the chart-`α` flow projection at the appropriate phase point.
+* `expMapIntrinsic_eq_chartFlow_proj_residual` — the chart-independence bridge:
+  for `q` in chart `α`'s source and small `w`, the intrinsic exponential is the
+  chart-`α` flow projection at the appropriate phase point.
 * `chartFlowVelCoordMap_contMDiff` — joint `C∞` smoothness of the
   chart-coordinate coordinatisation `(s, t) ↦ (extChartAt I α (γ t),
   chartFiberCoord α ⟨γ t, (s • V t) rescaled⟩)`.
@@ -63,6 +65,7 @@ namespace Exponential
 
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 open DifferentialGeometry.Geometry.Riemannian.HopfRinow
+open DifferentialGeometry.Geometry.Riemannian.AlongCurve
 open DifferentialGeometry.Integral.Measure
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -76,38 +79,226 @@ variable [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
 
 section JointVariationSmooth
 
-/-! ## The chart-independence bridge (residual)
+/-! ## Chart-`α` velocity lift of a moving-foot geodesic
+
+A continuous moving-foot geodesic `Γ` is, on the open set where its foot stays in
+a fixed chart `α`'s source, the projection of an honest integral curve of the
+fixed-chart geodesic vector field `geodesicVectorFieldChart g α`.  This is the
+fixed-chart counterpart of `IsGeodesicAt.hasGeodesicEquationAt`: the chart-`α`
+velocity lift solves the chart-`α` phase ODE (`chartPhase_eventually_of_geodesicOn`),
+so by the same Picard–Lindelöf reconstruction used for the flow orbit it is an
+`IsMIntegralCurveOn` of `geodesicVectorFieldChart g α`.  This lets us compare a
+geodesic to the chart-`α` flow orbit *without* leaving the chart `α` — the
+cross-chart identification reduces to single-chart integral-curve uniqueness. -/
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- The chart-`α` velocity lift of a curve `Γ`: invert the chart of `TM` at
+`⟨α, 0⟩` applied to the chart-`α` phase curve `(chartCurve α Γ s, deriv (chartCurve
+α Γ) s)`.  On the set where `Γ`'s foot lies in `α`'s chart source and `Γ` solves
+the moving-foot geodesic equation, this is an integral curve of
+`geodesicVectorFieldChart g α`. -/
+private def chartVelocityLift (α : M) (Γ : ℝ → M) : ℝ → TangentBundle I M :=
+  fun s => (extChartAt I.tangent (⟨α, (0 : E)⟩ : TangentBundle I M)).symm
+    (chartCurve (I := I) α Γ s, deriv (chartCurve (I := I) α Γ) s)
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- **Chart-`α` velocity lift is an integral curve.**  If `Γ` is a moving-foot
+geodesic (continuous on the open set `O` and satisfying the geodesic equation
+there) keeping its foot in `(chartAt H α).source` on `O`, then its chart-`α`
+velocity lift `chartVelocityLift α Γ` is an `IsMIntegralCurveOn` of
+`geodesicVectorFieldChart g α` on `O`, with projection `Γ` there. -/
+private theorem chartVelocityLift_isMIntegralCurveOn
+    [CompleteSpace E] [T2Space (TangentBundle I M)]
+    (g : SmoothRiemannianMetric I M) (α : M) {Γ : ℝ → M} {O : Set ℝ}
+    (hO_open : IsOpen O)
+    (hΓ_cont : ContinuousOn Γ O)
+    (hsrc : ∀ s ∈ O, Γ s ∈ (chartAt H α).source)
+    (hgeo : ∀ s ∈ O, HasGeodesicEquationAt (I := I) g Γ s) :
+    IsMIntegralCurveOn (chartVelocityLift (I := I) α Γ)
+      (geodesicVectorFieldChart (I := I) g α) O := by
+  classical
+  apply IsMIntegralCurveAt.isMIntegralCurveOn
+  intro s₀ hs₀
+  -- The chart-`α` phase curve and its ODE near `s₀`.
+  set cphase : ℝ → E × E :=
+    fun s => (chartCurve (I := I) α Γ s, deriv (chartCurve (I := I) α Γ) s) with hcphase_def
+  have hΓ_s₀_src : Γ s₀ ∈ (chartAt H α).source := hsrc s₀ hs₀
+  -- Chart-phase ODE + interior membership eventually near `s₀`.
+  have hev := chartPhase_eventually_of_geodesicOn (I := I) g α hO_open hs₀ hΓ_cont hsrc hgeo
+  -- The lift's value at `s₀` projects into `α`'s source (interior product point).
+  have hcphase_s₀_interior : cphase s₀ ∈
+      (interior (extChartAt I α).target) ×ˢ (Set.univ : Set E) :=
+    (hev.self_of_nhds).2
+  have hL_s₀_src : (chartVelocityLift (I := I) α Γ s₀).proj ∈ (chartAt H α).source := by
+    change ((extChartAt I.tangent (⟨α, (0 : E)⟩ : TangentBundle I M)).symm
+      (cphase s₀)).proj ∈ _
+    exact chartAt_source_of_extChartAt_tangent_zero_symm (I := I) α hcphase_s₀_interior
+  -- Local Picard–Lindelöf lift `g_loc` at `chartVelocityLift α Γ s₀`.
+  have hsmoothVF : ContMDiffAt I.tangent I.tangent.tangent 1
+      (fun u : TangentBundle I M =>
+        (⟨u, geodesicVectorFieldChart (I := I) g α u⟩ :
+          TangentBundle I.tangent (TangentBundle I M)))
+      (chartVelocityLift (I := I) α Γ s₀) :=
+    (geodesicVectorFieldChart_contMDiffAt (I := I) g α
+        (p₀ := chartVelocityLift (I := I) α Γ s₀) hL_s₀_src).of_le
+      (by exact_mod_cast (le_top : (1 : ℕ∞) ≤ ⊤))
+  obtain ⟨g_loc, hg_loc_s₀, hg_loc_int⟩ :=
+    exists_isMIntegralCurveAt_of_contMDiffAt_boundaryless
+      (I := I.tangent) (M := TangentBundle I M)
+      (v := geodesicVectorFieldChart (I := I) g α)
+      (t₀ := s₀) (x₀ := chartVelocityLift (I := I) α Γ s₀) hsmoothVF
+  -- The chart-`⟨α,0⟩`-pushed derivative of `g_loc` near `s₀`.
+  have hg_loc_s₀_src : (g_loc s₀).proj ∈ (chartAt H α).source := by
+    rw [hg_loc_s₀]; exact hL_s₀_src
+  have hd_gloc :=
+    eventually_hasDerivAt_chartPhaseVF_at_zero_section (I := I)
+      (g := g) (α := α) (s₀ := s₀) (f := g_loc) hg_loc_s₀_src hg_loc_int
+  -- The two chart-coordinate candidate solutions near `s₀`.
+  set c₁ : ℝ → E × E := fun s =>
+    extChartAt I.tangent (⟨α, (0 : E)⟩ : TangentBundle I M) (g_loc s) with hc₁_def
+  set c₂ : ℝ → E × E := cphase with hc₂_def
+  set w₀ : E × E := cphase s₀ with hw₀_def
+  have hw₀_interior : w₀ ∈
+      (interior (extChartAt I α).target) ×ˢ (Set.univ : Set E) := hcphase_s₀_interior
+  -- `c₂ s₀ = w₀`.
+  have hc₂_zero : c₂ s₀ = w₀ := rfl
+  -- `c₁ s₀ = w₀`: the chart-of-`TM` applied to its inverse at the interior point.
+  have hc₁_zero : c₁ s₀ = w₀ := by
+    have : c₁ s₀ = extChartAt I.tangent (⟨α, (0 : E)⟩ : TangentBundle I M) (g_loc s₀) := rfl
+    rw [this, hg_loc_s₀]
+    change extChartAt I.tangent (⟨α, (0 : E)⟩ : TangentBundle I M)
+      ((extChartAt I.tangent (⟨α, (0 : E)⟩ : TangentBundle I M)).symm (cphase s₀)) = w₀
+    rw [extChartAt_tangent_zero_apply_symm (I := I) α hcphase_s₀_interior]
+  -- `c₂` solves the chart-phase ODE + interior membership near `s₀`.
+  have hd_c₂ : ∀ᶠ s in 𝓝 s₀,
+      HasDerivAt c₂ (chartPhaseVF (I := I) g α (c₂ s)) s ∧
+      c₂ s ∈ (interior (extChartAt I α).target) ×ˢ (Set.univ : Set E) := hev
+  -- `c₁` solves the chart-phase ODE + interior membership near `s₀`.
+  have hd_c₁ : ∀ᶠ s in 𝓝 s₀,
+      HasDerivAt c₁ (chartPhaseVF (I := I) g α (c₁ s)) s ∧
+      c₁ s ∈ (interior (extChartAt I α).target) ×ˢ (Set.univ : Set E) := by
+    -- Interior membership of `c₁` near `s₀` (from `g_loc`'s foot in source).
+    have hπ_cont : Continuous (Bundle.TotalSpace.proj : TangentBundle I M → M) :=
+      FiberBundle.continuous_proj E (TangentSpace I)
+    have hgloc_proj_src : ∀ᶠ s in 𝓝 s₀, (g_loc s).proj ∈ (chartAt H α).source := by
+      have hcomp : ContinuousAt (fun s : ℝ => (g_loc s).proj) s₀ :=
+        hπ_cont.continuousAt.comp hg_loc_int.continuousAt
+      exact hcomp.preimage_mem_nhds ((chartAt H α).open_source.mem_nhds hg_loc_s₀_src)
+    filter_upwards [hd_gloc, hgloc_proj_src] with s hder hs_src
+    have hpair := extChartAt_tangent_zero_apply_chartFiber (I := I) α (p := g_loc s) hs_src
+    refine ⟨hder, ?_, Set.mem_univ _⟩
+    change (c₁ s).1 ∈ _
+    rw [hc₁_def]; simp only
+    rw [hpair]
+    change extChartAt I α (g_loc s).proj ∈ _
+    have h_extsrc : (g_loc s).proj ∈ (extChartAt I α).source := by
+      rw [extChartAt_source]; exact hs_src
+    exact DifferentialGeometry.Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
+      (I := I) α ((extChartAt I α).map_source h_extsrc)
+  -- Chart-coordinate ODE uniqueness: `c₁ =ᶠ c₂` near `s₀`.
+  have hc_eq : c₁ =ᶠ[𝓝 s₀] c₂ :=
+    chartPhaseVF_orbit_uniqueness_at (I := I) (g := g) (q := α)
+      (c₁ := c₁) (c₂ := c₂) (z₀ := w₀) (t := s₀) hw₀_interior hc₁_zero hc₂_zero hd_c₁ hd_c₂
+  -- Transfer to `g_loc =ᶠ chartVelocityLift α Γ`.
+  have hgloc_proj_src_nhds : ∀ᶠ s in 𝓝 s₀, (g_loc s).proj ∈ (chartAt H α).source := by
+    have hπ_cont : Continuous (Bundle.TotalSpace.proj : TangentBundle I M → M) :=
+      FiberBundle.continuous_proj E (TangentSpace I)
+    have hcomp : ContinuousAt (fun s : ℝ => (g_loc s).proj) s₀ :=
+      hπ_cont.continuousAt.comp hg_loc_int.continuousAt
+    exact hcomp.preimage_mem_nhds ((chartAt H α).open_source.mem_nhds hg_loc_s₀_src)
+  have hgloc_eq_L : g_loc =ᶠ[𝓝 s₀] chartVelocityLift (I := I) α Γ := by
+    filter_upwards [hc_eq, hgloc_proj_src_nhds] with s hs_c hs_src
+    have hgloc_chsrc : g_loc s ∈
+        (chartAt (ModelProd H E) (⟨α, (0 : E)⟩ : TangentBundle I M)).source :=
+      (mem_chartAt_modelProd_zero_source_iff (I := I) α (g_loc s)).mpr hs_src
+    have hgloc_extsrc : g_loc s ∈
+        (extChartAt I.tangent (⟨α, (0 : E)⟩ : TangentBundle I M)).source := by
+      rw [extChartAt_source]; exact hgloc_chsrc
+    have hleft :
+        (extChartAt I.tangent (⟨α, (0 : E)⟩ : TangentBundle I M)).symm
+          (extChartAt I.tangent (⟨α, (0 : E)⟩ : TangentBundle I M) (g_loc s)) = g_loc s :=
+      (extChartAt I.tangent (⟨α, (0 : E)⟩ : TangentBundle I M)).left_inv hgloc_extsrc
+    change g_loc s = (extChartAt I.tangent (⟨α, (0 : E)⟩ : TangentBundle I M)).symm (c₂ s)
+    rw [← hs_c]
+    change g_loc s = (extChartAt I.tangent (⟨α, (0 : E)⟩ : TangentBundle I M)).symm
+      (extChartAt I.tangent (⟨α, (0 : E)⟩ : TangentBundle I M) (g_loc s))
+    exact hleft.symm
+  -- `chartVelocityLift α Γ` inherits the integral-curve property at `s₀`.
+  rw [IsMIntegralCurveAt] at hg_loc_int ⊢
+  filter_upwards [hg_loc_int, hgloc_eq_L, hgloc_eq_L.eventually_nhds]
+    with s hs_int hs_eq hs_eq_nhds
+  rw [← hs_eq]
+  refine hs_int.congr_of_eventuallyEq ?_
+  filter_upwards [hs_eq_nhds] with x hx
+  exact hx.symm
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- The projection of the chart-`α` velocity lift recovers `Γ` where the foot is
+in `α`'s source. -/
+private theorem chartVelocityLift_proj
+    (α : M) {Γ : ℝ → M} {s : ℝ} (hs : Γ s ∈ (chartAt H α).source) :
+    (chartVelocityLift (I := I) α Γ s).proj = Γ s := by
+  classical
+  have hext_src : Γ s ∈ (extChartAt I α).source := by
+    rw [extChartAt_source]; exact hs
+  have hmem : (chartCurve (I := I) α Γ s, deriv (chartCurve (I := I) α Γ) s) ∈
+      (interior (extChartAt I α).target) ×ˢ (Set.univ : Set E) := by
+    refine ⟨?_, Set.mem_univ _⟩
+    have hΓ_target : extChartAt I α (Γ s) ∈ (extChartAt I α).target :=
+      (extChartAt I α).map_source hext_src
+    change chartCurve (I := I) α Γ s ∈ _
+    rw [chartCurve_def]
+    exact DifferentialGeometry.Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
+      (I := I) α hΓ_target
+  change ((extChartAt I.tangent (⟨α, (0 : E)⟩ : TangentBundle I M)).symm
+    (chartCurve (I := I) α Γ s, deriv (chartCurve (I := I) α Γ) s)).proj = Γ s
+  rw [extChartAt_tangent_zero_symm_proj (I := I) α hmem]
+  change (extChartAt I α).symm (chartCurve (I := I) α Γ s) = Γ s
+  rw [chartCurve_def, (extChartAt I α).left_inv hext_src]
+
+/-! ## The chart-independence bridge
 
 The chart-`α` geodesic flow `Φ` of `exists_chartExp_jointContDiffOn_nat`
 integrates the chart-phase ODE `HasDerivAt (Φ(z, ·)) (chartPhaseVF g α (Φ(z, s))) s`
 with chart center `α` *fixed*, while the intrinsic geodesic from a basepoint
 `q ≠ α` is the moving-foot geodesic launched from `q`.  Identifying the chart-`α`
 flow's base orbit at the appropriate phase point with `expMapIntrinsic q w` is
-the chart-independence of geodesics: both are the unique geodesic through `q`
-with the prescribed initial velocity, so the chart-`α` ODE solution, projected
-to `M` through `(extChartAt I α).symm`, agrees with the moving-foot geodesic.
+the chart-independence of geodesics: both are geodesics through `q` with the
+prescribed initial velocity.
 
-This identity — concretely, that the base orbit of the chart-`α` phase flow is a
-moving-foot geodesic `HasGeodesicEquationAt` even when its foot is not the chart
-center `α` — is the cross-chart "moving-chart geodesic equation" recorded as the
-outstanding analytic input in `Exponential/OffZeroRegularity.lean` and
-`Geodesic/Uniqueness.lean`.  It is isolated here as the sole residual of this
-file; the smoothness scaffold below consumes it as a black box. -/
+The identification is proved *without leaving the chart `α`*.  The flow orbit's
+foot stays in `(extChartAt I α).target`'s interior throughout `[-T, T]` for free
+(the confinement conjunct of the flow data), so its tangent-bundle lift `F` is an
+`IsMIntegralCurveOn` of `geodesicVectorFieldChart g α` there.  The intrinsic
+geodesic from `(q, vq)` has its own chart-`α` velocity lift `chartVelocityLift α`,
+also an integral curve of `geodesicVectorFieldChart g α` wherever its foot is in
+`α`'s source.  On the connected component of that source-set containing `0`, the
+two lifts agree by single-chart integral-curve uniqueness
+(`isMIntegralCurveOn_eq_of_isPreconnected`); a clopen/boundary argument propagates
+the agreement to `[0, t']` (the orbit foot's free confinement supplies the
+boundary step).  Spray homogeneity (`intrinsicGeodesic_smul`) then absorbs the
+fixed `t'`.  No moving chart `q` and no small-velocity exponential-radius lemmas
+are used. -/
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Chart-independence bridge (residual).**  For a chart center `α`, a finite
-order `n ≥ 1`, the chart-`α` joint geodesic flow `Φ`, its evaluation time `t'`,
-its phase-ball radius `ρ`, and a basepoint `q` in chart `α`'s source whose
-chart-`α` phase point `(extChartAt I α q, chartFiberCoord α ⟨q, t' • w⟩)` lies in
-the flow's phase-ball, the intrinsic exponential map `expMapIntrinsic g hEnorm q w`
-is the chart-`α` flow projection at the rescaled velocity, pulled back through
+/-- **Chart-independence bridge.**  For a chart center `α`, a finite order
+`n ≥ 1`, the chart-`α` joint geodesic flow `Φ`, its evaluation time `t'`, its
+phase-ball radius `ρ`, and a basepoint `q` in chart `α`'s source whose chart-`α`
+phase point `(extChartAt I α q, chartFiberCoord α ⟨q, t' • w⟩)` lies in the flow's
+phase-ball, the intrinsic exponential map `expMapIntrinsic g hEnorm q w` is the
+chart-`α` flow projection at the rescaled velocity, pulled back through
 `(extChartAt I α).symm`.
 
-This is the chart-independence of geodesics (the moving-chart geodesic equation):
-the chart-`α` flow base orbit `s ↦ (extChartAt I α).symm (Φ((x, v), s)).1` is the
-moving-foot geodesic launched from `(extChartAt I α).symm x` with the chart-`α`
-velocity `v`, hence at time `t'` it reaches the intrinsic geodesic's value, and
+This is the chart-independence of geodesics.  The chart-`α` flow base orbit
+`s ↦ (extChartAt I α).symm (Φ((x, v), s)).1` is, lifted to the tangent bundle, an
+integral curve of `geodesicVectorFieldChart g α`; the intrinsic geodesic launched
+from `q` with velocity `vq = t'⁻¹ • w` has a chart-`α` velocity lift which is also
+such an integral curve.  Single-chart integral-curve uniqueness identifies them on
+`[0, t']`, so at time `t'` the orbit reaches the intrinsic geodesic's value, and
 the launch-velocity rescaling `intrinsicGeodesic_smul` absorbs the fixed `t'`. -/
 theorem expMapIntrinsic_eq_chartFlow_proj_residual
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -133,21 +324,6 @@ theorem expMapIntrinsic_eq_chartFlow_proj_residual
         Φ ((z, s) : (E × E) × ℝ) ∈
           (interior (extChartAt I α).target) ×ˢ (Set.univ : Set E)))
     (q : M) (hq : q ∈ (chartAt H α).source) (w : TangentSpace I q)
-    -- The chart-`α` flow base orbit through `q`'s phase point keeps its foot in
-    -- `q`'s home chart-source throughout `[0, t']` (a small-velocity geodesic
-    -- confinement: the geodesic launched from `q` with velocity `t'⁻¹ • w` does
-    -- not leave `q`'s chart before time `t'`).
-    (hfoot : ∀ s ∈ Set.Icc (0 : ℝ) t',
-      (extChartAt I α).symm
-          (Φ (((extChartAt I α q,
-              chartFiberCoord (I := I) α
-                (TotalSpace.mk' E (E := (TangentSpace I : M → Type _)) q (t'⁻¹ • w)))
-            : E × E), s) : E × E).1 ∈ (chartAt H q).source)
-    -- Small-velocity agreement of the intrinsic and chart-fixed exponentials.
-    (hwexp : expMapIntrinsic (I := I) g hEnorm q w = expMap (I := I) g q w)
-    -- Small-velocity geodesic rescaling identity at `q`.
-    (hwresc : maximalGeodesic (I := I) g q ((1 : ℝ) • w) 1 =
-      maximalGeodesic (I := I) g q (t'⁻¹ • w) t')
     (hphase : ((extChartAt I α q,
         chartFiberCoord (I := I) α
           (TotalSpace.mk' E (E := (TangentSpace I : M → Type _)) q (t'⁻¹ • w))) : E × E)
@@ -363,118 +539,218 @@ theorem expMapIntrinsic_eq_chartFlow_proj_residual
   have hF_int : IsMIntegralCurveOn F (geodesicVectorFieldChart (I := I) g α)
       (Set.Ioo (-T) T) :=
     IsMIntegralCurveAt.isMIntegralCurveOn (fun s hs => hF_intAt s hs)
-  -- **Step E — identify `(F s).proj` with `maximalGeodesic g q vq s` on `[0, t']`.**
-  -- The chosen-curve witness for `maximalGeodesic g q vq`.
-  -- Build a `MaximalGeodesicWitness` from `F` restricted to a connected interval
-  -- around `0` where `F`'s foot stays in `q`'s chart-source.
-  -- The orbit foot in `q`'s source on `Icc 0 t'` is supplied by `hfoot`.
-  have hfoot' : ∀ s ∈ Set.Icc (0 : ℝ) t', (F s).proj ∈ (chartAt H q).source := by
+  -- **Step E — identify `(F s).proj` with the intrinsic geodesic from `(q, vq)`**
+  -- on a connected interval reaching `t'`, using single-chart-`α` integral-curve
+  -- uniqueness.  No moving chart `q` is involved.
+  -- `γF := (F ·).proj` is a moving-foot geodesic on `Ioo (-T) T`: it is the
+  -- projection of the chart-`α` integral curve `F` whose foot stays in `α`'s
+  -- chart-source there (`IsGeodesicAt.hasGeodesicEquationAt`).
+  set γF : ℝ → M := fun s => (F s).proj with hγF_def
+  have hγF_cont : ContinuousOn γF (Set.Ioo (-T) T) :=
+    (FiberBundle.continuous_proj E (TangentSpace I)).comp_continuousOn hF_int.continuousOn
+  have hγF_geo : ∀ s ∈ Set.Ioo (-T) T, HasGeodesicEquationAt (I := I) g γF s := by
     intro s hs
-    have hs_Icc : s ∈ Set.Icc (-T) T := by
-      refine ⟨?_, ?_⟩
-      · exact le_trans (by linarith [ht'_Ioo.1] : (-T : ℝ) ≤ 0) hs.1
-      · exact le_trans hs.2 (le_of_lt ht'_Ioo.2)
-    rw [hF_proj_eq s hs_Icc]
-    exact hfoot s hs
-  -- `0` and `t'` and the whole `Icc 0 t'` lie in `Ioo (-T) T`.
+    have hs_Icc : s ∈ Set.Icc (-T) T := Set.Ioo_subset_Icc_self hs
+    have hF_at : IsMIntegralCurveAt F (geodesicVectorFieldChart (I := I) g α) s :=
+      hF_int.isMIntegralCurveAt (isOpen_Ioo.mem_nhds hs)
+    have hGeoAt : IsGeodesicAt (I := I) g γF s :=
+      ⟨α, F, fun _ => rfl, hF_proj_src s hs_Icc, hF_at⟩
+    exact hGeoAt.hasGeodesicEquationAt (I := I) g
+  -- The intrinsic geodesic `Γ` from `(q, vq)`: complete, continuous, `Γ 0 = q`,
+  -- velocity `vq`, and a moving-foot geodesic everywhere.
+  set Γ : ℝ → M := intrinsicGeodesic (I := I) g hEnorm q vq with hΓ_def
+  have hΓ_geo : IsGeodesic (I := I) g Γ := intrinsicGeodesic_isGeodesic (I := I) g hEnorm q vq
+  have hΓ_cont : Continuous Γ := intrinsicGeodesic_continuous (I := I) g hEnorm q vq
+  have hΓ0 : Γ 0 = q := intrinsicGeodesic_zero (I := I) g hEnorm q vq
+  -- `Γ`'s foot lies in `α`'s source on an open set `S_Γ ⊆ Ioo (-T) T` containing `0`.
+  set S_Γ : Set ℝ :=
+    Set.Ioo (-T) T ∩ (Γ ⁻¹' (chartAt H α).source) with hS_def
+  have hS_open : IsOpen S_Γ := by
+    rw [hS_def]
+    exact isOpen_Ioo.inter (hΓ_cont.isOpen_preimage _ (chartAt H α).open_source)
+  have h0_Sopen : (0 : ℝ) ∈ S_Γ := by
+    refine ⟨⟨by linarith [hT_pos], hT_pos⟩, ?_⟩
+    rw [Set.mem_preimage, hΓ0]; exact hq
+  set J₀ : Set ℝ := connectedComponentIn S_Γ 0 with hJ₀_def
+  have hJ₀_open : IsOpen J₀ := hS_open.connectedComponentIn
+  have hJ₀_conn : IsPreconnected J₀ := isPreconnected_connectedComponentIn
+  have h0_J₀ : (0 : ℝ) ∈ J₀ := mem_connectedComponentIn h0_Sopen
+  have hJ₀_sub_S : J₀ ⊆ S_Γ := connectedComponentIn_subset S_Γ 0
+  have hJ₀_sub_Ioo : J₀ ⊆ Set.Ioo (-T) T := fun s hs => (hJ₀_sub_S hs).1
+  have hJ₀_src : ∀ s ∈ J₀, Γ s ∈ (chartAt H α).source := fun s hs => (hJ₀_sub_S hs).2
+  -- The chart-`α` velocity lift `L_Γ` of `Γ` on `S_Γ`.
+  have hΓ_geo_S : ∀ s ∈ S_Γ, HasGeodesicEquationAt (I := I) g Γ s :=
+    fun s _ => hΓ_geo s
+  have hΓ_src_S : ∀ s ∈ S_Γ, Γ s ∈ (chartAt H α).source := fun s hs => hs.2
+  have hL_int : IsMIntegralCurveOn (chartVelocityLift (I := I) α Γ)
+      (geodesicVectorFieldChart (I := I) g α) S_Γ :=
+    chartVelocityLift_isMIntegralCurveOn (I := I) g α hS_open hΓ_cont.continuousOn
+      hΓ_src_S hΓ_geo_S
+  -- `L_Γ 0 = ⟨q, vq⟩`, matching `F 0`.
+  have hΓ_mdiff0 : MDifferentiableAt 𝓘(ℝ, ℝ) I Γ 0 :=
+    ((intrinsicGeodesic_contMDiffOn (I := I) g hEnorm q vq).contMDiffAt
+      (Filter.univ_mem)).mdifferentiableAt (by norm_num)
+  have hΓv : (mfderiv 𝓘(ℝ, ℝ) I Γ 0 (1 : ℝ) : E) = (vq : E) :=
+    intrinsicGeodesic_mfderiv_zero (I := I) g hEnorm q vq
+  have hLΓ0 : chartVelocityLift (I := I) α Γ 0 = (⟨q, vq⟩ : TangentBundle I M) := by
+    -- The chart-`α` velocity at `0` is the chart-`α` fibre coordinate of `vq`.
+    -- `deriv (chartCurve α Γ) 0 = fderiv (extChartAt α ∘ Γ) 0 1` and the chart-`α`
+    -- velocity bridge relate it to `(triv α).continuousLinearMapAt q (mfderiv Γ 0 1)`.
+    have hcc_comp : chartCurve (I := I) α Γ = (extChartAt I α) ∘ Γ := by
+      funext s; rw [chartCurve_def]; rfl
+    have hderiv_fderiv : deriv (chartCurve (I := I) α Γ) 0
+        = (fderiv ℝ ((extChartAt I α) ∘ Γ) 0 : ℝ →L[ℝ] E) (1 : ℝ) := by
+      rw [hcc_comp]
+      exact (fderiv_apply_one_eq_deriv (f := (extChartAt I α) ∘ Γ) (x := (0 : ℝ))).symm
+    have hbridge := MFDerivAlongCurve.chartCoord_mfderiv_along_curve_eq_fderiv_of_mdifferentiableAt
+      (I := I) (γ := Γ) (t := 0) hΓ_mdiff0 α (by rw [hΓ0]; exact hq)
+    -- `hbridge : (triv α).continuousLinearMapAt (Γ 0) (mfderiv Γ 0 1) = fderiv ... 1`.
+    rw [hΓ0] at hbridge
+    -- The trivialisation CLM applied to the velocity `mfderiv Γ 0 1 = vq`.
+    have hderiv0 : deriv (chartCurve (I := I) α Γ) 0 =
+        ((trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ q) vq := by
+      rw [hderiv_fderiv, ← hbridge]
+      exact congrArg _ hΓv
+    -- That coordinate equals `chartFiberCoord α ⟨q, vq⟩` on the base set.
+    have hq_base : q ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
+      rw [TangentBundle.trivializationAt_baseSet]; exact hq
+    have hfib : ((trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ q) vq =
+        chartFiberCoord (I := I) α (⟨q, vq⟩ : TangentBundle I M) := by
+      rw [chartFiberCoord]
+      rw [Trivialization.continuousLinearMapAt_apply]
+      rw [(trivializationAt E (TangentSpace I) α).coe_linearMapAt_of_mem hq_base]
+    -- The lift at `0` inverts the chart-`α` phase point `(extChartAt α q, fibre)`.
+    have hcc0 : chartCurve (I := I) α Γ 0 = extChartAt I α q := by
+      rw [chartCurve_def, hΓ0]
+    have hQq_eq :
+        extChartAt I.tangent (⟨α, (0 : E)⟩ : TangentBundle I M)
+            (⟨q, vq⟩ : TangentBundle I M) =
+          (chartCurve (I := I) α Γ 0, deriv (chartCurve (I := I) α Γ) 0) := by
+      rw [extChartAt_tangent_zero_apply_chartFiber (I := I) α hq, hcc0, hderiv0, hfib]
+    have hQq_extsrc : (⟨q, vq⟩ : TangentBundle I M) ∈
+        (extChartAt I.tangent (⟨α, (0 : E)⟩ : TangentBundle I M)).source := by
+      rw [extChartAt_source]
+      exact (mem_chartAt_modelProd_zero_source_iff (I := I) α _).mpr hq
+    change (extChartAt I.tangent (⟨α, (0 : E)⟩ : TangentBundle I M)).symm
+      (chartCurve (I := I) α Γ 0, deriv (chartCurve (I := I) α Γ) 0) = _
+    rw [← hQq_eq]
+    exact (extChartAt I.tangent (⟨α, (0 : E)⟩ : TangentBundle I M)).left_inv hQq_extsrc
+  -- **`F = L_Γ` on `J₀`** by chart-`α` integral-curve uniqueness on a preconnected set.
+  have hF_eq_L : Set.EqOn F (chartVelocityLift (I := I) α Γ) J₀ := by
+    have hF_on_J₀ : IsMIntegralCurveOn F (geodesicVectorFieldChart (I := I) g α) J₀ :=
+      hF_int.mono hJ₀_sub_Ioo
+    have hL_on_J₀ : IsMIntegralCurveOn (chartVelocityLift (I := I) α Γ)
+        (geodesicVectorFieldChart (I := I) g α) J₀ :=
+      hL_int.mono hJ₀_sub_S
+    have hF_src_J₀ : ∀ s ∈ J₀, (F s).proj ∈ (chartAt H α).source :=
+      fun s hs => hF_proj_src s (Set.Ioo_subset_Icc_self (hJ₀_sub_Ioo hs))
+    have h0_eq : F 0 = chartVelocityLift (I := I) α Γ 0 := by rw [hF0, hLΓ0]
+    exact isMIntegralCurveOn_eq_of_isPreconnected (I := I) (g := g) (p := α)
+      (f₁ := F) (f₂ := chartVelocityLift (I := I) α Γ)
+      hJ₀_open hJ₀_conn h0_J₀ hF_on_J₀ hL_on_J₀ hF_src_J₀ h0_eq
+  -- Hence `γF = Γ` on `J₀` (project the lift agreement).
+  have hγF_eq_Γ : ∀ s ∈ J₀, γF s = Γ s := by
+    intro s hs
+    have h := hF_eq_L hs
+    rw [hγF_def]; simp only
+    rw [h]
+    exact chartVelocityLift_proj (I := I) α (hJ₀_src s hs)
+  -- **`[0, t'] ⊆ J₀`** by a clopen/boundary argument: at an exit point `s* ∈ [0, t']`
+  -- the orbit foot `γF s*` stays in `α`'s source (free confinement of `F`), and
+  -- `Γ s* = γF s* ∈ α`'s source` by continuity, so `S_Γ` (open) contains a
+  -- neighbourhood of `s*` connecting it back into `J₀`.
   have hIcc_sub_Ioo : Set.Icc (0 : ℝ) t' ⊆ Set.Ioo (-T) T := by
     intro s hs
     refine ⟨by linarith [hs.1, hT_pos], lt_of_le_of_lt hs.2 ht'_Ioo.2⟩
-  -- The open set `S := {s ∈ Ioo (-T) T | foot of F at s ∈ q's source}`.
-  set S : Set ℝ :=
-    Set.Ioo (-T) T ∩ ((fun s => (F s).proj) ⁻¹' (chartAt H q).source) with hS_def
-  have hF_cont_proj : ContinuousOn (fun s => (F s).proj) (Set.Ioo (-T) T) :=
-    (FiberBundle.continuous_proj E (TangentSpace I)).comp_continuousOn hF_int.continuousOn
-  have hS_open : IsOpen S := by
-    rw [hS_def]
-    have h := hF_cont_proj.isOpen_inter_preimage isOpen_Ioo ((chartAt H q).open_source)
-    simpa [Set.inter_comm] using h
-  -- `Icc 0 t' ⊆ S`.
-  have hIcc_sub_S : Set.Icc (0 : ℝ) t' ⊆ S := by
+  -- **Relative closedness of `J₀` in `S_Γ`**: `closure J₀ ∩ S_Γ ⊆ J₀`.  At a
+  -- closure point `s` lying in the open `S_Γ`, the set `J₀ ∪ {s}` is preconnected
+  -- (bark-and-tree) and contained in `S_Γ` containing `0`, hence inside the
+  -- connected component `J₀`.
+  have hJ₀_relclosed : closure J₀ ∩ S_Γ ⊆ J₀ := by
+    rintro s ⟨hs_cl, hs_S⟩
+    have hsub₁ : J₀ ⊆ insert s J₀ := Set.subset_insert s J₀
+    have hsub₂ : insert s J₀ ⊆ closure J₀ := by
+      rw [Set.insert_subset_iff]
+      exact ⟨hs_cl, subset_closure⟩
+    have hconn : IsPreconnected (insert s J₀) :=
+      hJ₀_conn.subset_closure hsub₁ hsub₂
+    have hins_sub_S : insert s J₀ ⊆ S_Γ := by
+      rw [Set.insert_subset_iff]; exact ⟨hs_S, hJ₀_sub_S⟩
+    have h0_ins : (0 : ℝ) ∈ insert s J₀ := Set.mem_insert_of_mem s h0_J₀
+    have := hconn.subset_connectedComponentIn h0_ins hins_sub_S
+    exact this (Set.mem_insert s J₀)
+  -- **`[0, t'] ⊆ J₀`** by a disjoint-closed-cover of the preconnected `[0, t']`.
+  -- `A := [0, t'] ∩ J₀`.  Cover `[0, t']` by the closed sets `u := closure A` and
+  -- `v := J₀ᶜ`.  They are disjoint inside `[0, t']`: `[0,t'] ∩ closure A ⊆ J₀`
+  -- (boundary argument: at a closure point `s`, `Γ s = γF s ∈ α`'s source` by
+  -- continuity and the free confinement of `F`, so `s ∈ S_Γ`, then `s ∈ J₀` by
+  -- relative closedness).  Since `0 ∈ closure A` and `0 ∈ J₀`, the preconnected
+  -- `[0, t']` lands in `u`, whence `[0,t'] ⊆ closure A ∩ [0,t'] ⊆ J₀`.
+  have hIcc_sub_Ioo : Set.Icc (0 : ℝ) t' ⊆ Set.Ioo (-T) T := by
     intro s hs
-    exact ⟨hIcc_sub_Ioo hs, hfoot' s hs⟩
-  -- `0 ∈ Icc 0 t'` and `t' ∈ Icc 0 t'`.
+    refine ⟨by linarith [hs.1, hT_pos], lt_of_le_of_lt hs.2 ht'_Ioo.2⟩
+  set A : Set ℝ := Set.Icc (0 : ℝ) t' ∩ J₀ with hA_def
   have h0_Icc : (0 : ℝ) ∈ Set.Icc (0 : ℝ) t' := ⟨le_refl _, le_of_lt ht'_pos⟩
-  have ht'_Icc0 : t' ∈ Set.Icc (0 : ℝ) t' := ⟨le_of_lt ht'_pos, le_refl _⟩
-  have h0_S : (0 : ℝ) ∈ S := hIcc_sub_S h0_Icc
-  -- The connected component `J₀ := connectedComponentIn S 0`: open, preconnected,
-  -- contains `0`, `t'`, and the whole `Icc 0 t'`, and is contained in `S`.
-  set J₀ : Set ℝ := connectedComponentIn S 0 with hJ₀_def
-  have hJ₀_open : IsOpen J₀ := hS_open.connectedComponentIn
-  have hJ₀_conn : IsPreconnected J₀ := isPreconnected_connectedComponentIn
-  have h0_J₀ : (0 : ℝ) ∈ J₀ := mem_connectedComponentIn h0_S
-  have hJ₀_sub_S : J₀ ⊆ S := connectedComponentIn_subset S 0
-  have hIcc_sub_J₀ : Set.Icc (0 : ℝ) t' ⊆ J₀ :=
-    (isPreconnected_Icc).subset_connectedComponentIn h0_Icc hIcc_sub_S
-  have ht'_J₀ : t' ∈ J₀ := hIcc_sub_J₀ ht'_Icc0
-  have hJ₀_sub_Ioo : J₀ ⊆ Set.Ioo (-T) T := fun s hs => (hJ₀_sub_S hs).1
-  have hJ₀_src : ∀ s ∈ J₀, (F s).proj ∈ (chartAt H q).source := fun s hs => (hJ₀_sub_S hs).2
-  -- **`F` is an `IsMIntegralCurveOn (gvf g q)` on `J₀`** (cross-chart VF coincidence).
-  have hF_int_q : IsMIntegralCurveOn F (geodesicVectorFieldChart (I := I) g q) J₀ := by
-    intro s hs
-    have hs_Ioo : s ∈ Set.Ioo (-T) T := hJ₀_sub_Ioo hs
-    have hsα : (F s).proj ∈ (chartAt H α).source :=
+  have h0_A : (0 : ℝ) ∈ A := ⟨h0_Icc, h0_J₀⟩
+  -- Boundary fact: `[0,t'] ∩ closure A ⊆ J₀`.
+  have hbound : Set.Icc (0 : ℝ) t' ∩ closure A ⊆ J₀ := by
+    rintro s ⟨hs, hs_cl⟩
+    have hs_Ioo : s ∈ Set.Ioo (-T) T := hIcc_sub_Ioo hs
+    have hγF_contAt : ContinuousAt γF s :=
+      (hγF_cont s hs_Ioo).continuousAt (isOpen_Ioo.mem_nhds hs_Ioo)
+    have hΓ_contAt : ContinuousAt Γ s := hΓ_cont.continuousAt
+    -- `γF s = Γ s`: continuity + agreement on `A ⊆ J₀`, limit along `𝓝[A] s`.
+    have hγF_eq_Γ_at_s : γF s = Γ s := by
+      have hcont_eq : ContinuousWithinAt (fun r => (γF r, Γ r)) A s :=
+        (hγF_contAt.continuousWithinAt.prodMk hΓ_contAt.continuousWithinAt)
+      have hclosed_diag : IsClosed {x : M × M | x.1 = x.2} := isClosed_diagonal
+      have hev : ∀ᶠ r in 𝓝[A] s, (γF r, Γ r) ∈ {x : M × M | x.1 = x.2} := by
+        filter_upwards [self_mem_nhdsWithin] with r hr
+        exact hγF_eq_Γ r hr.2
+      -- `s ∈ closure A` ⟹ `𝓝[A] s ≠ ⊥`, so the limit lands in the closed diagonal.
+      have hs_clA : s ∈ closure A := hs_cl
+      have hne : (𝓝[A] s).NeBot := mem_closure_iff_nhdsWithin_neBot.mp hs_clA
+      exact hclosed_diag.mem_of_tendsto hcont_eq.tendsto hev
+    have hγF_s_src : γF s ∈ (chartAt H α).source :=
       hF_proj_src s (Set.Ioo_subset_Icc_self hs_Ioo)
-    have hsq : (F s).proj ∈ (chartAt H q).source := hJ₀_src s hs
-    have hvf_eq : geodesicVectorFieldChart (I := I) g α (F s) =
-        geodesicVectorFieldChart (I := I) g q (F s) :=
-      geodesicVectorFieldChart_eq_of_proj_mem (I := I) g α q (p := F s) hsα hsq
-    have hd := hF_int s hs_Ioo
-    -- `IsMIntegralCurveOn` on `J₀` ⊆ `Ioo (-T) T`: transfer the within-derivative.
-    have hd' := (hF_int.mono hJ₀_sub_Ioo) s hs
-    rw [hvf_eq] at hd'
-    exact hd'
-  -- The geodesic-with-initial-data witness on `J₀`.
-  have hgeo_F : IsGeodesicOnWithInitial (I := I) g
-      (fun s => (F s).proj) J₀ q vq := by
-    refine ⟨F, ?_, hF0, hF_int_q⟩
-    intro _; rfl
-  -- Hence every `s ∈ J₀` is in the maximal interval of `(q, vq)`.
-  have hwitness : ∀ s ∈ J₀, MaximalGeodesicWitness (I := I) g q vq s := by
+    have hΓ_s_src : Γ s ∈ (chartAt H α).source := by rw [← hγF_eq_Γ_at_s]; exact hγF_s_src
+    have hs_S : s ∈ S_Γ := ⟨hs_Ioo, hΓ_s_src⟩
+    exact hJ₀_relclosed ⟨closure_mono (hA_def ▸ Set.inter_subset_right) hs_cl, hs_S⟩
+  -- Disjoint-closed cover of `[0, t']` by `closure A` and `J₀ᶜ`.
+  have hcover : Set.Icc (0 : ℝ) t' ⊆ closure A ∪ J₀ᶜ := by
     intro s hs
-    exact ⟨fun s => (F s).proj, J₀, hJ₀_open, hJ₀_conn, h0_J₀, hs, hgeo_F⟩
-  -- **Identify `(F s).proj` with `maximalGeodesic g q vq s` on `J₀`.**
-  have hF_proj_maximal : ∀ s ∈ J₀, (F s).proj = maximalGeodesic (I := I) g q vq s := by
-    intro s hs
-    have hs_mem : s ∈ maximalGeodesicInterval (I := I) g q vq := hwitness s hs
-    rw [maximalGeodesic_of_mem (I := I) hs_mem]
-    -- Extract the chosen-curve witness.
-    obtain ⟨J', hJ'_open, hJ'_conn, h0_J', hs_J', hgeo'⟩ :=
-      maximalGeodesicChosenCurve_spec (I := I) g q vq hs_mem
-    obtain ⟨f', hproj', hf'_0, hf'_on⟩ := hgeo'
-    -- Clopen propagation on `K := J₀ ∩ J'`.
-    set K : Set ℝ := J₀ ∩ J' with hK_def
-    have hK_open : IsOpen K := hJ₀_open.inter hJ'_open
-    have hK_conn : IsPreconnected K :=
-      (hJ₀_conn.ordConnected.inter hJ'_conn.ordConnected).isPreconnected
-    have h0_K : (0 : ℝ) ∈ K := ⟨h0_J₀, h0_J'⟩
-    have hs_K : s ∈ K := ⟨hs, hs_J'⟩
-    have hF_on_K : IsMIntegralCurveOn F (geodesicVectorFieldChart (I := I) g q) K :=
-      hF_int_q.mono Set.inter_subset_left
-    have hf'_on_K : IsMIntegralCurveOn f' (geodesicVectorFieldChart (I := I) g q) K :=
-      hf'_on.mono Set.inter_subset_right
-    have hF_src_K : ∀ s' ∈ K, (F s').proj ∈ (chartAt H q).source :=
-      fun s' hs'_K => hJ₀_src s' hs'_K.1
-    have h0_eq : F 0 = f' 0 := by rw [hF0, hf'_0]
-    have heqOn := isMIntegralCurveOn_eq_of_isPreconnected (I := I) (g := g) (p := q)
-      (f₁ := F) (f₂ := f') hK_open hK_conn h0_K hF_on_K hf'_on_K hF_src_K h0_eq
-    have hFs_eq : F s = f' s := heqOn hs_K
-    rw [show (F s).proj = (f' s).proj from by rw [hFs_eq]]
-    exact hproj' s
+    by_cases hsJ : s ∈ J₀
+    · exact Or.inl (subset_closure ⟨hs, hsJ⟩)
+    · exact Or.inr hsJ
+  have hdisj : Set.Icc (0 : ℝ) t' ∩ (closure A ∩ J₀ᶜ) = ∅ := by
+    rw [Set.eq_empty_iff_forall_notMem]
+    rintro s ⟨hs, hs_cl, hs_nJ⟩
+    exact hs_nJ (hbound ⟨hs, hs_cl⟩)
+  have hsub_u : Set.Icc (0 : ℝ) t' ⊆ closure A := by
+    rcases (isPreconnected_iff_subset_of_disjoint_closed.mp isPreconnected_Icc)
+        (closure A) J₀ᶜ isClosed_closure (hJ₀_open.isClosed_compl) hcover hdisj with hu | hv
+    · exact hu
+    · exact absurd (hv h0_Icc) (by simp [h0_J₀])
+  have hIcc_sub_J₀ : Set.Icc (0 : ℝ) t' ⊆ J₀ :=
+    fun s hs => hbound ⟨hs, hsub_u hs⟩
+  have ht'_J₀ : t' ∈ J₀ := hIcc_sub_J₀ ⟨le_of_lt ht'_pos, le_refl _⟩
   -- **Step F — evaluate at `s = t'` and chain to the conclusion.**
-  -- Projection identity at `t'`.
   have ht'_Icc : t' ∈ Set.Icc (-T) T := Set.Ioo_subset_Icc_self ht'_Ioo
   have hFt'_orbit : (F t').proj = (extChartAt I α).symm (Φ ((z₀, t') : (E × E) × ℝ)).1 :=
     hF_proj_eq t' ht'_Icc
-  -- `(F t').proj = maximalGeodesic g q vq t'`.
-  have hFt'_max : (F t').proj = maximalGeodesic (I := I) g q vq t' :=
-    hF_proj_maximal t' ht'_J₀
-  -- `maximalGeodesic g q vq t' = maximalGeodesic g q (1 • w) 1 = expMap g q w`.
-  have hmax_chain : maximalGeodesic (I := I) g q vq t' = expMap (I := I) g q w := by
-    rw [hvq_def, ← hwresc, one_smul]
-    rfl
-  -- Assemble: `expMapIntrinsic q w = expMap q w = maximalGeodesic q vq t' = orbit`.
-  rw [hwexp, ← hmax_chain, ← hFt'_max, hFt'_orbit, hz₀_def]
+  -- `(F t').proj = Γ t'`.
+  have hFt'_Γ : (F t').proj = Γ t' := hγF_eq_Γ t' ht'_J₀
+  -- `Γ t' = intrinsicGeodesic q vq t' = intrinsicGeodesic q (t' • vq) 1 = expMapIntrinsic q w`.
+  have ht'_ne : t' ≠ 0 := ne_of_gt ht'_pos
+  have hw_eq : w = t' • vq := by
+    rw [hvq_def, smul_smul, mul_inv_cancel₀ ht'_ne, one_smul]
+  have hΓt'_chain : Γ t' = expMapIntrinsic (I := I) g hEnorm q w := by
+    rw [hΓ_def]
+    rw [show expMapIntrinsic (I := I) g hEnorm q w =
+      intrinsicGeodesic (I := I) g hEnorm q w 1 from rfl]
+    rw [hw_eq, intrinsicGeodesic_smul (I := I) g hEnorm q vq t']
+  -- Assemble: `expMapIntrinsic q w = Γ t' = (F t').proj = orbit`.
+  rw [← hΓt'_chain, ← hFt'_Γ, hFt'_orbit, hz₀_def]
 
 end JointVariationSmooth
 
@@ -659,31 +935,15 @@ theorem expMapIntrinsic_variation_contMDiff
         ∀ s ∈ Set.Icc (-T) T,
         Φ ((z, s) : (E × E) × ℝ) ∈
           (interior (extChartAt I (γ t₀)).target) ×ˢ (Set.univ : Set E)))
-    -- The uniform-smallness coupling, near `(s₀, t₀)`: the chart-fibre of the
-    -- rescaled launch direction stays in the flow's phase-ball, the chart-`(γ t₀)`
-    -- flow base orbit keeps its foot in `(γ p.2)`'s home chart throughout
-    -- `[0, t']`, and the launch velocity `p.1 • (V₀ p.2).snd` is small enough that
-    -- the intrinsic and chart-fixed exponentials agree and the small-velocity
-    -- geodesic rescaling identity holds.  All are genuine small-`s` consequences.
+    -- The (pure-continuity) smallness coupling, near `(s₀, t₀)`: the basepoint
+    -- `γ p.2` lies in the chart-`(γ t₀)` source and the chart-fibre of the rescaled
+    -- launch direction stays in the flow's phase-ball.  Both hold on a fixed
+    -- neighbourhood of `(0, t₀)` (the coordinatisation hits the phase-ball centre
+    -- at `(0, t₀)`), so they are genuine small-`s` consequences.
     (hsmall : ∀ᶠ p in 𝓝 (s₀, t₀),
-      (γ p.2 ∈ (chartAt H (γ t₀)).source ∧
+      γ p.2 ∈ (chartAt H (γ t₀)).source ∧
         chartFlowVelCoordMap (I := I) (γ t₀) γ V₀ t' p ∈
-          Metric.ball ((extChartAt I (γ t₀) (γ t₀), (0 : E)) : E × E) ρ) ∧
-      (∀ s ∈ Set.Icc (0 : ℝ) t',
-        (extChartAt I (γ t₀)).symm
-            (Φ (((extChartAt I (γ t₀) (γ p.2),
-                chartFiberCoord (I := I) (γ t₀)
-                  (TotalSpace.mk' E (E := (TangentSpace I : M → Type _)) (γ p.2)
-                    (t'⁻¹ • (p.1 • (V₀ p.2).snd : E)))) : E × E), s) : E × E).1 ∈
-          (chartAt H (γ p.2)).source) ∧
-      expMapIntrinsic (I := I) g hEnorm (γ p.2)
-            ((p.1 • (V₀ p.2).snd : E) : TangentSpace I (γ p.2)) =
-          expMap (I := I) g (γ p.2)
-            ((p.1 • (V₀ p.2).snd : E) : TangentSpace I (γ p.2)) ∧
-      maximalGeodesic (I := I) g (γ p.2)
-            ((1 : ℝ) • ((p.1 • (V₀ p.2).snd : E) : TangentSpace I (γ p.2))) 1 =
-          maximalGeodesic (I := I) g (γ p.2)
-            ((t'⁻¹ • (p.1 • (V₀ p.2).snd : E)) : TangentSpace I (γ p.2)) t') :
+          Metric.ball ((extChartAt I (γ t₀) (γ t₀), (0 : E)) : E × E) ρ) :
     ContMDiffAt (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) I (n : ℕ∞)
       (fun p : ℝ × ℝ =>
         expMapIntrinsic (I := I) g hEnorm (γ p.2)
@@ -705,7 +965,7 @@ theorem expMapIntrinsic_variation_contMDiff
   have hΨ0_mem : Ψ (s₀, t₀) ∈
       Metric.ball ((extChartAt I α (γ t₀), (0 : E)) : E × E) ρ := by
     have := hsmall.self_of_nhds
-    rw [hα_def]; exact this.1.2
+    rw [hα_def]; exact this.2
   -- `G` is `ContDiffAt ℝ n` at `Ψ (s₀, t₀)` (interior of the open ball).
   have hG_cdAt : ContDiffAt ℝ (n : ℕ∞) G (Ψ (s₀, t₀)) :=
     hG_cd.contDiffAt (Metric.isOpen_ball.mem_nhds hΨ0_mem)
@@ -735,7 +995,7 @@ theorem expMapIntrinsic_variation_contMDiff
   -- by the chart-independence bridge `expMapIntrinsic_eq_chartFlow_proj_residual`.
   refine hcomp.congr_of_eventuallyEq ?_
   filter_upwards [hsmall] with p hp
-  obtain ⟨⟨hq_src0, hball⟩, hfoot, hwexp, hwresc⟩ := hp
+  obtain ⟨hq_src0, hball⟩ := hp
   -- Apply the residual at `q := γ p.2`, `w := p.1 • (V₀ p.2).snd`.
   have hq_src : γ p.2 ∈ (chartAt H α).source := hq_src0
   -- The phase-ball membership for the residual: `chartFiberCoord α ⟨γ p.2, t'⁻¹ • (p.1 • (V₀ p.2).snd)⟩`
@@ -753,7 +1013,7 @@ theorem expMapIntrinsic_variation_contMDiff
   have hbridge := expMapIntrinsic_eq_chartFlow_proj_residual (I := I) g hEnorm α n hn
     Φ ρ T t' ⟨hρ_pos, hT_pos, ht'_Ioo, ht'_pos, hG_cd, hΦ_init, hΦ_ode, hΦ_target⟩
     (γ p.2) hq_src ((p.1 • (V₀ p.2).snd : E) : TangentSpace I (γ p.2))
-    hfoot hwexp hwresc hphase_mem
+    hphase_mem
   -- Rewrite the bridge into the composite form `(extChartAt α).symm (G (Ψ p))`.
   rw [hbridge]
   -- The flow phase point of the residual is exactly `Ψ p` (after `t'⁻¹ • (p.1 • v) = (p.1 / t') • v`).
@@ -787,26 +1047,11 @@ theorem expMapIntrinsic_variation_contMDiffAt
     (hV₀ : ContMDiff 𝓘(ℝ, ℝ) I.tangent ∞ V₀)
     (hproj : ∀ t, (V₀ t).proj = γ t)
     (n : ℕ) (hn : 1 ≤ n) (s₀ t₀ : ℝ) :
-    ∃ (Φ : (E × E) × ℝ → E × E) (ρ t' : ℝ), 0 < ρ ∧ 0 < t' ∧
+    ∃ (ρ t' : ℝ), 0 < ρ ∧ 0 < t' ∧
       ((∀ᶠ p in 𝓝 (s₀, t₀),
-        (γ p.2 ∈ (chartAt H (γ t₀)).source ∧
+        γ p.2 ∈ (chartAt H (γ t₀)).source ∧
           chartFlowVelCoordMap (I := I) (γ t₀) γ V₀ t' p ∈
-            Metric.ball ((extChartAt I (γ t₀) (γ t₀), (0 : E)) : E × E) ρ) ∧
-        (∀ s ∈ Set.Icc (0 : ℝ) t',
-          (extChartAt I (γ t₀)).symm
-              (Φ (((extChartAt I (γ t₀) (γ p.2),
-                  chartFiberCoord (I := I) (γ t₀)
-                    (TotalSpace.mk' E (E := (TangentSpace I : M → Type _)) (γ p.2)
-                      (t'⁻¹ • (p.1 • (V₀ p.2).snd : E)))) : E × E), s) : E × E).1 ∈
-            (chartAt H (γ p.2)).source) ∧
-        expMapIntrinsic (I := I) g hEnorm (γ p.2)
-              ((p.1 • (V₀ p.2).snd : E) : TangentSpace I (γ p.2)) =
-            expMap (I := I) g (γ p.2)
-              ((p.1 • (V₀ p.2).snd : E) : TangentSpace I (γ p.2)) ∧
-        maximalGeodesic (I := I) g (γ p.2)
-              ((1 : ℝ) • ((p.1 • (V₀ p.2).snd : E) : TangentSpace I (γ p.2))) 1 =
-            maximalGeodesic (I := I) g (γ p.2)
-              ((t'⁻¹ • (p.1 • (V₀ p.2).snd : E)) : TangentSpace I (γ p.2)) t') →
+            Metric.ball ((extChartAt I (γ t₀) (γ t₀), (0 : E)) : E × E) ρ) →
       ContMDiffAt (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) I (n : ℕ∞)
         (fun p : ℝ × ℝ =>
           expMapIntrinsic (I := I) g hEnorm (γ p.2)
@@ -815,37 +1060,33 @@ theorem expMapIntrinsic_variation_contMDiffAt
   obtain ⟨Φ, ρ, T, t', hρ_pos, hT_pos, ht'_Ioo, ht'_pos, hG_cd, hΦ_init, hΦ_ode,
     hΦ_target, _hΦ_cd⟩ :=
     exists_chartExp_jointContDiffOn_nat (I := I) g (γ t₀) n hn
-  refine ⟨Φ, ρ, t', hρ_pos, ht'_pos, fun hsmall => ?_⟩
+  refine ⟨ρ, t', hρ_pos, ht'_pos, fun hsmall => ?_⟩
   exact expMapIntrinsic_variation_contMDiff (I := I) g hEnorm γ V₀ hγ hV₀ hproj n hn
     s₀ t₀ Φ ρ T t'
     ⟨hρ_pos, hT_pos, ht'_Ioo, ht'_pos, hG_cd, hΦ_init, hΦ_ode, hΦ_target⟩ hsmall
 
 /-! ## Internal discharge of the smallness coupling for small variation parameter
 
-The coupling `hsmall` of `expMapIntrinsic_variation_contMDiff` has five conjuncts.
-Three of them are *pure continuity* in the variation parameter and require no
-smallness input on the moving basepoint:
+The coupling `hsmall` of `expMapIntrinsic_variation_contMDiff` has two conjuncts,
+both *pure continuity* in the variation parameter and requiring no smallness input
+on the moving basepoint:
 
 * the chart-`(γ t₀)`-source membership `γ p.2 ∈ (chartAt H (γ t₀)).source`, and
-* the phase-ball membership of `chartFlowVelCoordMap (γ t₀) γ V₀ t' p`,
+* the phase-ball membership of `chartFlowVelCoordMap (γ t₀) γ V₀ t' p`.
 
-both of which hold on a fixed neighbourhood of `(0, t₀)` because at `(0, t₀)` the
+Both hold on a fixed neighbourhood of `(0, t₀)` because at `(0, t₀)` the
 coordinatisation hits the *centre* `(extChartAt I (γ t₀) (γ t₀), 0)` of the
 phase-ball (`chartFiberCoord_self_zero`), and the coordinatisation is jointly
-continuous (`chartFlowVelCoordMap_contMDiffAt`).  These two are discharged here.
+continuous (`chartFlowVelCoordMap_contMDiffAt`).  They are discharged here by
+`expMapIntrinsic_variation_smallField_phaseBall`.
 
-The remaining three conjuncts — the cross-chart moving-foot confinement
-(`hfoot`), the intrinsic/chart-fixed exponential agreement (`hwexp`), and the
-small-velocity geodesic rescaling (`hwresc`) — are *moving-basepoint* smallness
-statements: their fixed-basepoint witnesses
-(`foot_in_source_throughout`,
-`exists_expMapIntrinsic_eq_expMap_radius`,
-`maximalGeodesic_rescale_at_one_of_small`) each produce a positive radius that
-depends on the basepoint, and discharging them *uniformly* over the moving
-basepoint `γ p.2` near `γ t₀` is the genuine cross-chart input.  That uniform
-moving-basepoint smallness package is isolated in the residual hypothesis
-`hmoving` below; the wrapper consumes it as a black box exactly as
-`expMapIntrinsic_variation_contMDiff` consumes the bridge. -/
+The cross-chart geodesic identification that previously demanded extra
+moving-basepoint smallness conjuncts (foot confinement, intrinsic/chart-fixed
+agreement, geodesic rescaling) is now absorbed entirely into the chart-
+independence bridge `expMapIntrinsic_eq_chartFlow_proj_residual`, which compares
+the chart-`(γ t₀)` flow orbit to the intrinsic geodesic from `(γ p.2, vq)` by
+single-chart-`(γ t₀)` integral-curve uniqueness.  No moving-basepoint coupling
+survives. -/
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
@@ -943,210 +1184,26 @@ theorem expMapIntrinsic_variation_smallField_phaseBall
   filter_upwards [hO_nhds] with p hp
   exact hO_sub p hp
 
-/-! ## Radius-free moving-foot confinement (tube argument)
-
-The three moving-basepoint conjuncts (`hfoot`, `hwexp`, `hwresc`) are produced
-*radius-free* from the joint continuity of the chart-`(γ t₀)` geodesic flow `Φ`.
-The keystone is a uniform tube confinement: for a launch velocity small enough
-(achieved by taking the variation parameter `s₀` small and `p` near `(s₀, t₀)`),
-the chart-`(γ t₀)` flow base orbit launched from `γ p.2` stays within a uniform
-metric ball of `γ p.2` throughout `[0, t']`, hence inside `γ p.2`'s home chart.
-The velocity-to-zero limit is anchored by the *constant zero-velocity orbit*: at
-a zero-velocity phase point the chart-phase field vanishes, so the orbit is
-constant. -/
-
-/-- **The chart-phase field vanishes at zero velocity.**  For any chart-position
-`x : E`, `chartPhaseVF g α (x, 0) = 0`: the first component is the velocity `0`
-and the second is `-Γ_α(0, 0)(x) = 0` by the velocity-bilinearity of the
-Christoffel contraction. -/
-private lemma chartPhaseVF_zero_vel (g : SmoothRiemannianMetric I M) (α : M) (x : E) :
-    chartPhaseVF (I := I) g α ((x, (0 : E)) : E × E) = (0, 0) := by
-  have hΓ : Geodesic.chartChristoffelContraction (I := I) g α (0 : E) (0 : E) x = 0 :=
-    Geodesic.chartChristoffelContraction_zero_left (I := I) g α (0 : E) x
-  change ((0 : E), -Geodesic.chartChristoffelContraction (I := I) g α (0 : E) (0 : E) x)
-      = (0, 0)
-  rw [hΓ, neg_zero]
-
-attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
-  Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Zero-velocity flow orbit is constant.**  Let `Φ` be a chart-`α` geodesic
-flow satisfying, on every orbit through the phase-ball, the chart-phase ODE and
-the chart-target-interior confinement on `Ioo (-T) T`.  If a zero-velocity phase
-point `z = (x, 0)` lies in the ball, then its orbit is constant: `Φ (z, s) = z`
-for every `s ∈ Ioo (-T) T`.
-
-The constant curve `s ↦ z` solves the chart-phase ODE (the field vanishes at
-zero velocity, `chartPhaseVF_zero_vel`) with the same initial value `z`; chart-
-coordinate ODE uniqueness, propagated by a clopen argument along the preconnected
-interval `Ioo (-T) T`, forces the orbit to coincide with it. -/
-private lemma chartFlowOrbit_zeroVel_const
-    (g : SmoothRiemannianMetric I M) (α : M)
-    (Φ : (E × E) × ℝ → E × E) (z₀ : E × E) {ρ T : ℝ} {x : E}
-    (hz_ball : ((x, (0 : E)) : E × E) ∈ Metric.ball z₀ ρ)
-    (hΦ_init : ∀ z ∈ Metric.ball z₀ ρ,
-      Φ ((z, (0 : ℝ)) : (E × E) × ℝ) = z)
-    (hΦ_ode : ∀ z ∈ Metric.ball z₀ ρ, ∀ s ∈ Set.Ioo (-T) T,
-      HasDerivAt (fun s' : ℝ => Φ ((z, s') : (E × E) × ℝ))
-        (chartPhaseVF (I := I) g α (Φ ((z, s) : (E × E) × ℝ))) s)
-    (hΦ_target : ∀ z ∈ Metric.ball z₀ ρ, ∀ s ∈ Set.Icc (-T) T,
-      Φ ((z, s) : (E × E) × ℝ) ∈
-        (interior (extChartAt I α).target) ×ˢ (Set.univ : Set E)) :
-    ∀ s ∈ Set.Ioo (-T) T, Φ (((x, (0 : E)) : E × E), s) = ((x, (0 : E)) : E × E) := by
-  classical
-  set z : E × E := ((x, (0 : E)) : E × E) with hz_def
-  -- The field vanishes at the zero-velocity point `z`.
-  have hVF_z : chartPhaseVF (I := I) g α z = 0 := by
-    rw [hz_def]; exact chartPhaseVF_zero_vel (I := I) g α x
-  -- The orbit through `z` and its ODE data.
-  set orb : ℝ → E × E := fun s => Φ ((z, s) : (E × E) × ℝ) with horb_def
-  have horb0 : orb 0 = z := by rw [horb_def]; exact hΦ_init z hz_ball
-  have horb_ode : ∀ s ∈ Set.Ioo (-T) T,
-      HasDerivAt orb (chartPhaseVF (I := I) g α (orb s)) s := hΦ_ode z hz_ball
-  have horb_cont : ContinuousOn orb (Set.Ioo (-T) T) := by
-    intro s hs
-    exact (horb_ode s hs).continuousAt.continuousWithinAt
-  -- Reduce to: for each `T' < T`, the orbit is constant `z` on `Ioo (-T') T'`.
-  have hconst_on : ∀ T' : ℝ, 0 < T' → T' < T →
-      ∀ s ∈ Set.Ioo (-T') T', orb s = z := by
-    intro T' hT'_pos hT'_lt
-    -- The compact set `K := orb '' Icc (-T') T'`, contained in the interior product.
-    have hIcc_sub_Icc : Set.Icc (-T') T' ⊆ Set.Icc (-T) T := by
-      intro s hs; exact ⟨by linarith [hs.1], by linarith [hs.2]⟩
-    have hIcc_sub : Set.Icc (-T') T' ⊆ Set.Ioo (-T) T := by
-      intro s hs; exact ⟨by linarith [hs.1], by linarith [hs.2]⟩
-    have horb_contOn' : ContinuousOn orb (Set.Icc (-T') T') :=
-      horb_cont.mono hIcc_sub
-    set K : Set (E × E) := orb '' Set.Icc (-T') T' with hK_def
-    have hK_compact : IsCompact K := isCompact_Icc.image_of_continuousOn horb_contOn'
-    have hK_sub : K ⊆ (interior (extChartAt I α).target) ×ˢ (Set.univ : Set E) := by
-      rintro w ⟨s, hs, rfl⟩
-      exact hΦ_target z hz_ball s (hIcc_sub_Icc hs)
-    -- The two solutions on `Ioo (-T') T'`: the orbit and the constant `z`.
-    have horb_ode' : ∀ s ∈ Set.Ioo (-T') T',
-        HasDerivAt orb (chartPhaseVF (I := I) g α (orb s)) s := by
-      intro s hs
-      exact horb_ode s ⟨by linarith [hs.1], by linarith [hs.2]⟩
-    have hconst_ode : ∀ s ∈ Set.Ioo (-T') T',
-        HasDerivAt (fun _ : ℝ => z) (chartPhaseVF (I := I) g α ((fun _ : ℝ => z) s)) s := by
-      intro s _
-      rw [hVF_z]; exact hasDerivAt_const s z
-    have horb_in_K : ∀ s ∈ Set.Ioo (-T') T', orb s ∈ K := by
-      intro s hs
-      exact Set.mem_image_of_mem orb (Set.Ioo_subset_Icc_self hs)
-    have hconst_in_K : ∀ s ∈ Set.Ioo (-T') T', (fun _ : ℝ => z) s ∈ K := by
-      intro s _
-      refine ⟨0, ⟨by linarith, by linarith⟩, ?_⟩
-      exact horb0
-    have heq0 : orb 0 = (fun _ : ℝ => z) 0 := by simpa using horb0
-    have heqOn := chartPhaseVF_orbit_uniqueness_uniform_Ioo (I := I) g α
-      hK_compact hK_sub hT'_pos
-      (c₁ := orb) (c₂ := fun _ : ℝ => z)
-      horb_ode' hconst_ode horb_in_K hconst_in_K heq0
-    intro s hs
-    simpa using heqOn s hs
-  -- Pass from `T' < T` to all of `Ioo (-T) T`.
-  intro s hs
-  have hs_abs : |s| < T := by rw [abs_lt]; exact ⟨hs.1, hs.2⟩
-  set T' : ℝ := (|s| + T) / 2 with hT'_def
-  have hT'_lt : T' < T := by rw [hT'_def]; linarith
-  have hsT' : |s| < T' := by rw [hT'_def]; linarith
-  have hT'_pos : 0 < T' := lt_of_le_of_lt (abs_nonneg s) hsT'
-  have hs_Ioo' : s ∈ Set.Ioo (-T') T' := by rw [abs_lt] at hsT'; exact ⟨hsT'.1, hsT'.2⟩
-  have := hconst_on T' hT'_pos hT'_lt s hs_Ioo'
-  simpa [horb_def] using this
-
-attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
-  Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Moving-basepoint smallness package (residual).**  For the chart-`(γ t₀)`
-geodesic flow `Φ` of `exists_chartExp_jointContDiffOn_nat` at evaluation time `t'`
-and phase-ball radius `ρ`, there is `δ > 0` such that for every `s₀` in the
-`δ`-ball about `0`, on a neighbourhood of `(s₀, t₀)` the three *moving-basepoint*
-smallness conjuncts of `hsmall` hold:
-
-* `hfoot` — the chart-`(γ t₀)` flow base orbit launched from `γ p.2` keeps its
-  foot in `(γ p.2)`'s **home** chart `(chartAt H (γ p.2)).source` throughout
-  `[0, t']` (cross-chart moving-foot confinement);
-* `hwexp` — the intrinsic and chart-fixed exponentials agree at `γ p.2` for the
-  small launch velocity `p.1 • (V₀ p.2).snd`;
-* `hwresc` — the small-velocity geodesic rescaling identity at `γ p.2`.
-
-The fixed-basepoint witnesses are `foot_in_source_throughout`,
-`exists_expMapIntrinsic_eq_expMap_radius`, and
-`maximalGeodesic_rescale_at_one_of_small`, each producing a positive radius that
-depends on the basepoint.  Discharging the three conjuncts *uniformly* over the
-moving basepoint `γ p.2` near `γ t₀` — for which the chart-`(γ t₀)`-flow
-identification of the moving-foot geodesic (`expMapIntrinsic_eq_chartFlow_proj_residual`)
-must be coupled with the home-chart confinement of the geodesic launched from
-`γ p.2` (`foot_in_source_throughout`) — is the genuine cross-chart input flagged
-as the residual of this wrapper. -/
-theorem expMapIntrinsic_variation_smallField_moving
-    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
-    [T2Space (TangentBundle I M)]
-    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
-    (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
-    (γ : ℝ → M) (V₀ : ℝ → TangentBundle I M)
-    (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ)
-    (hV₀ : ContMDiff 𝓘(ℝ, ℝ) I.tangent ∞ V₀)
-    (hproj : ∀ t, (V₀ t).proj = γ t)
-    (n : ℕ) (hn : 1 ≤ n) (t₀ : ℝ)
-    (Φ : (E × E) × ℝ → E × E) (ρ T t' : ℝ)
-    (hΦ : 0 < ρ ∧ 0 < T ∧ t' ∈ Set.Ioo (-T) T ∧ 0 < t' ∧
-      ContDiffOn ℝ (n : ℕ∞)
-        (fun z : E × E => (Φ ((z, t') : (E × E) × ℝ)).1)
-        (Metric.ball ((extChartAt I (γ t₀) (γ t₀), (0 : E)) : E × E) ρ) ∧
-      (∀ z ∈ Metric.ball ((extChartAt I (γ t₀) (γ t₀), (0 : E)) : E × E) ρ,
-        Φ ((z, (0 : ℝ)) : (E × E) × ℝ) = z) ∧
-      (∀ z ∈ Metric.ball ((extChartAt I (γ t₀) (γ t₀), (0 : E)) : E × E) ρ,
-        ∀ s ∈ Set.Ioo (-T) T,
-        HasDerivAt (fun s' : ℝ => Φ ((z, s') : (E × E) × ℝ))
-          (chartPhaseVF (I := I) g (γ t₀) (Φ ((z, s) : (E × E) × ℝ))) s) ∧
-      (∀ z ∈ Metric.ball ((extChartAt I (γ t₀) (γ t₀), (0 : E)) : E × E) ρ,
-        ∀ s ∈ Set.Icc (-T) T,
-        Φ ((z, s) : (E × E) × ℝ) ∈
-          (interior (extChartAt I (γ t₀)).target) ×ˢ (Set.univ : Set E)) ∧
-      ContDiffOn ℝ (n : ℕ∞) Φ
-        ((Metric.ball ((extChartAt I (γ t₀) (γ t₀), (0 : E)) : E × E) ρ)
-          ×ˢ Set.Ioo (-T) T)) :
-    ∃ δ > 0, ∀ s₀ ∈ Metric.ball (0 : ℝ) δ,
-      ∀ᶠ p in 𝓝 (s₀, t₀),
-        (∀ s ∈ Set.Icc (0 : ℝ) t',
-          (extChartAt I (γ t₀)).symm
-              (Φ (((extChartAt I (γ t₀) (γ p.2),
-                  chartFiberCoord (I := I) (γ t₀)
-                    (TotalSpace.mk' E (E := (TangentSpace I : M → Type _)) (γ p.2)
-                      (t'⁻¹ • (p.1 • (V₀ p.2).snd : E)))) : E × E), s) : E × E).1 ∈
-            (chartAt H (γ p.2)).source) ∧
-        expMapIntrinsic (I := I) g hEnorm (γ p.2)
-              ((p.1 • (V₀ p.2).snd : E) : TangentSpace I (γ p.2)) =
-            expMap (I := I) g (γ p.2)
-              ((p.1 • (V₀ p.2).snd : E) : TangentSpace I (γ p.2)) ∧
-        maximalGeodesic (I := I) g (γ p.2)
-              ((1 : ℝ) • ((p.1 • (V₀ p.2).snd : E) : TangentSpace I (γ p.2))) 1 =
-            maximalGeodesic (I := I) g (γ p.2)
-              ((t'⁻¹ • (p.1 • (V₀ p.2).snd : E)) : TangentSpace I (γ p.2)) t' := by
-  sorry
-
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 /-- **Internal discharge of the smallness coupling for small variation parameter.**
 The wrapper of `expMapIntrinsic_variation_contMDiff` that obtains the chart-`(γ t₀)`
-geodesic flow internally and discharges the five-conjunct coupling `hsmall` for
+geodesic flow internally and discharges the smallness coupling `hsmall` for
 sufficiently small variation parameter `s₀`: there is `δ > 0` such that for every
 `s₀` in the `δ`-ball about `0`, the two-parameter intrinsic exponential variation
 `(s, t) ↦ expMapIntrinsic (γ t) (s • (V₀ t).snd)` is jointly `ContMDiff
 (𝓘(ℝ,ℝ).prod 𝓘(ℝ,ℝ)) I n` at `(s₀, t₀)`.
 
-This is the form the second-variation construction consumes.  The geometric
-conjuncts of `hsmall` (chart-source and phase-ball membership) are discharged by
-`expMapIntrinsic_variation_smallField_phaseBall` (pure continuity, the value at
-`(0, t₀)` being the phase-ball centre); the three *moving-basepoint* smallness
-conjuncts — the cross-chart moving-foot confinement, the intrinsic/chart-fixed
-exponential agreement, and the small-velocity geodesic rescaling — are supplied
-by `expMapIntrinsic_variation_smallField_moving`, the uniform-over-moving-basepoint
-smallness package isolated for this file.  The smallness `δ` is genuine (it is the
-variation-parameter threshold), not the conclusion. -/
+This is the form the second-variation construction consumes.  Both conjuncts of
+`hsmall` (chart-source and phase-ball membership) are pure continuity, discharged
+by `expMapIntrinsic_variation_smallField_phaseBall` (the coordinatisation hits the
+phase-ball centre at `(0, t₀)`).  The cross-chart geodesic identification — which
+formerly required moving-basepoint smallness conjuncts (foot confinement,
+intrinsic/chart-fixed agreement, geodesic rescaling) — is absorbed entirely into
+the chart-independence bridge `expMapIntrinsic_eq_chartFlow_proj_residual` via
+single-chart integral-curve uniqueness, so no moving-basepoint coupling remains.
+The smallness `δ` is genuine (it is the variation-parameter threshold), not the
+conclusion. -/
 theorem expMapIntrinsic_variation_contMDiffAt_of_smallField
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [T2Space (TangentBundle I M)]
@@ -1167,49 +1224,19 @@ theorem expMapIntrinsic_variation_contMDiffAt_of_smallField
   classical
   -- Obtain the chart-`(γ t₀)` geodesic flow at order `n`.
   obtain ⟨Φ, ρ, T, t', hρ_pos, hT_pos, ht'_Ioo, ht'_pos, hG_cd, hΦ_init, hΦ_ode,
-    hΦ_target, hΦ_cd⟩ :=
+    hΦ_target, _hΦ_cd⟩ :=
     exists_chartExp_jointContDiffOn_nat (I := I) g (γ t₀) n hn
-  -- The continuity discharge of the geometric conjuncts (chart-source + phase-ball).
-  obtain ⟨δ₁, hδ₁_pos, hphase⟩ :=
+  -- The continuity discharge of the smallness coupling (chart-source + phase-ball).
+  obtain ⟨δ, hδ_pos, hphase⟩ :=
     expMapIntrinsic_variation_smallField_phaseBall (I := I) γ V₀ hγ hV₀ hproj
       t₀ t' ρ hρ_pos
-  -- The moving-basepoint smallness package for the remaining three conjuncts.
-  obtain ⟨δ₂, hδ₂_pos, hmove⟩ :=
-    expMapIntrinsic_variation_smallField_moving (I := I) g hEnorm γ V₀ hγ hV₀ hproj
-      n hn t₀ Φ ρ T t'
-      ⟨hρ_pos, hT_pos, ht'_Ioo, ht'_pos, hG_cd, hΦ_init, hΦ_ode, hΦ_target, hΦ_cd⟩
-  -- Take `δ := min δ₁ δ₂`.
-  refine ⟨min δ₁ δ₂, lt_min hδ₁_pos hδ₂_pos, fun s₀ hs₀ => ?_⟩
-  have hs₀₁ : s₀ ∈ Metric.ball (0 : ℝ) δ₁ :=
-    Metric.ball_subset_ball (min_le_left _ _) hs₀
-  have hs₀₂ : s₀ ∈ Metric.ball (0 : ℝ) δ₂ :=
-    Metric.ball_subset_ball (min_le_right _ _) hs₀
-  -- Assemble the full five-conjunct coupling `hsmall` near `(s₀, t₀)`.
-  have hsmall : ∀ᶠ p in 𝓝 (s₀, t₀),
-      (γ p.2 ∈ (chartAt H (γ t₀)).source ∧
-        chartFlowVelCoordMap (I := I) (γ t₀) γ V₀ t' p ∈
-          Metric.ball ((extChartAt I (γ t₀) (γ t₀), (0 : E)) : E × E) ρ) ∧
-      (∀ s ∈ Set.Icc (0 : ℝ) t',
-        (extChartAt I (γ t₀)).symm
-            (Φ (((extChartAt I (γ t₀) (γ p.2),
-                chartFiberCoord (I := I) (γ t₀)
-                  (TotalSpace.mk' E (E := (TangentSpace I : M → Type _)) (γ p.2)
-                    (t'⁻¹ • (p.1 • (V₀ p.2).snd : E)))) : E × E), s) : E × E).1 ∈
-          (chartAt H (γ p.2)).source) ∧
-      expMapIntrinsic (I := I) g hEnorm (γ p.2)
-            ((p.1 • (V₀ p.2).snd : E) : TangentSpace I (γ p.2)) =
-          expMap (I := I) g (γ p.2)
-            ((p.1 • (V₀ p.2).snd : E) : TangentSpace I (γ p.2)) ∧
-      maximalGeodesic (I := I) g (γ p.2)
-            ((1 : ℝ) • ((p.1 • (V₀ p.2).snd : E) : TangentSpace I (γ p.2))) 1 =
-          maximalGeodesic (I := I) g (γ p.2)
-            ((t'⁻¹ • (p.1 • (V₀ p.2).snd : E)) : TangentSpace I (γ p.2)) t' := by
-    filter_upwards [hphase s₀ hs₀₁, hmove s₀ hs₀₂] with p hp_phase hp_move
-    exact ⟨hp_phase, hp_move⟩
-  -- Conclude via the headline manifold lift.
+  refine ⟨δ, hδ_pos, fun s₀ hs₀ => ?_⟩
+  -- Conclude via the headline manifold lift; the smallness coupling is the
+  -- pure-continuity phase-ball/source membership near `(s₀, t₀)`.
   exact expMapIntrinsic_variation_contMDiff (I := I) g hEnorm γ V₀ hγ hV₀ hproj n hn
     s₀ t₀ Φ ρ T t'
-    ⟨hρ_pos, hT_pos, ht'_Ioo, ht'_pos, hG_cd, hΦ_init, hΦ_ode, hΦ_target⟩ hsmall
+    ⟨hρ_pos, hT_pos, ht'_Ioo, ht'_pos, hG_cd, hΦ_init, hΦ_ode, hΦ_target⟩
+    (hphase s₀ hs₀)
 
 end Headline
 
