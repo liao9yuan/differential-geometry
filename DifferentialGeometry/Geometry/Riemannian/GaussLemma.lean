@@ -4272,6 +4272,396 @@ theorem local_radial_identification_of_minimizer
     have := hφ_eq (t₀ + s) hs'
     rw [hq_def]; exact this
 
+/-! ## The metric ball is contained in the normal ball
+
+The final piece needed by the Hopf–Rinow existence argument: a point at
+Riemannian distance `< expRadiusGp g c` from `c` lies in the open normal ball at
+`c` and is the radial-exponential image of a `g_c`-vector whose `g_c`-length
+equals that distance.
+
+The proof is a first-exit (clopen / connectedness) argument on a near-minimising
+path.  Every point reached by a path of length `< R := expRadiusGp g c` stays in
+the chart source `ψ.source` with `g_c`-chart-radius `< R`: along any confined
+prefix the radial fencing bound `radialDist_endpoint_le_pathELength` forces the
+running chart-radius below the running length, hence below `R`; and the boundary
+of the source sits at chart-radius `≥ R`, so the path can never exit.  Then the
+endpoint `y` is `ψ.symm (ψ y) = expMap c (ψ y)` with `g_c`-radius equal to the
+distance via `radial_riemannianEDist_eq_radius`. -/
+
+/-- **Coercivity upper bound.** The Euclidean norm is controlled by the
+`g_c`-length divided by the square root of the coercivity constant. -/
+private lemma norm_le_sqrt_inner_div_sqrt_coercive
+    (g : SmoothRiemannianMetric I M) (c : M) (x : E) :
+    ‖x‖ ≤ Real.sqrt (g.inner c x x) / Real.sqrt (gpCoerciveConst (I := I) g c) := by
+  have hc_pos : 0 < gpCoerciveConst (I := I) g c := gpCoerciveConst_pos (I := I) g c
+  have hsc_pos : 0 < Real.sqrt (gpCoerciveConst (I := I) g c) := Real.sqrt_pos.mpr hc_pos
+  have hcoerc : gpCoerciveConst (I := I) g c * ‖x‖ ^ 2 ≤ g.inner c x x :=
+    gpCoerciveConst_le (I := I) g c x
+  have hgnn : 0 ≤ g.inner c x x := le_trans (by positivity) hcoerc
+  -- `√c · ‖x‖ ≤ √(g_c(x,x))` by squaring (both sides nonnegative).
+  have hkey : Real.sqrt (gpCoerciveConst (I := I) g c) * ‖x‖ ≤ Real.sqrt (g.inner c x x) := by
+    have hlhs_eq : Real.sqrt (gpCoerciveConst (I := I) g c) * ‖x‖
+        = Real.sqrt (gpCoerciveConst (I := I) g c * ‖x‖ ^ 2) := by
+      rw [Real.sqrt_mul hc_pos.le, Real.sqrt_sq (norm_nonneg x)]
+    rw [hlhs_eq]
+    exact Real.sqrt_le_sqrt hcoerc
+  rw [le_div_iff₀ hsc_pos, mul_comm]
+  exact hkey
+
+/-- **First-exit confinement of a short path to the normal ball.** A `C¹` path
+`γ` on `[0, 1]` starting at `c` with total length below `R := expRadiusGp g c`
+stays, at every parameter, inside the chart source `ψ.source` with `g_c`-chart
+radius strictly below `R`. -/
+private theorem path_confined_to_normalBall
+    (g : SmoothRiemannianMetric I M) (c : M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+        ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    {γ : ℝ → M} (hγ : CMDiff[Set.Icc (0 : ℝ) 1] 1 γ) (hγ0 : γ 0 = c)
+    (hlen : pathELength I γ 0 1 < ENNReal.ofReal (expRadiusGp (I := I) g c)) :
+    ∀ t ∈ Set.Icc (0 : ℝ) 1,
+      γ t ∈ (NormalCoordinates.normalChartAt (I := I) g c).source ∧
+      Real.sqrt (g.inner c
+          (NormalCoordinates.normalChartAt (I := I) g c (γ t))
+          (NormalCoordinates.normalChartAt (I := I) g c (γ t)))
+        < expRadiusGp (I := I) g c := by
+  classical
+  haveI : T2Space M := gauss_t2Space_base (I := I) (M := M)
+  haveI : ProperSpace E := FiniteDimensional.proper_rclike (K := ℝ) (E := E)
+  set R : ℝ := expRadiusGp (I := I) g c with hR_def
+  have hR_pos : 0 < R := expRadiusGp_pos (I := I) g c
+  set ψ := NormalCoordinates.normalChartAt (I := I) g c with hψ_def
+  set B : E →L[ℝ] E →L[ℝ] ℝ := g.inner c with hB_def
+  have hBsym : ∀ x y : E, B x y = B y x := g.symm c
+  have hBnn : ∀ x : E, 0 ≤ B x x := fun x => by
+    rcases eq_or_ne x 0 with h | h
+    · subst h; simp
+    · exact (g.pos c x h).le
+  set ρ : ℝ → ℝ := fun t => Real.sqrt (g.inner c (ψ (γ t)) (ψ (γ t))) with hρ_def
+  -- The running length is finite and below `R`; record its real value `L₀`.
+  have hlen_ne_top : pathELength I γ 0 1 ≠ ⊤ := hlen.ne_top
+  set L₀ : ℝ := (pathELength I γ 0 1).toReal with hL₀_def
+  have hL₀_lt_R : L₀ < R := by
+    rw [hL₀_def]; exact (ENNReal.lt_ofReal_iff_toReal_lt hlen_ne_top).mp hlen
+  have hL₀_nn : 0 ≤ L₀ := ENNReal.toReal_nonneg
+  -- Basic chart facts.
+  have hcsrc : c ∈ ψ.source := by rw [hψ_def]; exact NormalCoordinates.normalChartAt_source (I := I) g c
+  have hψc : ψ c = 0 := by rw [hψ_def]; exact NormalCoordinates.normalChartAt_centre (I := I) g c
+  have hopen_src : IsOpen ψ.source := by
+    rw [hψ_def]; exact NormalCoordinates.normalChartAt_open_source (I := I) g c
+  have hγcont : ContinuousOn γ (Set.Icc (0 : ℝ) 1) := hγ.continuousOn
+  have hψcont : ContinuousOn ψ ψ.source := by
+    rw [hψ_def]; exact (NormalCoordinates.normalChartAt_contMDiffOn (I := I) g c).continuousOn
+  -- The good prefix set.
+  set S : Set ℝ := {t : ℝ | t ∈ Set.Icc (0 : ℝ) 1 ∧
+      ∀ s ∈ Set.Icc (0 : ℝ) t, γ s ∈ ψ.source ∧ ρ s ≤ L₀} with hS_def
+  -- It suffices to show `1 ∈ S` and upgrade `ρ ≤ L₀` to `ρ < R`.
+  suffices hS1 : (1 : ℝ) ∈ S by
+    intro t ht
+    obtain ⟨_, hall⟩ := hS1
+    obtain ⟨hsrc, hρle⟩ := hall t ⟨ht.1, ht.2⟩
+    refine ⟨hsrc, ?_⟩
+    calc ρ t ≤ L₀ := hρle
+      _ < R := hL₀_lt_R
+  -- `0 ∈ S`.
+  have hρ0 : ρ 0 = 0 := by
+    change Real.sqrt (B (ψ (γ 0)) (ψ (γ 0))) = 0
+    rw [hγ0, hψc]
+    simp
+  have h0S : (0 : ℝ) ∈ S := by
+    refine ⟨⟨le_rfl, zero_le_one⟩, ?_⟩
+    intro s hs
+    have hs0 : s = 0 := le_antisymm hs.2 hs.1
+    subst hs0
+    exact ⟨by rw [hγ0]; exact hcsrc, by rw [hρ0]; exact hL₀_nn⟩
+  have hSne : S.Nonempty := ⟨0, h0S⟩
+  have hSbdd : BddAbove S := ⟨1, fun t ht => ht.1.2⟩
+  set t₀ : ℝ := sSup S with ht₀_def
+  have ht₀_lb : (0 : ℝ) ≤ t₀ := le_csSup hSbdd h0S
+  have ht₀_ub : t₀ ≤ 1 := csSup_le hSne (fun t ht => ht.1.2)
+  have ht₀Icc : t₀ ∈ Set.Icc (0 : ℝ) 1 := ⟨ht₀_lb, ht₀_ub⟩
+  -- For `s < t₀`, the good-prefix property `P s` holds (since `s` is below some `t ∈ S`).
+  have hpre : ∀ s ∈ Set.Icc (0 : ℝ) t₀, s < t₀ → γ s ∈ ψ.source ∧ ρ s ≤ L₀ := by
+    intro s hs hst₀
+    obtain ⟨t, htS, hst⟩ := exists_lt_of_lt_csSup hSne hst₀
+    exact htS.2 s ⟨hs.1, le_of_lt hst⟩
+  -- Fencing: for a confined prefix `[0, u]`, the chart-radius at `u` is `≤ L₀`.
+  have hfence : ∀ u ∈ Set.Icc (0 : ℝ) 1, (∀ s ∈ Set.Icc (0 : ℝ) u, γ s ∈ ψ.source ∧ ρ s < R) →
+      ρ u ≤ L₀ := by
+    intro u huIcc hconf
+    have hγ_pref : CMDiff[Set.Icc (0 : ℝ) u] 1 γ :=
+      hγ.mono (Set.Icc_subset_Icc le_rfl huIcc.2)
+    have hsrc' : ∀ s ∈ Set.Icc (0 : ℝ) u, γ s ∈ ψ.source := fun s hs => (hconf s hs).1
+    have hbball' : ∀ s ∈ Set.Icc (0 : ℝ) u,
+        ‖ψ (γ s)‖ < expMapC2Radius (I := I) g c := by
+      intro s hs
+      exact norm_lt_expMapC2Radius_of_sqrt_inner_lt (I := I) g c (hconf s hs).2
+    have hdom' : ∀ s ∈ Set.Icc (0 : ℝ) u,
+        (show TangentSpace I c from ψ (γ s)) ∈ expDomain (I := I) g c :=
+      fun s hs => mem_expDomain_of_norm_lt_radius (I := I) g c (hbball' s hs)
+    have hlb := radialDist_endpoint_le_pathELength (I := I) g c hEnorm
+      (a := 0) (b := u) huIcc.1 hγ0 hγ_pref hsrc' hbball' hdom'
+    -- `ofReal (ρ u) ≤ pathELength γ 0 u ≤ pathELength γ 0 1 < ofReal R`, so `ρ u ≤ L₀`.
+    have hlb' : ENNReal.ofReal (ρ u) ≤ pathELength I γ 0 u := by
+      rw [hρ_def, hψ_def]; exact hlb
+    have hmono : pathELength I γ 0 u ≤ pathELength I γ 0 1 := by
+      have hadd : pathELength I γ 0 u + pathELength I γ u 1 = pathELength I γ 0 1 :=
+        pathELength_add (γ := γ) (I := I) huIcc.1 huIcc.2
+      calc pathELength I γ 0 u ≤ pathELength I γ 0 u + pathELength I γ u 1 := le_self_add
+        _ = pathELength I γ 0 1 := hadd
+    have hchain : ENNReal.ofReal (ρ u) ≤ pathELength I γ 0 1 := le_trans hlb' hmono
+    -- Convert to reals.
+    have : ENNReal.ofReal (ρ u) ≠ ⊤ := ENNReal.ofReal_ne_top
+    have hreal : ρ u ≤ L₀ := by
+      rw [hL₀_def]
+      have := (ENNReal.toReal_le_toReal this hlen_ne_top).mpr hchain
+      rwa [ENNReal.toReal_ofReal (Real.sqrt_nonneg _)] at this
+    exact hreal
+  -- `t₀ ∈ S`: the sup of the good prefix is itself good.
+  have ht₀S : t₀ ∈ S := by
+    refine ⟨ht₀Icc, ?_⟩
+    -- First: `γ t₀ ∈ ψ.source`, via a compact `ψ.symm`-image capturing the left limit.
+    -- The Euclidean closed ball of radius `r₀ := L₀ / √c` lies in `ψ.target`.
+    set sc : ℝ := Real.sqrt (gpCoerciveConst (I := I) g c) with hsc_def
+    have hsc_pos : 0 < sc := Real.sqrt_pos.mpr (gpCoerciveConst_pos (I := I) g c)
+    set r₀ : ℝ := L₀ / sc with hr₀_def
+    have hr₀_nn : 0 ≤ r₀ := div_nonneg hL₀_nn hsc_pos.le
+    -- `R = √c · expMapC2Radius`, so `expMapC2Radius = R / √c`, and `L₀ < R` gives `r₀ < expMapC2Radius`.
+    have hR_factored : R = sc * expMapC2Radius (I := I) g c := by
+      rw [hR_def, expRadiusGp, hsc_def]
+    have hC2_eq : expMapC2Radius (I := I) g c = R / sc := by
+      rw [hR_factored, mul_comm, mul_div_assoc, div_self (ne_of_gt hsc_pos), mul_one]
+    have hr₀_lt : r₀ < expMapC2Radius (I := I) g c := by
+      rw [hC2_eq, hr₀_def]
+      exact (div_lt_div_iff_of_pos_right hsc_pos).mpr hL₀_lt_R
+    have hball_tgt : Metric.closedBall (0 : E) r₀ ⊆ ψ.target := by
+      intro x hx
+      rw [Metric.mem_closedBall, dist_zero_right] at hx
+      rw [hψ_def]
+      exact ball_subset_normalChartAt_target (I := I) g c (lt_of_le_of_lt hx hr₀_lt)
+    -- The compact capturing set `K := ψ.symm '' closedBall 0 r₀ ⊆ ψ.source`.
+    set K : Set M := ψ.symm '' (Metric.closedBall (0 : E) r₀) with hK_def
+    have hKcompact : IsCompact K := by
+      rw [hK_def]
+      refine (isCompact_closedBall (0 : E) r₀).image_of_continuousOn ?_
+      have hψsymm_cont : ContinuousOn ψ.symm ψ.target := by
+        rw [hψ_def]
+        exact (NormalCoordinates.normalChartAt_symm_contMDiffOn (I := I) g c).continuousOn
+      exact hψsymm_cont.mono hball_tgt
+    have hKclosed : IsClosed K := hKcompact.isClosed
+    have hKsub : K ⊆ ψ.source := by
+      intro y hy
+      rw [hK_def] at hy
+      obtain ⟨x, hx, hxy⟩ := hy
+      rw [← hxy]
+      exact ψ.map_target (hball_tgt hx)
+    -- For `s < t₀` in the prefix, `γ s ∈ K`.
+    have hγs_in_K : ∀ s ∈ Set.Icc (0 : ℝ) t₀, s < t₀ → γ s ∈ K := by
+      intro s hs hst₀
+      obtain ⟨hsrc, hρle⟩ := hpre s hs hst₀
+      rw [hK_def]
+      refine ⟨ψ (γ s), ?_, ?_⟩
+      · rw [Metric.mem_closedBall, dist_zero_right]
+        -- `‖ψ(γs)‖ ≤ ρ s / √c ≤ L₀ / √c = r₀`.
+        have hnb := norm_le_sqrt_inner_div_sqrt_coercive (I := I) g c (ψ (γ s))
+        rw [← hsc_def] at hnb
+        have hρs_eq : Real.sqrt (g.inner c (ψ (γ s)) (ψ (γ s))) = ρ s := rfl
+        rw [hρs_eq] at hnb
+        rw [hr₀_def]
+        refine le_trans hnb ?_
+        exact div_le_div_of_nonneg_right hρle hsc_pos.le
+      · rw [hψ_def]; exact NormalCoordinates.normalChartAt_left_inv (I := I) g c hsrc
+    -- `γ t₀ ∈ K` (closed) as a left limit; hence `γ t₀ ∈ ψ.source`.
+    have hγt₀_src : γ t₀ ∈ ψ.source := by
+      rcases eq_or_lt_of_le ht₀_lb with ht₀0 | ht₀0
+      · rw [← ht₀0, hγ0]; exact hcsrc
+      · -- `t₀ > 0`: left limit.
+        have hγcontWithin : ContinuousWithinAt γ (Set.Iio t₀) t₀ := by
+          have : ContinuousWithinAt γ (Set.Icc (0 : ℝ) 1) t₀ := hγcont t₀ ht₀Icc
+          refine this.mono_of_mem_nhdsWithin ?_
+          rw [mem_nhdsWithin]
+          exact ⟨Set.Ioi 0, isOpen_Ioi, ht₀0, by
+            intro z hz; exact ⟨hz.1.le, lt_of_lt_of_le hz.2 ht₀_ub |>.le⟩⟩
+        have htend : Filter.Tendsto γ (nhdsWithin t₀ (Set.Iio t₀)) (nhds (γ t₀)) :=
+          hγcontWithin
+        have hev : ∀ᶠ s in nhdsWithin t₀ (Set.Iio t₀), γ s ∈ K := by
+          have hpos : Set.Ioo 0 t₀ ∈ nhdsWithin t₀ (Set.Iio t₀) := by
+            rw [mem_nhdsWithin]
+            exact ⟨Set.Ioi 0, isOpen_Ioi, ht₀0, by intro z hz; exact ⟨hz.1, hz.2⟩⟩
+          filter_upwards [hpos] with s hs
+          exact hγs_in_K s ⟨hs.1.le, hs.2.le⟩ hs.2
+        haveI : (nhdsWithin t₀ (Set.Iio t₀)).NeBot := nhdsLT_neBot t₀
+        exact hKsub (hKclosed.mem_of_tendsto htend hev)
+    refine fun s hs => ?_
+    rcases eq_or_lt_of_le hs.2 with hst₀ | hst₀
+    · -- `s = t₀`.
+      subst hst₀
+      refine ⟨hγt₀_src, ?_⟩
+      -- `ρ t₀ ≤ L₀` by left-continuity of `ρ` at `t₀` and `ρ s ≤ L₀` for `s < t₀`.
+      rcases eq_or_lt_of_le ht₀_lb with ht₀0 | ht₀0
+      · rw [← ht₀0, hρ0]; exact hL₀_nn
+      · -- Continuity of `ρ` within `Ioo 0 t₀` at `t₀` (where `γ` maps into the source).
+        have hIoo_nhds : Set.Ioo 0 t₀ ∈ nhdsWithin t₀ (Set.Iio t₀) := by
+          rw [mem_nhdsWithin]
+          exact ⟨Set.Ioi 0, isOpen_Ioi, ht₀0, by intro z hz; exact ⟨hz.1, hz.2⟩⟩
+        have hρcontWithin : ContinuousWithinAt ρ (Set.Ioo 0 t₀) t₀ := by
+          have hcomp : ContinuousWithinAt (fun s => ψ (γ s)) (Set.Ioo 0 t₀) t₀ := by
+            have h1 : ContinuousWithinAt γ (Set.Ioo 0 t₀) t₀ := by
+              have hsub : Set.Ioo (0 : ℝ) t₀ ⊆ Set.Icc (0 : ℝ) 1 :=
+                fun z hz => ⟨hz.1.le, lt_of_lt_of_le hz.2 ht₀_ub |>.le⟩
+              exact (hγcont t₀ ht₀Icc).mono hsub
+            have hmaps : Set.MapsTo γ (Set.Ioo 0 t₀) ψ.source :=
+              fun z hz => (hpre z ⟨hz.1.le, hz.2.le⟩ hz.2).1
+            exact (hψcont _ hγt₀_src).comp h1 hmaps
+          exact ((psd_sqrt_lipschitz B hBsym hBnn).continuous.continuousAt.comp_continuousWithinAt hcomp)
+        have htend : Filter.Tendsto ρ (nhdsWithin t₀ (Set.Ioo 0 t₀)) (nhds (ρ t₀)) :=
+          hρcontWithin
+        have hev : ∀ᶠ s in nhdsWithin t₀ (Set.Ioo 0 t₀), ρ s ≤ L₀ := by
+          have hself : Set.Ioo 0 t₀ ∈ nhdsWithin t₀ (Set.Ioo 0 t₀) := self_mem_nhdsWithin
+          filter_upwards [hself] with s hs
+          exact (hpre s ⟨hs.1.le, hs.2.le⟩ hs.2).2
+        haveI : (nhdsWithin t₀ (Set.Ioo 0 t₀)).NeBot := by
+          refine mem_closure_iff_nhdsWithin_neBot.mp ?_
+          rw [closure_Ioo (ne_of_lt ht₀0)]
+          exact Set.right_mem_Icc.mpr ht₀0.le
+        exact le_of_tendsto htend hev
+    · exact hpre s hs hst₀
+  -- `t₀ = 1`: otherwise we could extend the good prefix beyond `t₀`.
+  have ht₀_eq_one : t₀ = 1 := by
+    by_contra hne
+    have ht₀_lt_one : t₀ < 1 := lt_of_le_of_ne ht₀_ub hne
+    -- `γ t₀ ∈ ψ.source` and `ρ t₀ < R`.
+    obtain ⟨hγt₀_src, hρt₀_le⟩ := ht₀S.2 t₀ ⟨ht₀_lb, le_rfl⟩
+    have hρt₀_lt : ρ t₀ < R := lt_of_le_of_lt hρt₀_le hL₀_lt_R
+    -- Forward neighbourhood where `γ ∈ ψ.source` and `ρ < R`.
+    have hpre_nhds : γ ⁻¹' ψ.source ∈ nhdsWithin t₀ (Set.Icc (0 : ℝ) 1) :=
+      (hγcont t₀ ht₀Icc).preimage_mem_nhdsWithin (hopen_src.mem_nhds hγt₀_src)
+    have hρcontWithin : ContinuousWithinAt ρ
+        (Set.Icc (0 : ℝ) 1 ∩ γ ⁻¹' ψ.source) t₀ := by
+      have hcomp : ContinuousWithinAt (fun s => ψ (γ s))
+          (Set.Icc (0 : ℝ) 1 ∩ γ ⁻¹' ψ.source) t₀ := by
+        have h1 : ContinuousWithinAt γ (Set.Icc (0 : ℝ) 1 ∩ γ ⁻¹' ψ.source) t₀ :=
+          (hγcont t₀ ht₀Icc).mono Set.inter_subset_left
+        have hmaps : Set.MapsTo γ (Set.Icc (0 : ℝ) 1 ∩ γ ⁻¹' ψ.source) ψ.source :=
+          fun s hs => hs.2
+        exact (hψcont _ hγt₀_src).comp h1 hmaps
+      exact ((psd_sqrt_lipschitz B hBsym hBnn).continuous.continuousAt.comp_continuousWithinAt hcomp)
+    have hρ_small_nhds : {s | ρ s < R} ∈
+        nhdsWithin t₀ (Set.Icc (0 : ℝ) 1 ∩ γ ⁻¹' ψ.source) := by
+      have : Set.Iio R ∈ nhds (ρ t₀) := isOpen_Iio.mem_nhds hρt₀_lt
+      exact hρcontWithin this
+    -- Combine: `{s | γ s ∈ source ∧ ρ s < R}` ∈ nhdsWithin t₀ [0,1].
+    have hgood_nhds : {s | γ s ∈ ψ.source ∧ ρ s < R} ∈
+        nhdsWithin t₀ (Set.Icc (0 : ℝ) 1) := by
+      have hρ_in : {s | ρ s < R} ∈ nhdsWithin t₀ (Set.Icc (0 : ℝ) 1) := by
+        rw [nhdsWithin_inter_of_mem' hpre_nhds] at hρ_small_nhds
+        exact hρ_small_nhds
+      filter_upwards [hpre_nhds, hρ_in] with s hspre hsρ
+      exact ⟨hspre, hsρ⟩
+    -- Extract a forward `Ico t₀ u ⊆ good`.
+    have hIco_sub : Set.Ico t₀ 1 ⊆ Set.Icc (0 : ℝ) 1 :=
+      fun s hs => ⟨le_trans ht₀_lb hs.1, hs.2.le⟩
+    have hgood_right : {s | γ s ∈ ψ.source ∧ ρ s < R} ∈
+        nhdsWithin t₀ (Set.Ico t₀ 1) := nhdsWithin_mono t₀ hIco_sub hgood_nhds
+    rw [nhdsWithin_Ico_eq_nhdsGE ht₀_lt_one, mem_nhdsGE_iff_exists_Ico_subset] at hgood_right
+    obtain ⟨u, hu_mem, hu_sub⟩ := hgood_right
+    have hu_gt : t₀ < u := hu_mem
+    -- Pick `t₁ := min ((t₀+u)/2) 1 > t₀` and show `t₁ ∈ S`, contradicting `t₀ = sSup S`.
+    set t₁ : ℝ := min ((t₀ + u) / 2) 1 with ht₁_def
+    have ht₁_gt : t₀ < t₁ := by
+      rw [ht₁_def]; exact lt_min (by linarith) ht₀_lt_one
+    have ht₁_le_one : t₁ ≤ 1 := by rw [ht₁_def]; exact min_le_right _ _
+    have ht₁_lt_u : t₁ < u := by
+      rw [ht₁_def]
+      calc min ((t₀ + u) / 2) 1 ≤ (t₀ + u) / 2 := min_le_left _ _
+        _ < u := by linarith
+    have ht₁S : t₁ ∈ S := by
+      refine ⟨⟨le_trans ht₀_lb ht₁_gt.le, ht₁_le_one⟩, ?_⟩
+      intro s hs
+      rcases le_or_gt s t₀ with hle | hgt
+      · -- `s ≤ t₀`: from `t₀ ∈ S`.
+        exact ht₀S.2 s ⟨hs.1, hle⟩
+      · -- `t₀ < s ≤ t₁ < u`: from the forward good neighbourhood.
+        have hs_Ico : s ∈ Set.Ico t₀ u := ⟨le_of_lt hgt, lt_of_le_of_lt hs.2 ht₁_lt_u⟩
+        obtain ⟨hsrc, hsρ⟩ := hu_sub hs_Ico
+        refine ⟨hsrc, ?_⟩
+        -- `ρ s < R` and confinement up to `s` give `ρ s ≤ L₀` by the fence.
+        have hconf : ∀ z ∈ Set.Icc (0 : ℝ) s, γ z ∈ ψ.source ∧ ρ z < R := by
+          intro z hz
+          rcases le_or_gt z t₀ with hzle | hzgt
+          · obtain ⟨hzsrc, hzρ⟩ := ht₀S.2 z ⟨hz.1, hzle⟩
+            exact ⟨hzsrc, lt_of_le_of_lt hzρ hL₀_lt_R⟩
+          · have hz_Ico : z ∈ Set.Ico t₀ u :=
+              ⟨le_of_lt hzgt, lt_of_le_of_lt hz.2 (lt_of_le_of_lt hs.2 ht₁_lt_u)⟩
+            exact hu_sub hz_Ico
+        exact hfence s ⟨hs.1, le_trans hs.2 ht₁_le_one⟩ hconf
+    -- Contradiction: `t₁ ≤ sSup S = t₀ < t₁`.
+    exact absurd (le_csSup hSbdd ht₁S) (not_le.mpr ht₁_gt)
+  -- Conclude `1 ∈ S`.
+  rw [← ht₀_eq_one]; exact ht₀S
+
+/-- **The metric ball is contained in the normal ball.** A point `y` at finite
+Riemannian distance `< expRadiusGp g c` from `c` lies in the source of the normal
+chart at `c` and equals the radial exponential image `expMap g c v` of the chart
+coordinate `v := normalChartAt g c y`, which lies in the chart target and in the
+natural exponential domain, and whose `g_c`-length equals the Riemannian distance
+from `c` to `y`.
+
+The proof exhibits a near-minimising `C¹` path from `c` to `y` of length below
+`R := expRadiusGp g c` (`exists_lt_of_riemannianEDist_lt`), confines it to the
+normal ball by the first-exit argument `path_confined_to_normalBall`, reads off
+`y = expMap g c v` from the chart round-trip, and identifies the `g_c`-radius with
+the distance via the radial distance identity `radial_riemannianEDist_eq_radius`. -/
+theorem metricBall_subset_normalBall
+    (g : SmoothRiemannianMetric I M) (c : M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+        ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    {y : M} (hfin : riemannianEDist I c y ≠ ⊤)
+    (hy : (riemannianEDist I c y).toReal < expRadiusGp (I := I) g c) :
+    ∃ v : E, v ∈ (NormalCoordinates.normalChartAt (I := I) g c).target ∧
+        (show TangentSpace I c from v) ∈ expDomain (I := I) g c ∧
+        Real.sqrt (g.inner c (show TangentSpace I c from v) (show TangentSpace I c from v))
+          = (riemannianEDist I c y).toReal ∧
+        y = expMap (I := I) g c v := by
+  classical
+  set ψ := NormalCoordinates.normalChartAt (I := I) g c with hψ_def
+  -- From `.toReal < R` and finiteness, get `riemannianEDist c y < ofReal R`.
+  have hlt : riemannianEDist I c y < ENNReal.ofReal (expRadiusGp (I := I) g c) :=
+    (ENNReal.lt_ofReal_iff_toReal_lt hfin).mpr hy
+  -- A near-minimising path of length below `R`.
+  obtain ⟨γ, hγ0, hγ1, hγ, hγlen⟩ := exists_lt_of_riemannianEDist_lt hlt
+  -- Confine it to the normal ball.
+  obtain ⟨hy_src, hy_rad⟩ :=
+    path_confined_to_normalBall (I := I) g c hEnorm hγ hγ0 hγlen 1 ⟨zero_le_one, le_rfl⟩
+  rw [hγ1] at hy_src hy_rad
+  -- The chart coordinate `v := ψ y`.
+  set v : E := ψ y with hv_def
+  have hv_small : Real.sqrt (g.inner c v v) < expRadiusGp (I := I) g c := hy_rad
+  -- `v ∈ ψ.target`, `v ∈ expDomain c`.
+  have hv_eucl : ‖v‖ < expMapC2Radius (I := I) g c :=
+    norm_lt_expMapC2Radius_of_sqrt_inner_lt (I := I) g c hv_small
+  have hv_ball : v ∈ ψ.target := by
+    rw [hψ_def]; exact ball_subset_normalChartAt_target (I := I) g c hv_eucl
+  have hv_dom : (show TangentSpace I c from v) ∈ expDomain (I := I) g c :=
+    mem_expDomain_of_norm_lt_radius (I := I) g c hv_eucl
+  -- Chart round-trip: `y = ψ.symm v = expMap c v`.
+  have hy_eq : y = expMap (I := I) g c (show TangentSpace I c from v) := by
+    have hround : ψ.symm (ψ y) = y := by
+      rw [hψ_def]; exact NormalCoordinates.normalChartAt_left_inv (I := I) g c hy_src
+    have hsymm : ψ.symm v = expMap (I := I) g c (show TangentSpace I c from v) := by
+      rw [hψ_def]
+      exact NormalCoordinates.normalChartAt_symm_apply (I := I) g c
+        (show v ∈ ψ.symm.source from hv_ball)
+    rw [← hround, ← hv_def, hsymm]
+  -- The Riemannian distance from `c` to `y` equals the `g_c`-radius of `v`.
+  have hdist_eq : riemannianEDist I c (expMap (I := I) g c (show TangentSpace I c from v))
+      = ENNReal.ofReal (Real.sqrt (g.inner c v v)) :=
+    radial_riemannianEDist_eq_radius (I := I) g c hEnorm hv_dom hv_ball hv_small
+  refine ⟨v, hv_ball, hv_dom, ?_, hy_eq⟩
+  -- `√(g_c(v,v)) = (riemannianEDist c y).toReal`.
+  have hdy : riemannianEDist I c y = ENNReal.ofReal (Real.sqrt (g.inner c v v)) := by
+    rw [hy_eq]; exact hdist_eq
+  rw [hdy, ENNReal.toReal_ofReal (Real.sqrt_nonneg _)]
+
 end LocalRadialIdentification
 
 end RadialMinimizerConvention
