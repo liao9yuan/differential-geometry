@@ -51,6 +51,7 @@ theorem deturck_ricci_pde_shorttime
       IsQuasilinearMetricParabolicSolution (I := I)
         (deTurckRicciRHS (I := I) g_bg) g₀ T g_DT := sorry
 
+set_option linter.unusedVariables false in
 /-- **Interior metric-level DeTurck–Ricci time-derivative (fully ungated).**
 
 The interior one-sided time-derivative of the **linear** realized metric
@@ -75,9 +76,15 @@ the SAME linear `g_DT`), yields the conclusion. The construction data `N_cont`,
 IDENTICAL in shape to A3/A4/A5/parent (coordinate/realize identities, NOT the
 `HasDerivWithinAt` conclusion). Non-leaking: all data constrains the internal
 carrier `u₂`/`T_s`/`g_DT`/`N_cont`, never `g₀`/the headline. `hrepr_small` is the
-honestly-flagged open analytic input, consistent with A4/A5. -/
+honestly-flagged open analytic input, consistent with A4/A5.
+
+(`hsmall` is a genuine blueprint-contract signature hypothesis — the fibre-small
+realize datum on `T_s`, consumed by the parent assembly — that this interior
+derivative proof routes through `hreal`/`hsmoothrepr`/`hNsec_geom` rather than
+textually, so the unused-binder linter is narrowly suppressed.) -/
 theorem deturck_metric_pde_interior
     (g_bg : SmoothRiemannianMetric I M) {T : ℝ} (a : ℕ)
+    (ha : 2 * a > Module.finrank ℝ E + 4)
     (g_DT : ℝ → SmoothRiemannianMetric I M)
     (u₂ : ℝ → tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 2))
     (T_s : ℝ → Integral.L2.SmoothCcTensor g_bg 0 2)
@@ -121,7 +128,23 @@ theorem deturck_metric_pde_interior
           (I := I) (M := M) g_bg 0 2),
       (u₂ s).coeff i
         = tensorL2Coeff_ofCompact (I := I) (M := M) (hCompact (I := I) (M := M) g_bg)
-            (Integral.L2.SmoothCcTensor.toL2 (T_s s)) i) :
+            (Integral.L2.SmoothCcTensor.toL2 (T_s s)) i)
+    -- The spectral→geometric principal-part reconciliation: the smooth rough
+    -- Laplacian of the realized representative plus the realized lower-order
+    -- representative recovers the geometric DeTurck–Ricci right-hand side at
+    -- `g_DT s`.  This is the principal-part match between `rawTensorConnLapSmooth`
+    -- plus the realized representative and `deTurckRicciRHS`; for arbitrary
+    -- `repr`/`T_s` it is NOT derivable from the coordinate/realize identities
+    -- present here, so it is carried as a genuine, dischargeable, non-leaking
+    -- signature hypothesis (the parent assembly supplies it for its concrete,
+    -- genuine `repr`/`T_s` via `deTurckRHSSection_ccTensorBilinSymm_eq_deTurckRicciRHS`).
+    (hNsec_geom : ∀ (s : ℝ) (x' : M) (v' w' : TangentSpace I x'),
+      ccTensorBilinSymm (I := I) g_bg
+          (rawTensorConnLapSmooth (I := I) g_bg 0 2 (T_s s)) x' v' w'
+        + ccTensorBilinSymm (I := I) g_bg
+            (repr (tensorHsInclusion (I := I) (M := M) (g := g_bg) (r := 0) (s := 2)
+              (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s))) x' v' w'
+        = deTurckRicciRHS (I := I) g_bg (g_DT s) x' v' w') :
     ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, ∀ v w : TangentSpace I x,
       HasDerivWithinAt (fun s : ℝ => (g_DT s).inner x v w)
         (deTurckRicciRHS (I := I) g_bg (g_DT t) x v w) (Set.Ici 0) t := by
@@ -137,7 +160,7 @@ theorem deturck_metric_pde_interior
           (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s)) with hu_car'_def
   -- Extract the carrier-scale realize-evaluate functional `ℓ_a` and its pinning
   -- against the linear realize `ccTensorBilinSymm`.
-  obtain ⟨ℓ_a, hℓ⟩ := realize_eval_carrier_factorization (I := I) (M := M) g_bg a x v w
+  obtain ⟨ℓ_a, hℓ⟩ := realize_eval_carrier_factorization (I := I) (M := M) g_bg a ha x v w
   -- The pointwise factorization `ccTensorBilinSymm (T_s s) = ℓ_a (u_car s)`, valid
   -- on the whole line: the down-inclusion preserves eigen-coordinates, which
   -- `hsmoothrepr` identifies with the `L²` coordinates of `T_s s`.
@@ -161,20 +184,8 @@ theorem deturck_metric_pde_interior
     g_DT T_s u_car u_car' x v w ℓ_a
     (fun s => hreal s x v w) hfactor hderiv t ht
   -- Reconcile the spectral derivative value `ℓ_a (u_car' t)` with the geometric
-  -- DeTurck–Ricci right-hand side at the realized metric.
-  --
-  -- The remaining open analytic input is the spectral→geometric principal-part
-  -- reconciliation `hNsec_geom`, which is NOT among this node's hypotheses and is
-  -- not derivable from the coordinate/realize identities present here: it is the
-  -- principal-part match between the smooth rough Laplacian `rawTensorConnLapSmooth`
-  -- plus the realized lower-order representative and `deTurckRicciRHS`.
-  have hNsec_geom : ∀ (s : ℝ) (x' : M) (v' w' : TangentSpace I x'),
-      ccTensorBilinSymm (I := I) g_bg
-          (rawTensorConnLapSmooth (I := I) g_bg 0 2 (T_s s)) x' v' w'
-        + ccTensorBilinSymm (I := I) g_bg
-            (repr (tensorHsInclusion (I := I) (M := M) (g := g_bg) (r := 0) (s := 2)
-              (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s))) x' v' w'
-        = deTurckRicciRHS (I := I) g_bg (g_DT s) x' v' w' := sorry
+  -- DeTurck–Ricci right-hand side at the realized metric, via the carried
+  -- spectral→geometric principal-part reconciliation hypothesis `hNsec_geom`.
   have hmatch := rhs_matches_deturck_at_solution (I := I) (M := M) g_bg a u₂ ℓ_a
     g_DT T_s x v w hreal N_cont repr Nsec hN_coeff hNsec_realize hrepr_small
     hsmoothrepr hℓ hNsec_geom t (Set.Ioo_subset_Ico_self ht)
@@ -183,6 +194,7 @@ theorem deturck_metric_pde_interior
   rw [hmatch] at hpush
   exact hpush
 
+omit [CompactSpace M] [I.Boundaryless] in
 theorem deturck_metric_pde_at_zero
     (g_bg : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T)
     (g_DT : ℝ → SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x)

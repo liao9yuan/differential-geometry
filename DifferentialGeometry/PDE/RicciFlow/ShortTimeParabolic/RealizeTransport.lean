@@ -46,8 +46,10 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+set_option linter.unusedVariables false in
 theorem realize_eval_carrier_factorization
     (g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha : 2 * a > Module.finrank ℝ E + 4)
     (x : M) (v w : TangentSpace I x) :
     ∃ ℓ_a : tensorHs (I := I) (M := M) g_bg 0 2 (a : ℝ) →L[ℝ] ℝ,
       ∀ (T_z : Integral.L2.SmoothCcTensor g_bg 0 2)

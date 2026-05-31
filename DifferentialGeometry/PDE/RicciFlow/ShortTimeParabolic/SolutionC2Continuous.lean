@@ -101,7 +101,7 @@ theorem deturck_solution_c2_continuous_icc0
       ContinuousOn (fun s : ℝ => (g_DT s).inner x v w) (Set.Icc 0 T) := by
     intro x v w
     obtain ⟨ℓ_a, hℓ_a⟩ :=
-      realize_eval_carrier_factorization (I := I) (M := M) g_bg a x v w
+      realize_eval_carrier_factorization (I := I) (M := M) g_bg a ha x v w
     -- The realize functional reproduces the linear realize at every time `s`.
     have hval : ∀ s : ℝ,
         (g_DT s).inner x v w = g_bg.inner x v w + ℓ_a (u s) := by
