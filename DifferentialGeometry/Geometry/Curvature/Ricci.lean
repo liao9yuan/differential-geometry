@@ -59,7 +59,7 @@ manifestly symmetric in `(i, k)` by trace cyclicity.
 * `chartRicciTensor_symm`: `Rc_{ik}(α, y) = Rc_{ki}(α, y)` on the interior.
 * `chartRicciTensor_symm_of_boundaryless`: the same on the chart source under
   `[I.Boundaryless]`.
-* `ricciFun_symm`: pointwise symmetry of `ricciFun g` under `[I.Boundaryless]`.
+* `ricciFun_isPointwiseSymm_of_boundaryless`: pointwise symmetry of `ricciFun g` under `[I.Boundaryless]`.
 -/
 
 noncomputable section
@@ -1267,8 +1267,13 @@ theorem chartRicciTensor_symm_of_boundaryless [I.Boundaryless]
     extChartAt_target_subset_interior_of_boundaryless (I := I) α hx_target
   exact chartRicciTensor_symm (I := I) g α i k hx_int
 
-/-- **Pointwise symmetry of `ricciFun`** under `[I.Boundaryless]`. -/
-theorem ricciFun_symm [I.Boundaryless]
+/-- The pointwise Ricci bilinear form `ricciFun g` of a smooth Riemannian metric
+`g` is symmetric on a boundaryless manifold: `ricciFun g x v w = ricciFun g x w v`
+for every `x`, `v`, `w`. The boundaryless hypothesis is used so that every point
+lies in the interior of its chart target, where `chartRicciTensor_symm` applies;
+the chart-level symmetry is then transported through
+`ricciFun_symm_of_chartRicciTensor_symm`. -/
+theorem ricciFun_isPointwiseSymm_of_boundaryless [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) :
     IsPointwiseSymm (ricciFun (I := I) (M := M) g) := by
   refine ricciFun_symm_of_chartRicciTensor_symm (I := I) (M := M) g ?_

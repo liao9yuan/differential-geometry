@@ -25,7 +25,7 @@ The five declarations:
   of `[0,1]` adapted to a loop's pullback cover.
 * `uc_pi1_countable_piece_homotopy` — homotopy uniqueness of paths
   inside a single basis element with matching endpoints.
-* `uc_pi1_countable_polygonal_enumeration` — the headline countable
+* `fundamentalGroup_countable_surjection_of_nullHomotopic_basis` — the headline countable
   surjection onto the fundamental group.
 -/
 
@@ -656,21 +656,29 @@ lemma uc_pi1_countable_telescope
       (⟦_root_.Path.concat (p ∘ Fin.castSucc) (fun i => F i.castSucc)⟧)
       (⟦F (Fin.last n)⟧) (⟦c (Fin.last n).succ⟧)).symm
 
-/-- **Polygonal enumeration.** The fundamental group of a second-countable,
-connected, locally-path-connected, semi-locally-simply-connected space
-admits a surjection from a countable indexing set.
+/-- Given a countable open basis `B : ℕ → Set X` whose sets are
+path-connected, whose ambient loops are null-homotopic, and whose pairwise
+intersections are path-connected, the fundamental group `FundamentalGroup X x`
+of a second-countable connected locally-path-connected
+semi-locally-simply-connected space is the surjective image of a countable
+indexing type: there exist a countable `S` and a surjection
+`f : S → FundamentalGroup X x`.
 
-Argument: combine `uc_pi1_countable_basis_refinement`,
-`uc_pi1_countable_anchors`, `uc_pi1_countable_lebesgue_subdivision`,
-`uc_pi1_countable_piece_homotopy`, and `Path.trans_truncate_homotopic`.
-Every loop based at `x` is path-homotopic to a finite concatenation of
-truncations whose ranges lie inside refined basis sets; the truncations
-are then replaced by canonical anchor-to-anchor *polygonal segments*
-inside each `B (idx i)` via the basis-element null-homotopy property of
-`uc_pi1_countable_piece_homotopy` and an interior-vertex anchor
-substitution. The polygonal loop's class depends only on `(k, idx) :
-Σ k, Fin k → ℕ`, a countable type. -/
-theorem uc_pi1_countable_polygonal_enumeration
+The good basis is a supplied hypothesis here (`hBopen`, `hBpc`, `hBnull`,
+`hBbasis`, `hpcInter`); it is produced for an arbitrary such space by
+`uc_pi1_countable_basis_refinement`.
+
+Argument (classical Hatcher §1.3 / Spanier §2.4 polygonal reduction). Using
+the countable anchors of `uc_pi1_countable_anchors`, the indexing type is
+`S := Σ k : ℕ, Fin k → ℕ` (a sequence of basis indices, one per segment),
+which is countable, and `f s` is the class of the polygonal loop whose
+vertices are the chosen anchors. Surjectivity: an arbitrary loop is
+Lebesgue-subdivided (`uc_pi1_countable_lebesgue_subdivision`) into truncations
+each lying inside a single basis set `B (idx i)`; each truncation is replaced
+by the canonical anchor-to-anchor segment in `B (idx i)` using the homotopy
+uniqueness of `uc_pi1_countable_piece_homotopy` together with
+`Path.trans_truncate_homotopic`, so the loop's class equals `f ⟨k, idx⟩`. -/
+theorem fundamentalGroup_countable_surjection_of_nullHomotopic_basis
     (X : Type*) [TopologicalSpace X]
     [SecondCountableTopology X] [ConnectedSpace X] [LocPathConnectedSpace X]
     [DifferentialGeometry.Geometry.Riemannian.Topology.SemilocallySimplyConnectedSpace X]

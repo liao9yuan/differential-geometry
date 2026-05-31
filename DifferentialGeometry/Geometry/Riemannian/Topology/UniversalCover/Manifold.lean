@@ -18,7 +18,7 @@ import DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.Countabl
 Equips the universal cover `UniversalCover M` of a smooth manifold `M`
 with its own smooth-manifold structure, transported through the local
 homeomorphism `proj : UniversalCover M → M` (which is a covering map by
-`UniversalCover.isCoveringMap`).
+`UniversalCover.proj_isCoveringMap`).
 
 The instances assembled here are:
 
@@ -59,7 +59,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 /-- **Local section of `proj` around a point of the universal cover.**
 
-`UniversalCover.isCoveringMap.isLocalHomeomorph` provides, for each
+`UniversalCover.proj_isCoveringMap.isLocalHomeomorph` provides, for each
 cover-point, an `OpenPartialHomeomorph` whose underlying map agrees with
 `proj` and whose source contains the cover-point. We pick one such
 homeomorphism via `Classical.choose`. -/
@@ -68,13 +68,13 @@ noncomputable def localSection
     OpenPartialHomeomorph
       (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) M :=
   Classical.choose
-    ((UniversalCover.isCoveringMap (X := M)).isLocalHomeomorph xt)
+    ((UniversalCover.proj_isCoveringMap (X := M)).isLocalHomeomorph xt)
 
 lemma mem_source_localSection
     (xt : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :
     xt ∈ (localSection xt).source :=
   (Classical.choose_spec
-    ((UniversalCover.isCoveringMap (X := M)).isLocalHomeomorph xt)).1
+    ((UniversalCover.proj_isCoveringMap (X := M)).isLocalHomeomorph xt)).1
 
 lemma proj_eq_localSection
     (xt : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :
@@ -82,7 +82,7 @@ lemma proj_eq_localSection
         DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M → M)
       = localSection xt :=
   (Classical.choose_spec
-    ((UniversalCover.isCoveringMap (X := M)).isLocalHomeomorph xt)).2
+    ((UniversalCover.proj_isCoveringMap (X := M)).isLocalHomeomorph xt)).2
 
 /-- The chart at `xt` in the universal cover: compose the chosen local
 section with the model chart `chartAt H (proj xt)`. -/
@@ -368,7 +368,7 @@ instance instT2Space :
   have hSep : IsSeparatedMap
       (proj :
         DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M → M) :=
-    UniversalCover.isCoveringMap.isSeparatedMap
+    UniversalCover.proj_isCoveringMap.isSeparatedMap
   refine ⟨?_⟩
   intro a b hab
   by_cases h : proj a = proj b
@@ -380,7 +380,7 @@ instance instT2Space :
     have hpcont : Continuous
         (proj :
           DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M → M) :=
-      UniversalCover.isCoveringMap.continuous
+      UniversalCover.proj_isCoveringMap.continuous
     refine ⟨proj ⁻¹' U, proj ⁻¹' V,
       hUopen.preimage hpcont, hVopen.preimage hpcont, hpaU, hpbV, ?_⟩
     -- Disjoint preimages of disjoint sets.
@@ -390,7 +390,7 @@ instance instT2Space :
 
 /-- **Countability of the polygonal-loop representatives.**
 
-Auxiliary intermediate step for `pi1_countable_from_secondCountable`.
+Auxiliary intermediate step for `fundamentalGroup_countable_of_secondCountable`.
 On a second-countable, connected, locally path-connected, semi-locally
 simply connected space, the homotopy classes of loops at `x` are in
 surjective image of a countable indexing set. Concretely, one fixes a
@@ -419,37 +419,23 @@ theorem fundamentalGroup_isCountablyGenerated_aux
           JoinedIn (B m ∩ B n) a b) :
     ∃ (S : Type) (_ : Countable S) (f : S → FundamentalGroup X x),
       Function.Surjective f :=
-  uc_pi1_countable_polygonal_enumeration X x B hBopen hBpc hBnull hBbasis hpcInter
+  fundamentalGroup_countable_surjection_of_nullHomotopic_basis X x B hBopen hBpc hBnull hBbasis hpcInter
 
-/-- **Countability of the fundamental group for second-countable
-connected locally-simply-connected spaces.**
+/-- **The fundamental group is countable for a second-countable space with
+a good countable path-connected basis.**
 
-A polygonal-path approximation through a countable base topology: every
-loop is homotopic to a path along edges of a countable simplicial
-structure, of which there are only countably many up to homotopy.
+For a second-countable, connected, locally path-connected, semi-locally
+simply connected space `X`, given a countable family `B : ℕ → Set X` that is
+a topological basis of open, path-connected sets whose ambient loops are
+null-homotopic (`hBnull`) and whose pairwise intersections are internally
+path-joined (`hpcInter`), `FundamentalGroup X x` is `Countable`.
 
-The full classical argument decomposes into:
-
-1. Pick a countable basis `𝓑 = {Bₙ}` of `X` (from `SecondCountableTopology`)
-   refined to open path-connected sets each of which is contained in some
-   neighbourhood satisfying the semi-local condition.
-2. Pick a countable dense set of anchor points, one per nonempty pairwise
-   intersection `Bₙ ∩ Bₘ`.
-3. By the Lebesgue-number lemma, every loop in `X` based at `x` admits a
-   subdivision `0 = t₀ < t₁ < … < t_k = 1` and a finite sequence of basis
-   elements `B_{i₁}, …, B_{i_k}` with the image of `[t_{j-1}, t_j]` inside
-   `B_{iⱼ}`.
-4. Replacing each piece by the path joining the anchor points of
-   `B_{iⱼ₋₁} ∩ B_{iⱼ}` (which exists by path-connectedness of each `Bᵢ`),
-   we obtain a polygonal loop in `X` that is homotopic to the original by
-   the semi-local condition applied to each sub-piece.
-5. The set of all such polygonal loops, indexed by `List (ℕ × ℕ)` (basis
-   index plus anchor index in the relevant intersection), is countable;
-   its image in `FundamentalGroup X x` is therefore countable; and by
-   step 4 it is also surjective.
-
-This reduction is delivered as `fundamentalGroup_isCountablyGenerated_aux`. -/
-theorem pi1_countable_from_secondCountable
+The proof reduces to `fundamentalGroup_isCountablyGenerated_aux`, which
+produces a countable indexing set surjecting onto `FundamentalGroup X x`
+(every loop is homotopic to a polygonal loop along countably many basis
+edges); countability of the group then follows from surjectivity. The
+combinatorial polygonal-enumeration content lives in that auxiliary lemma. -/
+theorem fundamentalGroup_countable_of_secondCountable
     (X : Type*) [TopologicalSpace X]
     [SecondCountableTopology X]
     [ConnectedSpace X] [LocPathConnectedSpace X]
@@ -471,12 +457,19 @@ theorem pi1_countable_from_secondCountable
     fundamentalGroup_isCountablyGenerated_aux X x B hBopen hBpc hBnull hBbasis hpcInter
   exact Function.Surjective.countable hf
 
-/-- **Countability of fibres of the universal cover.**
+/-- **Fibres of the universal cover are countable.**
 
-The fibre `proj ⁻¹' {x}` is in bijection with `Path.Homotopic.Quotient
+For a second-countable smooth manifold `M`, every fibre `proj ⁻¹' {x}` is
+`Countable`. The fibre is in bijection with `Path.Homotopic.Quotient
 default x`, which by transport along a path from `default` to `x` is in
 bijection with `FundamentalGroup M default`; the latter is countable by
-`pi1_countable_from_secondCountable`. -/
+`fundamentalGroup_countable_of_secondCountable`.
+
+Open obligation: the good-cover input `hpcInter` (any two points common to
+two refined basis sets are joined by a path inside their intersection) is
+currently left as a `sorry`. On a smooth manifold this is supplied by a
+geodesically-convex (Whitehead) refinement, which requires the
+exponential-map normal-ball infrastructure not yet available here. -/
 theorem fibre_countable
     [SecondCountableTopology M]
     (x : M) :
@@ -506,7 +499,7 @@ theorem fibre_countable
     sorry
   have h_pi1_countable :
       Countable (FundamentalGroup M (default : M)) :=
-    pi1_countable_from_secondCountable M default B hBopen hBpc hBnull hBbasis hpcInter
+    fundamentalGroup_countable_of_secondCountable M default B hBopen hBpc hBnull hBbasis hpcInter
   haveI : PathConnectedSpace M := PathConnectedSpace.of_locPathConnectedSpace
   have hpath : Path (default : M) x := PathConnectedSpace.somePath default x
   -- Bijection between `proj ⁻¹' {x}` and `Path.Homotopic.Quotient default x`.
@@ -712,12 +705,14 @@ variable [SecondCountableTopology M] [Nonempty M]
 
 /-- **The universal cover is σ-compact.**
 
-Combine `UniversalCover.isCoveringMap`, `fibre_countable`, and
-`sigmaCompact_from_countable_fibre`. -/
+Combines `UniversalCover.proj_isCoveringMap`, `fibre_countable`, and
+`sigmaCompact_from_countable_fibre`. Since it relies on `fibre_countable`,
+this instance transitively inherits that lemma's open `hpcInter`
+(good-cover refinement) obligation. -/
 instance instSigmaCompactSpace :
     SigmaCompactSpace
       (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :=
-  sigmaCompact_from_countable_fibre UniversalCover.isCoveringMap fibre_countable
+  sigmaCompact_from_countable_fibre UniversalCover.proj_isCoveringMap fibre_countable
 
 /-- A finite-dimensional smooth manifold modelled on `ℝ` is locally
 compact (inherited from its model space). Provided here as a `theorem`
@@ -729,7 +724,7 @@ theorem locallyCompactSpaceBase (I : ModelWithCorners ℝ E H) :
 /-- **The universal cover is locally compact.**
 
 Local compactness pulls back along the local homeomorphism `proj`
-provided by `UniversalCover.isCoveringMap`. The base manifold's own
+provided by `UniversalCover.proj_isCoveringMap`. The base manifold's own
 local compactness is assumed as a class hypothesis here; downstream
 instances can supply it via `locallyCompactSpaceBase` (or, equivalently,
 `Manifold.locallyCompact_of_finiteDimensional`). -/
@@ -739,7 +734,7 @@ instance instLocallyCompactSpace [LocallyCompactSpace M] :
   -- `proj` is a covering map, hence a local homeomorphism.
   have hLH : IsLocalHomeomorph (proj :
       DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M → M) :=
-    UniversalCover.isCoveringMap.isLocalHomeomorph
+    UniversalCover.proj_isCoveringMap.isLocalHomeomorph
   refine ⟨fun xt n hn => ?_⟩
   -- Extract an `OpenPartialHomeomorph` around `xt`.
   obtain ⟨e, hxte, _hfe⟩ := hLH xt

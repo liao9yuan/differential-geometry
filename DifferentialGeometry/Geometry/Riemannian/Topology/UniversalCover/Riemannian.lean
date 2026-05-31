@@ -15,13 +15,15 @@ import Mathlib.Topology.VectorBundle.Riemannian
 Equips the universal cover `UniversalCover M` of a smooth Riemannian
 manifold `M` with its own smooth Riemannian metric, pulled back fiberwise
 along `proj : UniversalCover M → M` (which is a local diffeomorphism by
-the covering structure of `UniversalCover.isCoveringMap`).
+the covering structure of `UniversalCover.proj_isCoveringMap`).
 
 The pieces assembled here are:
 
 * `UniversalCover.liftedMetric g` — the lifted `SmoothRiemannianMetric`
-  on the universal cover. Fiberwise it is the pullback of `g` along the
-  invertible linear map `mfderiv I I proj x' : T_{x'} M̃ → T_{proj x'} M`.
+  on the universal cover. Fiberwise its inner product at `x'` is the inner
+  product of `g` at the base point `proj x'`, under the chart identification
+  of `T_{x'} (UniversalCover M)` with `T_{proj x'} M` along the local
+  diffeomorphism `proj`.
 * `UniversalCover.uc_pseudoEMetricSpace g` — the canonical
   `PseudoEMetricSpace` on the universal cover, built from
   `riemannianEDist` for the lifted bundle via Mathlib's
@@ -29,16 +31,16 @@ The pieces assembled here are:
   (`def` with the metric witness `g` and the model-with-corners `I`
   explicit) rather than `instance`, since the model-space parameters
   cannot be recovered from the conclusion type alone.
-* `uc_isRiemannianManifold g` — companion `theorem`: the
+* `isRiemannianManifold g` — companion `theorem`: the
   `IsRiemannianManifold` predicate holds for the canonical
   `uc_pseudoEMetricSpace g`, by `rfl` on `riemannianEDist`.
 * `uc_regularSpace` — the universal cover is a regular topological
   space (Hausdorff + locally compact ⇒ regular), discharging the
   `[RegularSpace (UC M)]` hypothesis of the principled API above.
-* `UniversalCover.proj_isLocalIsometry` — the pointwise statement that
-  `mfderiv I I proj x'` is a linear isometry from the tangent space at
-  `x'` (with the lifted metric) onto the tangent space at `proj x'`
-  (with the base metric).
+* `UniversalCover.liftedMetric_inner_eq` — the pointwise statement that the
+  lifted inner product at `x'` equals the base inner product `g.inner` at
+  `proj x'`, i.e. the chart identification carries the base metric to the
+  lifted metric at the level of fibre inner products (holds by `rfl`).
 -/
 
 open Set Function Filter Bundle
@@ -65,15 +67,17 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 /-- **The lifted smooth Riemannian metric on the universal cover.**
 
-For each `x' : UniversalCover M`, the fibre at `x'` is the pullback of the
-fibre of `g` at `proj x'` along the invertible continuous linear map
-`mfderiv I I proj x' : T_{x'} M̃ → T_{proj x'} M`.
+For each `x' : UniversalCover M`, the fibre inner product at `x'` is the
+inner product of `g` at the base point `proj x'`, transported via the
+identification of `T_{x'} (UniversalCover M)` with `T_{proj x'} M` by the
+local diffeomorphism `proj` (here both tangent spaces are the model space
+`E`, so the fibre inner product is literally `g.inner (proj x')`).
 
 Symmetry, positivity and `IsVonNBounded` inherit pointwise from `g`.
-Smoothness of the assembled section is BLOCKED on the still-stub
-`uc_hom_bundle_inCoordinates_pullback` (see `LiftedMetricSmoothness.lean`),
-which is a `True`-typed placeholder pending a cross-file
-private-visibility refactor of the cover-side chart accessors. -/
+Smoothness of the assembled section is supplied by
+`uc_liftedMetric_contMDiff` (see `LiftedMetricSmoothness.lean`), whose proof
+reduces the cover-side `inCoordinates` representation to the base-side one
+via `uc_hom_bundle_inCoordinates_pullback`. -/
 noncomputable def liftedMetric (g : SmoothRiemannianMetric I M) :
     SmoothRiemannianMetric I
       (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) where
@@ -116,12 +120,15 @@ the smooth-implies-continuous projection of `g`) so that Mathlib's
     ⟨g.inner, g.contMDiff.continuous, fun _ _ _ ↦ rfl⟩
   PseudoEMetricSpace.ofRiemannianMetric I _
 
-/-- **Principled `IsRiemannianManifold` for the universal cover.**
+/-- **`IsRiemannianManifold` for the universal cover.**
 
-Companion to `uc_pseudoEMetricSpace`: under the `letI`-injected
-canonical pseudo-emetric structure, the defining equation
-`edist x y = riemannianEDist I x y` holds by `rfl`. -/
-theorem uc_isRiemannianManifold
+For a lifted metric `g` on `UniversalCover M`, under the `letI`-injected
+`RiemannianBundle` and the canonical `uc_pseudoEMetricSpace g` structure
+the `IsRiemannianManifold I (UniversalCover M)` predicate holds: its
+defining equation `edist x y = riemannianEDist I x y` holds by `rfl`,
+because `uc_pseudoEMetricSpace` is reducibly
+`PseudoEMetricSpace.ofRiemannianMetric`. -/
+theorem isRiemannianManifold
     (g : SmoothRiemannianMetric I
         (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M))
     [RegularSpace
@@ -156,7 +163,7 @@ locally compact `R1` space is regular
 cover is regular.
 
 This discharges the `[RegularSpace (UniversalCover M)]` hypothesis of
-`uc_pseudoEMetricSpace` / `uc_isRiemannianManifold`, with no extra
+`uc_pseudoEMetricSpace` / `isRiemannianManifold`, with no extra
 ambient assumptions beyond the manifold structure already in scope.
 
 Supplied as a `theorem` (taking `I` explicitly) rather than an
@@ -171,15 +178,16 @@ theorem uc_regularSpace (I : ModelWithCorners ℝ E H) [I.Boundaryless] :
     Manifold.locallyCompact_of_finiteDimensional (M := M) I
   infer_instance
 
-/-- **`proj` is a local isometry on tangent spaces.**
+/-- **The lifted inner product equals the base inner product pulled back
+along `proj`.**
 
-At each `x' : UniversalCover M`, the derivative
-`mfderiv I I proj x' : T_{x'} M̃ → T_{proj x'} M` is a linear isomorphism
-(because `proj` is a local diffeomorphism), and by definition of the
-lifted metric it carries the lifted inner product on `T_{x'} M̃` to the
-original inner product on `T_{proj x'} M`. Packaged here as a linear
-isometric equivalence. -/
-theorem proj_isLocalIsometry (g : SmoothRiemannianMetric I M)
+For every `x' : UniversalCover M` and all `v w : E`, the lifted metric's
+inner product `(liftedMetric g).inner x'` agrees with `g.inner (proj x')`.
+This is the defining equation of `liftedMetric` (whose fibre inner product
+is literally `g.inner (proj x')`), so it holds by `rfl`. It records, at the
+level of fibre inner products, that the chart identification of the tangent
+spaces carries the base metric to the lifted metric. -/
+theorem liftedMetric_inner_eq (g : SmoothRiemannianMetric I M)
     (x' : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :
     ∀ (v w : E),
       g.inner (proj x') v w =

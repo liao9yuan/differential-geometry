@@ -541,7 +541,7 @@ theorem chartHessTrace_eq_laplacian
   -- Step 1: Voss–Weyl expansion of `Δ_g f`.
   have hxsrc : x ∈ (chartAt H α).source := mem_chart_source H x
   have hVW : Δ_g (I := I) g hf x = chartVossWeylLaplacian (I := I) g α f x :=
-    laplacian_eq_chartVossWeyl (I := I) g α hf hxsrc
+    voss_weyl_laplacian_formula_of_closed (I := I) g α hf hxsrc
   rw [hVW]
   -- Step 2: Hessian expansion of `chartHessTrace`.
   rw [chartHessTrace_expand (I := I) g f x]
@@ -3391,10 +3391,11 @@ theorem chartContractedChristoffel_holds_of_boundaryless [I.Boundaryless]
 We can now drop the `hcc` hypothesis from the headline trace identities by
 discharging it via `chartContractedChristoffel_holds_of_boundaryless`. -/
 
-/-- **Chart-coordinate trace identity** for the Hessian against the inverse Gram
-matrix (closed form): under `[I.Boundaryless]`, the chart-coordinate trace
-`∑_{ij} G^{ij}\,(\operatorname{Hess} f)_{ij}` of the chart Hessian equals the
-Laplacian. The contracted Christoffel hypothesis is discharged automatically. -/
+/-- On a closed (boundaryless, compact, T2, σ-compact) manifold, for smooth `f`
+the chart trace `chartHessTrace g f x` of the chart Hessian against the inverse
+Gram matrix equals the Laplace–Beltrami operator `Δ_g f x`. This is the closed
+form of `chartHessTrace_eq_laplacian`: the contracted-Christoffel hypothesis is
+discharged automatically via `chartContractedChristoffel_holds_of_boundaryless`. -/
 theorem chartHessTrace_eq_laplacian_of_boundaryless
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -3413,8 +3414,14 @@ theorem chartHessTrace_eq_laplacian_of_boundaryless
       (I := I) g x hx_target j
   exact chartHessTrace_eq_laplacian (I := I) g hf x hcc
 
-/-- **Trace identity (matrix form, closed)** under `[I.Boundaryless]`. -/
-theorem trace_hessFun_eq_laplacian_of_boundaryless
+/-- On a closed (boundaryless, compact, T2, σ-compact) manifold, for smooth `f`
+the explicit chart-coordinate trace
+`∑_{ij} (G⁻¹)_{ij}(x) · (Hess f)_{ij}(x)`, written out in terms of
+`chartInvGramMatrix` and `chartHessianTensor`, equals the Laplace–Beltrami
+operator `Δ_g f x`. This is the closed form of `trace_hessFun_eq_laplacian`:
+the contracted-Christoffel hypothesis is discharged automatically via
+`chartContractedChristoffel_holds_of_boundaryless`. -/
+theorem chartInvGram_trace_hessianTensor_eq_laplacian_of_boundaryless
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (x : M) :
@@ -3434,9 +3441,16 @@ theorem trace_hessFun_eq_laplacian_of_boundaryless
       (I := I) g x hx_target j
   exact trace_hessFun_eq_laplacian (I := I) g hf x hcc
 
-/-- **Bochner–Lichnerowicz dimension-Laplacian inequality (closed form)** under
-`[I.Boundaryless]`. The contracted Christoffel hypothesis is discharged
-automatically; only the orthonormality at `x` is supplied. -/
+/-- Dimension–Laplacian inequality `(Δ_g f x)² ≤ n · ∑_{ij} (Hess f)_{ij}(x)²`
+for smooth `f` on a closed (boundaryless, compact, T2, σ-compact) manifold,
+*assuming the chart is g-orthonormal at* `x` (the inverse Gram matrix at `x` is
+the identity). This is the pure Frobenius–trace Cauchy–Schwarz bound applied to
+the Hessian; it is not the Bochner formula and carries no Ricci term. The
+orthonormality hypothesis `h_orth` is what makes the naive (non-metric) chart
+Frobenius sum on the right the correct quantity. This is the closed form of
+`laplacian_sq_le_dim_mul_frobenius_sq_via_chartContracted`: the
+contracted-Christoffel hypothesis is discharged automatically via
+`chartContractedChristoffel_holds_of_boundaryless`. -/
 theorem laplacian_sq_le_dim_mul_frobenius_sq_of_orthonormal
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -3464,8 +3478,8 @@ theorem laplacian_sq_le_dim_mul_frobenius_sq_of_orthonormal
 /-! ## Compactness-free pointwise variant of the chart trace identity
 
 The proof of `chartHessTrace_eq_laplacian` uses `[CompactSpace M]` only
-indirectly, via `laplacian_eq_chartVossWeyl`. Substituting the pointwise
-chart Voss-Weyl identity `laplacian_eq_chartVossWeyl_pointwise` gives the
+indirectly, via `voss_weyl_laplacian_formula_of_closed`. Substituting the pointwise
+chart Voss-Weyl identity `voss_weyl_laplacian_formula_pointwise` gives the
 same conclusion without compactness. The remaining algebraic manipulation
 (Leibniz expansion of the chart Voss-Weyl Laplacian, contracted-Christoffel
 substitution, symmetrisation of the inverse Gram matrix) is purely chart-
@@ -3480,7 +3494,7 @@ work pointwise and cannot afford a compactness hypothesis. -/
 The chart-coordinate trace `∑_{ij} G^{ij} (Hess f)_{ij}(x)` equals `Δ_g f x`
 under the contracted Christoffel hypothesis, *without* requiring
 `[CompactSpace M]`. The proof is identical to `chartHessTrace_eq_laplacian`
-except it uses `laplacian_eq_chartVossWeyl_pointwise` for the Voss-Weyl
+except it uses `voss_weyl_laplacian_formula_pointwise` for the Voss-Weyl
 expansion of `Δ_g f x`. -/
 theorem chartHessTrace_eq_laplacian_pointwise
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
@@ -3496,7 +3510,7 @@ theorem chartHessTrace_eq_laplacian_pointwise
   -- Step 1: Voss–Weyl expansion of `Δ_g f` (compactness-free pointwise variant).
   have hxsrc : x ∈ (chartAt H α).source := mem_chart_source H x
   have hVW : Δ_g (I := I) g hf x = chartVossWeylLaplacian (I := I) g α f x :=
-    laplacian_eq_chartVossWeyl_pointwise (I := I) g α hf hxsrc
+    voss_weyl_laplacian_formula_pointwise (I := I) g α hf hxsrc
   rw [hVW]
   -- Step 2: Hessian expansion of `chartHessTrace`.
   rw [chartHessTrace_expand (I := I) g f x]

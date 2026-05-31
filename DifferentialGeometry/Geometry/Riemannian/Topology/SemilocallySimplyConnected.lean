@@ -88,11 +88,15 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
 include I in
-/-- Every point of a smooth manifold modelled on an inner-product space
-has an open neighbourhood that is contractible. The neighbourhood is the
-preimage, under the extended chart at `x`, of a small open ball around
-`extChartAt I x x` lying inside the chart's target. -/
-theorem chart_contractible_nhd_at_point (x : M) :
+/-- Every point `x` of a smooth manifold modelled on a (boundaryless,
+inner-product) model space has an open neighbourhood that is contractible.
+
+The neighbourhood is built as the preimage, under the open partial
+homeomorphism `e := (chartAt H x).transHomeomorph I.toHomeomorph` into the
+model space `E`, of a small open metric ball around `e x` contained in
+`e.target`; this preimage is homeomorphic to the ball, and the ball is
+contractible. -/
+theorem manifold_exists_contractible_open_nhd (x : M) :
     ∃ U : Set M, IsOpen U ∧ x ∈ U ∧ ContractibleSpace U := by
   -- Compose the chart at `x` with the model homeomorphism `I.toHomeomorph`
   -- (available because `I` is boundaryless) to get an open partial
@@ -153,7 +157,7 @@ theorem to discharge `SemilocallySimplyConnectedSpace M`. -/
 theorem manifold_semilocallySimplyConnectedSpace :
     SemilocallySimplyConnectedSpace M := ⟨by
   intro x
-  obtain ⟨U, hU_open, hxU, hU_contr⟩ := chart_contractible_nhd_at_point (I := I) x
+  obtain ⟨U, hU_open, hxU, hU_contr⟩ := manifold_exists_contractible_open_nhd (I := I) x
   refine ⟨U, hU_open.mem_nhds hxU, fun γ hγU => ?_⟩
   exact contractible_loops_nullhomotopic_in_subset hU_open hxU γ hγU⟩
 

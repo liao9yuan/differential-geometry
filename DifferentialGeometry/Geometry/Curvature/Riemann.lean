@@ -177,14 +177,14 @@ This is the same convention used by `hessFun` in the file
 `Hessian.lean`; in particular `pointwiseBilin` and `IsPointwiseSymm` are the
 project's standard carrier and symmetry predicate. -/
 
-/-- The pointwise Ricci tensor of a smooth Riemannian metric `g`, packaged
-as a `pointwiseBilin`. At each point `x`, the bilinear form is computed in
-the chart at `x`, summing the chart Ricci tensor entries against the
-model-basis representations of the input tangent vectors:
+/-- The pointwise Ricci tensor of a smooth Riemannian metric `g`, packaged as
+a `pointwiseBilin` (a real bilinear form on each `TangentSpace I x`). At each
+point `x` the form is evaluated in the chart at `x`: the input tangent vectors
+`v, w` are expanded in the canonical model basis `chartModelBasis E`, and the
+resulting coordinates are contracted against the `chartRicciTensor` entries at
+the chart center `extChartAt I x x`:
 $$\operatorname{Rc}(g)(x)(v, w) =
-    \sum_{i, k} v^i\,w^k \cdot \operatorname{Rc}_{ik}(x, \varphi_x(x)).$$
-The basis used to read off coordinates is the canonical model basis
-`chartModelBasis E`. -/
+    \sum_{i, k} v^i\,w^k \cdot \operatorname{Rc}_{ik}(x, \varphi_x(x)).$$ -/
 def ricciFun (g : SmoothRiemannianMetric I M) :
     pointwiseBilin (M := M) I :=
   fun x => LinearMap.mk₂ ℝ

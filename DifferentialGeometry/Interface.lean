@@ -16,7 +16,7 @@ namespace:
   `smoothToH1Compl`, `H1ComplToLp`, and their tensor counterparts.
 - Smooth Ricci tensor as a pointwise bilinear function `ricciBilinear`,
   together with `ricciBilinear_symm` and the trace identity
-  `ricciBilinear_eq_trace`, plus the bundled section types
+  `ricciBilinear_eq_trace_ricciEndo`, plus the bundled section types
   `Tensor02Section`, `Tensor04Section`, `Tensor13Section` and helpers.
 - Heat semigroup `e^{t Δ_g}` applied to smooth scalars via `heatFlow`,
   with `heatFlow_zero` and `heatFlow_norm_le` (`t ≥ 0`).

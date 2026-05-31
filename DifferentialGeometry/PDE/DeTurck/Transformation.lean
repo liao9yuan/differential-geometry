@@ -147,7 +147,7 @@ Applied to two tangent vectors, the operator returns `−2` times the Ricci tens
 
 `deTurckOp g g'` is a *symmetric* `(0,2)`-tensor: this is the genuine symmetry of the
 Ricci–DeTurck flow right-hand side.  Both constituents are symmetric — the Ricci tensor
-by `ricciFun_symm` and the metric Lie derivative by `lieDerivMetric_isPointwiseSymm` —
+by `ricciFun_isPointwiseSymm_of_boundaryless` and the metric Lie derivative by `lieDerivMetric_isPointwiseSymm` —
 and a scalar multiple and a sum of symmetric bilinear forms are symmetric. -/
 
 /-- **Symmetry of the Ricci–DeTurck operator as a `(0,2)`-tensor:**
@@ -161,7 +161,7 @@ theorem deTurckOp_isPointwiseSymm [I.Boundaryless]
     IsPointwiseSymm (deTurckOp (I := I) (M := M) g g') := by
   intro x v w
   rw [deTurckOp_apply, deTurckOp_apply]
-  rw [ricciFun_symm (I := I) g x v w,
+  rw [ricciFun_isPointwiseSymm_of_boundaryless (I := I) g x v w,
     lieDerivMetric_isPointwiseSymm (I := I) g (deTurckVF (I := I) g g') x v w]
 
 /-! ## The chart-component formula

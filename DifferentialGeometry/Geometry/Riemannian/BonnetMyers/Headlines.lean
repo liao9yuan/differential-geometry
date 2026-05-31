@@ -865,7 +865,7 @@ theorem bonnet_myers_finite_fundamentalGroup_of_ricci_bound
       IsCoveringMap
         (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.proj :
           DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M → M) :=
-    DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.UniversalCover.isCoveringMap
+    DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.UniversalCover.proj_isCoveringMap
   -- `PathConnectedSpace M`: from `[ConnectedSpace M]` + `[LocPathConnectedSpace M]`.
   haveI hpcM : PathConnectedSpace M :=
     PathConnectedSpace.of_locPathConnectedSpace
@@ -894,7 +894,7 @@ theorem bonnet_myers_finite_fundamentalGroup_of_ricci_bound
   haveI hSCM : SecondCountableTopology M :=
     ChartedSpace.secondCountable_of_sigmaCompact H M
   -- Compactness of the lifted manifold. This consumes the lifted instances and the
-  -- Ricci-bound pullback (`ricciBoundedBelow_pullback_universalCover`), and the
+  -- Ricci-bound pullback (`ricciBoundedBelow_liftedMetric_of_base`), and the
   -- still-sorry `CompleteSpace` of the universal cover. We package the latter as a
   -- local instance to mirror the upstream skeleton, then apply the proved compactness
   -- headline (Headline 2) to the lifted data.
@@ -916,7 +916,7 @@ theorem bonnet_myers_finite_fundamentalGroup_of_ricci_bound
         (I := I) g x
   have hRicLift :
       RicciBoundedBelow (I := I) gLift (((Module.finrank ℝ E : ℝ) - 1) * K) :=
-    DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.ricciBoundedBelow_pullback_universalCover
+    DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.ricciBoundedBelow_liftedMetric_of_base
       (I := I) (g := g) _hRic hBasisLift hBasisBase
   -- The universal cover is a regular topological space (Hausdorff + locally
   -- compact ⇒ regular); this discharges the `[RegularSpace (UC M)]` hypothesis
@@ -955,7 +955,7 @@ theorem bonnet_myers_finite_fundamentalGroup_of_ricci_bound
   haveI hRiemUC :
       IsRiemannianManifold I
         (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :=
-    DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.uc_isRiemannianManifold
+    DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.isRiemannianManifold
       (I := I) (M := M) gLift
   -- Completeness of the universal cover, principled (axiom-clean): every Cauchy
   -- sequence for the lifted extended metric converges, by `1`-Lipschitz
@@ -964,7 +964,7 @@ theorem bonnet_myers_finite_fundamentalGroup_of_ricci_bound
   haveI hCompUC :
       CompleteSpace
         (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :=
-    DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.completeSpace_universalCover_lifted
+    DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.completeSpace_of_complete
       (I := I) (M := M) g hEnormBase hEnormCover
   -- The lifted tangent bundle is a continuous Riemannian bundle: the fibre inner
   -- product is, by the installed `hRB = ⟨gLift.toRiemannianMetric⟩`, the lifted
@@ -1003,7 +1003,7 @@ theorem bonnet_myers_finite_fundamentalGroup_of_ricci_bound
         ((DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.proj :
             DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M → M)
           ⁻¹' {x}) :=
-    DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.fibre_finite
+    DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.isCoveringMap_fibre_finite_of_compact
       hcov x
   -- Pick a base lift `e' ∈ proj⁻¹{x}` via path-connectedness of `M`.
   obtain ⟨γ⟩ := PathConnectedSpace.joined (default : M) x

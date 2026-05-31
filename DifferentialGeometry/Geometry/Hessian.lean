@@ -517,11 +517,14 @@ The choice of basis is the canonical one provided by the carrier; using the
 model basis makes `hessFun g f` definitionally clean. The downstream symmetry
 property holds because the chart Hessian matrix is symmetric in `(i, j)`. -/
 
-/-- The pointwise Hessian of a smooth function `f` on a Riemannian manifold,
-packaged as a `pointwiseBilin`. At each point `x`, the bilinear form is computed
-in the chart at `x`, using the chart-coordinate Hessian formula involving the
-chart Christoffel symbols. The basis used to read off coordinates is the
-canonical model basis `chartModelBasis E`. -/
+/-- The pointwise Hessian of a function `f` on a Riemannian manifold `(M, g)`,
+packaged as a `pointwiseBilin I`. At each point `x` the value
+`hessFun g f x v w` is `∑ i j, vᵢ wⱼ (chartHessianTensor g x f i j x)`, where the
+components `vᵢ, wⱼ` are read off in the canonical model basis `chartModelBasis E`
+of `TangentSpace I x` and the matrix entries `chartHessianTensor g x f i j x` are
+the chart-coordinate Hessian (iterated partial derivatives minus the chart
+Christoffel correction), evaluated in the chart at `x`. The bilinearity fields
+record additivity and homogeneity in each argument. -/
 def hessFun (g : SmoothRiemannianMetric I M) (f : M → ℝ) :
     pointwiseBilin (M := M) I :=
   fun x => LinearMap.mk₂ ℝ
@@ -606,8 +609,12 @@ For smooth `f`, `hessFun g f` is pointwise symmetric: this follows from the
 symmetry of the chart Hessian matrix `(Hess f)_{ij}(x, x) = (Hess f)_{ji}(x, x)`,
 which holds at any chart-source point under `[I.Boundaryless]`. -/
 
-/-- **Symmetry of `hessFun`** for smooth functions, under `[I.Boundaryless]`. -/
-theorem hessFun_symm [I.Boundaryless]
+/-- **Symmetry of `hessFun`.** For a smooth scalar `f` on a boundaryless
+manifold, the pointwise Hessian bilinear form `hessFun g f` is symmetric:
+`hessFun g f x v w = hessFun g f x w v` for every point `x` and tangent vectors
+`v`, `w`. The proof reduces to the symmetry of the chart Hessian matrix in its
+two indices, which holds at any chart-source point under `[I.Boundaryless]`. -/
+theorem hessFun_symm_of_boundaryless [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :
     IsPointwiseSymm (hessFun (I := I) (M := M) g f) := by

@@ -65,7 +65,7 @@ vanishes wherever `mfderiv f x` does (in particular, off `tsupport f` where
 
 ## Main results
 
-* `tangentSectionAction_grad_g_eq_inner` : duality with the differential.
+* `tangentSectionAction_eq_inner_grad_g` : duality with the differential.
 * `inner_grad_g_symm` : symmetry of the metric on two gradients.
 * `hasCompactSupport_grad_g` : compact support of the gradient when `f` has
   compact support.
@@ -1084,10 +1084,11 @@ def grad_g [I.Boundaryless]
 
 /-! ## Duality with the tangent-section action -/
 
-/-- **Duality of gradient and tangent action.** The action of a smooth tangent
-section `X` on a smooth scalar `f` equals the metric inner product of `X` with
-the gradient `grad_g g hf`. -/
-theorem tangentSectionAction_grad_g_eq_inner [I.Boundaryless]
+/-- **Duality of gradient and directional derivative.** The action of a smooth
+tangent section `X` on a smooth scalar `f` at `x` — the directional derivative
+`mfderiv I 𝓘(ℝ) f x (X x)` — equals the metric inner product `g.inner x (X x)`
+of `X x` with the gradient `grad_g g hf x`. The manifold is boundaryless. -/
+theorem tangentSectionAction_eq_inner_grad_g [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :

@@ -21,7 +21,7 @@ Outline (Hatcher, Prop. 1.36, 1.39):
    over a path-connected open `U ⊆ X` in which every loop is
    null-homotopic in `X`, the basic open `basicOpen p U` projects
    bijectively onto `U`.
-2. Covering map structure (`UniversalCover.isCoveringMap`): the union of
+2. Covering map structure (`UniversalCover.proj_isCoveringMap`): the union of
    the sheets over each fibre realises evenly-covered neighbourhoods, so
    `proj` is a covering map.
 3. Path-connectedness (`UniversalCover.pathConnectedSpace`): every
@@ -280,14 +280,20 @@ private theorem uc_sheet_proj_isOpenMap
 set_option linter.dupNamespace false in
 /-- **The projection is a covering map.**
 
+The projection `proj : UniversalCover X → X` is a covering map, given that
+`X` is connected, locally path-connected, and semi-locally simply connected
+(the instance hypotheses on `X`).
+
 For each `x : X`, choose a path-connected open neighbourhood `U` of `x`
 (from `LocPathConnectedSpace X`) on which every loop based at `x` is
 null-homotopic in `X` (from `SemilocallySimplyConnectedSpace X`). The
 preimage `proj ⁻¹' U` decomposes as the disjoint union of the sheets
 `basicOpen p U _ _` indexed by `p ∈ proj ⁻¹' {x}`; each sheet maps
 homeomorphically onto `U` by `uc_sheet_bijection_on_good_U`; the fibre
-`proj ⁻¹' {x}` carries the discrete topology. -/
-theorem UniversalCover.isCoveringMap :
+`proj ⁻¹' {x}` carries the discrete topology. Together these data assemble
+the explicit homeomorphism `proj ⁻¹' U ≃ₜ U × (proj ⁻¹' {x})` witnessing
+that `U` is evenly covered. -/
+theorem UniversalCover.proj_isCoveringMap :
     IsCoveringMap (proj :
       DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover X → X) := by
   intro x
@@ -674,7 +680,7 @@ theorem uc_basePoint_loops_nullhomotopic
   -- `δ` and the subpath lift of `proj ∘ δ` are both lifts starting at basePoint.
   have hcov : IsCoveringMap
       (proj : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover X → X) :=
-    UniversalCover.isCoveringMap
+    UniversalCover.proj_isCoveringMap
   -- View `proj ∘ δ` as a path from `default` to `default`.
   set γ : _root_.Path (default : X) default :=
     { toFun := proj ∘ δ

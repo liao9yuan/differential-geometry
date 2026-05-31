@@ -56,7 +56,7 @@ For smooth `f, h : M → ℝ` with at least one compactly supported, the gradien
 of `h` is a compactly-supported smooth tangent section, and we can apply the
 basic integration-by-parts identity from `IntegrationByParts.lean` with this
 section. The duality `tangentSectionAction X f x = g.inner x (X x) (grad_g f x)`
-(provided by `tangentSectionAction_grad_g_eq_inner`) and the symmetry of the
+(provided by `tangentSectionAction_eq_inner_grad_g`) and the symmetry of the
 metric yield the integrand `g.inner x (grad_g f x) (grad_g h x)`.
 
 Because the divergence of `grad_g h` equals the Laplacian `Δ_g h`, the right-
@@ -99,8 +99,8 @@ theorem integral_inner_grad_eq_neg_integral_smul_laplacian
           ((grad_g (I := I) g hh :
             Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x) := by
     intro x
-    rw [tangentSectionAction_grad_g_eq_inner (I := I) g hf X x]
-    -- `tangentSectionAction_grad_g_eq_inner` gives:
+    rw [tangentSectionAction_eq_inner_grad_g (I := I) g hf X x]
+    -- `tangentSectionAction_eq_inner_grad_g` gives:
     -- `tangentSectionAction X f x = g.inner x (X x) (grad_g g hf x)`.
     -- Now with `X = grad_g g hh`, this is `g.inner x (grad_g g hh x) (grad_g g hf x)`.
     -- Apply symmetry to swap.
@@ -170,7 +170,7 @@ private theorem integral_inner_grad_eq_neg_integral_smul_laplacian'
           ((grad_g (I := I) g hh :
             Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x) := by
     intro x
-    rw [tangentSectionAction_grad_g_eq_inner (I := I) g hh X x]
+    rw [tangentSectionAction_eq_inner_grad_g (I := I) g hh X x]
   have hRHS_eq : ∀ x : M,
       h x * divergence_g (I := I) g X x = h x * Δ_g (I := I) g hf x := by
     intro x; rfl

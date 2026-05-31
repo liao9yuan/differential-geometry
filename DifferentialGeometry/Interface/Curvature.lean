@@ -54,8 +54,9 @@ noncomputable def ricciBilinear (g : DifferentialGeometry.Integral.Measure.Smoot
   ricciTensor (I := I) g x v w
 
 set_option linter.unusedSectionVars false in
-/-- **Symmetry of the Ricci tensor.** `Ric(v, w) = Ric(w, v)` for every pair
-of tangent vectors at every point. Restatement of `ricciTensor_symm`. -/
+/-- **Symmetry of the Ricci tensor.** `ricciBilinear g x v w = ricciBilinear g x w v`
+for every pair of tangent vectors `v, w` at every point `x`. Facade restatement of
+`ricciTensor_symm` through the `ricciBilinear` adapter. -/
 theorem ricciBilinear_symm (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M) (x : M)
     (v w : TangentSpace I x) :
     ricciBilinear (I := I) (M := M) g x v w =
@@ -63,9 +64,10 @@ theorem ricciBilinear_symm (g : DifferentialGeometry.Integral.Measure.SmoothRiem
   ricciTensor_symm (I := I) g x v w
 
 set_option linter.unusedSectionVars false in
-/-- **Trace identity for the Ricci tensor.** `Ric(v, w)` is the trace of the
-endomorphism `Z ↦ R(Z, v) w` of `T_x M`. Restatement of `ricciTensor_apply`. -/
-theorem ricciBilinear_eq_trace (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M) (x : M)
+/-- **Trace identity for the Ricci tensor.** `ricciBilinear g x v w` equals the trace
+of the endomorphism `ricciEndo g x v w`, i.e. the trace of `Z ↦ R(Z, v) w` on `T_x M`.
+Facade restatement of `ricciTensor_apply` through the `ricciBilinear` adapter. -/
+theorem ricciBilinear_eq_trace_ricciEndo (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M) (x : M)
     (v w : TangentSpace I x) :
     ricciBilinear (I := I) (M := M) g x v w =
       LinearMap.trace ℝ (TangentSpace I x) (ricciEndo (I := I) g x v w) :=

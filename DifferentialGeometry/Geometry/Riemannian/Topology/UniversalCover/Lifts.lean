@@ -68,7 +68,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 /-- **Naturality of the Levi-Civita connection under `proj`.**
 The Levi-Civita connection of the lifted metric on `M'` agrees, fibrewise
-through the linear isometric equivalence `proj_isLocalIsometry`, with the
+through the linear isometric equivalence `liftedMetric_inner_eq`, with the
 Levi-Civita connection of `g` on `M` applied to the pushforward of a
 section. Equivalently, the `mfderiv proj`-pullback of `LeviCivita g` is
 torsion-free and metric-compatible with respect to `liftedMetric g`, hence
@@ -190,17 +190,17 @@ theorem ricciTensor_lifted_natural (g : SmoothRiemannianMetric I M)
   rw [hRiem]
 
 /-- **Ricci lower bound transfers to the universal cover.**
-If `Ric_g ≥ κ · g` on `M`, then `Ric_{liftedMetric g} ≥ κ · (liftedMetric g)`
-on `M'`. Proof: at any `x'` and `v'`, set `x := proj x'`; by
-`proj_isLocalIsometry`, the inner products agree, and by
-`ricciTensor_lifted_natural` the Ricci values agree; apply `hRic x v'`.
+If `RicciBoundedBelow g κ` holds on `M` (i.e. `Ric_g ≥ κ · g`), then
+`RicciBoundedBelow (liftedMetric g) κ` holds on the universal cover.
+At any cover point `x'` and tangent vector `v'`, set `x := proj x'`; the
+inner products agree by `liftedMetric_inner_eq` and the Ricci values agree
+by `ricciTensor_lifted_natural`, so the base bound `hRic x v'` carries over.
 
-The pull-back of the lower bound is conditional on the chart-Riemann
-basis identification holding globally (both on the base and on the
-universal cover), reflecting the deferred deep chart-Christoffel
-computation that bridges the abstract Riemann operator to the chart
-Riemann tensor pointwise. -/
-theorem ricciBoundedBelow_pullback_universalCover
+The two hypotheses `h_lifted_all` and `h_base_all` assume the
+`chartRiemannBasisIdentity` predicate at every point of the cover and of the
+base respectively: the basis-coordinate identification of the abstract Riemann
+operator with the chart Riemann tensor (consumed by `ricciTensor_lifted_natural`). -/
+theorem ricciBoundedBelow_liftedMetric_of_base
     {g : SmoothRiemannianMetric I M} {κ : ℝ}
     (hRic : RicciBoundedBelow (I := I) g κ)
     (h_lifted_all : ∀ x' : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M,
@@ -216,13 +216,13 @@ theorem ricciBoundedBelow_pullback_universalCover
   -- Set the projected point.
   set x : M := proj x' with hx_def
   -- `(liftedMetric g).inner x' v' v' = g.inner (proj x') v' v'` by
-  -- `proj_isLocalIsometry` (which states the equality with the
+  -- `liftedMetric_inner_eq` (which states the equality with the
   -- model-fibre representation; `TangentSpace I _ = E` definitionally).
   have h_inner :
       (liftedMetric (I := I) g).inner x' v' v' = g.inner x v' v' := by
-    -- `proj_isLocalIsometry` gives `g.inner (proj x') v w =
+    -- `liftedMetric_inner_eq` gives `g.inner (proj x') v w =
     -- (liftedMetric g).inner x' v w`; flip and use `hx_def`.
-    exact (proj_isLocalIsometry (I := I) g x' v' v').symm
+    exact (liftedMetric_inner_eq (I := I) g x' v' v').symm
   -- `ricciTensor (liftedMetric g) x' v' v' = ricciTensor g (proj x') v' v'`
   -- by `ricciTensor_lifted_natural`.
   have h_ric :
@@ -377,7 +377,7 @@ infimum of projected path-lengths, is at most `riemannianEDist I x' y'`.
 Translating both sides through the `IsRiemannianManifold` predicates
 (`edist = riemannianEDist`) yields the edist comparison and so
 `LipschitzWith 1 proj`. -/
-theorem proj_lipschitz [RegularSpace
+theorem proj_lipschitzWith_one [RegularSpace
       (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)]
     (g : SmoothRiemannianMetric I M)
     [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
@@ -545,7 +545,7 @@ theorem tail_in_single_sheet [Nonempty M] [CompleteSpace M]
     exact ⟨⟨⟨y, Path.Homotopic.Quotient.mk γ0⟩, rfl⟩⟩
   have hEC :
       IsEvenlyCovered p y (p ⁻¹' {y}) :=
-    (UniversalCover.isCoveringMap (X := M)) y
+    (UniversalCover.proj_isCoveringMap (X := M)) y
   set t : Trivialization (p ⁻¹' {y}) p := hEC.toTrivialization with ht_def
   have hyU : y ∈ t.baseSet := hEC.mem_toTrivialization_baseSet
   -- `U := t.baseSet` is an open neighbourhood of `y`.
@@ -752,7 +752,7 @@ theorem sheet_homeomorph [Nonempty M] (y : M) :
       IsLocalHomeomorph
         (proj :
           DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M → M) :=
-    UniversalCover.isCoveringMap.isLocalHomeomorph
+    UniversalCover.proj_isCoveringMap.isLocalHomeomorph
   -- Extract an open partial homeomorphism `e` around `y'`.
   obtain ⟨e, hy'e, hfe⟩ := hLH y'
   -- `proj y' = y` by definition of `proj = Sigma.fst`.
@@ -841,14 +841,15 @@ theorem lift_the_limit [Nonempty M] [CompleteSpace M]
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 /-- **The universal cover is complete.**
-Every Cauchy sequence in `M'` (for the principled lifted extended metric
-`uc_pseudoEMetricSpace (liftedMetric g)`) converges, by combining
-`proj_lipschitz` (projection of a Cauchy sequence is Cauchy in `M`),
-`CompleteSpace M` (a limit `y` exists downstairs),
-and `lift_the_limit` (the limit lifts to `M'`). Packaged by
-`Mathlib.Topology.UniformSpace.Cauchy.complete_of_cauchySeq_tendsto`.
--/
-theorem completeSpace_universalCover_lifted [Nonempty M] [CompleteSpace M]
+If `M` is complete then the universal cover, equipped with the lifted extended
+metric `uc_pseudoEMetricSpace (liftedMetric g)`, is a `CompleteSpace`. Every
+Cauchy sequence in the cover projects (via the `1`-Lipschitz `proj_lipschitzWith_one`)
+to a Cauchy sequence in `M`, which converges to some `y` by `CompleteSpace M`;
+`lift_the_limit` lifts `y` back to a limit in the cover. Completeness follows
+from the Cauchy-sequence criterion `UniformSpace.complete_of_cauchySeq_tendsto`.
+The two `hEnorm` hypotheses are the bundle-norm — square-root inner-product
+identifications on the base and cover fibres, as in `proj_lipschitzWith_one`. -/
+theorem completeSpace_of_complete [Nonempty M] [CompleteSpace M]
     [RegularSpace (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)]
     (g : SmoothRiemannianMetric I M)
     [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
@@ -876,7 +877,7 @@ theorem completeSpace_universalCover_lifted [Nonempty M] [CompleteSpace M]
       LipschitzWith 1
         (proj :
           DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M → M) :=
-    proj_lipschitz (I := I) (M := M) g hEnormBase hEnormCover
+    proj_lipschitzWith_one (I := I) (M := M) g hEnormBase hEnormCover
   -- `proj` is uniformly continuous, so it sends Cauchy sequences to Cauchy sequences.
   have hUC :
       UniformContinuous
@@ -958,7 +959,7 @@ fibre `p⁻¹{x}` is closed in `E` (preimage of a point under a continuous map
 into a `T1Space`), hence compact (`IsClosed.isCompact` in the compact space
 `E`), and discrete (`IsCoveringMap` implies discrete fibres). A compact and
 discrete topological space is finite. -/
-theorem fibre_finite
+theorem isCoveringMap_fibre_finite_of_compact
     {X E : Type*} [TopologicalSpace X] [T1Space X]
     [TopologicalSpace E] [CompactSpace E]
     {p : E → X} (hp : IsCoveringMap p) (x : X) :

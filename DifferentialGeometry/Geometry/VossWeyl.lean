@@ -41,7 +41,7 @@ The proof combines:
 * `localDivergence_grad_g_eq_chartVossWeylLaplacian` : the chart-local
   Voss-Weyl divergence of `grad_g g hf` rewrites as the chart Voss-Weyl
   Laplacian.
-* `laplacian_eq_chartVossWeyl` : the headline identity
+* `voss_weyl_laplacian_formula_of_closed` : the headline identity
   `Δ_g g hf x = chartVossWeylLaplacian g α f x` on the chart source.
 -/
 
@@ -315,12 +315,14 @@ lemma localDivergence_grad_g_eq_chartVossWeylLaplacian [I.Boundaryless]
 
 /-! ## Headline theorem: chart Voss-Weyl formula for the Laplacian -/
 
-/-- **Chart Voss-Weyl formula for the Laplace-Beltrami operator.** On a closed
-manifold (compact and boundaryless), for any smooth scalar `f` and any chart
-`α`, the Laplacian `Δ_g g hf x` at `x` in the source of the chart at `α`
-equals the chart Voss-Weyl right-hand side
-`chartVossWeylLaplacian g α f x`. -/
-theorem laplacian_eq_chartVossWeyl
+/-- **Chart Voss-Weyl formula for the Laplace-Beltrami operator.** For a smooth
+scalar `f`, a chart `α`, and `x` in the source of the chart at `α`, the
+Laplacian `Δ_g g hf x` equals the chart Voss-Weyl right-hand side
+`chartVossWeylLaplacian g α f x`. Stated here on a closed manifold: `M` is
+boundaryless, `T2`, `σ`-compact, and compact. (The compactness hypothesis is
+not actually needed for the chart-local conclusion; see
+`voss_weyl_laplacian_formula_pointwise` for the σ-compact-only variant.) -/
+theorem voss_weyl_laplacian_formula_of_closed
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -346,13 +348,15 @@ theorem laplacian_eq_chartVossWeyl_of_sigmaCompact
   rw [voss_weyl_divergence_formula (I := I) g α (grad_g (I := I) g hf) hx]
   exact localDivergence_grad_g_eq_chartVossWeylLaplacian (I := I) g α hf hx
 
-/-- **Pointwise chart Voss-Weyl formula**: identical statement to
-`laplacian_eq_chartVossWeyl`, but with the `[CompactSpace M]` hypothesis
-dropped. The chart Voss-Weyl identity holds chart-source-pointwise; the
-compactness hypothesis is not used in the chart-local derivation. This is the
-standard pointwise statement consumed by downstream theorems (e.g. the chart
-Hessian-trace identity) that do not need any global compactness. -/
-theorem laplacian_eq_chartVossWeyl_pointwise
+/-- **Pointwise chart Voss-Weyl formula.** Same conclusion as
+`voss_weyl_laplacian_formula_of_closed` — `Δ_g g hf x = chartVossWeylLaplacian g α f x` for
+`x` in the source of the chart at `α` — but on a manifold that is only
+boundaryless, `T2`, and `σ`-compact, dropping `[CompactSpace M]`. The chart
+Voss-Weyl identity is chart-source-pointwise, so global compactness plays no
+role in the derivation. This is the variant consumed by downstream theorems
+(e.g. the chart Hessian-trace identity) that do not assume global
+compactness. -/
+theorem voss_weyl_laplacian_formula_pointwise
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
