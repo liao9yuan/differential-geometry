@@ -40,7 +40,7 @@ a positive-time smooth solution with `g(0) = g₀`. The proof passes through:
 
 1. Solve the (strictly parabolic) DeTurck–Ricci flow
    `∂_t g_DT = -2 Ric(g_DT) + 𝓛_{X_DT} g_DT` (where `X_DT = deTurckVF g_DT g_bg`)
-   for time `[0, T_DT)`, via `deturck_ricci_pde_shorttime` (here we take
+   for time `[0, T_DT)`, via `deturck_ricci_flow_parabolic_short_time_existence` (here we take
    `g_bg := g₀` as the background metric).
 2. Integrate the time-dependent vector field `-X_DT(t)` to obtain a smooth family
    of diffeomorphisms `Φ_t : M ≃ₘ M` with `Φ_0 = id` and `∂_t Φ_t = -X_DT ∘ Φ_t`.
@@ -54,7 +54,7 @@ chart-local Gram matrices, `Integral.Measure.chartGramMatrix`), jointly continuo
 up to `t = 0`, satisfies `g_fam 0 = g₀`, and solves `∂_t g_fam = -2 Ric(g_fam)`
 on `[0, T)`.
 
-The DeTurck step is supplied by `deturck_ricci_pde_shorttime` (the clean spectral
+The DeTurck step is supplied by `deturck_ricci_flow_parabolic_short_time_existence` (the clean spectral
 DeTurck–Ricci parabolic engine, which also exposes the DeTurck-field regularity and
 the joint chart-Gram smoothness/continuity of `g_DT`); the conjugating
 diffeomorphism family `Φ_fam` is built by `conjugating_diffeo_family` (integrating
@@ -97,7 +97,7 @@ theorem ricci_flow_short_time_existence
   -- where `X_DT(t) := deTurckVF (g_DT t) g₀` is the DeTurck vector field.
   obtain ⟨T_DT, g_DT, hDT, h_reg, h_cont0, h_grad0, h_gram_DT, h_gram0_DT,
       h_gramOnE0_DT, h_C2_DT⟩ :=
-    DifferentialGeometry.PDE.RicciFlow.deturck_ricci_pde_shorttime
+    DifferentialGeometry.PDE.RicciFlow.deturck_ricci_flow_parabolic_short_time_existence
       (I := I) (M := M) g₀ g₀
   -- Unpack the parabolic-solution data: `T_DT > 0`, initial condition, time derivative.
   obtain ⟨hT_DT_pos, hDT_init, hDT_deriv⟩ := hDT
@@ -113,7 +113,7 @@ theorem ricci_flow_short_time_existence
   --   (d) Apply the chain rule (`pullback_time_derivative_chain_rule`):
   --         ∂_t g_fam = (Φ_fam t)^* (∂_t g_DT - 𝓛_{X(t)} g_DT)
   --                   = (Φ_fam t)^* (-2 Ric(g_DT(t)))     (Lie term cancels)
-  --                   = -2 Ric((Φ_fam t)^* g_DT(t))       (`ricci_pullback_naturality`)
+  --                   = -2 Ric((Φ_fam t)^* g_DT(t))       (`ricci_tensor_pullback_natural_under_diffeomorphism`)
   --                   = -2 Ric(g_fam t).
   --   (e) Initial condition: `g_fam 0 = (Φ_fam 0)^* (g_DT 0) = id^* g₀ = g₀`,
   --       using `pullbackMetric_refl` and `hDT_init`.

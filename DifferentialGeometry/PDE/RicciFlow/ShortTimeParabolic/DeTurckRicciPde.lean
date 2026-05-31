@@ -47,12 +47,13 @@ variable
 
 /-- **DeTurck–Ricci parabolic short-time existence (the single faithful classical input).**
 
-Solves the strictly parabolic DeTurck–Ricci flow `∂_t g_DT = -2 Ric(g_DT) + 𝓛_{X_DT} g_DT`
-(with `X_DT(t) = deTurckVF (g_DT t) g_bg`) for a positive time, packaged as
-`IsQuasilinearMetricParabolicSolution`.  The existential is ENRICHED to additionally provide
-the DeTurck-vector-field regularity data that the conjugating-diffeomorphism construction
-consumes, all of which is genuinely TRUE of the interior-parabolic-smooth, `C⁰`-up-to-`0`
-DeTurck solution:
+For initial and background metrics `g₀`, `g_bg` there exist a positive time `T` and a metric
+family `g_DT` solving the strictly parabolic DeTurck–Ricci flow
+`∂_t g_DT = -2 Ric(g_DT) + 𝓛_{X_DT} g_DT` (with `X_DT(t) = deTurckVF (g_DT t) g_bg`) on `[0, T]`,
+packaged as `IsQuasilinearMetricParabolicSolution (deTurckRicciRHS g_bg) g₀ T g_DT`.  The
+existential is ENRICHED to additionally provide the DeTurck-vector-field and metric regularity
+data that the conjugating-diffeomorphism construction consumes, all of which is genuinely TRUE
+of the interior-parabolic-smooth, `C⁰`-up-to-`0` DeTurck solution:
 
 * `h_reg` — interior joint-`C∞` of the field map `q ↦ ⟨q.2, deTurckVF (g_DT q.1) g_bg q.2⟩`
   on `Ioo 0 T ×ˢ univ` (interior parabolic smoothness of the solution → smooth field);
@@ -78,7 +79,7 @@ DeTurck solution:
 These constrain only the internal `g_DT`/`X_DT`, never `g₀`/the headline statement, so the
 enrichment is non-leaking.  The body remains `sorry` — this is the single faithful
 "DeTurck–Ricci parabolic short-time existence" labeled classical input. -/
-theorem deturck_ricci_pde_shorttime
+theorem deturck_ricci_flow_parabolic_short_time_existence
     (g₀ g_bg : SmoothRiemannianMetric I M) :
     ∃ T : ℝ, ∃ g_DT : ℝ → SmoothRiemannianMetric I M,
       IsQuasilinearMetricParabolicSolution (I := I)

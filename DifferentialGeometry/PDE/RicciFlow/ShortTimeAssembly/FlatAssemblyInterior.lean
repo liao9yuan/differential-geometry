@@ -127,7 +127,7 @@ theorem flat_assembly_interior
       (T' t x v) (P' t x v) (T' t x w) (P' t x w)
       (hv_flat t ht x v) (hv_flat t ht x w) (hcorr t ht x v) (hcorr t ht x w)
   -- The single load-bearing value identification of the flat-route base lemma, at `t`
-  -- (Cartan cancellation `+𝓛 X g` vs `-𝓛 X g`, then `ricci_pullback_naturality`).
+  -- (Cartan cancellation `+𝓛 X g` vs `-𝓛 X g`, then `ricci_tensor_pullback_natural_under_diffeomorphism`).
   exact deTurck_pullback_eval_value_hasDerivWithinAt (I := I)
     g_bg g_DT Φ_fam t x v w (h_total_eval t ht x v w)
 

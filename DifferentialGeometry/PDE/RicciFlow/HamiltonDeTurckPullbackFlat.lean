@@ -3,7 +3,7 @@ import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.VariationalFlowF
 
 /-! # Hamilton–DeTurck pullback via the FLAT variational route
 
-The committed `hamiltonDeTurck_pullback_isRicciFlow` (`HamiltonDeTurckPullback.lean`) consumes the
+The committed `hamilton_deturck_pullback_solves_ricci_flow` (`HamiltonDeTurckPullback.lean`) consumes the
 **covariant** raw variational identities `RawVariationalIdentity` (each asserting the slot
 pushforward curve has derivative `-∇_{dΦ·} X`).  As the orbit-ODE analysis records
 (`SmoothInSpace/VariationalLiftManifoldFlowOrbitODE.lean`, residual (★)), that covariant
@@ -31,7 +31,7 @@ per-slot to a genuine **three-piece** time split of the pull-back inner product
 
 Adding the three pieces, the Lie term `+𝓛_{X_DT} g_DT` cancels against `-𝓛_{X_DT} g_DT`, the
 metric-transport residual cancels (`-metricTransportResidual` against `+metricTransportResidual`),
-and `ricci_pullback_naturality` transports `-2 Ric(g_DT t)` at the moved point to `-2 Ric(g_fam t)`
+and `ricci_tensor_pullback_natural_under_diffeomorphism` transports `-2 Ric(g_DT t)` at the moved point to `-2 Ric(g_fam t)`
 at `x` — the Ricci-flow right-hand side.
 
 The additive three-piece chain rule `h_total_eval` is exposed as a separable hypothesis whose
@@ -63,7 +63,7 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
 /-- **Hamilton–DeTurck pullback theorem via the flat route (pointwise within-set form).**
 
-Identical conclusion to `hamiltonDeTurck_pullback_isRicciFlow` — the pulled-back family
+Identical conclusion to `hamilton_deturck_pullback_solves_ricci_flow` — the pulled-back family
 `g_fam s := pullbackMetric (g_DT s) (Φ_fam s)` solves `∂_t g_fam = -2 Ric(g_fam)` on `[0, T)` —
 but with the covariant raw variational identities replaced by the **flat** per-slot identities
 and their per-slot Christoffel-residual `E`-equations (the genuinely-dischargeable data), plus

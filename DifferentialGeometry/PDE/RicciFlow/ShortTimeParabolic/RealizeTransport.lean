@@ -98,10 +98,10 @@ private theorem eigenRealizeEval_weight_summable
           (tensorSobolevWeight (I := I) (M := M) i (a : ℝ))⁻¹) ^ 2) :=
   -- The supercritical weighted summability of the per-eigenmode realize values is
   -- exactly the second realize face of the single open pointwise local-Weyl input
-  -- `local_weyl_pointwise_diagonal_kernel_bound`. The summand here unfolds (through
+  -- `weyl_pointwise_diagonalKernel_bound_of_closed`. The summand here unfolds (through
   -- the `eigenRealizeEval`/`eigenSmooth` abbreviations) to the node's summand
   -- verbatim.
-  ((local_weyl_pointwise_diagonal_kernel_bound (I := I) (M := M) g_bg 0 2).2 a ha).1 x v w
+  ((weyl_pointwise_diagonalKernel_bound_of_closed (I := I) (M := M) g_bg 0 2).2 a ha).1 x v w
 
 /-- **The supercritical pointwise realize eigen-expansion (the single open
 local-Weyl input, part 2).**
@@ -133,7 +133,7 @@ private theorem ccTensorBilinSymm_hasSum_eigenRealizeEval
   -- pointwise local-Weyl input. The summand unfolds (through `eigenRealizeEval`/
   -- `eigenSmooth`) to the node's `coeff · eᵢ` summand verbatim, and the target is
   -- the realize value `ccTensorBilinSymm g_bg T x v w`.
-  ((local_weyl_pointwise_diagonal_kernel_bound (I := I) (M := M) g_bg 0 2).2 a ha).2 T x v w
+  ((weyl_pointwise_diagonalKernel_bound_of_closed (I := I) (M := M) g_bg 0 2).2 a ha).2 T x v w
 
 set_option linter.unusedVariables false in
 theorem realize_eval_carrier_factorization

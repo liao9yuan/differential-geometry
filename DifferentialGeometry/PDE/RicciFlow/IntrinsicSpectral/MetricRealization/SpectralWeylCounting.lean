@@ -29,7 +29,7 @@ This file performs only the purely analytic / spectral reduction:
     ⟹ SpectralChartRegularity                   (the general-element ℓ¹ control)
     ⟹ SpectralSmoothRealizesAsSmooth            (the chart → C^∞ reconstruction).
 ```
-The first arrow specialises the abstract converter `eigenvalueTailSummable_of_counting`
+The first arrow specialises the abstract converter `eigenvalueTailSummable_of_polynomial_counting_bound`
 at the dyadic thresholds `Λ = 2^{n+1}`; the second and third are the proven
 reduction theorems of the gate.
 
@@ -90,7 +90,7 @@ def EigenvalueCountingBound (g : SmoothRiemannianMetric I M) (r s : ℕ) : Prop 
 
 Specialising the polynomial counting bound at the dyadic thresholds `Λ = 2^{n+1}`
 yields exactly the dyadic `count`/`hcount_card` data consumed by the abstract
-converter `eigenvalueTailSummable_of_counting`, with the explicit summability
+converter `eigenvalueTailSummable_of_polynomial_counting_bound`, with the explicit summability
 exponent `p = q + 2 > 0`.
 
 Concretely, for the dyadic shell at level `n` we take `countDyadic n := count (2^{n+1})`;
@@ -103,7 +103,7 @@ theorem eigenvalueTailSummable_of_countingBound
     EigenvalueTailSummable (I := I) (M := M) g r s := by
   obtain ⟨q, A, hA, count, hcount_mem, hcount_card⟩ := h
   -- Dyadic shell families: evaluate the threshold family at `Λ = 2^{n+1}`.
-  refine eigenvalueTailSummable_of_counting (I := I) (M := M) g r s q A hA
+  refine eigenvalueTailSummable_of_polynomial_counting_bound (I := I) (M := M) g r s q A hA
     (fun n => count ((2 : ℝ) ^ (n + 1))) ?_ ?_
   · -- Membership in the dyadic shell `count (2^{n+1})`.
     intro n i hi

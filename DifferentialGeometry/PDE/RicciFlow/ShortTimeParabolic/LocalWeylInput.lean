@@ -5,12 +5,12 @@ closed manifold, in its pointwise on-diagonal reproducing-kernel form.
 
 Every other lemma in the short-time-existence proof is proven outright; this file
 holds the one deferred classical theorem
-`local_weyl_pointwise_diagonal_kernel_bound`. It is the *pointwise* (per-point)
+`weyl_pointwise_diagonalKernel_bound_of_closed`. It is the *pointwise* (per-point)
 form of the local Weyl law — the supercritical on-diagonal reproducing-kernel
 estimate — which is strictly stronger than the integrated eigenvalue-counting
 bound `EigenvalueCountingBound`. From this single node we re-derive:
 
-* `local_weyl_eigenvalue_counting_bound` — the integrated polynomial counting
+* `weyl_eigenvalue_counting_bound_of_closed` — the integrated polynomial counting
   bound, by integrating the pointwise kernel estimate over the closed manifold
   (`eigenvalueCountingBound_of_pointwiseDiagonalKernelBound`); this in turn drives
   the proven clean chain `EigenvalueCountingBound ⟹ EigenvalueTailSummable ⟹
@@ -51,34 +51,40 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- **THE single deferred classical input** — the *pointwise* local Weyl law for
-the intrinsic tensor Laplacian on a closed manifold, in its supercritical
-on-diagonal reproducing-kernel form. It bundles the three faces of the same
-geometric content (heat-kernel parametrix / Karamata Tauberian on the on-diagonal
-heat trace), none of which is available in Mathlib:
+/-- The pointwise local Weyl law for the intrinsic tensor connection-Laplacian on
+a closed manifold, in its supercritical on-diagonal reproducing-kernel form: for a
+smooth Riemannian metric `g` and bidegree `(r, s)`, the conjunction of a polynomial
+diagonal-kernel bound and (at supercritical Sobolev order) two realize read-offs of
+the same on-diagonal kernel content. This is the project's single deferred classical
+analytic input (kept as the only `sorry` on the short-time-existence dependency
+graph); the three conjuncts package the heat-kernel-parametrix / Karamata-Tauberian
+content of the on-diagonal heat trace, none of which is available in Mathlib:
 
 1. **Polynomial diagonal-kernel bound.** There are a degree `q`, a constant
-   `B ≥ 0` and a threshold-capturing finite family `count Λ` such that the
-   on-diagonal reproducing kernel `∑_{i ∈ count Λ} ‖bᵢ(x)‖²_g` is bounded by
+   `B ≥ 0` and a threshold-capturing finite family `count Λ` (containing every
+   index with `1 + λᵢ < Λ`) such that the on-diagonal reproducing kernel
+   `diagonalKernel g r s (count Λ) x = ∑_{i ∈ count Λ} ‖bᵢ(x)‖²_g` is bounded by
    `B · Λ^q` pointwise on `M`. Integrating against the unit-energy identity gives
-   the integrated counting bound `EigenvalueCountingBound`.
+   the integrated counting bound `EigenvalueCountingBound` (the sibling
+   `weyl_eigenvalue_counting_bound_of_closed`).
 
 2. **Supercritical weighted summability of the realize values.** At a
-   supercritical Sobolev order `2a > dim M + 4`, the per-eigenmode realize values
-   `eᵢ(x,v,w) = ccTensorBilinSymm g (eigenSmooth g i) x v w` decay so that the
-   `Hᵃ`-Riesz weight `eᵢ(x,v,w)² · (1+λᵢ)^{-a}` is summable. (Via the fibre
-   Cauchy–Schwarz `eᵢ(x,v,w)² ≲ ‖bᵢ(x)‖²_g` this is dominated by the on-diagonal
-   kernel tail `∑ᵢ ‖bᵢ(x)‖²_g · (1+λᵢ)^{-a} < ∞`.)
+   supercritical Sobolev order `2a > finrank ℝ E + 4`, the per-eigenmode realize
+   values `eᵢ(x,v,w) = ccTensorBilinSymm g (eigenvectorSmooth_unconditional g 0 2 i) x v w`
+   for the bidegree `(0, 2)` spectrum decay so that the `Hᵃ`-Riesz weight
+   `tensorSobolevWeight i a · (eᵢ(x,v,w) · (tensorSobolevWeight i a)⁻¹)²` is
+   summable over `i`. (Via the fibre Cauchy–Schwarz `eᵢ(x,v,w)² ≲ ‖bᵢ(x)‖²_g` this
+   is dominated by the on-diagonal kernel tail `∑ᵢ ‖bᵢ(x)‖²_g · (1+λᵢ)^{-a} < ∞`.)
 
 3. **The realize eigen-expansion.** At the same supercritical order, the
-   realize-evaluation of a smooth compactly-supported `(0,2)`-tensor `T` is the
-   absolutely convergent eigen-series of its `L²`-coordinates weighted by the
-   per-eigenmode realize values.
+   realize-evaluation `ccTensorBilinSymm g T x v w` of a smooth compactly-supported
+   `(0, 2)`-tensor `T` is the `HasSum` of the eigen-series of its `L²`-coordinates
+   `tensorL2Coeff_ofCompact (SmoothCcTensor.toL2 T) i` weighted by the per-eigenmode
+   realize values.
 
-This is the ONLY `sorry` on the short-time-existence dependency graph that is not
-discharged; every other consumer (the integrated counting bound, the realize
-transport functional) is re-derived from it below or in `RealizeTransport.lean`. -/
-theorem local_weyl_pointwise_diagonal_kernel_bound
+Every other consumer (the integrated counting bound, the realize transport
+functional in `RealizeTransport.lean`) is re-derived from this node. -/
+theorem weyl_pointwise_diagonalKernel_bound_of_closed
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     (∃ (q : ℕ) (B : ℝ), 0 ≤ B ∧
       ∃ count : ℝ → Finset
@@ -107,18 +113,19 @@ theorem local_weyl_pointwise_diagonal_kernel_bound
                 (eigenvectorSmooth_unconditional (I := I) (M := M) g 0 2 i) x v w)
           (ccTensorBilinSymm (I := I) g T x v w))) := sorry
 
-/-- **The integrated polynomial eigenvalue-counting bound**, re-derived from the
-pointwise on-diagonal kernel estimate `local_weyl_pointwise_diagonal_kernel_bound`
-by integrating it against the closed-manifold Riemannian volume (the unit-energy
+/-- The integrated polynomial eigenvalue-counting bound `EigenvalueCountingBound g r s`
+for the tensor connection-Laplacian spectrum on a closed manifold. Re-derived from the
+pointwise on-diagonal kernel estimate `weyl_pointwise_diagonalKernel_bound_of_closed` by
+integrating it against the closed-manifold Riemannian volume (the unit-energy
 `∫_M ‖bᵢ‖²_g = 1` reproducing-kernel identity), via
 `eigenvalueCountingBound_of_pointwiseDiagonalKernelBound`. Every spectral consumer
 (smooth-representative gate, eigenvalue-tail summability) reduces to this one
 statement through the proven chain in `SpectralWeylCounting.lean`. -/
-theorem local_weyl_eigenvalue_counting_bound
+theorem weyl_eigenvalue_counting_bound_of_closed
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     EigenvalueCountingBound (I := I) (M := M) g r s := by
   obtain ⟨⟨q, B, hB, count, hmem, hkernel⟩, _⟩ :=
-    local_weyl_pointwise_diagonal_kernel_bound (I := I) (M := M) g r s
+    weyl_pointwise_diagonalKernel_bound_of_closed (I := I) (M := M) g r s
   exact eigenvalueCountingBound_of_pointwiseDiagonalKernelBound
     (I := I) (M := M) g r s q B hB count hmem hkernel
 

@@ -840,7 +840,7 @@ end RicciContJointAux
 /-! ## Moving-basepoint pushforward chart-coordinate continuity
 
 The bundled pullback inner product and pullback Ricci tensor both reduce, via the clean
-naturality identities `pullbackMetric_inner_eq_inner_mfderiv` / `ricci_pullback_naturality`,
+naturality identities `pullbackMetric_inner_eq_inner_mfderiv` / `ricci_tensor_pullback_natural_under_diffeomorphism`,
 to quantities evaluated at the *moving* point `Φ_fam s x` on the *moving* pushforward
 vectors `mfderiv (Φ_fam s) x v`.  Reading these off in a fixed chart `α` requires the
 chart-`α` trivialization coordinate `(triv α).continuousLinearMapAt (Φ_fam s x) (dΦ_s v)`,
@@ -1117,7 +1117,7 @@ theorem ricci_gfam_continuous_on
   classical
   open MovingPushforwardAux RicciContJointAux in
   -- Reduce the pullback-metric Ricci tensor to the moving-frame form via the CLEAN
-  -- naturality identity `ricci_pullback_naturality`:
+  -- naturality identity `ricci_tensor_pullback_natural_under_diffeomorphism`:
   --   `ricciTensor (Φ_s^* g_DT s) x v w
   --      = ricciTensor (g_DT s) (Φ_fam s x) (dΦ_s v) (dΦ_s w)`.
   have hnat : (fun s : ℝ => ricciTensor (I := I)
@@ -1126,7 +1126,7 @@ theorem ricci_gfam_continuous_on
           (mfderiv I I (Φ_fam s : M → M) x v)
           (mfderiv I I (Φ_fam s : M → M) x w) := by
     funext s
-    exact ricci_pullback_naturality (I := I) (g_DT s) (Φ_fam s) x v w
+    exact ricci_tensor_pullback_natural_under_diffeomorphism (I := I) (g_DT s) (Φ_fam s) x v w
   rw [hnat]
   -- Pointwise within-`Ico 0 T` continuity at each `s₀`, in the chart `α := Φ_fam s₀ x`.
   intro s₀ hs₀

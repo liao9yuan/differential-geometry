@@ -73,7 +73,7 @@ phrased with the `+` sign, the genuine output of the closed forms.
   isotropic, `(deTurckSymbol g g' x ξ t)_{ik} = |ξ|²_g · t_{ik}`.
 * `deTurckSymbol_apply_eq_smul_of_symm` — the **isotropy theorem**: on a symmetric input
   `t`, `deTurckSymbol g g' x ξ t = |ξ|²_g • t` as bilinear forms.
-* `deTurckSymbol_isStrictlyParabolic` — the **strict-parabolicity capstone**: for every
+* `deTurckSymbol_isStrictlyParabolic_of_symm` — the **strict-parabolicity capstone**: for every
   base point `x`, every nonzero covector `ξ`, and every symmetric input tensor `t`,
   `deTurckSymbol g g' x ξ t = |ξ|²_g • t` with `|ξ|²_g > 0` — the symbol of the
   Ricci–DeTurck operator is the positive-definite isotropic symbol `|ξ|²_g · id` on
@@ -296,12 +296,17 @@ terms `ξ_i(tξ)_k`, `ξ_k(ξt)_i`, so it is only *weakly* parabolic.  The DeTur
 `𝓛_W g` contributes exactly the gauge symbol `σ_DT` that cancels those terms.  This is the
 whole purpose of the DeTurck trick. -/
 
-/-- **Strict parabolicity of the Ricci–DeTurck operator — the capstone theorem.**
+/-- For every base point `x`, every **nonzero** covector `ξ`, and every **symmetric** input
+tensor `t` (`t v w = t w v`), the Ricci–DeTurck symbol acts as `|ξ|²_g • t` and the
+coefficient `|ξ|²_g` is strictly positive — the strict parabolicity of the Ricci–DeTurck
+operator on symmetric tensors.
 
-For every base point `x : M`, every **nonzero** covector `ξ : E`, and every **symmetric**
-input tensor `t` (`t v w = t w v` — the form a metric perturbation takes), the principal
-symbol of the Ricci–DeTurck operator acts as the isotropic, *positive-definite* symbol
+The conclusion is the conjunction `deTurckSymbol g g' x ξ t = |ξ|²_g • t ∧ 0 < |ξ|²_g`.
+In symbol notation, the principal symbol acts as the isotropic, *positive-definite* symbol
 $$\sigma(\mathcal D)(x, \xi)(t) \;=\; |\xi|^2_g \cdot t, \qquad |\xi|^2_g > 0.$$
+The symmetric-input hypothesis is essential: it is exactly what makes the off-diagonal
+gauge terms cancel (see below), so the statement holds only on symmetric tensors — which
+is precisely the space a metric perturbation lives in.
 
 This is the precise statement that the Ricci–DeTurck flow `∂_t g = −2 Rc(g) + 𝓛_W g` is
 **strictly (uniformly) parabolic**: on the symmetric tensors its linearization has
@@ -314,7 +319,7 @@ is `metricCovectorNormSq_pos`.
 The result is delivered as the conjunction of the isotropy identity
 `deTurckSymbol g g' x ξ t = |ξ|²_g • t` (`deTurckSymbol_apply_eq_smul_of_symm`) and the
 strict positivity `0 < |ξ|²_g` (`metricCovectorNormSq_pos`). -/
-theorem deTurckSymbol_isStrictlyParabolic (g g' : SmoothRiemannianMetric I M) (x : M)
+theorem deTurckSymbol_isStrictlyParabolic_of_symm (g g' : SmoothRiemannianMetric I M) (x : M)
     {ξ : E} (hξ : ξ ≠ 0) (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
     (ht : ∀ v w, t v w = t w v) :
     deTurckSymbol (I := I) g g' x ξ t =

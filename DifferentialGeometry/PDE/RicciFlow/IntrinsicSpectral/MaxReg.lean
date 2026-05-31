@@ -21,39 +21,38 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- **`L²`-maximal regularity for the connection Laplacian, predicate-free.**
-For every forcing term `f ∈ L²([0,T]; TensorL2 r s g)` on a closed time
-interval `[0,T]` with `0 < T ≤ 1`, the inhomogeneous heat equation
-`∂_t u = Δ_∇ u + f`, `u(0) = 0`, has a unique mild solution `u`
-belonging to the strong-solution space `H¹([0,T]; TensorL2 r s g)`,
-with the maximal-regularity norm bound `‖u‖_{H¹} ≤ 2 · ‖f‖_{L²}`.
+/-- **`L²`-maximal regularity for the connection Laplacian.**
+On a closed Riemannian manifold, for `0 < T ≤ 1`, the inhomogeneous heat
+equation `∂_t u = Δ_∇ u + f`, `u(0) = 0`, driven by a forcing term
+`f ∈ L²([0,T]; TensorL2 r s g)`, admits a strong solution `u` in the
+time-`H¹` space `H¹([0,T]; TensorL2 r s g)`, with the De Simon
+maximal-regularity bound `‖u‖_{H¹} ≤ 2 · ‖f‖_{L²}`.
 
-The statement is packaged as the existence of a bounded linear solution
-operator `SolOp` with the following substantive content:
+The conclusion bundles this as the existence of a bounded linear solution
+operator `SolOp : L²([0,T]; L²) →L H¹([0,T]; L²)` carrying four pieces of
+content:
 
-* **Maximal-regularity bound.**  `‖SolOp‖ ≤ 2`, the absolute De Simon
-  constant of the `H¹`-graph-norm estimate.
+* **Maximal-regularity bound.**  `‖SolOp‖ ≤ 2`, the absolute constant of
+  the `H¹`-graph-norm estimate.
 * **Initial condition.**  `(SolOp f).init = 0` for every forcing `f`,
   i.e. the Duhamel solution starts at the origin.
-* **Two-derivative gain (companion `H²` field).**  There is a bounded
-  linear companion operator
+* **Two-derivative gain (companion `H²` field).**  A bounded linear
+  companion operator
   `SolField : L²([0,T]; L²) →L L²([0,T]; H²(POU))`
-  with `‖SolField‖ ≤ 1 + T`, the De Simon two-derivative-gain bound.
-* **Inhomogeneous heat equation.**  There exists a bounded linear
-  operator
-  `LapField : L²([0,T]; H²(POU)) →L L²([0,T]; L²)` —
-  the time-pointwise extension of the rough Laplacian
-  `Δ_∇ : H²(POU) →L L²` — such that for every forcing `f`,
-  `(SolOp f).deriv = LapField (SolField f) + f`, the strong form of
-  `∂_t u = Δ_∇ u + f` at the `L²([0,T]; L²)` level.
+  with `‖SolField‖ ≤ 1 + T`, the two-derivative-gain bound.
+* **Inhomogeneous heat equation.**  A bounded linear operator
+  `LapField : L²([0,T]; H²(POU)) →L L²([0,T]; L²)`, the time-pointwise
+  extension of the rough Laplacian `Δ_∇ : H²(POU) →L L²`, with
+  `(SolOp f).deriv = LapField (SolField f) + f` for every forcing `f` —
+  the strong form of `∂_t u = Δ_∇ u + f` at the `L²([0,T]; L²)` level.
 
 The fourth clause is the non-vacuous content: any candidate solution
 operator must reproduce the forcing through the rough-Laplacian /
 companion-field identity, ruling out the trivial witness `SolOp = 0`
 (for which `(SolOp f).deriv = 0`, forcing `f = 0` for all `f`).
 
-Predicate-free: no `HasLocallyConstantChartAt` hypothesis. -/
-theorem connection_laplacian_maxreg_predicate_free
+The statement carries no `HasLocallyConstantChartAt` hypothesis. -/
+theorem connection_laplacian_l2_maximal_regularity
     (g : SmoothRiemannianMetric I M) (r s : ℕ) {T : ℝ}
     (_hT : 0 < T) (_hT1 : T ≤ 1) :
     ∃ SolOp : timeL2 (TensorL2 r s g) T →L[ℝ]

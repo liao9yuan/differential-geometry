@@ -414,19 +414,18 @@ theorem flow_t0_continuity_extension
   ⟨flow_orbit_continuousWithinAt_zero X_DT T hT Φ hΦ0 hcont0 hpicard,
     flow_mfderiv_continuousWithinAt_zero X_DT T hT Φ hgrad0 hvarpicard hJbound⟩
 
-/-- **Forward (one-sided, from `t = 0`) jointly-smooth flow of the interior DeTurck
-field.**
+/-- A time-dependent field `X_DT` that is jointly `C∞` on the interior `(0,T) ×ˢ univ`
+(`hint`) and continuous together with its chart-gradient up to `t = 0` (`hcont0`,
+`hgrad0`) admits a single forward flow `Φ : ℝ → M → M` with `Φ 0 = id`, per-time
+diffeomorphisms on `(0,T)`, the bare geometric velocity `∂ₛ Φ s x = X_DT t (Φ t x)` on
+`(0,T)`, and `t = 0` right-continuity of both the orbit `s ↦ Φ s x` and the moving
+spatial Jacobian `s ↦ mfderiv I I (Φ s) x v`.
 
-The single forward bare flow `Φ` of the interior-`C∞`-only field `X_DT`:
-`Φ 0 = id`, per-time diffeomorphisms on `(0,T)` (conjunct 2), the **bare** geometric
-velocity on `(0,T)` (conjunct 3), and `t = 0` right-continuity of the orbit and of the
-moving spatial Jacobian (conjuncts 4/5).
-
-The flow and the bare velocity, the per-time diffeomorphisms, and the chart-Picard /
-variational integral anchors come from the producer
-`interior_forward_bare_flow_from_zero`; conjuncts 4/5 are then discharged by the proven
-`t = 0` continuity extension `flow_t0_continuity_extension` from those anchors. -/
-theorem forward_flow_jointsmooth_onesided
+The flow, its `Φ 0 = id` value, the per-time diffeomorphisms, the bare velocity, and the
+chart-Picard / variational integral anchors are supplied by the producer
+`interior_forward_bare_flow_from_zero`; the two `t = 0` right-continuity claims are then
+obtained from `flow_t0_continuity_extension` applied to those anchors. -/
+theorem forward_flow_existence_onesided_of_jointsmooth_field
     (X_DT : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ) (hT : 0 < T)
     (hint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
       (fun q : ℝ × M => (TotalSpace.mk' E q.2 (X_DT q.1 q.2) : TangentBundle I M))

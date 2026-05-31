@@ -40,7 +40,7 @@ the product/chain rule into two pieces:
 Adding the two pieces, the Lie-derivative term `+𝓛_{X_DT} g_DT` of the DeTurck
 right-hand side is *exactly cancelled* by the `-𝓛_{X_DT} g_DT` from the
 pushforward variation (the Cartan cancellation), leaving `-2 Ric(g_DT t)` at the
-moved point `Φ_fam t x` with pushed-forward arguments. By `ricci_pullback_naturality`
+moved point `Φ_fam t x` with pushed-forward arguments. By `ricci_tensor_pullback_natural_under_diffeomorphism`
 this transports to `-2 Ric(g_fam t) x v w`, the Ricci-flow right-hand side.
 
 ## The genuine residuals (hypotheses, not `sorry`)
@@ -188,7 +188,7 @@ has within-set derivative `-2 Ric(g_fam t) x v w`.
 
 This is the within-set analogue of `deTurck_pullback_eval_form_derivative_witness`:
 the Lie term in the metric-slot piece cancels the `-𝓛_{X_DT} g_DT` pushforward
-piece (`ring`), and `ricci_pullback_naturality` transports `Ric(g_DT t)` at the
+piece (`ring`), and `ricci_tensor_pullback_natural_under_diffeomorphism` transports `Ric(g_DT t)` at the
 moved point to `Ric(g_fam t)` at `x`. -/
 theorem deTurck_pullback_eval_value_hasDerivWithinAt
     (g_bg : SmoothRiemannianMetric I M)
@@ -229,7 +229,7 @@ theorem deTurck_pullback_eval_value_hasDerivWithinAt
   -- Ricci naturality: transport `Ric(g_DT t)` at `Φ_fam t x` to `Ric(g_fam t)` at `x`.
   have h_ric_nat : R_DT = R_fam := by
     rw [hR_fam_def, hR_DT_def]
-    exact (ricci_pullback_naturality (I := I) (g_DT t) (Φ_fam t) x v w).symm
+    exact (ricci_tensor_pullback_natural_under_diffeomorphism (I := I) (g_DT t) (Φ_fam t) x v w).symm
   -- Identify the value of `h_total_eval` with `-2 R_fam`.
   have h_value : (((-2 : ℝ) * R_DT + L) + (-L)) = (-2 : ℝ) * R_fam := by
     rw [h_cancel, h_ric_nat]
@@ -259,7 +259,7 @@ point `x` and tangent pair `(v, w)`,
 
 (as a `HasDerivWithinAt (Ici 0)`), the Ricci-flow equation.
 
-The proof chains the committed transport lemmas:
+The proof chains the three transport lemmas:
 
 * `deTurck_metric_slot_hasDerivWithinAt` — the metric-slot derivative from the
   DeTurck PDE (documents the intrinsic-time piece);
@@ -267,7 +267,7 @@ The proof chains the committed transport lemmas:
   `-𝓛_{X_DT} g_DT`, proved from the raw variational identities via
   `variational_flow_feeds_cartan_witness` (documents the Cartan piece);
 * `deTurck_pullback_eval_value_hasDerivWithinAt` — the Cartan cancellation +
-  `ricci_pullback_naturality` value identification, transported to the bundled
+  `ricci_tensor_pullback_natural_under_diffeomorphism` value identification, transported to the bundled
   pullback form via `pullbackMetric_inner_hasDerivWithinAt_of_eval`.
 
 The genuine residual analytic inputs (hypotheses, not `sorry`): the raw
@@ -277,7 +277,7 @@ Mathlib), and the additive chain rule `h_total_eval` identifying the joint
 evaluation-form derivative with the *sum* of the two slot pieces (its value is the
 sum of the two determinate pieces, distinct from the `-2 Ric(g_fam)` conclusion —
 no hypothesis-packaging). -/
-theorem hamiltonDeTurck_pullback_isRicciFlow
+theorem hamilton_deturck_pullback_solves_ricci_flow
     (g_bg : SmoothRiemannianMetric I M)
     (g_DT : ℝ → SmoothRiemannianMetric I M) (T : ℝ)
     (hDT_deriv : ∀ t ∈ Set.Ico (0 : ℝ) T, ∀ x : M, ∀ v w : TangentSpace I x,
@@ -329,7 +329,7 @@ pullbackMetric (g_DT s) (Φ_fam s)` is a function `ℝ → SmoothRiemannianMetri
 that, at every `t ∈ [0, T)`, point `x` and tangent pair `(v, w)`, satisfies the
 Ricci-flow equation `∂_t (g_fam · .inner x v w)(t) = -2 Ric(g_fam t) x v w`.
 
-This is a one-line wrapper around `hamiltonDeTurck_pullback_isRicciFlow`,
+This is a one-line wrapper around `hamilton_deturck_pullback_solves_ricci_flow`,
 exhibiting the witness `g_fam` explicitly. -/
 theorem hamiltonDeTurck_pullback_ricciFlow_family
     (g_bg : SmoothRiemannianMetric I M)
@@ -364,7 +364,7 @@ theorem hamiltonDeTurck_pullback_ricciFlow_family
           ((-2 : ℝ) * ricciTensor (I := I) (g_fam t) x v w) (Set.Ici 0) t := by
   refine ⟨fun s => Diffeomorph.pullbackMetric (g_DT s) (Φ_fam s), fun _ => rfl, ?_⟩
   intro t ht x v w
-  exact hamiltonDeTurck_pullback_isRicciFlow (I := I)
+  exact hamilton_deturck_pullback_solves_ricci_flow (I := I)
     g_bg g_DT T hDT_deriv Φ_fam hv_raw h_total_eval t ht x v w
 
 end RicciFlow

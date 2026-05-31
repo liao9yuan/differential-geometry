@@ -532,18 +532,22 @@ private lemma conjCovFun_eq_LeviCivita_pullback
 
 /-! ## Main theorem -/
 
-/-- **Pointwise connection-pullback chain rule for the Levi-Civita derivative.**
-
-For a smooth Riemannian metric `g`, a smooth diffeomorphism `Φ : M ≃ₘ⟮I, I⟯ M`, a
-section `X : ∀ y, T_y M` whose total-space lift is manifold-differentiable at `x`,
-and a tangent vector `v ∈ T_x M`,
+/-- The Levi-Civita covariant derivative is natural under a diffeomorphism: for a smooth
+Riemannian metric `g`, a smooth diffeomorphism `Φ : M ≃ₘ⟮I, I⟯ M`, a section
+`X : ∀ y, T_y M` whose total-space lift is manifold-differentiable at `x`, and a tangent
+vector `v ∈ T_x M`,
 $$
   \mathrm{d}\Phi_x\bigl(\nabla^{\Phi^*g}_v X\bigr)
-    = \nabla^g_{\mathrm{d}\Phi_x v}(\Phi_*X)
+    = \nabla^g_{\mathrm{d}\Phi_x v}(\Phi_*X).
 $$
-where on the left we use `(LeviCivita (pullbackMetric g Φ)).toFun X x v` and on the
-right `(LeviCivita g).toFun (pushforward Φ X) (Φ x) (mfderiv Φ x v)`. -/
-theorem covariant_derivative_pullback_pointwise
+On the left `∇^{Φ*g}_v X` is `(LeviCivita (pullbackMetric g Φ)).toFun X x v`, the
+pullback-metric Levi-Civita derivative of `X` in direction `v`, transported by `dΦ_x`; on
+the right `∇^g(Φ_*X)` is `(LeviCivita g).toFun (pushforward Φ X) (Φ x) (mfderiv Φ x v)`,
+the `g`-Levi-Civita derivative of the pushed-forward section `Φ_*X` in direction `dΦ_x v`.
+The direction `v` is arbitrary; the proof extends it to a smooth global section and
+identifies the pullback connection with the conjugated connection `conjCovFun` via Koszul
+local uniqueness. -/
+theorem LeviCivita_covariant_derivative_natural_under_diffeomorphism_pointwise
     (g : SmoothRiemannianMetric I M) (Φ : M ≃ₘ⟮I, I⟯ M)
     {X : ∀ y : M, TangentSpace I y} {x : M} (v : TangentSpace I x)
     (hX : MDifferentiableAt I I.tangent

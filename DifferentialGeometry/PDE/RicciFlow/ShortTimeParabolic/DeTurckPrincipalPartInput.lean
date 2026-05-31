@@ -15,7 +15,7 @@ previously lived here; it was removed because every faithful, non-vacuous form o
 *whole-ball* Lipschitz estimate requires realizing arbitrary `H^{a+1}`-ball elements as
 genuine smooth metrics — the chart-free order-2 elliptic-regularity gate, a separate
 open sub-program rather than a standalone classical input.  The route-agnostic crux
-`deturck_ricci_pde_shorttime` does not transit it and is best discharged by the
+`deturck_ricci_flow_parabolic_short_time_existence` does not transit it and is best discharged by the
 classical maximal-regularity approach, which does not use this estimate.)
 -/
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckRemainderStrongExists

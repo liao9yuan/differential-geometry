@@ -124,20 +124,22 @@ theorem deTurckRicciRHS_principalSymbol_apply_eq_smul
   rw [DifferentialGeometry.PDE.DeTurck.isotropicSymbol_apply_apply,
     DifferentialGeometry.PDE.DeTurck.deTurckSymbolCoeff_apply]
 
-/-- **The remainder is principal-symbol-free: the DeTurck and rough-Laplacian
-principal symbols literally coincide.**
+/-- **The DeTurck-Ricci and rough-Laplacian principal symbols match on symmetric
+perturbations.**
 
 On a **symmetric** input bilinear form `t` (`t v w = t w v`) — the space the metric
-perturbation lives in — the Ricci–DeTurck principal symbol witness agrees with the
-negation of the bundled linearized symbol `deTurckSymbol g₀ g_bg`, which (after the
-gauge cancellation) is the isotropic scaling `|ξ|²_{g₀} • t`.  Thus the two
-candidate principal parts — the DeTurck RHS principal part and the rough Laplacian
-`Δ_∇` — differ by **zero** at the symbol level on symmetric perturbations: the
-splitting `N(g) = deTurckRicciRHS g_bg g − Δ_∇ g` has no second-order content.
+perturbation lives in — the isotropic principal-symbol witness `isotropicSymbol _
+(deTurckSymbolCoeff g₀)` (coefficient `−|ξ|²_{g₀}`) equals the negation of the bundled
+linearized Ricci–DeTurck symbol `deTurckSymbol g₀ g_bg`, which on symmetric `t` is the
+gauge-cancelled isotropic scaling `|ξ|²_{g₀} • t`.  Equivalently, the two candidate
+second-order parts — the DeTurck RHS principal part and the rough Laplacian
+`Δ_∇ = −∇*∇` — coincide at the symbol level on symmetric perturbations, so the
+remainder `N(g) = deTurckRicciRHS g_bg g − Δ_∇ g` carries no second-order content
+there.
 
-This is `deTurckRicciRHS_principal_symbol_equals_deTurckSymbol` re-exported under
-the splitting-oriented name. -/
-theorem deTurckRicciRHS_minus_roughLaplacian_principalSymbol_eq_zero
+The proof is `deTurckRicciRHS_principal_symbol_equals_deTurckSymbol`, whose symmetry
+hypothesis `ht` is what produces the gauge cancellation. -/
+theorem deturck_ricci_principal_symbol_matches_rough_laplacian_of_symm
     (g₀ g_bg : SmoothRiemannianMetric I M) (x : M) (ξ : E)
     (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
     (ht : ∀ v w, t v w = t w v) :

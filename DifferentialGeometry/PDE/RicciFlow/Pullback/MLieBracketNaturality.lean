@@ -77,6 +77,12 @@ private lemma pushforward_eq_mpullback_symm
   exact eqRec_heq (φ := fun z => TangentSpace I z) (Φ.apply_symm_apply x)
     ((mfderiv I I (⇑Φ) (Φ.symm x)) (V (Φ.symm x)))
 
+/-- The manifold Lie bracket is natural under pushforward by a diffeomorphism `Φ : M ≃ₘ⟮I, I⟯ M`:
+`mlieBracket I (Φ_* X) (Φ_* Y) x = Φ_* (mlieBracket I X Y) x`, where `Φ_*` is
+`Diffeomorph.pushforward Φ`. The hypotheses `hX`, `hY` are differentiability of the bundled
+sections of `X` and `Y` at the preimage point `Φ.symm x`. The proof rewrites each pushforward as
+the pullback along `Φ.symm` (`pushforward_eq_mpullback_symm`) and then applies Mathlib's
+`VectorField.mpullback_mlieBracket`. -/
 theorem mlie_bracket_pullback_naturality
     (Φ : M ≃ₘ⟮I, I⟯ M)
     (X Y : ∀ x : M, TangentSpace I x)

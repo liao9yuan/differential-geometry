@@ -247,7 +247,7 @@ theorem deTurckNonlinearitySpectral_principalPart_cancels
         (fun x : M => TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
         (DifferentialGeometry.PDE.DeTurck.deTurckSymbolCoeff (I := I) g₀) x ξ t
       = - DifferentialGeometry.PDE.DeTurck.deTurckSymbol (I := I) g₀ g_bg x ξ t :=
-  deTurckRicciRHS_minus_roughLaplacian_principalSymbol_eq_zero
+  deturck_ricci_principal_symbol_matches_rough_laplacian_of_symm
     (I := I) g₀ g_bg x ξ t ht
 
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral

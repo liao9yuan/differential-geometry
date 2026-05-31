@@ -201,17 +201,21 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- **Eigenvalue-tail summability from a dyadic counting bound (geometric form).**
+/-- A polynomial dyadic counting bound on the tensor Laplacian spectrum gives
+`EigenvalueTailSummable g r s`.
 
-If the eigenvalue-counting function admits a polynomial bound — for every `n`, the
-dyadic shell `{i : 1 + λᵢ < 2^{n+1}}` is contained in a finite family `count n`
-with `#(count n) ≤ A · 2^{(n+1)·q}` — then `EigenvalueTailSummable g r s` holds, at
-the explicit exponent `p = q + 2 > 0`.
+The hypotheses say that for every `n` the dyadic shell `{i : 1 + λᵢ < 2^{n+1}}` is
+contained in a finite family `count n` with `#(count n) ≤ A · 2^{(n+1)·q}` (with
+`A ≥ 0`). The conclusion is the existential predicate `EigenvalueTailSummable g r s`,
+which is realized here at the explicit exponent `p = q + 2 > 0`: the family
+`i ↦ (1 + λᵢ)^{-(q+2)}` is summable.
 
-This is the standard local-Weyl-law conclusion: a polynomial counting bound forces
-the Schatten-type eigenvalue-tail summability needed by the spectral
-smooth-representative gate. -/
-theorem eigenvalueTailSummable_of_counting
+This is the geometric specialization of the abstract dyadic converter
+`counting_summable_dyadic` to the tensor eigen-index set, taking the weight
+`w i = 1 + λᵢ ≥ 1` (using `tensor_lambda_nonneg`). It supplies the Schatten-type
+eigenvalue-tail summability that the spectral smooth-representative gate consumes;
+the polynomial counting bound itself (a local Weyl law) is provided separately. -/
+theorem eigenvalueTailSummable_of_polynomial_counting_bound
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (q : ℕ) (A : ℝ) (hA : 0 ≤ A)
     (count : ℕ → Finset (TensorSpectral.TensorEigenIdx (I := I) (M := M) g r s))

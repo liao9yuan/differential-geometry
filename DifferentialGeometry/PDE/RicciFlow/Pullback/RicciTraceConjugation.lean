@@ -155,7 +155,7 @@ private lemma pushforward_contMDiff
 
 This is the key section-level identity that allows us to differentiate `covApply` terms
 under the pullback. Both sides agree pointwise on `M` via the chain rule
-`covariant_derivative_pullback_pointwise`. -/
+`LeviCivita_covariant_derivative_natural_under_diffeomorphism_pointwise`. -/
 
 /-- The pushforward of `covApply cov_(Φ*g) Y Z` equals `covApply cov_g (Φ_*Y) (Φ_*Z)` at
 every point. -/
@@ -189,7 +189,7 @@ private lemma pushforward_covApply_eq
   -- Apply chain rule with `Y y` as the tangent vector.
   have hZ_at : MDifferentiableAt I I.tangent (T% Z) y :=
     (hZ y).mdifferentiableAt (by simp)
-  have hchain := covariant_derivative_pullback_pointwise (I := I) g Φ (Y y) hZ_at
+  have hchain := LeviCivita_covariant_derivative_natural_under_diffeomorphism_pointwise (I := I) g Φ (Y y) hZ_at
   -- `hchain : mfderiv Φ y ((LC (Φ*g)).toFun Z y (Y y))
   --             = (LC g).toFun (Φ_*Z) (Φ y) (mfderiv Φ y (Y y))`
   rw [hchain, hb]
@@ -242,7 +242,7 @@ private lemma riemannSec_pullback_pointwise
   have hterm1 : mfderiv I I (⇑Φ) x (cov₁.toFun (covApply cov₁ Y Z) x (X x))
       = cov₂.toFun (Diffeomorph.pushforward Φ (covApply cov₁ Y Z)) (Φ x)
           (mfderiv I I (⇑Φ) x (X x)) :=
-    covariant_derivative_pullback_pointwise (I := I) g Φ (X x) hcovYZ_at
+    LeviCivita_covariant_derivative_natural_under_diffeomorphism_pointwise (I := I) g Φ (X x) hcovYZ_at
   -- Same for term 2.
   have hcovXZ_smooth : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (covApply cov₁ X Z)) := by
     have hZ_le : ContMDiff I (I.prod 𝓘(ℝ, E)) ((∞ : WithTop ℕ∞) + 1) (T% Z) := by simpa using hZ
@@ -253,13 +253,13 @@ private lemma riemannSec_pullback_pointwise
   have hterm2 : mfderiv I I (⇑Φ) x (cov₁.toFun (covApply cov₁ X Z) x (Y x))
       = cov₂.toFun (Diffeomorph.pushforward Φ (covApply cov₁ X Z)) (Φ x)
           (mfderiv I I (⇑Φ) x (Y x)) :=
-    covariant_derivative_pullback_pointwise (I := I) g Φ (Y x) hcovXZ_at
+    LeviCivita_covariant_derivative_natural_under_diffeomorphism_pointwise (I := I) g Φ (Y x) hcovXZ_at
   -- For term 3, we need `Z` MDiff at x.
   have hZ_at : MDifferentiableAt I I.tangent (T% Z) x :=
     (hZ x).mdifferentiableAt (by simp)
   have hterm3 : mfderiv I I (⇑Φ) x (cov₁.toFun Z x (mlieBracket I X Y x))
       = cov₂.toFun Z' (Φ x) (mfderiv I I (⇑Φ) x (mlieBracket I X Y x)) := by
-    have h := covariant_derivative_pullback_pointwise (I := I) g Φ
+    have h := LeviCivita_covariant_derivative_natural_under_diffeomorphism_pointwise (I := I) g Φ
       (mlieBracket I X Y x) hZ_at
     exact h
   rw [hterm1, hterm2, hterm3]
@@ -372,32 +372,27 @@ private lemma ricciEndo_conjugation
 
 /-- **Pullback-by-conjugation for the Ricci tensor (pointwise form).**
 For a smooth Riemannian metric `g` on `M` and a diffeomorphism
-`Φ : M ≃ₘ⟮I, I⟯ M`, the Ricci tensor of the pullback metric `Φ*g`
-at a point `x` evaluated on `(v, w) ∈ T_x M × T_x M` agrees with the
-Ricci tensor of `g` at `Φ x` evaluated on the pushforward
-`(dΦ_x v, dΦ_x w)`.
+`Φ : M ≃ₘ⟮I, I⟯ M`, the Ricci tensor of the pullback metric
+`Diffeomorph.pullbackMetric g Φ` at a point `x` evaluated on
+`(v, w) ∈ T_x M × T_x M` equals the Ricci tensor of `g` at `Φ x`
+evaluated on the pushed-forward vectors `(mfderiv I I Φ x v, mfderiv I I Φ x w)`.
 
 Geometrically, this is the diffeomorphism-naturality of the Ricci tensor:
-since `Ric` is built from `(g, ∇^g)` by metric-independent algebraic
-operations (trace of the Riemann endomorphism), and both `g` and `∇^g`
-transform naturally under diffeomorphisms, so does `Ric`. The proof
-chains Riemann-curvature naturality (`riemann_pullback_conjugation`)
-with the conjugation-invariance of the trace (the trace of an
-endomorphism is unchanged when conjugated by an invertible linear
-map, here `mfderiv I I Φ x`).
+`Ric` is the fibrewise trace of the Riemann endomorphism
+`Z ↦ riemannOp (LeviCivita g) x Z v w` (this is `ricciTensor_apply`), and the
+proof shows that endomorphism transforms by conjugation under `Φ`, so its
+trace is unchanged.
 
-The substantive ingredient is the section-level Riemann-tensor naturality
-formula
-  `riemannOp (LeviCivita (Φ*g)) x Z v w
-    = (dΦ_x)⁻¹ (riemannOp (LeviCivita g) (Φ x) (dΦ_x Z) (dΦ_x v) (dΦ_x w))`,
-expressing that the Riemann endomorphism of the pullback connection is
-the conjugate of the Riemann endomorphism of the original connection by
-`dΦ_x`. Once available, the trace of the endomorphism
-`Z ↦ riemannOp (LeviCivita (Φ*g)) x Z v w` equals the trace of its
-conjugate, which is the endomorphism
-`Z' ↦ riemannOp (LeviCivita g) (Φ x) Z' (dΦ_x v) (dΦ_x w)` by
-`LinearMap.trace_conj`. -/
-theorem ricci_trace_pullback_conjugation
+The substantive ingredient is the pointwise Riemann-endomorphism
+conjugation identity proved in this file, `ricciEndo_conjugation` (built from
+`riemannOp_pullback_pointwise`):
+  `ricciEndo (Φ*g) x v w
+    = (mfderiv Φ.symm (Φ x)) ∘ ricciEndo g (Φ x) (dΦ_x v) (dΦ_x w) ∘ (mfderiv Φ x)`,
+i.e. the Ricci endomorphism of the pullback metric is the conjugate, by the
+invertible linear map `mfderiv I I Φ x`, of the Ricci endomorphism of `g` at
+`Φ x` with pushed-forward arguments. Taking traces, conjugation-invariance of
+the trace (`LinearMap.trace_conj'`) gives the stated identity. -/
+theorem ricciTensor_pullback_conjugation
     (g : SmoothRiemannianMetric I M) (Φ : M ≃ₘ⟮I, I⟯ M)
     (x : M) (v w : TangentSpace I x) :
     ricciTensor (I := I) (Diffeomorph.pullbackMetric g Φ) x v w

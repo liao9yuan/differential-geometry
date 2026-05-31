@@ -17,7 +17,7 @@ curve
 
 (definitionally `s ↦ (pullbackMetric (g_DT s) (Φ_fam s)).inner x v w`) in time and
 consumes a single substantive *regularity hypothesis* — the joint within-set
-derivative of this curve (`h_total_eval` of `hamiltonDeTurck_pullback_isRicciFlow`,
+derivative of this curve (`h_total_eval` of `hamilton_deturck_pullback_solves_ricci_flow`,
 equivalently `h_chain_eval` of `pullback_time_derivative_chain_rule`).
 
 This file **produces** that joint derivative from the genuine separable inputs,
@@ -59,7 +59,7 @@ moving-geometry slot derivative `s₂ ↦ Q(t, s₂)` is the partial `Q'(0,1)`.
 
 Consequently the diagonal derivative equals
 `(metric-slot value) + (moving-geometry-slot value)`, exactly the additive value
-shape that `hamiltonDeTurck_pullback_isRicciFlow` expects, and hence the
+shape that `hamilton_deturck_pullback_solves_ricci_flow` expects, and hence the
 chain-rule hypothesis `h_chain_eval` of `pullback_time_derivative_chain_rule` is
 discharged.
 
@@ -339,7 +339,7 @@ theorem deTurck_evalForm_chain_hasDerivWithinAt
 /-! ## (e) The `h_total_eval`-shaped output, wired to the genuine inputs
 
 We now wire the abstract capstone to the genuine producers to emit precisely the
-`h_total_eval` hypothesis consumed by `hamiltonDeTurck_pullback_isRicciFlow`, with
+`h_total_eval` hypothesis consumed by `hamilton_deturck_pullback_solves_ricci_flow`, with
 its additive value `((-2 Ric + 𝓛) + (-𝓛))`.
 
 Two distinct inputs feed the two diagonal partials:
@@ -387,7 +387,7 @@ the evaluation-form curve has within-set derivative
 
   `((-2 Ric(g_DT t)(Φ_fam t x)(dΦ_t v, dΦ_t w) + 𝓛_{X_DT}(g_DT t)(…)) + (-𝓛_{X_DT}(g_DT t)(…)))`,
 
-exactly the `h_total_eval` hypothesis of `hamiltonDeTurck_pullback_isRicciFlow`
+exactly the `h_total_eval` hypothesis of `hamilton_deturck_pullback_solves_ricci_flow`
 (equivalently the `h_chain_eval` hypothesis of
 `pullback_time_derivative_chain_rule`).  The diagonal chain rule
 `deTurck_evalForm_chain_hasDerivWithinAt` assembles the two partials; their values

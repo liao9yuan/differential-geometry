@@ -24,13 +24,13 @@ smooth dependence on `(g, ∇g, ∇²g)`, there is a positive existence time
 Phase 8 (handled in a separate dispatch) consumes this endpoint by
 instantiating `F` with the DeTurck-Ricci right-hand side
 `g ↦ -2 Ric(g) + 𝓛_{X(g, g_bg)} g`, which is strictly parabolic by the
-existing `deTurckSymbol_isStrictlyParabolic`.
+existing `deTurckSymbol_isStrictlyParabolic_of_symm`.
 
 ## Layout
 
 * `IsParabolicMetricRHS` — abstract data describing a parabolic operator
   on metrics together with its strict-parabolicity witness at the initial
-  metric, suitable for plugging into `quasilinear_metric_parabolic_shortTime_exists`.
+  metric, suitable for plugging into `quasilinear_parabolic_metric_short_time_existence`.
 * `IsQuasilinearMetricParabolicSolution F g₀ T g_fam` — the equation
   `∂_t g_fam(t) = F(g_fam(t))` evaluated pointwise against tangent
   vectors, with the initial condition `g_fam 0 = g₀` and the existence
@@ -48,7 +48,7 @@ existing `deTurckSymbol_isStrictlyParabolic`.
   (`Analysis/Parabolic/TensorLinearParabolic.lean`) provides this under
   a chart-locality predicate; the predicate-free version is the target
   of Route Y. The skeleton states it predicate-free.
-* `quasilinear_metric_parabolic_shortTime_exists` — the Phase 7 endpoint:
+* `quasilinear_parabolic_metric_short_time_existence` — the Phase 7 endpoint:
   short-time existence for `∂_t g = F(g)`, by Banach fixed point on
   Duhamel iterates seeded by the linearised semigroup.
 -/
@@ -92,9 +92,9 @@ def IsQuasilinearMetricParabolicSolution
 
 For the skeleton this is an opaque `Prop` placeholder; downstream callers
 (notably Phase 8) supply concrete content by combining the existing
-`deTurckSymbol_isStrictlyParabolic` (`PDE/DeTurck/StrictParabolicity.lean`) with
+`deTurckSymbol_isStrictlyParabolic_of_symm` (`PDE/DeTurck/StrictParabolicity.lean`) with
 the linearisation infrastructure in `PDE/DeTurck/DeTurckLinearization/`. The
-shape `Prop` is what `quasilinear_metric_parabolic_shortTime_exists` consumes. -/
+shape `Prop` is what `quasilinear_parabolic_metric_short_time_existence` consumes. -/
 def IsStrictlyParabolicMetricRHS
     (F : SmoothRiemannianMetric I M →
          (∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ))
@@ -133,40 +133,23 @@ def IsSmoothQuasilinearMetricRHS
 
 /-! ## Section B — The Phase 7 → Phase 8 endpoint (skeleton) -/
 
-/-- **Phase 7 endpoint: short-time existence for a strictly parabolic
-quasi-linear PDE on smooth Riemannian metrics over a closed manifold.**
+/-- **Short-time existence for a strictly parabolic quasi-linear PDE on smooth
+Riemannian metrics over a closed manifold.**
 
 For any smooth Riemannian metric `g₀` on a closed (compact, boundaryless)
 manifold `M` and any operator `F` on smooth Riemannian metrics that is
-strictly parabolic at `g₀` and has smooth quasi-linear dependence on
-`(g, ∇g, ∇²g)`, the PDE `∂_t g = F(g)` admits a positive existence time
-`T > 0` and a smooth-in-time solution `g_fam : ℝ → SmoothRiemannianMetric I M`
-with `g_fam 0 = g₀`.
+strictly parabolic at `g₀` (`IsStrictlyParabolicMetricRHS F g₀`) and has smooth
+quasi-linear dependence on the chart data `(g, ∇g, ∇²g)`
+(`IsSmoothQuasilinearMetricRHS F`), the PDE `∂_t g = F(g)` admits a positive
+existence time `T > 0` and a time-solution `g_fam : ℝ → SmoothRiemannianMetric I M`
+with `g_fam 0 = g₀`, in the sense of `IsQuasilinearMetricParabolicSolution`.
 
-Phase 8 instantiates this with `F(g) := -2 Ric(g) + 𝓛_{X(g, g_bg)} g`
-(the DeTurck-Ricci right-hand side). The strict-parabolicity witness for
-that `F` is the existing `deTurckSymbol_isStrictlyParabolic`.
+The DeTurck-Ricci right-hand side `F(g) := -2 Ric(g) + 𝓛_{X(g, g_bg)} g` is one
+intended instantiation; its strict-parabolicity witness is
+`deTurckSymbol_isStrictlyParabolic_of_symm`.
 
-This is the **engineering interface between Phase 7 and Phase 8**.
-
-**Proof outline (when filled in)**:
-1. Linearise `F` at `g₀` to obtain a linear principal part
-   `L g h = (DF)(g₀)(h)` plus a quasi-linear remainder.
-2. The principal part is a second-order elliptic operator on
-   `(0, 2)`-tensors with positive-definite symbol (by `IsStrictlyParabolicMetricRHS`).
-3. Generate a bounded `C₀`-semigroup `S` from `L g₀` on the Hilbert
-   completion (existing `tensorHeatSemigroup` after Route Y removes
-   chart-locality predicates).
-4. Apply `Analysis.Parabolic.QuasiLinear.Existence.semilinear_parabolic_existence`
-   to the abstract Duhamel iteration with `S` and the non-linear
-   remainder. This produces a mild solution `g_fam` on `[0, T]` with
-   `T = 1 / (L + 1)` where `L` is the local Lipschitz constant of the
-   remainder.
-5. Smooth-in-time regularity follows from the bootstrap inside the
-   maximal-regularity space (`Analysis/Parabolic/MaximalRegularity/`).
-
-For the skeleton, the entire proof is `sorry`. -/
-theorem quasilinear_metric_parabolic_shortTime_exists
+The proof is currently `sorry`. -/
+theorem quasilinear_parabolic_metric_short_time_existence
     [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
     (F : SmoothRiemannianMetric I M →
          (∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ))
@@ -240,7 +223,7 @@ predicate-free public surface; the abstract existence machinery in
 (which is fully proved, no `sorry`) gives the underlying Duhamel /
 Banach-fixed-point argument. To close `linear_tensor_parabolic_shortTime_exists`
 the open work is purely the existing-infrastructure lift to a
-predicate-free statement; `quasilinear_metric_parabolic_shortTime_exists`
+predicate-free statement; `quasilinear_parabolic_metric_short_time_existence`
 additionally needs the linearisation + Banach fixed-point assembly. Both
 are tracked downstream of Route Y completion. -/
 

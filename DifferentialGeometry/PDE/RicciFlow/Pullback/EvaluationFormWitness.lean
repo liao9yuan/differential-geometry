@@ -27,9 +27,9 @@ has time derivative `-2 · ricciTensor (g_fam t) x v w` at `t`, where
 This is the substantive cancellation step in the DeTurck-to-Ricci conjugation:
 the Lie-derivative term `𝓛_{X(g_DT)} g_DT` in the DeTurck right-hand side is
 *exactly cancelled* by the time-variation of the pushforwards (the Cartan
-formula + the flow condition + `lie_derivative_pullback_naturality`), and the
+formula + the flow condition + `lie_derivative_metric_pullback_natural_under_diffeomorphism_pointwise`), and the
 remaining `-2 Ric(g_DT)` piece is transported to `-2 Ric(g_fam t)` via
-`ricci_pullback_naturality`.
+`ricci_tensor_pullback_natural_under_diffeomorphism`.
 
 The substantive content provided by this primitive is the *value identification*
 
@@ -45,7 +45,7 @@ condition; this identity is the prerequisite encapsulated by the
 The Cartan-cancellation identity `Lpush = -lieDerivMetric (g_DT t) X (Φ_fam t x) (dΦv, dΦw)`
 is supplied as a separate propositional hypothesis. Internally it would be
 proved from the flow condition `∂_s Φ_fam = -X ∘ Φ_fam` plus
-`cartan_formula_for_lie_deriv_metric` plus `lie_derivative_pullback_naturality`,
+`cartan_formula_for_lie_deriv_metric` plus `lie_derivative_metric_pullback_natural_under_diffeomorphism_pointwise`,
 once the time-derivative of `s ↦ mfderiv (Φ_fam s) x v` admits a substantive
 identification at the level of `HasDerivAt`. -/
 
@@ -106,7 +106,7 @@ and the following honest mathematical hypotheses:
    minus the Lie derivative of the metric along `X`", which is itself the
    chart-α-representation identity for `lieDerivMetric` paired with the
    flow condition `∂_s Φ_fam = -X(g_DT t) ∘ Φ_fam` (a prerequisite proved
-   from `cartan_formula_for_lie_deriv_metric` + `lie_derivative_pullback_naturality`
+   from `cartan_formula_for_lie_deriv_metric` + `lie_derivative_metric_pullback_natural_under_diffeomorphism_pointwise`
    in a separate, downstream substep).
 
 4. `h_total_eval` — the genuine combined derivative of the full evaluation
@@ -121,7 +121,7 @@ metric `pullbackMetric (g_DT t) (Φ_fam t)`.
 The lemma's substantive content is the *value identification*: the symbolic
 sum `G_DT_RHS + Lpush` collapses to `-2 · Ric(g_fam t) x v w` after cancelling
 the Lie term via `h_cartan_cancellation` and transporting `Ric(g_DT t)` to
-`Ric(g_fam t)` via `ricci_pullback_naturality`. The signature exposes the
+`Ric(g_fam t)` via `ricci_tensor_pullback_natural_under_diffeomorphism`. The signature exposes the
 per-piece derivative hypotheses (not the conclusion shape) — no
 hypothesis-packaging. -/
 theorem deTurck_pullback_eval_form_derivative_witness
@@ -197,7 +197,7 @@ theorem deTurck_pullback_eval_form_derivative_witness
   -- Substantive Ricci-naturality transport: `R_DT = R_fam`.
   have h_ric_nat : R_DT = R_fam := by
     rw [hR_fam_def, hR_DT_def]
-    exact (ricci_pullback_naturality (I := I) (g_DT t) (Φ_fam t) x v w).symm
+    exact (ricci_tensor_pullback_natural_under_diffeomorphism (I := I) (g_DT t) (Φ_fam t) x v w).symm
   -- Assemble the value:
   have h_value :
       (((-2 : ℝ) * R_DT + L) + Lpush) = (-2 : ℝ) * R_fam := by

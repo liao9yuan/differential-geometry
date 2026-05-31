@@ -143,7 +143,7 @@ theorem conjugating_diffeo_family
   -- Conjuncts 4/5 (`hΦcont0`/`hΦmfderiv0`) are the `t = 0` right-continuity of the bare
   -- flow's orbit and moving spatial Jacobian, transported below to `Φ_fam`.
   obtain ⟨Φ, hΦ0, hdiffeo, hflow, hΦcont0, hΦmfderiv0⟩ :=
-    forward_flow_jointsmooth_onesided (I := I) X_DT T_DT hDT hint hcont0 hgrad0
+    forward_flow_existence_onesided_of_jointsmooth_field (I := I) X_DT T_DT hDT hint hcont0 hgrad0
   -- Package the bare flow as a diffeomorphism family anchored at the identity, with the
   -- pointwise agreement `Φ_fam t x = Φ t x` on the open interior `(0, T_DT)`.
   obtain ⟨Φ_fam, hfam0, hfameq, hfamode⟩ :=

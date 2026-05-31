@@ -48,7 +48,7 @@ variable
 
 /-! ## The interior heat-trace summability (the single Weyl-dependent input)
 
-The classical local Weyl law (`local_weyl_eigenvalue_counting_bound`, the one
+The classical local Weyl law (`weyl_eigenvalue_counting_bound_of_closed`, the one
 deferred analytic input of the development) reduces — via the proven chain
 `EigenvalueCountingBound ⟹ EigenvalueTailSummable` — to the existence of an
 exponent `p > 0` with `∑ᵢ (1 + λᵢ)^{-p}` summable.  From this single fact the
@@ -428,7 +428,7 @@ theorem interior_allscale_time_continuity
   -- Weyl-dependent tail summability (sole transit through local_weyl)
   have htail : EigenvalueTailSummable (I := I) (M := M) g_bg 0 2 :=
     eigenvalueTailSummable_of_countingBound (I := I) (M := M) g_bg 0 2
-      (local_weyl_eigenvalue_counting_bound (I := I) (M := M) g_bg 0 2)
+      (weyl_eigenvalue_counting_bound_of_closed (I := I) (M := M) g_bg 0 2)
   -- forcing masses summable at every order
   have hforce : ∀ d : ℝ, Summable (forcingMass (I := I) (M := M) gforce d) := by
     intro d

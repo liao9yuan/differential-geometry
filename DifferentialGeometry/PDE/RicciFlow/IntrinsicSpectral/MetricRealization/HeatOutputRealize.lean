@@ -283,21 +283,22 @@ def heatOutputBilinSymm (g : SmoothRiemannianMetric I M)
   ccTensorBilinSymm (I := I) g
     (heatOutputSmoothRepr (I := I) (M := M) g 0 2 ht u₀ hu₀_fs) x
 
-/-- **Realizing the positive-time heat output as a smooth Riemannian metric.**
+/-- On a closed Riemannian manifold `(M, g)`, for a covariant `(0,2)` initial
+datum `u₀ : TensorL2 0 2 g` with finite spectral support and a positive time `t`,
+if the symmetrized extracted bilinear form `heatOutputBilinSymm` of the heat
+output's smooth representative is uniformly `g`-fibre small with constant
+`δ' < 1`, then there exists a `SmoothRiemannianMetric I M` whose inner product is
+fibrewise `g.inner + heatOutputBilinSymm`.
 
-For a closed Riemannian manifold `(M, g)` and a covariant `(0,2)` initial datum
-`u₀ : TensorL2 0 2 g` with finite spectral support, let `T` be the genuine
-smooth representative `heatOutputSmoothRepr` of the positive-time heat output
-`e^{tΔ} u₀`. If the symmetrized extracted bilinear form
-`heatOutputBilinSymm = ccTensorBilinSymm T` is uniformly `g`-fibre small with
-constant `δ' < 1`, then there is a genuine `SmoothRiemannianMetric I M` equal
-fibrewise to `g + h_sym`.
-
-This is the substantive, *non-vacuous* spectral-heat-output realization: the
-positive-definiteness of `g + h_sym` (its quadratic form is bounded below by
-`(1 - δ') · g x v v > 0`) makes it an honest metric, and the smoothness of
-`h_sym` — inherited from the `C^∞` heat-output representative — makes the
-assembled object `C^∞`. -/
+Here the genuine smooth representative `heatOutputSmoothRepr` of the positive-time
+heat output `e^{tΔ} u₀` supplies the perturbation
+`heatOutputBilinSymm = ccTensorBilinSymm` of that representative. The fibre-bound
+hypothesis `hδ'` (with `δ' < 1`) is the genuine smallness assumption: it forces
+the quadratic form of `g + heatOutputBilinSymm` to be bounded below by
+`(1 - δ') · g x v v > 0`, so the perturbed object is positive-definite, and the
+`C^∞` regularity of the representative makes it a smooth metric. The metric is
+constructed (not assumed) by delegating to
+`exists_smooth_metric_of_smooth_tensor_small`. -/
 theorem exists_smooth_metric_of_heatOutput_small
     (g : SmoothRiemannianMetric I M)
     {t : ℝ} (ht : 0 < t) (u₀ : TensorL2 0 2 g)

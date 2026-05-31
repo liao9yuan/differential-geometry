@@ -18,7 +18,7 @@ for a globally Lipschitz lower-order nonlinearity `N : TensorL2 → TensorL2`,
 
 ## Main results
 
-* `tensor_quasilinear_parabolic_existence_intrinsic` — short-time
+* `tensor_quasilinear_heat_mild_solution_existence_intrinsic` — short-time
   existence of a continuous mild solution.
 * `tensor_quasilinear_parabolic_unique_intrinsic` — uniqueness of the
   mild solution on a short time interval.
@@ -67,7 +67,7 @@ path `u : [0, T] → TensorL2 r s g` solving the Duhamel integral equation
   `u(t) = e^{t Δ_∇} T_0 + ∫₀ᵗ e^{(t-τ) Δ_∇} (N (u τ)) dτ`
 
 with `u(0) = T_0`. -/
-theorem tensor_quasilinear_parabolic_existence_intrinsic
+theorem tensor_quasilinear_heat_mild_solution_existence_intrinsic
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T_0 : TensorL2 r s g)
     {N : TensorL2 r s g → TensorL2 r s g} {L : ℝ≥0} (hN : LipschitzWith L N) :

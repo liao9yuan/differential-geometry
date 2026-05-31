@@ -16,7 +16,7 @@ about this family:
 * **spatial smoothness at a fixed time** — each `Φ_fam s` is a smooth self-map
   of `M`, and the *pushforward* of a smooth vector field `Y` along `Φ_fam s` is a
   smooth section of `TM` (this is the exact `hPush_smooth`-shaped hypothesis taken
-  by `lie_derivative_pullback_naturality` / `assemble_lie_deriv_naturality`);
+  by `lie_derivative_metric_pullback_natural_under_diffeomorphism_pointwise` / `assemble_lie_deriv_naturality`);
 * **time regularity at a fixed point** — the bare flow's pointwise
   `HasMFDerivWithinAt` in `s`, with velocity `X s (Φ_fam s x)`, together with the
   continuity `s ↦ Φ_fam s x` it implies;
@@ -140,7 +140,7 @@ private lemma flowFamily_pushforward_eq_mpullback_symm
 For a time-indexed diffeomorphism family `Φ_fam`, a fixed time `s`, and a smooth
 tangent vector field `Y` on `M`, the pushforward `Diffeomorph.pushforward (Φ_fam s) Y`
 is a smooth section of the tangent bundle. This is *exactly* the hypothesis
-`hPush_smooth` taken (rather than proved) by `lie_derivative_pullback_naturality`
+`hPush_smooth` taken (rather than proved) by `lie_derivative_metric_pullback_natural_under_diffeomorphism_pointwise`
 and `assemble_lie_deriv_naturality` in the pull-back layer, here produced from the
 flow family for the specialisation `Φ := Φ_fam s`.
 

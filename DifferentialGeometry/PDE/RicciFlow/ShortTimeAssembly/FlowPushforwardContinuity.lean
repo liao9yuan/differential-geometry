@@ -84,7 +84,7 @@ theorem flow_pushforward_continuous_in_time
     -- GENUINE OPEN INPUT 2 (interior moving-mfderiv continuity): the `E`-valued moving spatial
     -- Jacobian `r ↦ mfderiv I I (Φ_fam r) x v` is continuous at every interior time `s ∈ (0, T)`.
     -- This is the interior-in-time analogue of the forward flow's `t = 0` moving-mfderiv
-    -- continuity (`forward_flow_jointsmooth_onesided`, conjunct 5) and is the genuine output of
+    -- continuity (`forward_flow_existence_onesided_of_jointsmooth_field`, conjunct 5) and is the genuine output of
     -- the flat variational identity `flat_raw_variational_identity`
     -- (`RawVariationalIdentityFlat`, which IS a `HasDerivAt` of this very curve, hence
     -- `ContinuousAt`).  That sibling cannot be invoked here because its signature carries
@@ -99,7 +99,7 @@ theorem flow_pushforward_continuous_in_time
     ∧ (∀ x : M, ContinuousWithinAt (fun s : ℝ => (Φ_fam s : M → M) x) (Set.Ici (0 : ℝ)) 0) := by
   -- The forward / interior flow `Φ` of `X` (one-sided, from 0), with its t=0 continuity data.
   obtain ⟨Φ, hΦ0', hdiffeo, hΦflow, hΦcont0, hΦmfderiv0⟩ :=
-    forward_flow_jointsmooth_onesided X T hT hint hcont0 hgrad0
+    forward_flow_existence_onesided_of_jointsmooth_field X T hT hint hcont0 hgrad0
   -- The interior bare-ODE of `Φ_fam` and `Φ`, restricted from `Set.Ici 0` to `Set.Ioo 0 T`.
   have hΦfam_ode : ∀ s ∈ Set.Ioo (0 : ℝ) T, ∀ x : M,
       HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun u : ℝ => (Φ_fam u : M → M) x) (Set.Ioo (0 : ℝ) T) s

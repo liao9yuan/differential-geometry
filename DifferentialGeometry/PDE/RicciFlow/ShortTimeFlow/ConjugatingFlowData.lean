@@ -147,7 +147,7 @@ the at-`0` endpoint of which is `hΦmfderiv0`.  That interior moving-Jacobian co
 pinned by `hΦode` alone (which fixes only the basepoint's time-derivative, not the spatial
 Jacobian's time-regularity); it is the genuine closed-manifold Hartman smooth-dependence-on-IC
 content of the flow.  The exact input that closes that gap is the DeTurck FIELD interior joint
-`C∞` datum `hfield_reg` (the `h_reg` output of `deturck_ricci_pde_shorttime`, restricted to the
+`C∞` datum `hfield_reg` (the `h_reg` output of `deturck_ricci_flow_parabolic_short_time_existence`, restricted to the
 horizon `T`): for a jointly-`C∞`-in-`(t, x)` field the flow map is jointly `C∞` in `(t, x)` on the
 interior, so its spatial Jacobian — and thus `s ↦ (mfderiv I I (Φ_fam s) y u : E)` — is continuous
 at every interior time.  Combined with the at-`0` data and the orbit continuity, both conjuncts
@@ -170,7 +170,7 @@ theorem conjugating_flow_orbit_pushforward_continuity_data
           (-(deTurckVF (I := I) (g_DT t) g_bg ((Φ_fam t : M → M) x)))))
     -- GENUINE interior-time smooth-dependence input: the DeTurck velocity field
     -- `q ↦ ⟨q.2, deTurckVF (g_DT q.1) g_bg q.2⟩` is jointly `C∞` on the interior `Ioo 0 T ×ˢ univ`
-    -- (the `h_reg` output of `deturck_ricci_pde_shorttime`).  By closed-manifold Hartman
+    -- (the `h_reg` output of `deturck_ricci_flow_parabolic_short_time_existence`).  By closed-manifold Hartman
     -- smooth-dependence-on-initial-conditions the flow map of this field is jointly `C∞` in
     -- `(t, x)` on the interior, hence its moving spatial Jacobian
     -- `s ↦ (mfderiv I I (Φ_fam s) y u : E)` is continuous at every interior time.  This is the

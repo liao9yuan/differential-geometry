@@ -97,9 +97,11 @@ present unconditional compactness result yields the precise hypothesis needed
 for the compact self-adjoint spectral theorem on the L² Hilbert space, with no
 chart-selection hypothesis anywhere in the chain. -/
 
-/-- The L²-side tensor resolvent is both a compact operator and
-self-adjoint, unconditionally (no chart-selection hypothesis). -/
-theorem tensorResolventL2_isCompactOperator_and_isSelfAdjoint_intrinsic
+/-- The L²-side tensor resolvent `tensorResolventL2 g r s` on a closed
+Riemannian manifold is both a compact operator and self-adjoint, with no
+chart-selection hypothesis. Compactness is `tensorResolventL2_isCompactOperator_intrinsic`
+and self-adjointness is `tensorResolventL2_isSelfAdjoint`. -/
+theorem tensorResolventL2_isCompactOperator_isSelfAdjoint_intrinsic
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     IsCompactOperator (tensorResolventL2 (I := I) (M := M) g r s) ∧
       IsSelfAdjoint (tensorResolventL2 (I := I) (M := M) g r s) :=

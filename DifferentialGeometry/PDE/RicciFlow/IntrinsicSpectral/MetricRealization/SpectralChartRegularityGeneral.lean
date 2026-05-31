@@ -810,13 +810,16 @@ theorem spectralChartRegularity_of_eigenvalueTailSummable
   exact gateElement_chartComponent_memWkp_of_tail (I := I) (M := M) g r s u h_mem
     h_tail k α P₀
 
-/-- **The full spectral smooth-representative gate from eigenvalue-tail
-summability.** Granting `EigenvalueTailSummable g r s`, every `L²` tensor lying in
-every `Hˢ` admits a genuine `C^∞` (`SmoothCcTensor`) representative: it is the
-composition of the general-element chart-Sobolev regularity
-`spectralChartRegularity_of_eigenvalueTailSummable` with the (unconditional)
-tensor super-critical reconstruction bridge `tensorSuperCriticalReconstruct`,
-through the gate reduction `spectralSmooth_realizesAsSmooth_of_reduction`. -/
+/-- Granting `EigenvalueTailSummable g r s` (the Weyl-type spectral counting
+input), the smooth-representative gate predicate `SpectralSmoothRealizesAsSmooth g
+r s` holds: every `L²` tensor lying in every `Hˢ` admits a genuine `C^∞`
+(`SmoothCcTensor`) representative.
+
+The proof chains the general-element chart-Sobolev regularity
+`spectralChartRegularity_of_eigenvalueTailSummable` (which consumes the tail
+summability) with the unconditional tensor super-critical reconstruction bridge
+`tensorSuperCriticalReconstruct`, through the gate reduction
+`spectralSmooth_realizesAsSmooth_of_reduction`. -/
 theorem spectralSmoothRealizesAsSmooth_of_eigenvalueTailSummable
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (h_tail : EigenvalueTailSummable (I := I) (M := M) g r s) :
