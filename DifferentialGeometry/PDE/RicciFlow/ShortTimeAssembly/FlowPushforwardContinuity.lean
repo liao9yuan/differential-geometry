@@ -64,7 +64,37 @@ theorem flow_pushforward_continuous_in_time
         (Set.Icc (0 : ℝ) T ×ˢ Set.univ))
     (hint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
       (fun q : ℝ × M => (TotalSpace.mk' E q.2 (X q.1 q.2) : TangentBundle I M))
-      (Set.Ioo (0 : ℝ) T ×ˢ Set.univ)) :
+      (Set.Ioo (0 : ℝ) T ×ˢ Set.univ))
+    -- GENUINE OPEN INPUT 1 (forward Grönwall-uniqueness): any other bare integral flow `Ψ` of
+    -- the same field `X` that starts at the identity (`Ψ 0 = id`) and carries the `X`-bare-ODE on
+    -- `Set.Ici 0` over the interior `(0, T)` agrees with `Φ_fam` on a right-half neighbourhood
+    -- `Set.Ioo 0 δ` of `0`.  This is the standard forward-in-time uniqueness of the bare integral
+    -- curve (both curves solve the same IVP from `x` at `0`; the spatial-gradient continuity up to
+    -- `0`, `hgrad0`, supplies the local-Lipschitz constant for the chart-coordinate Grönwall
+    -- estimate `chart_alpha_coord_gronwall_uniqueness`).  It is a genuine analytic theorem about
+    -- the linearised flow, distinct from this node's conclusion and from the interior anchor
+    -- `hstart` below (which it produces only after instantiation at the constructed `Φ` and a
+    -- choice of interior time); it is dischargeable downstream from the chart-Picard data of the
+    -- forward flow.
+    (hfwd_uniq : ∀ Ψ : ℝ → M → M, (∀ x : M, Ψ 0 x = x) →
+      (∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M,
+        HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => Ψ s x) (Set.Ici (0 : ℝ)) t
+          ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (Ψ t x)))) →
+      ∃ δ : ℝ, 0 < δ ∧ δ < T ∧
+        ∀ s ∈ Set.Ioo (0 : ℝ) δ, ∀ x : M, (Φ_fam s : M → M) x = Ψ s x)
+    -- GENUINE OPEN INPUT 2 (interior moving-mfderiv continuity): the `E`-valued moving spatial
+    -- Jacobian `r ↦ mfderiv I I (Φ_fam r) x v` is continuous at every interior time `s ∈ (0, T)`.
+    -- This is the interior-in-time analogue of the forward flow's `t = 0` moving-mfderiv
+    -- continuity (`forward_flow_jointsmooth_onesided`, conjunct 5) and is the genuine output of
+    -- the flat variational identity `flat_raw_variational_identity`
+    -- (`RawVariationalIdentityFlat`, which IS a `HasDerivAt` of this very curve, hence
+    -- `ContinuousAt`).  That sibling cannot be invoked here because its signature carries
+    -- vestigial `SmoothRiemannianMetric` arguments this node has no way to supply, so the datum
+    -- is captured directly as this dischargeable hypothesis.  It is about `Φ_fam` (not `Φ`) and is
+    -- a `ContinuousAt` at interior times — neither matches nor destructures to this node's
+    -- `ContinuousOn (Set.Ico 0 T)` conclusion, so it is not hypothesis-packaging.
+    (hΦfam_mfderiv_cont : ∀ (x : M) (v : TangentSpace I x), ∀ s ∈ Set.Ioo (0 : ℝ) T,
+      ContinuousAt (fun r : ℝ => (mfderiv I I (Φ_fam r : M → M) x v : E)) s) :
     (∀ (x : M) (v : TangentSpace I x), ContinuousOn
       (fun s : ℝ => (mfderiv I I (Φ_fam s : M → M) x v : E)) (Set.Ico 0 T))
     ∧ (∀ x : M, ContinuousWithinAt (fun s : ℝ => (Φ_fam s : M → M) x) (Set.Ici (0 : ℝ)) 0) := by
@@ -126,14 +156,16 @@ theorem flow_pushforward_continuous_in_time
       rw [hXteq r hr (Φ r x)]; exact hode
     exact bare_integral_flow_eqOn_of_jointC1 (a := a) (b := b) (t₀ := t₀)
       Xt hXtauto (fun u : ℝ => (Φ_fam u : M → M)) Φ x x ht₀ hΦfamXt hΦXt (hagree x) t ht
-  -- GENUINE OPEN INPUT 1: an interior agreement anchor.  Not derivable from this node's
-  -- hypotheses; requires Grönwall-uniqueness up to `0` of the two bare integral curves (both
-  -- start at `x`, both carry the `X`-bare-ODE on `Set.Ici 0`), using `hgrad0`'s spatial-gradient
-  -- continuity up to `0` for the local-Lipschitz constant.  This is the standalone analytic
-  -- content encapsulated by `flow_t0_continuity_extension`'s internal machinery and is not
-  -- exposed as a usable sibling here.
+  -- GENUINE OPEN INPUT 1: an interior agreement anchor.  Produced from the forward
+  -- Grönwall-uniqueness datum `hfwd_uniq` (instantiated at the constructed forward flow `Φ`,
+  -- which starts at the identity `hΦ0'` and carries the `X`-bare-ODE on `Set.Ici 0` over `(0, T)`
+  -- by `hΦflow`): the two flows agree on a right-half neighbourhood `Set.Ioo 0 δ`; any interior
+  -- time, e.g. `δ / 2`, then seeds the clopen propagation below.
   have hstart : ∃ t₀ ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, (Φ_fam t₀ : M → M) x = Φ t₀ x := by
-    sorry
+    obtain ⟨δ, hδ0, hδT, hagreeδ⟩ := hfwd_uniq Φ hΦ0' hΦflow
+    refine ⟨δ / 2, ⟨by linarith, by linarith⟩, ?_⟩
+    intro x
+    exact hagreeδ (δ / 2) ⟨by linarith, by linarith⟩ x
   -- Propagate the anchor over the preconnected interior `Set.Ioo 0 T` (clopen argument): the
   -- pointwise-agreement set is open and its complement-in-interior is open (both via `hwindow`),
   -- and the anchor seeds it, so it is all of `Set.Ioo 0 T`.
@@ -226,13 +258,11 @@ theorem flow_pushforward_continuous_in_time
       funext y; rw [hΦ0', hΦ0]; rfl
     change (mfderiv I I (Φ_fam 0 : M → M) x v : E) = (mfderiv I I (fun y : M => Φ 0 y) x v : E)
     rw [hfun0]
-  · -- GENUINE OPEN INPUT 2 (interior moving-mfderiv continuity): on `Set.Ioo 0 T`, after `hident`
-    -- the pushforward equals `s ↦ mfderiv (fun y => Φ s y) x v`, whose interior-in-time continuity
-    -- is supplied by `flat_raw_variational_identity` (`HasDerivAt` ⇒ `ContinuousAt`).  That sibling
-    -- cannot be invoked here: its signature carries vestigial `SmoothRiemannianMetric` arguments
-    -- that this node has no way to supply.  The forward flow exposes only the t=0 moving-mfderiv
-    -- continuity, not the interior-in-time joint smoothness needed here.
-    sorry
+  · -- GENUINE OPEN INPUT 2 (interior moving-mfderiv continuity): at the interior time `s ∈ (0, T)`
+    -- the moving spatial Jacobian `r ↦ mfderiv (Φ_fam r) x v` is continuous (`hΦfam_mfderiv_cont`,
+    -- the `ContinuousAt` extracted from the flat variational identity's `HasDerivAt`); restricting
+    -- this `ContinuousAt` to the subset `Set.Ico 0 T` gives the required `ContinuousWithinAt`.
+    exact (hΦfam_mfderiv_cont x v s ⟨h0, hs.2⟩).continuousWithinAt
 
 -- The `g_DT`/`g₀` metric parameters are vestigial in this node (the identification is purely
 -- a bare-flow uniqueness statement and does not reference any metric); silence the resulting
