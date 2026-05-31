@@ -2,6 +2,7 @@ import DifferentialGeometry.Geometry.Riemannian.Exponential.IntrinsicExp
 import DifferentialGeometry.Geometry.Riemannian.Exponential.IntrinsicExpContinuity
 import DifferentialGeometry.Geometry.Riemannian.GaussLemma
 import DifferentialGeometry.Geometry.Riemannian.NormalCoordinates
+import DifferentialGeometry.Geometry.Riemannian.Variation.SecondVariation
 import Mathlib.Topology.Order.Compact
 import Mathlib.Geometry.Manifold.Riemannian.PathELength
 
@@ -1151,6 +1152,739 @@ theorem expMapIntrinsic_surjective_dist
     refine ⟨r • u, ?_, ?_⟩
     · rw [hγ_def] at hγr_eq_q; exact hγr_eq_q
     · rw [sqrt_gInner_smul_self (I := I) g p hr_pos.le u, hu_unit, Real.sqrt_one, mul_one]
+
+/-! ## 9. The broken-geodesic no-corner lemma
+
+A length-minimising concatenation of two unit-speed geodesics has no corner at the
+junction: the incoming and outgoing velocities coincide.  This is the **first
+variation** ("broken Jacobi field" / "no-corner") argument.
+
+Let `c := γ ℓ₁ = σ 0` be the junction point, `T⁻ := γ'(ℓ₁)` the incoming velocity
+and `T⁺ := σ'(0)` the outgoing velocity, and `δ := T⁺ - T⁻` (as model-space
+vectors in `E`).  If `δ ≠ 0`, deform the broken curve in the direction of `δ`
+through a smooth one-parameter family `H` localised in the *smooth* chart at `c`
+(`extChartAt I c`, which is `C^∞` since the manifold is `C^∞` — note this is **not**
+the only-`C¹` normal chart `normalChartAt`), keeping both far endpoints fixed and
+pushing the junction off in the `δ` direction with a bump factor.  Applying the
+free-endpoint first-variation formula to each geodesic half (whose acceleration
+`∇_t γ'` vanishes, so the interior integral drops out) gives
+`L'(0) = ⟨δ, T⁻⟩ - ⟨δ, T⁺⟩ = -‖δ‖²_g < 0`, contradicting the minimality of the
+broken arc (which forces `L'(0) = 0`).  Hence `‖δ‖²_g = 0`, so `δ = 0` by positive
+definiteness of `g`, i.e. `T⁺ = T⁻`.
+
+The structural skeleton below isolates the single analytic input
+`broken_velocity_jump_normSq_zero`: the squared `g`-norm of the velocity jump
+`δ = T⁺ - T⁻` vanishes.  That fact is the content of the first-variation argument
+(smooth chart-localised variation construction + two free-endpoint applications +
+minimality ⟹ `L'(0) = 0`).  The deduction `‖δ‖²_g = 0 ⟹ T⁺ = T⁻` from positive
+definiteness `g.pos` is discharged unconditionally here. -/
+
+open DifferentialGeometry.Geometry.Riemannian.Variation
+open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
+
+/-- **Smooth chart-localised variation field value.** For the smooth slice
+`u ↦ φ.symm (y₀ + η u • c₀)` (with `φ := extChartAt I c`), built from a `C^∞`
+cutoff `η` with `η 0 = 0`, `η'(0) = 1`, whose perturbed argument stays in the
+chart target, the manifold velocity at `u = 0` is the inverse trivialisation of
+`c₀` at the foot `φ.symm y₀`. The chart round-trip collapses `φ ∘ slice` to the
+affine `u ↦ y₀ + η u • c₀`, whose Fréchet derivative is `c₀`; the bridge
+`raw_mfderiv_eq_symmL_apply_fderiv` then identifies the manifold velocity. -/
+private lemma chartSlice_mfderiv_value
+    (c : M) (y₀ c₀ : E) (ηf : ℝ → ℝ)
+    (hη_smooth : ContDiff ℝ ∞ ηf) (hη0 : ηf 0 = 0) (hη'0 : HasDerivAt ηf 1 0)
+    (hmem : ∀ u : ℝ, y₀ + ηf u • c₀ ∈ (extChartAt I c).target)
+    (hbase : (extChartAt I c).symm y₀ ∈ (chartAt H c).source) :
+    ((mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => (extChartAt I c).symm (y₀ + ηf u • c₀)) 0 (1 : ℝ)) : E)
+      = (trivializationAt E (TangentSpace I) c).symmL ℝ ((extChartAt I c).symm y₀) c₀ := by
+  set ζ : ℝ → M := fun u : ℝ => (extChartAt I c).symm (y₀ + ηf u • c₀) with hζ
+  have hsmooth_symm : ContMDiffOn 𝓘(ℝ, E) I ∞ (extChartAt I c).symm (extChartAt I c).target :=
+    contMDiffOn_extChartAt_symm c
+  have hηM : ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) ∞ ηf := by
+    rw [contMDiff_iff_contDiff]; exact hη_smooth
+  have hcurveE : ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, E) ∞ (fun u : ℝ => y₀ + ηf u • c₀) :=
+    contMDiff_const.add (hηM.smul contMDiff_const)
+  have hζsmooth : ContMDiff 𝓘(ℝ, ℝ) I ∞ ζ :=
+    hsmooth_symm.comp_contMDiff hcurveE (fun u => hmem u)
+  have hζ0 : ζ 0 ∈ (chartAt H c).source := by
+    simp only [hζ, hη0, zero_smul, add_zero]; exact hbase
+  have hbridge := MFDerivAlongCurve.raw_mfderiv_eq_symmL_apply_fderiv (I := I) (M := M)
+    (γ := ζ) hζsmooth c hζ0
+  rw [hbridge]
+  have hζ0eq : ζ 0 = (extChartAt I c).symm y₀ := by simp only [hζ, hη0, zero_smul, add_zero]
+  rw [hζ0eq]
+  congr 1
+  have hcomp_eq : (fun u : ℝ => extChartAt I c (ζ u)) =ᶠ[nhds 0] (fun u : ℝ => y₀ + ηf u • c₀) := by
+    filter_upwards with u
+    simp only [hζ]
+    rw [PartialEquiv.right_inv _ (hmem u)]
+  have hfd : fderiv ℝ ((extChartAt I c) ∘ ζ) 0 (1 : ℝ)
+      = fderiv ℝ (fun u : ℝ => y₀ + ηf u • c₀) 0 (1 : ℝ) := by
+    apply Filter.EventuallyEq.fderiv_eq at hcomp_eq
+    rw [show ((extChartAt I c) ∘ ζ) = (fun u : ℝ => extChartAt I c (ζ u)) from rfl, hcomp_eq]
+  rw [hfd]
+  have h : HasDerivAt (fun u : ℝ => ηf u • c₀) c₀ 0 := by
+    have := hη'0.smul_const c₀; simpa using this
+  have hderiv : HasDerivAt (fun u : ℝ => y₀ + ηf u • c₀) c₀ 0 := by
+    have hsum := (hasDerivAt_const (0 : ℝ) y₀).add h
+    rw [zero_add] at hsum; exact hsum
+  rw [fderiv_apply_one_eq_deriv]
+  exact hderiv.deriv
+
+/-- **Joint smoothness of the chart-localised variation.** A two-parameter map
+`Hfun : ℝ → ℝ → M` that agrees with the chart formula
+`φ.symm (φ (ξ t) + η s • (β t • w))` on an open `t`-set `W` (where `ξ t` is in the
+chart source and the perturbed argument is in the chart target), and agrees with
+the unperturbed `ξ t` off the bump's support (`tsupport β ⊆ W`), is jointly `C^∞`
+on `ℝ × ℝ` (i.e. `IsSmoothVariation`). Proved by the open-cover smoothness
+criterion: `W × ℝ` carries the chart formula, `(tsupport β)ᶜ × ℝ` carries `ξ`. -/
+private lemma isSmoothVariation_of_chartGlue
+    (c : M) (ξ : ℝ → M) (βf ηf : ℝ → ℝ) (w : E)
+    (hξ : ContMDiff 𝓘(ℝ, ℝ) I ∞ ξ)
+    (hβ : ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) ∞ βf) (hη : ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) ∞ ηf)
+    (W : Set ℝ) (hWopen : IsOpen W) (hWsub : ∀ t ∈ W, ξ t ∈ (chartAt H c).source)
+    (hsupp : tsupport βf ⊆ W)
+    (hmem : ∀ p : ℝ × ℝ, p.2 ∈ W →
+        extChartAt I c (ξ p.2) + ηf p.1 • (βf p.2 • w) ∈ (extChartAt I c).target)
+    (Hfun : ℝ → ℝ → M)
+    (hH_in : ∀ s t, t ∈ W → Hfun s t = (extChartAt I c).symm
+        (extChartAt I c (ξ t) + ηf s • (βf t • w)))
+    (hH_out : ∀ s t, t ∉ tsupport βf → Hfun s t = ξ t) :
+    IsSmoothVariation (I := I) (fun s t => Hfun s t) := by
+  apply contMDiff_of_locally_contMDiffOn
+  intro p
+  by_cases hp : p.2 ∈ W
+  · refine ⟨{q : ℝ × ℝ | q.2 ∈ W}, hWopen.preimage continuous_snd, hp, ?_⟩
+    have hsmooth_symm : ContMDiffOn 𝓘(ℝ, E) I ∞ (extChartAt I c).symm (extChartAt I c).target :=
+      contMDiffOn_extChartAt_symm c
+    have hcurve : ContMDiffOn (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, E) ∞
+        (fun q : ℝ × ℝ => extChartAt I c (ξ q.2) + ηf q.1 • (βf q.2 • w))
+        {q : ℝ × ℝ | q.2 ∈ W} := by
+      have hext : ContMDiffOn I 𝓘(ℝ, E) ∞ (extChartAt I c) (chartAt H c).source :=
+        contMDiffOn_extChartAt
+      have hcomp : ContMDiffOn (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, E) ∞
+          (fun q : ℝ × ℝ => extChartAt I c (ξ q.2)) {q : ℝ × ℝ | q.2 ∈ W} := by
+        apply hext.comp (hξ.comp contMDiff_snd).contMDiffOn
+        intro q hq; exact hWsub q.2 hq
+      apply hcomp.add
+      apply ContMDiffOn.smul
+      · exact (hη.comp contMDiff_fst).contMDiffOn
+      · exact ((hβ.comp contMDiff_snd).contMDiffOn).smul contMDiffOn_const
+    have hcompose : ContMDiffOn (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) I ∞
+        ((extChartAt I c).symm ∘
+          (fun q : ℝ × ℝ => extChartAt I c (ξ q.2) + ηf q.1 • (βf q.2 • w)))
+        {q : ℝ × ℝ | q.2 ∈ W} :=
+      hsmooth_symm.comp hcurve (fun q hq => hmem q hq)
+    apply hcompose.congr
+    intro q hq; exact hH_in q.1 q.2 hq
+  · refine ⟨{q : ℝ × ℝ | q.2 ∉ tsupport βf},
+      (isClosed_tsupport βf).isOpen_compl.preimage continuous_snd,
+      (fun hcontra => hp (hsupp hcontra)), ?_⟩
+    have : ContMDiffOn (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) I ∞ (fun q : ℝ × ℝ => ξ q.2)
+        {q : ℝ × ℝ | q.2 ∉ tsupport βf} := (hξ.comp contMDiff_snd).contMDiffOn
+    apply this.congr
+    intro q hq; exact hH_out q.1 q.2 hq
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- **First-variation data for one geodesic half.** For a `C^∞` unit-speed
+geodesic `ξ` on `[0, len]` (`len > 0`), perturbed in a smooth chart at a fixed
+point `c` along a model vector `w` with cutoff `ηf` (`ηf 0 = 0`, `ηf'(0) = 1`)
+and bump `βf` supported inside the open set where `ξ` enters the chart source,
+the chart-localised variation `Fξ s t := φ.symm (φ (ξ t) + ηf s • (βf t • w))`
+(equal to `ξ t` off `tsupport βf`) is a smooth unit-speed variation of `ξ` whose
+arc length on `[0, len]` has, at `s = 0`, derivative equal to the free-endpoint
+boundary term
+`⟨V len, ξ'(len)⟩ - ⟨V 0, ξ'(0)⟩` with `V t = symmL_{ξ t} (βf t • w)`
+(the interior `∇_t ξ'` integral vanishes because `ξ` is a geodesic). It also
+satisfies `Fξ 0 = ξ`, the arc length at `s = 0` is `len`, and the path length of
+each slice dominates the Riemannian edistance between its endpoints. -/
+private lemma broken_piece_firstVariation
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (v : TangentSpace I x),
+      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x v v)))
+    (c : M) (w : E) {ξ : ℝ → M} {len : ℝ} (hlen : 0 < len)
+    (hξsmooth : ContMDiff (𝓘(ℝ, ℝ)) I ∞ ξ)
+    (hξgeo : IsGeodesicOn (I := I) g ξ (Set.Icc 0 len))
+    (hξunit : ∀ t ∈ Set.Icc (0 : ℝ) len,
+      g.inner (ξ t) (mfderiv (𝓘(ℝ, ℝ)) I ξ t (1 : ℝ)) (mfderiv (𝓘(ℝ, ℝ)) I ξ t (1 : ℝ)) = 1)
+    (ηf βf : ℝ → ℝ)
+    (hη_smooth : ContDiff ℝ ∞ ηf) (hη0 : ηf 0 = 0) (hη'0 : HasDerivAt ηf 1 0)
+    (hβ_smooth : ContDiff ℝ ∞ βf)
+    (W : Set ℝ) (hWopen : IsOpen W) (hWsub : ∀ t ∈ W, ξ t ∈ (chartAt H c).source)
+    (hsupp : tsupport βf ⊆ W)
+    (hmem : ∀ s t, ξ t ∈ (chartAt H c).source →
+        extChartAt I c (ξ t) + ηf s • (βf t • w) ∈ (extChartAt I c).target)
+    (Fξ : ℝ → ℝ → M)
+    (hF_def : ∀ s t, t ∈ W → Fξ s t = (extChartAt I c).symm
+        (extChartAt I c (ξ t) + ηf s • (βf t • w)))
+    (hF_out : ∀ s t, t ∉ tsupport βf → Fξ s t = ξ t) :
+    HasDerivAt (fun s : ℝ => arcLength (I := I) g (fun t : ℝ => Fξ s t) 0 len)
+        (g.inner (ξ len)
+            ((trivializationAt E (TangentSpace I) c).symmL ℝ (ξ len) (βf len • w))
+            (mfderiv (𝓘(ℝ, ℝ)) I ξ len (1 : ℝ))
+          - g.inner (ξ 0)
+            ((trivializationAt E (TangentSpace I) c).symmL ℝ (ξ 0) (βf 0 • w))
+            (mfderiv (𝓘(ℝ, ℝ)) I ξ 0 (1 : ℝ))) 0
+      ∧ arcLength (I := I) g (fun t : ℝ => ξ t) 0 len = len
+      ∧ (∀ s : ℝ, riemannianEDist I (Fξ s 0) (Fξ s len)
+          ≤ ENNReal.ofReal (arcLength (I := I) g (fun t : ℝ => Fξ s t) 0 len)) := by
+  classical
+  -- Smoothness of the cutoff and bump.
+  have hηM : ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) ∞ ηf := by rw [contMDiff_iff_contDiff]; exact hη_smooth
+  have hβM : ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) ∞ βf := by rw [contMDiff_iff_contDiff]; exact hβ_smooth
+  -- (A) `Fξ` is a smooth variation.
+  have hsmooth : IsSmoothVariation (I := I) Fξ :=
+    isSmoothVariation_of_chartGlue (I := I) c ξ βf ηf w hξsmooth hβM hηM W hWopen hWsub hsupp
+      (fun p hp => hmem p.1 p.2 (hWsub p.2 hp)) Fξ hF_def hF_out
+  -- (B) The central slice is `ξ`.
+  have hF0 : ∀ t, Fξ 0 t = ξ t := by
+    intro t
+    by_cases ht : t ∈ tsupport βf
+    · have hsrc : ξ t ∈ (extChartAt I c).source := by
+        rw [extChartAt_source]; exact hWsub t (hsupp ht)
+      rw [hF_def 0 t (hsupp ht), hη0, zero_smul, add_zero,
+        PartialEquiv.left_inv _ hsrc]
+    · exact hF_out 0 t ht
+  -- (C) The variation field at each `t`: `V t = symmL_{ξ t} (βf t • w)`.
+  have hV : ∀ t, ((mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => Fξ u t) 0 (1 : ℝ)) : E)
+      = (trivializationAt E (TangentSpace I) c).symmL ℝ (ξ t) (βf t • w) := by
+    intro t
+    by_cases ht : t ∈ tsupport βf
+    · -- `t ∈ W`, use the chart formula and `chartSlice_mfderiv_value`.
+      have htW : t ∈ W := hsupp ht
+      have hsrc : ξ t ∈ (chartAt H c).source := hWsub t htW
+      have hsrc' : (extChartAt I c).symm (extChartAt I c (ξ t)) = ξ t := by
+        apply PartialEquiv.left_inv; rw [extChartAt_source]; exact hsrc
+      have heqfun : (fun u : ℝ => Fξ u t)
+          = (fun u : ℝ => (extChartAt I c).symm (extChartAt I c (ξ t) + ηf u • (βf t • w))) := by
+        funext u; exact hF_def u t htW
+      rw [heqfun]
+      have hbase : (extChartAt I c).symm (extChartAt I c (ξ t)) ∈ (chartAt H c).source := by
+        rw [hsrc']; exact hsrc
+      have hcsv := chartSlice_mfderiv_value (I := I) c (extChartAt I c (ξ t)) (βf t • w) ηf
+        hη_smooth hη0 hη'0 (fun u => hmem u t hsrc) hbase
+      rw [hsrc'] at hcsv
+      exact hcsv
+    · -- `t ∉ tsupport βf`: slice is constant `ξ t`, and `βf t = 0`.
+      have hβ0 : βf t = 0 := image_eq_zero_of_notMem_tsupport ht
+      have heqfun : (fun u : ℝ => Fξ u t) = (fun _ : ℝ => ξ t) := by
+        funext u; exact hF_out u t ht
+      rw [hβ0, zero_smul, map_zero, heqfun]
+      rw [mfderiv_const]
+      rfl
+  -- (D) Unit-speed of the central slice (`Fξ 0 = ξ`).
+  have hFcentral : ∀ t, (fun u : ℝ => Fξ 0 u) t = ξ t := hF0
+  have hUnit : ∀ t ∈ Set.Icc (0 : ℝ) len,
+      g.inner (Fξ 0 t)
+          (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => Fξ 0 u) t (1 : ℝ))
+          (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => Fξ 0 u) t (1 : ℝ)) = 1 := by
+    intro t ht
+    have hslice_eq : (fun u : ℝ => Fξ 0 u) = ξ := funext hF0
+    rw [hslice_eq, hF0 t]
+    exact hξunit t ht
+  -- (E) Free-endpoint first variation.
+  have hfv := first_variation_formula_free_endpoint (I := I) g Fξ len hsmooth hlen hUnit
+  -- (F) The interior integral vanishes (`ξ` is a geodesic).
+  have hslice_eq : (fun v : ℝ => Fξ 0 v) = ξ := funext hF0
+  -- `covDerivAlong ξ (velocity ξ) t = 0` on `[0, len]`.
+  have hcov0 : ∀ t ∈ Set.Icc (0 : ℝ) len,
+      covDerivAlong (I := I) g ξ
+          (fun v : ℝ => mfderiv (𝓘(ℝ, ℝ)) I ξ v (1 : ℝ)) t = 0 := by
+    intro t ht
+    exact (covDerivAlong_velocity_eq_zero_iff_hasGeodesicEquationAt (I := I) g ξ t hξsmooth).mpr
+      (hξgeo.hasGeodesicEquationAt ht)
+  have hintzero :
+      (∫ t in (0 : ℝ)..len,
+        g.inner (Fξ 0 t)
+          (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => Fξ u t) 0 (1 : ℝ))
+          (covDerivAlong (I := I) g (fun v : ℝ => Fξ 0 v)
+            (fun v : ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun w : ℝ => Fξ 0 w) v (1 : ℝ)) t)) = 0 := by
+    rw [show (∫ t in (0 : ℝ)..len,
+        g.inner (Fξ 0 t)
+          (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => Fξ u t) 0 (1 : ℝ))
+          (covDerivAlong (I := I) g (fun v : ℝ => Fξ 0 v)
+            (fun v : ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun w : ℝ => Fξ 0 w) v (1 : ℝ)) t))
+        = ∫ _t in (0 : ℝ)..len, (0 : ℝ) from ?_, intervalIntegral.integral_zero]
+    apply intervalIntegral.integral_congr
+    intro t ht
+    rw [Set.uIcc_of_le hlen.le] at ht
+    simp only
+    have hcov : covDerivAlong (I := I) g (fun v : ℝ => Fξ 0 v)
+        (fun v : ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun w : ℝ => Fξ 0 w) v (1 : ℝ)) t = 0 := by
+      rw [hslice_eq]; exact hcov0 t ht
+    rw [hcov, map_zero]
+  -- (G) Conjunct 1: the boundary `HasDerivAt`.
+  have hbdry : HasDerivAt (fun s : ℝ => arcLength (I := I) g (fun t : ℝ => Fξ s t) 0 len)
+        (g.inner (ξ len)
+            ((trivializationAt E (TangentSpace I) c).symmL ℝ (ξ len) (βf len • w))
+            (mfderiv (𝓘(ℝ, ℝ)) I ξ len (1 : ℝ))
+          - g.inner (ξ 0)
+            ((trivializationAt E (TangentSpace I) c).symmL ℝ (ξ 0) (βf 0 • w))
+            (mfderiv (𝓘(ℝ, ℝ)) I ξ 0 (1 : ℝ))) 0 := by
+    -- Transform `hfv`'s value: kill the integral, identify the slice-velocity and field.
+    convert hfv using 1
+    rw [hintzero, sub_zero, hF0 len, hF0 0, hslice_eq]
+    congr 1
+    · congr 2
+      exact (hV len).symm
+    · congr 2
+      exact (hV 0).symm
+  refine ⟨hbdry, ?_, ?_⟩
+  · -- (H) Conjunct 2: `arcLength ξ 0 len = len` (unit speed).
+    rw [arcLength]
+    have hcongr : (∫ t in (0 : ℝ)..len,
+        Real.sqrt (g.inner (ξ t)
+          (mfderiv (𝓘(ℝ, ℝ)) I ξ t (1 : ℝ)) (mfderiv (𝓘(ℝ, ℝ)) I ξ t (1 : ℝ))))
+        = ∫ _t in (0 : ℝ)..len, (1 : ℝ) := by
+      apply intervalIntegral.integral_congr
+      intro t ht
+      rw [Set.uIcc_of_le hlen.le] at ht
+      simp only
+      rw [hξunit t ht, Real.sqrt_one]
+    rw [hcongr, intervalIntegral.integral_const, smul_eq_mul, mul_one, sub_zero]
+  · -- (I) Conjunct 3: path length of each slice dominates the endpoint edistance.
+    intro s
+    -- The slice `Fξ s` is `C^∞`, hence `C¹` on `[0, len]`.
+    have hslice_smooth : ContMDiff (𝓘(ℝ, ℝ)) I ∞ (fun t : ℝ => Fξ s t) := by
+      have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞
+          (fun t : ℝ => (s, t)) := contMDiff_const.prodMk contMDiff_id
+      exact (hsmooth : ContMDiff _ _ _ _).comp hincl
+    -- `pathELength = ofReal (arcLength)` via the `C¹` conversion.
+    -- Continuity of the velocity total-space section of the slice.
+    have hvelTM : Continuous (fun t : ℝ => TotalSpace.mk' E
+        (E := (TangentSpace I : M → Type _)) (Fξ s t)
+        (mfderiv 𝓘(ℝ, ℝ) I (fun t : ℝ => Fξ s t) t (1 : ℝ))) := by
+      have := MFDerivAlongCurve.continuous_tangentMap_unitLift (I := I) (M := M)
+        (γ := fun t : ℝ => Fξ s t) hslice_smooth
+      simpa only [tangentMap] using this
+    have hspeed_cont : ContinuousOn (fun t : ℝ => Real.sqrt
+        (g.inner (Fξ s t)
+          (mfderiv 𝓘(ℝ, ℝ) I (fun t : ℝ => Fξ s t) t (1 : ℝ))
+          (mfderiv 𝓘(ℝ, ℝ) I (fun t : ℝ => Fξ s t) t (1 : ℝ)))) (Set.Icc 0 len) :=
+      Real.continuous_sqrt.comp_continuousOn
+        (continuousOn_g_inner_along_curve (I := I) g
+          hvelTM.continuousOn hvelTM.continuousOn)
+    -- Speed integrand, integrable on the compact interval.
+    set Fspeed : ℝ → ℝ := fun t : ℝ => Real.sqrt
+      (g.inner (Fξ s t)
+        (mfderiv 𝓘(ℝ, ℝ) I (fun t : ℝ => Fξ s t) t (1 : ℝ))
+        (mfderiv 𝓘(ℝ, ℝ) I (fun t : ℝ => Fξ s t) t (1 : ℝ))) with hFspeed_def
+    have hFspeed_nn : ∀ t, 0 ≤ Fspeed t := fun t => Real.sqrt_nonneg _
+    have hFspeed_int : MeasureTheory.IntegrableOn Fspeed (Set.Icc 0 len) MeasureTheory.volume :=
+      hspeed_cont.integrableOn_compact isCompact_Icc
+    -- `pathELength = ofReal (arcLength)`, computed inline via the lintegral form and
+    -- `hEnorm`, keeping the active fibre ENorm consistent with `riemannianEDist`.
+    have hpath_eq : pathELength I (fun t : ℝ => Fξ s t) 0 len
+        = ENNReal.ofReal (arcLength (I := I) g (fun t : ℝ => Fξ s t) 0 len) := by
+      have harc_eq : arcLength (I := I) g (fun t : ℝ => Fξ s t) 0 len
+          = ∫ t in Set.Icc 0 len, Fspeed t := by
+        rw [arcLength, intervalIntegral.integral_of_le hlen.le,
+          ← MeasureTheory.integral_Icc_eq_integral_Ioc]
+      rw [Manifold.pathELength_eq_lintegral_mfderiv_Icc, harc_eq,
+        MeasureTheory.ofReal_integral_eq_lintegral_ofReal hFspeed_int
+          (MeasureTheory.ae_of_all _ hFspeed_nn)]
+      refine MeasureTheory.setLIntegral_congr_fun measurableSet_Icc (fun t _ht => ?_)
+      rw [hFspeed_def]
+      exact hEnorm (Fξ s t) (mfderiv 𝓘(ℝ, ℝ) I (fun t : ℝ => Fξ s t) t (1 : ℝ))
+    rw [← hpath_eq]
+    have hC1 : ContMDiffOn 𝓘(ℝ, ℝ) I 1 (fun t : ℝ => Fξ s t) (Set.Icc 0 len) :=
+      (hslice_smooth.contMDiffOn).of_le (by exact_mod_cast le_top)
+    exact riemannianEDist_le_pathELength (I := I) (γ := fun t : ℝ => Fξ s t)
+      (a := 0) (b := len) hC1 rfl rfl hlen.le
+
+/-- **Localised bump + margin for one geodesic half.** Around a junction time `jt`
+where the `C^∞` curve `ξ` is at `c`, builds a smooth, compactly supported bump
+`βf` with `βf jt = 1`, `tsupport βf` inside the open set `W := ξ⁻¹(chart source)`
+and avoiding the far time `fe`, together with a positive margin `r` such that any
+chart-coordinate perturbation of `ξ` on `tsupport βf` of size `< r` stays inside
+the chart target. This packages the geometric data feeding
+`broken_piece_firstVariation`. -/
+private lemma exists_broken_bump
+    (c : M) {ξ : ℝ → M} {jt fe : ℝ} (hjtfe : jt ≠ fe) (hjtc : ξ jt = c)
+    (hξsmooth : ContMDiff (𝓘(ℝ, ℝ)) I ∞ ξ) :
+    ∃ (βf : ℝ → ℝ) (W : Set ℝ) (r : ℝ),
+      0 < r ∧ IsOpen W ∧ (∀ t ∈ W, ξ t ∈ (chartAt H c).source) ∧ tsupport βf ⊆ W
+      ∧ ContDiff ℝ ∞ βf ∧ βf jt = 1 ∧ βf fe = 0 ∧ (∀ t, βf t ∈ Set.Icc (0 : ℝ) 1)
+      ∧ fe ∉ tsupport βf
+      ∧ (∀ t ∈ tsupport βf, extChartAt I c (ξ t) ∈ (extChartAt I c).target)
+      ∧ (∀ t ∈ tsupport βf, ∀ z : E,
+          ‖z - extChartAt I c (ξ t)‖ < r → z ∈ (extChartAt I c).target) := by
+  classical
+  -- `W := ξ⁻¹(source)` is open, contains `jt`, avoids `fe` after intersecting with `{fe}ᶜ`.
+  set U : Set M := (chartAt H c).source with hU
+  have hUopen : IsOpen U := (chartAt H c).open_source
+  have hjtU : ξ jt ∈ U := by rw [hjtc]; exact mem_chart_source H c
+  set W₀ : Set ℝ := ξ ⁻¹' U with hW₀
+  have hW₀open : IsOpen W₀ := hUopen.preimage hξsmooth.continuous
+  have hjtW₀ : jt ∈ W₀ := hjtU
+  -- Remove the far time `fe` (it differs from `jt`).
+  set W : Set ℝ := W₀ ∩ {fe}ᶜ with hWdef
+  have hWopen : IsOpen W := hW₀open.inter isOpen_compl_singleton
+  have hjtW : jt ∈ W := ⟨hjtW₀, hjtfe⟩
+  have hWnhds : W ∈ nhds jt := hWopen.mem_nhds hjtW
+  -- A smooth compactly-supported bump `βf` with `tsupport βf ⊆ W`, `βf jt = 1`,
+  -- values in `[0,1]`.
+  obtain ⟨βf, hβtsupp, hβcompact, hβsmooth0, hβrange, hβjt⟩ :=
+    exists_contDiff_tsupport_subset (n := (⊤ : ℕ∞)) (x := jt) hWnhds
+  have hβsmooth : ContDiff ℝ ∞ βf := by
+    have : ((⊤ : ℕ∞) : WithTop ℕ∞) = (∞ : WithTop ℕ∞) := rfl
+    rwa [this] at hβsmooth0
+  have hWsub : ∀ t ∈ W, ξ t ∈ (chartAt H c).source := fun t ht => ht.1
+  have hβfe : βf fe = 0 := by
+    by_contra hne
+    have : fe ∈ tsupport βf := subset_tsupport _ (by simpa [Function.mem_support] using hne)
+    have : fe ∈ W := hβtsupp this
+    exact this.2 rfl
+  have hβIcc : ∀ t, βf t ∈ Set.Icc (0 : ℝ) 1 := fun t => hβrange ⟨t, rfl⟩
+  -- `ξ (tsupport βf)` is compact in `U`, so `φ (ξ (tsupport βf))` is compact in `φ.target`.
+  have hξimg_compact : IsCompact (ξ '' tsupport βf) := hβcompact.image hξsmooth.continuous
+  have hξimg_sub : ξ '' tsupport βf ⊆ (extChartAt I c).source := by
+    rintro x ⟨t, ht, rfl⟩; rw [extChartAt_source]; exact hWsub t (hβtsupp ht)
+  have hcompact_img : IsCompact (extChartAt I c '' (ξ '' tsupport βf)) :=
+    hξimg_compact.image_of_continuousOn ((continuousOn_extChartAt c).mono hξimg_sub)
+  have hsub_target : extChartAt I c '' (ξ '' tsupport βf) ⊆ (extChartAt I c).target := by
+    rintro y ⟨x, ⟨t, ht, rfl⟩, rfl⟩
+    apply (extChartAt I c).map_source
+    rw [extChartAt_source]; exact hWsub t (hβtsupp ht)
+  have htarget_open : IsOpen (extChartAt I c).target := isOpen_extChartAt_target c
+  obtain ⟨r, hr_pos, hr_thick⟩ :=
+    hcompact_img.exists_thickening_subset_open htarget_open hsub_target
+  refine ⟨βf, W, r, hr_pos, hWopen, hWsub, hβtsupp, hβsmooth, hβjt, hβfe, hβIcc, ?_, ?_, ?_⟩
+  · -- `fe ∉ tsupport βf` because `tsupport βf ⊆ W ⊆ {fe}ᶜ`.
+    intro hc; exact (hβtsupp hc).2 rfl
+  · intro t ht
+    apply (extChartAt I c).map_source
+    rw [extChartAt_source]; exact hWsub t (hβtsupp ht)
+  · intro t ht z hz
+    apply hr_thick
+    rw [Metric.mem_thickening_iff]
+    refine ⟨extChartAt I c (ξ t), ⟨ξ t, ⟨t, ht, rfl⟩, rfl⟩, ?_⟩
+    rw [dist_eq_norm]; exact hz
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- **No corner at the junction of a length-minimising broken geodesic.**
+For a unit-speed geodesic `γ` on `[0, ℓ₁]` and a unit-speed geodesic `σ` on
+`[0, ℓ₂]` issuing from `γ ℓ₁ = σ 0`, whose concatenation realises the Riemannian
+distance from `γ 0` to `σ ℓ₂` (length `ℓ₁ + ℓ₂`) and lies inside the normal ball
+of the junction `c := γ ℓ₁`, the incoming velocity `γ'(ℓ₁)` equals the outgoing
+velocity `σ'(0)`:
+`mfderiv 𝓘(ℝ,ℝ) I γ ℓ₁ 1 = mfderiv 𝓘(ℝ,ℝ) I σ 0 1`.
+
+This is the textbook "a minimising broken geodesic is unbroken" / no-corner
+lemma, proved by the broken first variation of arc length.
+
+The proof reduces, via positive definiteness of `g` (`g.pos`), to the vanishing of
+the squared `g`-norm of the velocity jump `δ := σ'(0) - γ'(ℓ₁)` at the junction
+`c`, which is the conclusion of the first-variation computation (smooth-chart
+variation, free-endpoint formula on each geodesic half, and minimality of the
+broken arc). -/
+theorem broken_minimizer_velocity_match
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    {γ σ : ℝ → M} {ℓ₁ ℓ₂ : ℝ} (hℓ₁ : 0 < ℓ₁) (hℓ₂ : 0 < ℓ₂)
+    (hγgeo : IsGeodesicOn (I := I) g γ (Set.Icc 0 ℓ₁))
+    (hσgeo : IsGeodesicOn (I := I) g σ (Set.Icc 0 ℓ₂))
+    (hγsmooth : ContMDiff (𝓘(ℝ, ℝ)) I ∞ γ)
+    (hσsmooth : ContMDiff (𝓘(ℝ, ℝ)) I ∞ σ)
+    (hγunit : ∀ t ∈ Set.Icc (0 : ℝ) ℓ₁,
+      g.inner (γ t) (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ))
+        (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ)) = 1)
+    (hσunit : ∀ t ∈ Set.Icc (0 : ℝ) ℓ₂,
+      g.inner (σ t) (mfderiv (𝓘(ℝ, ℝ)) I σ t (1 : ℝ))
+        (mfderiv (𝓘(ℝ, ℝ)) I σ t (1 : ℝ)) = 1)
+    (hjunc : γ ℓ₁ = σ 0)
+    (hmin : riemannianEDist I (γ 0) (σ ℓ₂) = ENNReal.ofReal (ℓ₁ + ℓ₂)) :
+    mfderiv (𝓘(ℝ, ℝ)) I γ ℓ₁ (1 : ℝ) = mfderiv (𝓘(ℝ, ℝ)) I σ 0 (1 : ℝ) := by
+  classical
+  -- The junction point and the two junction velocities (as model-space vectors).
+  set c : M := γ ℓ₁ with hc_def
+  -- Incoming velocity `T⁻ = γ'(ℓ₁)` and outgoing velocity `T⁺ = σ'(0)`,
+  -- both viewed as elements of the model space `E` (`TangentSpace I _ = E`).
+  set Tminus : E := (mfderiv (𝓘(ℝ, ℝ)) I γ ℓ₁ (1 : ℝ) : E) with hTminus_def
+  set Tplus : E := (mfderiv (𝓘(ℝ, ℝ)) I σ 0 (1 : ℝ) : E) with hTplus_def
+  -- The velocity jump `δ := T⁺ - T⁻` at the junction `c`.
+  set δ : E := Tplus - Tminus with hδ_def
+  -- **First-variation core.** The squared `g`-norm of the velocity jump vanishes.
+  --
+  -- This is the analytic content of the no-corner / broken first variation: build
+  -- a smooth one-parameter variation `H` of the unit-speed concatenation `Γ`
+  -- (`Γ = γ` on `[0, ℓ₁]`, `Γ = σ(· - ℓ₁)` on `[ℓ₁, ℓ₁ + ℓ₂]`) localised in the
+  -- *smooth* chart `extChartAt I c`, fixing both far endpoints and pushing the
+  -- junction off in the `δ` direction with a bump factor.  Each half is a smooth
+  -- variation of a geodesic (`covDerivAlong γ' = 0`, so the interior integral in
+  -- `first_variation_formula_free_endpoint` drops out), whose free-endpoint
+  -- boundary terms sum to `⟨δ, T⁻⟩ - ⟨δ, T⁺⟩ = -‖δ‖²_g`.  Minimality of the
+  -- broken arc (`hmin` together with `riemannianEDist_le_pathELength`) makes `0` a
+  -- local minimum of the total length `L`, so `L'(0) = 0`, forcing `‖δ‖²_g = 0`.
+  have hjump : g.inner c δ δ = 0 := by
+    -- The chart-coordinate jump and its inverse trivialisation.
+    set w : E := (trivializationAt E (TangentSpace I) c).continuousLinearMapAt ℝ c δ with hw_def
+    have hsymmLw : (trivializationAt E (TangentSpace I) c).symmL ℝ c w = δ :=
+      (trivializationAt E (TangentSpace I) c).symmL_continuousLinearMapAt
+        (FiberBundle.mem_baseSet_trivializationAt' c) δ
+    -- `σ 0 = c` (the junction, from `hjunc`).
+    have hσ0c : σ 0 = c := hjunc.symm
+    -- The bumps and margins for the two geodesic halves.
+    obtain ⟨βγ, Wγ, rγ, hrγ, hWγopen, hWγsub, hβγsupp, hβγsmooth, hβγjt, hβγfe,
+        hβγIcc, hβγfenot, hβγtarget, hβγmargin⟩ :=
+      exists_broken_bump (I := I) c (ξ := γ) (jt := ℓ₁) (fe := 0)
+        (ne_of_gt hℓ₁) hc_def.symm hγsmooth
+    obtain ⟨βσ, Wσ, rσ, hrσ, hWσopen, hWσsub, hβσsupp, hβσsmooth, hβσjt, hβσfe,
+        hβσIcc, hβσfenot, hβσtarget, hβσmargin⟩ :=
+      exists_broken_bump (I := I) c (ξ := σ) (jt := 0) (fe := ℓ₂)
+        (ne_of_lt hℓ₂) hσ0c hσsmooth
+    -- Choose `ρ > 0` small: `ρ < rγ / (‖w‖+1)` and `ρ < rσ / (‖w‖+1)`.
+    set ρ : ℝ := min (rγ / (‖w‖ + 1)) (rσ / (‖w‖ + 1)) with hρ_def
+    have hwpos : 0 < ‖w‖ + 1 := by positivity
+    have hρ_pos : 0 < ρ := lt_min (div_pos hrγ hwpos) (div_pos hrσ hwpos)
+    have hρrγ : ρ * ‖w‖ < rγ := by
+      have h1 : ρ ≤ rγ / (‖w‖ + 1) := min_le_left _ _
+      calc ρ * ‖w‖ ≤ (rγ / (‖w‖ + 1)) * ‖w‖ :=
+            mul_le_mul_of_nonneg_right h1 (norm_nonneg _)
+        _ < rγ := by
+            rw [div_mul_eq_mul_div, div_lt_iff₀ hwpos]
+            nlinarith [norm_nonneg w, hrγ]
+    have hρrσ : ρ * ‖w‖ < rσ := by
+      have h1 : ρ ≤ rσ / (‖w‖ + 1) := min_le_right _ _
+      calc ρ * ‖w‖ ≤ (rσ / (‖w‖ + 1)) * ‖w‖ :=
+            mul_le_mul_of_nonneg_right h1 (norm_nonneg _)
+        _ < rσ := by
+            rw [div_mul_eq_mul_div, div_lt_iff₀ hwpos]
+            nlinarith [norm_nonneg w, hrσ]
+    -- The shared cutoff `η s := ρ · sin (s / ρ)`.
+    set ηf : ℝ → ℝ := fun s : ℝ => ρ * Real.sin (s / ρ) with hηf_def
+    have hη_smooth : ContDiff ℝ ∞ ηf :=
+      contDiff_const.mul (Real.contDiff_sin.comp (contDiff_id.div_const ρ))
+    have hη0 : ηf 0 = 0 := by simp [hηf_def]
+    have hη'0 : HasDerivAt ηf 1 0 := by
+      have h1 : HasDerivAt (fun s : ℝ => s / ρ) (1 / ρ) 0 := by
+        simpa using (hasDerivAt_id (0 : ℝ)).div_const ρ
+      have h2 : HasDerivAt Real.sin (Real.cos (0 / ρ)) (0 / ρ) := Real.hasDerivAt_sin _
+      have h4 := ((h2.comp 0 h1).const_mul ρ)
+      simp only [Real.cos_zero, zero_div] at h4
+      convert h4 using 1
+      field_simp
+    have hηbd : ∀ s, |ηf s| ≤ ρ := by
+      intro s
+      rw [hηf_def, abs_mul, abs_of_pos hρ_pos]
+      calc ρ * |Real.sin (s / ρ)| ≤ ρ * 1 :=
+            mul_le_mul_of_nonneg_left (Real.abs_sin_le_one _) hρ_pos.le
+        _ = ρ := mul_one ρ
+    -- Perturbation-norm bound: `‖η s • (βf t • w)‖ ≤ ρ‖w‖`.
+    have hpert_bd : ∀ (βf : ℝ → ℝ) (s t : ℝ), (∀ t, βf t ∈ Set.Icc (0 : ℝ) 1) →
+        ‖ηf s • (βf t • w)‖ ≤ ρ * ‖w‖ := by
+      intro βf s t hβIcc
+      rw [norm_smul, norm_smul, Real.norm_eq_abs, Real.norm_eq_abs]
+      have h1 : |ηf s| ≤ ρ := hηbd s
+      have h2 : |βf t| ≤ 1 := by
+        rw [abs_of_nonneg (hβIcc t).1]; exact (hβIcc t).2
+      calc |ηf s| * (|βf t| * ‖w‖) ≤ ρ * (1 * ‖w‖) := by
+            apply mul_le_mul h1 _ (by positivity) hρ_pos.le
+            exact mul_le_mul_of_nonneg_right h2 (norm_nonneg _)
+        _ = ρ * ‖w‖ := by ring
+    -- Membership in the chart target for the chart-perturbed point.
+    have hmemγ : ∀ s t, γ t ∈ (chartAt H c).source →
+        extChartAt I c (γ t) + ηf s • (βγ t • w) ∈ (extChartAt I c).target := by
+      intro s t hsrc
+      by_cases ht : t ∈ tsupport βγ
+      · apply hβγmargin t ht
+        rw [add_sub_cancel_left]
+        calc ‖ηf s • (βγ t • w)‖ ≤ ρ * ‖w‖ := hpert_bd βγ s t hβγIcc
+          _ < rγ := hρrγ
+      · have hβ0 : βγ t = 0 := image_eq_zero_of_notMem_tsupport ht
+        rw [hβ0, zero_smul, smul_zero, add_zero]
+        apply (extChartAt I c).map_source
+        rw [extChartAt_source]; exact hsrc
+    have hmemσ : ∀ s t, σ t ∈ (chartAt H c).source →
+        extChartAt I c (σ t) + ηf s • (βσ t • w) ∈ (extChartAt I c).target := by
+      intro s t hsrc
+      by_cases ht : t ∈ tsupport βσ
+      · apply hβσmargin t ht
+        rw [add_sub_cancel_left]
+        calc ‖ηf s • (βσ t • w)‖ ≤ ρ * ‖w‖ := hpert_bd βσ s t hβσIcc
+          _ < rσ := hρrσ
+      · have hβ0 : βσ t = 0 := image_eq_zero_of_notMem_tsupport ht
+        rw [hβ0, zero_smul, smul_zero, add_zero]
+        apply (extChartAt I c).map_source
+        rw [extChartAt_source]; exact hsrc
+    -- The two chart-localised variations.
+    set Fγ : ℝ → ℝ → M := fun s t =>
+      if t ∈ Wγ then (extChartAt I c).symm (extChartAt I c (γ t) + ηf s • (βγ t • w)) else γ t
+      with hFγ_def
+    set Fσ : ℝ → ℝ → M := fun s t =>
+      if t ∈ Wσ then (extChartAt I c).symm (extChartAt I c (σ t) + ηf s • (βσ t • w)) else σ t
+      with hFσ_def
+    -- The `hF_def` / `hF_out` glue equations.
+    have hFγ_in : ∀ s t, t ∈ Wγ → Fγ s t
+        = (extChartAt I c).symm (extChartAt I c (γ t) + ηf s • (βγ t • w)) := by
+      intro s t ht; simp only [hFγ_def]; exact if_pos ht
+    have hFγ_out : ∀ s t, t ∉ tsupport βγ → Fγ s t = γ t := by
+      intro s t ht
+      have hβ0 : βγ t = 0 := image_eq_zero_of_notMem_tsupport ht
+      simp only [hFγ_def]
+      by_cases htW : t ∈ Wγ
+      · rw [if_pos htW, hβ0, zero_smul, smul_zero, add_zero]
+        apply PartialEquiv.left_inv
+        rw [extChartAt_source]; exact hWγsub t htW
+      · rw [if_neg htW]
+    have hFσ_in : ∀ s t, t ∈ Wσ → Fσ s t
+        = (extChartAt I c).symm (extChartAt I c (σ t) + ηf s • (βσ t • w)) := by
+      intro s t ht; simp only [hFσ_def]; exact if_pos ht
+    have hFσ_out : ∀ s t, t ∉ tsupport βσ → Fσ s t = σ t := by
+      intro s t ht
+      have hβ0 : βσ t = 0 := image_eq_zero_of_notMem_tsupport ht
+      simp only [hFσ_def]
+      by_cases htW : t ∈ Wσ
+      · rw [if_pos htW, hβ0, zero_smul, smul_zero, add_zero]
+        apply PartialEquiv.left_inv
+        rw [extChartAt_source]; exact hWσsub t htW
+      · rw [if_neg htW]
+    -- Apply the per-piece first-variation lemma to each half.
+    obtain ⟨hbdryγ, harcγ, hedistγ⟩ :=
+      broken_piece_firstVariation (I := I) g hEnorm c w hℓ₁ hγsmooth hγgeo hγunit
+        ηf βγ hη_smooth hη0 hη'0 hβγsmooth Wγ hWγopen hWγsub hβγsupp
+        (fun s t hsrc => hmemγ s t hsrc) Fγ hFγ_in hFγ_out
+    obtain ⟨hbdryσ, harcσ, hedistσ⟩ :=
+      broken_piece_firstVariation (I := I) g hEnorm c w hℓ₂ hσsmooth hσgeo hσunit
+        ηf βσ hη_smooth hη0 hη'0 hβσsmooth Wσ hWσopen hWσsub hβσsupp
+        (fun s t hsrc => hmemσ s t hsrc) Fσ hFσ_in hFσ_out
+    -- Simplify the two boundary derivative values using `βγ ℓ₁ = 1`, `βγ 0 = 0`,
+    -- `βσ 0 = 1`, `βσ ℓ₂ = 0` and the round-trip `symmL_c (1 • w) = δ`.
+    have hsymm1 : (trivializationAt E (TangentSpace I) c).symmL ℝ c (βγ ℓ₁ • w) = δ := by
+      rw [hβγjt, one_smul]; exact hsymmLw
+    have hsymm0γ : (trivializationAt E (TangentSpace I) c).symmL ℝ (γ 0) (βγ 0 • w) = 0 := by
+      rw [hβγfe, zero_smul, map_zero]
+    have hsymm1σ : (trivializationAt E (TangentSpace I) c).symmL ℝ c (βσ 0 • w) = δ := by
+      rw [hβσjt, one_smul]; exact hsymmLw
+    have hsymm0σ : (trivializationAt E (TangentSpace I) c).symmL ℝ (σ ℓ₂) (βσ ℓ₂ • w) = 0 := by
+      rw [hβσfe, zero_smul, map_zero]
+    -- Piece-1 boundary value `= g.inner c δ Tminus`.
+    have hbdryγ' : HasDerivAt (fun s : ℝ => arcLength (I := I) g (fun t : ℝ => Fγ s t) 0 ℓ₁)
+        (g.inner c δ Tminus) 0 := by
+      have heq : g.inner (γ ℓ₁)
+            ((trivializationAt E (TangentSpace I) c).symmL ℝ (γ ℓ₁) (βγ ℓ₁ • w))
+            (mfderiv (𝓘(ℝ, ℝ)) I γ ℓ₁ (1 : ℝ))
+          - g.inner (γ 0)
+            ((trivializationAt E (TangentSpace I) c).symmL ℝ (γ 0) (βγ 0 • w))
+            (mfderiv (𝓘(ℝ, ℝ)) I γ 0 (1 : ℝ))
+          = g.inner c δ Tminus := by
+        rw [← hc_def, hsymm1, hsymm0γ, map_zero, ContinuousLinearMap.zero_apply, sub_zero]
+      rw [← heq]; exact hbdryγ
+    -- Piece-2 boundary value `= - g.inner c δ Tplus`.
+    have hbdryσ' : HasDerivAt (fun s : ℝ => arcLength (I := I) g (fun t : ℝ => Fσ s t) 0 ℓ₂)
+        (- g.inner c δ Tplus) 0 := by
+      have heq : g.inner (σ ℓ₂)
+            ((trivializationAt E (TangentSpace I) c).symmL ℝ (σ ℓ₂) (βσ ℓ₂ • w))
+            (mfderiv (𝓘(ℝ, ℝ)) I σ ℓ₂ (1 : ℝ))
+          - g.inner (σ 0)
+            ((trivializationAt E (TangentSpace I) c).symmL ℝ (σ 0) (βσ 0 • w))
+            (mfderiv (𝓘(ℝ, ℝ)) I σ 0 (1 : ℝ))
+          = - g.inner c δ Tplus := by
+        rw [hσ0c, hsymm1σ, hsymm0σ, map_zero, ContinuousLinearMap.zero_apply, zero_sub]
+        rfl
+      rw [← heq]; exact hbdryσ
+    -- The total length functional `L s := arc₁ + arc₂` and its derivative at `0`.
+    set Lfun : ℝ → ℝ := fun s : ℝ =>
+      arcLength (I := I) g (fun t : ℝ => Fγ s t) 0 ℓ₁
+        + arcLength (I := I) g (fun t : ℝ => Fσ s t) 0 ℓ₂ with hLfun_def
+    have hLderiv0 : HasDerivAt Lfun (g.inner c δ Tminus + - g.inner c δ Tplus) 0 :=
+      hbdryγ'.add hbdryσ'
+    -- `L'(0) = - g.inner c δ δ`.
+    have hLval : g.inner c δ Tminus + - g.inner c δ Tplus = - g.inner c δ δ := by
+      have hbil : g.inner c δ Tminus - g.inner c δ Tplus = g.inner c δ (Tminus - Tplus) :=
+        (ContinuousLinearMap.map_sub (g.inner c δ) Tminus Tplus).symm
+      have hsub : Tminus - Tplus = -δ := by rw [hδ_def]; abel
+      rw [show g.inner c δ Tminus + - g.inner c δ Tplus
+          = g.inner c δ Tminus - g.inner c δ Tplus from by ring, hbil, hsub]
+      exact ContinuousLinearMap.map_neg _ _
+    have hLderiv : HasDerivAt Lfun (- g.inner c δ δ) 0 := hLval ▸ hLderiv0
+    -- Central slices: `Fγ 0 = γ`, `Fσ 0 = σ`.
+    have hFγ0 : ∀ t, Fγ 0 t = γ t := by
+      intro t
+      by_cases ht : t ∈ Wγ
+      · rw [hFγ_in 0 t ht, hη0, zero_smul, add_zero]
+        apply PartialEquiv.left_inv
+        rw [extChartAt_source]; exact hWγsub t ht
+      · exact hFγ_out 0 t (fun hc => ht (hβγsupp hc))
+    have hFσ0 : ∀ t, Fσ 0 t = σ t := by
+      intro t
+      by_cases ht : t ∈ Wσ
+      · rw [hFσ_in 0 t ht, hη0, zero_smul, add_zero]
+        apply PartialEquiv.left_inv
+        rw [extChartAt_source]; exact hWσsub t ht
+      · exact hFσ_out 0 t (fun hc => ht (hβσsupp hc))
+    -- `L 0 = ℓ₁ + ℓ₂`.
+    have hL0 : Lfun 0 = ℓ₁ + ℓ₂ := by
+      rw [hLfun_def]
+      simp only
+      rw [show (fun t : ℝ => Fγ 0 t) = γ from funext hFγ0,
+        show (fun t : ℝ => Fσ 0 t) = σ from funext hFσ0]
+      rw [harcγ, harcσ]
+    -- Far endpoints fixed: `Fγ s 0 = γ 0`, `Fσ s ℓ₂ = σ ℓ₂`.
+    have hFγfix : ∀ s, Fγ s 0 = γ 0 := fun s => hFγ_out s 0 hβγfenot
+    have hFσfix : ∀ s, Fσ s ℓ₂ = σ ℓ₂ := fun s => hFσ_out s ℓ₂ hβσfenot
+    -- Junction match: `Fγ s ℓ₁ = Fσ s 0` (both `= φ.symm (φ c + η s • (1 • w))`).
+    have hjunction : ∀ s, Fγ s ℓ₁ = Fσ s 0 := by
+      intro s
+      have hℓ₁W : ℓ₁ ∈ Wγ := hβγsupp (subset_tsupport _ (by
+        simp only [Function.mem_support, hβγjt]; exact one_ne_zero))
+      have h0W : (0 : ℝ) ∈ Wσ := hβσsupp (subset_tsupport _ (by
+        simp only [Function.mem_support, hβσjt]; exact one_ne_zero))
+      rw [hFγ_in s ℓ₁ hℓ₁W, hFσ_in s 0 h0W, hβγjt, hβσjt, ← hc_def, hσ0c]
+    -- `L 0 = ℓ₁ + ℓ₂` is a global minimum: `∀ s, ℓ₁ + ℓ₂ ≤ L s`.
+    have hLmin : ∀ s, ℓ₁ + ℓ₂ ≤ Lfun s := by
+      intro s
+      -- Triangle inequality through the moving junction point.
+      have htri : riemannianEDist I (γ 0) (σ ℓ₂)
+          ≤ riemannianEDist I (γ 0) (Fγ s ℓ₁) + riemannianEDist I (Fγ s ℓ₁) (σ ℓ₂) :=
+        riemannianEDist_triangle
+      have hd1 : riemannianEDist I (γ 0) (Fγ s ℓ₁)
+          ≤ ENNReal.ofReal (arcLength (I := I) g (fun t : ℝ => Fγ s t) 0 ℓ₁) := by
+        have := hedistγ s
+        rwa [hFγfix s] at this
+      have hd2 : riemannianEDist I (Fγ s ℓ₁) (σ ℓ₂)
+          ≤ ENNReal.ofReal (arcLength (I := I) g (fun t : ℝ => Fσ s t) 0 ℓ₂) := by
+        have := hedistσ s
+        rwa [← hjunction s, hFσfix s] at this
+      -- Arc lengths are non-negative.
+      have harc1_nn : 0 ≤ arcLength (I := I) g (fun t : ℝ => Fγ s t) 0 ℓ₁ := by
+        rw [arcLength, intervalIntegral.integral_of_le hℓ₁.le]
+        exact MeasureTheory.setIntegral_nonneg measurableSet_Ioc (fun t _ => Real.sqrt_nonneg _)
+      have harc2_nn : 0 ≤ arcLength (I := I) g (fun t : ℝ => Fσ s t) 0 ℓ₂ := by
+        rw [arcLength, intervalIntegral.integral_of_le hℓ₂.le]
+        exact MeasureTheory.setIntegral_nonneg measurableSet_Ioc (fun t _ => Real.sqrt_nonneg _)
+      -- Combine: `ofReal(ℓ₁+ℓ₂) ≤ ofReal(L s)`.
+      have hchain : ENNReal.ofReal (ℓ₁ + ℓ₂) ≤ ENNReal.ofReal (Lfun s) := by
+        rw [← hmin]
+        refine htri.trans ?_
+        rw [hLfun_def]
+        simp only
+        rw [ENNReal.ofReal_add harc1_nn harc2_nn]
+        exact add_le_add hd1 hd2
+      have hLs_nn : 0 ≤ Lfun s := by rw [hLfun_def]; simp only; exact add_nonneg harc1_nn harc2_nn
+      exact (ENNReal.ofReal_le_ofReal_iff hLs_nn).mp hchain
+    -- `0` is a global minimum of `L`, so `L'(0) = 0`, forcing `g.inner c δ δ = 0`.
+    have hisMin : IsMinOn Lfun Set.univ 0 := by
+      intro s _
+      rw [hL0]; exact hLmin s
+    have hLocalMin : IsLocalMin Lfun 0 :=
+      hisMin.isLocalMin (Filter.univ_mem)
+    have hLderiv_zero : - g.inner c δ δ = 0 := hLocalMin.hasDerivAt_eq_zero hLderiv
+    linarith [hLderiv_zero]
+  -- **Positive-definite finish.** `‖δ‖²_g = 0 ⟹ δ = 0`, i.e. `T⁺ = T⁻`.
+  have hδ0 : δ = 0 := by
+    by_contra hδ_ne
+    exact absurd hjump (ne_of_gt (g.pos c δ hδ_ne))
+  -- `δ = 0 ⟹ T⁺ = T⁻` as elements of `E`.
+  have hTeq : Tplus = Tminus := sub_eq_zero.mp hδ0
+  -- The two `mfderiv`-velocities agree as `E`-vectors; conclude as fibre vectors.
+  change (mfderiv (𝓘(ℝ, ℝ)) I γ ℓ₁ (1 : ℝ) : E) = (mfderiv (𝓘(ℝ, ℝ)) I σ 0 (1 : ℝ) : E)
+  rw [← hTminus_def, ← hTplus_def]; exact hTeq.symm
 
 end Exponential
 end Riemannian
