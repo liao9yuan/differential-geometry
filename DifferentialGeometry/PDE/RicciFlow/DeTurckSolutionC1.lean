@@ -19,43 +19,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
-/-- **Spatial-`C¹` time-continuity of the DeTurck-Ricci solution's DeTurck
-vector field.**
-
-Given a `IsQuasilinearMetricParabolicSolution`-style time-dependent family
-`g_DT : ℝ → SmoothRiemannianMetric I M` (the output of
-`deTurckRicci_shortTime_exists`) on the existence interval `[0, T)`, the
-time-parameterised DeTurck vector field
-`t ↦ deTurckVF (g_DT t) g_bg` is continuous on `[0, T)` in the
-`C¹`-section topology.  The section topology on
-`Cₛ^∞⟮I; E, TangentSpace I⟯` is not directly available, so we phrase the
-conclusion pointwise: for every base point `x : M`, the function
-`t ↦ (deTurckVF (g_DT t) g_bg) x` is continuous on `[0, T)` as a map
-into the tangent fibre `TangentSpace I x`.
-
-This is the composition of the two children below:
-`maxreg_solution_in_c1_via_sobolev_embedding` (the metric family is
-`C¹`-time-continuous via the maxReg Sobolev embedding), and
-`deturck_vf_continuous_in_c1_input` (the assignment `g ↦ deTurckVF g g_bg`
-is continuous in the `C¹`-section topology). -/
-theorem deTurckRicci_solution_spatial_C1_time_continuous
-    (g_bg : SmoothRiemannianMetric I M)
-    (T : ℝ) (g_DT : ℝ → SmoothRiemannianMetric I M)
-    (_hsol : IsQuasilinearMetricParabolicSolution (I := I)
-              (deTurckRicciRHS (I := I) g_bg) (g_DT 0) T g_DT)
-    (h_C1 : ∀ x : M,
-      ContinuousOn
-        (fun t : ℝ =>
-          (deTurckVF (I := I) (g_DT t) g_bg :
-            Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x)
-        (Set.Ico (0 : ℝ) T)) :
-    ∀ x : M,
-      ContinuousOn
-        (fun t : ℝ =>
-          (deTurckVF (I := I) (g_DT t) g_bg :
-            Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x)
-        (Set.Ico (0 : ℝ) T) := h_C1
-
 /-- **From maxReg `H^{a+2}` regularity to `C¹` spatial regularity.**
 
 A maxReg-style solution `g_DT : ℝ → SmoothRiemannianMetric I M` of the

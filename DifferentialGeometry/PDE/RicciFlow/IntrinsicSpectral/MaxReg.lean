@@ -1,4 +1,3 @@
-import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.Eigenbasis
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.HilbertSpace
 import DifferentialGeometry.PDE.RicciFlow.HebeyBlock.SpectralPouH2Identify
 import DifferentialGeometry.PDE.RicciFlow.ConnectionLaplacian.L2PMap

@@ -1220,7 +1220,6 @@ import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients.
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients.RicciDiffAffine
 import DifferentialGeometry.PDE.RicciFlow.StrictParabolicAtSelf
 import DifferentialGeometry.PDE.RicciFlow.HebeyBlock.UniformChartBounds
-import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.Eigenbasis
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.HeatSemigroupIntrinsic
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.BoundedC0SemigroupIntrinsic
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.QuasilinearExistenceIntrinsic

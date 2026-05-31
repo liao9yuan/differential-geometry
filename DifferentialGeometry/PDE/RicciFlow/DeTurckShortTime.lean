@@ -3,7 +3,6 @@ import DifferentialGeometry.PDE.ParabolicShortTime
 import DifferentialGeometry.PDE.RicciFlow.DeTurckRHS
 import DifferentialGeometry.PDE.RicciFlow.StrictParabolicAtSelf
 import DifferentialGeometry.PDE.RicciFlow.SmoothQuasilinear
-import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.Eigenbasis
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MaxReg
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.PointwiseDeriv
 

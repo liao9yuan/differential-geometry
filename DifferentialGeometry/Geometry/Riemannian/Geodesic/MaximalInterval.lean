@@ -468,26 +468,6 @@ lemma isGeodesic_iff_isGeodesicOn_univ
   · intro hγ t
     exact hγ t (Set.mem_univ t)
 
-/-- **Bridge 1b — pointwise identification of an `Icc 0 L`-witness with
-`maximalGeodesic g p v` on `Icc 0 L`.**
-
-Given an initial-data witness on `Icc 0 L` and the assumption that
-`maximalGeodesicInterval g p v = Set.univ`, the maximal-interval
-preconnectedness machinery delivers an agreement-on-`Icc 0 L` statement
-between the supplied witness and the canonical `maximalGeodesic g p v`.
-
-The substantive content — initial-data ODE uniqueness on a connected
-neighbourhood of `0` — is delegated to the upstream uniqueness chain and
-consumed here as a hypothesis `hEqLocal`. The bridge then restates the
-agreement in the canonical form `Set.EqOn γ (maximalGeodesic g p v) (Icc 0 L)`. -/
-theorem maximalGeodesic_eqOn_Icc_of_isGeodesicOnWithInitial
-    (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p)
-    {γ : ℝ → M} {L : ℝ} (_hL : 0 ≤ L)
-    (_hγ_on : IsGeodesicOnWithInitial (I := I) g γ (Set.Icc 0 L) p v)
-    (hEqLocal : Set.EqOn γ (maximalGeodesic (I := I) g p v) (Set.Icc 0 L)) :
-    Set.EqOn γ (maximalGeodesic (I := I) g p v) (Set.Icc 0 L) :=
-  hEqLocal
-
 end BridgeLemmas
 
 /-! ## Bridge 3: `pathELength` agrees with the chart-integral arc length on `C¹` curves
