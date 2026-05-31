@@ -16,6 +16,8 @@ import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.ChartOverlapUniq
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.BareFlowFromJointC1
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.SmoothInSpace.VariationalLiftFlatIdentity
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.SmoothDependence.GlobalClosedManifold
+import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.SmoothInSpace.VariationalLiftLocalChartDischarge
+import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.VariationalFlowFlatPairedResidual
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
@@ -44,6 +46,67 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+/-- **The D.3 flat-jet producer: the producer's flat factor value is the negative
+trivialised-flat derivative.**
+
+The genuine analytic identity behind the flat value-jet equation.  The producer's flat factor
+values `T'`, `P'` (the chart-smoothness data of the concrete flow) carry, on the orbit
+pushforward of `v`, the derivative value `T' (dΦv) + P' v`; the flat variational ODE realisation
+`hodejet` records that this curve's derivative is read by the *trivialised flat derivative*
+`fderiv (fun z => -(chartTrivRepr α X z)) (φ α) (dΦv)` — the chart-`α` conjugated linearisation
+of the generator `-X`.  Combining the two genuine `HasDerivAt`s of the *same* orbit-pushforward
+curve `s ↦ mfderiv (Φ_fam s) x v` (the producer's `RawVariationalIdentityFlat` value `hflat` and
+the trivialised flat ODE value `hodejet`) by derivative uniqueness, and splitting the trivialised
+flat derivative into the raw flat `fderiv` plus the moving-trivialisation `D²φ` correction via the
+committed reconciliation `flatLinearization_eq_rawFderiv_add_movingTriv`, yields
+
+  `T' (dΦv) + P' v = -(fderiv (chartRawRepr α X) (φ α) (dΦv) + movingTrivCorrection α X (dΦv))`.
+
+`hodejet` is the genuine chart-coordinate variational-ODE datum (the trivialised flat
+linearisation of the orbit pushforward), dischargeable from the concrete flow's joint smoothness;
+`hRdiff`/`hCdiff` are the convention-bridge differentiability side conditions.  No
+hypothesis-packaging: `hflat` and `hodejet` are `HasDerivAt`s of the orbit-pushforward curve (the
+producer datum and the chart linearisation), neither of which is the `E`-value equation that is
+the conclusion. -/
+theorem flatProducerJet_eq_neg_rawFderiv_add_movingTriv
+    (X : Cₛ^∞⟮I; E, (TangentSpace I)⟯)
+    (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M)) (t : ℝ) (x : M) (v : TangentSpace I x)
+    (T' P' : E →L[ℝ] E)
+    (hflat : RawVariationalIdentityFlat (I := I) Φ_fam t x v T' P')
+    (hodejet : HasDerivAt (fun s : ℝ => (mfderiv I I (Φ_fam s : M → M) x v : E))
+      (fderiv ℝ (fun z => -(chartTrivRepr (I := I) (Φ_fam t x)
+          (X : ∀ y : M, TangentSpace I y) z))
+        (extChartAt I (Φ_fam t x) (Φ_fam t x))
+        (mfderiv I I (Φ_fam t : M → M) x v)) t)
+    (hRdiff : DifferentiableAt ℝ
+      (chartRawRepr (I := I) (Φ_fam t x) (X : ∀ y : M, TangentSpace I y))
+      (extChartAt I (Φ_fam t x) (Φ_fam t x)))
+    (hCdiff : DifferentiableAt ℝ
+      (fun z => chartMovingTriv (I := I) (Φ_fam t x) z)
+      (extChartAt I (Φ_fam t x) (Φ_fam t x))) :
+    T' (mfderiv I I (Φ_fam t : M → M) x v) + P' v
+      = -(fderiv ℝ (chartRawRepr (I := I) (Φ_fam t x)
+              (X : ∀ y : M, TangentSpace I y))
+            (extChartAt I (Φ_fam t x) (Φ_fam t x))
+            (mfderiv I I (Φ_fam t : M → M) x v)
+          + movingTrivCorrection (I := I) (Φ_fam t x)
+              (X : ∀ y : M, TangentSpace I y)
+              (mfderiv I I (Φ_fam t : M → M) x v)) := by
+  -- The producer's `RawVariationalIdentityFlat` is literally `HasDerivAt` of the orbit-pushforward
+  -- curve with the applied product-rule value `T' (dΦv) + P' v`.
+  have hflat' : HasDerivAt (fun s : ℝ => (mfderiv I I (Φ_fam s : M → M) x v : E))
+      (T' (mfderiv I I (Φ_fam t : M → M) x v) + P' v) t := hflat
+  -- The two `HasDerivAt`s are of the SAME curve, so the derivative values coincide.
+  have hval := hflat'.unique hodejet
+  rw [hval]
+  -- Split the trivialised flat derivative into raw flat `fderiv` + `D²φ`.
+  exact flatLinearization_eq_rawFderiv_add_movingTriv (I := I) (Φ_fam t x)
+    (X : ∀ y : M, TangentSpace I y) (mfderiv I I (Φ_fam t : M → M) x v) hRdiff hCdiff
+
+-- `g_DT`/`g_bg` are vestigial mandated signature binders here: the flat per-slot identity is a
+-- bare-flow / chart-smoothness statement that references no metric.  Silence the resulting
+-- unused-variable linter on those binders only.
+set_option linter.unusedVariables false in
 theorem flat_raw_variational_identity
     (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M)
     (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))
@@ -59,15 +122,67 @@ theorem flat_raw_variational_identity
             ((1 : ℝ →L[ℝ] ℝ).smulRight (X s ((Φ_fam s : M → M) y))))
     (horbit_cont : ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M,
       ContinuousAt (fun y : M => (Φ_fam t : M → M) y) x ∧
-      ContinuousAt (fun s : ℝ => (Φ_fam s : M → M) x) t) :
+      ContinuousAt (fun s : ℝ => (Φ_fam s : M → M) x) t)
+    (hx_src : ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, x ∈ (chartAt H (Φ_fam t x)).source)
+    (hGfd : ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M,
+      ∃ G' : E →L[ℝ] (E →L[ℝ] E),
+        HasFDerivAt (fun z => chartMovingTriv (I := I) (Φ_fam t x) z) G'
+          (extChartAt I (Φ_fam t x) ((Φ_fam t : M → M) x))) :
     ∃ T' P' : ℝ → ∀ x : M, TangentSpace I x → (E →L[ℝ] E),
       ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, ∀ v : TangentSpace I x,
-        RawVariationalIdentityFlat (I := I) Φ_fam t x v (T' t x v) (P' t x v) := sorry
+        RawVariationalIdentityFlat (I := I) Φ_fam t x v (T' t x v) (P' t x v) := by
+  classical
+  -- For each `(t, x, v)` in the interior, the joint-smooth bare-field producer
+  -- `rawVariationalIdentityFlat_of_jointSmoothBareField` manufactures the flat per-slot identity
+  -- with concrete factor jets.  We pick, per point, the produced factor data via choice; the two
+  -- factor functions `T'`/`P'` are the choice readouts.  The producer is invoked on the uniform
+  -- two-sided window supplied by `hΦfam_ode`, with the per-point chart-source/chart-jet data.
+  -- Per-point existence of the flat identity (factors existentially quantified).
+  have hpoint : ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, ∀ v : TangentSpace I x,
+      ∃ Tv Pv : E →L[ℝ] E, RawVariationalIdentityFlat (I := I) Φ_fam t x v Tv Pv := by
+    intro t ht x v
+    obtain ⟨T₀, hT₀, W, hW, hxW, hode⟩ := hΦfam_ode t ht x
+    obtain ⟨G', hG'⟩ := hGfd t ht x
+    obtain ⟨ΦE, velChart, Pv, _hvel, hident⟩ :=
+      rawVariationalIdentityFlat_of_jointSmoothBareField (I := I) X hX hXauto Φ_fam t x v
+        (hx_src t ht x) hT₀ hW hxW hode (horbit_cont t ht x).1 (horbit_cont t ht x).2 hG'
+    exact ⟨_, _, hident⟩
+  -- Globalise: choose, for each `(t, x, v)`, the factor data.  The factor functions read the
+  -- choice at each point (`0` off the interior, irrelevant to the conclusion which only quantifies
+  -- over interior `t`).
+  choose! Tv Pv hTv using hpoint
+  exact ⟨Tv, Pv, fun t ht x v => hTv t ht x v⟩
 
 theorem flat_christoffel_correction_eqn
     (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M)
     (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))
-    (T' P' : ℝ → ∀ x : M, TangentSpace I x → (E →L[ℝ] E)) :
+    (T' P' : ℝ → ∀ x : M, TangentSpace I x → (E →L[ℝ] E))
+    (hjet : ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, ∀ v : TangentSpace I x,
+      (T' t x v) (mfderiv I I (Φ_fam t : M → M) x v) + (P' t x v) v
+        = -(fderiv ℝ (chartRawRepr (I := I) (Φ_fam t x)
+                ((deTurckVF (I := I) (g_DT t) g_bg :
+                    Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
+                  ∀ y : M, TangentSpace I y))
+              (extChartAt I (Φ_fam t x) (Φ_fam t x))
+              (mfderiv I I (Φ_fam t : M → M) x v)
+            + movingTrivCorrection (I := I) (Φ_fam t x)
+                ((deTurckVF (I := I) (g_DT t) g_bg :
+                    Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
+                  ∀ y : M, TangentSpace I y)
+                (mfderiv I I (Φ_fam t : M → M) x v)))
+    (hα : ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M,
+      (Φ_fam t x) ∈ chartLeviCivitaGoodSet (I := I) (Φ_fam t x))
+    (hRdiff : ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M,
+      DifferentiableAt ℝ
+        (chartRawRepr (I := I) (Φ_fam t x)
+          ((deTurckVF (I := I) (g_DT t) g_bg :
+              Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
+            ∀ y : M, TangentSpace I y))
+        (extChartAt I (Φ_fam t x) (Φ_fam t x)))
+    (hCdiff : ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M,
+      DifferentiableAt ℝ
+        (fun z => chartMovingTriv (I := I) (Φ_fam t x) z)
+        (extChartAt I (Φ_fam t x) (Φ_fam t x))) :
     ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, ∀ v : TangentSpace I x,
       (T' t x v) (mfderiv I I (Φ_fam t : M → M) x v) + (P' t x v) v
         = negCovariantSlotValue (I := I) (g_DT t)
@@ -75,23 +190,31 @@ theorem flat_christoffel_correction_eqn
           + christoffelCorrection (I := I) (g_DT t) (Φ_fam t x) (Φ_fam t x)
               (chartE_section_repr (I := I) (Φ_fam t x)
                 (deTurckVF (I := I) (g_DT t) g_bg) (Φ_fam t x))
-              (mfderiv I I (Φ_fam t : M → M) x v) := sorry
+              (mfderiv I I (Φ_fam t : M → M) x v) := by
+  intro t ht x v
+  -- The basepoint bridge `∇_w X = F(w) + Γ(w)` for the DeTurck field, at the orbit point.
+  have hbridge :=
+    leviCivita_basepoint_eq_rawFderiv_add_corrections (I := I) (g_DT t) (Φ_fam t x)
+      ((deTurckVF (I := I) (g_DT t) g_bg :
+          Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) : ∀ y : M, TangentSpace I y)
+      (mfderiv I I (Φ_fam t : M → M) x v)
+      (hα t ht x)
+      ((deTurckVF (I := I) (g_DT t) g_bg).mdifferentiableAt)
+      (hRdiff t ht x) (hCdiff t ht x)
+  -- `negCovariantSlotValue = -(LeviCivita) = -((F) + Γ)`.
+  rw [hjet t ht x v, negCovariantSlotValue, hbridge]
+  abel
 
 theorem flat_value_jet_identity
     (X : Cₛ^∞⟮I; E, (TangentSpace I)⟯)
     (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M)) (t : ℝ) (x : M) (v : TangentSpace I x)
     (T' P' : E →L[ℝ] E)
     (hflat : RawVariationalIdentityFlat (I := I) Φ_fam t x v T' P')
-    (hΦflow : HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => (Φ_fam s : M → M) x)
-      (Set.Ici (0 : ℝ)) t
-      ((1 : ℝ →L[ℝ] ℝ).smulRight
-        (-((X : ∀ y : M, TangentSpace I y) ((Φ_fam t : M → M) x)))))
-    (hΦnbhd : ∃ T₀ : ℝ, 0 < T₀ ∧ ∃ W : Set M, IsOpen W ∧ x ∈ W ∧
-      ∀ y ∈ W, ∀ s ∈ Set.Ioo (t - T₀) (t + T₀),
-        HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun u : ℝ => (Φ_fam u : M → M) y)
-          (Set.Ioo (t - T₀) (t + T₀)) s
-          ((1 : ℝ →L[ℝ] ℝ).smulRight
-            (-((X : ∀ y : M, TangentSpace I y) ((Φ_fam s : M → M) y)))))
+    (hodejet : HasDerivAt (fun s : ℝ => (mfderiv I I (Φ_fam s : M → M) x v : E))
+      (fderiv ℝ (fun z => -(chartTrivRepr (I := I) (Φ_fam t x)
+          (X : ∀ y : M, TangentSpace I y) z))
+        (extChartAt I (Φ_fam t x) (Φ_fam t x))
+        (mfderiv I I (Φ_fam t : M → M) x v)) t)
     (hRdiff : DifferentiableAt ℝ
       (chartRawRepr (I := I) (Φ_fam t x) (X : ∀ y : M, TangentSpace I y))
       (extChartAt I (Φ_fam t x) (Φ_fam t x)))
@@ -105,6 +228,8 @@ theorem flat_value_jet_identity
             (mfderiv I I (Φ_fam t : M → M) x v)
           + movingTrivCorrection (I := I) (Φ_fam t x)
               (X : ∀ y : M, TangentSpace I y)
-              (mfderiv I I (Φ_fam t : M → M) x v)) := sorry
+              (mfderiv I I (Φ_fam t : M → M) x v)) :=
+  flatProducerJet_eq_neg_rawFderiv_add_movingTriv (I := I) X Φ_fam t x v T' P'
+    hflat hodejet hRdiff hCdiff
 
 end DifferentialGeometry.PDE.RicciFlow

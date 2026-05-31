@@ -45,6 +45,30 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+/-- **All-scale interior time-continuity of the maximal-regularity solution.**
+
+OPEN (honest gap, single `sorry`). The conclusion asks for a *pointwise-in-time,
+`Hˢ`-valued continuous path* `uσ` on `[ε, T]` agreeing (after the spectral
+inclusion) with the base-scale represented path `timeH1.toFun u`. The available
+spectral infrastructure (`ParabolicInteriorSmoothing`, the `_ofCompact` readout
+lemmas) provides only the **L²-in-time** order-`σ` field and a.e./coordinate
+identities, NOT a pointwise-continuous `Hˢ`-valued path.
+
+Precise reduction for the next worker (no fabrication shortcut is possible — the
+existential witness must be constructed, so an "input path" hypothesis would be
+hypothesis-packaging and is forbidden):
+* synthesise `uσ t` mode-by-mode as the `Hˢ`-element with coordinates
+  `i ↦ (timeH1.toFun u t).coeff i` (each coordinate is `u₀.coeff i · e^{-λᵢ t}`
+  plus the Duhamel convolution, from `maxRegDuhamelSolField_coeff_ae` /
+  `summable_solModeCoeff_ofCompact` under
+  `tensorResolventL2_isCompactOperator_intrinsic`);
+* prove `ContinuousOn uσ (Icc ε T)` via `continuousOn_tsum` (cf. the scalar
+  template `CrossScaleField.continuousOn_normSq_repr`), applied to the
+  `Hˢ`-valued per-mode functions `t ↦ (toFun u t).coeff i • basisVecσ i`,
+  whose uniform-on-`[ε,T]` summability of `Hˢ`-norms reduces to the **interior
+  heat-trace summability** `∑ᵢ (1 + λᵢ)^σ · e^{-2 λᵢ ε} < ∞` — a Weyl-type
+  spectral-asymptotics input (finiteness of `tr(e^{2εΔ}(1−Δ)^σ)`), the allowed
+  open gap. This is the sole remaining obligation. -/
 theorem interior_allscale_time_continuity
     (g_bg : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ}
     (u₀ : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 2))

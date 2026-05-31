@@ -44,6 +44,53 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+-- The base-point-motion curve `s ↦ g.inner (Φ_fam s x) (frozen v) (frozen w)` is the
+-- composite of the orbit `s ↦ Φ_fam s x` (with `horbit` giving the manifold velocity
+-- `-(X (Φ_fam t x))` at `t`) and the scalar map `p ↦ g.inner p (frozen v) (frozen w)`.  Its
+-- within-set derivative at `t` is, by the chain rule, the directional derivative of that scalar
+-- metric map along `-(X α)`, which `basepoint_directional_deriv_eq_neg_residual` evaluates to
+-- `-metricTransportResidual`.  The chain rule (`MDifferentiableAt.comp_hasMFDerivWithinAt`,
+-- then `hasMFDerivWithinAt_iff_hasFDerivWithinAt`) requires the manifold-differentiability of
+-- the scalar metric map `p ↦ g.inner p a b` at `α` for the FROZEN tangent vectors `a`, `b`.
+-- That regularity is the metric-coefficient (chart-Gram-matrix) smoothness, the same content
+-- as the value identity in `basepoint_directional_deriv_eq_neg_residual`: it is the genuine
+-- open analytic input of the base-point-motion piece (the metric-coefficient directional
+-- derivative read as the Christoffel pairing `metricTransportResidual`).  The constant-`E`
+-- section `fun p => a` is NOT a smooth tangent vector field on a curved manifold, so the
+-- standard `inner_bundle`/`clm_bundle_apply₂` smoothness combinators do not apply directly;
+-- this must be discharged in chart coordinates from the smooth chart-Gram-matrix entries.
+theorem basepoint_metric_along_curve
+    (g : SmoothRiemannianMetric I M) (X : Cₛ^∞⟮I; E, (TangentSpace I)⟯)
+    (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M)) (t : ℝ) (x : M) (v w : TangentSpace I x)
+    (horbit : HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => (Φ_fam s : M → M) x)
+        (Set.Ici (0 : ℝ)) t
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (-(X (Φ_fam t x))))) :
+    HasDerivWithinAt
+      (fun s : ℝ => g.inner ((Φ_fam s : M → M) x)
+        (mfderiv I I (Φ_fam t : M → M) x v) (mfderiv I I (Φ_fam t : M → M) x w))
+      (-metricTransportResidual (I := I) g X Φ_fam t x v w) (Set.Ici 0) t := sorry
+
+-- GENUINE OPEN ANALYTIC INPUT (the single base-point-motion gap, isolated here).
+-- The directional derivative of the scalar metric map `p ↦ g.inner p a b` (`a`, `b` the frozen
+-- pushforwards) along the orbit velocity `-(X α)` equals `-metricTransportResidual`.  Mathematically
+-- this is the chart metric-compatibility identity: differentiating the Gram-matrix coefficients of
+-- `g` along `X` produces the symmetric Christoffel pairing `g(Γ(X̃,a),b) + g(a,Γ(X̃,b))` (=
+-- `metricTransportResidual`), via `∇g = 0` (`LeviCivita_isMetricCompatible`) and the covariant
+-- derivative of a chart-constant section being the Christoffel correction (`christoffelCorrection`).
+-- The project does not yet carry the chart-coordinate metric-coefficient-derivative lemma nor the
+-- covariant-derivative-of-a-constant-chart-section identity needed to assemble this; building them
+-- (the metric-coefficient directional derivative read as the Christoffel pairing) is the remaining
+-- analytic obligation.  It is NOT covered by the paired-residual pushforward-kinetic tower
+-- (`variational_flow_flat_paired_residual_*`), which differentiates the FROZEN-base-point
+-- pushforward-kinetic curve `s ↦ g.inner (Φ_fam t x) (mfderiv (Φ_fam s) …)`, a genuinely different
+-- curve from the base-point-motion curve `s ↦ g.inner (Φ_fam s x) (frozen …)` here.
+theorem basepoint_directional_deriv_eq_neg_residual
+    (g : SmoothRiemannianMetric I M) (X : Cₛ^∞⟮I; E, (TangentSpace I)⟯)
+    (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M)) (t : ℝ) (x : M) (v w : TangentSpace I x) :
+    mfderiv I 𝓘(ℝ) (fun p : M => g.inner p (mfderiv I I (Φ_fam t : M → M) x v)
+      (mfderiv I I (Φ_fam t : M → M) x w)) (Φ_fam t x) (-(X (Φ_fam t x)))
+    = -metricTransportResidual (I := I) g X Φ_fam t x v w := sorry
+
 theorem basepoint_motion_datum
     (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M)
     (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))
@@ -57,24 +104,14 @@ theorem basepoint_motion_datum
         (fun s : ℝ => (g_DT t).inner ((Φ_fam s : M → M) x)
           (mfderiv I I (Φ_fam t : M → M) x v) (mfderiv I I (Φ_fam t : M → M) x w))
         (-metricTransportResidual (I := I) (g_DT t)
-            (deTurckVF (I := I) (g_DT t) g_bg) Φ_fam t x v w) (Set.Ici 0) t := sorry
-
-theorem basepoint_metric_along_curve
-    (g : SmoothRiemannianMetric I M) (X : Cₛ^∞⟮I; E, (TangentSpace I)⟯)
-    (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M)) (t : ℝ) (x : M) (v w : TangentSpace I x)
-    (horbit : HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => (Φ_fam s : M → M) x)
-        (Set.Ici (0 : ℝ)) t
-        ((1 : ℝ →L[ℝ] ℝ).smulRight (-(X (Φ_fam t x))))) :
-    HasDerivWithinAt
-      (fun s : ℝ => g.inner ((Φ_fam s : M → M) x)
-        (mfderiv I I (Φ_fam t : M → M) x v) (mfderiv I I (Φ_fam t : M → M) x w))
-      (-metricTransportResidual (I := I) g X Φ_fam t x v w) (Set.Ici 0) t := sorry
-
-theorem basepoint_directional_deriv_eq_neg_residual
-    (g : SmoothRiemannianMetric I M) (X : Cₛ^∞⟮I; E, (TangentSpace I)⟯)
-    (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M)) (t : ℝ) (x : M) (v w : TangentSpace I x) :
-    mfderiv I 𝓘(ℝ) (fun p : M => g.inner p (mfderiv I I (Φ_fam t : M → M) x v)
-      (mfderiv I I (Φ_fam t : M → M) x w)) (Φ_fam t x) (-(X (Φ_fam t x)))
-    = -metricTransportResidual (I := I) g X Φ_fam t x v w := sorry
+            (deTurckVF (I := I) (g_DT t) g_bg) Φ_fam t x v w) (Set.Ici 0) t := by
+  -- Per interior point, this is exactly `basepoint_metric_along_curve` instantiated with the
+  -- frozen metric `g := g_DT t` and the DeTurck field `X := deTurckVF (g_DT t) g_bg`: the orbit
+  -- velocity `-deTurckVF (g_DT t) g_bg (Φ_fam t x)` supplied by `horbit` matches the
+  -- `-(X (Φ_fam t x))` velocity that node consumes (`X (Φ_fam t x)` unfolds definitionally to
+  -- `deTurckVF (g_DT t) g_bg (Φ_fam t x)`).  Pure specialisation; no new analytic content.
+  intro t ht x v w
+  exact basepoint_metric_along_curve (I := I) (g_DT t)
+    (deTurckVF (I := I) (g_DT t) g_bg) Φ_fam t x v w (horbit t ht x)
 
 end DifferentialGeometry.PDE.RicciFlow

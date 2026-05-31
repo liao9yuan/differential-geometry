@@ -49,8 +49,12 @@ variable
 -- blueprint dependency contract (they pin the carrier to the Duhamel solution field
 -- and the forcing to the continuous DeTurck nonlinearity). This proof discharges the
 -- conclusion through the per-mode/Duhamel assembly sibling `permode_sum_hasderivat`,
--- which already internalises those facts via its own carrier link `hu₂`, so they are
--- unused HERE; the narrow linter suppression keeps the signature intact and warning-free.
+-- threading those Duhamel hypotheses together with the two interior-smoothing inputs
+-- `hderiv_ae` (a.e. identity of the L² time-derivative with the spectral RHS) and
+-- `hRHS_cont` (interior continuity of the spectral RHS path) into the call site.
+-- Some of the Duhamel hypotheses are subsumed by the two interior inputs at the call
+-- site; the narrow linter suppression keeps the full signature intact and
+-- warning-free.
 set_option linter.unusedVariables false in
 theorem deturck_interior_time_regularity
     (g_bg : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ}
@@ -66,7 +70,18 @@ theorem deturck_interior_time_regularity
       (fun t => deTurckGeometricN (I := I) g_bg a
         (maxRegDuhamelSolFieldHa1 (I := I) (M := M) (a : ℝ) hT hT1 u₀ gforce t)))
     (hu₂ : ∀ s, tensorHsInclusion (I := I) (M := M) (g := g_bg) (r := 0) (s := 2)
-      (show (a : ℝ) ≤ (a : ℝ) + 2 by linarith) (u₂ s) = timeH1.toFun u s) :
+      (show (a : ℝ) ≤ (a : ℝ) + 2 by linarith) (u₂ s) = timeH1.toFun u s)
+    (hderiv_ae : (u.deriv : ℝ → tensorHs (I := I) (M := M) g_bg 0 2 (a : ℝ))
+        =ᵐ[timeMeasure T]
+      (fun s => scaleLaplacianFun (I := I) (M := M) (u₂ s) +
+        deTurckGeometricN (I := I) g_bg a
+          (tensorHsInclusion (I := I) (M := M) (g := g_bg) (r := 0) (s := 2)
+            (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s))))
+    (hRHS_cont : ContinuousOn
+      (fun s => scaleLaplacianFun (I := I) (M := M) (u₂ s) +
+        deTurckGeometricN (I := I) g_bg a
+          (tensorHsInclusion (I := I) (M := M) (g := g_bg) (r := 0) (s := 2)
+            (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s))) (Set.Ioo (0 : ℝ) T)) :
     ∀ s ∈ Set.Ioo (0 : ℝ) T,
       HasDerivAt (fun r => (timeH1.toFun u r : tensorHs (I := I) (M := M) g_bg 0 2 (a : ℝ)))
         (scaleLaplacianFun (I := I) (M := M) (u₂ s) +
@@ -77,9 +92,11 @@ theorem deturck_interior_time_regularity
   -- instantiating its order-`(a+1)` carrier `u₁` as the canonical inclusion of the
   -- order-`(a+2)` lift `u₂`. With that choice the `hu₁` link is definitional (`rfl`),
   -- and the conclusion of `permode_sum_hasderivat` is syntactically the conclusion here.
-  exact permode_sum_hasderivat (I := I) (M := M) g_bg a u u₂
+  -- The Duhamel-structure hypotheses and the two interior-smoothing inputs are
+  -- threaded through verbatim.
+  exact permode_sum_hasderivat (I := I) (M := M) g_bg a u₀ gforce hT hT1 u u₂
     (fun s => tensorHsInclusion (I := I) (M := M) (g := g_bg) (r := 0) (s := 2)
       (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s))
-    hu₂ (fun _ => rfl)
+    hu hu₂sol hforce hu₂ (fun _ => rfl) hderiv_ae hRHS_cont
 
 end DifferentialGeometry.PDE.RicciFlow
