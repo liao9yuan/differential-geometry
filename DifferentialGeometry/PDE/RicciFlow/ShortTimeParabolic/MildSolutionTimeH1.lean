@@ -5,6 +5,7 @@ equation. Skeleton stub for the short-time-existence blueprint (GAP 1, ROUTE B
 spectral strong existence).
 -/
 import DifferentialGeometry.PDE.RicciFlow.ShortTimeExistence
+import DifferentialGeometry.PDE.RicciFlow.ShortTimeParabolic.HScaleLipschitz
 import DifferentialGeometry.PDE.RicciFlow.HamiltonDeTurckPullbackFlat
 import DifferentialGeometry.PDE.RicciFlow.Pullback.EvaluationFormChainRule
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckRemainderStrongExists
@@ -83,7 +84,23 @@ theorem deturck_mildsolution_timeh1
     (hrepr_small : ∀ u : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 1),
       ∃ δ' : ℝ, δ' < 1 ∧
         gFibreOpBound (I := I) (M := M) g_bg
-          (ccTensorBilinSymm (I := I) g_bg (repr u)) δ') :
+          (ccTensorBilinSymm (I := I) g_bg (repr u)) δ')
+    (hNsec_lip : ∃ K : ℝ≥0, ∀ u u' : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 1),
+      Summable (fun i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+            (I := I) (M := M) g_bg 0 2 =>
+          tensorSobolevWeight (I := I) (M := M) i (a : ℝ) *
+            (tensorL2Coeff_ofCompact (I := I) (M := M)
+                (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g_bg 0 2)
+                (DifferentialGeometry.Integral.L2.SmoothCcTensor.toL2 (Nsec u)
+                  - DifferentialGeometry.Integral.L2.SmoothCcTensor.toL2 (Nsec u')) i) ^ 2)
+        ∧ (∑' i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+              (I := I) (M := M) g_bg 0 2,
+            tensorSobolevWeight (I := I) (M := M) i (a : ℝ) *
+              (tensorL2Coeff_ofCompact (I := I) (M := M)
+                  (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g_bg 0 2)
+                  (DifferentialGeometry.Integral.L2.SmoothCcTensor.toL2 (Nsec u)
+                    - DifferentialGeometry.Integral.L2.SmoothCcTensor.toL2 (Nsec u')) i) ^ 2)
+            ≤ ((K : ℝ) * dist u u') ^ 2) :
     ∃ T : ℝ, ∃ (hT : 0 < T) (hT1 : T ≤ 1)
         (u : MaxRegSolutionSpace (I := I) (M := M) (a : ℝ) T)
         (gforce : timeL2 (tensorHs (I := I) (M := M) g_bg 0 2 (a : ℝ)) T),
@@ -94,6 +111,24 @@ theorem deturck_mildsolution_timeh1
           u = maxRegDuhamelMap (I := I) (M := M) (a : ℝ) hT hT1 u₀ gforce ∧
           gforce =ᵐ[timeMeasure T]
             (fun t => N_cont
-              (maxRegDuhamelSolFieldHa1 (I := I) (M := M) (a : ℝ) hT hT1 u₀ gforce t)) := sorry
+              (maxRegDuhamelSolFieldHa1 (I := I) (M := M) (a : ℝ) hT hT1 u₀ gforce t)) := by
+  -- The H-scale local Lipschitz witness for the continuous realize-based
+  -- nonlinearity `N_cont`, on a closed `H^{a+1}`-ball about the included datum.
+  obtain ⟨L_R, R, hR, hLip⟩ :=
+    deturckN_hscale_lipschitz (I := I) (M := M) g_bg a u₀ N_cont repr Nsec
+      hN_coeff hNsec_realize hrepr_small hNsec_lip
+  -- Feed the Lipschitz nonlinearity to the CLEAN parabolic strong-existence
+  -- engine, on the loss-of-one-derivative scale `(a : ℝ)`.
+  obtain ⟨T₀, hT₀_pos, hsol⟩ :=
+    deTurckRemainder_strong_shortTime_exists (I := I) (M := M) g_bg
+      (a := (a : ℝ)) (N := N_cont) (L_R := L_R) (R := R) hR u₀ hLip
+  -- Choose a short horizon `T = min T₀ 1` inside the engine's validity window.
+  refine ⟨min T₀ 1, lt_min hT₀_pos one_pos, min_le_right _ _, ?_⟩
+  obtain ⟨u, gforce, hduh, hforce, htrace, _hderiv⟩ :=
+    hsol (lt_min hT₀_pos one_pos) (min_le_left _ _) (min_le_right _ _)
+  -- Assemble the four target conjuncts: the `H¹ ↪ C⁰` time continuity is
+  -- unconditional; the trace, Duhamel identification and forcing fixed-point
+  -- identity are the engine's output (re-ordered).
+  exact ⟨u, gforce, timeH1.continuousOn_toFun u, htrace, hduh, hforce⟩
 
 end DifferentialGeometry.PDE.RicciFlow

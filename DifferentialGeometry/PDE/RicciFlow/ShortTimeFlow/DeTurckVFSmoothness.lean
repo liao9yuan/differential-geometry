@@ -97,6 +97,11 @@ theorem deturck_solution_joint_smooth
     ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
       (fun q : ℝ × M => (TotalSpace.mk' E q.2
         (deTurckVF (I := I) (g_DT q.1) (g_DT 0) q.2) : TangentBundle I M))
-      (Set.Ioo (0 : ℝ) T ×ˢ Set.univ) := sorry
+      (Set.Ioo (0 : ℝ) T ×ˢ Set.univ) :=
+  -- This is `deturck_vf_joint_smoothness` specialised to the background metric
+  -- `g_bg := g_DT 0`.  The smoothness hypothesis `h_smooth` is literally the
+  -- chart-Gram joint-`C∞` hypothesis `h_gDT` of that theorem (it only constrains
+  -- the evolving family `g_DT q.1`, not the background), so it transports verbatim.
+  deturck_vf_joint_smoothness (I := I) (g_DT 0) g_DT T h_smooth
 
 end DifferentialGeometry.PDE.RicciFlow

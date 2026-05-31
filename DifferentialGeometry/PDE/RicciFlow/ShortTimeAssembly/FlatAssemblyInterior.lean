@@ -90,6 +90,46 @@ theorem flat_assembly_interior
         (fun s : ℝ =>
           (Diffeomorph.pullbackMetric (g_DT s) (Φ_fam s)).inner x v w)
         ((-2) * ricciTensor (I := I)
-          (Diffeomorph.pullbackMetric (g_DT t) (Φ_fam t)) x v w) (Set.Ici 0) t := sorry
+          (Diffeomorph.pullbackMetric (g_DT t) (Φ_fam t)) x v w) (Set.Ici 0) t := by
+  -- LEAF assembly: at each interior time `t ∈ Ioo 0 T`, the flat variational data carried
+  -- by this node's hypotheses are exactly the per-point inputs that the CLEAN flat-route
+  -- base lemma `hamiltonDeTurck_pullback_isRicciFlow_flat` consumes at that point. Concretely
+  -- the only load-bearing step of that base lemma is the value identification
+  -- `deTurck_pullback_eval_value_hasDerivWithinAt` (Cartan cancellation + Ricci naturality),
+  -- which depends solely on the three-piece additive chain rule `h_total_eval` AT `t`. The
+  -- other flat data (`hDT_deriv`, `hv_flat`, `hcorr`, `hbase`) document the three honest
+  -- pieces that produce `h_total_eval`; here they are already discharged into `h_total_eval`,
+  -- so the interior conclusion follows from the single-point value identification.
+  intro t ht x v w
+  -- The DeTurck PDE for the metric-family piece, at this interior point (mirrors the base
+  -- lemma's `deTurck_metric_slot_hasDerivWithinAt` step but instantiated only at `t`, since
+  -- this node's data are supplied on the open interval `Ioo 0 T`, not the half-open `Ico 0 T`).
+  have _h_metric : HasDerivWithinAt
+      (fun s : ℝ => (g_DT s).inner (Φ_fam t x)
+        (mfderiv I I (Φ_fam t : M → M) x v)
+        (mfderiv I I (Φ_fam t : M → M) x w))
+      ((-2 : ℝ) * ricciTensor (I := I) (g_DT t) (Φ_fam t x)
+          (mfderiv I I (Φ_fam t : M → M) x v)
+          (mfderiv I I (Φ_fam t : M → M) x w)
+        + lieDerivMetric (I := I) (g_DT t)
+            (deTurckVF (I := I) (g_DT t) g_bg) (Φ_fam t x)
+            (mfderiv I I (Φ_fam t : M → M) x v)
+            (mfderiv I I (Φ_fam t : M → M) x w)) (Set.Ici 0) t := by
+    have h := hDT_deriv t ht (Φ_fam t x)
+      (mfderiv I I (Φ_fam t : M → M) x v) (mfderiv I I (Φ_fam t : M → M) x w)
+    rwa [deTurckRicciRHS_apply] at h
+  -- The base-point-motion piece, at this interior point.
+  have _h_base := hbase t ht x v w
+  -- The pushforward-kinetic piece (honest flat-route value), from the flat per-slot
+  -- identities and the per-slot Christoffel-residual `E`-equations at `t`.
+  have _h_push :=
+    variational_flow_flat_pairing_hasDerivWithinAt (I := I)
+      (g_DT t) (deTurckVF (I := I) (g_DT t) g_bg) Φ_fam t x v w
+      (T' t x v) (P' t x v) (T' t x w) (P' t x w)
+      (hv_flat t ht x v) (hv_flat t ht x w) (hcorr t ht x v) (hcorr t ht x w)
+  -- The single load-bearing value identification of the flat-route base lemma, at `t`
+  -- (Cartan cancellation `+𝓛 X g` vs `-𝓛 X g`, then `ricci_pullback_naturality`).
+  exact deTurck_pullback_eval_value_hasDerivWithinAt (I := I)
+    g_bg g_DT Φ_fam t x v w (h_total_eval t ht x v w)
 
 end DifferentialGeometry.PDE.RicciFlow

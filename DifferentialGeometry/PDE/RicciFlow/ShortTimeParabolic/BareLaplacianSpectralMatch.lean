@@ -51,6 +51,31 @@ theorem bare_laplacian_spectral_match
         (Integral.L2.SmoothCcTensor.toL2 (rawTensorConnLapSmooth (I := I) g_bg 0 2 Tsm)) i =
       (- Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx.lambda (I := I) (M := M) i) *
         tensorL2Coeff_ofCompact (I := I) (M := M) (hCompact (I := I) (M := M) g_bg)
-          (Integral.L2.SmoothCcTensor.toL2 Tsm) i := sorry
+          (Integral.L2.SmoothCcTensor.toL2 Tsm) i := by
+  -- `Δ_∇ T = T - (1 - Δ_∇) T`, since `(1 - Δ_∇) T = T - Δ_∇ T` by definition.
+  have hraw : rawTensorConnLapSmooth (I := I) g_bg 0 2 Tsm
+      = Tsm - oneMinusConnLapSmooth (I := I) g_bg 0 2 Tsm := by
+    rw [oneMinusConnLapSmooth, sub_sub_cancel]
+  -- The eigenbasis-coordinate functional is the basis `repr`, a continuous linear
+  -- map, so it respects subtraction.
+  have hsub :
+      tensorL2Coeff_ofCompact (I := I) (M := M) (hCompact (I := I) (M := M) g_bg)
+          (Integral.L2.SmoothCcTensor.toL2 Tsm -
+            Integral.L2.SmoothCcTensor.toL2
+              (oneMinusConnLapSmooth (I := I) g_bg 0 2 Tsm)) i =
+        tensorL2Coeff_ofCompact (I := I) (M := M) (hCompact (I := I) (M := M) g_bg)
+            (Integral.L2.SmoothCcTensor.toL2 Tsm) i -
+          tensorL2Coeff_ofCompact (I := I) (M := M) (hCompact (I := I) (M := M) g_bg)
+            (Integral.L2.SmoothCcTensor.toL2
+              (oneMinusConnLapSmooth (I := I) g_bg 0 2 Tsm)) i := by
+    unfold tensorL2Coeff_ofCompact
+    rw [map_sub]
+    rfl
+  -- Split the coordinate of `Δ_∇ T` and feed the per-step identity
+  -- `cᵢ((1 - Δ_∇) T) = (1 + λᵢ) · cᵢ(T)`; then `1 - (1 + λᵢ) = -λᵢ`.
+  rw [hraw, Integral.L2.SmoothCcTensor.toL2_sub, hsub,
+    tensorL2Coeff_ofCompact_oneMinusConnLapSmooth
+      (I := I) (M := M) g_bg (hCompact (I := I) (M := M) g_bg) Tsm i]
+  ring
 
 end DifferentialGeometry.PDE.RicciFlow

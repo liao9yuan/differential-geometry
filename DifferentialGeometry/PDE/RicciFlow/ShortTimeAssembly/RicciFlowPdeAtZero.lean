@@ -45,6 +45,25 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+theorem interior_ici_deriv_to_ordinary
+    (f : ℝ → ℝ) {T : ℝ} (e : ℝ → ℝ)
+    (h_int : ∀ t ∈ Set.Ioo (0 : ℝ) T, HasDerivWithinAt f (e t) (Set.Ici 0) t) :
+    DifferentiableOn ℝ f (Set.Ioo 0 T) ∧
+      (∀ t ∈ Set.Ioo (0 : ℝ) T, deriv f t = e t) := by
+  -- On the open interval `Ioo 0 T`, the within-`Ici 0` derivative restricts to a
+  -- within-`Ioo 0 T` derivative (since `Ioo 0 T ⊆ Ici 0`); openness then identifies
+  -- `derivWithin` with the ordinary `deriv` and gives `differentiableOn`.
+  have hsub : Set.Ioo (0 : ℝ) T ⊆ Set.Ici (0 : ℝ) := fun y hy => le_of_lt hy.1
+  -- The restricted within-`Ioo 0 T` derivative at every interior point.
+  have h_within : ∀ t ∈ Set.Ioo (0 : ℝ) T,
+      HasDerivWithinAt f (e t) (Set.Ioo 0 T) t := fun t ht => (h_int t ht).mono hsub
+  refine ⟨fun t ht => (h_within t ht).differentiableWithinAt, fun t ht => ?_⟩
+  -- `deriv f t = derivWithin f (Ioo 0 T) t` by openness, and the latter equals `e t`.
+  have hopen : IsOpen (Set.Ioo (0 : ℝ) T) := isOpen_Ioo
+  rw [← derivWithin_of_isOpen hopen ht]
+  exact (h_within t ht).derivWithin (hopen.uniqueDiffWithinAt ht)
+
+omit [CompactSpace M] [I.Boundaryless] in
 theorem ricci_flow_pde_at_zero
     (g_fam : ℝ → SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T) (x : M)
     (v w : TangentSpace I x)
@@ -55,13 +74,29 @@ theorem ricci_flow_pde_at_zero
       (fun s : ℝ => (g_fam s).inner x v w)
       ((-2) * ricciTensor (I := I) (g_fam t) x v w) (Set.Ici 0) t) :
     HasDerivWithinAt (fun s : ℝ => (g_fam s).inner x v w)
-      ((-2) * ricciTensor (I := I) (g_fam 0) x v w) (Set.Ici 0) 0 := sorry
-
-theorem interior_ici_deriv_to_ordinary
-    (f : ℝ → ℝ) {T : ℝ} (e : ℝ → ℝ)
-    (h_int : ∀ t ∈ Set.Ioo (0 : ℝ) T, HasDerivWithinAt f (e t) (Set.Ici 0) t) :
-    DifferentiableOn ℝ f (Set.Ioo 0 T) ∧
-      (∀ t ∈ Set.Ioo (0 : ℝ) T, deriv f t = e t) := sorry
+      ((-2) * ricciTensor (I := I) (g_fam 0) x v w) (Set.Ici 0) 0 := by
+  -- Abbreviations for the inner-product and Ricci-RHS families.
+  set f : ℝ → ℝ := fun s : ℝ => (g_fam s).inner x v w with hf
+  set e : ℝ → ℝ := fun s : ℝ => (-2) * ricciTensor (I := I) (g_fam s) x v w with he
+  -- The interior data, transported to the present `f`/`e` notation.
+  have h_int : ∀ t ∈ Set.Ioo (0 : ℝ) T, HasDerivWithinAt f (e t) (Set.Ici 0) t :=
+    h_interior
+  -- The interior `Ici`-derivatives upgrade to ordinary derivatives on `Ioo 0 T`,
+  -- and `deriv f = e` there.
+  obtain ⟨h_diff, h_derivEq⟩ := interior_ici_deriv_to_ordinary f e h_int
+  -- We apply the continuity-extension theorem with the open interior interval as the
+  -- right-neighbourhood witness.
+  refine hasDerivWithinAt_Ici_of_tendsto_deriv (s := Set.Ioo 0 T) h_diff ?_ ?_ ?_
+  · -- `f` is right-continuous at `0` along `Ioo 0 T`: restrict the `Ico 0 T` continuity.
+    have h0 : (0 : ℝ) ∈ Set.Ico (0 : ℝ) T := ⟨le_rfl, hT⟩
+    exact (h_cont.continuousWithinAt h0).mono Set.Ioo_subset_Ico_self
+  · -- `Ioo 0 T` is a right-neighbourhood of `0`.
+    exact Ioo_mem_nhdsGT hT
+  · -- The derivative converges to `e 0` from the right: `deriv f =ᶠ e` on `Ioo 0 T`,
+    -- which is in `𝓝[>] 0`, and `e` is right-continuous at `0` by hypothesis.
+    have h_eventuallyEq : (fun s : ℝ => deriv f s) =ᶠ[nhdsWithin 0 (Set.Ioi 0)] e :=
+      Filter.eventuallyEq_of_mem (Ioo_mem_nhdsGT hT) h_derivEq
+    exact (h_ric_cont.tendsto).congr' h_eventuallyEq.symm
 
 theorem gfam_inner_continuous_on
     (g_DT : ℝ → SmoothRiemannianMetric I M) (T : ℝ) (hT : 0 < T)

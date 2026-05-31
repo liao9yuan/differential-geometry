@@ -17,6 +17,8 @@ import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.ChartOverlapUniq
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.BareFlowFromJointC1
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.SmoothInSpace.VariationalLiftFlatIdentity
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.SmoothDependence.GlobalClosedManifold
+import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.VariationalFlowFlatPairing
+import DifferentialGeometry.PDE.RicciFlow.ShortTimeAssembly.BasepointMotion
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
@@ -45,31 +47,44 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-theorem total_eval_three_piece_chain_rule
-    (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M)
+theorem geometry_slot_joint_datum
+    (g_DT : ℝ → SmoothRiemannianMetric I M)
     (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))
-    (hDT_deriv : ∀ s ∈ Set.Ico (0 : ℝ) T, ∀ y : M, ∀ a b : TangentSpace I y,
-      HasDerivWithinAt (fun u : ℝ => (g_DT u).inner y a b)
-        (deTurckRicciRHS (I := I) g_bg (g_DT s) y a b) (Set.Ici 0) s)
-    (hΦ_orbit : ∀ x : M, ∀ s ∈ Set.Ioo (0 : ℝ) T,
-      HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun u : ℝ => (Φ_fam u : M → M) x)
-        (Set.Ici (0 : ℝ)) s
-        ((1 : ℝ →L[ℝ] ℝ).smulRight
-          (-(deTurckVF (I := I) (g_DT s) g_bg ((Φ_fam s : M → M) x)))))
     (hΦ : ContMDiffOn (𝓘(ℝ, ℝ).prod I) I ∞
       (fun q : ℝ × M => (Φ_fam q.1 : M → M) q.2)
       (Set.Ioo (0 : ℝ) T ×ˢ Set.univ)) :
     ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, ∀ v w : TangentSpace I x,
-      HasDerivWithinAt
-        (fun s : ℝ => (g_DT s).inner ((Φ_fam s : M → M) x)
-          (mfderiv I I (Φ_fam s : M → M) x v) (mfderiv I I (Φ_fam s : M → M) x w))
-        ( ((-2) * ricciTensor (I := I) (g_DT t) (Φ_fam t x)
-              (mfderiv I I (Φ_fam t : M → M) x v) (mfderiv I I (Φ_fam t : M → M) x w)
-            + lieDerivMetric (I := I) (g_DT t) (deTurckVF (I := I) (g_DT t) g_bg) (Φ_fam t x)
-                (mfderiv I I (Φ_fam t : M → M) x v) (mfderiv I I (Φ_fam t : M → M) x w))
-          + (- lieDerivMetric (I := I) (g_DT t) (deTurckVF (I := I) (g_DT t) g_bg) (Φ_fam t x)
-                (mfderiv I I (Φ_fam t : M → M) x v) (mfderiv I I (Φ_fam t : M → M) x w)) )
-        (Set.Ici 0) t := sorry
+      ∃ R' : (ℝ × ℝ) →L[ℝ] ℝ,
+        HasFDerivWithinAt
+          (fun p : ℝ × ℝ => (g_DT t).inner ((Φ_fam p.1 : M → M) x)
+            (mfderiv I I (Φ_fam p.2 : M → M) x v)
+            (mfderiv I I (Φ_fam p.2 : M → M) x w)) R'
+          ((Set.Ici (0 : ℝ)) ×ˢ (Set.univ : Set ℝ)) (t, t) := sorry
+
+theorem evalform_joint_frechet_datum
+    (g_DT : ℝ → SmoothRiemannianMetric I M)
+    (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))
+    (hg : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+        (fun q : ℝ × M =>
+          Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT q.1) x₀ i j
+            (extChartAt I x₀ q.2))
+        (Set.Ioo (0 : ℝ) T ×ˢ Set.univ))
+    (hΦ : ContMDiffOn (𝓘(ℝ, ℝ).prod I) I ∞
+      (fun q : ℝ × M => (Φ_fam q.1 : M → M) q.2)
+      (Set.Ioo (0 : ℝ) T ×ˢ Set.univ))
+    (hpush_v : ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, ∀ v : TangentSpace I x,
+      ∃ V' : ℝ →L[ℝ] E,
+        HasFDerivWithinAt (fun s : ℝ => (mfderiv I I (Φ_fam s : M → M) x v : E)) V'
+          (Set.Ici (0 : ℝ)) t)
+    (hpush_w : ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, ∀ w : TangentSpace I x,
+      ∃ W' : ℝ →L[ℝ] E,
+        HasFDerivWithinAt (fun s : ℝ => (mfderiv I I (Φ_fam s : M → M) x w : E)) W'
+          (Set.Ici (0 : ℝ)) t) :
+    ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, ∀ v w : TangentSpace I x,
+      ∃ Q' : (ℝ × ℝ) →L[ℝ] ℝ,
+        HasFDerivWithinAt (evalFormTwoVar (I := I) g_DT Φ_fam x v w) Q'
+          ((Set.Ici (0 : ℝ)) ×ˢ (Set.univ : Set ℝ)) (t, t) := sorry
 
 theorem evalform_geometry_slot
     (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M)
@@ -114,45 +129,115 @@ theorem evalform_geometry_slot
           (mfderiv I I (Φ_fam s : M → M) x v) (mfderiv I I (Φ_fam s : M → M) x w))
         (- lieDerivMetric (I := I) (g_DT t) (deTurckVF (I := I) (g_DT t) g_bg) (Φ_fam t x)
             (mfderiv I I (Φ_fam t : M → M) x v)
-            (mfderiv I I (Φ_fam t : M → M) x w)) (Set.Ici 0) t := sorry
+            (mfderiv I I (Φ_fam t : M → M) x w)) (Set.Ici 0) t := by
+  intro t ht x v w
+  have ht0 : (0 : ℝ) ≤ t := ht.1.le
+  -- The two-variable geometry map `R`: the first variable moves the base point
+  -- `Φ_fam · x`, the second variable moves the two pushforwards.  Its diagonal is the
+  -- moving-geometry slot curve we must differentiate; its two frozen restrictions are
+  -- the base-point-motion curve and the pushforward-kinetic curve.
+  let R : ℝ × ℝ → ℝ := fun p : ℝ × ℝ => (g_DT t).inner ((Φ_fam p.1 : M → M) x)
+      (mfderiv I I (Φ_fam p.2 : M → M) x v)
+      (mfderiv I I (Φ_fam p.2 : M → M) x w)
+  -- The single-point joint Fréchet datum for `R` (sibling node).
+  obtain ⟨R', hR'⟩ := geometry_slot_joint_datum (I := I) g_DT T Φ_fam hΦ t ht x v w
+  -- The diagonal derivative `R'(1,0) + R'(0,1)`.
+  have hdiag : HasDerivWithinAt (fun s : ℝ => R (s, s)) (R' (1, 0) + R' (0, 1))
+      (Set.Ici (0 : ℝ)) t :=
+    evalForm_diagonal_hasDerivWithinAt_of_jointFDeriv R t R' hR'
+  -- First partial `R'(1, 0)` is the within-set derivative of the base-point-motion
+  -- curve `s ↦ R (s, t)` (pushforwards frozen at `t`).
+  have hpart1 : HasDerivWithinAt (fun s : ℝ => R (s, t)) (R' (1, 0))
+      (Set.Ici (0 : ℝ)) t :=
+    evalForm_jointFDeriv_partial_fst R t R' hR'
+  -- Second partial `R'(0, 1)` is the within-set derivative of the pushforward-kinetic
+  -- curve `s ↦ R (t, s)` (base point frozen at `t`).
+  have hpart2 : HasDerivWithinAt (fun s : ℝ => R (t, s)) (R' (0, 1))
+      (Set.Ici (0 : ℝ)) t :=
+    evalForm_jointFDeriv_partial_snd R t ht0 R' hR'
+  -- Base-point-motion piece (`basepoint_motion_datum`): value `-metricTransportResidual`.
+  -- Its curve is definitionally `s ↦ R (s, t)`, so uniqueness on `Ici 0` forces `R'(1,0)`.
+  -- Reorder the orbit-ODE quantifiers (`∀ x, ∀ s` ⟶ `∀ s, ∀ x`) to match `horbit`.
+  have hΦ_orbit' : ∀ s ∈ Set.Ioo (0 : ℝ) T, ∀ y : M,
+      HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun u : ℝ => (Φ_fam u : M → M) y)
+        (Set.Ici (0 : ℝ)) s
+        ((1 : ℝ →L[ℝ] ℝ).smulRight
+          (-(deTurckVF (I := I) (g_DT s) g_bg ((Φ_fam s : M → M) y)))) :=
+    fun s hs y => hΦ_orbit y s hs
+  have hbase := basepoint_motion_datum (I := I) g_DT g_bg T Φ_fam hΦ_orbit' t ht x v w
+  have hR10 : R' (1, 0)
+      = -metricTransportResidual (I := I) (g_DT t)
+          (deTurckVF (I := I) (g_DT t) g_bg) Φ_fam t x v w :=
+    hasDerivWithinAt_Ici_unique ht0 hpart1 hbase
+  -- Pushforward-kinetic piece (`variational_flow_flat_pairing`): value
+  -- `-lieDerivMetric + metricTransportResidual`.  Its slot inputs are supplied
+  -- per-direction by `hv_flat`/`hw_flat` and the Christoffel-residual equations
+  -- `hcorr_v`/`hcorr_w`.  Its curve is definitionally `s ↦ R (t, s)`.
+  have hpush := DifferentialGeometry.PDE.RicciFlow.ODE.variational_flow_flat_pairing_hasDerivWithinAt
+    (I := I) (g_DT t) (deTurckVF (I := I) (g_DT t) g_bg) Φ_fam t x v w
+    (T'v x v t) (P'v x v t) (T'w x w t) (P'w x w t)
+    (hv_flat t ht x v) (hw_flat t ht x w) (hcorr_v t ht x v) (hcorr_w t ht x w)
+  have hR01 : R' (0, 1)
+      = -lieDerivMetric (I := I) (g_DT t) (deTurckVF (I := I) (g_DT t) g_bg) (Φ_fam t x)
+            (mfderiv I I (Φ_fam t : M → M) x v) (mfderiv I I (Φ_fam t : M → M) x w)
+          + metricTransportResidual (I := I) (g_DT t)
+              (deTurckVF (I := I) (g_DT t) g_bg) Φ_fam t x v w :=
+    hasDerivWithinAt_Ici_unique ht0 hpart2 hpush
+  -- The two metric-transport residuals cancel: `R'(1,0) + R'(0,1) = -lieDerivMetric`.
+  have hsum : R' (1, 0) + R' (0, 1)
+      = -lieDerivMetric (I := I) (g_DT t) (deTurckVF (I := I) (g_DT t) g_bg) (Φ_fam t x)
+          (mfderiv I I (Φ_fam t : M → M) x v) (mfderiv I I (Φ_fam t : M → M) x w) := by
+    rw [hR10, hR01]; ring
+  rw [hsum] at hdiag
+  -- The diagonal `fun s => R (s, s)` is definitionally the moving-geometry slot curve.
+  exact hdiag
 
-theorem evalform_joint_frechet_datum
-    (g_DT : ℝ → SmoothRiemannianMetric I M)
+theorem total_eval_three_piece_chain_rule
+    (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M)
     (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))
-    (hg : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
-      ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
-        (fun q : ℝ × M =>
-          Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT q.1) x₀ i j
-            (extChartAt I x₀ q.2))
-        (Set.Ioo (0 : ℝ) T ×ˢ Set.univ))
+    (hDT_deriv : ∀ s ∈ Set.Ico (0 : ℝ) T, ∀ y : M, ∀ a b : TangentSpace I y,
+      HasDerivWithinAt (fun u : ℝ => (g_DT u).inner y a b)
+        (deTurckRicciRHS (I := I) g_bg (g_DT s) y a b) (Set.Ici 0) s)
+    (hΦ_orbit : ∀ x : M, ∀ s ∈ Set.Ioo (0 : ℝ) T,
+      HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun u : ℝ => (Φ_fam u : M → M) x)
+        (Set.Ici (0 : ℝ)) s
+        ((1 : ℝ →L[ℝ] ℝ).smulRight
+          (-(deTurckVF (I := I) (g_DT s) g_bg ((Φ_fam s : M → M) x)))))
     (hΦ : ContMDiffOn (𝓘(ℝ, ℝ).prod I) I ∞
       (fun q : ℝ × M => (Φ_fam q.1 : M → M) q.2)
       (Set.Ioo (0 : ℝ) T ×ˢ Set.univ))
-    (hpush_v : ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, ∀ v : TangentSpace I x,
-      ∃ V' : ℝ →L[ℝ] E,
-        HasFDerivWithinAt (fun s : ℝ => (mfderiv I I (Φ_fam s : M → M) x v : E)) V'
-          (Set.Ici (0 : ℝ)) t)
-    (hpush_w : ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, ∀ w : TangentSpace I x,
-      ∃ W' : ℝ →L[ℝ] E,
-        HasFDerivWithinAt (fun s : ℝ => (mfderiv I I (Φ_fam s : M → M) x w : E)) W'
-          (Set.Ici (0 : ℝ)) t) :
-    ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, ∀ v w : TangentSpace I x,
+    -- The moving-geometry slot derivative (`-𝓛`), discharged by `evalform_geometry_slot`.
+    (h_geom : ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, ∀ v w : TangentSpace I x,
+      HasDerivWithinAt
+        (fun s : ℝ => (g_DT t).inner ((Φ_fam s : M → M) x)
+          (mfderiv I I (Φ_fam s : M → M) x v) (mfderiv I I (Φ_fam s : M → M) x w))
+        (- lieDerivMetric (I := I) (g_DT t) (deTurckVF (I := I) (g_DT t) g_bg) (Φ_fam t x)
+            (mfderiv I I (Φ_fam t : M → M) x v)
+            (mfderiv I I (Φ_fam t : M → M) x w)) (Set.Ici 0) t)
+    -- The single-point joint Fréchet datum, discharged by `evalform_joint_frechet_datum`.
+    (h_joint : ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, ∀ v w : TangentSpace I x,
       ∃ Q' : (ℝ × ℝ) →L[ℝ] ℝ,
         HasFDerivWithinAt (evalFormTwoVar (I := I) g_DT Φ_fam x v w) Q'
-          ((Set.Ici (0 : ℝ)) ×ˢ (Set.univ : Set ℝ)) (t, t) := sorry
-
-theorem geometry_slot_joint_datum
-    (g_DT : ℝ → SmoothRiemannianMetric I M)
-    (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))
-    (hΦ : ContMDiffOn (𝓘(ℝ, ℝ).prod I) I ∞
-      (fun q : ℝ × M => (Φ_fam q.1 : M → M) q.2)
-      (Set.Ioo (0 : ℝ) T ×ˢ Set.univ)) :
+          ((Set.Ici (0 : ℝ)) ×ˢ (Set.univ : Set ℝ)) (t, t)) :
     ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, ∀ v w : TangentSpace I x,
-      ∃ R' : (ℝ × ℝ) →L[ℝ] ℝ,
-        HasFDerivWithinAt
-          (fun p : ℝ × ℝ => (g_DT t).inner ((Φ_fam p.1 : M → M) x)
-            (mfderiv I I (Φ_fam p.2 : M → M) x v)
-            (mfderiv I I (Φ_fam p.2 : M → M) x w)) R'
-          ((Set.Ici (0 : ℝ)) ×ˢ (Set.univ : Set ℝ)) (t, t) := sorry
+      HasDerivWithinAt
+        (fun s : ℝ => (g_DT s).inner ((Φ_fam s : M → M) x)
+          (mfderiv I I (Φ_fam s : M → M) x v) (mfderiv I I (Φ_fam s : M → M) x w))
+        ( ((-2) * ricciTensor (I := I) (g_DT t) (Φ_fam t x)
+              (mfderiv I I (Φ_fam t : M → M) x v) (mfderiv I I (Φ_fam t : M → M) x w)
+            + lieDerivMetric (I := I) (g_DT t) (deTurckVF (I := I) (g_DT t) g_bg) (Φ_fam t x)
+                (mfderiv I I (Φ_fam t : M → M) x v) (mfderiv I I (Φ_fam t : M → M) x w))
+          + (- lieDerivMetric (I := I) (g_DT t) (deTurckVF (I := I) (g_DT t) g_bg) (Φ_fam t x)
+                (mfderiv I I (Φ_fam t : M → M) x v) (mfderiv I I (Φ_fam t : M → M) x w)) )
+        (Set.Ici 0) t := by
+  intro t ht x v w
+  -- The moving-geometry slot derivative (`-𝓛`) is the `h_push_moving` consumed by the
+  -- diagonal `h_total_eval` assembly; the metric slot (`-2 Ric + 𝓛`) comes from the
+  -- DeTurck PDE `hDT_deriv`, and the two diagonal partials are pinned by uniqueness on
+  -- `Ici 0` through the single-point joint Fréchet datum.
+  have h_push_moving := h_geom t ht x v w
+  obtain ⟨Q', hQ'⟩ := h_joint t ht x v w
+  exact DifferentialGeometry.PDE.RicciFlow.Pullback.deTurck_pullback_h_total_eval
+    (I := I) g_bg g_DT T hDT_deriv Φ_fam t ⟨ht.1.le, ht.2⟩ x v w h_push_moving hQ'
 
 end DifferentialGeometry.PDE.RicciFlow

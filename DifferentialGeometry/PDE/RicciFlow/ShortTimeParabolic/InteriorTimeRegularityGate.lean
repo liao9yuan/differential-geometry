@@ -5,6 +5,7 @@ The interior parabolic time-regularity gate: for `t > 0` the carrier-scale path
 interior spectral gate).
 -/
 import DifferentialGeometry.PDE.RicciFlow.ShortTimeExistence
+import DifferentialGeometry.PDE.RicciFlow.ShortTimeParabolic.ForcingPerModeAssembly
 import DifferentialGeometry.PDE.RicciFlow.HamiltonDeTurckPullbackFlat
 import DifferentialGeometry.PDE.RicciFlow.Pullback.EvaluationFormChainRule
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckRemainderStrongExists
@@ -44,6 +45,13 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+-- `hu`, `hu₂sol`, `hforce` are genuine node-signature hypotheses retained for the
+-- blueprint dependency contract (they pin the carrier to the Duhamel solution field
+-- and the forcing to the continuous DeTurck nonlinearity). This proof discharges the
+-- conclusion through the per-mode/Duhamel assembly sibling `permode_sum_hasderivat`,
+-- which already internalises those facts via its own carrier link `hu₂`, so they are
+-- unused HERE; the narrow linter suppression keeps the signature intact and warning-free.
+set_option linter.unusedVariables false in
 theorem deturck_interior_time_regularity
     (g_bg : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ}
     (u₀ : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 2))
@@ -64,6 +72,14 @@ theorem deturck_interior_time_regularity
         (scaleLaplacianFun (I := I) (M := M) (u₂ s) +
           deTurckGeometricN (I := I) g_bg a
             (tensorHsInclusion (I := I) (M := M) (g := g_bg) (r := 0) (s := 2)
-              (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s))) s := sorry
+              (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s))) s := by
+  -- Reduce to the per-mode/Duhamel assembly sibling `permode_sum_hasderivat` by
+  -- instantiating its order-`(a+1)` carrier `u₁` as the canonical inclusion of the
+  -- order-`(a+2)` lift `u₂`. With that choice the `hu₁` link is definitional (`rfl`),
+  -- and the conclusion of `permode_sum_hasderivat` is syntactically the conclusion here.
+  exact permode_sum_hasderivat (I := I) (M := M) g_bg a u u₂
+    (fun s => tensorHsInclusion (I := I) (M := M) (g := g_bg) (r := 0) (s := 2)
+      (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s))
+    hu₂ (fun _ => rfl)
 
 end DifferentialGeometry.PDE.RicciFlow
