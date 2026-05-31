@@ -46,7 +46,12 @@ variable
 
 theorem basepoint_motion_datum
     (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M)
-    (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M)) :
+    (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))
+    (horbit : ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M,
+      HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => (Φ_fam s : M → M) x)
+        (Set.Ici (0 : ℝ)) t
+        ((1 : ℝ →L[ℝ] ℝ).smulRight
+          (-(deTurckVF (I := I) (g_DT t) g_bg (Φ_fam t x))))) :
     ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, ∀ v w : TangentSpace I x,
       HasDerivWithinAt
         (fun s : ℝ => (g_DT t).inner ((Φ_fam s : M → M) x)

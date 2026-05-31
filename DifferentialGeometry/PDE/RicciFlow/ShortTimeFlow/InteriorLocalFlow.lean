@@ -64,7 +64,12 @@ theorem interior_local_flow_existence
 theorem interior_flow_uniqueness_glue
     (X : ℝ → ∀ x : M, TangentSpace I x) (hX : AutonomizedFieldJointC1 (I := I) X)
     (T : ℝ) (hT : 0 < T)
-    (hper : ∀ α : M, ChartLocalPicardData (I := I) X α) :
+    (hper : ∀ α : M, ChartLocalPicardData (I := I) X α)
+    (hperNeg : ∀ α : M, ChartLocalPicardData (I := I) (fun t x => -(X t x)) α)
+    (hSmoothX_chart : ∀ α : M, ContDiff ℝ ∞ (Function.uncurry fun t y =>
+      (X t ((chartAt H α).symm (I.symm y)) : E)))
+    (hSmoothNegX_chart : ∀ α : M, ContDiff ℝ ∞ (Function.uncurry fun t y =>
+      ((-X t ((chartAt H α).symm (I.symm y))) : E))) :
     ∃ Φcc : ℝ → M → M, (∀ x : M, Φcc 0 x = x) ∧
       (∀ x : M, ∃ α : M, ∀ s : ℝ, Φcc s x =
         (chartAt H α).symm (I.symm ((hper α).flow (I ((chartAt H α) x)) s))) ∧
@@ -78,7 +83,8 @@ theorem chartcover_orbit_is_bare_integral_curve
     (T : ℝ) (hT : 0 < T) (Φcc : ℝ → M → M)
     (hΦcc0 : ∀ x : M, Φcc 0 x = x)
     (hper : ∀ α : M, ChartLocalPicardData (I := I) X α)
-    (hrepr : ∀ x : M, ∃ α : M, ∀ s : ℝ, Φcc s x =
+    (hTle : ∀ α : M, T ≤ (hper α).T)
+    (hrepr : ∀ x : M, ∃ α : M, x ∈ (hper α).U ∧ ∀ s : ℝ, Φcc s x =
       (chartAt H α).symm (I.symm ((hper α).flow (I ((chartAt H α) x)) s))) :
     ∀ t : ℝ, 0 < t → t < T → ∀ x : M, HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => Φcc s x)
       (Set.Ici (0 : ℝ)) t ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φcc t x))) := sorry

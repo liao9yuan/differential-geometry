@@ -45,7 +45,13 @@ variable
 
 theorem forcing_continuous_interior
     (g_bg : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ}
-    (u₁ : ℝ → tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 1)) :
+    (u₁ : ℝ → tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 1))
+    (u₀ : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 2)) (R : ℝ)
+    (hcont : ∀ ε : ℝ, 0 < ε → ContinuousOn u₁ (Set.Icc ε T))
+    (hball : ∀ ε : ℝ, 0 < ε → ∀ s ∈ Set.Icc ε T,
+      u₁ s ∈ Metric.closedBall
+        (tensorHsInclusion (I := I) (M := M) (g := g_bg) (r := 0) (s := 2)
+          (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) u₀) R) :
     ∀ ε : ℝ, 0 < ε →
       ContinuousOn (fun s => (deTurckGeometricN (I := I) g_bg a (u₁ s) :
         tensorHs (I := I) (M := M) g_bg 0 2 (a : ℝ))) (Set.Icc ε T) := sorry

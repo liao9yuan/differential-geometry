@@ -46,7 +46,20 @@ variable
 
 theorem flat_raw_variational_identity
     (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M)
-    (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M)) :
+    (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))
+    (X : ℝ → ∀ x : M, TangentSpace I x)
+    (hX : ContMDiff (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
+      (fun q : ℝ × M => (TotalSpace.mk' E q.2 (X q.1 q.2) : TangentBundle I M)))
+    (hXauto : AutonomizedFieldJointC1 (I := I) X)
+    (hΦfam_ode : ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M,
+      ∃ T₀ : ℝ, 0 < T₀ ∧ ∃ W : Set M, IsOpen W ∧ x ∈ W ∧
+        ∀ y ∈ W, ∀ s ∈ Set.Ioo (t - T₀) (t + T₀),
+          HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun u : ℝ => (Φ_fam u : M → M) y)
+            (Set.Ioo (t - T₀) (t + T₀)) s
+            ((1 : ℝ →L[ℝ] ℝ).smulRight (X s ((Φ_fam s : M → M) y))))
+    (horbit_cont : ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M,
+      ContinuousAt (fun y : M => (Φ_fam t : M → M) y) x ∧
+      ContinuousAt (fun s : ℝ => (Φ_fam s : M → M) x) t) :
     ∃ T' P' : ℝ → ∀ x : M, TangentSpace I x → (E →L[ℝ] E),
       ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, ∀ v : TangentSpace I x,
         RawVariationalIdentityFlat (I := I) Φ_fam t x v (T' t x v) (P' t x v) := sorry
@@ -67,7 +80,8 @@ theorem flat_christoffel_correction_eqn
 theorem flat_value_jet_identity
     (X : Cₛ^∞⟮I; E, (TangentSpace I)⟯)
     (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M)) (t : ℝ) (x : M) (v : TangentSpace I x)
-    (T' P' : E →L[ℝ] E) :
+    (T' P' : E →L[ℝ] E)
+    (hflat : RawVariationalIdentityFlat (I := I) Φ_fam t x v T' P') :
     T' (mfderiv I I (Φ_fam t : M → M) x v) + P' v
       = -(fderiv ℝ (chartRawRepr (I := I) (Φ_fam t x)
               (X : ∀ y : M, TangentSpace I y))

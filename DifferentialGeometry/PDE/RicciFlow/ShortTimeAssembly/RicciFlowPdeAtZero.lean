@@ -64,15 +64,27 @@ theorem interior_ici_deriv_to_ordinary
       (∀ t ∈ Set.Ioo (0 : ℝ) T, deriv f t = e t) := sorry
 
 theorem gfam_inner_continuous_on
-    (g_DT : ℝ → SmoothRiemannianMetric I M) (T : ℝ)
-    (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M)) (x : M) (v w : TangentSpace I x) :
+    (g_DT : ℝ → SmoothRiemannianMetric I M) (T : ℝ) (hT : 0 < T)
+    (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M)) (x : M) (v w : TangentSpace I x)
+    (hg : ∀ (y : M) (p q : TangentSpace I y),
+      ContinuousOn (fun s : ℝ => (g_DT s).inner y p q) (Set.Icc 0 T))
+    (hΦ_orbit : ∀ y : M,
+      ContinuousOn (fun s : ℝ => (Φ_fam s : M → M) y) (Set.Icc 0 T))
+    (hΦ_mfderiv : ∀ (y : M) (p : TangentSpace I y),
+      ContinuousOn (fun s : ℝ => (mfderiv I I (Φ_fam s : M → M) y p : E)) (Set.Icc 0 T)) :
     ContinuousOn
       (fun s : ℝ => (Diffeomorph.pullbackMetric (g_DT s) (Φ_fam s)).inner x v w)
       (Set.Icc 0 T) := sorry
 
 theorem ricci_gfam_continuous_on
-    (g_DT : ℝ → SmoothRiemannianMetric I M) (T : ℝ)
-    (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M)) (x : M) (v w : TangentSpace I x) :
+    (g_DT : ℝ → SmoothRiemannianMetric I M) (T : ℝ) (hT : 0 < T)
+    (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M)) (x : M) (v w : TangentSpace I x)
+    (hC2 : ∀ (y : M) (p q : TangentSpace I y),
+      ContinuousOn (fun s : ℝ => (g_DT s).inner y p q) (Set.Icc 0 T))
+    (hΦ0 : ∀ y : M,
+      ContinuousOn (fun s : ℝ => (Φ_fam s : M → M) y) (Set.Icc 0 T))
+    (hΦ : ∀ (y : M) (p : TangentSpace I y),
+      ContinuousOn (fun s : ℝ => (mfderiv I I (Φ_fam s : M → M) y p : E)) (Set.Icc 0 T)) :
     ContinuousOn
       (fun s : ℝ => ricciTensor (I := I)
         (Diffeomorph.pullbackMetric (g_DT s) (Φ_fam s)) x v w)
@@ -80,8 +92,15 @@ theorem ricci_gfam_continuous_on
 
 theorem ricci_continuous_in_metric_time
     (g_DT : ℝ → SmoothRiemannianMetric I M) (T : ℝ) (x : M) (v w : TangentSpace I x)
-    (hC2 : ∀ y : M, ∀ p q : TangentSpace I y,
-      ContinuousOn (fun s : ℝ => (g_DT s).inner y p q) (Set.Icc 0 T)) :
+    (hval : ∀ y : M, ∀ p q : TangentSpace I y,
+      ContinuousOn (fun s : ℝ => (g_DT s).inner y p q) (Set.Icc 0 T))
+    (hC2 : ∀ (α : M) (y : M), y ∈ chartLeviCivitaGoodSet (I := I) α →
+      ∀ i j : Fin (Module.finrank ℝ E), ∀ k : ℕ, k ≤ 2 →
+        ContinuousOn
+          (fun s : ℝ => iteratedFDeriv ℝ k
+            (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT s) α i j)
+            (extChartAt I α y))
+          (Set.Icc 0 T)) :
     ContinuousOn (fun s : ℝ => ricciTensor (I := I) (g_DT s) x v w) (Set.Icc 0 T) := sorry
 
 end DifferentialGeometry.PDE.RicciFlow

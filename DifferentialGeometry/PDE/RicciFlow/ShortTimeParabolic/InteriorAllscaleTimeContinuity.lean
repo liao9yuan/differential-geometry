@@ -11,6 +11,7 @@ import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckRemainderStro
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization.DeTurckGeometricNonlinearity
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.EigenCombination
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization.TensorHsRealize
+import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.ParabolicInteriorSmoothing
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.ChartLocalPicard
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.ChartOverlapUniqueness
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.BareFlowFromJointC1
@@ -46,7 +47,15 @@ variable
 
 theorem interior_allscale_time_continuity
     (g_bg : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ}
+    (u₀ : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 2))
+    (gforce : timeL2 (tensorHs (I := I) (M := M) g_bg 0 2 (a : ℝ)) T)
+    (hT : 0 < T) (hT1 : T ≤ 1)
     (u : MaxRegSolutionSpace (I := I) (M := M) (a : ℝ) T)
+    (hu : u = maxRegDuhamelMap (I := I) (M := M) (a : ℝ) hT hT1 u₀ gforce)
+    (hcouple : ∀ d : ℝ,
+      Summable (solFieldMass (I := I) (M := M) hT.le gforce (d + 1)) →
+        Summable (forcingMass (I := I) (M := M) gforce d))
+    (hbase : Summable (solFieldMass (I := I) (M := M) hT.le gforce (a : ℝ)))
     (σ : ℝ) (haσ : (a : ℝ) ≤ σ) :
     ∀ ε : ℝ, 0 < ε →
       ∃ uσ : ℝ → tensorHs (I := I) (M := M) g_bg 0 2 σ,

@@ -50,7 +50,12 @@ theorem forward_flow_jointsmooth_onesided
       (Set.Ioo (0 : ℝ) T ×ˢ Set.univ))
     (hcont0 : ContinuousOn
       (fun q : ℝ × M => (X_DT q.1 q.2 : TangentSpace I q.2))
-      (Set.Icc (0 : ℝ) T ×ˢ Set.univ)) :
+      (Set.Icc (0 : ℝ) T ×ˢ Set.univ))
+    (hgrad0 : ∀ α : M,
+      ContinuousOn
+        (fun q : ℝ × M =>
+          fderiv ℝ (chartRawRepr (I := I) α (X_DT q.1)) (extChartAt I α q.2))
+        (Set.Icc (0 : ℝ) T ×ˢ Set.univ)) :
     ∃ Φ : ℝ → M → M, (∀ x : M, Φ 0 x = x) ∧
       (∀ t ∈ Set.Ioo (0 : ℝ) T, ∃ d : M ≃ₘ⟮I, I⟯ M, ∀ x : M, d x = Φ t x) ∧
       (∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => Φ s x)

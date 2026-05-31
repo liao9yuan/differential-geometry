@@ -46,8 +46,12 @@ variable
 theorem deturck_vf_joint_smoothness
     (g_bg : SmoothRiemannianMetric I M)
     (g_DT : ℝ → SmoothRiemannianMetric I M) (T : ℝ)
-    (h_gDT : ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
-      (fun q : ℝ × M => (g_DT q.1).inner q.2 0 0) (Set.Ioo (0 : ℝ) T ×ˢ Set.univ)) :
+    (h_gDT : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+        (fun q : ℝ × M =>
+          Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT q.1) x₀ i j
+            (extChartAt I x₀ q.2))
+        (Set.Ioo (0 : ℝ) T ×ˢ Set.univ)) :
     ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
       (fun q : ℝ × M => (TotalSpace.mk' E q.2 (deTurckVF (I := I) (g_DT q.1) g_bg q.2)
         : TangentBundle I M))
@@ -57,7 +61,20 @@ theorem deturck_vf_continuous_up_to_zero
     (g_bg g₀ : SmoothRiemannianMetric I M)
     (g_DT : ℝ → SmoothRiemannianMetric I M) (T : ℝ)
     (hC2 : ∀ x : M, ∀ v w : TangentSpace I x,
-      ContinuousOn (fun s : ℝ => (g_DT s).inner x v w) (Set.Icc 0 T)) :
+      ContinuousOn (fun s : ℝ => (g_DT s).inner x v w) (Set.Icc 0 T))
+    (h_partial : ∀ (α : M) (l i j : Fin (Module.finrank ℝ E)) (y : E),
+      ContinuousOn
+        (fun t : ℝ =>
+          Integral.DivergenceTheorem.partialDeriv (E := E) l
+            (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t) α i j) y)
+        (Set.Icc (0 : ℝ) T))
+    (h_partial2 : ∀ (α : M) (m l i j : Fin (Module.finrank ℝ E)) (y : E),
+      ContinuousOn
+        (fun t : ℝ =>
+          Integral.DivergenceTheorem.partialDeriv (E := E) m
+            (Integral.DivergenceTheorem.partialDeriv (E := E) l
+              (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t) α i j)) y)
+        (Set.Icc (0 : ℝ) T)) :
     (ContinuousOn (fun q : ℝ × M => (deTurckVF (I := I) (g_DT q.1) g₀ q.2 : TangentSpace I q.2))
       (Set.Icc (0 : ℝ) T ×ˢ Set.univ))
     ∧ (∀ (α : M) (k : Fin (Module.finrank ℝ E)),
@@ -68,8 +85,12 @@ theorem deturck_vf_continuous_up_to_zero
 
 theorem deturck_solution_joint_smooth
     (g_DT : ℝ → SmoothRiemannianMetric I M) (T : ℝ)
-    (h_smooth : ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
-      (fun q : ℝ × M => (g_DT q.1).inner q.2 0 0) (Set.Ioo (0 : ℝ) T ×ˢ Set.univ)) :
+    (h_smooth : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+        (fun q : ℝ × M =>
+          Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT q.1) x₀ i j
+            (extChartAt I x₀ q.2))
+        (Set.Ioo (0 : ℝ) T ×ˢ Set.univ)) :
     ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
       (fun q : ℝ × M => (TotalSpace.mk' E q.2
         (deTurckVF (I := I) (g_DT q.1) (g_DT 0) q.2) : TangentBundle I M))

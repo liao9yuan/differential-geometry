@@ -47,6 +47,7 @@ variable
 
 theorem realize_eval_carrier_factorization
     (g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha : Module.finrank ℝ E < 2 * (a - 2))
     (x : M) (v w : TangentSpace I x) :
     ∃ ℓ_a : tensorHs (I := I) (M := M) g_bg 0 2 (a : ℝ) →L[ℝ] ℝ,
       ∀ u₂ : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 2),
@@ -84,7 +85,12 @@ theorem rhs_matches_deturck_at_solution
     (g_bg : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ}
     (u₂ : ℝ → tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 2))
     (ℓ_a : tensorHs (I := I) (M := M) g_bg 0 2 (a : ℝ) →L[ℝ] ℝ)
-    (x : M) (v w : TangentSpace I x) :
+    (x : M) (v w : TangentSpace I x)
+    (hreal : ∀ u : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 2),
+      (realizeMetricMap (I := I) g_bg a u).inner x v w
+        = g_bg.inner x v w +
+          ℓ_a (tensorHsInclusion (I := I) (M := M) (g := g_bg) (r := 0) (s := 2)
+            (show (a : ℝ) ≤ (a : ℝ) + 2 by linarith) u)) :
     ∀ t ∈ Set.Ico (0 : ℝ) T,
       ℓ_a (scaleLaplacianFun (I := I) (M := M) (u₂ t) +
           deTurckGeometricN (I := I) g_bg a

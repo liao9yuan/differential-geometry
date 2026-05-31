@@ -46,8 +46,17 @@ variable
 
 theorem deturck_interior_time_regularity
     (g_bg : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ}
+    (u₀ : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 2))
+    (gforce : timeL2 (tensorHs (I := I) (M := M) g_bg 0 2 (a : ℝ)) T)
+    (hT : 0 < T) (hT1 : T ≤ 1)
     (u : MaxRegSolutionSpace (I := I) (M := M) (a : ℝ) T)
     (u₂ : ℝ → tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 2))
+    (hu : u = maxRegDuhamelMap (I := I) (M := M) (a : ℝ) hT hT1 u₀ gforce)
+    (hu₂sol : ∀ s, u₂ s =
+      maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1 u₀ gforce s)
+    (hforce : gforce =ᵐ[timeMeasure T]
+      (fun t => deTurckGeometricN (I := I) g_bg a
+        (maxRegDuhamelSolFieldHa1 (I := I) (M := M) (a : ℝ) hT hT1 u₀ gforce t)))
     (hu₂ : ∀ s, tensorHsInclusion (I := I) (M := M) (g := g_bg) (r := 0) (s := 2)
       (show (a : ℝ) ≤ (a : ℝ) + 2 by linarith) (u₂ s) = timeH1.toFun u s) :
     ∀ s ∈ Set.Ioo (0 : ℝ) T,

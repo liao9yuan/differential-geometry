@@ -50,17 +50,32 @@ theorem deturck_ricci_pde_shorttime
         (deTurckRicciRHS (I := I) g_bg) g₀ T g_DT := sorry
 
 theorem deturck_metric_pde_interior
-    (g_bg : SmoothRiemannianMetric I M) {T : ℝ}
-    (g_DT : ℝ → SmoothRiemannianMetric I M) :
+    (g_bg : SmoothRiemannianMetric I M) {T : ℝ} (a : ℕ)
+    (g_DT : ℝ → SmoothRiemannianMetric I M)
+    (u₂ : ℝ → tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 2))
+    (hreal : ∀ s, g_DT s = realizeMetricMap (I := I) g_bg a (u₂ s))
+    (hreg : ∀ s ∈ Set.Ioo (0 : ℝ) T,
+      HasDerivAt
+        (fun r => (tensorHsInclusion (I := I) (M := M) (g := g_bg) (r := 0) (s := 2)
+          (show (a : ℝ) ≤ (a : ℝ) + 2 by linarith) (u₂ r)))
+        (scaleLaplacianFun (I := I) (M := M) (u₂ s) +
+          deTurckGeometricN (I := I) g_bg a
+            (tensorHsInclusion (I := I) (M := M) (g := g_bg) (r := 0) (s := 2)
+              (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s))) s) :
     ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, ∀ v w : TangentSpace I x,
       HasDerivWithinAt (fun s : ℝ => (g_DT s).inner x v w)
         (deTurckRicciRHS (I := I) g_bg (g_DT t) x v w) (Set.Ici 0) t := sorry
 
 theorem deturck_metric_pde_at_zero
-    (g_bg : SmoothRiemannianMetric I M)
-    (g_DT : ℝ → SmoothRiemannianMetric I M) :
-    ∀ x : M, ∀ v w : TangentSpace I x,
-      HasDerivWithinAt (fun s : ℝ => (g_DT s).inner x v w)
-        (deTurckRicciRHS (I := I) g_bg (g_DT 0) x v w) (Set.Ici 0) 0 := sorry
+    (g_bg : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T)
+    (g_DT : ℝ → SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x)
+    (h_cont : ContinuousOn (fun s : ℝ => (g_DT s).inner x v w) (Set.Icc 0 T))
+    (h_rhs_cont : ContinuousWithinAt
+      (fun s : ℝ => deTurckRicciRHS (I := I) g_bg (g_DT s) x v w) (Set.Ioi 0) 0)
+    (h_interior : ∀ t ∈ Set.Ioo (0 : ℝ) T, HasDerivWithinAt
+      (fun s : ℝ => (g_DT s).inner x v w)
+      (deTurckRicciRHS (I := I) g_bg (g_DT t) x v w) (Set.Ici 0) t) :
+    HasDerivWithinAt (fun s : ℝ => (g_DT s).inner x v w)
+      (deTurckRicciRHS (I := I) g_bg (g_DT 0) x v w) (Set.Ici 0) 0 := sorry
 
 end DifferentialGeometry.PDE.RicciFlow

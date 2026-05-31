@@ -49,6 +49,32 @@ theorem flat_assembly_interior
     (g_DT : ℝ → SmoothRiemannianMetric I M) (T : ℝ)
     (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))
     (T' P' : ℝ → ∀ x : M, TangentSpace I x → (E →L[ℝ] E))
+    (hDT_deriv : ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, ∀ v w : TangentSpace I x,
+      HasDerivWithinAt (fun s : ℝ => (g_DT s).inner x v w)
+        (deTurckRicciRHS (I := I) g_bg (g_DT t) x v w) (Set.Ici 0) t)
+    (hbase : ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, ∀ v w : TangentSpace I x,
+      HasDerivWithinAt
+        (fun s : ℝ => (g_DT t).inner ((Φ_fam s : M → M) x)
+          (mfderiv I I (Φ_fam t : M → M) x v)
+          (mfderiv I I (Φ_fam t : M → M) x w))
+        (-metricTransportResidual (I := I) (g_DT t)
+            (deTurckVF (I := I) (g_DT t) g_bg) Φ_fam t x v w) (Set.Ici 0) t)
+    (h_total_eval : ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, ∀ v w : TangentSpace I x,
+      HasDerivWithinAt
+        (fun s : ℝ => (g_DT s).inner (Φ_fam s x)
+          (mfderiv I I (Φ_fam s : M → M) x v)
+          (mfderiv I I (Φ_fam s : M → M) x w))
+        (((-2 : ℝ) * ricciTensor (I := I) (g_DT t) (Φ_fam t x)
+              (mfderiv I I (Φ_fam t : M → M) x v)
+              (mfderiv I I (Φ_fam t : M → M) x w)
+            + lieDerivMetric (I := I) (g_DT t)
+                (deTurckVF (I := I) (g_DT t) g_bg) (Φ_fam t x)
+                (mfderiv I I (Φ_fam t : M → M) x v)
+                (mfderiv I I (Φ_fam t : M → M) x w))
+          + (- lieDerivMetric (I := I) (g_DT t)
+                (deTurckVF (I := I) (g_DT t) g_bg) (Φ_fam t x)
+                (mfderiv I I (Φ_fam t : M → M) x v)
+                (mfderiv I I (Φ_fam t : M → M) x w))) (Set.Ici 0) t)
     (hv_flat : ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, ∀ v : TangentSpace I x,
       RawVariationalIdentityFlat (I := I) Φ_fam t x v (T' t x v) (P' t x v))
     (hcorr : ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, ∀ v : TangentSpace I x,
