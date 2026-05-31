@@ -1166,6 +1166,330 @@ private lemma gq_coercive (g : SmoothRiemannianMetric I M) (q : M) :
     calc c * ‖x‖ ^ 2 = ‖x‖ ^ 2 * c := by ring
       _ ≤ ‖x‖ ^ 2 * B u u := mul_le_mul_of_nonneg_left hcu hsq_nn
 
+/-! ### Cross-chart confinement of the intrinsic geodesic for small velocity
+
+The home-chart confinement hypothesis `hsrc_I` consumed by
+`expMapIntrinsic_eq_expMap_of_small` (the intrinsic geodesic stays inside
+`(chartAt H q).source` throughout `(-1, 2)`) is itself a genuine cross-chart datum.
+We discharge it for *small* launch velocity by a combined "agree-and-confine"
+clopen argument on the connected interval `Ioo (-1) 2`: the agreement set
+
+`A := { t ∈ Ioo (-1) 2 | (chart-q phase of γ_M)(t) = (chart-q phase of γ_I)(t)
+                          ∧ γ_I t ∈ (chartAt H q).source }`
+
+is closed (continuity of both chart-phase curves plus the closed diagonal and the
+chart source pulled back), open (at `t ∈ A` the foot `γ_I t ∈ source` is open, so
+`γ_I` stays in source on a neighbourhood, the chart-`q` ODE for both curves is
+then available there, and chart-`q` ODE uniqueness `geodesic_eventuallyEq_of_…`
+propagates both the phase agreement and — by chart injectivity together with
+`γ_M`'s confinement — the foot confinement), and contains `0` (shared launch data
+`(q, v)`).  Preconnectedness of `Ioo (-1) 2` forces `A = Ioo (-1) 2`, i.e. the
+intrinsic foot stays in source throughout.  This is the non-circular reading of
+the agreement engine that exposes the confinement as an *output*. -/
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- **Foot-in-source on `(-1, 2)` for small velocity (intrinsic geodesic).**
+There is `ρ > 0` such that for every launch velocity `v` with `√(g_q(v,v)) < ρ`,
+the intrinsic geodesic `t ↦ intrinsicGeodesic g hEnorm q v t` keeps its foot
+inside the home chart source `(chartAt H q).source` for every `t ∈ Ioo (-1) 2`.
+
+This discharges the cross-chart confinement hypothesis `hsrc_I` of
+`expMapIntrinsic_eq_expMap_of_small` (so the latter becomes side-condition free on
+small velocities).  The proof is the combined agree-and-confine clopen propagation
+of the chart-`q` phase agreement set, anchored at the launch time `0`. -/
+theorem intrinsicGeodesic_foot_in_source_of_small
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [T2Space (TangentBundle I M)]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (q : M) :
+    ∃ ρ : ℝ, 0 < ρ ∧ ∀ {v : TangentSpace I q},
+      Real.sqrt (g.inner q (v : E) (v : E)) < ρ →
+      ∀ t ∈ Set.Ioo (-1 : ℝ) 2,
+        intrinsicGeodesic (I := I) g hEnorm q v t ∈ (chartAt H q).source := by
+  classical
+  -- Coercivity constant of `g_q` (converts `g`-norm to Euclidean norm).
+  obtain ⟨c, hc_pos, hcoerc⟩ := gq_coercive (I := I) g q
+  -- Home-chart maximal-geodesic data radius (used only for the launch velocity),
+  -- the `C²`/geodesic radius, and the continuity-and-foot-source radius on `(-1, 2)`.
+  obtain ⟨ρ₁, hρ₁_pos, hdata⟩ := exists_maximalGeodesic_data_of_small (I := I) g q
+  obtain ⟨ρ₂, hρ₂_pos, hMdata⟩ :=
+    DifferentialGeometry.Geometry.Riemannian.radial_maximalGeodesic_cont_and_foot_in_source_of_small
+      (I := I) g q
+  set R : ℝ := min (min ρ₁ ρ₂)
+    (DifferentialGeometry.Geometry.Riemannian.expMapC2Radius (I := I) g q) with hR_def
+  have hR_pos : 0 < R :=
+    lt_min (lt_min hρ₁_pos hρ₂_pos)
+      (DifferentialGeometry.Geometry.Riemannian.expMapC2Radius_pos (I := I) g q)
+  refine ⟨Real.sqrt c * R, mul_pos (Real.sqrt_pos.mpr hc_pos) hR_pos, ?_⟩
+  intro v hv t ht
+  -- Convert `√(g_q(v,v)) < √c · R` to Euclidean `‖vE‖ < R` via coercivity.
+  set vE : E := (v : E) with hvE_def
+  have hvE : ‖vE‖ < R := by
+    have hsq : g.inner q vE vE < (Real.sqrt c * R) ^ 2 := by
+      have := Real.lt_sq_of_sqrt_lt (x := g.inner q vE vE) hv
+      simpa using this
+    have hRsq : (Real.sqrt c * R) ^ 2 = c * R ^ 2 := by
+      rw [mul_pow, Real.sq_sqrt hc_pos.le]
+    rw [hRsq] at hsq
+    have hcoerc_v : c * ‖vE‖ ^ 2 ≤ g.inner q vE vE := hcoerc vE
+    have hlt : c * ‖vE‖ ^ 2 < c * R ^ 2 := lt_of_le_of_lt hcoerc_v hsq
+    have hsq_lt : ‖vE‖ ^ 2 < R ^ 2 := lt_of_mul_lt_mul_left hlt hc_pos.le
+    nlinarith [norm_nonneg vE, hsq_lt, hR_pos]
+  have hv₁ : ‖vE‖ < ρ₁ := lt_of_lt_of_le hvE (le_trans (min_le_left _ _) (min_le_left _ _))
+  have hv₂' : ‖vE‖ < ρ₂ := lt_of_lt_of_le hvE (le_trans (min_le_left _ _) (min_le_right _ _))
+  have hv₂ : ‖vE‖ <
+      DifferentialGeometry.Geometry.Riemannian.expMapC2Radius (I := I) g q :=
+    lt_of_lt_of_le hvE (min_le_right _ _)
+  -- The launch velocity (interval-independent).
+  obtain ⟨_a₀, _b₀, _ha₀, _hb₀, _hcont_M, hvel_M, _hsrcM₀⟩ := hdata hv₁
+  -- Continuity and foot-in-source of the maximal geodesic on `Ioo (-1) 2`.
+  obtain ⟨hcont_M12, hsrcM12⟩ := hMdata hv₂'
+  -- Work on `O := Ioo (-1) 2` directly.
+  set O : Set ℝ := Set.Ioo (-1 : ℝ) 2 with hO_def
+  have hO_open : IsOpen O := isOpen_Ioo
+  have hO_conn : IsPreconnected O := isPreconnected_Ioo
+  have ha : (-1 : ℝ) < 0 := by norm_num
+  have hb : (1 : ℝ) < 2 := by norm_num
+  have hO_sub_12 : O ⊆ Set.Ioo (-1 : ℝ) 2 := le_refl _
+  -- The two curves.
+  set γM : ℝ → M := fun s => maximalGeodesic (I := I) g q v s with hγM_def
+  set γI : ℝ → M := fun s => intrinsicGeodesic (I := I) g hEnorm q v s with hγI_def
+  have hγI_cont : Continuous γI := intrinsicGeodesic_continuous (I := I) g hEnorm q v
+  have hγI_contOn : ContinuousOn γI O := hγI_cont.continuousOn
+  have hγM_contOn : ContinuousOn γM O := hcont_M12
+  -- Geodesic equations on `O`.
+  have hγI_geoAll : ∀ s, Geodesic.HasGeodesicEquationAt (I := I) g γI s :=
+    fun s => (intrinsicGeodesic_isGeodesic (I := I) g hEnorm q v) s
+  have hγI_geo : ∀ s ∈ O, Geodesic.HasGeodesicEquationAt (I := I) g γI s :=
+    fun s _ => hγI_geoAll s
+  have hγM_geo : ∀ s ∈ O, Geodesic.HasGeodesicEquationAt (I := I) g γM s := by
+    intro s hs
+    exact DifferentialGeometry.Geometry.Riemannian.radial_hasGeodesicEquationAt_of_norm_lt_radius
+      (I := I) g q hv₂ s (hO_sub_12 hs)
+  -- Foot-in-source for the maximal geodesic on `O`.
+  have hsrcM : ∀ s ∈ O, γM s ∈ (chartAt H q).source := hsrcM12
+  -- Launch points / velocities.
+  have hγM0 : γM 0 = q := by rw [hγM_def]; exact maximalGeodesic_zero (I := I) g q v
+  have hγI0 : γI 0 = q := by rw [hγI_def]; exact intrinsicGeodesic_zero (I := I) g hEnorm q v
+  have h0O : (0 : ℝ) ∈ O := ⟨ha, by linarith⟩
+  have hγM_mdiff0 : MDifferentiableAt 𝓘(ℝ, ℝ) I γM 0 := by
+    have hC1 : ContMDiffOn 𝓘(ℝ, ℝ) I 1 γM O :=
+      HopfRinow.isGeodesicOn_contMDiffOn_one (I := I) g hO_open hγM_geo hγM_contOn
+    exact (hC1.contMDiffAt (hO_open.mem_nhds h0O)).mdifferentiableAt (by norm_num)
+  have hγI_mdiff0 : MDifferentiableAt 𝓘(ℝ, ℝ) I γI 0 :=
+    (((intrinsicGeodesic_contMDiffOn (I := I) g hEnorm q v).contMDiffAt
+      (Filter.univ_mem)).mdifferentiableAt (by norm_num))
+  have hvM : (mfderiv 𝓘(ℝ, ℝ) I γM 0 (1 : ℝ) : E) = (v : E) := hvel_M
+  have hvI : (mfderiv 𝓘(ℝ, ℝ) I γI 0 (1 : ℝ) : E) = (v : E) := by
+    rw [hγI_def]; exact intrinsicGeodesic_mfderiv_zero (I := I) g hEnorm q v
+  -- Chart-`q`-phase curves.
+  set cM : ℝ → E × E :=
+    fun s => (chartCurve (I := I) q γM s, deriv (chartCurve (I := I) q γM) s) with hcM_def
+  set cI : ℝ → E × E :=
+    fun s => (chartCurve (I := I) q γI s, deriv (chartCurve (I := I) q γI) s) with hcI_def
+  have hcM0 : cM 0 = cI 0 := by
+    have hfst : chartCurve (I := I) q γM 0 = chartCurve (I := I) q γI 0 := by
+      rw [chartCurve_def, chartCurve_def, hγM0, hγI0]
+    have hsnd : deriv (chartCurve (I := I) q γM) 0 = deriv (chartCurve (I := I) q γI) 0 := by
+      rw [chartCurve_deriv_zero_eq (I := I) q hγM_mdiff0 hγM0 hvM,
+        chartCurve_deriv_zero_eq (I := I) q hγI_mdiff0 hγI0 hvI]
+    change (chartCurve (I := I) q γM 0, deriv (chartCurve (I := I) q γM) 0)
+      = (chartCurve (I := I) q γI 0, deriv (chartCurve (I := I) q γI) 0)
+    rw [hfst, hsnd]
+  -- The combined agree-and-confine set.
+  set A : Set ℝ := {s | s ∈ O ∧ cM s = cI s ∧ γI s ∈ (chartAt H q).source} with hA_def
+  -- `cM`, `cI` are continuous on `O`.
+  have hcM_contOn : ContinuousOn cM O := fun t ht =>
+    (chartPhase_continuousAt_of_geodesicOn (I := I) g q hO_open ht hγM_contOn
+      hsrcM hγM_geo).continuousWithinAt
+  -- For the intrinsic curve, continuity of `cI` is only available where its foot is
+  -- in source; we use it locally inside the openness step.
+  -- `A` is open in `O`.
+  have hA_openIn : ∀ s ∈ A, ∃ U : Set ℝ, IsOpen U ∧ s ∈ U ∧ U ⊆ O ∧ U ⊆ A := by
+    intro s hs
+    obtain ⟨hsO, hsphase, hsI_src⟩ := hs
+    -- `γI` stays in source on an open neighbourhood `O'` of `s` inside `O`.
+    have hsrcI_nhds : ∀ᶠ r in 𝓝 s, γI r ∈ (chartAt H q).source := by
+      have hopen : IsOpen (γI ⁻¹' (chartAt H q).source) :=
+        (chartAt H q).open_source.preimage hγI_cont
+      exact hopen.mem_nhds hsI_src
+    obtain ⟨O'', hO''_sub, hO''_open, hsO''⟩ :=
+      mem_nhds_iff.mp (Filter.inter_mem (hsrcI_nhds) (hO_open.mem_nhds hsO))
+    -- `O' := O''` is open, contains `s`, lands in `O`, and `γI ∈ source` on it.
+    set O' : Set ℝ := O'' with hO'_def
+    have hO'_open : IsOpen O' := hO''_open
+    have hsO' : s ∈ O' := hsO''
+    have hO'_sub_O : O' ⊆ O := fun r hr => (hO''_sub hr).2
+    have hsrcI' : ∀ r ∈ O', γI r ∈ (chartAt H q).source := fun r hr => (hO''_sub hr).1
+    -- On `O'` both curves keep their feet in source and satisfy the geodesic eqn,
+    -- and `γM` is continuous; so chart-`q` ODE uniqueness applies at `s`.
+    have hγM_contOn' : ContinuousOn γM O' := hγM_contOn.mono hO'_sub_O
+    have hγI_contOn' : ContinuousOn γI O' := hγI_cont.continuousOn
+    have hsrcM' : ∀ r ∈ O', γM r ∈ (chartAt H q).source := fun r hr => hsrcM r (hO'_sub_O hr)
+    have hγM_geo' : ∀ r ∈ O', Geodesic.HasGeodesicEquationAt (I := I) g γM r :=
+      fun r hr => hγM_geo r (hO'_sub_O hr)
+    have hγI_geo' : ∀ r ∈ O', Geodesic.HasGeodesicEquationAt (I := I) g γI r :=
+      fun r hr => hγI_geo r (hO'_sub_O hr)
+    -- Local curve agreement `γM =ᶠ[𝓝 s] γI` from chart-phase ODE uniqueness.
+    have hphase_eq :
+        (chartCurve (I := I) q γM s, deriv (chartCurve (I := I) q γM) s)
+          = (chartCurve (I := I) q γI s, deriv (chartCurve (I := I) q γI) s) := hsphase
+    have hev_eq : γM =ᶠ[𝓝 s] γI :=
+      geodesic_eventuallyEq_of_chartPhase_eq (I := I) g q hO'_open hsO'
+        hγM_contOn' hγI_contOn' hsrcM' hsrcI' hγM_geo' hγI_geo' hphase_eq
+    -- Local chart-phase agreement `cM =ᶠ[𝓝 s] cI`.
+    have hcM_ev : ∀ᶠ r in 𝓝 s,
+        HasDerivAt (fun u => (chartCurve (I := I) q γM u, deriv (chartCurve (I := I) q γM) u))
+          (Geodesic.chartPhaseVF (I := I) g q
+            (chartCurve (I := I) q γM r, deriv (chartCurve (I := I) q γM) r)) r ∧
+        (chartCurve (I := I) q γM r, deriv (chartCurve (I := I) q γM) r)
+          ∈ (interior (extChartAt I q).target) ×ˢ (Set.univ : Set E) :=
+      chartPhase_eventually_of_geodesicOn (I := I) g q hO'_open hsO'
+        hγM_contOn' hsrcM' hγM_geo'
+    have hcI_ev : ∀ᶠ r in 𝓝 s,
+        HasDerivAt (fun u => (chartCurve (I := I) q γI u, deriv (chartCurve (I := I) q γI) u))
+          (Geodesic.chartPhaseVF (I := I) g q
+            (chartCurve (I := I) q γI r, deriv (chartCurve (I := I) q γI) r)) r ∧
+        (chartCurve (I := I) q γI r, deriv (chartCurve (I := I) q γI) r)
+          ∈ (interior (extChartAt I q).target) ×ˢ (Set.univ : Set E) :=
+      chartPhase_eventually_of_geodesicOn (I := I) g q hO'_open hsO'
+        hγI_contOn' hsrcI' hγI_geo'
+    set z₀ : E × E := cM s with hz₀_def
+    have hz₀_mem : z₀ ∈ (interior (extChartAt I q).target) ×ˢ (Set.univ : Set E) :=
+      (hcM_ev.self_of_nhds).2
+    have h1z : cM s = z₀ := rfl
+    have h2z : cI s = z₀ := by rw [hz₀_def, hcM_def, hcI_def]; exact hsphase.symm
+    have hcphase_ev : cM =ᶠ[𝓝 s] cI :=
+      chartPhaseVF_orbit_uniqueness_at (I := I) (g := g) (q := q) hz₀_mem h1z h2z
+        hcM_ev hcI_ev
+    -- Combine: on a neighbourhood `W` of `s`, `r ∈ O`, `cM r = cI r`, and
+    -- `γI r ∈ source`.
+    have hW_mem : (O' ∩ {r | cM r = cI r ∧ γI r ∈ (chartAt H q).source}) ∈ 𝓝 s := by
+      refine Filter.inter_mem (hO'_open.mem_nhds hsO') ?_
+      filter_upwards [hcphase_ev, hsrcI_nhds] with r hr hr_src
+      exact ⟨hr, hr_src⟩
+    obtain ⟨W, hW_sub, hW_open, hsW⟩ := mem_nhds_iff.mp hW_mem
+    refine ⟨W, hW_open, hsW, ?_, ?_⟩
+    · intro r hr; exact hO'_sub_O (hW_sub hr).1
+    · intro r hr
+      obtain ⟨hrO', hrphase, hr_src⟩ := hW_sub hr
+      exact ⟨hO'_sub_O hrO', hrphase, hr_src⟩
+  -- `A` is closed in `O`: characterise it as a relatively-closed condition.
+  -- On `O`, `cI` is continuous *where the foot is in source*; we instead show `A`
+  -- closed by writing it as `O ∩ (closure-stable conditions)` using the openness of
+  -- its complement-in-`O`.  Concretely, we use the clopen-in-`O` formulation: `A` is
+  -- open in `O` (above) and its complement in `O` is open in `O` too.
+  -- Complement-openness: at `s ∈ O \ A`, either the phase disagrees or the foot is
+  -- out of source; both are open conditions on `O` (the latter since `Oᶜ`-source is
+  -- closed... we instead prove `A` is closed directly via continuity on `O`).
+  -- We prove `A` clopen in the subtype `O`.
+  haveI : PreconnectedSpace (↥O) := isPreconnected_iff_preconnectedSpace.mp hO_conn
+  set Asub : Set (↥O) := {x : ↥O | (x : ℝ) ∈ A} with hAsub_def
+  have hAsub_open : IsOpen Asub := by
+    rw [isOpen_iff_mem_nhds]
+    intro x hx
+    obtain ⟨U, hU_open, hxU, _hUO, hUA⟩ := hA_openIn (x : ℝ) hx
+    have hmem : (Subtype.val ⁻¹' U) ∈ nhds x :=
+      (hU_open.preimage continuous_subtype_val).mem_nhds hxU
+    refine Filter.mem_of_superset hmem ?_
+    intro y hy
+    exact hUA hy
+  -- On `A`, the two curves agree (chart injectivity from phase agreement plus both
+  -- feet in source).  This is the key to closedness: it lets us pass `γI = γM` to a
+  -- limit point even where `cI` is not a priori continuous.
+  have hAeq_curve : ∀ s ∈ A, γM s = γI s := by
+    intro s hs
+    obtain ⟨_hsO, hsphase, hsI_src⟩ := hs
+    have hfst : extChartAt I q (γM s) = extChartAt I q (γI s) := by
+      have := congrArg Prod.fst hsphase
+      simpa [hcM_def, hcI_def, chartCurve_def] using this
+    have hγM_es : γM s ∈ (extChartAt I q).source := by
+      rw [extChartAt_source_eq_chartAt_source (I := I)]; exact hsrcM s _hsO
+    have hγI_es : γI s ∈ (extChartAt I q).source := by
+      rw [extChartAt_source_eq_chartAt_source (I := I)]; exact hsI_src
+    exact (extChartAt I q).injOn hγM_es hγI_es hfst
+  -- The position-agreement locus on `O` is relatively closed (both curves continuous
+  -- on `O`).
+  set P : Set (↥O) := {x : ↥O | γM (x : ℝ) = γI (x : ℝ)} with hP_def
+  have hPclosed : IsClosed P := by
+    have hγM_sub : Continuous (fun x : ↥O => γM (x : ℝ)) :=
+      hγM_contOn.comp_continuous continuous_subtype_val (fun x => x.2)
+    have hγI_sub : Continuous (fun x : ↥O => γI (x : ℝ)) :=
+      hγI_cont.comp continuous_subtype_val
+    exact isClosed_eq hγM_sub hγI_sub
+  -- `A` is closed in `O` (cluster-point argument).
+  have hAsub_closed : IsClosed Asub := by
+    rw [isClosed_iff_clusterPt]
+    intro x hx
+    have hxO : (x : ℝ) ∈ O := x.2
+    -- The cluster point agrees: `Asub ⊆ P` and `P` is closed.
+    have hAsub_sub_P : Asub ⊆ P := fun y hy => hAeq_curve (y : ℝ) hy
+    have hxP : x ∈ P :=
+      hPclosed.closure_subset (mem_closure_iff_clusterPt.mpr
+        (hx.mono (Filter.principal_mono.mpr hAsub_sub_P)))
+    have hγeq_x : γM (x : ℝ) = γI (x : ℝ) := hxP
+    -- Foot-in-source for `γI` at `(x : ℝ)` (= `γM`, confined).
+    have hxsrc : γI (x : ℝ) ∈ (chartAt H q).source := by
+      rw [← hγeq_x]; exact hsrcM (x : ℝ) hxO
+    -- Near `(x : ℝ)`, `γI` stays in source, so `cI` is continuous at `(x : ℝ)`.
+    have hsrcI_nhds : ∀ᶠ r in 𝓝 (x : ℝ), γI r ∈ (chartAt H q).source := by
+      have hopen : IsOpen (γI ⁻¹' (chartAt H q).source) :=
+        (chartAt H q).open_source.preimage hγI_cont
+      exact hopen.mem_nhds hxsrc
+    obtain ⟨O'', hO''_sub, hO''_open, hxO''⟩ :=
+      mem_nhds_iff.mp (Filter.inter_mem hsrcI_nhds (hO_open.mem_nhds hxO))
+    have hO'_open : IsOpen O'' := hO''_open
+    have hxO' : (x : ℝ) ∈ O'' := hxO''
+    have hO'_sub_O : O'' ⊆ O := fun r hr => (hO''_sub hr).2
+    have hsrcI' : ∀ r ∈ O'', γI r ∈ (chartAt H q).source := fun r hr => (hO''_sub hr).1
+    have hcI_catx : ContinuousAt cI (x : ℝ) :=
+      chartPhase_continuousAt_of_geodesicOn (I := I) g q hO'_open hxO'
+        (hγI_cont.continuousOn) hsrcI' (fun r _ => hγI_geoAll r)
+    have hcM_catx : ContinuousAt cM (x : ℝ) :=
+      chartPhase_continuousAt_of_geodesicOn (I := I) g q hO_open hxO hγM_contOn
+        hsrcM hγM_geo
+    -- The phase-agreement locus `{cM = cI}` is closed near `x`; `x` clusters `Asub ⊆
+    -- {cM = cI}`, so `cM x = cI x`.
+    have hpair_catx : ContinuousAt (fun r => (cM r, cI r)) (x : ℝ) :=
+      hcM_catx.prodMk hcI_catx
+    have hphase_x : cM (x : ℝ) = cI (x : ℝ) := by
+      -- `x` clusters `Asub`, push forward along `Subtype.val` to cluster `A ⊆ {cM=cI}`
+      -- on `ℝ`; the diagonal is closed and the pair map is continuous at `(x:ℝ)`.
+      by_contra hne
+      -- `{r | (cM r, cI r) ∈ diagonalᶜ}` is a neighbourhood of `(x:ℝ)` disjoint from `A`.
+      have hdiag_open : IsOpen {p : (E × E) × (E × E) | p.1 ≠ p.2} :=
+        isOpen_compl_iff.mpr isClosed_diagonal
+      have hxmem : ((cM (x : ℝ), cI (x : ℝ))) ∈ {p : (E × E) × (E × E) | p.1 ≠ p.2} := hne
+      have hnhds : (fun r => (cM r, cI r)) ⁻¹' {p : (E × E) × (E × E) | p.1 ≠ p.2}
+          ∈ 𝓝 (x : ℝ) := hpair_catx.preimage_mem_nhds (hdiag_open.mem_nhds hxmem)
+      -- This neighbourhood pulls back to a neighbourhood of `x` in `↥O` disjoint from
+      -- `Asub`, contradicting the cluster point.
+      have hnhds_sub : (Subtype.val ⁻¹'
+          ((fun r => (cM r, cI r)) ⁻¹' {p : (E × E) × (E × E) | p.1 ≠ p.2})) ∈ 𝓝 x :=
+        continuousAt_subtype_val.preimage_mem_nhds hnhds
+      have hdisj : Disjoint (𝓝 x) (Filter.principal Asub) := by
+        rw [Filter.disjoint_principal_right]
+        refine Filter.mem_of_superset hnhds_sub ?_
+        intro y hy
+        simp only [Set.mem_preimage, Set.mem_setOf_eq] at hy
+        intro hyAsub
+        exact hy (hyAsub.2.1)
+      exact (clusterPt_iff_not_disjoint.mp hx) hdisj
+    exact ⟨hxO, hphase_x, hxsrc⟩
+  have hAsub_clopen : IsClopen Asub := ⟨hAsub_closed, hAsub_open⟩
+  have hAsub_ne : Asub.Nonempty := by
+    refine ⟨⟨0, h0O⟩, ?_⟩
+    exact ⟨h0O, hcM0, by rw [hγI0]; exact mem_chart_source H q⟩
+  have hAsub_univ : Asub = Set.univ := hAsub_clopen.eq_univ hAsub_ne
+  -- `O = Ioo (-1) 2` exactly, so `t ∈ Ioo (-1) 2` is `t ∈ O`; conclude.
+  have htO : t ∈ O := ht
+  have : (⟨t, htO⟩ : ↥O) ∈ Asub := by rw [hAsub_univ]; exact Set.mem_univ _
+  exact (this.2).2
+
 /-! ### The headline small-velocity agreement bridge -/
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup

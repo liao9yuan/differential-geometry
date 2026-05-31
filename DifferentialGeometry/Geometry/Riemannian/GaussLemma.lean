@@ -207,6 +207,83 @@ theorem radial_maximalGeodesic_hasGeodesicEquationAt_of_small
     (γ' := fun s : ℝ => (F s).proj) (t₀ := t)
     (hF_proj t ht_J).symm hEvEq hgeoEqF
 
+/-- **Continuity and foot-in-source on `(-1, 2)` for small velocity (maximal
+geodesic).** There is an explicit `ρ > 0` such that for every `v` with `‖v‖ < ρ`,
+the maximal geodesic `t ↦ maximalGeodesic g p v t` is continuous on `Ioo (-1) 2`
+and keeps its foot inside the home chart source `(chartAt H p).source` for every
+`t ∈ Ioo (-1) 2`.  Both are read off the rescaled chart-pushed flow orbit (its
+continuity and its chart-source confinement), exactly as in the geodesic-equation
+sibling `radial_maximalGeodesic_hasGeodesicEquationAt_of_small`. -/
+theorem radial_maximalGeodesic_cont_and_foot_in_source_of_small
+    (g : SmoothRiemannianMetric I M) (p : M) :
+    ∃ ρ : ℝ, 0 < ρ ∧
+      ∀ {v : TangentSpace I p}, ‖(v : E)‖ < ρ →
+        ContinuousOn (fun s => maximalGeodesic (I := I) g p v s) (Set.Ioo (-1 : ℝ) 2) ∧
+        ∀ t ∈ Set.Ioo (-1 : ℝ) 2,
+          maximalGeodesic (I := I) g p v t ∈ (chartAt H p).source := by
+  classical
+  obtain ⟨ρ₀, T, Φ, hρ₀_pos, hT_pos, hΦ_init, hΦ_target, hΦ_phase, _hF⟩ :=
+    Exponential.exists_uniform_existence_interval (I := I) (g := g) (p := p)
+  set t' : ℝ := T / 2 with ht'_def
+  have ht'_pos : 0 < t' := by rw [ht'_def]; linarith
+  have ht'_lt_T : t' < T := by rw [ht'_def]; linarith
+  refine ⟨t' * ρ₀, mul_pos ht'_pos hρ₀_pos, ?_⟩
+  intro v hv
+  set w : E := (v : E) with hw_def
+  have ht'_ne : t' ≠ 0 := ne_of_gt ht'_pos
+  obtain ⟨vb, hvb_def⟩ : ∃ vb : E, vb = (1 / t') • w := ⟨_, rfl⟩
+  have hvb_resc : t' • vb = (v : E) := by
+    rw [hvb_def, smul_smul, mul_one_div, div_self ht'_ne, one_smul, hw_def]
+  have hw_norm : ‖w‖ < t' * ρ₀ := by rw [hw_def]; exact hv
+  have hvb_ball : vb ∈ Metric.ball (0 : E) ρ₀ := by
+    rw [Metric.mem_ball, dist_zero_right, hvb_def, norm_smul]
+    rw [Real.norm_eq_abs, abs_of_pos (by positivity : (0 : ℝ) < 1 / t')]
+    rw [one_div, ← div_eq_inv_mul]
+    rw [div_lt_iff₀ ht'_pos]
+    linarith [hw_norm, mul_comm t' ρ₀]
+  -- `J = Ioo (-T/t') (T/t') = Ioo (-2) 2 ⊇ Ioo (-1) 2`.
+  have hT_div : T / t' = 2 := by rw [ht'_def]; field_simp
+  have h12_sub_J : Set.Ioo (-1 : ℝ) 2 ⊆ Set.Ioo (-T / t') (T / t') := by
+    rw [neg_div, hT_div]; intro x hx; obtain ⟨hx0, hx1⟩ := hx; exact ⟨by linarith, by linarith⟩
+  -- The integral curve `F` and its projection identification on `J`.
+  have hF_int := Exponential.chartFlowOrbitLiftRescaled_isMIntegralCurveOn_Ioo
+    (I := I) g p vb ht'_pos (hΦ_target vb hvb_ball) (hΦ_phase vb hvb_ball)
+  have hπ_cont : Continuous (Bundle.TotalSpace.proj : TangentBundle I M → M) :=
+    FiberBundle.continuous_proj E (TangentSpace I)
+  have hproj_cont : ContinuousOn
+      (fun r => (Exponential.chartFlowOrbitLiftRescaled (I := I) Φ p t' vb r).proj)
+      (Set.Ioo (-T / t') (T / t')) :=
+    hπ_cont.comp_continuousOn hF_int.continuousOn
+  have hEqOn : Set.EqOn (fun r => maximalGeodesic (I := I) g p v r)
+      (fun r => (Exponential.chartFlowOrbitLiftRescaled (I := I) Φ p t' vb r).proj)
+      (Set.Ioo (-T / t') (T / t')) := by
+    intro r hr
+    have h := Exponential.chartFlowOrbitLiftRescaled_proj_eq_maximalGeodesic_on_Ioo
+      (I := I) (g := g) (p := p) (v := vb) (T := T) (t' := t') ht'_pos
+      (hΦ_init vb hvb_ball) (hΦ_target vb hvb_ball) (hΦ_phase vb hvb_ball) (s := r) hr
+    rw [show (t' • vb : TangentSpace I p) = v from hvb_resc] at h
+    exact h.symm
+  refine ⟨?_, ?_⟩
+  · -- Continuity on `Ioo (-1) 2 ⊆ J`.
+    exact ((hproj_cont.congr hEqOn).mono h12_sub_J)
+  · intro t ht
+    -- `t' * t ∈ [-T, T]` (since `t ∈ (-1, 2)` and `t' = T/2 < T`).
+    have hts_Icc : t' * t ∈ Set.Icc (-T) T := by
+      obtain ⟨ht0, ht1⟩ := ht
+      refine ⟨?_, ?_⟩
+      · nlinarith [ht'_pos.le, hT_pos.le, ht'_lt_T.le]
+      · nlinarith [ht'_lt_T.le, ht'_pos.le]
+    have hΦ_target_tt := hΦ_target vb hvb_ball (t' * t) hts_Icc
+    have hsrc' :=
+      Exponential.chartFlowOrbitLiftRescaled_proj_mem_chartAt_source (I := I) p vb t' t
+        hΦ_target_tt
+    have ht_J : t ∈ Set.Ioo (-T / t') (T / t') := h12_sub_J ht
+    have hEq := Exponential.chartFlowOrbitLiftRescaled_proj_eq_maximalGeodesic_on_Ioo
+      (I := I) (g := g) (p := p) (v := vb) (T := T) (t' := t') ht'_pos
+      (hΦ_init vb hvb_ball) (hΦ_target vb hvb_ball) (hΦ_phase vb hvb_ball) (s := t) ht_J
+    rw [show (t' • vb : TangentSpace I p) = v from hvb_resc] at hEq
+    rw [← hEq]; exact hsrc'
+
 /-! ## The combined `C²` / geodesic radius
 
 The variational argument behind Gauss's lemma needs three simultaneous
