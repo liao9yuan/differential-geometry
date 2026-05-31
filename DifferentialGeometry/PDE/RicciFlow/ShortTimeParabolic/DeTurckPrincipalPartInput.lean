@@ -1,25 +1,22 @@
 /-
-The second isolated open analytic input of the Ricci-flow short-time-existence
-development: the quasilinear-parabolicity / Gårding frontier for the genuine
-geometric Ricci–DeTurck remainder.
+Proven bridge material relating the smooth Ricci–DeTurck section to the
+Ricci–DeTurck right-hand side.
 
-This file holds two declarations:
+This file holds two fully proven declarations:
 
-* a fully proven bridge `deTurckRHSSection_ccTensorBilinSymm_eq_deTurckRicciRHS`
-  identifying the symmetric bilinear form extracted from the smooth tensor
-  section `deTurckRHSSection g_bg g` with the Ricci–DeTurck right-hand side
-  `deTurckRicciRHS g_bg g` (relying on the symmetry of the latter, proved here as
-  `deTurckRicciRHS_symm`); and
+* `deTurckRicciRHS_symm` — the Ricci–DeTurck right-hand side `deTurckRicciRHS g_bg g`
+  is a symmetric bilinear form; and
+* `deTurckRHSSection_ccTensorBilinSymm_eq_deTurckRicciRHS` — the symmetric bilinear
+  form extracted (via `ccTensorBilinSymm`) from the smooth tensor section
+  `deTurckRHSSection g_bg g` equals `deTurckRicciRHS g_bg g`.
 
-* the single deferred classical input `deturck_geometric_nonlinearity_hscale_lipschitz`
-  — the local Lipschitz estimate, on the carrier Sobolev scale `H^{a+1} → Hᵃ`, of
-  the GENUINE geometric DeTurck remainder section
-  `deTurckRemainderSection g_bg · = deTurckRHSSection g_bg (g_bg + h(·)) − Δ_∇ T_·`
-  (the `deTurckRHSSection`-based remainder, NOT the finite-support-gated
-  `deTurckGeometricN`).  This is the analytic Gårding / quasilinear-parabolicity
-  input (heat-kernel parametrix / coercive principal-part estimate) that is not
-  present in Mathlib; it is the companion of the local Weyl law
-  `local_weyl_eigenvalue_counting_bound`.
+(A quasilinear-parabolicity / Gårding Lipschitz `sorry` for the geometric remainder
+previously lived here; it was removed because every faithful, non-vacuous form of the
+*whole-ball* Lipschitz estimate requires realizing arbitrary `H^{a+1}`-ball elements as
+genuine smooth metrics — the chart-free order-2 elliptic-regularity gate, a separate
+open sub-program rather than a standalone classical input.  The route-agnostic crux
+`deturck_ricci_pde_shorttime` does not transit it and is best discharged by the
+classical maximal-regularity approach, which does not use this estimate.)
 -/
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckRemainderStrongExists
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization.DeTurckGeometricNonlinearity
@@ -130,72 +127,5 @@ theorem deTurckRHSSection_ccTensorBilinSymm_eq_deTurckRicciRHS
   simp only [Matrix.cons_val_zero, Matrix.cons_val_one]
   rw [deTurckRicciRHS_symm (I := I) g_bg g x w v]
   ring
-
-/-! ## The deferred quasilinear-parabolicity / Gårding input
-
-The maximal-regularity engine `deTurckRemainder_strong_shortTime_exists`
-(`DeTurckRemainderStrongExists.lean`) consumes a locally Lipschitz lower-order
-nonlinearity `N : H^{a+1} → Hᵃ` in the form of a `LipschitzOnWith` bound on a
-closed `H^{a+1}`-ball about the included initial datum.  For the GENUINE geometric
-Ricci–DeTurck nonlinearity the eigenbasis coordinates of `N(u)` are the `L²`
-coordinates of the remainder section
-
-  `deTurckRemainderSection g_bg u
-     = deTurckRHSSection g_bg (g_bg + h_sym(u)) − rawTensorConnLapSmooth g_bg 0 2 T_u`,
-
-so the Lipschitz bound on `N` is, per mode, the weighted square-summable estimate
-on the coordinate differences of that section — exactly the shape established for
-the continuous realize-anchored nonlinearity in `deturckN_hscale_lipschitz`'s
-`hNsec_lip` hypothesis, but now for the `deTurckRHSSection`-based remainder
-section itself.  Establishing this estimate is the classical
-quasilinear-parabolicity / Gårding coercivity of the gauge-cancelled DeTurck
-operator (heat-kernel parametrix / principal-part match with the rough
-Laplacian); it is not present in Mathlib.
-
-This is the SECOND deferred classical input, the companion of the local Weyl law
-`local_weyl_eigenvalue_counting_bound`. -/
-
-/-- **THE single deferred quasilinear-parabolicity / Gårding input** — the local
-Lipschitz estimate, on the carrier spectral Sobolev scale `H^{a+1} → Hᵃ`, of the
-GENUINE geometric Ricci–DeTurck remainder section `deTurckRemainderSection g_bg ·`
-(the `deTurckRHSSection`-based remainder, NOT the finite-support-gated
-`deTurckGeometricN`).
-
-Stated in the precise weighted per-mode form consumed by the engine
-`deTurckRemainder_strong_shortTime_exists`: there is a Lipschitz constant `K` and a
-positive radius `R` so that on the closed `H^{a+1}`-ball about the included initial
-datum `u₀`, the weighted `ℓ²` sum of the squared eigenbasis-coordinate differences
-of the remainder section's `L²` image is dominated by `(K · dist u u')²`.  This is
-the order-2 Gårding coercivity / principal-part match of the gauge-cancelled
-DeTurck operator with the rough Laplacian, a classical theorem (heat-kernel
-parametrix) NOT present in Mathlib; it is the ONLY analytic `sorry` on the
-short-time-existence graph besides the local Weyl law
-`local_weyl_eigenvalue_counting_bound`, and is its direct companion. -/
-theorem deturck_geometric_nonlinearity_hscale_lipschitz
-    (g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (u₀ : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 2)) :
-    ∃ (K : ℝ≥0) (R : ℝ), 0 < R ∧
-      ∀ u u' : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 1),
-        u ∈ Metric.closedBall
-            (tensorHsInclusion (I := I) (M := M) (g := g_bg) (r := 0) (s := 2)
-              (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) u₀) R →
-        u' ∈ Metric.closedBall
-            (tensorHsInclusion (I := I) (M := M) (g := g_bg) (r := 0) (s := 2)
-              (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) u₀) R →
-        Summable (fun i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
-            (I := I) (M := M) g_bg 0 2 =>
-            tensorSobolevWeight (I := I) (M := M) i (a : ℝ) *
-              (tensorL2Coeff_ofCompact (I := I) (M := M)
-                  (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g_bg 0 2)
-                  (SmoothCcTensor.toL2 (deTurckRemainderSection (I := I) g_bg u)
-                    - SmoothCcTensor.toL2 (deTurckRemainderSection (I := I) g_bg u')) i) ^ 2)
-          ∧ (∑' i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
-              (I := I) (M := M) g_bg 0 2,
-              tensorSobolevWeight (I := I) (M := M) i (a : ℝ) *
-                (tensorL2Coeff_ofCompact (I := I) (M := M)
-                    (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g_bg 0 2)
-                    (SmoothCcTensor.toL2 (deTurckRemainderSection (I := I) g_bg u)
-                      - SmoothCcTensor.toL2 (deTurckRemainderSection (I := I) g_bg u')) i) ^ 2)
-              ≤ ((K : ℝ) * dist u u') ^ 2 := sorry
 
 end DifferentialGeometry.PDE.RicciFlow
