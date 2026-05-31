@@ -1861,6 +1861,234 @@ theorem first_variation_formula
   -- The target value is `-∫ B`; rewrite `B` to the target integrand.
   exact hS2A
 
+/-- **Free-endpoint first variation of arc length.** Same setup as
+`first_variation_formula` but without the endpoint-fixed hypotheses: for a smooth
+unit-speed variation `f` of `γ := f 0`, the derivative of
+`s ↦ arcLength g (f s ·) 0 L` at `s = 0` equals the boundary term
+`⟨V L, γ' L⟩ - ⟨V 0, γ' 0⟩` minus the integral of `⟨V, ∇_t γ'⟩_g`, where
+`V t := ∂_s f|_{s = 0}` is the variation field and `γ' t := ∂_t (f 0)` is the
+central velocity. (When the endpoints are fixed, `V 0 = V L = 0` and the boundary
+term vanishes, recovering `first_variation_formula`.) -/
+theorem first_variation_formula_free_endpoint
+    (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M) (L : ℝ)
+    (hf : IsSmoothVariation (I := I) f) (hL : 0 < L)
+    (hUnit : ∀ t ∈ Set.Icc (0 : ℝ) L,
+      g.inner (f 0 t)
+          (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f 0 u) t (1 : ℝ))
+          (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f 0 u) t (1 : ℝ)) = 1) :
+    HasDerivAt (fun s : ℝ => arcLength (I := I) g (fun t : ℝ => f s t) 0 L)
+      ( (g.inner (f 0 L)
+          (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f u L) 0 (1 : ℝ))
+          (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f 0 u) L (1 : ℝ))
+         - g.inner (f 0 0)
+          (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f u 0) 0 (1 : ℝ))
+          (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f 0 u) 0 (1 : ℝ)))
+        - ∫ t in (0 : ℝ)..L,
+          g.inner (f 0 t)
+            (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f u t) 0 (1 : ℝ))
+            (DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong.covDerivAlong
+              (I := I) g (fun v : ℝ => f 0 v)
+              (fun v : ℝ =>
+                mfderiv (𝓘(ℝ, ℝ)) I (fun w : ℝ => f 0 w) v (1 : ℝ)) t)) 0 := by
+  classical
+  open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong in
+  -- Abbreviations: central curve `γ`, variation field `V`, central velocity `γ'`.
+  set γ : ℝ → M := fun v : ℝ => f 0 v with hγ_def
+  set V : ∀ t : ℝ, TangentSpace I (γ t) :=
+    fun t : ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f u t) 0 (1 : ℝ) with hV_def
+  set γ' : ∀ t : ℝ, TangentSpace I (γ t) :=
+    fun t : ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun w : ℝ => f 0 w) t (1 : ℝ) with hγ'_def
+  -- (0) The unit-speed hypothesis rewritten as `speedSq g f 0 t = 1` on `[0, L]`.
+  have hUnit' : ∀ t ∈ Set.Icc (0 : ℝ) L, speedSq (I := I) g f 0 t = 1 := by
+    intro t ht; exact hUnit t ht
+  -- (1) The arc-length slice is the integral of `√(speedSq)`.
+  have harc : (fun s : ℝ => arcLength (I := I) g (fun t : ℝ => f s t) 0 L)
+      = (fun s : ℝ => ∫ t in (0 : ℝ)..L, Real.sqrt (speedSq (I := I) g f s t)) := by
+    funext s; exact arcLength_slice_eq_integral_sqrt_speedSq (I := I) g f s L
+  rw [harc]
+  -- (2) Differentiate under the integral (`S2`).
+  have hS2 := S2_diff_under_interval_integral (I := I) g f L hf hL hUnit'
+  -- (3) The `S2` derivative value equals `∫₀ᴸ ⟨∇_t V, γ'⟩` after using `√(speedSq) = 1`
+  -- and the intrinsic commutation `∇_s ∂_t f = ∇_t V`.
+  have hsqrt1 : ∀ t ∈ Set.Icc (0 : ℝ) L, Real.sqrt (speedSq (I := I) g f 0 t) = 1 := by
+    intro t ht; rw [hUnit' t ht, Real.sqrt_one]
+  -- The `S2` integrand simplifies to `⟨∇_t V, γ'⟩` on `[0, L]`.
+  have hintegrand_eq : Set.EqOn
+      (fun t : ℝ =>
+        (2 * g.inner (f 0 t)
+          (covDerivAlong (I := I) g (fun s : ℝ => f s t)
+            (fun s : ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f s u) t (1 : ℝ)) 0)
+          (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f 0 u) t (1 : ℝ)))
+          / (2 * Real.sqrt (speedSq (I := I) g f 0 t)))
+      (fun t : ℝ => g.inner (γ t) (covDerivAlong (I := I) g γ V t) (γ' t))
+      (Set.uIcc 0 L) := by
+    intro t ht
+    rw [Set.uIcc_of_le (le_of_lt hL)] at ht
+    simp only []
+    rw [hsqrt1 t ht, mul_one]
+    -- `∇_s ∂_t f|₀ = ∇_t V` by `commute_ds_dt_intrinsic`.
+    have hcomm := commute_ds_dt_intrinsic (I := I) g f hf t
+    -- `covDerivAlong g γ V t` is the RHS of the commutation.
+    rw [show covDerivAlong (I := I) g (fun s : ℝ => f s t)
+          (fun s : ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f s u) t (1 : ℝ)) 0
+        = covDerivAlong (I := I) g γ V t from by
+      rw [hcomm, hγ_def, hV_def]]
+    rw [hγ'_def, hγ_def]
+    ring
+  rw [intervalIntegral.integral_congr hintegrand_eq] at hS2
+  -- (4) Integration by parts via metric compatibility (`metric_compat_hasDerivAt_inner`).
+  -- The boundary function `h t := ⟨V t, γ' t⟩` has derivative `⟨∇_t V, γ'⟩ + ⟨V, ∇_t γ'⟩`.
+  have hγ_smooth : ContMDiff (𝓘(ℝ, ℝ)) I ∞ γ := by
+    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞ (fun v : ℝ => ((0 : ℝ), v)) :=
+      contMDiff_const.prodMk contMDiff_id
+    exact (hf : ContMDiff _ _ _ _).comp hincl
+  -- Chart-rep differentiability of `V` and `γ'` at every `t₀`.
+  have hVdiff : ∀ t₀ : ℝ, DifferentiableAt ℝ (chartRepAt (I := I) γ V t₀) t₀ := by
+    intro t₀; rw [hγ_def, hV_def]
+    exact variationField_chartRep_differentiableAt (I := I) g f hf t₀
+  have hγ'diff : ∀ t₀ : ℝ, DifferentiableAt ℝ (chartRepAt (I := I) γ γ' t₀) t₀ := by
+    intro t₀; rw [hγ_def, hγ'_def]
+    exact velocityField_chartRep_differentiableAt (I := I) g f hf t₀
+  -- The boundary derivative everywhere on `[0, L]`.
+  have hbdry : ∀ t ∈ Set.uIcc (0 : ℝ) L,
+      HasDerivAt (fun s : ℝ => g.inner (γ s) (V s) (γ' s))
+        (g.inner (γ t) (covDerivAlong (I := I) g γ V t) (γ' t)
+          + g.inner (γ t) (V t) (covDerivAlong (I := I) g γ γ' t)) t := by
+    intro t _ht
+    exact metric_compat_hasDerivAt_inner (I := I) g γ V γ' t hγ_smooth (hVdiff t) (hγ'diff t)
+  -- Interval-integrability of the boundary derivative `hbd'`.
+  -- `hbd := ⟨V, γ'⟩` is `C^∞` (inner product of two smooth sections), so
+  -- `deriv hbd` is continuous; and `hbd' = deriv hbd` by `hbdry`.
+  set hbd : ℝ → ℝ := fun s : ℝ => g.inner (γ s) (V s) (γ' s) with hbd_def
+  set hbd' : ℝ → ℝ := fun t : ℝ =>
+    g.inner (γ t) (covDerivAlong (I := I) g γ V t) (γ' t)
+      + g.inner (γ t) (V t) (covDerivAlong (I := I) g γ γ' t) with hbd'_def
+  -- Total-space smoothness of `V` (swapped variation) and `γ'`.
+  have hfswap : IsSmoothVariation (I := I) (fun a b : ℝ => f b a) := by
+    have hswapmap : ContMDiff (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞
+        (fun q : ℝ × ℝ => (q.2, q.1)) := contMDiff_snd.prodMk contMDiff_fst
+    exact (hf : ContMDiff _ _ _ _).comp hswapmap
+  have hVtotal : ContMDiff (𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, E)) ∞ (fun t : ℝ =>
+      (TotalSpace.mk' E (E := (TangentSpace I : M → Type _)) (γ t) (V t) : TangentBundle I M)) := by
+    have hbase := velocity_totalSpace_contMDiff (I := I) (M := M) (fun a b : ℝ => f b a) hfswap
+    have hcomp := hbase.comp
+      (contMDiff_id.prodMk contMDiff_const : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞
+        (fun t : ℝ => (t, (0 : ℝ))))
+    refine hcomp.congr (fun t => ?_)
+    rfl
+  have hγ'total : ContMDiff (𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, E)) ∞ (fun t : ℝ =>
+      (TotalSpace.mk' E (E := (TangentSpace I : M → Type _)) (γ t) (γ' t) : TangentBundle I M)) := by
+    have hbase := velocity_totalSpace_contMDiff (I := I) (M := M) f hf
+    have hcomp := hbase.comp
+      (contMDiff_const.prodMk contMDiff_id : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞
+        (fun t : ℝ => ((0 : ℝ), t)))
+    refine hcomp.congr (fun t => ?_)
+    rfl
+  -- `hbd` is `C^∞`.
+  have hbd_contdiff : ContDiff ℝ ∞ hbd :=
+    g_inner_along_curve_contMDiff (I := I) (M := M) g hVtotal hγ'total
+  -- `deriv hbd` is continuous, and `hbd' = deriv hbd`.
+  have hderiv_cont : Continuous (deriv hbd) := hbd_contdiff.continuous_deriv (by simp)
+  have hbd'_eq_deriv : ∀ t : ℝ, hbd' t = deriv hbd t := by
+    intro t
+    have hd : HasDerivAt hbd (hbd' t) t := by
+      have := metric_compat_hasDerivAt_inner (I := I) g γ V γ' t hγ_smooth (hVdiff t) (hγ'diff t)
+      exact this
+    exact (hd.deriv).symm
+  have hbd'_cont : Continuous hbd' := by
+    refine hderiv_cont.congr (fun t => (hbd'_eq_deriv t).symm)
+  have hbd'_int : IntervalIntegrable hbd' MeasureTheory.volume 0 L :=
+    hbd'_cont.continuousOn.intervalIntegrable
+  -- (5) FTC: `∫₀ᴸ hbd' = hbd L - hbd 0`.  The boundary term is *kept*.
+  have hFTC : (∫ t in (0 : ℝ)..L, hbd' t) = hbd L - hbd 0 := by
+    refine intervalIntegral.integral_eq_sub_of_hasDerivAt (fun t ht => ?_) hbd'_int
+    exact metric_compat_hasDerivAt_inner (I := I) g γ V γ' t hγ_smooth (hVdiff t) (hγ'diff t)
+  -- (6) `A t := ⟨∇_t V, γ'⟩` is continuous: it equals `½ ∂_s speedSq|₀`, the
+  -- partial derivative of the jointly-`C^∞` speed-squared (`S1`/`S2` reasoning).
+  set A : ℝ → ℝ := fun t : ℝ => g.inner (γ t) (covDerivAlong (I := I) g γ V t) (γ' t)
+    with hA_def
+  -- `A t = ½ D2num t` where `D2num t := 2 ⟨∇_s ∂_t f|₀, ∂_t f⟩` is the `S1` numerator.
+  set D2num : ℝ → ℝ := fun t : ℝ =>
+    2 * g.inner (f 0 t)
+      (covDerivAlong (I := I) g (fun s : ℝ => f s t)
+        (fun s : ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f s u) t (1 : ℝ)) 0)
+      (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f 0 u) t (1 : ℝ)) with hD2num_def
+  -- `D2num` is continuous: it is the partial `s`-derivative of the jointly-`C^∞`
+  -- speed-squared `G := fun p => speedSq g f p.1 p.2` at `(0, t)`.
+  have hG : ContDiff ℝ ∞ (fun p : ℝ × ℝ => speedSq (I := I) g f p.1 p.2) :=
+    speedSq_contDiff (I := I) (M := M) g f hf
+  have hD2num_eq : ∀ t : ℝ,
+      D2num t = fderiv ℝ (fun p : ℝ × ℝ => speedSq (I := I) g f p.1 p.2) (0, t) (1, 0) := by
+    intro t
+    have hS1 := S1_moving_foot_metric_compatibility (I := I) g f t hf
+    have hslice : HasDerivAt
+        (fun u : ℝ => (fun p : ℝ × ℝ => speedSq (I := I) g f p.1 p.2) (u, t))
+        (fderiv ℝ (fun p : ℝ × ℝ => speedSq (I := I) g f p.1 p.2) (0, t) (1, 0)) 0 := by
+      have hdiff : DifferentiableAt ℝ (fun p : ℝ × ℝ => speedSq (I := I) g f p.1 p.2) (0, t) :=
+        (hG.differentiable (by simp)).differentiableAt
+      have := Aux2.hasDerivAt_slice_fst
+        (fun u v : ℝ => speedSq (I := I) g f u v) 0 t hdiff
+      simpa using this
+    have hS1' : HasDerivAt
+        (fun u : ℝ => (fun p : ℝ × ℝ => speedSq (I := I) g f p.1 p.2) (u, t)) (D2num t) 0 := by
+      simpa [hD2num_def] using hS1
+    exact hS1'.unique hslice
+  have hD2num_cont : Continuous D2num := by
+    have hc : Continuous (fun p : ℝ × ℝ => fderiv ℝ (fun q : ℝ × ℝ =>
+        speedSq (I := I) g f q.1 q.2) p) := hG.continuous_fderiv (by simp)
+    have hcapp : Continuous (fun p : ℝ × ℝ => fderiv ℝ (fun q : ℝ × ℝ =>
+        speedSq (I := I) g f q.1 q.2) p (1, 0)) := hc.clm_apply continuous_const
+    have : Continuous (fun t : ℝ =>
+        fderiv ℝ (fun q : ℝ × ℝ => speedSq (I := I) g f q.1 q.2) (0, t) (1, 0)) :=
+      hcapp.comp (continuous_const.prodMk continuous_id)
+    exact this.congr (fun t => (hD2num_eq t).symm)
+  -- `A t = ½ D2num t` (via the intrinsic commutation `∇_s ∂_t f = ∇_t V`).
+  have hA_eq_half : ∀ t : ℝ, A t = D2num t / 2 := by
+    intro t
+    change g.inner (γ t) (covDerivAlong (I := I) g γ V t) (γ' t)
+      = (2 * g.inner (f 0 t)
+          (covDerivAlong (I := I) g (fun s : ℝ => f s t)
+            (fun s : ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f s u) t (1 : ℝ)) 0)
+          (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f 0 u) t (1 : ℝ))) / 2
+    have hcomm := commute_ds_dt_intrinsic (I := I) g f hf t
+    rw [show covDerivAlong (I := I) g γ V t
+        = covDerivAlong (I := I) g (fun s : ℝ => f s t)
+            (fun s : ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f s u) t (1 : ℝ)) 0 from by
+      rw [hγ_def, hV_def]; rw [hcomm]]
+    rw [hγ'_def, hγ_def]; ring
+  have hA_cont : Continuous A := by
+    have : A = (fun t : ℝ => D2num t / 2) := by funext t; exact hA_eq_half t
+    rw [this]; exact hD2num_cont.div_const 2
+  have hA_int : IntervalIntegrable A MeasureTheory.volume 0 L :=
+    hA_cont.continuousOn.intervalIntegrable
+  -- (7) `B t := ⟨V, ∇_t γ'⟩ = hbd' t - A t` is continuous, hence integrable.
+  set B : ℝ → ℝ := fun t : ℝ => g.inner (γ t) (V t) (covDerivAlong (I := I) g γ γ' t)
+    with hB_def
+  have hB_eq : ∀ t : ℝ, B t = hbd' t - A t := by
+    intro t; rw [hB_def, hbd'_def, hA_def]; ring
+  have hB_cont : Continuous B := by
+    have : B = (fun t : ℝ => hbd' t - A t) := by funext t; exact hB_eq t
+    rw [this]; exact hbd'_cont.sub hA_cont
+  have hB_int : IntervalIntegrable B MeasureTheory.volume 0 L :=
+    hB_cont.continuousOn.intervalIntegrable
+  -- (8) `∫ hbd' = ∫ A + ∫ B = hbd L - hbd 0`, so `∫ A = (hbd L - hbd 0) - ∫ B`.
+  have hsplit : (∫ t in (0 : ℝ)..L, hbd' t)
+      = (∫ t in (0 : ℝ)..L, A t) + (∫ t in (0 : ℝ)..L, B t) := by
+    rw [← intervalIntegral.integral_add hA_int hB_int]
+  rw [hsplit] at hFTC
+  -- `∫ A = (hbd L - hbd 0) - ∫ B`.
+  have hAB : (∫ t in (0 : ℝ)..L, A t) = (hbd L - hbd 0) - (∫ t in (0 : ℝ)..L, B t) := by
+    linarith [hFTC]
+  -- (9) The `S2` derivative value is `∫ A`; rewrite it to `(hbd L - hbd 0) - ∫ B`,
+  -- which is the target boundary-plus-integral value.
+  have hS2A : HasDerivAt
+      (fun s : ℝ => ∫ t in (0 : ℝ)..L, Real.sqrt (speedSq (I := I) g f s t))
+      (∫ t in (0 : ℝ)..L, A t) 0 := hS2
+  rw [hAB] at hS2A
+  -- `hbd L - hbd 0 = ⟨V L, γ' L⟩ - ⟨V 0, γ' 0⟩`, the target boundary term, and
+  -- `∫ B` is the target integral; both fold definitionally to the goal.
+  exact hS2A
+
 /-! ## First variation vanishes along a geodesic -/
 
 /-- For a unit-speed geodesic `γ` and any endpoint-fixed smooth
