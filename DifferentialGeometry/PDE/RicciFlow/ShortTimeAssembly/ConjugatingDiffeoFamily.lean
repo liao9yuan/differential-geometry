@@ -93,11 +93,20 @@ theorem conjugating_diffeo_family
         (Set.Icc 0 T_DT ×ˢ Set.univ)) :
     ∃ T : ℝ, 0 < T ∧ T ≤ T_DT ∧ ∃ Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M),
       Φ_fam 0 = _root_.Diffeomorph.refl I M ∞ ∧
-      ∀ x : M, ∀ s ∈ Set.Ioo (0 : ℝ) T,
+      (∀ x : M, ∀ s ∈ Set.Ioo (0 : ℝ) T,
         HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun u : ℝ => (Φ_fam u : M → M) x)
           (Set.Ici (0 : ℝ)) s
           ((1 : ℝ →L[ℝ] ℝ).smulRight
-            (-(deTurckVF (I := I) (g_DT s) g_bg ((Φ_fam s : M → M) x)))) := by
+            (-(deTurckVF (I := I) (g_DT s) g_bg ((Φ_fam s : M → M) x))))) ∧
+      -- The `t = 0` right-continuity of the orbit and of the moving spatial Jacobian
+      -- (the forward flow's conjuncts 4/5, transported to `Φ_fam`).  These are the
+      -- genuine flow smooth-dependence-on-IC continuity outputs consumed by the
+      -- `t = 0`-endpoint continuity node `conjugating_flow_t0_continuity_data`.
+      (∀ x : M,
+        ContinuousWithinAt (fun s : ℝ => (Φ_fam s : M → M) x) (Set.Ici (0 : ℝ)) 0) ∧
+      (∀ (x : M) (v : TangentSpace I x),
+        ContinuousWithinAt (fun s : ℝ => (mfderiv I I (Φ_fam s : M → M) x v : E))
+          (Set.Ici (0 : ℝ)) 0) := by
   -- The conjugating flow integrates the NEGATED DeTurck field.
   set X_DT : ℝ → ∀ x : M, TangentSpace I x :=
     fun s x => -(deTurckVF (I := I) (g_DT s) g_bg x) with hXDT
@@ -131,15 +140,50 @@ theorem conjugating_diffeo_family
     rw [hfun]
     exact (h_grad0 α).neg
   -- Forward (one-sided, from `t = 0`) flow of the negated field on horizon `T_DT`.
-  obtain ⟨Φ, hΦ0, hdiffeo, hflow, _, _⟩ :=
+  -- Conjuncts 4/5 (`hΦcont0`/`hΦmfderiv0`) are the `t = 0` right-continuity of the bare
+  -- flow's orbit and moving spatial Jacobian, transported below to `Φ_fam`.
+  obtain ⟨Φ, hΦ0, hdiffeo, hflow, hΦcont0, hΦmfderiv0⟩ :=
     forward_flow_jointsmooth_onesided (I := I) X_DT T_DT hDT hint hcont0 hgrad0
-  -- Package the bare flow as a diffeomorphism family anchored at the identity.
-  obtain ⟨Φ_fam, hfam0, _hfameq, hfamode⟩ :=
+  -- Package the bare flow as a diffeomorphism family anchored at the identity, with the
+  -- pointwise agreement `Φ_fam t x = Φ t x` on the open interior `(0, T_DT)`.
+  obtain ⟨Φ_fam, hfam0, hfameq, hfamode⟩ :=
     time_dependent_vf_bare_flow_family (I := I) X_DT T_DT hDT Φ hΦ0
       (fun t ht htT => hdiffeo t ⟨ht, htT⟩)
       (fun t ht htT x => hflow t ⟨ht, htT⟩ x)
-  refine ⟨T_DT, hDT, le_refl _, Φ_fam, hfam0, ?_⟩
-  intro x s hs
-  exact hfamode s hs.1 hs.2 x
+  -- `Φ_fam` and `Φ` agree as functions on `Ico 0 T_DT`: at `0` both are the identity
+  -- (`hfam0`/`hΦ0`), on the interior both agree pointwise (`hfameq`).
+  have hfun_eqOn : ∀ s ∈ Set.Ico (0 : ℝ) T_DT, (Φ_fam s : M → M) = fun y : M => Φ s y := by
+    intro s hs
+    funext y
+    rcases eq_or_lt_of_le hs.1 with h0 | h0
+    · rw [← h0, hfam0, hΦ0]; rfl
+    · exact hfameq s h0 hs.2 y
+  refine ⟨T_DT, hDT, le_refl _, Φ_fam, hfam0, ?_, ?_, ?_⟩
+  · intro x s hs
+    exact hfamode s hs.1 hs.2 x
+  · -- Conjunct 4: orbit right-continuity at `0`, transported from `Φ` via `hfun_eqOn`.
+    intro x
+    have heqOn : Set.EqOn (fun s : ℝ => (Φ_fam s : M → M) x) (fun s : ℝ => Φ s x)
+        (Set.Ico 0 T_DT) := by
+      intro s hs
+      change (Φ_fam s : M → M) x = Φ s x
+      rw [hfun_eqOn s hs]
+    refine (hΦcont0 x).congr_of_eventuallyEq
+      (Filter.eventuallyEq_of_mem (Ico_mem_nhdsGE hDT) heqOn) ?_
+    rw [hfun_eqOn 0 ⟨le_rfl, hDT⟩]
+  · -- Conjunct 5: moving-spatial-Jacobian right-continuity at `0`, transported from `Φ`.
+    intro x v
+    have hmfeq : Set.EqOn
+        (fun s : ℝ => (mfderiv I I (Φ_fam s : M → M) x v : E))
+        (fun s : ℝ => (mfderiv I I (fun y : M => Φ s y) x v : E)) (Set.Ico 0 T_DT) := by
+      intro s hs
+      change (mfderiv I I (Φ_fam s : M → M) x v : E)
+        = (mfderiv I I (fun y : M => Φ s y) x v : E)
+      rw [hfun_eqOn s hs]
+    refine (hΦmfderiv0 x v).congr_of_eventuallyEq
+      (Filter.eventuallyEq_of_mem (Ico_mem_nhdsGE hDT) hmfeq) ?_
+    change (mfderiv I I (Φ_fam 0 : M → M) x v : E)
+      = (mfderiv I I (fun y : M => Φ 0 y) x v : E)
+    rw [hfun_eqOn 0 ⟨le_rfl, hDT⟩]
 
 end DifferentialGeometry.PDE.RicciFlow

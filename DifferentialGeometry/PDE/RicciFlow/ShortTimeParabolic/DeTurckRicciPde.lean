@@ -62,7 +62,18 @@ DeTurck solution:
   on `Ioo 0 T ×ˢ baseSet` (the canonical `chartGramMatrix` formulation of joint smoothness
   of the metric family; TRUE of the interior-parabolic-smooth DeTurck solution);
 * `h_gram0` — joint-`(t, x)` continuity of each chart-local Gram-matrix entry of `g_DT`
-  up to `t = 0` on `Ico 0 T ×ˢ baseSet` (continuity-up-to-the-`C⁰`-at-`0`-boundary).
+  up to `t = 0` on `Ico 0 T ×ˢ baseSet` (continuity-up-to-the-`C⁰`-at-`0`-boundary);
+* `h_gramOnE0` — joint-`(t, x)` continuity of each chart-Gram entry in the `chartGramOnE` /
+  `extChartAt` form on `Icc 0 T ×ˢ univ`, up to `t = 0`.  This is the `k = 0` value-continuity
+  in the exact shape `gfam_inner_continuous_on` consumes (`hg_joint`); a genuine `C⁰`-up-to-`0`
+  output of the smooth DeTurck solution;
+* `h_C2` — joint-`(t, x)` continuity of the spatial `k ≤ 2` iterated Fréchet jets of each
+  chart-Gram entry (in the `chartGramOnE` / `extChartAt` form, on `Icc 0 T ×ˢ goodSet`) up to
+  `t = 0`.  This is the GENUINE second-order-in-space regularity output of the DeTurck–Ricci
+  parabolic solution from SMOOTH initial data, which is `C^∞` up to `t = 0` (all spatial jets,
+  in particular the `k ≤ 2` ones controlling the Hessian/Ricci, vary continuously in time up to
+  `0`).  It is the exact `hC2` input of `ricci_gfam_continuous_on`, needed because the pullback
+  Ricci is a second-order spatial quantity that a `k = 0`-only datum cannot control up to `0`.
 
 These constrain only the internal `g_DT`/`X_DT`, never `g₀`/the headline statement, so the
 enrichment is non-leaking.  The body remains `sorry` — this is the single faithful
@@ -94,7 +105,19 @@ theorem deturck_ricci_pde_shorttime
         ContinuousOn
           (fun p : ℝ × M =>
             Integral.Measure.chartGramMatrix (I := I) (g_DT p.1) x₀ p.2 i j)
-          (Set.Ico (0 : ℝ) T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) := sorry
+          (Set.Ico (0 : ℝ) T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) ∧
+      (∀ (α : M) (i j : Fin (Module.finrank ℝ E)),
+        ContinuousOn
+          (fun q : ℝ × M =>
+            Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT q.1) α i j
+              (extChartAt I α q.2))
+          (Set.Icc 0 T ×ˢ Set.univ)) ∧
+      (∀ (α : M) (i j : Fin (Module.finrank ℝ E)) (k : ℕ), k ≤ 2 →
+        ContinuousOn
+          (fun q : ℝ × M => iteratedFDeriv ℝ k
+            (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT q.1) α i j)
+            (extChartAt I α q.2))
+          (Set.Icc 0 T ×ˢ chartLeviCivitaGoodSet (I := I) α)) := sorry
 
 set_option linter.unusedVariables false in
 /-- **Interior metric-level DeTurck–Ricci time-derivative (fully ungated).**
