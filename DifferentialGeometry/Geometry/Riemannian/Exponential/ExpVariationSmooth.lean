@@ -813,7 +813,7 @@ theorem expMapIntrinsic_variation_contMDiffAt
             ((p.1 • (V₀ p.2).snd : E) : TangentSpace I (γ p.2))) (s₀, t₀)) := by
   classical
   obtain ⟨Φ, ρ, T, t', hρ_pos, hT_pos, ht'_Ioo, ht'_pos, hG_cd, hΦ_init, hΦ_ode,
-    hΦ_target⟩ :=
+    hΦ_target, _hΦ_cd⟩ :=
     exists_chartExp_jointContDiffOn_nat (I := I) g (γ t₀) n hn
   refine ⟨Φ, ρ, t', hρ_pos, ht'_pos, fun hsmall => ?_⟩
   exact expMapIntrinsic_variation_contMDiff (I := I) g hEnorm γ V₀ hγ hV₀ hproj n hn
@@ -943,6 +943,118 @@ theorem expMapIntrinsic_variation_smallField_phaseBall
   filter_upwards [hO_nhds] with p hp
   exact hO_sub p hp
 
+/-! ## Radius-free moving-foot confinement (tube argument)
+
+The three moving-basepoint conjuncts (`hfoot`, `hwexp`, `hwresc`) are produced
+*radius-free* from the joint continuity of the chart-`(γ t₀)` geodesic flow `Φ`.
+The keystone is a uniform tube confinement: for a launch velocity small enough
+(achieved by taking the variation parameter `s₀` small and `p` near `(s₀, t₀)`),
+the chart-`(γ t₀)` flow base orbit launched from `γ p.2` stays within a uniform
+metric ball of `γ p.2` throughout `[0, t']`, hence inside `γ p.2`'s home chart.
+The velocity-to-zero limit is anchored by the *constant zero-velocity orbit*: at
+a zero-velocity phase point the chart-phase field vanishes, so the orbit is
+constant. -/
+
+/-- **The chart-phase field vanishes at zero velocity.**  For any chart-position
+`x : E`, `chartPhaseVF g α (x, 0) = 0`: the first component is the velocity `0`
+and the second is `-Γ_α(0, 0)(x) = 0` by the velocity-bilinearity of the
+Christoffel contraction. -/
+private lemma chartPhaseVF_zero_vel (g : SmoothRiemannianMetric I M) (α : M) (x : E) :
+    chartPhaseVF (I := I) g α ((x, (0 : E)) : E × E) = (0, 0) := by
+  have hΓ : Geodesic.chartChristoffelContraction (I := I) g α (0 : E) (0 : E) x = 0 :=
+    Geodesic.chartChristoffelContraction_zero_left (I := I) g α (0 : E) x
+  change ((0 : E), -Geodesic.chartChristoffelContraction (I := I) g α (0 : E) (0 : E) x)
+      = (0, 0)
+  rw [hΓ, neg_zero]
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- **Zero-velocity flow orbit is constant.**  Let `Φ` be a chart-`α` geodesic
+flow satisfying, on every orbit through the phase-ball, the chart-phase ODE and
+the chart-target-interior confinement on `Ioo (-T) T`.  If a zero-velocity phase
+point `z = (x, 0)` lies in the ball, then its orbit is constant: `Φ (z, s) = z`
+for every `s ∈ Ioo (-T) T`.
+
+The constant curve `s ↦ z` solves the chart-phase ODE (the field vanishes at
+zero velocity, `chartPhaseVF_zero_vel`) with the same initial value `z`; chart-
+coordinate ODE uniqueness, propagated by a clopen argument along the preconnected
+interval `Ioo (-T) T`, forces the orbit to coincide with it. -/
+private lemma chartFlowOrbit_zeroVel_const
+    (g : SmoothRiemannianMetric I M) (α : M)
+    (Φ : (E × E) × ℝ → E × E) (z₀ : E × E) {ρ T : ℝ} {x : E}
+    (hz_ball : ((x, (0 : E)) : E × E) ∈ Metric.ball z₀ ρ)
+    (hΦ_init : ∀ z ∈ Metric.ball z₀ ρ,
+      Φ ((z, (0 : ℝ)) : (E × E) × ℝ) = z)
+    (hΦ_ode : ∀ z ∈ Metric.ball z₀ ρ, ∀ s ∈ Set.Ioo (-T) T,
+      HasDerivAt (fun s' : ℝ => Φ ((z, s') : (E × E) × ℝ))
+        (chartPhaseVF (I := I) g α (Φ ((z, s) : (E × E) × ℝ))) s)
+    (hΦ_target : ∀ z ∈ Metric.ball z₀ ρ, ∀ s ∈ Set.Icc (-T) T,
+      Φ ((z, s) : (E × E) × ℝ) ∈
+        (interior (extChartAt I α).target) ×ˢ (Set.univ : Set E)) :
+    ∀ s ∈ Set.Ioo (-T) T, Φ (((x, (0 : E)) : E × E), s) = ((x, (0 : E)) : E × E) := by
+  classical
+  set z : E × E := ((x, (0 : E)) : E × E) with hz_def
+  -- The field vanishes at the zero-velocity point `z`.
+  have hVF_z : chartPhaseVF (I := I) g α z = 0 := by
+    rw [hz_def]; exact chartPhaseVF_zero_vel (I := I) g α x
+  -- The orbit through `z` and its ODE data.
+  set orb : ℝ → E × E := fun s => Φ ((z, s) : (E × E) × ℝ) with horb_def
+  have horb0 : orb 0 = z := by rw [horb_def]; exact hΦ_init z hz_ball
+  have horb_ode : ∀ s ∈ Set.Ioo (-T) T,
+      HasDerivAt orb (chartPhaseVF (I := I) g α (orb s)) s := hΦ_ode z hz_ball
+  have horb_cont : ContinuousOn orb (Set.Ioo (-T) T) := by
+    intro s hs
+    exact (horb_ode s hs).continuousAt.continuousWithinAt
+  -- Reduce to: for each `T' < T`, the orbit is constant `z` on `Ioo (-T') T'`.
+  have hconst_on : ∀ T' : ℝ, 0 < T' → T' < T →
+      ∀ s ∈ Set.Ioo (-T') T', orb s = z := by
+    intro T' hT'_pos hT'_lt
+    -- The compact set `K := orb '' Icc (-T') T'`, contained in the interior product.
+    have hIcc_sub_Icc : Set.Icc (-T') T' ⊆ Set.Icc (-T) T := by
+      intro s hs; exact ⟨by linarith [hs.1], by linarith [hs.2]⟩
+    have hIcc_sub : Set.Icc (-T') T' ⊆ Set.Ioo (-T) T := by
+      intro s hs; exact ⟨by linarith [hs.1], by linarith [hs.2]⟩
+    have horb_contOn' : ContinuousOn orb (Set.Icc (-T') T') :=
+      horb_cont.mono hIcc_sub
+    set K : Set (E × E) := orb '' Set.Icc (-T') T' with hK_def
+    have hK_compact : IsCompact K := isCompact_Icc.image_of_continuousOn horb_contOn'
+    have hK_sub : K ⊆ (interior (extChartAt I α).target) ×ˢ (Set.univ : Set E) := by
+      rintro w ⟨s, hs, rfl⟩
+      exact hΦ_target z hz_ball s (hIcc_sub_Icc hs)
+    -- The two solutions on `Ioo (-T') T'`: the orbit and the constant `z`.
+    have horb_ode' : ∀ s ∈ Set.Ioo (-T') T',
+        HasDerivAt orb (chartPhaseVF (I := I) g α (orb s)) s := by
+      intro s hs
+      exact horb_ode s ⟨by linarith [hs.1], by linarith [hs.2]⟩
+    have hconst_ode : ∀ s ∈ Set.Ioo (-T') T',
+        HasDerivAt (fun _ : ℝ => z) (chartPhaseVF (I := I) g α ((fun _ : ℝ => z) s)) s := by
+      intro s _
+      rw [hVF_z]; exact hasDerivAt_const s z
+    have horb_in_K : ∀ s ∈ Set.Ioo (-T') T', orb s ∈ K := by
+      intro s hs
+      exact Set.mem_image_of_mem orb (Set.Ioo_subset_Icc_self hs)
+    have hconst_in_K : ∀ s ∈ Set.Ioo (-T') T', (fun _ : ℝ => z) s ∈ K := by
+      intro s _
+      refine ⟨0, ⟨by linarith, by linarith⟩, ?_⟩
+      exact horb0
+    have heq0 : orb 0 = (fun _ : ℝ => z) 0 := by simpa using horb0
+    have heqOn := chartPhaseVF_orbit_uniqueness_uniform_Ioo (I := I) g α
+      hK_compact hK_sub hT'_pos
+      (c₁ := orb) (c₂ := fun _ : ℝ => z)
+      horb_ode' hconst_ode horb_in_K hconst_in_K heq0
+    intro s hs
+    simpa using heqOn s hs
+  -- Pass from `T' < T` to all of `Ioo (-T) T`.
+  intro s hs
+  have hs_abs : |s| < T := by rw [abs_lt]; exact ⟨hs.1, hs.2⟩
+  set T' : ℝ := (|s| + T) / 2 with hT'_def
+  have hT'_lt : T' < T := by rw [hT'_def]; linarith
+  have hsT' : |s| < T' := by rw [hT'_def]; linarith
+  have hT'_pos : 0 < T' := lt_of_le_of_lt (abs_nonneg s) hsT'
+  have hs_Ioo' : s ∈ Set.Ioo (-T') T' := by rw [abs_lt] at hsT'; exact ⟨hsT'.1, hsT'.2⟩
+  have := hconst_on T' hT'_pos hT'_lt s hs_Ioo'
+  simpa [horb_def] using this
+
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 /-- **Moving-basepoint smallness package (residual).**  For the chart-`(γ t₀)`
@@ -993,7 +1105,10 @@ theorem expMapIntrinsic_variation_smallField_moving
       (∀ z ∈ Metric.ball ((extChartAt I (γ t₀) (γ t₀), (0 : E)) : E × E) ρ,
         ∀ s ∈ Set.Icc (-T) T,
         Φ ((z, s) : (E × E) × ℝ) ∈
-          (interior (extChartAt I (γ t₀)).target) ×ˢ (Set.univ : Set E))) :
+          (interior (extChartAt I (γ t₀)).target) ×ˢ (Set.univ : Set E)) ∧
+      ContDiffOn ℝ (n : ℕ∞) Φ
+        ((Metric.ball ((extChartAt I (γ t₀) (γ t₀), (0 : E)) : E × E) ρ)
+          ×ˢ Set.Ioo (-T) T)) :
     ∃ δ > 0, ∀ s₀ ∈ Metric.ball (0 : ℝ) δ,
       ∀ᶠ p in 𝓝 (s₀, t₀),
         (∀ s ∈ Set.Icc (0 : ℝ) t',
@@ -1052,7 +1167,7 @@ theorem expMapIntrinsic_variation_contMDiffAt_of_smallField
   classical
   -- Obtain the chart-`(γ t₀)` geodesic flow at order `n`.
   obtain ⟨Φ, ρ, T, t', hρ_pos, hT_pos, ht'_Ioo, ht'_pos, hG_cd, hΦ_init, hΦ_ode,
-    hΦ_target⟩ :=
+    hΦ_target, hΦ_cd⟩ :=
     exists_chartExp_jointContDiffOn_nat (I := I) g (γ t₀) n hn
   -- The continuity discharge of the geometric conjuncts (chart-source + phase-ball).
   obtain ⟨δ₁, hδ₁_pos, hphase⟩ :=
@@ -1062,7 +1177,7 @@ theorem expMapIntrinsic_variation_contMDiffAt_of_smallField
   obtain ⟨δ₂, hδ₂_pos, hmove⟩ :=
     expMapIntrinsic_variation_smallField_moving (I := I) g hEnorm γ V₀ hγ hV₀ hproj
       n hn t₀ Φ ρ T t'
-      ⟨hρ_pos, hT_pos, ht'_Ioo, ht'_pos, hG_cd, hΦ_init, hΦ_ode, hΦ_target⟩
+      ⟨hρ_pos, hT_pos, ht'_Ioo, ht'_pos, hG_cd, hΦ_init, hΦ_ode, hΦ_target, hΦ_cd⟩
   -- Take `δ := min δ₁ δ₂`.
   refine ⟨min δ₁ δ₂, lt_min hδ₁_pos hδ₂_pos, fun s₀ hs₀ => ?_⟩
   have hs₀₁ : s₀ ∈ Metric.ball (0 : ℝ) δ₁ :=

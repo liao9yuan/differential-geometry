@@ -1453,7 +1453,10 @@ theorem exists_chartExp_jointContDiffOn_nat
       (∀ z ∈ Metric.ball ((extChartAt I α α, (0 : E)) : E × E) ρ,
         ∀ s ∈ Set.Icc (-T) T,
         Φ ((z, s) : (E × E) × ℝ) ∈
-          (interior (extChartAt I α).target) ×ˢ (Set.univ : Set E)) := by
+          (interior (extChartAt I α).target) ×ˢ (Set.univ : Set E)) ∧
+      -- Joint `C^n` smoothness of the full flow on the phase-ball–time product:
+      ContDiffOn ℝ (n : ℕ∞) Φ
+        ((Metric.ball ((extChartAt I α α, (0 : E)) : E × E) ρ) ×ˢ Set.Ioo (-T) T) := by
   classical
   set x₀ : E := extChartAt I α α with hx₀_def
   have hx₀_src : α ∈ (extChartAt I α).source :=
@@ -1618,7 +1621,7 @@ theorem exists_chartExp_jointContDiffOn_nat
       Metric.closedBall_subset_closedBall (le_of_lt b.rIn_lt_rOut) h_in_closed
     exact hb_sub h_in_outer
   exact ⟨Φ, ρ, T, t', hρ_pos, hT_pos, ht'_in_Ioo, ht'_pos,
-    hjoint, hΦ_init_z, hΦ_phase_z, hΦ_target_z⟩
+    hjoint, hΦ_init_z, hΦ_phase_z, hΦ_target_z, hΦ_cd⟩
 
 end JointBasepointVector
 
