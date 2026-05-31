@@ -480,6 +480,7 @@ import DifferentialGeometry.Geometry.Riemannian.Exponential.UniformUniqueness
 import DifferentialGeometry.Geometry.Riemannian.Exponential.UniformExistence
 import DifferentialGeometry.Geometry.Riemannian.Exponential.ChainedFlowContinuity
 import DifferentialGeometry.Geometry.Riemannian.Exponential.OffZeroRegularity
+import DifferentialGeometry.Geometry.Riemannian.Exponential.ExpVariationSmooth
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.MaximalRescaling
 import DifferentialGeometry.Geometry.Riemannian.MetricExistence
 import DifferentialGeometry.Geometry.Riemannian.NormalCoordinates
