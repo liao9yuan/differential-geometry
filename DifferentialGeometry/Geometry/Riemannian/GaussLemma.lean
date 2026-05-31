@@ -2062,6 +2062,42 @@ private lemma psd_sqrt_lipschitz (B : F →L[ℝ] F →L[ℝ] ℝ)
               rw [Real.sqrt_mul hb0, show ‖x - y‖ * ‖x - y‖ = ‖x - y‖ ^ 2 by ring,
                 Real.sqrt_sq (norm_nonneg _)]
 
+/-- **Angular direction has zero derivative under radiality.** For a curve
+`c : ℝ → F` differentiable at `t` with `ρ s = √(B(cs)(cs))`, if at `t` the
+radial distance is positive (`0 < ρ t`), `ρ` is differentiable with derivative
+`B(ct)(c')/ρ t`, and the velocity `c'` is `B`-radial
+(`c' = (B(ct)(c')/B(ct)(ct)) • c t`), then the angular direction
+`θ s = (ρ s)⁻¹ • c s` has derivative `0` at `t`.  This is the rigidity ODE:
+the angular component of a radial velocity is stationary.  The proof is the
+product rule `θ' = (ρ⁻¹)' • c + ρ⁻¹ • c'`, in which the two scalar coefficients
+of `c t` cancel exactly because `c'` is radial and `ρ t ^ 2 = B(ct)(ct)`. -/
+private lemma angular_hasDerivAt_zero (B : F →L[ℝ] F →L[ℝ] ℝ)
+    {c : ℝ → F} {c' : F} {ρ : ℝ → ℝ} {t : ℝ}
+    (hc : HasDerivAt c c' t) (hρt : 0 < ρ t)
+    (hρ : HasDerivAt ρ (B (c t) c' / ρ t) t)
+    (hρsq : ρ t ^ 2 = B (c t) (c t))
+    (hrad : c' = (B (c t) c' / B (c t) (c t)) • c t) :
+    HasDerivAt (fun s => (ρ s)⁻¹ • c s) 0 t := by
+  have hrne : ρ t ≠ 0 := ne_of_gt hρt
+  have hBne : B (c t) (c t) ≠ 0 := by rw [← hρsq]; positivity
+  -- Abbreviate the (opaque) radial coefficient `k := B(ct)(c')`.
+  set k : ℝ := B (c t) c' with hk_def
+  have hinv : HasDerivAt (fun s => (ρ s)⁻¹) (-(k / ρ t) / (ρ t)^2) t := by
+    have h := hρ.inv hrne
+    simpa [hk_def] using h
+  have hθ' : HasDerivAt (fun s => (ρ s)⁻¹ • c s)
+      ((ρ t)⁻¹ • c' + (-(k / ρ t) / (ρ t)^2) • c t) t := by
+    have h := hinv.smul hc
+    simpa using h
+  have hzero : (ρ t)⁻¹ • c' + (-(k / ρ t) / (ρ t)^2) • c t = 0 := by
+    -- substitute the radial form of `c'` (only the standalone `c'`).
+    rw [hrad]
+    rw [smul_smul, ← add_smul]
+    rw [show (ρ t)⁻¹ * (k / B (c t) (c t)) + -(k / ρ t) / ρ t ^ 2 = 0 by
+      rw [← hρsq]; field_simp; ring]
+    rw [zero_smul]
+  rwa [hzero] at hθ'
+
 /-- **Right-difference-quotient fencing theorem.** If `ρ` is continuous on
 `[a, b]` with `ρ a ≤ 0`, and `φ` is integrable on `[a, b]`, continuous from
 the right at every interior point, and dominates the right-side limit inferior
@@ -2534,6 +2570,85 @@ private theorem radialDist_endpoint_le_pathELength
         ≤ ENNReal.ofReal (∫ t in a..b, φ t) := ENNReal.ofReal_le_ofReal hftc
     _ ≤ pathELength I γ a b := hpath
 
+/-- **Ball-wide injectivity of the exponential differential.** For a vector
+`u` inside the `C²`-ball `‖u‖ < expMapC2Radius g p`, the manifold differential
+`mfderiv (fun y ↦ expMap g p y) u` is injective.  The normal chart is the
+inverse of `expMap g p` (as a partial diffeomorphism), so the chart-image left
+inverse `normalChartAt g p` produces, via the chain rule on the composite
+`normalChartAt ∘ expMap = id` valid on a neighbourhood of `u`, a continuous
+linear left inverse of the exponential differential; a linear map with a left
+inverse is injective.  This is the keystone of the equality-case rigidity: it
+lets the annihilation of the `g_p`-orthogonal part under `dexp` (the content of
+`gauss_radial_lower_bound_eq_iff`) be lifted to the annihilation of the
+orthogonal part itself. -/
+private theorem mfderiv_expMap_injective_of_norm_lt_radius
+    (g : SmoothRiemannianMetric I M) (p : M) {u : E}
+    (hu : ‖u‖ < expMapC2Radius (I := I) g p) :
+    Function.Injective
+      (mfderiv 𝓘(ℝ, E) I
+        (fun y : E => (expMap (I := I) g p (show TangentSpace I p from y) : M)) u) := by
+  classical
+  -- Abbreviations.
+  set Φ := NormalCoordinates.expMapDiffeo (I := I) g p with hΦ_def
+  set ψ := NormalCoordinates.normalChartAt (I := I) g p with hψ_def
+  -- `u` lies in the exponential-side diffeomorphism's source.
+  have hsrc : u ∈ Φ.source := by
+    have := ball_subset_normalChartAt_target (I := I) g p hu
+    rw [NormalCoordinates.normalChartAt_target_eq] at this
+    exact this
+  -- The two functions `Φ` and `y ↦ expMap g p y` agree near `u` (open source).
+  have hΦ_exp : Φ =ᶠ[nhds u]
+      (fun y : E => (expMap (I := I) g p (show TangentSpace I p from y) : M)) := by
+    refine Filter.eventuallyEq_of_mem (Φ.open_source.mem_nhds hsrc) ?_
+    intro y hy
+    exact NormalCoordinates.expMapDiffeo_apply_eq (I := I) g p hy
+  -- So the exponential differential at `u` equals the differential of `Φ` at `u`.
+  set A : E →L[ℝ] TangentSpace I (expMap (I := I) g p (show TangentSpace I p from u)) :=
+    mfderiv 𝓘(ℝ, E) I
+      (fun y : E => (expMap (I := I) g p (show TangentSpace I p from y) : M)) u with hA_def
+  have hA_eq : A = mfderiv 𝓘(ℝ, E) I Φ u := by
+    rw [hA_def, hΦ_exp.mfderiv_eq]
+  -- `Φ u = expMap g p u` (agreement on the source).
+  have hΦu : Φ u = expMap (I := I) g p (show TangentSpace I p from u) :=
+    NormalCoordinates.expMapDiffeo_apply_eq (I := I) g p hsrc
+  -- `ψ ∘ Φ = id` near `u` (left inverse on the open source).
+  have hψΦ_id : (ψ ∘ Φ) =ᶠ[nhds u] (_root_.id : E → E) := by
+    refine Filter.eventuallyEq_of_mem (Φ.open_source.mem_nhds hsrc) ?_
+    intro y hy
+    change ψ (Φ y) = y
+    exact Φ.left_inv hy
+  -- Differentiability of `Φ` at `u` and of `ψ` at `Φ u`.
+  have hΦ_diff : MDifferentiableAt 𝓘(ℝ, E) I Φ u :=
+    (Φ.contMDiffOn_toFun.mdifferentiableOn one_ne_zero u hsrc).mdifferentiableAt
+      (Φ.open_source.mem_nhds hsrc)
+  have hΦu_target : Φ u ∈ ψ.source := by
+    rw [hψ_def, NormalCoordinates.normalChartAt_source_eq]
+    exact Φ.map_source hsrc
+  have hψ_diff : MDifferentiableAt I 𝓘(ℝ, E) ψ (Φ u) :=
+    ((NormalCoordinates.normalChartAt_contMDiffOn (I := I) g p).mdifferentiableOn
+      one_ne_zero (Φ u) hΦu_target).mdifferentiableAt
+      ((NormalCoordinates.normalChartAt_open_source (I := I) g p).mem_nhds hΦu_target)
+  -- Chain rule on `ψ ∘ Φ = id`, evaluated pointwise: `mfderiv ψ (Φ u)` is a
+  -- left inverse of `mfderiv Φ u`.
+  have hchain := mfderiv_comp (I := 𝓘(ℝ, E)) (I' := I) (I'' := 𝓘(ℝ, E))
+    (f := Φ) (g := ψ) (x := u) hψ_diff hΦ_diff
+  have hid : mfderiv 𝓘(ℝ, E) 𝓘(ℝ, E) (ψ ∘ Φ) u
+      = mfderiv 𝓘(ℝ, E) 𝓘(ℝ, E) (_root_.id : E → E) u := hψΦ_id.mfderiv_eq
+  have hleft : Function.LeftInverse
+      (mfderiv I 𝓘(ℝ, E) ψ (Φ u)) (mfderiv 𝓘(ℝ, E) I Φ u) := by
+    intro x
+    -- Evaluate the CLM identity `mfderiv (ψ∘Φ) u = mfderiv id u` at `x`.
+    have hidx := congrArg (fun (T : E →L[ℝ] E) => T x) hid
+    simp only at hidx
+    -- LHS: `mfderiv (ψ∘Φ) u x = mfderiv ψ (Φ u) (mfderiv Φ u x)`.
+    rw [hchain] at hidx
+    -- RHS: `mfderiv id u x = x`.
+    rw [mfderiv_id] at hidx
+    simpa using hidx
+  have hΦinj : Function.Injective (mfderiv 𝓘(ℝ, E) I Φ u) := hleft.injective
+  rw [hA_eq]
+  exact hΦinj
+
 set_option linter.unusedVariables false in
 /-- **Inside the normal ball, every `C¹` curve from `p` to `expMap g p v`
 has length at least the `g_p`-norm of `v`.** This is the length lower
@@ -2891,6 +3006,614 @@ theorem normalBall_radial_unique_minimizer
       _ ≤ pathELength I γ (0:ℝ) 1 := hpath_mono
       _ < r := hγ_len
 
+/-- **A minimiser of exact radial length stays inside the `C²`-ball.** A `C¹`
+curve `γ` on `[a, b]` from `p`, confined to the normal-chart source, whose total
+`pathELength` is at most the `g_p`-radial bound `S = √(g_p(v, v)) < expRadiusGp`,
+has chart image inside the Euclidean `C²`-ball at every parameter.  This is the
+first-exit confinement underlying the equality case: were the chart radial
+distance to reach a level `δ ∈ (S, expRadiusGp)` at some first time `t₀`, the
+radial fencing on `[a, t₀]` would force `δ ≤ pathELength γ a t₀ ≤ pathELength
+γ a b ≤ S < δ`, a contradiction.  The output ball bound feeds the pointwise
+Gauss estimates that are only available on the `C²`-ball. -/
+private theorem minimizer_confined_to_C2_ball
+    (g : SmoothRiemannianMetric I M) (p : M) {v : E}
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+        ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hsmall_g : Real.sqrt (g.inner p v v) < expRadiusGp (I := I) g p)
+    {γ : ℝ → M} {a b : ℝ}
+    (hγ : CMDiff[Set.Icc a b] 1 γ) (hγa : γ a = p)
+    (hγ_inBall : ∀ t ∈ Set.Icc a b,
+      γ t ∈ (NormalCoordinates.normalChartAt (I := I) g p).source)
+    (hlen_le : pathELength I γ a b ≤
+      ENNReal.ofReal (Real.sqrt (g.inner p v v))) :
+    ∀ t ∈ Set.Icc a b,
+      ‖NormalCoordinates.normalChartAt (I := I) g p (γ t)‖ <
+        expMapC2Radius (I := I) g p := by
+  classical
+  set ψ := NormalCoordinates.normalChartAt (I := I) g p with hψ_def
+  set B : E →L[ℝ] E →L[ℝ] ℝ := g.inner p with hB_def
+  have hBsym : ∀ x y : E, B x y = B y x := g.symm p
+  have hBnn : ∀ x : E, 0 ≤ B x x := fun x => by
+    rcases eq_or_ne x 0 with h | h
+    · subst h; simp
+    · exact (g.pos p x h).le
+  set S : ℝ := Real.sqrt (g.inner p v v) with hS_def
+  have hS_nn : 0 ≤ S := Real.sqrt_nonneg _
+  set c : ℝ → E := fun t => ψ (γ t) with hc_def
+  set ρ : ℝ → ℝ := fun t => Real.sqrt (B (c t) (c t)) with hρ_def
+  have hγcont : ContinuousOn γ (Set.Icc a b) := hγ.continuousOn
+  have hψcont : ContinuousOn ψ ψ.source :=
+    (NormalCoordinates.normalChartAt_contMDiffOn (I := I) g p).continuousOn
+  have hccont : ContinuousOn c (Set.Icc a b) := hψcont.comp hγcont hγ_inBall
+  have hρc : ContinuousOn ρ (Set.Icc a b) :=
+    ((psd_sqrt_lipschitz B hBsym hBnn).continuous.comp_continuousOn hccont)
+  -- `ρ` is the `g_p`-radial distance; `ρ t < expRadiusGp ⟹ ‖c t‖ < C²radius`.
+  have hρ_to_ball : ∀ {t : ℝ}, ρ t < expRadiusGp (I := I) g p →
+      ‖c t‖ < expMapC2Radius (I := I) g p := by
+    intro t ht
+    exact norm_lt_expMapC2Radius_of_sqrt_inner_lt (I := I) g p ht
+  -- It suffices to show `ρ t < expRadiusGp` for all `t ∈ [a, b]`.
+  suffices hbound : ∀ t ∈ Set.Icc a b, ρ t < expRadiusGp (I := I) g p by
+    intro t ht
+    exact hρ_to_ball (hbound t ht)
+  -- Pick `δ` strictly between `S` and `expRadiusGp`.
+  obtain ⟨δ, hSδ, hδR⟩ := exists_between hsmall_g
+  have hδ_pos : 0 < δ := lt_of_le_of_lt hS_nn hSδ
+  -- It suffices to show `ρ t ≤ δ` for all `t` (then `ρ t ≤ δ < expRadiusGp`).
+  suffices hle : ∀ t ∈ Set.Icc a b, ρ t ≤ δ by
+    intro t ht; exact lt_of_le_of_lt (hle t ht) hδR
+  -- Suppose not.  Let `t₀` be the first time `ρ` reaches `δ` (`Z = {ρ ≥ δ}`).
+  by_contra hcon
+  simp only [not_forall, not_le, exists_prop] at hcon
+  obtain ⟨t', ht'Icc, ht'δ⟩ := hcon
+  -- `Z` is the (closed, nonempty) set of parameters with `ρ ≥ δ`.
+  set Z : Set ℝ := {t ∈ Set.Icc a b | δ ≤ ρ t} with hZ_def
+  have hZne : Z.Nonempty := ⟨t', ht'Icc, ht'δ.le⟩
+  have hZbdd : BddBelow Z := ⟨a, fun t ht => ht.1.1⟩
+  set t₀ : ℝ := sInf Z with ht₀_def
+  have ht₀_lb : a ≤ t₀ := le_csInf hZne (fun t ht => ht.1.1)
+  have ht₀_ub : t₀ ≤ b := by
+    obtain ⟨t, ht⟩ := hZne; exact le_trans (csInf_le hZbdd ht) ht.1.2
+  have ht₀Icc : t₀ ∈ Set.Icc a b := ⟨ht₀_lb, ht₀_ub⟩
+  -- For `s < t₀`, `s ∉ Z`, so (if `s ∈ [a,b]`) `ρ s < δ`.
+  have hpre : ∀ s ∈ Set.Icc a b, s < t₀ → ρ s < δ := by
+    intro s hs hst₀
+    by_contra hns
+    have hns' : δ ≤ ρ s := not_lt.mp hns
+    have hsZ : s ∈ Z := ⟨hs, hns'⟩
+    exact absurd (csInf_le hZbdd hsZ) (not_le.mpr hst₀)
+  -- By continuity and closedness of `Z`, `ρ t₀ = δ`.
+  have hρt₀_ge : δ ≤ ρ t₀ := by
+    -- `ρ t₀ = lim_{s→t₀⁻} ρ s` if `t₀ > a`, but each such `ρ s < δ`; so `≤ δ`,
+    -- and equals `δ` by closedness.  We obtain `δ ≤ ρ t₀` from `Z` closed.
+    have hZclosed : IsClosed Z := by
+      have h2 : Z = Set.Icc a b ∩ ρ ⁻¹' (Set.Ici δ) := by
+        ext t; simp only [hZ_def, Set.mem_setOf_eq, Set.mem_inter_iff,
+          Set.mem_preimage, Set.mem_Ici]
+      rw [h2]
+      exact hρc.preimage_isClosed_of_isClosed isClosed_Icc isClosed_Ici
+    have ht₀mem : t₀ ∈ Z := by
+      rw [← hZclosed.closure_eq]
+      exact csInf_mem_closure hZne hZbdd
+    exact ht₀mem.2
+  have hρt₀_le : ρ t₀ ≤ δ := by
+    rcases eq_or_lt_of_le ht₀_lb with h0 | h0
+    · -- `t₀ = a`: but `ρ a = 0 < δ`, so `ρ t₀ = 0 ≤ δ`.
+      rw [← h0]
+      have hca : c a = 0 := by
+        rw [hc_def]; simp only; rw [hγa, hψ_def]
+        exact NormalCoordinates.normalChartAt_centre (I := I) g p
+      rw [hρ_def]; simp only [hca, map_zero, Real.sqrt_zero]; exact hδ_pos.le
+    · -- `t₀ > a`: `ρ t₀ = lim_{s→t₀⁻} ρ s ≤ δ` since each `ρ s < δ`.
+      have htend : Filter.Tendsto ρ (nhdsWithin t₀ (Set.Iio t₀)) (nhds (ρ t₀)) :=
+        (hρc.continuousWithinAt ht₀Icc).mono_of_mem_nhdsWithin (by
+          rw [mem_nhdsWithin]
+          exact ⟨Set.Ioi a, isOpen_Ioi, h0, by
+            intro z hz; exact ⟨hz.1.le, le_trans hz.2.le ht₀_ub⟩⟩)
+      have hev : ∀ᶠ s in nhdsWithin t₀ (Set.Iio t₀), ρ s ≤ δ := by
+        have hpos : Set.Ioo a t₀ ∈ nhdsWithin t₀ (Set.Iio t₀) := by
+          rw [mem_nhdsWithin]
+          exact ⟨Set.Ioi a, isOpen_Ioi, h0, by intro z hz; exact ⟨hz.1, hz.2⟩⟩
+        filter_upwards [hpos] with s hs
+        exact (hpre s ⟨hs.1.le, le_trans hs.2.le ht₀_ub⟩ hs.2).le
+      haveI : (nhdsWithin t₀ (Set.Iio t₀)).NeBot := nhdsLT_neBot t₀
+      exact le_of_tendsto htend hev
+  have ht₀_eq : ρ t₀ = δ := le_antisymm hρt₀_le hρt₀_ge
+  -- On `[a, t₀]`, `ρ ≤ δ < expRadiusGp`, hence `‖c‖ < C²radius` and in domain.
+  have hpref_le : ∀ s ∈ Set.Icc a t₀, ρ s ≤ δ := by
+    intro s hs
+    rcases eq_or_lt_of_le hs.2 with h | h
+    · rw [h]; exact hρt₀_le
+    · exact (hpre s ⟨hs.1, le_trans hs.2 ht₀_ub⟩ h).le
+  have hsrc' : ∀ s ∈ Set.Icc a t₀, γ s ∈ ψ.source :=
+    fun s hs => hγ_inBall s ⟨hs.1, le_trans hs.2 ht₀_ub⟩
+  have hbball' : ∀ s ∈ Set.Icc a t₀, ‖ψ (γ s)‖ < expMapC2Radius (I := I) g p := by
+    intro s hs
+    exact hρ_to_ball (lt_of_le_of_lt (hpref_le s hs) hδR)
+  have hdom' : ∀ s ∈ Set.Icc a t₀,
+      (show TangentSpace I p from ψ (γ s)) ∈ expDomain (I := I) g p :=
+    fun s hs => mem_expDomain_of_norm_lt_radius (I := I) g p (hbball' s hs)
+  have hγ_pref : CMDiff[Set.Icc a t₀] 1 γ := hγ.mono (Set.Icc_subset_Icc le_rfl ht₀_ub)
+  have hlb := radialDist_endpoint_le_pathELength (I := I) g p hEnorm
+    (a := a) (b := t₀) ht₀_lb hγa hγ_pref hsrc' hbball' hdom'
+  -- The endpoint radial value `√(g_p(ψ(γ t₀), ψ(γ t₀))) = ρ t₀ = δ`.
+  have hendpt : Real.sqrt (g.inner p (ψ (γ t₀)) (ψ (γ t₀))) = δ := by
+    have : ρ t₀ = δ := ht₀_eq
+    rwa [hρ_def, hc_def, hB_def] at this
+  rw [hendpt] at hlb
+  -- `pathELength γ a t₀ ≤ pathELength γ a b`.
+  have hpath_mono : pathELength I γ a t₀ ≤ pathELength I γ a b := by
+    have hadd : pathELength I γ a t₀ + pathELength I γ t₀ b = pathELength I γ a b :=
+      pathELength_add (γ := γ) (I := I) ht₀_lb ht₀_ub
+    calc pathELength I γ a t₀ ≤ pathELength I γ a t₀ + pathELength I γ t₀ b := le_self_add
+      _ = pathELength I γ a b := hadd
+  -- Assemble: `δ ≤ pathELength γ a t₀ ≤ pathELength γ a b ≤ S < δ`.
+  have hδS : ENNReal.ofReal δ ≤ ENNReal.ofReal S := by
+    calc ENNReal.ofReal δ ≤ pathELength I γ a t₀ := hlb
+      _ ≤ pathELength I γ a b := hpath_mono
+      _ ≤ ENNReal.ofReal S := hlen_le
+  have hδS' : δ ≤ S := (ENNReal.ofReal_le_ofReal_iff hS_nn).mp hδS
+  exact absurd hδS' (not_le.mpr hSδ)
+
+/-- **Radial-distance identity and chart-velocity radiality for an exact
+minimiser.** Under the `C²`-ball confinement (`hbball`), a `C¹` curve `γ` from
+`p` confined to the chart with exact radial length `√(g_p(v,v))` has chart
+radial distance `ρ(t) = √(g_p(ψ(γt), ψ(γt)))` equal to the running speed
+integral `∫_a^t √(g(γs)(γ's)(γ's)) ds` at every parameter, so `ρ` is monotone;
+and at every *interior* parameter where the chart image `ψ(γt)` is nonzero, the
+chart velocity `mfderiv (ψ∘γ) t 1` is `g_p`-parallel to `ψ(γt)`.  The radiality
+is the rigidity extracted from the tightness of Gauss's bound:
+the running integral makes `ρ` differentiable with `ρ'(t)` equal to the
+intrinsic speed, which forces the pointwise Gauss estimate to be an equality and
+hence (via `gauss_radial_lower_bound_eq_iff` and the ball-wide injectivity of
+the exponential differential) the chart velocity to be radial. -/
+private theorem radial_minimizer_radiality
+    (g : SmoothRiemannianMetric I M) (p : M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+        ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    {γ : ℝ → M} {a b : ℝ} (hab : a ≤ b)
+    (hγ : CMDiff[Set.Icc a b] 1 γ) (hγa : γ a = p)
+    (hγ_inBall : ∀ t ∈ Set.Icc a b,
+      γ t ∈ (NormalCoordinates.normalChartAt (I := I) g p).source)
+    (hbball : ∀ t ∈ Set.Icc a b,
+      ‖NormalCoordinates.normalChartAt (I := I) g p (γ t)‖ <
+        expMapC2Radius (I := I) g p)
+    (hlen : pathELength I γ a b =
+      ENNReal.ofReal (Real.sqrt
+        (g.inner p (NormalCoordinates.normalChartAt (I := I) g p (γ b))
+          (NormalCoordinates.normalChartAt (I := I) g p (γ b))))) :
+    (∀ s t : ℝ, s ∈ Set.Icc a b → t ∈ Set.Icc a b → s ≤ t →
+        Real.sqrt (g.inner p (NormalCoordinates.normalChartAt (I := I) g p (γ s))
+            (NormalCoordinates.normalChartAt (I := I) g p (γ s)))
+          ≤ Real.sqrt (g.inner p (NormalCoordinates.normalChartAt (I := I) g p (γ t))
+            (NormalCoordinates.normalChartAt (I := I) g p (γ t)))) ∧
+    (∀ t ∈ Set.Ioo a b,
+      NormalCoordinates.normalChartAt (I := I) g p (γ t) ≠ 0 →
+      mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, E)
+          (fun s => NormalCoordinates.normalChartAt (I := I) g p (γ s)) t (1:ℝ)
+        = (g.inner p (NormalCoordinates.normalChartAt (I := I) g p (γ t))
+              (mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, E)
+                (fun s => NormalCoordinates.normalChartAt (I := I) g p (γ s)) t (1:ℝ))
+            / g.inner p (NormalCoordinates.normalChartAt (I := I) g p (γ t))
+                (NormalCoordinates.normalChartAt (I := I) g p (γ t)))
+          • NormalCoordinates.normalChartAt (I := I) g p (γ t)) := by
+  classical
+  set ψ := NormalCoordinates.normalChartAt (I := I) g p with hψ_def
+  set B : E →L[ℝ] E →L[ℝ] ℝ := g.inner p with hB_def
+  have hBsym : ∀ x y : E, B x y = B y x := g.symm p
+  have hBnn : ∀ x : E, 0 ≤ B x x := fun x => by
+    rcases eq_or_ne x 0 with h | h
+    · subst h; simp
+    · exact (g.pos p x h).le
+  set c : ℝ → E := fun t => ψ (γ t) with hc_def
+  set ρ : ℝ → ℝ := fun t => Real.sqrt (B (c t) (c t)) with hρ_def
+  set φ : ℝ → ℝ := fun t =>
+    Real.sqrt (g.inner (γ t)
+      (mfderivWithin 𝓘(ℝ, ℝ) I γ (Set.Icc a b) t 1)
+      (mfderivWithin 𝓘(ℝ, ℝ) I γ (Set.Icc a b) t 1))
+    with hφ_def
+  -- Domain membership along the curve.
+  have hdom : ∀ t ∈ Set.Icc a b,
+      (show TangentSpace I p from ψ (γ t)) ∈ expDomain (I := I) g p :=
+    fun t ht => mem_expDomain_of_norm_lt_radius (I := I) g p (hbball t ht)
+  -- Continuity of `c`, `ρ`, `φ` (mirroring the engine).
+  have hγcont : ContinuousOn γ (Set.Icc a b) := hγ.continuousOn
+  have hψcont : ContinuousOn ψ ψ.source :=
+    (NormalCoordinates.normalChartAt_contMDiffOn (I := I) g p).continuousOn
+  have hccont : ContinuousOn c (Set.Icc a b) := hψcont.comp hγcont hγ_inBall
+  have hρc : ContinuousOn ρ (Set.Icc a b) :=
+    ((psd_sqrt_lipschitz B hBsym hBnn).continuous.comp_continuousOn hccont)
+  have hca : c a = 0 := by
+    rw [hc_def]; simp only; rw [hγa, hψ_def]
+    exact NormalCoordinates.normalChartAt_centre (I := I) g p
+  have hρa0 : ρ a = 0 := by rw [hρ_def]; simp only [hca, map_zero, Real.sqrt_zero]
+  -- Velocity continuity for `φ`.
+  rcases eq_or_lt_of_le hab with hab_eq | hab_lt
+  · -- Degenerate `a = b`: both conclusions are vacuous / trivial.
+    subst hab_eq
+    refine ⟨?_, ?_⟩
+    · intro s t hs ht hst
+      have hsa : s = a := le_antisymm hs.2 hs.1
+      have hta : t = a := le_antisymm ht.2 ht.1
+      rw [hsa, hta]
+    · intro t ht; exact absurd ht (by simp)
+  have hUnique : UniqueMDiffOn 𝓘(ℝ, ℝ) (Set.Icc a b) := fun x hx => by
+    rw [uniqueMDiffWithinAt_iff_uniqueDiffWithinAt]; exact (uniqueDiffOn_Icc hab_lt) x hx
+  have hLift : Continuous (fun t : ℝ => (⟨t, (1 : ℝ)⟩ : TangentBundle 𝓘(ℝ, ℝ) ℝ)) :=
+    (tangentBundleModelSpaceHomeomorph 𝓘(ℝ, ℝ)).symm.continuous.comp
+      (continuous_id.prodMk continuous_const)
+  have hMaps : Set.MapsTo (fun t : ℝ => (⟨t, (1 : ℝ)⟩ : TangentBundle 𝓘(ℝ, ℝ) ℝ))
+      (Set.Icc a b) (Bundle.TotalSpace.proj ⁻¹' (Set.Icc a b)) := fun t ht => by simpa using ht
+  have hVel : ContinuousOn (fun t : ℝ => TotalSpace.mk' E
+      (E := (TangentSpace I : M → Type _)) (γ t)
+      (mfderivWithin 𝓘(ℝ, ℝ) I γ (Set.Icc a b) t 1)) (Set.Icc a b) :=
+    ((hγ.continuousOn_tangentMapWithin (le_refl 1) hUnique).comp
+      hLift.continuousOn hMaps).congr (fun t _ => rfl)
+  have hφc : ContinuousOn φ (Set.Icc a b) := by
+    rw [hφ_def]
+    exact Real.continuous_sqrt.comp_continuousOn
+      (Variation.continuousOn_g_inner_along_curve (I := I) g hVel hVel)
+  have hφnn : ∀ t ∈ Set.Icc a b, 0 ≤ φ t := fun t _ => Real.sqrt_nonneg _
+  have hφint : MeasureTheory.IntegrableOn φ (Set.Icc a b) MeasureTheory.volume :=
+    hφc.integrableOn_compact isCompact_Icc
+  -- Alias used by the slope analysis below.
+  have hsrc : ∀ t ∈ Set.Icc a b, γ t ∈ ψ.source := hγ_inBall
+  have hφcont : ∀ x ∈ Set.Ico a b, ContinuousWithinAt φ (Set.Ioi x) x := by
+    intro x hx
+    refine (hφc x ⟨hx.1, hx.2.le⟩).mono_of_mem_nhdsWithin ?_
+    rw [mem_nhdsWithin]
+    exact ⟨Set.Iio b, isOpen_Iio, hx.2, by
+      intro z hz; exact ⟨le_trans hx.1 (le_of_lt hz.2), le_of_lt hz.1⟩⟩
+  have hφ_eq_mfderiv : ∀ t ∈ Set.Ioo a b,
+      φ t = Real.sqrt
+        (g.inner (γ t) (mfderiv 𝓘(ℝ, ℝ) I γ t 1) (mfderiv 𝓘(ℝ, ℝ) I γ t 1)) := by
+    intro t ht
+    rw [hφ_def]; simp only
+    rw [mfderivWithin_of_mem_nhds (Icc_mem_nhds ht.1 ht.2)]
+  have hslope : ∀ x ∈ Set.Ico a b, ∀ r, φ x < r →
+      ∃ᶠ z in nhdsWithin x (Set.Ioi x), slope ρ x z < r := by
+    intro x hx r hr
+    have hxIcc : x ∈ Set.Icc a b := ⟨hx.1, hx.2.le⟩
+    set cv : E := mfderivWithin 𝓘(ℝ, ℝ) 𝓘(ℝ, E) c (Set.Icc a b) x 1 with hcv_def
+    have hcderiv : HasDerivWithinAt c cv (Set.Ici x) x := by
+      have hγdiff : MDifferentiableWithinAt 𝓘(ℝ, ℝ) I γ (Set.Icc a b) x :=
+        (hγ.mdifferentiableOn (by norm_num)) x hxIcc
+      have hψdiff : MDifferentiableWithinAt I 𝓘(ℝ, E) ψ ψ.source (γ x) :=
+        (NormalCoordinates.normalChartAt_contMDiffOn (I := I) g p).mdifferentiableOn
+          one_ne_zero (γ x) (hsrc x hxIcc)
+      have hcomp : MDifferentiableWithinAt 𝓘(ℝ, ℝ) 𝓘(ℝ, E) c (Set.Icc a b) x :=
+        hψdiff.comp x hγdiff (fun t ht => hsrc t ht)
+      have hmf : HasMFDerivWithinAt 𝓘(ℝ, ℝ) 𝓘(ℝ, E) c (Set.Icc a b) x
+          (mfderivWithin 𝓘(ℝ, ℝ) 𝓘(ℝ, E) c (Set.Icc a b) x) := hcomp.hasMFDerivWithinAt
+      rw [hasMFDerivWithinAt_iff_hasFDerivWithinAt] at hmf
+      have hHDW : HasDerivWithinAt c cv (Set.Icc a b) x := hmf.hasDerivWithinAt
+      refine hHDW.mono_of_mem_nhdsWithin ?_
+      rw [mem_nhdsWithin]
+      exact ⟨Set.Iio b, isOpen_Iio, hx.2, by
+        intro z hz; exact ⟨le_trans hx.1 hz.2, le_of_lt hz.1⟩⟩
+    by_cases hcx : c x = 0
+    · have htend : Filter.Tendsto (fun z => slope ρ x z)
+          (nhdsWithin x (Set.Ioi x)) (nhds (Real.sqrt (B cv cv))) := by
+        have hcz : Filter.Tendsto (fun z => (z - x)⁻¹ • c z)
+            (nhdsWithin x (Set.Ioi x)) (nhds cv) := by
+          have h0 := hcderiv.mono (Set.Ioi_subset_Ici_self)
+          rw [hasDerivWithinAt_iff_tendsto_slope] at h0
+          have hset : Set.Ioi x \ {x} = Set.Ioi x := by
+            ext z; simp only [Set.mem_diff, Set.mem_Ioi, Set.mem_singleton_iff]
+            exact ⟨fun h => h.1, fun h => ⟨h, ne_of_gt h⟩⟩
+          rw [hset] at h0
+          refine (Filter.tendsto_congr' ?_).mp h0
+          filter_upwards with z; rw [slope_def_module, hcx, sub_zero]
+        have hcont : Continuous (fun w : E => Real.sqrt (B w w)) := by fun_prop
+        have htend2 := (hcont.tendsto cv).comp hcz
+        refine (Filter.tendsto_congr' ?_).mp htend2
+        filter_upwards [self_mem_nhdsWithin] with z hz
+        have hzx : 0 < z - x := sub_pos.mpr hz
+        have heq : slope ρ x z
+            = Real.sqrt (B ((z - x)⁻¹ • c z) ((z - x)⁻¹ • c z)) := by
+          rw [hρ_def, slope_def_module, hcx]
+          simp only [map_zero, Real.sqrt_zero, sub_zero, smul_eq_mul, map_smul,
+            ContinuousLinearMap.smul_apply]
+          rw [show (z - x)⁻¹ * ((z - x)⁻¹ * B (c z) (c z))
+              = ((z - x)⁻¹) ^ 2 * B (c z) (c z) by ring,
+            Real.sqrt_mul (by positivity), Real.sqrt_sq (by positivity), mul_comm]
+        simp only [Function.comp_apply]
+        exact heq.symm
+      have hφx_eq : φ x = Real.sqrt (B cv cv) := by
+        have hγx_p : γ x = p := by
+          have hcx' : ψ (γ x) = 0 := hcx
+          have hpsrc : p ∈ ψ.source := by
+            rw [hψ_def]; exact NormalCoordinates.normalChartAt_source (I := I) g p
+          have hψp : ψ p = 0 := by
+            rw [hψ_def]; exact NormalCoordinates.normalChartAt_centre (I := I) g p
+          exact ψ.injOn (hsrc x hxIcc) hpsrc (by rw [hcx', hψp])
+        have hcv_eq : cv = mfderivWithin 𝓘(ℝ, ℝ) I γ (Set.Icc a b) x 1 := by
+          rw [hcv_def]
+          have hUnique : UniqueMDiffWithinAt 𝓘(ℝ, ℝ) (Set.Icc a b) x := by
+            rw [uniqueMDiffWithinAt_iff_uniqueDiffWithinAt]
+            exact (uniqueDiffOn_Icc hab_lt) x hxIcc
+          have hγdiff : MDifferentiableWithinAt 𝓘(ℝ, ℝ) I γ (Set.Icc a b) x :=
+            (hγ.mdifferentiableOn (by norm_num)) x hxIcc
+          have hψdiff : MDifferentiableWithinAt I 𝓘(ℝ, E) ψ ψ.source (γ x) :=
+            (NormalCoordinates.normalChartAt_contMDiffOn (I := I) g p).mdifferentiableOn
+              one_ne_zero (γ x) (hsrc x hxIcc)
+          have hchain := mfderivWithin_comp (I := 𝓘(ℝ, ℝ)) (I' := I) (I'' := 𝓘(ℝ, E))
+            (f := γ) (g := ψ) (s := Set.Icc a b) (u := ψ.source) x hψdiff hγdiff
+            (fun t ht => hsrc t ht) hUnique
+          have hcomp_eq : c = ψ ∘ γ := rfl
+          rw [hcomp_eq, hchain]
+          simp only [Function.comp_apply]
+          have hsource_nhds : ψ.source ∈ nhds (γ x) :=
+            (NormalCoordinates.normalChartAt_open_source (I := I) g p).mem_nhds (hsrc x hxIcc)
+          rw [mfderivWithin_of_mem_nhds hsource_nhds, hγx_p,
+            NormalCoordinates.mfderiv_normalChartAt_self]
+          rfl
+        simp only [hφ_def]
+        rw [hcv_eq, hγx_p, hB_def]; rfl
+      rw [hφx_eq] at hr
+      exact (htend.eventually_lt_const hr).frequently
+    · have hxIoo : x ∈ Set.Ioo a b := by
+        refine ⟨lt_of_le_of_ne hx.1 ?_, hx.2⟩
+        intro hxa; apply hcx; rw [← hxa]; exact hca
+      have hmem : Set.Icc a b ∈ nhds x := Icc_mem_nhds hxIoo.1 hxIoo.2
+      have hγdiff : MDifferentiableAt 𝓘(ℝ, ℝ) I γ x :=
+        ((hγ.mdifferentiableOn (by norm_num)) x hxIcc).mdifferentiableAt hmem
+      have hψdiff : MDifferentiableAt I 𝓘(ℝ, E) ψ (γ x) :=
+        ((NormalCoordinates.normalChartAt_contMDiffOn (I := I) g p).mdifferentiableOn
+          one_ne_zero (γ x) (hsrc x hxIcc)).mdifferentiableAt
+          ((NormalCoordinates.normalChartAt_open_source (I := I) g p).mem_nhds (hsrc x hxIcc))
+      have hcdiff : MDifferentiableAt 𝓘(ℝ, ℝ) 𝓘(ℝ, E) c x := hψdiff.comp x hγdiff
+      set cv₂ : E := mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, E) c x 1 with hcv₂_def
+      have hcHDA : HasDerivAt c cv₂ x := by
+        have hmf : HasMFDerivAt 𝓘(ℝ, ℝ) 𝓘(ℝ, E) c x (mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, E) c x) :=
+          hcdiff.hasMFDerivAt
+        rw [hasMFDerivAt_iff_hasFDerivAt] at hmf
+        exact hmf.hasDerivAt
+      have hpos : 0 < B (c x) (c x) := by rw [hB_def]; exact g.pos p (c x) hcx
+      have hρderiv : HasDerivAt ρ (B (c x) cv₂ / Real.sqrt (B (c x) (c x))) x :=
+        radialDist_hasDerivAt B hBsym c cv₂ hcHDA hpos
+      set ρ' : ℝ := B (c x) cv₂ / Real.sqrt (B (c x) (c x)) with hρ'_def
+      have hev : ∀ᶠ s in nhds x, γ s ∈ ψ.source := by
+        have hopen : Set.Ioo a b ∈ nhds x := isOpen_Ioo.mem_nhds hxIoo
+        filter_upwards [hopen] with s hs using hsrc s (Ioo_subset_Icc_self hs)
+      have hball : ‖ψ (γ x)‖ < expMapC2Radius (I := I) g p := hbball x hxIcc
+      have hune : ψ (γ x) ≠ 0 := hcx
+      have hgauss := gauss_pointwise_speed_lower_bound (I := I) g p hγdiff
+        (hsrc x hxIcc) (hdom x hxIcc) hball hune hev
+      have hcv₂_eq : cv₂ = mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, E)
+          (fun s => ψ (γ s)) x (1 : ℝ) := rfl
+      have hρ'sq_le : ρ' ^ 2 ≤
+          g.inner (γ x) (mfderiv 𝓘(ℝ, ℝ) I γ x 1) (mfderiv 𝓘(ℝ, ℝ) I γ x 1) := by
+        have hρ'sq : ρ' ^ 2 = (B (c x) cv₂) ^ 2 / B (c x) (c x) := by
+          rw [hρ'_def, div_pow, Real.sq_sqrt hpos.le]
+        rw [hρ'sq, hcv₂_eq, hB_def]
+        exact hgauss
+      have hφx_eq : φ x = Real.sqrt
+          (g.inner (γ x) (mfderiv 𝓘(ℝ, ℝ) I γ x 1) (mfderiv 𝓘(ℝ, ℝ) I γ x 1)) := by
+        simp only [hφ_def]
+        rw [mfderivWithin_of_mem_nhds hmem]
+      have hρ'_le : ρ' ≤ φ x := by
+        rw [hφx_eq]
+        calc ρ' ≤ |ρ'| := le_abs_self _
+          _ = Real.sqrt (ρ' ^ 2) := (Real.sqrt_sq_eq_abs _).symm
+          _ ≤ _ := Real.sqrt_le_sqrt hρ'sq_le
+      have hρ'_lt : ρ' < r := lt_of_le_of_lt hρ'_le hr
+      exact (hρderiv.hasDerivWithinAt (s := Set.Ici x)).liminf_right_slope_le hρ'_lt
+  -- (continued below)
+  -- `ρ b = ∫_a^b φ`: `pathELength = ofReal(∫ φ)` (via `hEnorm`) `= ofReal(ρ b)`.
+  have hpath_eq : pathELength I γ a b = ENNReal.ofReal (∫ t in a..b, φ t) := by
+    rw [pathELength_eq_lintegral_mfderiv_Ioo,
+      intervalIntegral.integral_of_le hab, MeasureTheory.integral_Ioc_eq_integral_Ioo,
+      MeasureTheory.ofReal_integral_eq_lintegral_ofReal
+        (hφint.mono_set Ioo_subset_Icc_self)
+        (by filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioo] with x hx
+            using hφnn x (Ioo_subset_Icc_self hx))]
+    apply MeasureTheory.setLIntegral_congr_fun measurableSet_Ioo
+    intro t ht
+    simp only
+    rw [hφ_eq_mfderiv t ht]
+    exact hEnorm (γ t) (mfderiv 𝓘(ℝ, ℝ) I γ t 1)
+  -- A convenient interval-integrability helper for sub-intervals of `[a, b]`.
+  have hφii : ∀ s t : ℝ, a ≤ s → s ≤ t → t ≤ b →
+      IntervalIntegrable φ MeasureTheory.volume s t := by
+    intro s t has hst htb
+    refine MeasureTheory.IntegrableOn.intervalIntegrable ?_
+    rw [Set.uIcc_of_le hst]
+    exact hφint.mono_set (Set.Icc_subset_Icc has htb)
+  have hint_nn : ∀ s t : ℝ, a ≤ s → s ≤ t → t ≤ b → 0 ≤ ∫ u in s..t, φ u := by
+    intro s t has hst htb
+    rw [intervalIntegral.integral_of_le hst]
+    exact MeasureTheory.setIntegral_nonneg measurableSet_Ioc
+      (fun u hu => hφnn u ⟨le_trans has (le_of_lt hu.1), le_trans hu.2 htb⟩)
+  have hρb_nn : 0 ≤ ρ b := Real.sqrt_nonneg _
+  have hρb_int : ρ b = ∫ t in a..b, φ t := by
+    -- `pathELength = ofReal(√(g_p(ψ(γb),ψ(γb)))) = ofReal(ρ b)` and `= ofReal(∫ φ)`.
+    have hρb_eq : ρ b = Real.sqrt
+        (g.inner p (ψ (γ b)) (ψ (γ b))) := rfl
+    have h : ENNReal.ofReal (ρ b) = ENNReal.ofReal (∫ t in a..b, φ t) := by
+      rw [hρb_eq, ← hlen, hpath_eq]
+    exact (ENNReal.ofReal_eq_ofReal_iff hρb_nn (hint_nn a b le_rfl hab le_rfl)).mp h
+  -- `ρ t ≤ ∫_a^t φ` (slope fencing on `[a, t]`).
+  have hρ_le_int : ∀ t ∈ Set.Icc a b, ρ t ≤ ∫ s in a..t, φ s := by
+    intro t ht
+    have hat : a ≤ t := ht.1
+    have htb : t ≤ b := ht.2
+    refine image_radialDist_le_intervalIntegral_of_slope_le hat
+      (hρc.mono (Set.Icc_subset_Icc le_rfl htb)) (le_of_eq hρa0)
+      (hφint.mono_set (Set.Icc_subset_Icc le_rfl htb)) ?_ ?_
+    · intro x hx
+      exact hφcont x ⟨hx.1, lt_of_lt_of_le hx.2 htb⟩
+    · intro x hx r hr
+      exact hslope x ⟨hx.1, lt_of_lt_of_le hx.2 htb⟩ r hr
+  -- `ρ b - ρ t ≤ ∫_t^b φ` (slope fencing of `ρ(·) - ρ t` on `[t, b]`).
+  have hρb_sub_le : ∀ t ∈ Set.Icc a b, ρ b - ρ t ≤ ∫ s in t..b, φ s := by
+    intro t ht
+    have hat : a ≤ t := ht.1
+    have htb : t ≤ b := ht.2
+    have hkey := image_radialDist_le_intervalIntegral_of_slope_le
+      (ρ := fun s => ρ s - ρ t) (φ := φ) htb
+      ((hρc.mono (Set.Icc_subset_Icc hat le_rfl)).sub continuousOn_const)
+      (by simp) (hφint.mono_set (Set.Icc_subset_Icc hat le_rfl)) ?_ ?_
+    · simpa using hkey
+    · intro x hx
+      exact hφcont x ⟨le_trans hat hx.1, hx.2⟩
+    · intro x hx r hr
+      -- slope of `ρ - const` equals slope of `ρ`.
+      have hsl := hslope x ⟨le_trans hat hx.1, hx.2⟩ r hr
+      refine hsl.mono (fun z hz => ?_)
+      have hsleq : slope (fun s => ρ s - ρ t) x z = slope ρ x z := by
+        rw [slope_def_field, slope_def_field]; ring_nf
+      rw [hsleq]; exact hz
+  -- Sandwich: `ρ t = ∫_a^t φ` for all `t`.
+  have hρ_int : ∀ t ∈ Set.Icc a b, ρ t = ∫ s in a..t, φ s := by
+    intro t ht
+    have hat : a ≤ t := ht.1
+    have htb : t ≤ b := ht.2
+    have hsplit : (∫ s in a..t, φ s) + ∫ s in t..b, φ s = ∫ s in a..b, φ s :=
+      intervalIntegral.integral_add_adjacent_intervals
+        (hφii a t le_rfl hat htb) (hφii t b hat htb le_rfl)
+    have hle1 := hρ_le_int t ht
+    have hle2 := hρb_sub_le t ht
+    -- `ρ b = ρ t + (ρ b - ρ t) ≤ ∫_a^t + ∫_t^b = ∫_a^b = ρ b`.
+    have : ρ b ≤ ∫ s in a..b, φ s := by
+      rw [← hsplit]
+      calc ρ b = ρ t + (ρ b - ρ t) := by ring
+        _ ≤ (∫ s in a..t, φ s) + ∫ s in t..b, φ s := add_le_add hle1 hle2
+    rw [hρb_int] at this
+    -- equality forces both sub-bounds to be equalities.
+    have heq1 : ρ t = ∫ s in a..t, φ s := by
+      by_contra hne
+      have hlt1 : ρ t < ∫ s in a..t, φ s := lt_of_le_of_ne hle1 hne
+      have : ρ b < ∫ s in a..b, φ s := by
+        rw [← hsplit]
+        calc ρ b = ρ t + (ρ b - ρ t) := by ring
+          _ < (∫ s in a..t, φ s) + ∫ s in t..b, φ s := by
+              exact add_lt_add_of_lt_of_le hlt1 hle2
+      rw [hρb_int] at this; exact absurd rfl (ne_of_lt this)
+    exact heq1
+  -- `ρ` is monotone: it is the running integral of the nonnegative `φ`.
+  have hmono : ∀ s t : ℝ, s ∈ Set.Icc a b → t ∈ Set.Icc a b → s ≤ t → ρ s ≤ ρ t := by
+    intro s t hs ht hst
+    rw [hρ_int s hs, hρ_int t ht]
+    have hsub : (∫ u in a..t, φ u) - ∫ u in a..s, φ u = ∫ u in s..t, φ u := by
+      rw [intervalIntegral.integral_interval_sub_left
+        (hφii a t le_rfl ht.1 ht.2) (hφii a s le_rfl hs.1 hs.2)]
+    have hnn : 0 ≤ ∫ u in s..t, φ u := hint_nn s t hs.1 hst ht.2
+    linarith [hsub ▸ hnn]
+  -- Convert `ρ`-monotonicity to the stated `√(g_p ...)`-monotonicity.
+  refine ⟨fun s t hs ht hst => ?_, ?_⟩
+  · have := hmono s t hs ht hst
+    rwa [hρ_def, hc_def, hB_def] at this
+  -- Radiality at interior points where the chart image is nonzero.
+  · intro t ht hne
+    have htIcc : t ∈ Set.Icc a b := ⟨le_of_lt ht.1, le_of_lt ht.2⟩
+    have hmem : Set.Icc a b ∈ nhds t := Icc_mem_nhds ht.1 ht.2
+    -- Chart-velocity `cv₂ = mfderiv c t 1` and its `HasDerivAt`.
+    have hγdiff : MDifferentiableAt 𝓘(ℝ, ℝ) I γ t :=
+      ((hγ.mdifferentiableOn (by norm_num)) t htIcc).mdifferentiableAt hmem
+    have hψdiff : MDifferentiableAt I 𝓘(ℝ, E) ψ (γ t) :=
+      ((NormalCoordinates.normalChartAt_contMDiffOn (I := I) g p).mdifferentiableOn
+        one_ne_zero (γ t) (hsrc t htIcc)).mdifferentiableAt
+        ((NormalCoordinates.normalChartAt_open_source (I := I) g p).mem_nhds (hsrc t htIcc))
+    have hcdiff : MDifferentiableAt 𝓘(ℝ, ℝ) 𝓘(ℝ, E) c t := hψdiff.comp t hγdiff
+    set cv₂ : E := mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, E) c t 1 with hcv₂_def
+    have hcHDA : HasDerivAt c cv₂ t := by
+      have hmf : HasMFDerivAt 𝓘(ℝ, ℝ) 𝓘(ℝ, E) c t (mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, E) c t) :=
+        hcdiff.hasMFDerivAt
+      rw [hasMFDerivAt_iff_hasFDerivAt] at hmf
+      exact hmf.hasDerivAt
+    have hcx_ne : c t ≠ 0 := hne
+    have hpos : 0 < B (c t) (c t) := by rw [hB_def]; exact g.pos p (c t) hcx_ne
+    -- `ρ` has two derivatives at `t`: the radial one and the FTC one.
+    have hρderiv1 : HasDerivAt ρ (B (c t) cv₂ / Real.sqrt (B (c t) (c t))) t :=
+      radialDist_hasDerivAt B hBsym c cv₂ hcHDA hpos
+    -- FTC: `ρ = ∫_a^· φ` near `t`, and `φ` is continuous at `t`, giving `ρ' = φ t`.
+    have hρderiv2 : HasDerivAt ρ (φ t) t := by
+      have hftc : HasDerivAt (fun u => ∫ s in a..u, φ s) (φ t) t :=
+        intervalIntegral.integral_hasDerivAt_right
+          (hφii a t le_rfl (le_of_lt ht.1) (le_of_lt ht.2))
+          ⟨Set.Icc a b, hmem, hφc.aestronglyMeasurable measurableSet_Icc⟩
+          (hφc.continuousAt hmem)
+      refine hftc.congr_of_eventuallyEq ?_
+      filter_upwards [isOpen_Ioo.mem_nhds ht] with s hs
+      exact hρ_int s (Ioo_subset_Icc_self hs)
+    -- Uniqueness of the derivative: `B(ct)(cv₂)/ρ = φ t`, hence the Gauss
+    -- tightness `(B(ct)(cv₂))²/B(ct)(ct) = g(γt)(γ't)(γ't)`.
+    have hρ'_eq : B (c t) cv₂ / Real.sqrt (B (c t) (c t)) = φ t :=
+      hρderiv1.unique hρderiv2
+    -- The chart-velocity equals `mfderiv (ψ∘γ) t 1` and γ-velocity = dexp(cv₂).
+    have hev : ∀ᶠ s in nhds t, γ s ∈ ψ.source := by
+      have hopen : Set.Ioo a b ∈ nhds t := isOpen_Ioo.mem_nhds ht
+      filter_upwards [hopen] with s hs using hsrc s (Ioo_subset_Icc_self hs)
+    have hball : ‖ψ (γ t)‖ < expMapC2Radius (I := I) g p := hbball t htIcc
+    -- `gauss_pointwise_speed_lower_bound` gives the ≤; tightness gives `=`.
+    have hgauss := gauss_pointwise_speed_lower_bound (I := I) g p hγdiff
+      (hsrc t htIcc) (hdom t htIcc) hball hne hev
+    have hcv₂_eq : cv₂ = mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, E) (fun s => ψ (γ s)) t (1 : ℝ) := rfl
+    have hφt_sq : φ t ^ 2 =
+        g.inner (γ t) (mfderiv 𝓘(ℝ, ℝ) I γ t 1) (mfderiv 𝓘(ℝ, ℝ) I γ t 1) := by
+      rw [hφ_def]; simp only
+      rw [mfderivWithin_of_mem_nhds hmem, Real.sq_sqrt]
+      rcases eq_or_ne (mfderiv 𝓘(ℝ, ℝ) I γ t 1) 0 with h0 | h0
+      · rw [h0]; simp
+      · exact (g.pos (γ t) _ h0).le
+    -- `(B(ct)(cv₂))² / B(ct)(ct) = φ t ^ 2 = g(γt)(γ't)(γ't)`.
+    have hLHS_sq : (B (c t) cv₂) ^ 2 / B (c t) (c t) = φ t ^ 2 := by
+      have : (B (c t) cv₂ / Real.sqrt (B (c t) (c t))) ^ 2 = φ t ^ 2 := by rw [hρ'_eq]
+      rwa [div_pow, Real.sq_sqrt hpos.le] at this
+    have htight : (B (c t) cv₂) ^ 2 / B (c t) (c t) =
+        g.inner (γ t) (mfderiv 𝓘(ℝ, ℝ) I γ t 1) (mfderiv 𝓘(ℝ, ℝ) I γ t 1) := by
+      rw [hLHS_sq, hφt_sq]
+    -- Rewrite the intrinsic speed via `radial_chain_mfderiv` and `expMap_normalChartAt`
+    -- into the form appearing in `gauss_radial_lower_bound_eq_iff`.
+    have hchain := radial_chain_mfderiv (I := I) g p hγdiff (hsrc t htIcc) hball hev
+    have hbase : expMap (I := I) g p (show TangentSpace I p from (ψ (γ t))) = γ t :=
+      expMap_normalChartAt (I := I) g p (hsrc t htIcc)
+    -- `dexp_{ψ(γt)}(cv₂) = γ't` (chain rule, `cv₂ = mfderiv (ψ∘γ) t 1`).
+    have hdexp : mfderiv 𝓘(ℝ, E) I
+        (fun y : E => (expMap (I := I) g p (show TangentSpace I p from y) : M)) (ψ (γ t))
+        (show TangentSpace I p from cv₂) = mfderiv 𝓘(ℝ, ℝ) I γ t 1 :=
+      hchain.symm
+    -- The Gauss equality LHS holds (with `u = ψ(γt)`, `ζ = cv₂`): the tightness.
+    -- The RHS, by `hbase` and `hdexp`, equals `g(γt)(γ't)(γ't)`.
+    have hRHS :
+        g.inner (expMap (I := I) g p (show TangentSpace I p from (ψ (γ t))))
+            (mfderiv 𝓘(ℝ, E) I
+              (fun y : E => (expMap (I := I) g p (show TangentSpace I p from y) : M)) (ψ (γ t))
+              (show TangentSpace I p from cv₂))
+            (mfderiv 𝓘(ℝ, E) I
+              (fun y : E => (expMap (I := I) g p (show TangentSpace I p from y) : M)) (ψ (γ t))
+              (show TangentSpace I p from cv₂)) =
+          g.inner (γ t) (mfderiv 𝓘(ℝ, ℝ) I γ t 1) (mfderiv 𝓘(ℝ, ℝ) I γ t 1) := by
+      rw [hdexp, hbase]
+    have hgauss_eq :
+        (g.inner p (ψ (γ t)) cv₂) ^ 2 / g.inner p (ψ (γ t)) (ψ (γ t)) =
+          g.inner (expMap (I := I) g p (show TangentSpace I p from (ψ (γ t))))
+            (mfderiv 𝓘(ℝ, E) I
+              (fun y : E => (expMap (I := I) g p (show TangentSpace I p from y) : M)) (ψ (γ t))
+              (show TangentSpace I p from cv₂))
+            (mfderiv 𝓘(ℝ, E) I
+              (fun y : E => (expMap (I := I) g p (show TangentSpace I p from y) : M)) (ψ (γ t))
+              (show TangentSpace I p from cv₂)) := by
+      rw [hRHS]; exact htight
+    -- Apply the equality-case iff to get the orthogonal part annihilated.
+    have hiff := gauss_radial_lower_bound_eq_iff (I := I) g p (hdom t htIcc) hball hne cv₂
+    have horth_dexp := hiff.mp hgauss_eq
+    -- Ball-wide injectivity of `dexp` ⟹ the orthogonal part vanishes.
+    have hinj := mfderiv_expMap_injective_of_norm_lt_radius (I := I) g p hball
+    have horth_zero :
+        cv₂ - (g.inner p (ψ (γ t)) cv₂ / g.inner p (ψ (γ t)) (ψ (γ t))) • (ψ (γ t)) = 0 :=
+      hinj (horth_dexp.trans (ContinuousLinearMap.map_zero _).symm)
+    -- Rearrange into the radial form `cv₂ = (B(ψγt)(cv₂)/B(ψγt)(ψγt)) • (ψ γt)`.
+    have hradial : cv₂ =
+        (g.inner p (ψ (γ t)) cv₂ / g.inner p (ψ (γ t)) (ψ (γ t))) • (ψ (γ t)) :=
+      sub_eq_zero.mp horth_zero
+    -- Conclude (note `cv₂ = mfderiv (ψ∘γ) t 1`).
+    rw [hcv₂_eq] at hradial
+    exact hradial
+
+set_option linter.unusedVariables false in
+set_option maxHeartbeats 1600000 in
 /-- **Equality case of the radial unique-minimiser bound.** Inside the
 normal ball at `p`, a `C¹` curve `γ` on `[a, b]` from `p` to
 `expMap g p v` that stays in the normal-chart source and whose
@@ -2909,7 +3632,7 @@ theorem normalBall_radial_minimizer_equality
     (hv : (show TangentSpace I p from v) ∈ expDomain (I := I) g p)
     (hball : v ∈ (NormalCoordinates.normalChartAt (I := I) g p).target)
     (hsmall_g : Real.sqrt (g.inner p v v) < expRadiusGp (I := I) g p)
-    {γ : ℝ → M} {a b : ℝ} (hab : a ≤ b)
+    {γ : ℝ → M} {a b : ℝ} (hab : a < b)
     (hγ : CMDiff[Set.Icc a b] 1 γ)
     (hγa : γ a = p)
     (hγb : γ b = expMap (I := I) g p (show TangentSpace I p from v))
@@ -2920,7 +3643,233 @@ theorem normalBall_radial_minimizer_equality
     ∃ φ : ℝ → ℝ, MonotoneOn φ (Set.Icc a b) ∧ φ a = 0 ∧ φ b = 1 ∧
       ∀ t ∈ Set.Icc a b,
         γ t = expMap (I := I) g p (show TangentSpace I p from (φ t • v)) := by
-  sorry
+  classical
+  set ψ := NormalCoordinates.normalChartAt (I := I) g p with hψ_def
+  set B : E →L[ℝ] E →L[ℝ] ℝ := g.inner p with hB_def
+  have hBsym : ∀ x y : E, B x y = B y x := g.symm p
+  have hBnn : ∀ x : E, 0 ≤ B x x := fun x => by
+    rcases eq_or_ne x 0 with h | h
+    · subst h; simp
+    · exact (g.pos p x h).le
+  set S : ℝ := Real.sqrt (g.inner p v v) with hS_def
+  have hS_nn : 0 ≤ S := Real.sqrt_nonneg _
+  set c : ℝ → E := fun t => ψ (γ t) with hc_def
+  set ρ : ℝ → ℝ := fun t => Real.sqrt (B (c t) (c t)) with hρ_def
+  -- Chart endpoint values.
+  have hca : c a = 0 := by
+    rw [hc_def]; simp only; rw [hγa, hψ_def]
+    exact NormalCoordinates.normalChartAt_centre (I := I) g p
+  have hcb : c b = v := by
+    have hsymm := NormalCoordinates.normalChartAt_symm_apply (I := I) g p (v := v) hball
+    have hrinv := NormalCoordinates.normalChartAt_right_inv (I := I) g p hball
+    -- `c b = ψ (exp_p v) = ψ (ψ.symm v) = v`.
+    change ψ (γ b) = v
+    rw [hγb, hψ_def, ← hsymm, hrinv]
+  have hρa : ρ a = 0 := by rw [hρ_def]; simp only [hca, map_zero, Real.sqrt_zero]
+  have hρb : ρ b = S := by
+    change Real.sqrt (B (c b) (c b)) = S
+    rw [hcb]; rfl
+  have hSsq : S ^ 2 = B v v := by
+    rw [hS_def]
+    exact Real.sq_sqrt (hBnn v)
+  -- Ball confinement from the exact length, via the first-exit lemma.
+  have hbball : ∀ t ∈ Set.Icc a b,
+      ‖ψ (γ t)‖ < expMapC2Radius (I := I) g p :=
+    minimizer_confined_to_C2_ball (I := I) g p hEnorm hsmall_g hγ hγa hγ_inBall (le_of_eq hlen)
+  -- The radiality package: `ρ` monotone and the chart velocity is radial.
+  have hψγb : NormalCoordinates.normalChartAt (I := I) g p (γ b) = v := by
+    rw [← hψ_def]; exact hcb
+  have hlen' : pathELength I γ a b = ENNReal.ofReal (Real.sqrt
+      (g.inner p (NormalCoordinates.normalChartAt (I := I) g p (γ b))
+        (NormalCoordinates.normalChartAt (I := I) g p (γ b)))) := by
+    rw [hlen, hψγb]
+  obtain ⟨hmono, hradial⟩ :=
+    radial_minimizer_radiality (I := I) g p hEnorm (le_of_lt hab) hγ hγa hγ_inBall hbball hlen'
+  -- Translate `hmono` to `ρ` and `hradial` to `c`.
+  have hρmono : ∀ s t : ℝ, s ∈ Set.Icc a b → t ∈ Set.Icc a b → s ≤ t → ρ s ≤ ρ t := by
+    intro s t hs ht hst; exact hmono s t hs ht hst
+  have hρnn : ∀ t, 0 ≤ ρ t := fun t => Real.sqrt_nonneg _
+  -- `S > 0` main case (and `S = 0` degenerate handled separately).
+  rcases eq_or_lt_of_le hS_nn with hS0 | hSpos
+  · -- `S = 0`: `v = 0`, the whole curve sits at `p`.
+    have hSeq : S = 0 := hS0.symm
+    have hvz : v = 0 := by
+      have : B v v = 0 := by rw [← hSsq, hSeq]; ring
+      by_contra hv0
+      exact absurd this (ne_of_gt (by rw [hB_def]; exact g.pos p v hv0))
+    -- `ρ ≡ 0` on `[a, b]` (monotone, `ρ a = ρ b = 0`).
+    have hρ0 : ∀ t ∈ Set.Icc a b, ρ t = 0 := by
+      intro t ht
+      refine le_antisymm ?_ (hρnn t)
+      calc ρ t ≤ ρ b := hρmono t b ht ⟨le_of_lt hab, le_rfl⟩ ht.2
+        _ = 0 := by rw [hρb, hSeq]
+    -- `c t = 0` and `γ t = p`.
+    have hct0 : ∀ t ∈ Set.Icc a b, c t = 0 := by
+      intro t ht
+      have : B (c t) (c t) = 0 := by
+        have h := hρ0 t ht; rw [hρ_def] at h; simp only at h
+        nlinarith [Real.sq_sqrt (hBnn (c t)), Real.sqrt_nonneg (B (c t) (c t)), h,
+          Real.sq_sqrt (hBnn (c t))]
+      by_contra hc0
+      exact absurd this (ne_of_gt (by rw [hB_def]; exact g.pos p (c t) hc0))
+    refine ⟨fun t => (t - a) / (b - a), ?_, ?_, ?_, ?_⟩
+    · intro s hs t ht hst
+      simp only
+      gcongr
+      linarith
+    · simp only [sub_self, zero_div]
+    · simp only; rw [div_self (by linarith : b - a ≠ 0)]
+    · intro t ht
+      have hctz : c t = 0 := hct0 t ht
+      have hγtp : γ t = p := by
+        have : ψ (γ t) = ψ p := by
+          rw [show ψ (γ t) = c t from rfl, hctz, hψ_def,
+            NormalCoordinates.normalChartAt_centre (I := I) g p]
+        exact ψ.injOn (hγ_inBall t ht)
+          (by rw [hψ_def]; exact NormalCoordinates.normalChartAt_source (I := I) g p) this
+      rw [hγtp, hvz, smul_zero]
+      -- `exp_p 0 = ψ.symm 0 = p`, so `p = exp_p 0`.
+      have h0tgt : (0 : E) ∈ (NormalCoordinates.normalChartAt (I := I) g p).target :=
+        NormalCoordinates.zero_mem_normalChartAt_target (I := I) g p
+      have hsymm := NormalCoordinates.normalChartAt_symm_apply (I := I) g p
+        (v := (0 : E)) h0tgt
+      rw [NormalCoordinates.normalChartAt_symm_zero (I := I) g p] at hsymm
+      -- `hsymm : p = exp_p 0`.
+      exact hsymm
+  -- `S > 0` main case.  Here `ρ b = S > 0` and the angular direction
+  -- `θ(t) = (ρ t)⁻¹ • c t` is constant `= S⁻¹ • v` on `{ρ > 0}`, forcing
+  -- `c t = (ρ t / S) • v`.
+  · have hSpos' : 0 < S := hSpos
+    -- `HasDerivAt c (mfderiv c t 1) t` at interior parameters.
+    have hcderiv : ∀ t ∈ Set.Ioo a b,
+        HasDerivAt c (mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, E) c t 1) t := by
+      intro t ht
+      have htIcc : t ∈ Set.Icc a b := ⟨le_of_lt ht.1, le_of_lt ht.2⟩
+      have hmem : Set.Icc a b ∈ nhds t := Icc_mem_nhds ht.1 ht.2
+      have hγdiff : MDifferentiableAt 𝓘(ℝ, ℝ) I γ t :=
+        ((hγ.mdifferentiableOn (by norm_num)) t htIcc).mdifferentiableAt hmem
+      have hψdiff : MDifferentiableAt I 𝓘(ℝ, E) ψ (γ t) :=
+        ((NormalCoordinates.normalChartAt_contMDiffOn (I := I) g p).mdifferentiableOn
+          one_ne_zero (γ t) (hγ_inBall t htIcc)).mdifferentiableAt
+          ((NormalCoordinates.normalChartAt_open_source (I := I) g p).mem_nhds (hγ_inBall t htIcc))
+      have hcdiff : MDifferentiableAt 𝓘(ℝ, ℝ) 𝓘(ℝ, E) c t := hψdiff.comp t hγdiff
+      have hmf : HasMFDerivAt 𝓘(ℝ, ℝ) 𝓘(ℝ, E) c t (mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, E) c t) :=
+        hcdiff.hasMFDerivAt
+      rw [hasMFDerivAt_iff_hasFDerivAt] at hmf
+      exact hmf.hasDerivAt
+    -- `ρ` is continuous on `[a, b]`.
+    have hccont : ContinuousOn c (Set.Icc a b) :=
+      ((NormalCoordinates.normalChartAt_contMDiffOn (I := I) g p).continuousOn).comp
+        hγ.continuousOn hγ_inBall
+    have hρc : ContinuousOn ρ (Set.Icc a b) :=
+      ((psd_sqrt_lipschitz B hBsym hBnn).continuous.comp_continuousOn hccont)
+    -- The angular direction `θ t := (ρ t)⁻¹ • c t`.
+    set θ : ℝ → E := fun t => (ρ t)⁻¹ • c t with hθ_def
+    -- At interior `t` with `ρ t > 0`, `θ` has derivative `0` (angular ODE).
+    have hθderiv : ∀ t ∈ Set.Ioo a b, 0 < ρ t → HasDerivAt θ 0 t := by
+      intro t ht hρt
+      have hct_ne : c t ≠ 0 := by
+        intro h0
+        have : ρ t = 0 := by rw [hρ_def]; simp only [h0, map_zero, Real.sqrt_zero]
+        exact absurd this (ne_of_gt hρt)
+      have hBpos : 0 < B (c t) (c t) := by rw [hB_def]; exact g.pos p (c t) hct_ne
+      have hc' : HasDerivAt c (mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, E) c t 1) t := hcderiv t ht
+      have hρ' : HasDerivAt ρ
+          (B (c t) (mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, E) c t 1) / Real.sqrt (B (c t) (c t))) t :=
+        radialDist_hasDerivAt B hBsym c (mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, E) c t 1) hc' hBpos
+      have hρt_eq : Real.sqrt (B (c t) (c t)) = ρ t := rfl
+      rw [hρt_eq] at hρ'
+      have hrad' : mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, E) c t 1
+          = (B (c t) (mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, E) c t 1) / B (c t) (c t)) • (c t) :=
+        hradial t ht (by
+          show NormalCoordinates.normalChartAt (I := I) g p (γ t) ≠ 0
+          rw [← hψ_def]; exact hct_ne)
+      have hρtsq : ρ t ^ 2 = B (c t) (c t) := by
+        rw [hρ_def]; simp only; rw [Real.sq_sqrt (hBnn (c t))]
+      exact angular_hasDerivAt_zero B hc' hρt hρ' hρtsq hrad'
+    -- `θ b = S⁻¹ • v`.
+    have hθb : θ b = (S)⁻¹ • v := by
+      rw [hθ_def]; simp only [hρb, hcb]
+    -- For interior `t` with `ρ t > 0`, propagate `θ t = θ b` via constancy on `[t,b]`.
+    have hθ_const : ∀ t ∈ Set.Ioo a b, 0 < ρ t → θ t = θ b := by
+      intro t ht hρt
+      -- On `[t, b]`, `ρ ≥ ρ t > 0` (monotonicity), so `θ` is `C¹` with `θ' = 0`.
+      have hρpos_on : ∀ s ∈ Set.Icc t b, 0 < ρ s := by
+        intro s hs
+        have hsIcc : s ∈ Set.Icc a b := ⟨le_trans (le_of_lt ht.1) hs.1, hs.2⟩
+        exact lt_of_lt_of_le hρt
+          (hρmono t s ⟨le_of_lt ht.1, le_of_lt ht.2⟩ hsIcc hs.1)
+      -- Continuity of `θ` on `[t, b]`.
+      have hθcont : ContinuousOn θ (Set.Icc t b) := by
+        apply ContinuousOn.smul
+        · apply ContinuousOn.inv₀
+          · exact (hρc.mono (Set.Icc_subset_Icc (le_of_lt ht.1) le_rfl))
+          · exact fun s hs => ne_of_gt (hρpos_on s hs)
+        · exact hccont.mono (Set.Icc_subset_Icc (le_of_lt ht.1) le_rfl)
+      -- Right-derivative `0` at every `x ∈ Ico t b`.
+      have hθrd : ∀ x ∈ Set.Ico t b, HasDerivWithinAt θ 0 (Set.Ici x) x := by
+        intro x hx
+        have hxIoo : x ∈ Set.Ioo a b := ⟨lt_of_lt_of_le ht.1 hx.1, hx.2⟩
+        have hρx : 0 < ρ x := hρpos_on x ⟨hx.1, le_of_lt hx.2⟩
+        exact (hθderiv x hxIoo hρx).hasDerivWithinAt
+      have hconst := constant_of_has_deriv_right_zero hθcont hθrd
+      exact (hconst b (Set.right_mem_Icc.2 (le_of_lt ht.2))).symm
+    -- Conclude `c t = (ρ t / S) • v` for all `t ∈ [a, b]`.
+    have hc_formula : ∀ t ∈ Set.Icc a b, c t = (ρ t / S) • v := by
+      intro t ht
+      rcases eq_or_lt_of_le (hρnn t) with hρt0 | hρtpos
+      · -- `ρ t = 0`: `c t = 0` and `(ρt/S)•v = 0`.
+        have hct0 : c t = 0 := by
+          have : B (c t) (c t) = 0 := by
+            have h : ρ t = 0 := hρt0.symm
+            rw [hρ_def] at h; simp only at h
+            nlinarith [Real.sq_sqrt (hBnn (c t)), Real.sqrt_nonneg (B (c t) (c t)), h]
+          by_contra hc0
+          exact absurd this (ne_of_gt (by rw [hB_def]; exact g.pos p (c t) hc0))
+        rw [hct0, ← hρt0, zero_div, zero_smul]
+      · -- `ρ t > 0`.  Boundary `t = a` is impossible (`ρ a = 0`); handle `t = b`
+        -- and interior `t ∈ (a, b)` via `θ`-constancy.
+        rcases eq_or_lt_of_le ht.2 with htb | htb
+        · -- `t = b`: `c b = v = (S/S)•v`.
+          rw [htb, hcb, hρb, div_self (ne_of_gt hSpos'), one_smul]
+        · have hta : a < t := by
+            rcases eq_or_lt_of_le ht.1 with hta | hta
+            · exfalso; rw [← hta] at hρtpos; exact (hρtpos.ne') hρa
+            · exact hta
+          have htIoo : t ∈ Set.Ioo a b := ⟨hta, htb⟩
+          have hθt := hθ_const t htIoo hρtpos
+          -- `θ t = θ b = S⁻¹ • v`, so `c t = ρ t • (S⁻¹ • v) = (ρt/S)•v`.
+          rw [hθb] at hθt
+          have hθt' : (ρ t)⁻¹ • c t = S⁻¹ • v := hθt
+          have hctv : c t = ρ t • (S⁻¹ • v) := by
+            rw [← hθt', smul_smul, mul_inv_cancel₀ hρtpos.ne', one_smul]
+          rw [hctv, smul_smul, div_eq_mul_inv]
+      -- end of cases
+    -- Build `φ = ρ / S` and conclude.
+    refine ⟨fun t => ρ t / S, ?_, ?_, ?_, ?_⟩
+    · intro s hs t ht hst
+      simp only
+      gcongr
+      exact hρmono s t hs ht hst
+    · simp only [hρa, zero_div]
+    · simp only [hρb, div_self (ne_of_gt hSpos')]
+    · intro t ht
+      -- `γ t = ψ.symm (c t) = ψ.symm ((ρt/S)•v) = exp_p ((ρt/S)•v)`.
+      have hctf := hc_formula t ht
+      have hγt_symm : γ t = ψ.symm (c t) := by
+        rw [hc_def]; simp only
+        exact (NormalCoordinates.normalChartAt_left_inv (I := I) g p (hγ_inBall t ht)).symm
+      rw [hγt_symm, hctf]
+      -- `ψ.symm w = exp_p w` for `w` in the target.
+      have hwtgt : ((ρ t / S) • v) ∈
+          (NormalCoordinates.normalChartAt (I := I) g p).symm.source := by
+        change ((ρ t / S) • v) ∈ (NormalCoordinates.normalChartAt (I := I) g p).target
+        -- `(ρt/S)•v = c t ∈ ψ.target` (chart image of a source point).
+        rw [← hctf, hc_def]; simp only
+        exact (NormalCoordinates.normalChartAt (I := I) g p).map_source (hγ_inBall t ht)
+      change ψ.symm ((ρ t / S) • v) = _
+      rw [hψ_def]
+      exact NormalCoordinates.normalChartAt_symm_apply (I := I) g p hwtgt
 
 end RadialUniqueMinimizer
 
