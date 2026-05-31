@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Riemannian.AlongCurve
 import DifferentialGeometry.Geometry.Riemannian.MFDerivAlongCurve
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.Equation
+import DifferentialGeometry.Geometry.Riemannian.Geodesic.ChartTransition
 
 set_option linter.unusedSectionVars false
 
@@ -648,6 +649,300 @@ theorem covDerivAlong_velocity_eq_zero_of_hasGeodesicEquationAt_C2
     exact this.deriv.symm ▸ rfl
   rw [← hv_eq, ← ha_eq]
   exact hid
+
+/-! ## Chart-foot invariance of the intrinsic covariant derivative
+
+The intrinsic covariant derivative `covDerivAlong g γ V t` is defined by
+pinning the *canonical* foot chart `chartAt H (γ t)`. The lemma
+`covDerivAlong_chart_foot_invariance` below shows that *any* chart `β`
+whose source contains the foot `γ t` computes the same fibre vector:
+represent `V` in chart `β` (via the `β`-trivialisation), apply the
+chart-`β` covariant derivative `chartCovDerivAlong g β γ (·) t`, and map
+the model-fibre result back into `T_{γ(t)} M` by the inverse `β`-
+trivialisation; the answer is `covDerivAlong g γ V t`.
+
+The proof reads everything in the *canonical foot chart* `α := γ t`
+(coordinates), where `covDerivAlong_chartCoord` is the identity. The
+chart-`β` covariant derivative pushes through the reverse chart-transition
+Jacobian `chartTransitionAt β α`; expanding the chart-`β` Christoffel
+contraction with the transformation law
+`chartChristoffelContraction_transform` produces an inhomogeneous
+second-derivative correction `chartTransitionSecondDerivCorrection` that
+*exactly cancels* the non-tensorial mismatch coming from differentiating
+the foot-dependent transition Jacobian applied to the section
+(`fderiv_chartTransitionAt_apply_eq_pushCorrection` plus the mutual-inverse
+Jacobian collapse `chartTransitionAt_comp_chartTransitionAt'`). -/
+
+/-- The chart-`β`-coordinate representation of a section `V` along `γ`,
+*pinned at the basepoint `β`* (rather than at the moving foot `γ t`): for
+each `s`, the model-fibre vector
+`(triv_β)·.continuousLinearMapAt ℝ (γ s) (V s) : E`, the chart-`β`
+coordinate of `V s ∈ T_{γ(s)} M`. With `β = γ t` it agrees with
+`chartRepAt γ V t`. -/
+def chartRepAtBase (β : M) (γ : ℝ → M) (V : ∀ t, TangentSpace I (γ t)) : ℝ → E :=
+  fun s => (trivializationAt E (TangentSpace I) β).continuousLinearMapAt ℝ (γ s) (V s)
+
+@[simp] lemma chartRepAtBase_apply (β : M) (γ : ℝ → M)
+    (V : ∀ t, TangentSpace I (γ t)) (s : ℝ) :
+    chartRepAtBase (I := I) β γ V s =
+      (trivializationAt E (TangentSpace I) β).continuousLinearMapAt ℝ (γ s) (V s) := rfl
+
+/-- With basepoint `β = γ t`, the pinned-foot chart representation
+`chartRepAt γ V t` and the general `chartRepAtBase (γ t) γ V` coincide. -/
+lemma chartRepAtBase_foot (γ : ℝ → M) (V : ∀ t, TangentSpace I (γ t)) (t : ℝ) :
+    chartRepAtBase (I := I) (γ t) γ V = chartRepAt (I := I) γ V t := rfl
+
+/-- **Trivialisation composite is the chart-transition Jacobian.** For two
+basepoints `α β : M` and a manifold point `b` in both chart sources, the
+chart-`β` trivialisation coordinate of the inverse chart-`α` trivialisation
+of `v` equals the chart-transition Jacobian `chartTransitionAt α β` at the
+chart-`α` image of `b`, applied to `v`. (Bundle `coordChange` composition
+law combined with the boundaryless identification
+`fderivWithin (range I) = fderiv`.) -/
+private theorem trivCoord_comp_symmL_eq_transition [I.Boundaryless]
+    (α β : M) {b : M}
+    (hα : b ∈ (chartAt H α).source) (hβ : b ∈ (chartAt H β).source) (v : E) :
+    (trivializationAt E (TangentSpace I) β).continuousLinearMapAt ℝ b
+        ((trivializationAt E (TangentSpace I) α).symmL ℝ b v) =
+      chartTransitionAt (I := I) α β (extChartAt I α b) v := by
+  rw [TangentBundle.continuousLinearMapAt_trivializationAt_eq_core (I := I) hβ,
+    TangentBundle.symmL_trivializationAt_eq_core (I := I) hα]
+  have hb_self : b ∈ (chartAt H b).source := mem_chart_source H b
+  have hmem : b ∈ (tangentBundleCore I M).baseSet (achart H α)
+      ∩ (tangentBundleCore I M).baseSet (achart H b)
+      ∩ (tangentBundleCore I M).baseSet (achart H β) := by
+    refine ⟨⟨?_, ?_⟩, ?_⟩
+    · rw [tangentBundleCore_baseSet]; exact hα
+    · rw [tangentBundleCore_baseSet]; exact hb_self
+    · rw [tangentBundleCore_baseSet]; exact hβ
+  have hcomp := (tangentBundleCore I M).coordChange_comp
+    (achart H α) (achart H b) (achart H β) b hmem v
+  have hcc : ((tangentBundleCore I M).coordChange (achart H α) (achart H β) b) v =
+      chartTransitionAt (I := I) α β (extChartAt I α b) v := by
+    change tangentCoordChange I α β b v = _
+    rw [tangentCoordChange_def, chartTransitionAt_def, chartTransitionMap_def]
+    have hrange : (Set.range I : Set E) = Set.univ :=
+      ModelWithCorners.Boundaryless.range_eq_univ (I := I)
+    rw [hrange, fderivWithin_univ]
+  rw [← hcc]
+  exact hcomp
+
+/-- **Chart-foot invariance of the intrinsic covariant derivative.** For a
+`C^∞` curve `γ`, a section `V` along `γ` whose canonical foot-chart
+representation `chartRepAt γ V t` is differentiable at `t`, and *any*
+basepoint `β` whose chart source contains the foot `γ t`, the chart-`β`
+recipe for the covariant derivative — transport `V` into chart-`β`
+coordinates (`chartRepAtBase β γ V`), take the chart-`β` covariant
+derivative `chartCovDerivAlong g β γ (·) t`, push the result back into the
+fibre by the inverse `β`-trivialisation `symmL ℝ (γ t)` — returns exactly
+the canonical intrinsic value `covDerivAlong g γ V t`.
+
+The differentiability hypothesis `hV` is the genuine "the section varies
+differentiably in chart coordinates at `t`" assumption (the same one under
+which `covDerivAlong_add` and friends are stated); it is not a restatement
+of the conclusion. The smoothness `hγ` of the curve supplies the chart
+trajectory's `HasDerivAt` and the eventual two-source membership that make
+the chart-transition chain rule valid near `t`. -/
+theorem covDerivAlong_chart_foot_invariance [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M) (γ : ℝ → M) (V : ∀ t, TangentSpace I (γ t))
+    (t : ℝ) (β : M)
+    (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ)
+    (hβ : γ t ∈ (chartAt H β).source)
+    (hV : DifferentiableAt ℝ (chartRepAt (I := I) γ V t) t) :
+    (trivializationAt E (TangentSpace I) β).symmL ℝ (γ t)
+        (chartCovDerivAlong (I := I) g β γ (chartRepAtBase (I := I) β γ V) t) =
+      covDerivAlong (I := I) g γ V t := by
+  classical
+  -- The canonical foot chart `α := γ t`; the foot lies in its own chart source.
+  set α : M := γ t with hα_def
+  have hα : γ t ∈ (chartAt H α).source := mem_chart_source H (γ t)
+  -- Chart-coordinate abbreviations.
+  set uα : ℝ → E := chartCurve (I := I) α γ with huα_def
+  set x : E := extChartAt I α (γ t) with hx_def
+  have hxut : uα t = x := by rw [huα_def, chartCurve_def, hx_def]
+  -- The reverse transition Jacobian `A`, the forward `J`, and the foot image `xβ`.
+  set xβ : E := chartTransitionMap (I := I) α β x with hxβ_def
+  -- The foot is in `chartTransitionSource α β`.
+  have hsrc : x ∈ chartTransitionSource (I := I) α β :=
+    extChartAt_mem_chartTransitionSource (I := I) α β hα hβ
+  -- Foot-image identities: `xβ = extChartAt I β (γ t) = chartCurve β γ t`.
+  have hxβ_eq : xβ = extChartAt I β (γ t) := by
+    rw [hxβ_def, hx_def, chartTransitionMap_apply_extChartAt (I := I) α β hα]
+  have hxβ_curve : xβ = chartCurve (I := I) β γ t := by rw [hxβ_eq, chartCurve_def]
+  -- The canonical foot-chart representation, and the chart-`β` representation.
+  set repα : ℝ → E := chartRepAt (I := I) γ V t with hrepα_def
+  set repβ : ℝ → E := chartRepAtBase (I := I) β γ V with hrepβ_def
+  -- `HasDerivAt` for the chart-α trajectory and the foot-chart representation.
+  have huα_hd : HasDerivAt uα (deriv uα t) t :=
+    ((contDiffAt_chartCurve (I := I) hγ t).differentiableAt (by simp)).hasDerivAt
+  have hrepα_hd : HasDerivAt repα (deriv repα t) t := hV.hasDerivAt
+  -- An open neighbourhood `U ∋ t` on which `γ` stays in both chart sources.
+  set U : Set ℝ := γ ⁻¹' ((chartAt H α).source ∩ (chartAt H β).source) with hU_def
+  have hU_open : IsOpen U :=
+    ((chartAt H α).open_source.inter (chartAt H β).open_source).preimage hγ.continuous
+  have htU : t ∈ U := ⟨hα, hβ⟩
+  have hU_nhds : U ∈ 𝓝 t := hU_open.mem_nhds htU
+  -- On `U`, `repβ s = chartTransitionAt α β (uα s) (repα s)` (the same tangent
+  -- vector, read in chart-β coordinates, is the transition push of its chart-α
+  -- coordinate).
+  have hrepβ_eq : repβ =ᶠ[𝓝 t]
+      (fun s => chartTransitionAt (I := I) α β (uα s) (repα s)) := by
+    filter_upwards [hU_nhds] with s hs
+    obtain ⟨hsα, hsβ⟩ := hs
+    have hbridge :
+        (trivializationAt E (TangentSpace I) β).continuousLinearMapAt ℝ (γ s)
+            ((trivializationAt E (TangentSpace I) α).symmL ℝ (γ s)
+              ((trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ (γ s) (V s))) =
+          chartTransitionAt (I := I) α β (extChartAt I α (γ s))
+            ((trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ (γ s) (V s)) :=
+      trivCoord_comp_symmL_eq_transition (I := I) α β hsα hsβ _
+    -- `symmL ∘ continuousLinearMapAt = id` at the base point `γ s`.
+    have hround :
+        (trivializationAt E (TangentSpace I) α).symmL ℝ (γ s)
+            ((trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ (γ s) (V s)) =
+          V s := by
+      have hmem : γ s ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
+        rw [TangentBundle.trivializationAt_baseSet]
+        exact hsα
+      exact (trivializationAt E (TangentSpace I) α).symmL_continuousLinearMapAt
+        (R := ℝ) hmem (V s)
+    rw [hround] at hbridge
+    rw [hrepβ_def, chartRepAtBase_apply]
+    rw [hrepα_def, chartRepAt_apply]
+    rw [huα_def, chartCurve_def]
+    exact hbridge
+  -- The value at `t`: `repβ t = chartTransitionAt α β x (repα t)`.
+  have hrepβ_t : repβ t = chartTransitionAt (I := I) α β x (repα t) := by
+    have := hrepβ_eq.eq_of_nhds
+    rw [this, hxut]
+  -- Chart-β trajectory is the transition push of the chart-α trajectory near `t`.
+  have huβ_eq : chartCurve (I := I) β γ =ᶠ[𝓝 t]
+      (fun s => chartTransitionMap (I := I) α β (uα s)) := by
+    filter_upwards [hU_nhds] with s hs
+    obtain ⟨hsα, _⟩ := hs
+    rw [chartCurve_def, huα_def, chartCurve_def]
+    exact (chartTransitionMap_apply_extChartAt (I := I) α β hsα).symm
+  -- `HasDerivAt` of the chart-β trajectory: `deriv uβ t = J (deriv uα t)`.
+  have hTdiff : DifferentiableAt ℝ (chartTransitionMap (I := I) α β) x :=
+    chartTransitionMap_differentiableAt (I := I) α β hsrc
+  have huβ_hd : HasDerivAt (chartCurve (I := I) β γ)
+      (chartTransitionAt (I := I) α β x (deriv uα t)) t := by
+    have hcomp : HasDerivAt
+        (fun s => chartTransitionMap (I := I) α β (uα s))
+        (chartTransitionAt (I := I) α β x (deriv uα t)) t := by
+      have hc : HasDerivAt (chartTransitionMap (I := I) α β ∘ uα)
+          ((fderiv ℝ (chartTransitionMap (I := I) α β) (uα t)) (deriv uα t)) t :=
+        hTdiff.hasFDerivAt.comp_hasDerivAt t huα_hd
+      -- `uα t = x` (defeq); `chartTransitionAt α β x = fderiv (chartTransitionMap α β) x`.
+      rw [chartTransitionAt_def]
+      exact hc
+    exact hcomp.congr_of_eventuallyEq huβ_eq
+  have hderiv_uβ : deriv (chartCurve (I := I) β γ) t =
+      chartTransitionAt (I := I) α β x (deriv uα t) := huβ_hd.deriv
+  -- `HasDerivAt` of the chart-β representation via the CLM-application rule.
+  have hAdiff : DifferentiableAt ℝ
+      (fun z => (chartTransitionAt (I := I) α β z : E →L[ℝ] E)) x := by
+    have h_open : IsOpen (chartTransitionSource (I := I) α β) :=
+      chartTransitionSource_isOpen (I := I) α β
+    exact ((chartTransitionAt_smooth (I := I) α β).contDiffAt
+      (h_open.mem_nhds hsrc)).differentiableAt (by simp)
+  have hcA : HasDerivAt
+      (fun s => (chartTransitionAt (I := I) α β (uα s) : E →L[ℝ] E))
+      ((fderiv ℝ (fun z => chartTransitionAt (I := I) α β z) x) (deriv uα t)) t :=
+    -- `uα t = x` definitionally, so the `comp` derivative matches.
+    hAdiff.hasFDerivAt.comp_hasDerivAt t huα_hd
+  have hrepβ_hd : HasDerivAt repβ
+      (((fderiv ℝ (fun z => chartTransitionAt (I := I) α β z) x) (deriv uα t)) (repα t)
+        + chartTransitionAt (I := I) α β x (deriv repα t)) t := by
+    have hbase : HasDerivAt (fun s => chartTransitionAt (I := I) α β (uα s) (repα s))
+        (((fderiv ℝ (fun z => chartTransitionAt (I := I) α β z) x) (deriv uα t)) (repα t)
+          + chartTransitionAt (I := I) α β x (deriv repα t)) t :=
+      -- `uα t = x` definitionally; `clm_apply` value matches up to that defeq.
+      hcA.clm_apply hrepα_hd
+    exact hbase.congr_of_eventuallyEq hrepβ_eq
+  have hderiv_repβ : deriv repβ t =
+      ((fderiv ℝ (fun z => chartTransitionAt (I := I) α β z) x) (deriv uα t)) (repα t)
+        + chartTransitionAt (I := I) α β x (deriv repα t) := hrepβ_hd.deriv
+  -- The foot lies in the base set of its own (chart-α) trivialisation.
+  have hmemα : γ t ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
+    rw [TangentBundle.trivializationAt_baseSet]; exact hα
+  -- The RHS is, by definition, the inverse chart-α trivialisation of the chart-α
+  -- covariant derivative `chartCovDerivAlong g α γ repα t` (since `α = γ t`).
+  rw [covDerivAlong_def]
+  -- Re-express the LHS as `symmL_α ∘ continuousLinearMapAt_α` of itself (round trip
+  -- at the foot), reducing the goal to a chart-α coordinate equality in `E`.
+  rw [← (trivializationAt E (TangentSpace I) α).symmL_continuousLinearMapAt
+    (R := ℝ) hmemα
+    ((trivializationAt E (TangentSpace I) β).symmL ℝ (γ t)
+      (chartCovDerivAlong (I := I) g β γ repβ t))]
+  congr 1
+  -- The forward chart-α coordinate of `symmL_β` is `chartTransitionAt β α xβ`.
+  have hAcoord :
+      (trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ (γ t)
+          ((trivializationAt E (TangentSpace I) β).symmL ℝ (γ t)
+            (chartCovDerivAlong (I := I) g β γ repβ t)) =
+        chartTransitionAt (I := I) β α xβ
+          (chartCovDerivAlong (I := I) g β γ repβ t) := by
+    rw [trivCoord_comp_symmL_eq_transition (I := I) β α hβ hα
+      (chartCovDerivAlong (I := I) g β γ repβ t)]
+    rw [hxβ_eq]
+  rw [hAcoord]
+  -- Set `A := chartTransitionAt β α xβ` and expand the chart-β covariant derivative.
+  set A : E →L[ℝ] E := chartTransitionAt (I := I) β α xβ with hA_def
+  rw [chartCovDerivAlong_def]
+  -- `A` is linear: distribute over the sum.
+  rw [map_add]
+  -- The chart-β curve value at `t` is `xβ`.
+  have huβ_t : chartCurve (I := I) β γ t = xβ := hxβ_curve.symm
+  rw [hderiv_repβ, hderiv_uβ, hrepβ_t, huβ_t]
+  -- Collapse `A ∘ chartTransitionAt α β x = id` (mutual-inverse Jacobian at the foot).
+  have hinv : (A.comp (chartTransitionAt (I := I) α β x)) = ContinuousLinearMap.id ℝ E := by
+    rw [hA_def, hxβ_def]
+    exact chartTransitionAt_comp_chartTransitionAt (I := I) α β hsrc
+  have hcollapse : ∀ z : E, A (chartTransitionAt (I := I) α β x z) = z := by
+    intro z
+    have := congrArg (fun L : E →L[ℝ] E => L z) hinv
+    simpa [ContinuousLinearMap.comp_apply] using this
+  -- The foot-slot derivative of the transition Jacobian = forward push of `D²T`.
+  have hfoot :
+      ((fderiv ℝ (fun z => chartTransitionAt (I := I) α β z) x) (deriv uα t)) (repα t) =
+        chartTransitionAt (I := I) α β x
+          (chartTransitionSecondDerivCorrection (I := I) α β (deriv uα t) (repα t) x) :=
+    fderiv_chartTransitionAt_apply_eq_pushCorrection (I := I) α β hsrc (deriv uα t) (repα t)
+  -- Apply `A` to the first summand and collapse.
+  rw [map_add, hfoot, hcollapse, hcollapse]
+  -- The chart-Christoffel transformation law at the foot `γ t` (outer α, inner β).
+  have htransform :
+      chartChristoffelContraction (I := I) g α (deriv uα t) (repα t) x =
+        chartTransitionAt (I := I) β α xβ
+            (chartChristoffelContraction (I := I) g β
+              (chartTransitionAt (I := I) α β x (deriv uα t))
+              (chartTransitionAt (I := I) α β x (repα t)) xβ)
+          + chartTransitionSecondDerivCorrection (I := I) α β (deriv uα t) (repα t) x := by
+    have hxx : x = extChartAt I α (γ t) := hx_def
+    rw [hxx]
+    have h := chartChristoffelContraction_transform (I := I) g α β hα hβ
+      (deriv uα t) (repα t)
+    rw [← hxx, ← hxβ_def] at h
+    exact h
+  -- Now assemble: the two `D²T` terms cancel.
+  -- LHS (after `map_add`, `hfoot`, `hcollapse`):
+  --   D²T + deriv repα t + A(Γ_β(J v, J w)(xβ))
+  -- and `A(Γ_β(...)) = Γ_α(v, w)(x) - D²T` by `htransform`.
+  rw [show chartTransitionAt (I := I) β α xβ
+        (chartChristoffelContraction (I := I) g β
+          (chartTransitionAt (I := I) α β x (deriv uα t))
+          (chartTransitionAt (I := I) α β x (repα t)) xβ)
+      = chartChristoffelContraction (I := I) g α (deriv uα t) (repα t) x
+          - chartTransitionSecondDerivCorrection (I := I) α β (deriv uα t) (repα t) x by
+    rw [htransform]; abel]
+  -- The RHS (`chartCovDerivAlong g α γ repα t`) expanded in `repα`, `uα`, `x`.
+  have hRHS : chartCovDerivAlong (I := I) g α γ repα t =
+      deriv repα t + chartChristoffelContraction (I := I) g α (deriv uα t) (repα t) x := by
+    rw [chartCovDerivAlong_def, ← huα_def, hxut]
+  rw [hRHS]
+  -- The two `D²T` corrections cancel; the remaining terms match.
+  abel
 
 end CovariantDerivativeAlong
 
