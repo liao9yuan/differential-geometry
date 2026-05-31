@@ -1578,6 +1578,435 @@ theorem expMapIntrinsic_eq_expMap_of_small
     intro t ht
     exact hsrc_I t (hIoo'_sub_12 ht)
 
+/-! ## Affine reparametrisation of a moving-foot geodesic
+
+The moving-foot geodesic equation `HasGeodesicEquationAt` is a chart-coordinate
+second-order ODE; under the affine time-rescaling `s ↦ c · s` it transforms by
+the second-order chain rule, the extra factor `c` in the velocity matching the
+quadratic scaling `Γ(c v, c v) = c² Γ(v, v)` of the Christoffel contraction
+(`Geodesic.chartChristoffelContraction_smul_left_right`).  Hence the rescaled
+curve `s ↦ γ (c · s)` is again a moving-foot geodesic.  This is the affine
+reparametrisation engine for the spray-homogeneity theorem; we build it directly
+at the `HasGeodesicEquationAt` level (no lift-to-`TM` detour). -/
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- **Affine time-rescaling of the moving-foot geodesic equation.**  If `γ`
+satisfies the moving-foot geodesic equation at `c · t`, then the rescaled curve
+`s ↦ γ (c · s)` satisfies it at `t`.  The new velocity is `c` times the old,
+the new acceleration `c²` times the old, and the quadratic Christoffel scaling
+makes the geodesic identity persist. -/
+private theorem hasGeodesicEquationAt_comp_const_smul
+    (g : SmoothRiemannianMetric I M) {γ : ℝ → M} (c t : ℝ)
+    (hgeo : Geodesic.HasGeodesicEquationAt (I := I) g γ (c * t)) :
+    Geodesic.HasGeodesicEquationAt (I := I) g (fun s => γ (c * s)) t := by
+  classical
+  obtain ⟨v, a, hv, hev, ha, hid⟩ := hgeo
+  set η : ℝ → M := fun s => γ (c * s) with hη_def
+  -- The chart-local curve of `η` at base `t` is the chart-local curve of `γ` at
+  -- base `c * t`, precomposed with the affine map `s ↦ c * s`.
+  have hηt : η t = γ (c * t) := rfl
+  have hcl_eq : Geodesic.chartLocalCurve (I := I) η t
+      = (Geodesic.chartLocalCurve (I := I) γ (c * t)) ∘ (fun s => c * s) := by
+    funext s
+    simp only [Geodesic.chartLocalCurve_def, Function.comp_apply, hη_def]
+  set w : ℝ → E := Geodesic.chartLocalCurve (I := I) γ (c * t) with hw_def
+  -- Derivative of the affine map.
+  have haff : ∀ s : ℝ, HasDerivAt (fun r : ℝ => c * r) c s := fun s => by
+    simpa using (hasDerivAt_id s).const_mul c
+  -- First clause: velocity of `chartLocalCurve η t` at `t` is `c • v`.
+  have hv' : HasDerivAt (Geodesic.chartLocalCurve (I := I) η t) (c • v) t := by
+    rw [hcl_eq]
+    have hcomp : HasDerivAt (w ∘ (fun s => c * s)) (c • v) t := by
+      have := (hv).scomp t (haff t)
+      simpa [hw_def] using this
+    exact hcomp
+  -- Second clause: eventual differentiability of `chartLocalCurve η t` near `t`,
+  -- with derivative `c • deriv w (c * s)`.
+  have hev' : ∀ᶠ s in 𝓝 t,
+      HasDerivAt (Geodesic.chartLocalCurve (I := I) η t)
+        (deriv (Geodesic.chartLocalCurve (I := I) η t) s) s := by
+    -- `w` is differentiable eventually near `c * t`; pull back along `s ↦ c * s`.
+    have hpb : Filter.Tendsto (fun s : ℝ => c * s) (𝓝 t) (𝓝 (c * t)) := by
+      have := (haff t).continuousAt
+      simpa [hη_def] using this.tendsto
+    filter_upwards [hpb.eventually hev] with s hs
+    -- `hs : HasDerivAt w (deriv w (c * s)) (c * s)`.
+    have hcomp : HasDerivAt (w ∘ (fun r => c * r)) (c • deriv w (c * s)) s :=
+      hs.scomp s (haff s)
+    have hcls : HasDerivAt (Geodesic.chartLocalCurve (I := I) η t)
+        (c • deriv w (c * s)) s := by rw [hcl_eq]; exact hcomp
+    -- Identify the value with `deriv (chartLocalCurve η t) s`.
+    rwa [hcls.deriv]
+  -- Third clause: second derivative of `chartLocalCurve η t` at `t` is `c² • a`.
+  -- First, `deriv (chartLocalCurve η t) = fun s => c • deriv w (c * s)` near `t`.
+  have hderiv_eq : (fun s => deriv (Geodesic.chartLocalCurve (I := I) η t) s)
+      =ᶠ[𝓝 t] (fun s => c • deriv w (c * s)) := by
+    have hpb : Filter.Tendsto (fun s : ℝ => c * s) (𝓝 t) (𝓝 (c * t)) := by
+      have := (haff t).continuousAt
+      simpa using this.tendsto
+    filter_upwards [hpb.eventually hev] with s hs
+    have hcomp : HasDerivAt (w ∘ (fun r => c * r)) (c • deriv w (c * s)) s :=
+      hs.scomp s (haff s)
+    have hcls : HasDerivAt (Geodesic.chartLocalCurve (I := I) η t)
+        (c • deriv w (c * s)) s := by rw [hcl_eq]; exact hcomp
+    exact hcls.deriv
+  have ha' : HasDerivAt (fun s => deriv (Geodesic.chartLocalCurve (I := I) η t) s)
+      (c • (c • a)) t := by
+    -- Differentiate `s ↦ c • deriv w (c * s)` at `t`, using `HasDerivAt (deriv w) a (c*t)`.
+    have hinner : HasDerivAt (fun s => deriv w (c * s)) (c • a) t := by
+      have := ha.scomp t (haff t)
+      simpa [hw_def] using this
+    have houter : HasDerivAt (fun s => c • deriv w (c * s)) (c • (c • a)) t :=
+      hinner.const_smul c
+    exact houter.congr_of_eventuallyEq hderiv_eq
+  -- Identify chart data of `η` at `t` with that of `γ` at `c * t`.
+  have hfoot : (fun s => γ (c * s)) t = γ (c * t) := rfl
+  have hbase : extChartAt I (η t) (η t) = extChartAt I (γ (c * t)) (γ (c * t)) := by
+    rw [hηt]
+  -- The geodesic identity for `η` at `t`, with velocity `c • v` and accel `c² • a`.
+  refine ⟨c • v, c • (c • a), hv', hev', ha', ?_⟩
+  -- `c² • a + Γ_{η t}(c v, c v)(...) = c² • (a + Γ(v,v)(...)) = c² • 0 = 0`.
+  have hΓ : Geodesic.chartChristoffelContraction (I := I) g (η t) (c • v) (c • v)
+        (extChartAt I (η t) (η t))
+      = (c * c) • Geodesic.chartChristoffelContraction (I := I) g (γ (c * t)) v v
+        (extChartAt I (γ (c * t)) (γ (c * t))) := by
+    rw [hηt, hbase]
+    exact Geodesic.chartChristoffelContraction_smul_smul (I := I) g (γ (c * t)) c v _
+  rw [hΓ]
+  have hcc : c • (c • a) = (c * c) • a := by rw [smul_smul]
+  rw [hcc, ← smul_add, hid, smul_zero]
+
+/-! ## Global uniqueness of complete geodesics from initial data
+
+Two moving-foot geodesics on all of `ℝ`, both continuous, sharing the same
+initial point `Γ₁ 0 = Γ₂ 0` and the same launch velocity, coincide everywhere.
+The argument is a clopen propagation along the preconnected line `ℝ` of the
+*local-agreement* set `S = {t | Γ₁ =ᶠ[𝓝 t] Γ₂}`.
+
+* `S` is **open** by inspection (local agreement on a neighbourhood is itself an
+  open condition).
+* `S` is **closed** by chart-`(Γ₁ t)`-coordinate ODE uniqueness: at any cluster
+  point `t` of `S` the two chart-phase curves agree at `t` (the feet agree by
+  continuity; the chart-velocities agree by continuity of the chart-phase curve
+  along the cluster), and `geodesic_eventuallyEq_of_chartPhase_eq` upgrades that
+  to local agreement, i.e. `t ∈ S`.
+
+The base point `0 ∈ S` is anchored by the shared launch data, and
+preconnectedness of `ℝ` forces `S = univ`, hence `Γ₁ = Γ₂`. -/
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- **Local agreement of two moving-foot geodesics from matching initial data at
+`t₀`.**  If `γ₁, γ₂` are continuous moving-foot geodesics on all of `ℝ`, share the
+foot `γ₁ t₀ = γ₂ t₀` and the chart-`(γ₁ t₀)` velocity
+`deriv (chartCurve (γ₁ t₀) γ₁) t₀ = deriv (chartCurve (γ₁ t₀) γ₂) t₀`, then
+`γ₁ =ᶠ[𝓝 t₀] γ₂`.  This is the open-propagation engine for the global
+uniqueness theorem below; it is chart-`(γ₁ t₀)`-coordinate ODE uniqueness
+specialised to the chart centred at the common foot. -/
+private theorem geodesic_eventuallyEq_of_initial_local
+    (g : SmoothRiemannianMetric I M) {γ₁ γ₂ : ℝ → M} {t₀ : ℝ}
+    (hγ₁_cont : Continuous γ₁) (hγ₂_cont : Continuous γ₂)
+    (hgeo₁ : Geodesic.IsGeodesic (I := I) g γ₁)
+    (hgeo₂ : Geodesic.IsGeodesic (I := I) g γ₂)
+    (h0 : γ₁ t₀ = γ₂ t₀)
+    (hvel : deriv (chartCurve (I := I) (γ₁ t₀) γ₁) t₀
+        = deriv (chartCurve (I := I) (γ₁ t₀) γ₂) t₀) :
+    γ₁ =ᶠ[𝓝 t₀] γ₂ := by
+  classical
+  set q : M := γ₁ t₀ with hq_def
+  -- Open neighbourhood `O` of `t₀` on which both feet stay in `(chartAt H q).source`.
+  set O : Set ℝ := γ₁ ⁻¹' (chartAt H q).source ∩ γ₂ ⁻¹' (chartAt H q).source with hO_def
+  have hO_open : IsOpen O :=
+    ((chartAt H q).open_source.preimage hγ₁_cont).inter
+      ((chartAt H q).open_source.preimage hγ₂_cont)
+  have hq_src : q ∈ (chartAt H q).source := mem_chart_source H q
+  have htO : t₀ ∈ O := by
+    refine ⟨?_, ?_⟩
+    · change γ₁ t₀ ∈ (chartAt H q).source; exact hq_src
+    · change γ₂ t₀ ∈ (chartAt H q).source; rw [← h0]; exact hq_src
+  have hsrc₁ : ∀ s ∈ O, γ₁ s ∈ (chartAt H q).source := fun s hs => hs.1
+  have hsrc₂ : ∀ s ∈ O, γ₂ s ∈ (chartAt H q).source := fun s hs => hs.2
+  have hgeo₁' : ∀ s ∈ O, Geodesic.HasGeodesicEquationAt (I := I) g γ₁ s :=
+    fun s _ => hgeo₁ s
+  have hgeo₂' : ∀ s ∈ O, Geodesic.HasGeodesicEquationAt (I := I) g γ₂ s :=
+    fun s _ => hgeo₂ s
+  -- The chart-`q`-phase curves agree at `t₀`.
+  have hphase :
+      (chartCurve (I := I) q γ₁ t₀, deriv (chartCurve (I := I) q γ₁) t₀)
+        = (chartCurve (I := I) q γ₂ t₀, deriv (chartCurve (I := I) q γ₂) t₀) := by
+    have hfst : chartCurve (I := I) q γ₁ t₀ = chartCurve (I := I) q γ₂ t₀ := by
+      rw [chartCurve_def, chartCurve_def, ← hq_def, h0]
+    have hsnd : deriv (chartCurve (I := I) q γ₁) t₀ = deriv (chartCurve (I := I) q γ₂) t₀ := by
+      rw [hq_def]; exact hvel
+    rw [hfst, hsnd]
+  exact geodesic_eventuallyEq_of_chartPhase_eq (I := I) g q hO_open htO
+    hγ₁_cont.continuousOn hγ₂_cont.continuousOn hsrc₁ hsrc₂ hgeo₁' hgeo₂' hphase
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- **Global uniqueness of complete geodesics from initial data.**  Two
+moving-foot geodesics on all of `ℝ`, both continuous, sharing the initial point
+`Γ₁ 0 = Γ₂ 0` and the launch velocity
+`(mfderiv 𝓘(ℝ,ℝ) I Γ₁ 0 1 : E) = (mfderiv 𝓘(ℝ,ℝ) I Γ₂ 0 1 : E)`, coincide on all
+of `ℝ`.
+
+The proof is a clopen propagation along the preconnected line of the
+local-agreement set `S = {t | Γ₁ =ᶠ[𝓝 t] Γ₂}`: openness is immediate, closedness
+is chart-`(Γ₁ t)`-coordinate ODE uniqueness at each cluster point, and the base
+point `0` is anchored by the shared launch data. -/
+theorem isGeodesic_eq_of_initial
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    (g : SmoothRiemannianMetric I M) {Γ₁ Γ₂ : ℝ → M}
+    (h₁ : Geodesic.IsGeodesic (I := I) g Γ₁) (h₂ : Geodesic.IsGeodesic (I := I) g Γ₂)
+    (hc₁ : Continuous Γ₁) (hc₂ : Continuous Γ₂)
+    (h0 : Γ₁ 0 = Γ₂ 0)
+    (hv : (mfderiv 𝓘(ℝ, ℝ) I Γ₁ 0 (1 : ℝ) : E) = (mfderiv 𝓘(ℝ, ℝ) I Γ₂ 0 (1 : ℝ) : E)) :
+    Γ₁ = Γ₂ := by
+  classical
+  -- Both curves are `C¹` on `ℝ`, hence `MDifferentiableAt` everywhere.
+  have hC1₁ : ContMDiffOn 𝓘(ℝ, ℝ) I 1 Γ₁ Set.univ :=
+    HopfRinow.isGeodesicOn_contMDiffOn_one (I := I) g isOpen_univ
+      (h₁.isGeodesicOn Set.univ) hc₁.continuousOn
+  have hC1₂ : ContMDiffOn 𝓘(ℝ, ℝ) I 1 Γ₂ Set.univ :=
+    HopfRinow.isGeodesicOn_contMDiffOn_one (I := I) g isOpen_univ
+      (h₂.isGeodesicOn Set.univ) hc₂.continuousOn
+  have hmdiff₁ : ∀ t, MDifferentiableAt 𝓘(ℝ, ℝ) I Γ₁ t :=
+    fun t => (hC1₁.contMDiffAt (Filter.univ_mem)).mdifferentiableAt (by norm_num)
+  have hmdiff₂ : ∀ t, MDifferentiableAt 𝓘(ℝ, ℝ) I Γ₂ t :=
+    fun t => (hC1₂.contMDiffAt (Filter.univ_mem)).mdifferentiableAt (by norm_num)
+  -- The local-agreement set.
+  set S : Set ℝ := {t | Γ₁ =ᶠ[𝓝 t] Γ₂} with hS_def
+  -- `S` is open: local agreement on a neighbourhood is an open condition.
+  have hS_open : IsOpen S := by
+    rw [isOpen_iff_mem_nhds]
+    intro t ht
+    rcases Filter.eventually_iff_exists_mem.mp ht with ⟨U, hU_nhds, hU_eq⟩
+    rcases mem_nhds_iff.mp hU_nhds with ⟨V, hVU, hV_open, htV⟩
+    refine Filter.mem_of_superset (hV_open.mem_nhds htV) ?_
+    intro s hsV
+    -- `Γ₁ = Γ₂` on `V` (an open neighbourhood of `s`), so `Γ₁ =ᶠ[𝓝 s] Γ₂`.
+    exact Filter.eventually_iff_exists_mem.mpr
+      ⟨V, hV_open.mem_nhds hsV, fun r hrV => hU_eq r (hVU hrV)⟩
+  -- The feet-agreement set, closed by continuity.
+  have hfeet_closed : IsClosed {t : ℝ | Γ₁ t = Γ₂ t} :=
+    isClosed_eq hc₁ hc₂
+  -- `S ⊆ {Γ₁ = Γ₂}` (local agreement implies pointwise agreement).
+  have hS_sub_feet : S ⊆ {t : ℝ | Γ₁ t = Γ₂ t} := by
+    intro t ht; exact ht.self_of_nhds
+  -- `S` is closed.
+  have hS_closed : IsClosed S := by
+    rw [← closure_subset_iff_isClosed]
+    intro t ht
+    -- `t ∈ closure S`; feet agree at `t`.
+    have hfeet_t : Γ₁ t = Γ₂ t := by
+      have : t ∈ closure {s : ℝ | Γ₁ s = Γ₂ s} :=
+        closure_mono hS_sub_feet ht
+      rwa [hfeet_closed.closure_eq] at this
+    set q : M := Γ₁ t with hq_def
+    -- Open neighbourhood `O` of `t` with both feet in `(chartAt H q).source`.
+    set O : Set ℝ := Γ₁ ⁻¹' (chartAt H q).source ∩ Γ₂ ⁻¹' (chartAt H q).source with hO_def
+    have hO_open : IsOpen O :=
+      ((chartAt H q).open_source.preimage hc₁).inter
+        ((chartAt H q).open_source.preimage hc₂)
+    have hq_src : q ∈ (chartAt H q).source := mem_chart_source H q
+    have htO : t ∈ O := by
+      refine ⟨?_, ?_⟩
+      · change Γ₁ t ∈ (chartAt H q).source; exact hq_src
+      · change Γ₂ t ∈ (chartAt H q).source; rw [← hfeet_t]; exact hq_src
+    have hsrc₁ : ∀ s ∈ O, Γ₁ s ∈ (chartAt H q).source := fun s hs => hs.1
+    have hsrc₂ : ∀ s ∈ O, Γ₂ s ∈ (chartAt H q).source := fun s hs => hs.2
+    have hgeo₁ : ∀ s ∈ O, Geodesic.HasGeodesicEquationAt (I := I) g Γ₁ s :=
+      fun s _ => h₁ s
+    have hgeo₂ : ∀ s ∈ O, Geodesic.HasGeodesicEquationAt (I := I) g Γ₂ s :=
+      fun s _ => h₂ s
+    -- The chart-`q`-phase curves.
+    set c₁ : ℝ → E × E :=
+      fun s => (chartCurve (I := I) q Γ₁ s, deriv (chartCurve (I := I) q Γ₁) s) with hc₁_def
+    set c₂ : ℝ → E × E :=
+      fun s => (chartCurve (I := I) q Γ₂ s, deriv (chartCurve (I := I) q Γ₂) s) with hc₂_def
+    -- The chart-phase curves are continuous on `O`.
+    have hc₁_contOn : ContinuousOn c₁ O := fun s hs =>
+      (chartPhase_continuousAt_of_geodesicOn (I := I) g q hO_open hs hc₁.continuousOn
+        hsrc₁ hgeo₁).continuousWithinAt
+    have hc₂_contOn : ContinuousOn c₂ O := fun s hs =>
+      (chartPhase_continuousAt_of_geodesicOn (I := I) g q hO_open hs hc₂.continuousOn
+        hsrc₂ hgeo₂).continuousWithinAt
+    -- On `S ∩ O` the two chart-phase curves agree: where `Γ₁ =ᶠ Γ₂`, the chart-`q`
+    -- coordinate curves agree eventually, hence so do their derivatives.
+    have hc_eqOn : Set.EqOn c₁ c₂ (S ∩ O) := by
+      intro s hs
+      have hloc : Γ₁ =ᶠ[𝓝 s] Γ₂ := hs.1
+      have hcc : chartCurve (I := I) q Γ₁ =ᶠ[𝓝 s] chartCurve (I := I) q Γ₂ := by
+        filter_upwards [hloc] with r hr
+        rw [chartCurve_def, chartCurve_def, hr]
+      have hfst : chartCurve (I := I) q Γ₁ s = chartCurve (I := I) q Γ₂ s := by
+        rw [chartCurve_def, chartCurve_def, hloc.self_of_nhds]
+      have hsnd : deriv (chartCurve (I := I) q Γ₁) s = deriv (chartCurve (I := I) q Γ₂) s :=
+        Filter.EventuallyEq.deriv_eq hcc
+      simp only [hc₁_def, hc₂_def, hfst, hsnd]
+    -- `t ∈ closure (S ∩ O)`: `O` is a neighbourhood of `t` and `t ∈ closure S`.
+    have ht_closSO : t ∈ closure (S ∩ O) := by
+      rw [mem_closure_iff_nhds]
+      intro u hu
+      have huO : u ∩ O ∈ 𝓝 t := Filter.inter_mem hu (hO_open.mem_nhds htO)
+      rcases (mem_closure_iff_nhds.mp ht) (u ∩ O) huO with ⟨z, hz_uO, hz_S⟩
+      exact ⟨z, hz_uO.1, hz_S, hz_uO.2⟩
+    -- The chart-phase curves agree at `t` by continuity of agreement on the closure.
+    -- Extend the agreement from `S ∩ O` to the set `(S ∩ O) ∪ {t}`, on which both
+    -- chart-phase curves are still continuous and which lies in `closure (S ∩ O)`.
+    have hc_t : c₁ t = c₂ t := by
+      set W : Set ℝ := (S ∩ O) ∪ {t} with hW_def
+      have hW_sub_O : W ⊆ O := by
+        rintro s (hs | hs)
+        · exact hs.2
+        · rw [Set.mem_singleton_iff.mp hs]; exact htO
+      have hSO_sub_W : (S ∩ O) ⊆ W := Set.subset_union_left
+      have hW_sub_clos : W ⊆ closure (S ∩ O) := by
+        rintro s (hs | hs)
+        · exact subset_closure hs
+        · rw [Set.mem_singleton_iff.mp hs]; exact ht_closSO
+      have heqW : Set.EqOn c₁ c₂ W :=
+        hc_eqOn.of_subset_closure (hc₁_contOn.mono hW_sub_O) (hc₂_contOn.mono hW_sub_O)
+          hSO_sub_W hW_sub_clos
+      exact heqW (Set.mem_union_right _ rfl)
+    -- chart-phase agreement at `t` ⟹ feet + chart-velocity agree at `t`.
+    have hvel_t : deriv (chartCurve (I := I) q Γ₁) t = deriv (chartCurve (I := I) q Γ₂) t := by
+      have := congrArg Prod.snd hc_t
+      simpa [hc₁_def, hc₂_def] using this
+    -- Local agreement at `t`, i.e. `t ∈ S`.
+    have : Γ₁ =ᶠ[𝓝 t] Γ₂ :=
+      geodesic_eventuallyEq_of_initial_local (I := I) g hc₁ hc₂ h₁ h₂ hfeet_t
+        (by rw [hq_def] at hvel_t; exact hvel_t)
+    exact this
+  -- `0 ∈ S` from the shared launch data.
+  have h0S : (0 : ℝ) ∈ S := by
+    -- chart-`(Γ₁ 0)`-velocities agree at `0` via `chartCurve_deriv_zero_eq` + `hv`.
+    set q : M := Γ₁ 0 with hq_def
+    have hv₁ : deriv (chartCurve (I := I) q Γ₁) 0
+        = ((trivializationAt E (TangentSpace I) q).continuousLinearMapAt ℝ q)
+            (mfderiv 𝓘(ℝ, ℝ) I Γ₁ 0 (1 : ℝ) : E) :=
+      chartCurve_deriv_zero_eq (I := I) q (hmdiff₁ 0) rfl rfl
+    have hv₂ : deriv (chartCurve (I := I) q Γ₂) 0
+        = ((trivializationAt E (TangentSpace I) q).continuousLinearMapAt ℝ q)
+            (mfderiv 𝓘(ℝ, ℝ) I Γ₂ 0 (1 : ℝ) : E) :=
+      chartCurve_deriv_zero_eq (I := I) q (hmdiff₂ 0) h0.symm rfl
+    have hvel0 : deriv (chartCurve (I := I) q Γ₁) 0
+        = deriv (chartCurve (I := I) q Γ₂) 0 := by
+      rw [hv₁, hv₂, hv]
+    exact geodesic_eventuallyEq_of_initial_local (I := I) g hc₁ hc₂ h₁ h₂ h0
+      (by rw [hq_def] at hvel0; exact hvel0)
+  -- Clopen + nonempty + preconnected ⟹ `S = univ`.
+  have hS_clopen : IsClopen S := ⟨hS_closed, hS_open⟩
+  have hS_univ : S = Set.univ := hS_clopen.eq_univ ⟨0, h0S⟩
+  -- `S = univ` ⟹ pointwise `Γ₁ = Γ₂`.
+  funext t
+  have htS : t ∈ S := by rw [hS_univ]; exact Set.mem_univ t
+  exact htS.self_of_nhds
+
+/-! ## Homogeneity of the intrinsic geodesic spray
+
+The intrinsic geodesic depends on its launch velocity through the spray, which is
+homogeneous of degree one: rescaling the launch velocity by `t` and the time by
+`1/t` traces the same curve.  Concretely, the affine reparametrisation
+`s ↦ intrinsicGeodesic p u (t · s)` is a geodesic (affine-reparam invariance,
+`hasGeodesicEquationAt_comp_const_smul`) launching from `p` with velocity `t • u`
+(second-order chain rule), so by the global uniqueness theorem
+`isGeodesic_eq_of_initial` it coincides with `intrinsicGeodesic p (t • u)`.
+Evaluating at `s = 1` gives the spray-homogeneity identity, the keystone
+guaranteeing that the radial ray `s ↦ expMapIntrinsic p (s • u)` is a single
+smooth geodesic. -/
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- **Spray homogeneity of the intrinsic geodesic.**  For every scalar `t`,
+`intrinsicGeodesic g hEnorm p (t • u) 1 = intrinsicGeodesic g hEnorm p u t`.
+Equivalently `expMapIntrinsic p (t • u) = intrinsicGeodesic p u t`, so the radial
+ray `s ↦ expMapIntrinsic p (s • u)` is the single smooth geodesic
+`intrinsicGeodesic p u`. -/
+theorem intrinsicGeodesic_smul
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (p : M) (u : TangentSpace I p) (t : ℝ) :
+    intrinsicGeodesic (I := I) g hEnorm p (t • u) 1
+      = intrinsicGeodesic (I := I) g hEnorm p u t := by
+  classical
+  -- The reparametrised geodesic `Γrep s = intrinsicGeodesic p u (t · s)`.
+  set φ : ℝ → M := intrinsicGeodesic (I := I) g hEnorm p u with hφ_def
+  set Γrep : ℝ → M := fun s => φ (t * s) with hΓrep_def
+  -- `φ` is a complete geodesic launching at `p` with velocity `u`.
+  have hφ_geo : Geodesic.IsGeodesic (I := I) g φ :=
+    intrinsicGeodesic_isGeodesic (I := I) g hEnorm p u
+  have hφ_cont : Continuous φ := intrinsicGeodesic_continuous (I := I) g hEnorm p u
+  have hφ0 : φ 0 = p := intrinsicGeodesic_zero (I := I) g hEnorm p u
+  have hφ_mdiff0 : MDifferentiableAt 𝓘(ℝ, ℝ) I φ 0 :=
+    ((intrinsicGeodesic_contMDiffOn (I := I) g hEnorm p u).contMDiffAt
+      (Filter.univ_mem)).mdifferentiableAt (by norm_num)
+  have hφv : (mfderiv 𝓘(ℝ, ℝ) I φ 0 (1 : ℝ) : E) = (u : E) :=
+    intrinsicGeodesic_mfderiv_zero (I := I) g hEnorm p u
+  -- `Γrep` is a geodesic (affine reparametrisation of the geodesic `φ`).
+  have hΓrep_geo : Geodesic.IsGeodesic (I := I) g Γrep := by
+    intro s
+    exact hasGeodesicEquationAt_comp_const_smul (I := I) g t s (hφ_geo (t * s))
+  -- `Γrep` is continuous.
+  have hΓrep_cont : Continuous Γrep := hφ_cont.comp (by fun_prop)
+  -- `Γrep 0 = p`.
+  have hΓrep0 : Γrep 0 = p := by rw [hΓrep_def]; simp only [mul_zero]; exact hφ0
+  -- The launch velocity of `Γrep` at `0`: `mfderiv Γrep 0 1 = t • u`.
+  have hscale_mfderiv : HasMFDerivAt 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (fun s : ℝ => t * s)
+      (0 : ℝ) (t • ContinuousLinearMap.id ℝ ℝ) := by
+    rw [hasMFDerivAt_iff_hasFDerivAt]
+    have hfd : HasFDerivAt (fun s : ℝ => t * s) (t • ContinuousLinearMap.id ℝ ℝ) (0 : ℝ) := by
+      simpa [mul_comm] using
+        ((hasFDerivAt_id (0 : ℝ)).const_mul t)
+    simpa using hfd
+  have hφ_at : HasMFDerivAt 𝓘(ℝ, ℝ) I φ (t * (0 : ℝ)) (mfderiv 𝓘(ℝ, ℝ) I φ 0) := by
+    rw [mul_zero]; exact hφ_mdiff0.hasMFDerivAt
+  have hΓrep_mfderiv : mfderiv 𝓘(ℝ, ℝ) I Γrep 0
+      = (mfderiv 𝓘(ℝ, ℝ) I φ 0).comp (t • ContinuousLinearMap.id ℝ ℝ) :=
+    (hφ_at.comp 0 hscale_mfderiv).mfderiv
+  have hΓrep_vel : (mfderiv 𝓘(ℝ, ℝ) I Γrep 0 (1 : ℝ) : E) = ((t • u : TangentSpace I p) : E) := by
+    -- `mfderiv Γrep 0 1 = ((mfderiv φ 0).comp (t • id)) 1 = mfderiv φ 0 (t • 1) = t • mfderiv φ 0 1`.
+    have h1 : mfderiv 𝓘(ℝ, ℝ) I Γrep 0 (1 : ℝ)
+        = (mfderiv 𝓘(ℝ, ℝ) I φ 0) ((t • ContinuousLinearMap.id ℝ ℝ) (1 : ℝ)) := by
+      rw [hΓrep_mfderiv]; rfl
+    have h2 : (t • ContinuousLinearMap.id ℝ ℝ) (1 : ℝ) = t • (1 : ℝ) := by
+      rw [ContinuousLinearMap.smul_apply, ContinuousLinearMap.id_apply]
+    have happ : mfderiv 𝓘(ℝ, ℝ) I Γrep 0 (1 : ℝ)
+        = t • (mfderiv 𝓘(ℝ, ℝ) I φ 0) (1 : ℝ) := by
+      rw [h1, h2]
+      exact ContinuousLinearMap.map_smul (mfderiv 𝓘(ℝ, ℝ) I φ 0) t (1 : ℝ)
+    -- The `: E` ascription is definitional (`TangentSpace I · = E`); the scalar
+    -- action commutes with it, so the goal reduces to `t • (mfderiv φ 0 1) = t • u`.
+    rw [happ]
+    exact congrArg (t • ·) hφv
+  -- `intrinsicGeodesic p (t • u)` launches at `p` with velocity `t • u`.
+  have hψ_geo : Geodesic.IsGeodesic (I := I) g (intrinsicGeodesic (I := I) g hEnorm p (t • u)) :=
+    intrinsicGeodesic_isGeodesic (I := I) g hEnorm p (t • u)
+  have hψ_cont : Continuous (intrinsicGeodesic (I := I) g hEnorm p (t • u)) :=
+    intrinsicGeodesic_continuous (I := I) g hEnorm p (t • u)
+  have hψ0 : intrinsicGeodesic (I := I) g hEnorm p (t • u) 0 = p :=
+    intrinsicGeodesic_zero (I := I) g hEnorm p (t • u)
+  have hψv : (mfderiv 𝓘(ℝ, ℝ) I (intrinsicGeodesic (I := I) g hEnorm p (t • u)) 0 (1 : ℝ) : E)
+      = ((t • u : TangentSpace I p) : E) :=
+    intrinsicGeodesic_mfderiv_zero (I := I) g hEnorm p (t • u)
+  -- The two complete geodesics share initial data, hence agree by uniqueness.
+  have hfoot : Γrep 0 = intrinsicGeodesic (I := I) g hEnorm p (t • u) 0 := by
+    rw [hΓrep0, hψ0]
+  have hvel : (mfderiv 𝓘(ℝ, ℝ) I Γrep 0 (1 : ℝ) : E)
+      = (mfderiv 𝓘(ℝ, ℝ) I (intrinsicGeodesic (I := I) g hEnorm p (t • u)) 0 (1 : ℝ) : E) := by
+    rw [hΓrep_vel, hψv]
+  have heq : Γrep = intrinsicGeodesic (I := I) g hEnorm p (t • u) :=
+    isGeodesic_eq_of_initial (I := I) g hΓrep_geo hψ_geo hΓrep_cont hψ_cont hfoot hvel
+  -- Evaluate at `s = 1`.
+  have h1 : Γrep 1 = intrinsicGeodesic (I := I) g hEnorm p (t • u) 1 := by rw [heq]
+  rw [hΓrep_def] at h1
+  simp only [mul_one, hφ_def] at h1
+  exact h1.symm
+
 end AgreementBridge
 
 end Exponential
