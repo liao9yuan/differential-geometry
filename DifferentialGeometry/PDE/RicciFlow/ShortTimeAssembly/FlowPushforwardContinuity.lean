@@ -4,7 +4,6 @@ identification of the diffeomorphism family with the chart-cover flow, and the
 `t = 0` right-continuity of the moving pushforward. Skeleton stubs for the
 short-time-existence blueprint (GAP 2, flow-continuity).
 -/
-import DifferentialGeometry.PDE.RicciFlow.ShortTimeExistence
 import DifferentialGeometry.PDE.RicciFlow.HamiltonDeTurckPullbackFlat
 import DifferentialGeometry.PDE.RicciFlow.Pullback.EvaluationFormChainRule
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckRemainderStrongExists

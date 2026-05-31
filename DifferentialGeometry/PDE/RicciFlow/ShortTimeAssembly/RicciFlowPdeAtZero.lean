@@ -5,7 +5,6 @@ continuity of the pulled-back inner product and Ricci tensor in time, and
 continuity of Ricci in the metric-time variable. Skeleton stubs for the
 short-time-existence blueprint (GAP 2, `t = 0` extension).
 -/
-import DifferentialGeometry.PDE.RicciFlow.ShortTimeExistence
 import DifferentialGeometry.PDE.RicciFlow.HamiltonDeTurckPullbackFlat
 import DifferentialGeometry.PDE.RicciFlow.Pullback.EvaluationFormChainRule
 import DifferentialGeometry.PDE.RicciFlow.Pullback.RicciNaturality

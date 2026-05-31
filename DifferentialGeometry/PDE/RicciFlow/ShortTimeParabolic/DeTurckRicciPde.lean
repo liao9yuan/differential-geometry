@@ -3,7 +3,6 @@ Metric-level short-time existence for the strictly parabolic DeTurck–Ricci flo
 together with its interior (`Ioo`) and `t = 0` one-sided time-derivative pieces.
 Skeleton stubs for the short-time-existence blueprint (GAP 1, transport layer).
 -/
-import DifferentialGeometry.PDE.RicciFlow.ShortTimeExistence
 import DifferentialGeometry.PDE.RicciFlow.ShortTimeParabolic.RealizeTransport
 import DifferentialGeometry.PDE.RicciFlow.ShortTimeParabolic.SolutionC2Continuous
 import DifferentialGeometry.PDE.RicciFlow.HamiltonDeTurckPullbackFlat

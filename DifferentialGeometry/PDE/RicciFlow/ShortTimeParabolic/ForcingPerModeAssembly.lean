@@ -3,7 +3,6 @@ Interior continuity of the DeTurck geometric forcing (M2) and the term-by-term
 per-mode assembly of the interior time-derivative (M3). Skeleton stubs for the
 short-time-existence blueprint (GAP 1, spectral M2/M3).
 -/
-import DifferentialGeometry.PDE.RicciFlow.ShortTimeExistence
 import DifferentialGeometry.PDE.RicciFlow.HamiltonDeTurckPullbackFlat
 import DifferentialGeometry.PDE.RicciFlow.Pullback.EvaluationFormChainRule
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckRemainderStrongExists

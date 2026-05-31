@@ -3,7 +3,6 @@ The local per-mode scalar Duhamel–Leibniz rule: the per-mode convolution is
 differentiable at an interior time with derivative `-λ·(conv) + f`. Skeleton stub
 for the short-time-existence blueprint (GAP 1, per-mode scalar leaf).
 -/
-import DifferentialGeometry.PDE.RicciFlow.ShortTimeExistence
 import DifferentialGeometry.PDE.RicciFlow.HamiltonDeTurckPullbackFlat
 import DifferentialGeometry.PDE.RicciFlow.Pullback.EvaluationFormChainRule
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckRemainderStrongExists

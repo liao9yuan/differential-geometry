@@ -4,7 +4,6 @@ The interior parabolic time-regularity gate: for `t > 0` the carrier-scale path
 `Δ_∇ u₂ + N(u₁)`. Skeleton stub for the short-time-existence blueprint (GAP 1,
 interior spectral gate).
 -/
-import DifferentialGeometry.PDE.RicciFlow.ShortTimeExistence
 import DifferentialGeometry.PDE.RicciFlow.ShortTimeParabolic.ForcingPerModeAssembly
 import DifferentialGeometry.PDE.RicciFlow.HamiltonDeTurckPullbackFlat
 import DifferentialGeometry.PDE.RicciFlow.Pullback.EvaluationFormChainRule

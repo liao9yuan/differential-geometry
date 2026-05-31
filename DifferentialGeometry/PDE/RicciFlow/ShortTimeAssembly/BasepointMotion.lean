@@ -4,7 +4,6 @@ the frozen-vector chart-metric map along the conjugating orbit equals the negati
 metric-transport residual, with the curve-level datum threaded through the orbit-flow
 flat route.  Skeleton stubs for the short-time-existence blueprint (GAP 2, basepoint motion).
 -/
-import DifferentialGeometry.PDE.RicciFlow.ShortTimeExistence
 import DifferentialGeometry.PDE.RicciFlow.HamiltonDeTurckPullbackFlat
 import DifferentialGeometry.PDE.RicciFlow.Pullback.EvaluationFormChainRule
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckRemainderStrongExists

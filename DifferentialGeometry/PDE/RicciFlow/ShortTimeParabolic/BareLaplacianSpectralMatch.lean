@@ -3,7 +3,6 @@ The smooth coordinate eigen-equation matching the raw connection Laplacian's
 tensor-`L²` coefficient against the spectral eigenvalue. Skeleton stub for the
 short-time-existence blueprint (GAP 1, spectral identity).
 -/
-import DifferentialGeometry.PDE.RicciFlow.ShortTimeExistence
 import DifferentialGeometry.PDE.RicciFlow.HamiltonDeTurckPullbackFlat
 import DifferentialGeometry.PDE.RicciFlow.Pullback.EvaluationFormChainRule
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckRemainderStrongExists

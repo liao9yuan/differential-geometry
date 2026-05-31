@@ -4,7 +4,6 @@ autonomized field, and the joint-`C∞` ⇒ autonomized-`C¹` predicate for the
 cutoff. Skeleton stubs for the short-time-existence blueprint (GAP 2, field
 globalization).
 -/
-import DifferentialGeometry.PDE.RicciFlow.ShortTimeExistence
 import DifferentialGeometry.PDE.RicciFlow.HamiltonDeTurckPullbackFlat
 import DifferentialGeometry.PDE.RicciFlow.Pullback.EvaluationFormChainRule
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckRemainderStrongExists

@@ -4,7 +4,6 @@ family satisfies `∂_t (Φ_s^* g_DT s) = -2 Ric` on the open time interval, fro
 flat variational data and the Christoffel-correction equation. Skeleton stub for
 the short-time-existence blueprint (GAP 2, headline assembly).
 -/
-import DifferentialGeometry.PDE.RicciFlow.ShortTimeExistence
 import DifferentialGeometry.PDE.RicciFlow.HamiltonDeTurckPullbackFlat
 import DifferentialGeometry.PDE.RicciFlow.Pullback.EvaluationFormChainRule
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckRemainderStrongExists

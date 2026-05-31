@@ -4,7 +4,6 @@ scale, with its Duhamel-fixed-point identification and forcing fixed-point
 equation. Skeleton stub for the short-time-existence blueprint (GAP 1, ROUTE B
 spectral strong existence).
 -/
-import DifferentialGeometry.PDE.RicciFlow.ShortTimeExistence
 import DifferentialGeometry.PDE.RicciFlow.ShortTimeParabolic.HScaleLipschitz
 import DifferentialGeometry.PDE.RicciFlow.HamiltonDeTurckPullbackFlat
 import DifferentialGeometry.PDE.RicciFlow.Pullback.EvaluationFormChainRule

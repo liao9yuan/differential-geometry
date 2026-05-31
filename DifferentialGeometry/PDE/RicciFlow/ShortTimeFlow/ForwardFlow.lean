@@ -3,7 +3,6 @@ The forward (one-sided, from `t = 0`) jointly-smooth flow of the interior DeTurc
 field, and the `t = 0` right-continuity extension of the flow and its pushforward.
 Skeleton stubs for the short-time-existence blueprint (GAP 2, forward flow).
 -/
-import DifferentialGeometry.PDE.RicciFlow.ShortTimeExistence
 import DifferentialGeometry.PDE.RicciFlow.HamiltonDeTurckPullbackFlat
 import DifferentialGeometry.PDE.RicciFlow.Pullback.EvaluationFormChainRule
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckRemainderStrongExists

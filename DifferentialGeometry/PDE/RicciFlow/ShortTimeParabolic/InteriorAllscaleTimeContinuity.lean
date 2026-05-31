@@ -4,7 +4,6 @@ All-scale interior time-continuity of the maximal-regularity solution: on every
 `σ ≥ a`, by analytic-semigroup decay. Skeleton stub for the short-time-existence
 blueprint (GAP 1, spectral M1).
 -/
-import DifferentialGeometry.PDE.RicciFlow.ShortTimeExistence
 import DifferentialGeometry.PDE.RicciFlow.HamiltonDeTurckPullbackFlat
 import DifferentialGeometry.PDE.RicciFlow.Pullback.EvaluationFormChainRule
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckRemainderStrongExists

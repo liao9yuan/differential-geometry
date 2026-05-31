@@ -3,7 +3,6 @@ The per-chart forward Picard local flow, the forward-uniqueness glue into one
 interior flow carrying the bare velocity, and the chart-cover orbit linchpin.
 Skeleton stubs for the short-time-existence blueprint (GAP 2, interior flow).
 -/
-import DifferentialGeometry.PDE.RicciFlow.ShortTimeExistence
 import DifferentialGeometry.PDE.RicciFlow.HamiltonDeTurckPullbackFlat
 import DifferentialGeometry.PDE.RicciFlow.Pullback.EvaluationFormChainRule
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckRemainderStrongExists

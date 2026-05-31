@@ -5,7 +5,6 @@ the total time derivative splits into the `-2 Ric + 𝓛` geometry slot and the
 single-point joint-Fréchet data. Skeleton stubs for the short-time-existence
 blueprint (GAP 2, evaluation-form assembly).
 -/
-import DifferentialGeometry.PDE.RicciFlow.ShortTimeExistence
 import DifferentialGeometry.PDE.RicciFlow.HamiltonDeTurckPullbackFlat
 import DifferentialGeometry.PDE.RicciFlow.Pullback.EvaluationFormChainRule
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckRemainderStrongExists

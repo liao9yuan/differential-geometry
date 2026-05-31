@@ -4,7 +4,6 @@ raw flat variational identity, the Christoffel-correction equation relating its
 factor values, and the flat value-jet identity at the chart level. Skeleton stubs
 for the short-time-existence blueprint (GAP 2, flat variational data).
 -/
-import DifferentialGeometry.PDE.RicciFlow.ShortTimeExistence
 import DifferentialGeometry.PDE.RicciFlow.HamiltonDeTurckPullbackFlat
 import DifferentialGeometry.PDE.RicciFlow.Pullback.EvaluationFormChainRule
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckRemainderStrongExists

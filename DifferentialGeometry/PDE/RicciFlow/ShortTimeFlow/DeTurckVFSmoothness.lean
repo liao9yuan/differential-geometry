@@ -3,7 +3,6 @@ Joint smoothness and up-to-`t = 0` continuity of the time-dependent DeTurck
 vector field on the open interior, plus the chart-Gram joint-`C∞` interface.
 Skeleton stubs for the short-time-existence blueprint (GAP 2, flow regularity).
 -/
-import DifferentialGeometry.PDE.RicciFlow.ShortTimeExistence
 import DifferentialGeometry.PDE.RicciFlow.HamiltonDeTurckPullbackFlat
 import DifferentialGeometry.PDE.RicciFlow.Pullback.EvaluationFormChainRule
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckRemainderStrongExists
@@ -15,6 +14,7 @@ import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.ChartOverlapUniq
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.BareFlowFromJointC1
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.SmoothInSpace.VariationalLiftFlatIdentity
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.SmoothDependence.GlobalClosedManifold
+import DifferentialGeometry.PDE.DeTurck.DeTurckVFChartCoord
 
 namespace DifferentialGeometry.PDE.RicciFlow
 

@@ -4,7 +4,6 @@ tensor, via the linear small-tensor realization and the `Hᵃ ↪ C²` Sobolev
 embedding. Skeleton stub for the short-time-existence blueprint (GAP 1,
 deliverable).
 -/
-import DifferentialGeometry.PDE.RicciFlow.ShortTimeExistence
 import DifferentialGeometry.PDE.RicciFlow.ShortTimeParabolic.RealizeTransport
 import DifferentialGeometry.PDE.RicciFlow.ShortTimeAssembly.RicciFlowPdeAtZero
 import DifferentialGeometry.PDE.RicciFlow.HamiltonDeTurckPullbackFlat

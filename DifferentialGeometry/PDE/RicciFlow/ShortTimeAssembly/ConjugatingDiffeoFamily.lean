@@ -4,7 +4,6 @@ smooth family of diffeomorphisms anchored at the identity, carrying the bare
 backward orbit ODE on the interior. Skeleton stub for the short-time-existence
 blueprint (GAP 2, diffeomorphism family).
 -/
-import DifferentialGeometry.PDE.RicciFlow.ShortTimeExistence
 import DifferentialGeometry.PDE.RicciFlow.HamiltonDeTurckPullbackFlat
 import DifferentialGeometry.PDE.RicciFlow.Pullback.EvaluationFormChainRule
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckRemainderStrongExists

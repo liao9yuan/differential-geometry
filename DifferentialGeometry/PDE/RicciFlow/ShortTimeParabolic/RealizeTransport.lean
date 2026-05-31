@@ -5,7 +5,6 @@ functional and its factorization, the push of the within-derivative through it,
 and the spectral→geometric reconciliation at the solution. Skeleton stubs for the
 short-time-existence blueprint (GAP 1, transport layer).
 -/
-import DifferentialGeometry.PDE.RicciFlow.ShortTimeExistence
 import DifferentialGeometry.PDE.RicciFlow.ShortTimeParabolic.LocalWeylInput
 import DifferentialGeometry.PDE.RicciFlow.ShortTimeParabolic.BareLaplacianSpectralMatch
 import DifferentialGeometry.PDE.RicciFlow.HamiltonDeTurckPullbackFlat
