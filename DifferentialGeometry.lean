@@ -1317,6 +1317,30 @@ import DifferentialGeometry.PDE.RicciFlow.HamiltonDeTurckPullback
 import DifferentialGeometry.PDE.RicciFlow.HamiltonDeTurckPullbackFlat
 import DifferentialGeometry.PDE.RicciFlow.Pullback.EvaluationFormChainRule
 import DifferentialGeometry.PDE.RicciFlow.ShortTimeExistence
+-- Ricci-flow short-time existence: interior parabolic DeTurck–Ricci layer
+import DifferentialGeometry.PDE.RicciFlow.ShortTimeParabolic.DeTurckRicciPde
+import DifferentialGeometry.PDE.RicciFlow.ShortTimeParabolic.HScaleLipschitz
+import DifferentialGeometry.PDE.RicciFlow.ShortTimeParabolic.MildSolutionTimeH1
+import DifferentialGeometry.PDE.RicciFlow.ShortTimeParabolic.InteriorTimeRegularityGate
+import DifferentialGeometry.PDE.RicciFlow.ShortTimeParabolic.InteriorAllscaleTimeContinuity
+import DifferentialGeometry.PDE.RicciFlow.ShortTimeParabolic.ForcingPerModeAssembly
+import DifferentialGeometry.PDE.RicciFlow.ShortTimeParabolic.BareLaplacianSpectralMatch
+import DifferentialGeometry.PDE.RicciFlow.ShortTimeParabolic.DuhamelIntegralTimeDeriv
+import DifferentialGeometry.PDE.RicciFlow.ShortTimeParabolic.SolutionC2Continuous
+import DifferentialGeometry.PDE.RicciFlow.ShortTimeParabolic.RealizeTransport
+-- Ricci-flow short-time existence: DeTurck conjugating-flow layer
+import DifferentialGeometry.PDE.RicciFlow.ShortTimeFlow.DeTurckVFSmoothness
+import DifferentialGeometry.PDE.RicciFlow.ShortTimeFlow.ForwardFlow
+import DifferentialGeometry.PDE.RicciFlow.ShortTimeFlow.InteriorLocalFlow
+import DifferentialGeometry.PDE.RicciFlow.ShortTimeFlow.CutoffExtension
+-- Ricci-flow short-time existence: Hamilton–DeTurck headline assembly + t=0
+import DifferentialGeometry.PDE.RicciFlow.ShortTimeAssembly.FlatAssemblyInterior
+import DifferentialGeometry.PDE.RicciFlow.ShortTimeAssembly.ConjugatingDiffeoFamily
+import DifferentialGeometry.PDE.RicciFlow.ShortTimeAssembly.FlatVariationalData
+import DifferentialGeometry.PDE.RicciFlow.ShortTimeAssembly.BasepointMotion
+import DifferentialGeometry.PDE.RicciFlow.ShortTimeAssembly.EvalFormChainRule
+import DifferentialGeometry.PDE.RicciFlow.ShortTimeAssembly.RicciFlowPdeAtZero
+import DifferentialGeometry.PDE.RicciFlow.ShortTimeAssembly.FlowPushforwardContinuity
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.SobolevScale.Order2Equivalence
 
 -- Public consumption-facing facade
