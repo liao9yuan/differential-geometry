@@ -1977,7 +1977,7 @@ $$
   \mathrm{Ric}_x(v, w) = \sum_i g_x\bigl(R(B_i, v) w,\, B_i\bigr).
 $$
 This is the "Ricci as orthonormal trace" formula. -/
-private theorem ricciTensor_eq_orthonormal_trace
+theorem ricciTensor_eq_orthonormal_trace
     (v w : TangentSpace I x)
     (B : Fin (Module.finrank ℝ E) → TangentSpace I x)
     (hB : ∀ i j : Fin (Module.finrank ℝ E),

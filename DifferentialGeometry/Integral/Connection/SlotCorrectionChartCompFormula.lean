@@ -1,47 +1,22 @@
-import DifferentialGeometry.Integral.Connection.ChartTensorRSCovariantDerivative
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.TrivProj.Bridge
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensor.Components
+import DifferentialGeometry.Analysis.Laplacian.TensorRegularity.CovDerivSlotCorrectionComponent
 
 /-!
-# Chart-component formula for the upper/lower Christoffel slot corrections
+# Chart-component formula for the input/output slot corrections, with general
+vector-field argument
 
-For a smooth Riemannian manifold `(M, g)` modelled on `(E, H)` with model `I`,
-a chart center `α : M`, a smooth tangent vector field `B`, an `(r, s)`-tensor
-section `T`, and a base point `b` in the chart `α` source, this file expresses
-the `(Idx, Jdx)`-chart-frame component of
+For an arbitrary vector field `B`, the chart-scalar component of
+`chartTensorRSInputSlotCorrection r s g α T B b k` (resp. the output-slot
+analog) is expressed as a finite sum
 
-* `chartTensorRSInputSlotCorrection r s g α T B b k`
-  (the `k`-th upper-slot Christoffel correction), and
-* `chartTensorRSOutputSlotCorrection r s g α T B b l`
-  (the `l`-th lower-slot Christoffel correction),
+```
+∑ m, (B^m at b) * ∑ Idx', inputSlotCoeff g r α m k Idx Idx' y *
+  tensorChartComponentRaw g r s S α Idx' Jdx b
+```
 
-projected by the chart-α trivialisation, in closed form as a multilinear value
-built from:
-
-* `chartLeviCivitaParallelCLM g α b B`, the chart-`α` Levi-Civita parallel CLM,
-  which itself unfolds (via `chartLeviCivitaParallelCLM_apply` and
-  `christoffelCorrection_apply`) to a polynomial in chart-Christoffel data
-  `chartChristoffel g α i j k` and B's chart components
-  `(chartModelBasis E).repr (trivToE α b (B b))`,
-* T's chart-frame action `(T b) ω' (chartJinv α b ∘ chartModelBasis ∘ Jdx)`
-  applied to a `(0, r)`-CMM input `ω'` and a tuple of chart-frame vectors,
-  which evaluated on the chart-frame basis yields T's chart components.
-
-The formulae make no expansion choices: the closed-form RHS exposes the
-slot-CLM `chartLeviCivitaParallelCLM g α b B` and the chart-Jacobians
-`chartJ α b` / `chartJinv α b` so that any further expansion (into
-Christoffel symbols, B's components, T's components) is a direct
-substitution of the corresponding `_apply` lemmas of the building blocks.
-
-## Main results
-
-* `chartTensorRSInputSlotCorrection_chartComp_formula` — the closed-form
-  chart-component formula for the upper-slot Christoffel correction.
-* `chartTensorRSOutputSlotCorrection_chartComp_formula` — the closed-form
-  chart-component formula for the lower-slot Christoffel correction.
-
-The right-hand sides are polynomials in chart-Christoffel data, B's chart
-components, and T's chart components in the sense described above.
+where `B^m(b) = ((chartModelBasis E).repr (trivToE α b (B b))) m` are the
+chart components of `B`. The `chartBasisVecFiber`-case is supplied by the
+companion file `CovDerivSlotCorrectionComponent.lean`; we extend it via
+linearity in `B`.
 -/
 
 noncomputable section
@@ -49,318 +24,537 @@ noncomputable section
 set_option backward.isDefEq.respectTransparency false
 set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 800000
+set_option maxHeartbeats 1600000
+set_option linter.unusedSectionVars false
 
-open Bundle Manifold Set IsManifold ContinuousLinearMap
-open scoped Manifold Topology Bundle ContDiff BigOperators
+open Bundle Manifold Set Filter
+open scoped Manifold Topology ContDiff BigOperators
+open Tensor0SBundle
 
 namespace DifferentialGeometry
 namespace Integral
 namespace Connection
 
+open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 open DifferentialGeometry.Integral.Measure
+open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
-open DifferentialGeometry.Tensor
-open Tensor0SBundle
+open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Tensor.Tensor0SRiemannian
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
-  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+  [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
+/-! ## Linearity of `chartLeviCivitaParallelCLM` in the field's value at `b`
 
-/-! ## Chart-frame component formula: input slot
+On the chart base set, the value of the section `B` at `b` decomposes as
+`B b = ∑_m B^m(b) • chartBasisVecFiber α m b`. The CLM
+`chartLeviCivitaParallelCLM g α b B` is linear in `B b` (via
+`christoffelCorrection`'s additivity in `Y` and `trivToE`'s linearity), so
+the same finite-sum decomposition propagates through. -/
 
-The input slot correction `chartTensorRSInputSlotCorrection r s g α T B b k`
-is, by definition, `(T b).comp (tensorSlotSubstCLM r b Φ)` where `Φ` is the
-`k`-th tangent-slot substitution by `chartLeviCivitaParallelCLM g α b B`.
+/-- `B b` decomposes in the chart frame on the chart base set. The chart
+component `((chartModelBasis E).repr (trivToE α b (B b))) m` is the `B^m(b)`
+factor. -/
+lemma section_eq_sum_chartFrame
+    (α : M) {b : M}
+    (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
+    (B : Π b' : M, TangentSpace I b') :
+    B b =
+      ∑ m : Fin (Module.finrank ℝ E),
+        (((chartModelBasis E).repr (trivToE (I := I) α b (B b))) m) •
+          chartBasisVecFiber (I := I) α m b := by
+  classical
+  -- Apply `sum_chartFrame_coord_eq` with `w = B b`, and convert `coord` to
+  -- `repr` to match the headline shape.
+  have h := sum_chartFrame_coord_eq (I := I) (M := M) α hb (B b)
+  refine h.symm.trans ?_
+  refine Finset.sum_congr rfl (fun m _ => ?_)
+  -- `chartJ α b` and `trivToE α b` agree (both = `continuousLinearMapAt ℝ b`).
+  have hchartJ_eq : chartJ (I := I) (M := M) α b (B b) =
+      trivToE (I := I) α b (B b) := rfl
+  rw [Module.Basis.coord_apply, hchartJ_eq]
 
-After projection through the chart-α trivialisation, the
-`(Idx, Jdx)`-chart-frame component is:
+/-- Auxiliary: `christoffelCorrection` is linear in its `Y` argument, applied
+to a finite sum of scalar-weighted basis vectors. The coefficients `c m` and
+vectors `w m` are free parameters; this is purely the linearity
+`christoffelCorrection (∑ m, c m • w m) v = ∑ m, c m • christoffelCorrection
+(w m) v`. -/
+lemma christoffelCorrection_sum
+    (g : SmoothRiemannianMetric I M) (α b : M)
+    (c : Fin (Module.finrank ℝ E) → ℝ)
+    (w : Fin (Module.finrank ℝ E) → E) (v : TangentSpace I b) :
+    christoffelCorrection (I := I) g α b
+        (∑ m : Fin (Module.finrank ℝ E), c m • w m) v =
+      ∑ m : Fin (Module.finrank ℝ E),
+        c m • christoffelCorrection (I := I) g α b (w m) v := by
+  classical
+  induction (Finset.univ : Finset (Fin (Module.finrank ℝ E))) using Finset.induction
+    with
+  | empty =>
+      simp only [Finset.sum_empty]
+      have h := christoffelCorrection_smul (I := I) g α b (c := 0)
+        (Y := (0 : E)) v
+      rw [zero_smul, zero_smul] at h
+      exact h
+  | insert m s hms ih =>
+      rw [Finset.sum_insert hms, Finset.sum_insert hms]
+      rw [christoffelCorrection_add (I := I) g α b]
+      rw [christoffelCorrection_smul (I := I) g α b]
+      rw [ih]
 
-```
-((T b)  ((dualCovariantCMM r Idx).compCLM (chartJ α b ∘ Φ_•)))
-  (fun j => chartJinv α b (chartModelBasis E (Jdx j)))
-```
+/-- On the chart base set, the chart Levi-Civita parallel CLM along an
+arbitrary vector field `B` is the finite sum of `B^m(b)`-weighted parallel
+CLMs along the chart coordinate basis vector fields. -/
+lemma chartLeviCivitaParallelCLM_sum_decomposition
+    (g : SmoothRiemannianMetric I M) (α : M) {b : M}
+    (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
+    (B : Π b' : M, TangentSpace I b') :
+    chartLeviCivitaParallelCLM (I := I) g α b B =
+      ∑ m : Fin (Module.finrank ℝ E),
+        (((chartModelBasis E).repr (trivToE (I := I) α b (B b))) m) •
+          chartLeviCivitaParallelCLM (I := I) g α b
+            (chartBasisVecFiber (I := I) α m) := by
+  classical
+  -- Both sides are CLMs `TangentSpace I b →L[ℝ] TangentSpace I b`. Reduce to
+  -- equality of the underlying `christoffelCorrection` expression on `E`.
+  ext v
+  -- Expand the LHS via `chartLeviCivitaParallelCLM_apply`.
+  rw [chartLeviCivitaParallelCLM_apply]
+  -- Expand the RHS sum.
+  rw [show (∑ m : Fin (Module.finrank ℝ E),
+        (((chartModelBasis E).repr (trivToE (I := I) α b (B b))) m) •
+          chartLeviCivitaParallelCLM (I := I) g α b
+            (chartBasisVecFiber (I := I) α m)) v =
+      ∑ m : Fin (Module.finrank ℝ E),
+        ((((chartModelBasis E).repr (trivToE (I := I) α b (B b))) m) •
+          chartLeviCivitaParallelCLM (I := I) g α b
+            (chartBasisVecFiber (I := I) α m)) v by
+    rw [ContinuousLinearMap.sum_apply]]
+  -- Rewrite each summand via `chartLeviCivitaParallelCLM_apply` and unfold
+  -- the scalar multiplication.
+  have hRHS : ∀ m : Fin (Module.finrank ℝ E),
+      ((((chartModelBasis E).repr (trivToE (I := I) α b (B b))) m) •
+          chartLeviCivitaParallelCLM (I := I) g α b
+            (chartBasisVecFiber (I := I) α m)) v =
+        (((chartModelBasis E).repr (trivToE (I := I) α b (B b))) m) •
+          trivFromE (I := I) α b
+            (christoffelCorrection (I := I) g α b
+              (trivToE (I := I) α b
+                (chartBasisVecFiber (I := I) α m b)) v) := by
+    intro m
+    rw [ContinuousLinearMap.smul_apply, chartLeviCivitaParallelCLM_apply]
+  rw [Finset.sum_congr rfl (fun m _ => hRHS m)]
+  -- Pull `trivFromE α b` and `christoffelCorrection (· in argument Y)` out
+  -- of the sum.
+  rw [show ∑ m : Fin (Module.finrank ℝ E),
+        (((chartModelBasis E).repr (trivToE (I := I) α b (B b))) m) •
+          trivFromE (I := I) α b
+            (christoffelCorrection (I := I) g α b
+              (trivToE (I := I) α b
+                (chartBasisVecFiber (I := I) α m b)) v) =
+      trivFromE (I := I) α b
+        (∑ m : Fin (Module.finrank ℝ E),
+          (((chartModelBasis E).repr (trivToE (I := I) α b (B b))) m) •
+            christoffelCorrection (I := I) g α b
+              (trivToE (I := I) α b
+                (chartBasisVecFiber (I := I) α m b)) v) by
+    rw [map_sum]
+    refine Finset.sum_congr rfl (fun m _ => ?_)
+    rw [map_smul]]
+  congr 1
+  have hsection := section_eq_sum_chartFrame (I := I) (M := M) α hb B
+  have htriv : trivToE (I := I) α b (B b) =
+      ∑ m : Fin (Module.finrank ℝ E),
+        (((chartModelBasis E).repr (trivToE (I := I) α b (B b))) m) •
+          trivToE (I := I) α b (chartBasisVecFiber (I := I) α m b) := by
+    have := congrArg (trivToE (I := I) α b) hsection
+    rw [map_sum] at this
+    refine this.trans ?_
+    refine Finset.sum_congr rfl (fun m _ => ?_)
+    rw [map_smul]
+  nth_rewrite 1 [htriv]
+  exact christoffelCorrection_sum (I := I) g α b
+    (fun m => ((chartModelBasis E).repr (trivToE (I := I) α b (B b))) m)
+    (fun m => trivToE (I := I) α b (chartBasisVecFiber (I := I) α m b)) v
 
-Concretely, `Φ_i = chartLeviCivitaParallelCLM g α b B` if `i = k`, and the
-identity otherwise. The right-hand side is therefore a value of `T b` on:
+/-! ## Propagation through the slot correction -/
 
-* a `(0, r)`-CMM input whose covariant slots are precomposed with the
-  chart-Jacobian and either `chartLeviCivitaParallelCLM` (slot `k`) or the
-  identity (other slots),
-* a tuple of chart-frame vectors `chartJinv α b ∘ chartModelBasis ∘ Jdx`,
-  i.e. exactly the chart-`α` coordinate basis vectors at `b`.
+/-- The slot-substitution CLM combined with the tangent-slot CLM and the
+chart Levi-Civita parallel CLM decomposes as a finite sum in `B`'s chart
+components. This is the common core of both the input and output slot
+correction decompositions. -/
+lemma slotSubst_tangentSlot_parallel_sum_decomposition
+    (g : SmoothRiemannianMetric I M) (α : M) (n : ℕ) {b : M}
+    (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
+    (B : Π b' : M, TangentSpace I b') (k : Fin n) :
+    tensorSlotSubstCLM (I := I) n b
+        (tangentSlotCLM (I := I) n k
+          (chartLeviCivitaParallelCLM (I := I) g α b B)) =
+      ∑ m : Fin (Module.finrank ℝ E),
+        (((chartModelBasis E).repr (trivToE (I := I) α b (B b))) m) •
+          tensorSlotSubstCLM (I := I) n b
+            (tangentSlotCLM (I := I) n k
+              (chartLeviCivitaParallelCLM (I := I) g α b
+                (chartBasisVecFiber (I := I) α m))) := by
+  classical
+  refine ContinuousLinearMap.ext (fun τ => ?_)
+  refine tensor0SSpace_ext n b (fun v => ?_)
+  rw [tensorSlotSubstCLM_eval]
+  rw [ContinuousLinearMap.sum_apply, ContinuousMultilinearMap.sum_apply]
+  have hRHS : ∀ m : Fin (Module.finrank ℝ E),
+      (((((chartModelBasis E).repr (trivToE (I := I) α b (B b))) m) •
+          tensorSlotSubstCLM (I := I) n b
+            (tangentSlotCLM (I := I) n k
+              (chartLeviCivitaParallelCLM (I := I) g α b
+                (chartBasisVecFiber (I := I) α m)))) τ) v =
+        (((chartModelBasis E).repr (trivToE (I := I) α b (B b))) m) *
+          τ (fun i : Fin n => tangentSlotCLM (I := I) n k
+            (chartLeviCivitaParallelCLM (I := I) g α b
+              (chartBasisVecFiber (I := I) α m)) i (v i)) := by
+    intro m
+    rw [ContinuousLinearMap.smul_apply,
+      ContinuousMultilinearMap.smul_apply, tensorSlotSubstCLM_eval, smul_eq_mul]
+  rw [Finset.sum_congr rfl (fun m _ => hRHS m)]
+  have hΦB_decomp : chartLeviCivitaParallelCLM (I := I) g α b B =
+      ∑ m : Fin (Module.finrank ℝ E),
+        (((chartModelBasis E).repr (trivToE (I := I) α b (B b))) m) •
+          chartLeviCivitaParallelCLM (I := I) g α b
+            (chartBasisVecFiber (I := I) α m) :=
+    chartLeviCivitaParallelCLM_sum_decomposition (I := I) (M := M) g α hb B
+  have hLHStuple : (fun i : Fin n => tangentSlotCLM (I := I) n k
+        (chartLeviCivitaParallelCLM (I := I) g α b B) i (v i)) =
+      Function.update (fun i : Fin n => v i) k
+        (chartLeviCivitaParallelCLM (I := I) g α b B (v k)) := by
+    funext i
+    by_cases hi : i = k
+    · subst hi
+      rw [tangentSlotCLM_self, Function.update_self]
+    · rw [tangentSlotCLM_other (I := I) n k _ hi, Function.update_of_ne hi]
+      rfl
+  have hRHStuple : ∀ m : Fin (Module.finrank ℝ E),
+      (fun i : Fin n => tangentSlotCLM (I := I) n k
+          (chartLeviCivitaParallelCLM (I := I) g α b
+            (chartBasisVecFiber (I := I) α m)) i (v i)) =
+        Function.update (fun i : Fin n => v i) k
+          (chartLeviCivitaParallelCLM (I := I) g α b
+            (chartBasisVecFiber (I := I) α m) (v k)) := by
+    intro m
+    funext i
+    by_cases hi : i = k
+    · subst hi
+      rw [tangentSlotCLM_self, Function.update_self]
+    · rw [tangentSlotCLM_other (I := I) n k _ hi, Function.update_of_ne hi]
+      rfl
+  rw [hLHStuple]
+  rw [show (∑ m : Fin (Module.finrank ℝ E),
+        (((chartModelBasis E).repr (trivToE (I := I) α b (B b))) m) *
+          τ (fun i : Fin n => tangentSlotCLM (I := I) n k
+            (chartLeviCivitaParallelCLM (I := I) g α b
+              (chartBasisVecFiber (I := I) α m)) i (v i))) =
+      ∑ m : Fin (Module.finrank ℝ E),
+        (((chartModelBasis E).repr (trivToE (I := I) α b (B b))) m) *
+          τ (Function.update (fun i : Fin n => v i) k
+            (chartLeviCivitaParallelCLM (I := I) g α b
+              (chartBasisVecFiber (I := I) α m) (v k))) by
+    refine Finset.sum_congr rfl (fun m _ => ?_)
+    rw [hRHStuple m]]
+  have hΦBvk : chartLeviCivitaParallelCLM (I := I) g α b B (v k) =
+      ∑ m : Fin (Module.finrank ℝ E),
+        (((chartModelBasis E).repr (trivToE (I := I) α b (B b))) m) •
+          chartLeviCivitaParallelCLM (I := I) g α b
+            (chartBasisVecFiber (I := I) α m) (v k) := by
+    have h := congrArg (fun (φ : TangentSpace I b →L[ℝ] TangentSpace I b)
+        => φ (v k)) hΦB_decomp
+    simp only at h
+    rw [h, ContinuousLinearMap.sum_apply]
+    refine Finset.sum_congr rfl (fun m _ => ?_)
+    rw [ContinuousLinearMap.smul_apply]
+  rw [hΦBvk]
+  have htoML := τ.toMultilinearMap.map_update_sum
+      (t := (Finset.univ : Finset (Fin (Module.finrank ℝ E))))
+      (i := k)
+      (g := fun m : Fin (Module.finrank ℝ E) =>
+        (((chartModelBasis E).repr (trivToE (I := I) α b (B b))) m) •
+          chartLeviCivitaParallelCLM (I := I) g α b
+            (chartBasisVecFiber (I := I) α m) (v k))
+      (m := fun i : Fin n => v i)
+  have hτap1 : τ.toMultilinearMap (Function.update (fun i : Fin n => v i) k
+          (∑ m ∈ (Finset.univ : Finset (Fin (Module.finrank ℝ E))),
+            (((chartModelBasis E).repr (trivToE (I := I) α b (B b))) m) •
+              chartLeviCivitaParallelCLM (I := I) g α b
+                (chartBasisVecFiber (I := I) α m) (v k))) =
+      τ (Function.update (fun i : Fin n => v i) k
+          (∑ m ∈ (Finset.univ : Finset (Fin (Module.finrank ℝ E))),
+            (((chartModelBasis E).repr (trivToE (I := I) α b (B b))) m) •
+              chartLeviCivitaParallelCLM (I := I) g α b
+                (chartBasisVecFiber (I := I) α m) (v k))) := rfl
+  rw [hτap1] at htoML
+  rw [htoML]
+  refine Finset.sum_congr rfl (fun m _ => ?_)
+  have hτap2 : τ.toMultilinearMap (Function.update (fun i : Fin n => v i) k
+        ((((chartModelBasis E).repr (trivToE (I := I) α b (B b))) m) •
+          chartLeviCivitaParallelCLM (I := I) g α b
+            (chartBasisVecFiber (I := I) α m) (v k))) =
+      τ (Function.update (fun i : Fin n => v i) k
+        ((((chartModelBasis E).repr (trivToE (I := I) α b (B b))) m) •
+          chartLeviCivitaParallelCLM (I := I) g α b
+            (chartBasisVecFiber (I := I) α m) (v k))) := rfl
+  rw [hτap2]
+  rw [τ.map_update_smul, smul_eq_mul]
 
-The combined expression is a polynomial in:
-
-* chart-Christoffel symbols `chartChristoffel g α i j k`
-  (via the explicit expansion of `chartLeviCivitaParallelCLM` in
-  `chartLeviCivitaParallelCLM_apply` + `christoffelCorrection_apply`),
-* B's chart components `(chartModelBasis E).repr (trivToE α b (B b))`
-  (same expansion),
-* T's chart components (evaluation of `T b` on tuples of chart-frame
-  vectors `chartJinv α b ∘ chartModelBasis ∘ Idx'`, i.e. the chart-frame
-  matrix of `T b`).
--/
-
-/-- **Closed-form chart-frame component of the upper-slot Christoffel
-correction.** For a smooth Riemannian manifold `(M, g)`, a chart center `α`,
-a tangent vector field `B`, an `(r, s)`-tensor section `T`, a base point `b`
-in the chart `α` source, an input-slot index `k : Fin r`, and a pair of
-chart-frame multi-indices `Idx : Fin r → Fin n` and `Jdx : Fin s → Fin n`,
-the `(Idx, Jdx)`-chart-frame component of the `triv-α`-projected upper-slot
-Christoffel correction at `b` equals the explicit closed-form value
-
-```
-((T b)  ((dualCovariantCMM r Idx).compContinuousLinearMap
-            (fun i : Fin r => (chartJ α b).comp
-              (tangentSlotCLM r k (chartLeviCivitaParallelCLM g α b B) i))))
-  (fun j : Fin s => chartJinv α b (chartModelBasis E (Jdx j)))
-```
-
-This is a polynomial in chart-Christoffel data, B's chart components, and
-T's chart components in the sense described in the file-level docstring. -/
-theorem chartTensorRSInputSlotCorrection_chartComp_formula
+/-- The chart-component projection of the trivialisation-image of the
+input-slot Christoffel correction along a general field `B`, expressed as a
+finite linear combination in `B`'s chart components, of chart-component
+projections of slot corrections along chart coordinate basis vector fields. -/
+lemma chartTensorRSInputSlotCorrection_chartComp_decomposition
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
-    (T : Π b' : M, TensorRSSpace r s I b')
-    (B : Π b' : M, TangentSpace I b') {b : M}
-    (hb : b ∈ (chartAt H α).source) (k : Fin r)
+    (T : Π b : M, TensorRSSpace r s I b)
+    (B : Π b : M, TangentSpace I b) {b : M}
+    (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
+    (k : Fin r)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
     (Jdx : Fin s → Fin (Module.finrank ℝ E)) :
     tensorChartComponentProjection (E := E) r s Idx Jdx
         ((trivializationAt (TensorRSModel r s ℝ E)
-            (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b
+            (fun z : M => TensorRSSpace r s I z) α).continuousLinearMapAt ℝ b
           (chartTensorRSInputSlotCorrection (I := I) r s g α T B b k)) =
-      (show ContinuousMultilinearMap ℝ
-          (fun _ : Fin s => TangentSpace I b) ℝ from
-        (show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b from T b)
-          ((dualCovariantCMM (E := E) r Idx).compContinuousLinearMap
-            (fun i : Fin r =>
-              (chartJ (I := I) (M := M) α b).comp
-                (tangentSlotCLM (I := I) r k
-                  (chartLeviCivitaParallelCLM (I := I) g α b B) i))))
-        (fun j : Fin s =>
-          chartJinv (I := I) (M := M) α b ((chartModelBasis E) (Jdx j))) := by
+      ∑ m : Fin (Module.finrank ℝ E),
+        (((chartModelBasis E).repr (trivToE (I := I) α b (B b))) m) *
+          tensorChartComponentProjection (E := E) r s Idx Jdx
+            ((trivializationAt (TensorRSModel r s ℝ E)
+                (fun z : M => TensorRSSpace r s I z) α).continuousLinearMapAt ℝ b
+              (chartTensorRSInputSlotCorrection (I := I) r s g α T
+                (chartBasisVecFiber (I := I) α m) b k)) := by
   classical
-  -- Bridge: `triv.cLMA(b)` on the slot correction is `chartRSTwistInv ∘ toModel`.
-  rw [triv_continuousLinearMapAt_eq_chartRSTwistInv_toModel (I := I) (M := M)
-    r s α hb (chartTensorRSInputSlotCorrection (I := I) r s g α T B b k)]
-  -- Unfold the component projection.
-  rw [tensorChartComponentProjection_apply]
-  -- Unfold `chartRSTwistInv_apply`.
-  rw [chartRSTwistInv_apply]
-  -- Expose CMM `compContinuousLinearMap` evaluation.
-  rw [ContinuousMultilinearMap.compContinuousLinearMap_apply]
-  -- The slot correction, viewed as a CLM and evaluated at the precomposed
-  -- input, factors as `(T b)` applied to a `tensorSlotSubstCLM` value.
-  -- `TensorRSSpace.toModel` is identity at the function level, so we get the
-  -- raw `chartTensorRSInputSlotCorrection` action.
-  change (((show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b from
-              chartTensorRSInputSlotCorrection (I := I) r s g α T B b k)
-            ((dualCovariantCMM (E := E) r Idx).compContinuousLinearMap
-              (fun _ : Fin r => chartJ (I := I) (M := M) α b)))
-          : ContinuousMultilinearMap ℝ
-              (fun _ : Fin s => TangentSpace I b) ℝ)
-        (fun j : Fin s =>
-          chartJinv (I := I) (M := M) α b ((chartModelBasis E) (Jdx j))) = _
-  -- Unfold the input-slot correction's action on its input CMM.
-  rw [chartTensorRSInputSlotCorrection_apply (I := I) r s g α T B b k
-    ((dualCovariantCMM (E := E) r Idx).compContinuousLinearMap
-      (fun _ : Fin r => chartJ (I := I) (M := M) α b))
-    (fun j : Fin s =>
-      chartJinv (I := I) (M := M) α b ((chartModelBasis E) (Jdx j)))]
-  -- The intermediate `tensorSlotSubstCLM` value: rewrite `tensorSlotSubstCLM ...`
-  -- via `tensorSlotSubstCLM_apply`. After applying `T b` and evaluating, the
-  -- proof reduces to a CMM equality between
-  --   `tensorSlotSubstCLM r b Phi w_in`
-  -- and the precomposed form
-  --   `(dualCovariantCMM r Idx).compCLM (fun i => (chartJ α b).comp (Phi i))`.
-  -- We lift this CMM equality through `T b` and through the final evaluation.
-  -- Name the slot-CLM family `Phi` and the precomposed input CMM `w_in` to
-  -- keep the rewrite below compact.
-  -- Step: prove the CMM equality first, then transport.
-  have hsubst :
-      (show ContinuousMultilinearMap ℝ
-          (fun _ : Fin r => TangentSpace I b) ℝ from
-        tensorSlotSubstCLM (I := I) r b
-          (tangentSlotCLM (I := I) r k
-            (chartLeviCivitaParallelCLM (I := I) g α b B))
-          ((dualCovariantCMM (E := E) r Idx).compContinuousLinearMap
-            (fun _ : Fin r => chartJ (I := I) (M := M) α b))) =
-      ((dualCovariantCMM (E := E) r Idx).compContinuousLinearMap
-          (fun i : Fin r => (chartJ (I := I) (M := M) α b).comp
-            (tangentSlotCLM (I := I) r k
-              (chartLeviCivitaParallelCLM (I := I) g α b B) i))) := by
-    refine ContinuousMultilinearMap.ext ?_
-    intro w
-    rw [tensorSlotSubstCLM_apply (I := I) r b
-      (tangentSlotCLM (I := I) r k
-        (chartLeviCivitaParallelCLM (I := I) g α b B))
-      ((dualCovariantCMM (E := E) r Idx).compContinuousLinearMap
-        (fun _ : Fin r => chartJ (I := I) (M := M) α b)) w]
-    rw [ContinuousMultilinearMap.compContinuousLinearMap_apply,
-      ContinuousMultilinearMap.compContinuousLinearMap_apply]
-    rfl
-  -- Lift to a `Tensor0SSpace`-fibre equality (definitionally the same).
-  have hsubst_fiber :
-      (tensorSlotSubstCLM (I := I) r b
-          (tangentSlotCLM (I := I) r k
-            (chartLeviCivitaParallelCLM (I := I) g α b B))
-          ((dualCovariantCMM (E := E) r Idx).compContinuousLinearMap
-            (fun _ : Fin r => chartJ (I := I) (M := M) α b))
-        : Tensor0SSpace r I b) =
-      ((dualCovariantCMM (E := E) r Idx).compContinuousLinearMap
-          (fun i : Fin r => (chartJ (I := I) (M := M) α b).comp
-            (tangentSlotCLM (I := I) r k
-              (chartLeviCivitaParallelCLM (I := I) g α b B) i))) :=
-    hsubst
-  rw [hsubst_fiber]
+  have hΨB := slotSubst_tangentSlot_parallel_sum_decomposition
+    (I := I) (M := M) g α r hb B k
+  -- With `hΨB` proved, the slot correction itself decomposes via composition
+  -- on the right.
+  have hslot : chartTensorRSInputSlotCorrection (I := I) r s g α T B b k =
+      ∑ m : Fin (Module.finrank ℝ E),
+        (((chartModelBasis E).repr (trivToE (I := I) α b (B b))) m) •
+          chartTensorRSInputSlotCorrection (I := I) r s g α T
+            (chartBasisVecFiber (I := I) α m) b k := by
+    unfold chartTensorRSInputSlotCorrection
+    rw [hΨB]
+    rw [show (show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b from T b).comp
+        (∑ m : Fin (Module.finrank ℝ E),
+          (((chartModelBasis E).repr (trivToE (I := I) α b (B b))) m) •
+            tensorSlotSubstCLM (I := I) r b
+              (tangentSlotCLM (I := I) r k
+                (chartLeviCivitaParallelCLM (I := I) g α b
+                  (chartBasisVecFiber (I := I) α m)))) =
+        ∑ m : Fin (Module.finrank ℝ E),
+          (((chartModelBasis E).repr (trivToE (I := I) α b (B b))) m) •
+            (show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b from T b).comp
+              (tensorSlotSubstCLM (I := I) r b
+                (tangentSlotCLM (I := I) r k
+                  (chartLeviCivitaParallelCLM (I := I) g α b
+                    (chartBasisVecFiber (I := I) α m)))) by
+      rw [ContinuousLinearMap.comp_finset_sum]
+      refine Finset.sum_congr rfl (fun m _ => ?_)
+      rw [ContinuousLinearMap.comp_smul]]
+  rw [hslot]
+  rw [show ((trivializationAt (TensorRSModel r s ℝ E)
+        (fun z : M => TensorRSSpace r s I z) α).continuousLinearMapAt ℝ b
+        (∑ m : Fin (Module.finrank ℝ E),
+          (((chartModelBasis E).repr (trivToE (I := I) α b (B b))) m) •
+            chartTensorRSInputSlotCorrection (I := I) r s g α T
+              (chartBasisVecFiber (I := I) α m) b k)) =
+      ∑ m : Fin (Module.finrank ℝ E),
+        (((chartModelBasis E).repr (trivToE (I := I) α b (B b))) m) •
+          (trivializationAt (TensorRSModel r s ℝ E)
+            (fun z : M => TensorRSSpace r s I z) α).continuousLinearMapAt ℝ b
+            (chartTensorRSInputSlotCorrection (I := I) r s g α T
+              (chartBasisVecFiber (I := I) α m) b k) by
+    rw [map_sum]
+    refine Finset.sum_congr rfl (fun m _ => ?_)
+    rw [map_smul]]
+  rw [map_sum]
+  refine Finset.sum_congr rfl (fun m _ => ?_)
+  rw [map_smul, smul_eq_mul]
 
-/-! ## Chart-frame component formula: output slot
-
-The output slot correction `chartTensorRSOutputSlotCorrection r s g α T B b l`
-is, by definition, `(tensorSlotSubstCLM s b Ψ).comp (T b)` where `Ψ` is the
-`l`-th tangent-slot substitution by `chartLeviCivitaParallelCLM g α b B`.
-
-After projection through the chart-α trivialisation, the
-`(Idx, Jdx)`-chart-frame component is:
-
-```
-((T b) ((dualCovariantCMM r Idx).compCLM (fun _ => chartJ α b)))
-  (fun j => Ψ_j (chartJinv α b (chartModelBasis E (Jdx j))))
-```
-
-Concretely, `Ψ_j = chartLeviCivitaParallelCLM g α b B` if `j = l`, and the
-identity otherwise. The right-hand side is a value of `T b` on:
-
-* a `(0, r)`-CMM input precomposed by the chart-Jacobian (no slot
-  substitution on the input side),
-* a tuple of vectors where each chart-frame vector is then mapped through
-  the slot-CLM `Ψ_j`.
--/
-
-/-- **Closed-form chart-frame component of the lower-slot Christoffel
-correction.** For a smooth Riemannian manifold `(M, g)`, a chart center `α`,
-a tangent vector field `B`, an `(r, s)`-tensor section `T`, a base point `b`
-in the chart `α` source, an output-slot index `l : Fin s`, and a pair of
-chart-frame multi-indices `Idx : Fin r → Fin n` and `Jdx : Fin s → Fin n`,
-the `(Idx, Jdx)`-chart-frame component of the `triv-α`-projected lower-slot
-Christoffel correction at `b` equals the explicit closed-form value
-
-```
-((T b)  ((dualCovariantCMM r Idx).compContinuousLinearMap
-            (fun _ : Fin r => chartJ α b)))
-  (fun j : Fin s =>
-    tangentSlotCLM s l (chartLeviCivitaParallelCLM g α b B) j
-      (chartJinv α b (chartModelBasis E (Jdx j))))
-```
-
-This is a polynomial in chart-Christoffel data, B's chart components, and
-T's chart components in the sense described in the file-level docstring. -/
-theorem chartTensorRSOutputSlotCorrection_chartComp_formula
+/-- Symmetric statement for the output-slot Christoffel correction. -/
+lemma chartTensorRSOutputSlotCorrection_chartComp_decomposition
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
-    (T : Π b' : M, TensorRSSpace r s I b')
-    (B : Π b' : M, TangentSpace I b') {b : M}
-    (hb : b ∈ (chartAt H α).source) (l : Fin s)
+    (T : Π b : M, TensorRSSpace r s I b)
+    (B : Π b : M, TangentSpace I b) {b : M}
+    (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
+    (l : Fin s)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
     (Jdx : Fin s → Fin (Module.finrank ℝ E)) :
     tensorChartComponentProjection (E := E) r s Idx Jdx
         ((trivializationAt (TensorRSModel r s ℝ E)
-            (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b
+            (fun z : M => TensorRSSpace r s I z) α).continuousLinearMapAt ℝ b
           (chartTensorRSOutputSlotCorrection (I := I) r s g α T B b l)) =
-      (show ContinuousMultilinearMap ℝ
-          (fun _ : Fin s => TangentSpace I b) ℝ from
-        (show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b from T b)
-          ((dualCovariantCMM (E := E) r Idx).compContinuousLinearMap
-            (fun _ : Fin r => chartJ (I := I) (M := M) α b)))
-        (fun j : Fin s =>
-          tangentSlotCLM (I := I) s l
-            (chartLeviCivitaParallelCLM (I := I) g α b B) j
-            (chartJinv (I := I) (M := M) α b ((chartModelBasis E) (Jdx j)))) := by
+      ∑ m : Fin (Module.finrank ℝ E),
+        (((chartModelBasis E).repr (trivToE (I := I) α b (B b))) m) *
+          tensorChartComponentProjection (E := E) r s Idx Jdx
+            ((trivializationAt (TensorRSModel r s ℝ E)
+                (fun z : M => TensorRSSpace r s I z) α).continuousLinearMapAt ℝ b
+              (chartTensorRSOutputSlotCorrection (I := I) r s g α T
+                (chartBasisVecFiber (I := I) α m) b l)) := by
   classical
-  -- Bridge: `triv.cLMA(b)` on the slot correction is `chartRSTwistInv ∘ toModel`.
-  rw [triv_continuousLinearMapAt_eq_chartRSTwistInv_toModel (I := I) (M := M)
-    r s α hb (chartTensorRSOutputSlotCorrection (I := I) r s g α T B b l)]
-  -- Unfold the component projection.
-  rw [tensorChartComponentProjection_apply]
-  -- Unfold `chartRSTwistInv_apply`.
-  rw [chartRSTwistInv_apply]
-  -- Expose CMM `compContinuousLinearMap` evaluation.
-  rw [ContinuousMultilinearMap.compContinuousLinearMap_apply]
-  -- The slot correction, viewed as a CLM and evaluated at the precomposed
-  -- input, factors as `tensorSlotSubstCLM s b Ψ` applied to `T b ω`.
-  -- `TensorRSSpace.toModel` is identity at the function level, so we get the
-  -- raw `chartTensorRSOutputSlotCorrection` action.
-  change (((show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b from
-              chartTensorRSOutputSlotCorrection (I := I) r s g α T B b l)
-            ((dualCovariantCMM (E := E) r Idx).compContinuousLinearMap
-              (fun _ : Fin r => chartJ (I := I) (M := M) α b)))
-          : ContinuousMultilinearMap ℝ
-              (fun _ : Fin s => TangentSpace I b) ℝ)
-        (fun j : Fin s =>
-          chartJinv (I := I) (M := M) α b ((chartModelBasis E) (Jdx j))) = _
-  -- Unfold the output-slot correction's action on its input CMM. The RHS of
-  -- `chartTensorRSOutputSlotCorrection_apply` already evaluates the
-  -- `tensorSlotSubstCLM`-substituted tuple in place; the resulting form is
-  -- exactly our headline RHS.
-  exact chartTensorRSOutputSlotCorrection_apply (I := I) r s g α T B b l
-    ((dualCovariantCMM (E := E) r Idx).compContinuousLinearMap
-      (fun _ : Fin r => chartJ (I := I) (M := M) α b))
-    (fun j : Fin s =>
-      chartJinv (I := I) (M := M) α b ((chartModelBasis E) (Jdx j)))
+  -- Apply the common slot-CLM decomposition helper.
+  have hΨB := slotSubst_tangentSlot_parallel_sum_decomposition
+    (I := I) (M := M) g α s hb B l
+  -- The slot correction itself is `Ψ.comp (T b)`, so the sum factors out
+  -- on the *left*.
+  have hslot : chartTensorRSOutputSlotCorrection (I := I) r s g α T B b l =
+      ∑ m : Fin (Module.finrank ℝ E),
+        (((chartModelBasis E).repr (trivToE (I := I) α b (B b))) m) •
+          chartTensorRSOutputSlotCorrection (I := I) r s g α T
+            (chartBasisVecFiber (I := I) α m) b l := by
+    unfold chartTensorRSOutputSlotCorrection
+    rw [hΨB]
+    rw [show (∑ m : Fin (Module.finrank ℝ E),
+          (((chartModelBasis E).repr (trivToE (I := I) α b (B b))) m) •
+            tensorSlotSubstCLM (I := I) s b
+              (tangentSlotCLM (I := I) s l
+                (chartLeviCivitaParallelCLM (I := I) g α b
+                  (chartBasisVecFiber (I := I) α m)))).comp
+        (show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b from T b) =
+        ∑ m : Fin (Module.finrank ℝ E),
+          (((chartModelBasis E).repr (trivToE (I := I) α b (B b))) m) •
+            (tensorSlotSubstCLM (I := I) s b
+              (tangentSlotCLM (I := I) s l
+                (chartLeviCivitaParallelCLM (I := I) g α b
+                  (chartBasisVecFiber (I := I) α m)))).comp
+              (show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b from T b) by
+      rw [ContinuousLinearMap.finset_sum_comp]
+      refine Finset.sum_congr rfl (fun m _ => ?_)
+      rw [ContinuousLinearMap.smul_comp]]
+  rw [hslot]
+  rw [show ((trivializationAt (TensorRSModel r s ℝ E)
+        (fun z : M => TensorRSSpace r s I z) α).continuousLinearMapAt ℝ b
+        (∑ m : Fin (Module.finrank ℝ E),
+          (((chartModelBasis E).repr (trivToE (I := I) α b (B b))) m) •
+            chartTensorRSOutputSlotCorrection (I := I) r s g α T
+              (chartBasisVecFiber (I := I) α m) b l)) =
+      ∑ m : Fin (Module.finrank ℝ E),
+        (((chartModelBasis E).repr (trivToE (I := I) α b (B b))) m) •
+          (trivializationAt (TensorRSModel r s ℝ E)
+            (fun z : M => TensorRSSpace r s I z) α).continuousLinearMapAt ℝ b
+            (chartTensorRSOutputSlotCorrection (I := I) r s g α T
+              (chartBasisVecFiber (I := I) α m) b l) by
+    rw [map_sum]
+    refine Finset.sum_congr rfl (fun m _ => ?_)
+    rw [map_smul]]
+  rw [map_sum]
+  refine Finset.sum_congr rfl (fun m _ => ?_)
+  rw [map_smul, smul_eq_mul]
 
-/-! ## Sanity-check examples -/
+/-! ## The final chart-component formula
 
-example (g : SmoothRiemannianMetric I M) (α : M)
-    (T : Π b' : M, TensorRSSpace 1 2 I b')
-    (B : Π b' : M, TangentSpace I b') {b : M}
-    (hb : b ∈ (chartAt H α).source) (k : Fin 1)
-    (Idx : Fin 1 → Fin (Module.finrank ℝ E))
-    (Jdx : Fin 2 → Fin (Module.finrank ℝ E)) :
-    tensorChartComponentProjection (E := E) 1 2 Idx Jdx
-        ((trivializationAt (TensorRSModel 1 2 ℝ E)
-            (fun y : M => TensorRSSpace 1 2 I y) α).continuousLinearMapAt ℝ b
-          (chartTensorRSInputSlotCorrection (I := I) 1 2 g α T B b k)) =
-      (show ContinuousMultilinearMap ℝ
-          (fun _ : Fin 2 => TangentSpace I b) ℝ from
-        (show Tensor0SSpace 1 I b →L[ℝ] Tensor0SSpace 2 I b from T b)
-          ((dualCovariantCMM (E := E) 1 Idx).compContinuousLinearMap
-            (fun i : Fin 1 =>
-              (chartJ (I := I) (M := M) α b).comp
-                (tangentSlotCLM (I := I) 1 k
-                  (chartLeviCivitaParallelCLM (I := I) g α b B) i))))
-        (fun j : Fin 2 =>
-          chartJinv (I := I) (M := M) α b ((chartModelBasis E) (Jdx j))) :=
-  chartTensorRSInputSlotCorrection_chartComp_formula (I := I) (M := M)
-    g 1 2 α T B hb k Idx Jdx
+Substituting the established formula
+`chartTensorRSInputSlotCorrection_component_eq` (resp.
+`chartTensorRSOutputSlotCorrection_component_eq`) into the decomposition
+above yields the chart-component formula in the form of a smooth polynomial
+in chart Christoffel data, the chart components of `B`, and the raw chart
+components of `S`. -/
 
-example (g : SmoothRiemannianMetric I M) (α : M)
-    (T : Π b' : M, TensorRSSpace 1 2 I b')
-    (B : Π b' : M, TangentSpace I b') {b : M}
-    (hb : b ∈ (chartAt H α).source) (l : Fin 2)
-    (Idx : Fin 1 → Fin (Module.finrank ℝ E))
-    (Jdx : Fin 2 → Fin (Module.finrank ℝ E)) :
-    tensorChartComponentProjection (E := E) 1 2 Idx Jdx
-        ((trivializationAt (TensorRSModel 1 2 ℝ E)
-            (fun y : M => TensorRSSpace 1 2 I y) α).continuousLinearMapAt ℝ b
-          (chartTensorRSOutputSlotCorrection (I := I) 1 2 g α T B b l)) =
-      (show ContinuousMultilinearMap ℝ
-          (fun _ : Fin 2 => TangentSpace I b) ℝ from
-        (show Tensor0SSpace 1 I b →L[ℝ] Tensor0SSpace 2 I b from T b)
-          ((dualCovariantCMM (E := E) 1 Idx).compContinuousLinearMap
-            (fun _ : Fin 1 => chartJ (I := I) (M := M) α b)))
-        (fun j : Fin 2 =>
-          tangentSlotCLM (I := I) 2 l
-            (chartLeviCivitaParallelCLM (I := I) g α b B) j
-            (chartJinv (I := I) (M := M) α b ((chartModelBasis E) (Jdx j)))) :=
-  chartTensorRSOutputSlotCorrection_chartComp_formula (I := I) (M := M)
-    g 1 2 α T B hb l Idx Jdx
+/-- **Chart-component formula for the input-slot Christoffel correction with
+a general vector field.** Let `y` lie in the Euclidean chart target,
+`b := (extChartAt I α).symm (toEuclidean.symm y)`, and let `S` be a smooth
+compactly-supported `(r, s)`-tensor. The `continuousLinearMapAt`-wrapped
+chart-component projection of the input-slot Christoffel correction of
+`S.toSection` along an arbitrary section `B`, at the `(Idx, Jdx)` chart
+component, equals the finite sum
+
+```
+∑ m, B_m(b) · ∑ Idx', inputSlotCoeff g r α m k Idx Idx' y ·
+        tensorChartComponentRaw g r s S α Idx' Jdx b
+```
+
+where `B_m(b) = ((chartModelBasis E).repr (trivToE α b (B b))) m` is the
+`m`-th chart component of `B` at `b`. Every coefficient is `C^∞` on the
+chart Euclidean target (`inputSlotCoeff_contDiffOn`); no derivative of `S`
+appears. -/
+theorem chartTensorRSInputSlotCorrection_chartComp_formula
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (S : SmoothCcTensor g r s) (α : M)
+    (B : Π b : M, TangentSpace I b) (k : Fin r)
+    (Idx : Fin r → Fin (Module.finrank ℝ E))
+    (Jdx : Fin s → Fin (Module.finrank ℝ E))
+    {y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))}
+    (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
+    tensorChartComponentProjection (E := E) r s Idx Jdx
+        ((trivializationAt (TensorRSModel r s ℝ E)
+            (fun z : M => TensorRSSpace r s I z) α).continuousLinearMapAt ℝ
+          ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
+          (chartTensorRSInputSlotCorrection (I := I) r s g α S.toSection B
+            ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) k)) =
+      ∑ m : Fin (Module.finrank ℝ E),
+        (((chartModelBasis E).repr (trivToE (I := I) α
+              ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
+              (B ((extChartAt I α).symm
+                ((toEuclidean (E := E)).symm y))))) m) *
+          (∑ Idx' : Fin r → Fin (Module.finrank ℝ E),
+            inputSlotCoeff (I := I) (M := M) g r α m k Idx Idx' y *
+              tensorChartComponentRaw (I := I) (M := M) g r s S α Idx' Jdx
+                ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) := by
+  classical
+  set b : M := (extChartAt I α).symm ((toEuclidean (E := E)).symm y) with hb_def
+  have hb_chart : b ∈ (chartAt H α).source :=
+    symm_toEuclidean_symm_mem_chartAtSource (I := I) (M := M) α hy
+  have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
+    rw [TangentBundle.trivializationAt_baseSet]
+    exact hb_chart
+  -- Apply the decomposition lemma.
+  rw [chartTensorRSInputSlotCorrection_chartComp_decomposition
+    (I := I) (M := M) g r s α S.toSection B hb_base k Idx Jdx]
+  -- Apply the established formula to each summand.
+  refine Finset.sum_congr rfl (fun m _ => ?_)
+  congr 1
+  exact chartTensorRSInputSlotCorrection_component_eq
+    (I := I) (M := M) g r s S α m k Idx Jdx hy
+
+/-- **Chart-component formula for the output-slot Christoffel correction with
+a general vector field.** Symmetric statement to the input case. -/
+theorem chartTensorRSOutputSlotCorrection_chartComp_formula
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (S : SmoothCcTensor g r s) (α : M)
+    (B : Π b : M, TangentSpace I b) (l : Fin s)
+    (Idx : Fin r → Fin (Module.finrank ℝ E))
+    (Jdx : Fin s → Fin (Module.finrank ℝ E))
+    {y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))}
+    (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
+    tensorChartComponentProjection (E := E) r s Idx Jdx
+        ((trivializationAt (TensorRSModel r s ℝ E)
+            (fun z : M => TensorRSSpace r s I z) α).continuousLinearMapAt ℝ
+          ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
+          (chartTensorRSOutputSlotCorrection (I := I) r s g α S.toSection B
+            ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) l)) =
+      ∑ m : Fin (Module.finrank ℝ E),
+        (((chartModelBasis E).repr (trivToE (I := I) α
+              ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
+              (B ((extChartAt I α).symm
+                ((toEuclidean (E := E)).symm y))))) m) *
+          (∑ Jdx' : Fin s → Fin (Module.finrank ℝ E),
+            outputSlotCoeff (I := I) (M := M) g s α m l Jdx Jdx' y *
+              tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx'
+                ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) := by
+  classical
+  set b : M := (extChartAt I α).symm ((toEuclidean (E := E)).symm y) with hb_def
+  have hb_chart : b ∈ (chartAt H α).source :=
+    symm_toEuclidean_symm_mem_chartAtSource (I := I) (M := M) α hy
+  have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
+    rw [TangentBundle.trivializationAt_baseSet]
+    exact hb_chart
+  rw [chartTensorRSOutputSlotCorrection_chartComp_decomposition
+    (I := I) (M := M) g r s α S.toSection B hb_base l Idx Jdx]
+  refine Finset.sum_congr rfl (fun m _ => ?_)
+  congr 1
+  exact chartTensorRSOutputSlotCorrection_component_eq
+    (I := I) (M := M) g r s S α m l Idx Jdx hy
 
 end Connection
 end Integral
 end DifferentialGeometry
+
+end

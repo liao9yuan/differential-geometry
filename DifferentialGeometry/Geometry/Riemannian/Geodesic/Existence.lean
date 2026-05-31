@@ -139,9 +139,13 @@ theorem exists_geodesic_at
     exists_isMIntegralCurveAt_geodesicVectorFieldChart (I := I) g p v
   refine ⟨projectCurve (I := I) f, f, hf0, rfl,
     projectCurve_zero_of_lift (I := I) hf0, hf, ?_⟩
-  -- `IsGeodesicAt g γ 0`: provide chart basepoint `p`, lift `f`, and the
-  -- pointwise projection identity together with the integral-curve property.
-  exact ⟨p, f, fun t => rfl, hf⟩
+  -- `IsGeodesicAt g γ 0`: provide chart basepoint `p`, lift `f`, the
+  -- pointwise projection identity, the foot-in-source clause (the foot at
+  -- `0` is `p ∈ (chartAt H p).source`), and the integral-curve property.
+  refine ⟨p, f, fun t => rfl, ?_, hf⟩
+  -- `(f 0).proj = p` by the initial datum, so it lies in the chart at `p`.
+  have h0 : (f 0).proj = p := projectCurve_zero_of_lift (I := I) hf0
+  rw [h0]; exact mem_chart_source H p
 
 /-! ## Derivative of the lifted curve in the chart at `⟨p, 0⟩`
 

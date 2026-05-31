@@ -396,6 +396,74 @@ theorem sectionalCurvature_zero_right
   have h := sectionalCurvature_of_linearly_dependent_right (I := I) g p 0 v
   rw [zero_smul] at h; exact h
 
+/-- **Sign invariance of `K` in the left argument**: `K(-v, w) = K(v, w)`.
+Follows from `sectionalCurvature_smul_left` applied with `c = -1`. -/
+theorem sectionalCurvature_neg_left
+    (g : SmoothRiemannianMetric I M) (p : M)
+    (v w : TangentSpace I p) :
+    sectionalCurvature (I := I) g p (-v) w =
+      sectionalCurvature (I := I) g p v w := by
+  have h := sectionalCurvature_smul_left (I := I) g p
+    (c := (-1 : ℝ)) (by norm_num) v w
+  rw [neg_one_smul] at h
+  exact h
+
+/-- **Sign invariance of `K` in the right argument**: `K(v, -w) = K(v, w)`.
+Follows from `sectionalCurvature_smul_right` applied with `c = -1`. -/
+theorem sectionalCurvature_neg_right
+    (g : SmoothRiemannianMetric I M) (p : M)
+    (v w : TangentSpace I p) :
+    sectionalCurvature (I := I) g p v (-w) =
+      sectionalCurvature (I := I) g p v w := by
+  have h := sectionalCurvature_smul_right (I := I) g p
+    (c := (-1 : ℝ)) (by norm_num) v w
+  rw [neg_one_smul] at h
+  exact h
+
+/-- **Double-slot sign invariance of `K`**: `K(-v, -w) = K(v, w)`.
+Follows by composing `sectionalCurvature_neg_left` and
+`sectionalCurvature_neg_right`. -/
+theorem sectionalCurvature_neg_neg
+    (g : SmoothRiemannianMetric I M) (p : M)
+    (v w : TangentSpace I p) :
+    sectionalCurvature (I := I) g p (-v) (-w) =
+      sectionalCurvature (I := I) g p v w := by
+  rw [sectionalCurvature_neg_left (I := I) g p v (-w),
+      sectionalCurvature_neg_right (I := I) g p v w]
+
+/-- **Joint scaling invariance of `K`**: `K(c • v, d • w) = K(v, w)` for
+`c ≠ 0` and `d ≠ 0`. Follows by composing `sectionalCurvature_smul_left`
+and `sectionalCurvature_smul_right`. -/
+theorem sectionalCurvature_smul_smul
+    (g : SmoothRiemannianMetric I M) (p : M) {c d : ℝ}
+    (hc : c ≠ 0) (hd : d ≠ 0) (v w : TangentSpace I p) :
+    sectionalCurvature (I := I) g p (c • v) (d • w) =
+      sectionalCurvature (I := I) g p v w := by
+  rw [sectionalCurvature_smul_left (I := I) g p hc v (d • w),
+      sectionalCurvature_smul_right (I := I) g p hd v w]
+
+/-- **Negated-scaling invariance of `K` in the left argument**:
+`K(-(c • v), w) = K(v, w)` for `c ≠ 0`. Follows by composing
+`sectionalCurvature_neg_left` and `sectionalCurvature_smul_left`. -/
+theorem sectionalCurvature_neg_smul_left
+    (g : SmoothRiemannianMetric I M) (p : M) {c : ℝ} (hc : c ≠ 0)
+    (v w : TangentSpace I p) :
+    sectionalCurvature (I := I) g p (-(c • v)) w =
+      sectionalCurvature (I := I) g p v w := by
+  rw [sectionalCurvature_neg_left (I := I) g p (c • v) w,
+      sectionalCurvature_smul_left (I := I) g p hc v w]
+
+/-- **Negated-scaling invariance of `K` in the right argument**:
+`K(v, -(c • w)) = K(v, w)` for `c ≠ 0`. Follows by composing
+`sectionalCurvature_neg_right` and `sectionalCurvature_smul_right`. -/
+theorem sectionalCurvature_neg_smul_right
+    (g : SmoothRiemannianMetric I M) (p : M) {c : ℝ} (hc : c ≠ 0)
+    (v w : TangentSpace I p) :
+    sectionalCurvature (I := I) g p v (-(c • w)) =
+      sectionalCurvature (I := I) g p v w := by
+  rw [sectionalCurvature_neg_right (I := I) g p v (c • w),
+      sectionalCurvature_smul_right (I := I) g p hc v w]
+
 /-! ## Hypothesis-bearing symmetry
 
 The symmetry `K(v, w) = K(w, v)` follows from the antisymmetry of the
@@ -488,3 +556,11 @@ theorem sectionalCurvature_symm_of_chartRiemannLower_second_pair_antisymm
 end Riemannian
 end Geometry
 end DifferentialGeometry
+
+-- TEMP AXIOM CHECK
+#print axioms DifferentialGeometry.Geometry.Riemannian.sectionalCurvature_neg_left
+#print axioms DifferentialGeometry.Geometry.Riemannian.sectionalCurvature_neg_right
+#print axioms DifferentialGeometry.Geometry.Riemannian.sectionalCurvature_neg_neg
+#print axioms DifferentialGeometry.Geometry.Riemannian.sectionalCurvature_smul_smul
+#print axioms DifferentialGeometry.Geometry.Riemannian.sectionalCurvature_neg_smul_left
+#print axioms DifferentialGeometry.Geometry.Riemannian.sectionalCurvature_neg_smul_right

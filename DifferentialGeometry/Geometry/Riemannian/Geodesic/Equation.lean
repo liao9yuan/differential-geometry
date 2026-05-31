@@ -34,18 +34,25 @@ This file packages:
   used by chart-local Picard-Lindelöf because its smoothness on the chart
   domain is unconditional.
 
-* `IsGeodesicAt g γ t₀`, `IsGeodesic g γ` — the integral-curve predicate
-  for a geodesic. A curve `γ : ℝ → M` is a geodesic if there exists a
-  basepoint `α : M` and a lifted curve `f : ℝ → TangentBundle I M`
-  projecting to `γ`, such that `f` is an integral curve of the chart-fixed
-  geodesic vector field at `α`. The local variant `IsGeodesicAt g γ t₀`
-  asks for `f` to be a local integral curve in a neighbourhood of `t₀`.
-
 * `HasGeodesicEquationAt g γ t` — the explicit chart-local second-order
-  geodesic equation in the chart at `γ t`, recorded as a separate
-  predicate for later use. Chart invariance and the bridge from
-  `IsGeodesic` to `HasGeodesicEquationAt` are separate downstream
-  developments.
+  geodesic equation in the canonical chart centred at the foot point
+  `γ t`. This moving-foot equation is the intrinsic, chart-independent
+  formulation of the geodesic condition at a single time.
+
+* `IsGeodesic g γ`, `IsGeodesicOn g γ s` — the public geodesic predicates,
+  defined intrinsically as `HasGeodesicEquationAt g γ t` at every time `t`
+  (respectively at every `t ∈ s`). Because the equation is read in the
+  chart at the moving foot point, these predicates remain meaningful for
+  geodesics that leave any single chart.
+
+* `IsGeodesicAt g γ t₀` — the local integral-curve predicate for the
+  chart-fixed geodesic spray. A curve `γ : ℝ → M` satisfies it if there
+  exists a basepoint `α : M` and a lifted curve `f : ℝ → TangentBundle I M`
+  projecting to `γ`, such that `f` is a local integral curve of the
+  chart-fixed geodesic vector field at `α` in a neighbourhood of `t₀`.
+  This is the spray-existence interface fed by Picard-Lindelöf; the bridge
+  from `IsGeodesicAt` to `HasGeodesicEquationAt` is a separate downstream
+  development.
 
 A handful of basic properties is recorded: the constant curve is a
 geodesic, and reparametrisation by a time translation `t ↦ t + b`
@@ -187,6 +194,18 @@ lemma chartChristoffelContraction_smul_smul
         refine Finset.sum_congr rfl ?_
         intro j _
         ring
+
+/-- The Christoffel contraction is even in its (repeated) velocity slot:
+negating the velocity vector leaves `Γ(v, v)(y)` unchanged. This is the
+key sign cancellation behind time-reversal invariance of the geodesic
+equation, where the velocity flips sign but the acceleration does not. -/
+lemma chartChristoffelContraction_neg
+    (g : SmoothRiemannianMetric I M) (α : M) (v : E) (y : E) :
+    chartChristoffelContraction (I := I) g α (-v) (-v) y =
+      chartChristoffelContraction (I := I) g α v v y := by
+  have hneg : (-v : E) = ((-1 : ℝ) • v) := (neg_one_smul ℝ v).symm
+  rw [hneg, chartChristoffelContraction_smul_smul (I := I) g α (-1 : ℝ) v y]
+  norm_num
 
 /-! ## The geodesic vector field on the tangent bundle
 
@@ -429,44 +448,114 @@ the global form `IsGeodesic g γ` is the conjunction over all `t : ℝ`.
 
 /-- Local geodesic at time `t₀`: there is a basepoint `α : M` and a lifted
 curve `f : ℝ → TangentBundle I M` with `(f t).proj = γ t` for all `t`,
-such that `f` is a local integral curve of the chart-fixed geodesic
-vector field `geodesicVectorFieldChart g α` at `t₀`. -/
+whose foot at `t₀` lies in the basepoint chart-source
+`(chartAt H α).source`, such that `f` is a local integral curve of the
+chart-fixed geodesic vector field `geodesicVectorFieldChart g α` at `t₀`.
+
+The foot-in-source clause `(f t₀).proj ∈ (chartAt H α).source` records that
+the lift's foot at `t₀` lies in the chart at the basepoint `α`. This is
+where the chart-fixed geodesic vector field is genuinely the geodesic
+spray (off the chart-source it degenerates to the zero section), so it is
+the natural well-posedness condition for the witness. Every constructor
+(Picard–Lindelöf at the initial point, the stationary geodesic, and the
+chart-rebased maximal-interval witnesses) supplies it; consumers use it to
+transfer the integral-curve property to the foot's own chart. -/
 def IsGeodesicAt (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (t₀ : ℝ) : Prop :=
   ∃ (α : M) (f : ℝ → TangentBundle I M),
     (∀ t, (f t).proj = γ t) ∧
+    (f t₀).proj ∈ (chartAt H α).source ∧
     IsMIntegralCurveAt f (geodesicVectorFieldChart (I := I) g α) t₀
 
-/-- A curve `γ : ℝ → M` is a geodesic of `g` if it admits a velocity lift
-`f : ℝ → TangentBundle I M` projecting to `γ` and a chart basepoint
-`α : M` such that `f` is a global integral curve of the chart-fixed
-geodesic vector field at `α`. -/
+/-- A curve `γ : ℝ → M` is a geodesic of `g` if it satisfies the intrinsic
+moving-foot geodesic equation `HasGeodesicEquationAt g γ t` at every time
+`t`. This is the chart-independent definition: at each time `t` the
+equation is read in the canonical chart centred at the foot point `γ t`,
+so it remains meaningful for geodesics leaving any single chart. -/
 def IsGeodesic (g : SmoothRiemannianMetric I M) (γ : ℝ → M) : Prop :=
-  ∃ (α : M) (f : ℝ → TangentBundle I M),
-    (∀ t, (f t).proj = γ t) ∧
-    IsMIntegralCurve f (geodesicVectorFieldChart (I := I) g α)
+  ∀ t : ℝ, HasGeodesicEquationAt (I := I) g γ t
 
-/-- A global geodesic is a local geodesic at every time. -/
-lemma IsGeodesic.isGeodesicAt {g : SmoothRiemannianMetric I M} {γ : ℝ → M}
-    (hγ : IsGeodesic (I := I) g γ) (t : ℝ) :
-    IsGeodesicAt (I := I) g γ t := by
-  obtain ⟨α, f, hproj, hf⟩ := hγ
-  exact ⟨α, f, hproj, hf.isMIntegralCurveAt t⟩
+/-- A global geodesic satisfies the moving-foot geodesic equation at every
+time (definitional projection). -/
+lemma IsGeodesic.hasGeodesicEquationAt {g : SmoothRiemannianMetric I M}
+    {γ : ℝ → M} (hγ : IsGeodesic (I := I) g γ) (t : ℝ) :
+    HasGeodesicEquationAt (I := I) g γ t :=
+  hγ t
+
+/-- `γ : ℝ → M` is a geodesic of `g` on `s : Set ℝ` if it satisfies the
+intrinsic moving-foot geodesic equation `HasGeodesicEquationAt g γ t` at
+every time `t ∈ s`. The set-relativised analogue of `IsGeodesic`. -/
+def IsGeodesicOn (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
+    (s : Set ℝ) : Prop :=
+  ∀ t ∈ s, HasGeodesicEquationAt (I := I) g γ t
+
+/-- A geodesic on a set satisfies the moving-foot geodesic equation at
+every time of the set (definitional projection). -/
+lemma IsGeodesicOn.hasGeodesicEquationAt {g : SmoothRiemannianMetric I M}
+    {γ : ℝ → M} {s : Set ℝ} {t : ℝ}
+    (hγ : IsGeodesicOn (I := I) g γ s) (ht : t ∈ s) :
+    HasGeodesicEquationAt (I := I) g γ t :=
+  hγ t ht
+
+/-- `IsGeodesicOn` is monotone in the set. -/
+lemma IsGeodesicOn.mono {g : SmoothRiemannianMetric I M}
+    {γ : ℝ → M} {s s' : Set ℝ}
+    (hγ : IsGeodesicOn (I := I) g γ s) (hs : s' ⊆ s) :
+    IsGeodesicOn (I := I) g γ s' :=
+  fun t ht => hγ t (hs ht)
+
+/-- A global geodesic, restricted to any set, is a geodesic on that set. -/
+lemma IsGeodesic.isGeodesicOn {g : SmoothRiemannianMetric I M}
+    {γ : ℝ → M} (hγ : IsGeodesic (I := I) g γ) (s : Set ℝ) :
+    IsGeodesicOn (I := I) g γ s :=
+  fun t _ => hγ t
 
 /-! ## Stationary geodesic: a constant curve is a geodesic -/
 
-/-- The constant curve `fun _ => p` is a geodesic. The lifted curve is the
-constant zero section `fun _ => ⟨p, 0⟩`, and the chart-fixed geodesic
-vector field vanishes there. -/
+/-- The constant curve `fun _ => p` is a geodesic. In the chart at `p`,
+the chart-local curve `s ↦ φ_p p` is constant, so both its velocity and
+acceleration vanish, and the Christoffel contraction of the zero velocity
+with itself vanishes by `chartChristoffelContraction_zero_left`. -/
 theorem isGeodesic_const (g : SmoothRiemannianMetric I M) (p : M) :
     IsGeodesic (I := I) g (fun _ : ℝ => p) := by
   classical
-  refine ⟨p, fun _ : ℝ => (⟨p, (0 : E)⟩ : TangentBundle I M), ?_, ?_⟩
-  · intro t; rfl
-  · -- A constant lift is an integral curve precisely because the vector
-    -- field vanishes at the constant value.
-    refine isMIntegralCurve_const ?_
-    exact geodesicVectorFieldChart_zero_section (I := I) g p
+  intro t
+  -- The chart-local curve of the constant curve is itself constant.
+  have hconst : chartLocalCurve (I := I) (fun _ : ℝ => p) t =
+      fun _ : ℝ => extChartAt I p p := by
+    funext s; rfl
+  refine ⟨(0 : E), (0 : E), ?_, ?_, ?_, ?_⟩
+  · -- Velocity: derivative of a constant chart-local curve is `0`.
+    rw [hconst]; exact hasDerivAt_const t (extChartAt I p p)
+  · -- Eventual first-derivative clause: `deriv` of the constant curve is
+    -- `0` everywhere, and the constant function has that derivative.
+    refine Filter.Eventually.of_forall (fun s => ?_)
+    rw [hconst]
+    have hd : deriv (fun _ : ℝ => extChartAt I p p) s = 0 := deriv_const s _
+    rw [hd]; exact hasDerivAt_const s (extChartAt I p p)
+  · -- Acceleration: the derivative `s ↦ deriv (constant) s` is the zero
+    -- function, whose derivative is `0`.
+    have hd : (fun s => deriv (chartLocalCurve (I := I) (fun _ : ℝ => p) t) s)
+        = fun _ : ℝ => (0 : E) := by
+      funext s; rw [hconst]; exact deriv_const s _
+    rw [hd]; exact hasDerivAt_const t (0 : E)
+  · -- Geodesic identity: `0 + Γ_p(0, 0)(φ_p p) = 0`.
+    rw [chartChristoffelContraction_zero_left]
+    -- `(fun _ => p) t = p`, so the foot point is `p`.
+    simp
+
+/-- A constant curve is a local geodesic at every time (spray formulation).
+The constant lift `fun _ => ⟨p, 0⟩` is an integral curve of the chart-fixed
+geodesic vector field, which vanishes at the zero section. -/
+theorem IsGeodesicAt.const (g : SmoothRiemannianMetric I M) (p : M) (t : ℝ) :
+    IsGeodesicAt (I := I) g (fun _ : ℝ => p) t := by
+  classical
+  refine ⟨p, fun _ : ℝ => (⟨p, (0 : E)⟩ : TangentBundle I M), fun _ => rfl,
+    mem_chart_source H p, ?_⟩
+  -- A constant lift is an integral curve precisely because the vector
+  -- field vanishes at the constant value.
+  refine (isMIntegralCurve_const ?_).isMIntegralCurveAt t
+  exact geodesicVectorFieldChart_zero_section (I := I) g p
 
 /-! ## Time-translation reparametrisation preserves the geodesic property
 
@@ -480,18 +569,151 @@ scales the fibre by `a`, and verifying the integral-curve identity for it
 requires a manifold-derivative computation on the tangent bundle which is
 deferred to a follow-up file. -/
 
-/-- Time-translation reparametrisation preserves the geodesic property. -/
+/-- Time-translation reparametrisation preserves the geodesic property.
+At time `t`, the chart-local curve of `s ↦ γ (s + b)` is the chart-local
+curve of `γ` at the shifted base time `t + b`, precomposed with the shift
+`s ↦ s + b`; the geodesic equation transfers under the shift since
+`HasDerivAt.comp_add_const` carries derivatives unchanged and the foot
+point `γ (t + b)` and velocity coincide. -/
 theorem isGeodesic_comp_add
     {g : SmoothRiemannianMetric I M} {γ : ℝ → M}
     (hγ : IsGeodesic (I := I) g γ) (b : ℝ) :
     IsGeodesic (I := I) g (fun s => γ (s + b)) := by
-  obtain ⟨α, f, hproj, hf⟩ := hγ
-  refine ⟨α, fun s => f (s + b), ?_, ?_⟩
-  · intro t; simp [hproj]
-  · -- `IsMIntegralCurve.comp_add` shifts the parameter but does not change the
-    -- vector field; the conclusion has `f ∘ (· + b)`, which is exactly what
-    -- our lifted curve is.
-    simpa [Function.comp] using hf.comp_add b
+  intro t
+  -- The geodesic-equation data of `γ` at the shifted base time `t + b`.
+  obtain ⟨v, a, hv, hev, ha, hgeo⟩ := hγ (t + b)
+  -- The chart-local curve of the shifted curve at `t` is the chart-local
+  -- curve of `γ` at `t + b`, precomposed with `· + b`.
+  have hshift : chartLocalCurve (I := I) (fun s => γ (s + b)) t =
+      fun s => chartLocalCurve (I := I) γ (t + b) (s + b) := by
+    funext s; rfl
+  refine ⟨v, a, ?_, ?_, ?_, ?_⟩
+  · -- Velocity clause.
+    rw [hshift]
+    exact hv.comp_add_const t b
+  · -- Eventual first-derivative clause: shift the eventually-statement,
+    -- then identify the derivative with the shifted derivative.
+    rw [hshift]
+    have hderiv : ∀ s,
+        deriv (fun s => chartLocalCurve (I := I) γ (t + b) (s + b)) s =
+          deriv (chartLocalCurve (I := I) γ (t + b)) (s + b) := by
+      intro s
+      exact deriv_comp_add_const (chartLocalCurve (I := I) γ (t + b)) b s
+    -- The eventually-statement of `γ` at `t + b` shifted by `· + b`.
+    have hev' : ∀ᶠ s in nhds t, HasDerivAt
+        (chartLocalCurve (I := I) γ (t + b))
+        (deriv (chartLocalCurve (I := I) γ (t + b)) (s + b)) (s + b) := by
+      have hcont : Filter.Tendsto (fun s : ℝ => s + b) (nhds t) (nhds (t + b)) :=
+        (continuous_add_const b).continuousAt
+      exact hcont.eventually hev
+    filter_upwards [hev'] with s hs
+    rw [hderiv s]
+    exact hs.comp_add_const s b
+  · -- Acceleration clause: the second-derivative function shifts too.
+    rw [hshift]
+    have hd2 : (fun s => deriv
+        (fun s => chartLocalCurve (I := I) γ (t + b) (s + b)) s) =
+        fun s => deriv (chartLocalCurve (I := I) γ (t + b)) (s + b) := by
+      funext s
+      exact deriv_comp_add_const (chartLocalCurve (I := I) γ (t + b)) b s
+    rw [hd2]
+    exact ha.comp_add_const t b
+  · -- Geodesic identity: foot point of the shifted curve at `t` is `γ (t + b)`.
+    exact hgeo
+
+/-! ## Time-reversal reparametrisation preserves the geodesic property
+
+If `γ` is a geodesic, so is its time reversal `s ↦ γ (-s)`. Writing
+`u(s) := φ_{γ t}(γ s)` for the chart-local curve of `γ`, the chart-local
+curve of the reversed curve at base time `τ` is `u(-·)` read in the chart
+at `(fun s => γ (-s)) τ = γ (-τ)`. The velocity flips sign,
+`v(s) = -u'(-s)`, but the acceleration does not, `v''(s) = u''(-s)`,
+because the chain rule contributes `(-1)² = 1` to the second derivative.
+Since the Christoffel contraction `Γ(v, v)` is even in `v`
+(`chartChristoffelContraction_neg`), the geodesic identity
+`u''(-τ) + Γ(u'(-τ), u'(-τ)) = 0` for `γ` at `-τ` transfers verbatim to
+the reversed curve at `τ`. -/
+
+/-- The chart-local curve of the time-reversed curve `s ↦ γ (-s)` at base
+time `τ` equals the chart-local curve of `γ` at the reflected base time
+`-τ`, precomposed with negation: `chartLocalCurve (γ ∘ neg) τ = u ∘ neg`
+where `u = chartLocalCurve γ (-τ)`. Holds definitionally. -/
+lemma chartLocalCurve_comp_neg (γ : ℝ → M) (τ : ℝ) :
+    chartLocalCurve (I := I) (fun s => γ (-s)) τ =
+      (fun s => chartLocalCurve (I := I) γ (-τ) (-s)) := rfl
+
+/-- **Pointwise time-reversal of the geodesic equation.** If `γ` satisfies
+the moving-foot geodesic equation at `-τ`, then the time-reversed curve
+`s ↦ γ (-s)` satisfies it at `τ`. The reversed-curve velocity is the
+negation of the original velocity at `-τ`; the acceleration is unchanged;
+and the Christoffel contraction is even in the velocity, so the geodesic
+identity carries over unchanged. -/
+theorem hasGeodesicEquationAt_comp_neg
+    {g : SmoothRiemannianMetric I M} {γ : ℝ → M} {τ : ℝ}
+    (hγ : HasGeodesicEquationAt (I := I) g γ (-τ)) :
+    HasGeodesicEquationAt (I := I) g (fun s => γ (-s)) τ := by
+  obtain ⟨v, a, hv, hev, ha, hgeo⟩ := hγ
+  -- Abbreviations for the original chart-local curve at `-τ`.
+  set u : ℝ → E := chartLocalCurve (I := I) γ (-τ) with hu_def
+  -- The chart-local curve of the reversed curve at `τ` is `u ∘ neg`.
+  have hrev : chartLocalCurve (I := I) (fun s => γ (-s)) τ = (fun s => u (-s)) :=
+    chartLocalCurve_comp_neg (I := I) γ τ
+  -- The `deriv` of the reversed chart-local curve is `s ↦ -(deriv u) (-s)`.
+  have hderiv_rev : deriv (chartLocalCurve (I := I) (fun s => γ (-s)) τ) =
+      (fun s => -(deriv u (-s))) := by
+    rw [hrev]; funext s; exact deriv_comp_neg u s
+  -- New velocity is `-v`; new acceleration is `a`.
+  refine ⟨-v, a, ?_, ?_, ?_, ?_⟩
+  · -- Velocity clause: `(u ∘ neg)'(τ) = (-1) • u'(-τ) = -v`.
+    rw [hrev]
+    have hcomp : HasDerivAt (fun s => u (-s)) ((-1 : ℝ) • v) τ := by
+      have := (hv.scomp τ (hasDerivAt_neg τ))
+      simpa [Function.comp_def] using this
+    simpa using hcomp
+  · -- Eventual first-derivative clause near `τ`.
+    rw [hderiv_rev, hrev]
+    -- The eventually-statement of `γ` at `-τ` pulled back under `· ↦ -·`.
+    have hcont : Filter.Tendsto (fun s : ℝ => -s) (nhds τ) (nhds (-τ)) :=
+      (continuous_neg.tendsto τ)
+    have hev' : ∀ᶠ s in nhds τ,
+        HasDerivAt u (deriv u (-s)) (-s) := hcont.eventually hev
+    filter_upwards [hev'] with s hs
+    -- `(u ∘ neg)'(s) = (-1) • (deriv u (-s)) = -(deriv u (-s))`.
+    have := hs.scomp s (hasDerivAt_neg s)
+    simpa [Function.comp_def] using this
+  · -- Acceleration clause: `(s ↦ -(deriv u)(-s))'(τ) = a`.
+    rw [hderiv_rev]
+    -- First differentiate `deriv u` composed with negation: derivative `-a` at `τ`.
+    have hinner : HasDerivAt (fun s => deriv u (-s)) ((-1 : ℝ) • a) τ := by
+      have := (ha.scomp τ (hasDerivAt_neg τ))
+      simpa [Function.comp_def] using this
+    -- Then negate: derivative `-((-1) • a) = a`.
+    have hfin := hinner.neg
+    simpa using hfin
+  · -- Geodesic identity: foot point and velocity even-ness.
+    -- `(fun s => γ (-s)) τ = γ (-τ)` definitionally; velocity slot `-v`.
+    rw [chartChristoffelContraction_neg (I := I) g _ v]
+    exact hgeo
+
+/-- **Time-reversal of a global geodesic.** If `γ` is a geodesic, so is its
+time reversal `s ↦ γ (-s)`. -/
+theorem isGeodesic_comp_neg
+    {g : SmoothRiemannianMetric I M} {γ : ℝ → M}
+    (hγ : IsGeodesic (I := I) g γ) :
+    IsGeodesic (I := I) g (fun s => γ (-s)) := by
+  intro τ
+  exact hasGeodesicEquationAt_comp_neg (I := I) (hγ (-τ))
+
+/-- **Time-reversal of a geodesic on a set.** If `γ` is a geodesic on
+`s : Set ℝ`, then the time reversal `t ↦ γ (-t)` is a geodesic on the
+preimage `Neg.neg ⁻¹' s = {τ | -τ ∈ s}`. -/
+theorem isGeodesicOn_comp_neg
+    {g : SmoothRiemannianMetric I M} {γ : ℝ → M} {s : Set ℝ}
+    (hγ : IsGeodesicOn (I := I) g γ s) :
+    IsGeodesicOn (I := I) g (fun t => γ (-t)) (Neg.neg ⁻¹' s) := by
+  intro τ hτ
+  -- `hτ : τ ∈ Neg.neg ⁻¹' s`, i.e. `-τ ∈ s`.
+  exact hasGeodesicEquationAt_comp_neg (I := I) (hγ (-τ) hτ)
 
 /-! ## Smoothness of the geodesic vector field (chart-fixed formulation)
 

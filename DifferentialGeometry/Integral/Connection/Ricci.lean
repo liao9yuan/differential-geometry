@@ -1115,6 +1115,47 @@ theorem ricciTensor_symm
       riemannOpEndo_trace_eq_zero g x v w] at htr_diff
   linarith
 
+/-- **Double-negation with swap.** Bilinearity in each slot cancels both negations, then
+symmetry exchanges the arguments: `Ric(-v, -w) = Ric(w, v)`. -/
+theorem ricciTensor_neg_neg_swap
+    (g : SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x) :
+    ricciTensor (I := I) g x (-v) (-w) = ricciTensor (I := I) g x w v := by
+  have h1 : ricciTensor (I := I) g x (-v) (-w) = ricciTensor (I := I) g x v w := by
+    simp
+  rw [h1, ricciTensor_symm]
+
+/-- **Diagonal of a sum.** Combining bilinearity with symmetry,
+`Ric(v + w, v + w) = Ric(v, v) + 2 · Ric(v, w) + Ric(w, w)`. -/
+theorem ricciTensor_add_self
+    (g : SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x) :
+    ricciTensor (I := I) g x (v + w) (v + w) =
+      ricciTensor (I := I) g x v v + 2 * ricciTensor (I := I) g x v w +
+        ricciTensor (I := I) g x w w := by
+  have hexpand : ricciTensor (I := I) g x (v + w) (v + w) =
+      ricciTensor (I := I) g x v v + ricciTensor (I := I) g x w v +
+        (ricciTensor (I := I) g x v w + ricciTensor (I := I) g x w w) := by
+    simp [map_add, ContinuousLinearMap.add_apply]
+  rw [hexpand, ricciTensor_symm (I := I) g x w v]
+  ring
+
+/-- **Sum with negated second slot.** Bilinearity expands the sum and pulls the negation
+out of the second slot: `Ric(v + w, -u) = -Ric(v, u) - Ric(w, u)`. -/
+theorem ricciTensor_add_neg
+    (g : SmoothRiemannianMetric I M) (x : M) (v w u : TangentSpace I x) :
+    ricciTensor (I := I) g x (v + w) (-u) =
+      -ricciTensor (I := I) g x v u - ricciTensor (I := I) g x w u := by
+  simp only [map_add, ContinuousLinearMap.add_apply, map_neg]
+  ring
+
+/-- **Difference with negated second slot.** Bilinearity expands the subtraction and pulls
+the negation out of the second slot: `Ric(v - w, -u) = Ric(w, u) - Ric(v, u)`. -/
+theorem ricciTensor_sub_neg
+    (g : SmoothRiemannianMetric I M) (x : M) (v w u : TangentSpace I x) :
+    ricciTensor (I := I) g x (v - w) (-u) =
+      ricciTensor (I := I) g x w u - ricciTensor (I := I) g x v u := by
+  simp only [map_sub, ContinuousLinearMap.sub_apply, map_neg]
+  ring
+
 end RicciSymmetry
 
 /-! ## Smoothness of `ricciTensor` as a `(0, 2)`-tensor section
@@ -1148,7 +1189,7 @@ variable [CompleteSpace E]
 
 /-- For smooth global tangent sections `X, Y, Z`, the section
 `b ↦ ⟨b, riemannSec (LeviCivita g) X Y Z b⟩` of the tangent bundle is smooth. -/
-private theorem riemannSec_section_smooth
+theorem riemannSec_section_smooth
     (g : SmoothRiemannianMetric I M)
     {X Y Z : Π b : M, TangentSpace I b}
     (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% X))
@@ -1227,6 +1268,80 @@ private theorem riemannSec_section_smooth
   intro b
   -- Goal: (T% (sub-section)) b = (T% (riemannSec...)) b. Reduces by `rfl`.
   rfl
+
+/-! ### Smoothness of `riemannOp` as a `Hom`-bundle (trilinear CLM) section
+
+The bundled Riemann curvature operator `b ↦ riemannOp (LeviCivita g) b` is a section of
+the four-fold Hom-bundle
+`fun x : M => TangentSpace I x →L TangentSpace I x →L TangentSpace I x →L TangentSpace I x`,
+whose model fibre is `E →L[ℝ] E →L[ℝ] E →L[ℝ] E`. We prove its `C^∞`-smoothness by a
+three-stage descent through the operator-to-bundle bridge
+`cotangentCov_clmSection_smooth_aux`, peeling one tangent-vector slot at each stage. The
+base case — smoothness of `b ↦ riemannOp (LeviCivita g) b (X b) (Y b) (Z b)` as a tangent
+section for smooth tangent fields `X, Y, Z` — is supplied by `riemannOp_apply_smooth`
+(identifying the pointwise value with the section-level Riemann formula) together with
+`riemannSec_section_smooth`. -/
+
+/-- **Smoothness of the Riemann curvature operator as a Hom-bundle section.** For a smooth
+Riemannian metric `g` on `M`, the section
+`b ↦ ⟨b, riemannOp (LeviCivita g) b⟩` of the four-fold Hom-bundle
+`fun x : M => TangentSpace I x →L TangentSpace I x →L TangentSpace I x →L TangentSpace I x`
+(model fibre `E →L[ℝ] E →L[ℝ] E →L[ℝ] E`) is `C^∞`. The descent uses the
+operator-to-bundle bridge `cotangentCov_clmSection_smooth_aux` three times, reducing to the
+tangent-section smoothness `riemannSec_section_smooth` via `riemannOp_apply_smooth`. -/
+theorem riemannOp_section_contMDiff (g : SmoothRiemannianMetric I M) :
+    ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] E →L[ℝ] E)) ∞
+      (fun b : M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] E →L[ℝ] E)
+        (E := fun x : M =>
+          TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ]
+            TangentSpace I x)
+        b (riemannOp (LeviCivita (I := I) g) b)) := by
+  classical
+  -- Stage 1: peel the X-slot. For each smooth tangent section `X`, the section
+  -- `b ↦ ⟨b, riemannOp (LeviCivita g) b (X b)⟩` of the trilinear Hom-bundle is smooth.
+  apply cotangentCov_clmSection_smooth_aux
+    (V₂ := fun x : M =>
+      TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x)
+    (φ := fun x : M => riemannOp (LeviCivita (I := I) g) x)
+  intro X
+  -- Stage 2: peel the Y-slot. For each smooth tangent section `Y`, the section
+  -- `b ↦ ⟨b, riemannOp (LeviCivita g) b (X b) (Y b)⟩` of the bilinear Hom-bundle is smooth.
+  apply cotangentCov_clmSection_smooth_aux
+    (V₂ := fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x)
+    (φ := fun x : M => riemannOp (LeviCivita (I := I) g) x (X x))
+  intro Y
+  -- Stage 3: peel the Z-slot. For each smooth tangent section `Z`, the tangent section
+  -- `b ↦ ⟨b, riemannOp (LeviCivita g) b (X b) (Y b) (Z b)⟩` is smooth.
+  apply cotangentCov_clmSection_smooth_aux
+    (V₂ := fun x : M => TangentSpace I x)
+    (φ := fun x : M => riemannOp (LeviCivita (I := I) g) x (X x) (Y x))
+  intro Z
+  -- Base case: identify the pointwise value with the section-level Riemann formula and
+  -- conclude by `riemannSec_section_smooth`.
+  have hsec : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (T% (fun b : M => riemannSec (LeviCivita (I := I) g) X Y Z b)) :=
+    riemannSec_section_smooth g X.contMDiff Y.contMDiff Z.contMDiff
+  refine hsec.congr ?_
+  intro b
+  -- Goal (from `congr`): `⟨b, riemannOp g b (X b) (Y b) (Z b)⟩ = (T% (riemannSec g X Y Z)) b`.
+  change TotalSpace.mk' E (E := TangentSpace I) b
+      (riemannOp (LeviCivita (I := I) g) b (X b) (Y b) (Z b)) =
+    TotalSpace.mk' E (E := TangentSpace I) b
+      (riemannSec (LeviCivita (I := I) g) X Y Z b)
+  rw [riemannOp_apply_smooth (cov := LeviCivita (I := I) g)
+    X.contMDiff Y.contMDiff Z.contMDiff]
+
+/-- **Continuity of the Riemann curvature operator section.** The section
+`b ↦ ⟨b, riemannOp (LeviCivita g) b⟩` of the four-fold Hom-bundle is continuous. This is
+the form consumed by downstream integrability arguments (e.g. for the index form). -/
+theorem riemannOp_section_continuous (g : SmoothRiemannianMetric I M) :
+    Continuous
+      (fun b : M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] E →L[ℝ] E)
+        (E := fun x : M =>
+          TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ]
+            TangentSpace I x)
+        b (riemannOp (LeviCivita (I := I) g) b)) :=
+  (riemannOp_section_contMDiff g).continuous
 
 /-- The local trace formula: for `b` in a trivialization base set, the trace of an
 endomorphism `F : T_b M →L[ℝ] T_b M` decomposes as a sum of dual-frame pairings using
@@ -1522,6 +1637,146 @@ theorem ricciTensor_contMDiff (g : SmoothRiemannianMetric I M) :
   rfl
 
 end RicciSmoothness
+
+/-! ## Pair (block) symmetry of the Riemann curvature operator
+
+The block symmetry `⟨R(X, Y) Z, W⟩ = ⟨R(Z, W) X, Y⟩` of the Levi-Civita Riemann
+curvature operator. It is the algebraic consequence of the first Bianchi identity
+together with the first-pair antisymmetry (`riemannOp_swap`) and the last-pair
+metric-skewness (`riemannOp_metric_skew`), and controls the sign of the curvature
+term in the second variation of arc length. -/
+
+section PairSymmetry
+
+variable [CompleteSpace E]
+
+/-- The four-tensor `T(a, b, c, d) := g_x(R(a, b) c, d)` packaging the Levi-Civita Riemann
+curvature operator paired against the metric. Used to phrase the algebraic symmetries
+that produce pair symmetry. -/
+private def riemann4 (g : SmoothRiemannianMetric I M) (x : M)
+    (a b c d : TangentSpace I x) : ℝ :=
+  g.inner x (riemannOp (LeviCivita (I := I) g) x a b c) d
+
+/-- **First-pair antisymmetry of `riemann4`.** `T(a, b, c, d) = -T(b, a, c, d)`, from
+`riemannOp_swap` and linearity of `g.inner x` in its first slot. -/
+private lemma riemann4_swap12 (g : SmoothRiemannianMetric I M) (x : M)
+    (a b c d : TangentSpace I x) :
+    riemann4 (I := I) g x a b c d = -riemann4 (I := I) g x b a c d := by
+  unfold riemann4
+  rw [riemannOp_swap (LeviCivita (I := I) g) x a b c]
+  rw [ContinuousLinearMap.map_neg (g.inner x), ContinuousLinearMap.neg_apply]
+
+/-- **Last-pair antisymmetry of `riemann4`.** `T(a, b, c, d) = -T(a, b, d, c)`, from
+`riemannOp_metric_skew` and symmetry of `g.inner x`. -/
+private lemma riemann4_swap34 (g : SmoothRiemannianMetric I M) (x : M)
+    (a b c d : TangentSpace I x) :
+    riemann4 (I := I) g x a b c d = -riemann4 (I := I) g x a b d c := by
+  unfold riemann4
+  have hskew := riemannOp_metric_skew (I := I) g x a b c d
+  -- hskew : g⟨R(a,b)c, d⟩ + g⟨c, R(a,b)d⟩ = 0.
+  have hsymm : g.inner x c (riemannOp (LeviCivita (I := I) g) x a b d) =
+      g.inner x (riemannOp (LeviCivita (I := I) g) x a b d) c :=
+    g.symm x c (riemannOp (LeviCivita (I := I) g) x a b d)
+  rw [hsymm] at hskew
+  linarith
+
+/-- **First Bianchi identity for `riemann4`.** The cyclic sum in the first three slots
+vanishes: `T(a, b, c, e) + T(b, c, a, e) + T(c, a, b, e) = 0`. Obtained by pairing the
+fibre-level cyclic first Bianchi identity (assembled from
+`riemannOp_first_bianchi_rearranged` and `riemannOp_swap`) against the metric. -/
+private lemma riemann4_bianchi (g : SmoothRiemannianMetric I M) (x : M)
+    (a b c e : TangentSpace I x) :
+    riemann4 (I := I) g x a b c e + riemann4 (I := I) g x b c a e +
+      riemann4 (I := I) g x c a b e = 0 := by
+  -- Cyclic first Bianchi on the operator: R(a,b)c + R(b,c)a + R(c,a)b = 0.
+  -- From `riemannOp_first_bianchi_rearranged g x b c a : R(a,b)c - R(a,c)b = -R(b,c)a`
+  -- and `riemannOp_swap` to rewrite R(a,c)b = -R(c,a)b.
+  have hrear := riemannOp_first_bianchi_rearranged (I := I) g x b c a
+  -- hrear : R(a,b)c - R(a,c)b = -R(b,c)a.
+  have hswap := riemannOp_swap (LeviCivita (I := I) g) x a c b
+  -- hswap : R(a,c)b = -R(c,a)b.
+  rw [hswap] at hrear
+  -- hrear : R(a,b)c - (-R(c,a)b) = -R(b,c)a, i.e. R(a,b)c + R(c,a)b = -R(b,c)a.
+  have hcyc : riemannOp (LeviCivita (I := I) g) x a b c +
+      riemannOp (LeviCivita (I := I) g) x b c a +
+      riemannOp (LeviCivita (I := I) g) x c a b = 0 := by
+    have h := hrear
+    -- h : R(a,b)c - -R(c,a)b = -R(b,c)a.
+    rw [sub_neg_eq_add] at h
+    -- h : R(a,b)c + R(c,a)b = -R(b,c)a.
+    -- Rearranged to the cyclic sum = 0.
+    rw [show riemannOp (LeviCivita (I := I) g) x a b c +
+        riemannOp (LeviCivita (I := I) g) x b c a +
+        riemannOp (LeviCivita (I := I) g) x c a b =
+        (riemannOp (LeviCivita (I := I) g) x a b c +
+          riemannOp (LeviCivita (I := I) g) x c a b) +
+        riemannOp (LeviCivita (I := I) g) x b c a from by abel]
+    rw [h]
+    abel
+  -- Pair against the metric in the fourth slot.
+  have hpair : riemann4 (I := I) g x a b c e + riemann4 (I := I) g x b c a e +
+      riemann4 (I := I) g x c a b e =
+      g.inner x (riemannOp (LeviCivita (I := I) g) x a b c +
+        riemannOp (LeviCivita (I := I) g) x b c a +
+        riemannOp (LeviCivita (I := I) g) x c a b) e := by
+    unfold riemann4
+    rw [ContinuousLinearMap.map_add (g.inner x), ContinuousLinearMap.map_add (g.inner x)]
+    simp only [ContinuousLinearMap.add_apply]
+  rw [hpair, hcyc]
+  simp
+
+/-- **Block symmetry of `riemann4`.** `T(a, b, c, d) = T(c, d, a, b)`. This is the
+classical algebraic consequence of the first Bianchi identity together with the two
+antisymmetries (`riemann4_swap12`, `riemann4_swap34`): summing the cyclic first Bianchi
+identity (`riemann4_bianchi`) over the four cyclic shifts of `(a, c, b, d)` and reducing
+each term with the antisymmetries cancels everything except `-2 T(a,b,c,d) + 2 T(c,d,a,b)`. -/
+private lemma riemann4_pair_symm (g : SmoothRiemannianMetric I M) (x : M)
+    (a b c d : TangentSpace I x) :
+    riemann4 (I := I) g x a b c d = riemann4 (I := I) g x c d a b := by
+  -- The four cyclic first Bianchi identities on the cyclic shifts of `(a, c, b, d)`.
+  have b1 := riemann4_bianchi (I := I) g x a c b d
+  -- T(a,c,b,d) + T(c,b,a,d) + T(b,a,c,d) = 0.
+  have b2 := riemann4_bianchi (I := I) g x c b d a
+  -- T(c,b,d,a) + T(b,d,c,a) + T(d,c,b,a) = 0.
+  have b3 := riemann4_bianchi (I := I) g x b d a c
+  -- T(b,d,a,c) + T(d,a,b,c) + T(a,b,d,c) = 0.
+  have b4 := riemann4_bianchi (I := I) g x d a c b
+  -- T(d,a,c,b) + T(a,c,d,b) + T(c,d,a,b) = 0.
+  -- First-pair antisymmetries (A1) to canonicalize the first two slots.
+  have a1_cbad := riemann4_swap12 (I := I) g x c b a d   -- T(c,b,a,d) = -T(b,c,a,d).
+  have a1_bacd := riemann4_swap12 (I := I) g x b a c d   -- T(b,a,c,d) = -T(a,b,c,d).
+  have a1_cbda := riemann4_swap12 (I := I) g x c b d a   -- T(c,b,d,a) = -T(b,c,d,a).
+  have a1_dcba := riemann4_swap12 (I := I) g x d c b a   -- T(d,c,b,a) = -T(c,d,b,a).
+  have a1_dabc := riemann4_swap12 (I := I) g x d a b c   -- T(d,a,b,c) = -T(a,d,b,c).
+  have a1_dacb := riemann4_swap12 (I := I) g x d a c b   -- T(d,a,c,b) = -T(a,d,c,b).
+  -- Last-pair antisymmetries (A2) to canonicalize the last two slots.
+  have a2_bcda := riemann4_swap34 (I := I) g x b c d a   -- T(b,c,d,a) = -T(b,c,a,d).
+  have a2_bdca := riemann4_swap34 (I := I) g x b d c a   -- T(b,d,c,a) = -T(b,d,a,c).
+  have a2_cdba := riemann4_swap34 (I := I) g x c d b a   -- T(c,d,b,a) = -T(c,d,a,b).
+  have a2_abdc := riemann4_swap34 (I := I) g x a b d c   -- T(a,b,d,c) = -T(a,b,c,d).
+  have a2_adcb := riemann4_swap34 (I := I) g x a d c b   -- T(a,d,c,b) = -T(a,d,b,c).
+  have a2_acdb := riemann4_swap34 (I := I) g x a c d b   -- T(a,c,d,b) = -T(a,c,b,d).
+  linarith
+
+/-- **Pair (block) symmetry of `riemannOp`.** For the Levi-Civita connection of a smooth
+Riemannian metric `g`, at each point `x ∈ M` and for any fibre vectors
+`v, w, Z, W ∈ T_x M`,
+$$
+  g_x\bigl(R(v, w) Z, W\bigr) = g_x\bigl(R(Z, W) v, w\bigr).
+$$
+The slot order matches the curvature term produced by the second-variation derivation
+(`curvature_identity_on_variation_fixed_chart`), where the curvature operator acts as
+`R(v, w) u` via `riemannOp (LeviCivita g) x v w u`. -/
+theorem riemannOp_inner_pair_symm
+    (g : SmoothRiemannianMetric I M) (x : M)
+    (v w Z W : TangentSpace I x) :
+    g.inner x (riemannOp (LeviCivita (I := I) g) x v w Z) W =
+      g.inner x (riemannOp (LeviCivita (I := I) g) x Z W v) w := by
+  -- Reduce to the four-tensor `T` and apply block symmetry: T(v, w, Z, W) = T(Z, W, v, w).
+  change riemann4 (I := I) g x v w Z W = riemann4 (I := I) g x Z W v w
+  exact riemann4_pair_symm (I := I) g x v w Z W
+
+end PairSymmetry
 
 end Connection
 end Integral

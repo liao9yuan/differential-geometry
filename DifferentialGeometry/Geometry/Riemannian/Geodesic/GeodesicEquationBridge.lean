@@ -536,7 +536,7 @@ theorem IsGeodesicAt.hasGeodesicEquationAt_chartCentered
     (hα : (hγ.choose) = γ t₀) :
     HasGeodesicEquationAt (I := I) g γ t₀ := by
   -- Unpack the existential structure of `IsGeodesicAt`.
-  obtain ⟨hproj, hf⟩ := hγ.choose_spec.choose_spec
+  obtain ⟨hproj, _hα_src, hf⟩ := hγ.choose_spec.choose_spec
   -- `hγ.choose = α`, the witness basepoint. After `hα`, it equals `γ t₀`.
   -- Rewrite the chart-fixed VF in `hf` accordingly.
   set f : ℝ → TangentBundle I M := hγ.choose_spec.choose with hf_def

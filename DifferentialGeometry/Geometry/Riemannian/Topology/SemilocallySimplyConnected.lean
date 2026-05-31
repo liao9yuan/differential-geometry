@@ -1,0 +1,165 @@
+import Mathlib.Topology.Connected.LocPathConnected
+import Mathlib.Topology.Connected.PathConnected
+import Mathlib.Topology.Homotopy.Path
+import Mathlib.Topology.Homotopy.Contractible
+import Mathlib.AlgebraicTopology.FundamentalGroupoid.SimplyConnected
+import Mathlib.Analysis.Normed.Module.Connected
+import Mathlib.Analysis.InnerProductSpace.Basic
+import Mathlib.Geometry.Manifold.IsManifold.Basic
+import Mathlib.Geometry.Manifold.IsManifold.ExtChartAt
+import Mathlib.Topology.OpenPartialHomeomorph.Constructions
+
+/-!
+# Semi-locally simply connected spaces
+
+A topological space `X` is *semi-locally simply connected* if every point
+has a neighbourhood `U` such that every loop in `U` (based at the point)
+is null-homotopic in `X`. This is the point-set hypothesis required for
+the standard construction of the universal cover (Hatcher, Prop. 1.36):
+the universal cover exists for spaces that are connected, locally path
+connected, and semi-locally simply connected.
+
+`Mathlib` does not yet provide this typeclass, so we introduce it here
+in the same style as `LocPathConnectedSpace` and `SimplyConnectedSpace`
+(a `class` with a single proof-valued field `out`).
+
+We then establish, as the manifold instance, that every smooth manifold
+modelled on an inner-product space is semi-locally simply connected: each
+chart pulls a neighbourhood of `x` back to an open ball in the model
+space, which is contractible, so every loop in the chart neighbourhood
+is null-homotopic.
+-/
+
+open Set Function Filter Metric Bundle Manifold
+open scoped Topology Manifold ContDiff
+
+namespace DifferentialGeometry
+namespace Geometry
+namespace Riemannian
+namespace Topology
+
+/-- A topological space is *semi-locally simply connected* if every point
+has a neighbourhood `U` such that every loop in `U` (based at the point)
+is null-homotopic in the ambient space.
+
+This is the point-set hypothesis (alongside connectedness and local path
+connectedness) under which the universal cover exists. -/
+class SemilocallySimplyConnectedSpace (X : Type*) [TopologicalSpace X] :
+    Prop where
+  /-- For every point, there is a neighbourhood in which every loop is
+  null-homotopic in `X`. -/
+  out : ∀ x : X, ∃ U ∈ nhds x, ∀ γ : _root_.Path x x,
+          Set.range γ.toContinuousMap ⊆ U →
+            (⟦γ⟧ : _root_.Path.Homotopic.Quotient x x) = ⟦_root_.Path.refl x⟧
+
+/-- If `U ⊆ X` is open and `ContractibleSpace U`, then every loop
+`γ : Path x x` with `range γ ⊆ U` is null-homotopic in `X`, i.e.
+`⟦γ⟧ = ⟦Path.refl x⟧` in `Path.Homotopic.Quotient x x`. -/
+theorem contractible_loops_nullhomotopic_in_subset
+    {X : Type*} [TopologicalSpace X]
+    {U : Set X} (_hUopen : IsOpen U) [ContractibleSpace U]
+    {x : X} (_hxU : x ∈ U)
+    (γ : _root_.Path x x)
+    (hγU : Set.range γ.toContinuousMap ⊆ U) :
+    (⟦γ⟧ : _root_.Path.Homotopic.Quotient x x) = ⟦_root_.Path.refl x⟧ := by
+  -- `U` is simply connected as a subspace, since contractible spaces are simply
+  -- connected (`SimplyConnectedSpace.ofContractible`).
+  have hSC : IsSimplyConnected U := (inferInstance : SimplyConnectedSpace U)
+  -- Convert the range hypothesis into a pointwise membership.
+  have hmem : ∀ t, γ t ∈ U := by
+    intro t
+    have ht : γ t ∈ Set.range γ.toContinuousMap := by
+      refine ⟨t, ?_⟩
+      simp [Path.coe_toContinuousMap]
+    exact hγU ht
+  -- Apply the characterization of simply connected sets to get a homotopy to
+  -- the constant loop.
+  obtain ⟨F, _⟩ :=
+    (isSimplyConnected_iff_exists_homotopy_refl_forall_mem.mp hSC).2 x γ hmem
+  -- Descend the homotopy to the quotient.
+  exact Quotient.sound ⟨F⟩
+
+section ChartContractible
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [InnerProductSpace ℝ E]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  [I.Boundaryless]
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+
+include I in
+/-- Every point of a smooth manifold modelled on an inner-product space
+has an open neighbourhood that is contractible. The neighbourhood is the
+preimage, under the extended chart at `x`, of a small open ball around
+`extChartAt I x x` lying inside the chart's target. -/
+theorem chart_contractible_nhd_at_point (x : M) :
+    ∃ U : Set M, IsOpen U ∧ x ∈ U ∧ ContractibleSpace U := by
+  -- Compose the chart at `x` with the model homeomorphism `I.toHomeomorph`
+  -- (available because `I` is boundaryless) to get an open partial
+  -- homeomorphism `e : OpenPartialHomeomorph M E`.
+  set e : OpenPartialHomeomorph M E :=
+    (chartAt H x).transHomeomorph I.toHomeomorph with he_def
+  have he_source : e.source = (chartAt H x).source := rfl
+  -- The image of `x` under `e` is some point `c` in `e.target`.
+  set c : E := e x with hc_def
+  -- The target of `e` is open in `E` and contains `c`.
+  have hxsrc : x ∈ e.source := by
+    rw [he_source]; exact mem_chart_source H x
+  have hc_target : c ∈ e.target := e.map_source hxsrc
+  have h_target_open : IsOpen e.target := e.open_target
+  -- Pick a radius `r > 0` such that `Metric.ball c r ⊆ e.target`.
+  obtain ⟨r, hr_pos, hr_sub⟩ :=
+    Metric.isOpen_iff.mp h_target_open c hc_target
+  -- Define `U` as the preimage of the ball under `e`, intersected with the source.
+  set B : Set E := Metric.ball c r with hB_def
+  set U : Set M := e.source ∩ e ⁻¹' B with hU_def
+  -- `U` is open.
+  have hU_open : IsOpen U := e.isOpen_inter_preimage Metric.isOpen_ball
+  -- `x ∈ U`: `x ∈ e.source` and `e x = c ∈ B`.
+  have hxU : x ∈ U := by
+    refine ⟨hxsrc, ?_⟩
+    change e x ∈ B
+    simp [hB_def, ← hc_def, Metric.mem_ball, dist_self, hr_pos]
+  -- The image of `U` under `e` equals `B`.
+  have heImage : e '' U = B := by
+    ext b
+    refine ⟨?_, ?_⟩
+    · rintro ⟨m, ⟨_, hmB⟩, rfl⟩
+      exact hmB
+    · intro hb
+      have hbT : b ∈ e.target := hr_sub hb
+      refine ⟨e.symm b, ⟨e.map_target hbT, ?_⟩, e.right_inv hbT⟩
+      change e (e.symm b) ∈ B
+      rw [e.right_inv hbT]
+      exact hb
+  -- Therefore `U` is homeomorphic to the ball `B` (via the restriction of `e`).
+  have hU_sub : U ⊆ e.source := Set.inter_subset_left
+  let φ : U ≃ₜ B := e.homeomorphOfImageSubsetSource hU_sub heImage
+  -- The ball `B` is contractible.
+  have hB_contr : ContractibleSpace B := Metric.contractibleSpace_ball hr_pos
+  -- Transfer contractibility along the homeomorphism.
+  have hU_contr : ContractibleSpace U := φ.contractibleSpace
+  exact ⟨U, hU_open, hxU, hU_contr⟩
+
+include I in
+/-- Every smooth manifold modelled on an inner-product space is
+semi-locally simply connected. For each `x : M`, a chart neighbourhood
+is contractible, hence every loop in it is null-homotopic in `M`.
+
+This is delivered as a `theorem` (not an `instance`) because typeclass
+search cannot infer the model-with-corners `I` from the manifold type
+`M` alone. Downstream consumers that have `I` in scope can invoke this
+theorem to discharge `SemilocallySimplyConnectedSpace M`. -/
+theorem manifold_semilocallySimplyConnectedSpace :
+    SemilocallySimplyConnectedSpace M := ⟨by
+  intro x
+  obtain ⟨U, hU_open, hxU, hU_contr⟩ := chart_contractible_nhd_at_point (I := I) x
+  refine ⟨U, hU_open.mem_nhds hxU, fun γ hγU => ?_⟩
+  exact contractible_loops_nullhomotopic_in_subset hU_open hxU γ hγU⟩
+
+end ChartContractible
+
+end Topology
+end Riemannian
+end Geometry
+end DifferentialGeometry

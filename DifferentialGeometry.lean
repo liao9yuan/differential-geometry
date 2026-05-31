@@ -131,7 +131,6 @@ import DifferentialGeometry.Synthetic.Flow.RicciFlow.Evolution.Ricci
 import DifferentialGeometry.Synthetic.Flow.RicciFlow.Evolution.RiemannVariation
 import DifferentialGeometry.Synthetic.Flow.RicciFlow.Evolution.RiemannLaplacian
 import DifferentialGeometry.Synthetic.Flow.RicciFlow.Evolution.RiemannEvolution
-import DifferentialGeometry.Synthetic.Flow.RicciFlow.Calculus
 
 import DifferentialGeometry.VectorBundle.Dual
 import DifferentialGeometry.VectorBundle.Equiv
@@ -455,7 +454,6 @@ import DifferentialGeometry.Analysis.Sobolev.Nirenberg.SubstitutionDischargeFina
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.SubstitutionDischargeAssembly
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.H2Regularity
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.Iteration
-import DifferentialGeometry.Analysis.Sobolev.Intrinsic.H1Lp
 import DifferentialGeometry.Analysis.Laplacian.Regularity.EllipticRegularity
 import DifferentialGeometry.Analysis.Laplacian.Lichnerowicz
 
@@ -471,10 +469,16 @@ import DifferentialGeometry.Geometry.NormGradSq
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.Equation
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.Existence
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.GeodesicEquationBridge
-import DifferentialGeometry.Geometry.Riemannian.Geodesic.MaximalInterval
+import DifferentialGeometry.Geometry.Riemannian.Geodesic.Homogeneity
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.SmoothFlow
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.Smoothness
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.Uniqueness
+import DifferentialGeometry.Geometry.Riemannian.Geodesic.CrossVFReduction
+import DifferentialGeometry.Geometry.Riemannian.Geodesic.AffineReparam
+import DifferentialGeometry.Geometry.Riemannian.Geodesic.ChartTransition
+import DifferentialGeometry.Geometry.Riemannian.Geodesic.GramPullback
+import DifferentialGeometry.Geometry.Riemannian.Geodesic.MaximalInterval
+import DifferentialGeometry.Geometry.Riemannian.Geodesic.ProjDerivative
 import DifferentialGeometry.Geometry.Riemannian.Exponential.Bridge
 import DifferentialGeometry.Geometry.Riemannian.Exponential.ChartFlowToTangentLift
 import DifferentialGeometry.Geometry.Riemannian.Exponential.ChartIdentification
@@ -483,9 +487,14 @@ import DifferentialGeometry.Geometry.Riemannian.Exponential.Definition
 import DifferentialGeometry.Geometry.Riemannian.Exponential.Final
 import DifferentialGeometry.Geometry.Riemannian.Exponential.FinalClosure
 import DifferentialGeometry.Geometry.Riemannian.Exponential.InverseManifoldChain
+import DifferentialGeometry.Geometry.Riemannian.Exponential.IntrinsicExp
+import DifferentialGeometry.Geometry.Riemannian.Exponential.IntrinsicExpContinuity
+import DifferentialGeometry.Geometry.Riemannian.Exponential.IntrinsicMfderivAtZero
 import DifferentialGeometry.Geometry.Riemannian.Exponential.LocalDiffeomorphism
 import DifferentialGeometry.Geometry.Riemannian.Exponential.MfderivAtZero
+import DifferentialGeometry.Geometry.Riemannian.Exponential.MinimizingGeodesic
 import DifferentialGeometry.Geometry.Riemannian.Exponential.PreconnectedPropagation
+import DifferentialGeometry.Geometry.Riemannian.Exponential.RescaleSmallnessUniform
 import DifferentialGeometry.Geometry.Riemannian.Exponential.RescaledLift
 import DifferentialGeometry.Geometry.Riemannian.Exponential.Smoothness
 import DifferentialGeometry.Geometry.Riemannian.Exponential.SmoothnessClose
@@ -494,7 +503,11 @@ import DifferentialGeometry.Geometry.Riemannian.Exponential.Unconditional
 import DifferentialGeometry.Geometry.Riemannian.Exponential.UnifiedPackaging
 import DifferentialGeometry.Geometry.Riemannian.Exponential.UniformUniqueness
 import DifferentialGeometry.Geometry.Riemannian.Exponential.UniformExistence
+import DifferentialGeometry.Geometry.Riemannian.Exponential.ChainedFlowContinuity
+import DifferentialGeometry.Geometry.Riemannian.Exponential.OffZeroRegularity
+import DifferentialGeometry.Geometry.Riemannian.Exponential.ExpVariationSmooth
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.MaximalRescaling
+import DifferentialGeometry.Geometry.Riemannian.MetricExistence
 import DifferentialGeometry.Geometry.Riemannian.NormalCoordinates
 import DifferentialGeometry.Geometry.Riemannian.InjectivityRadius
 import DifferentialGeometry.Geometry.Riemannian.SectionalCurvature
@@ -507,8 +520,6 @@ import DifferentialGeometry.Geometry.Riemannian.Geodesic.ChartChristoffelTransfo
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.ChartInvariance
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.Intrinsic
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.ConstantSpeed
-import DifferentialGeometry.Geometry.Riemannian.Geodesic.Homogeneity
-import DifferentialGeometry.Geometry.Riemannian.Geodesic.AffineReparam
 import DifferentialGeometry.Geometry.Riemannian.Exp.Basic
 import DifferentialGeometry.Geometry.Riemannian.Length.LengthFunctional
 import DifferentialGeometry.Geometry.Riemannian.Length.EnergyFunctional
@@ -529,6 +540,34 @@ import DifferentialGeometry.Geometry.Riemannian.Curvature.Bridges
 import DifferentialGeometry.Geometry.Riemannian.Completeness.Defs
 import DifferentialGeometry.Geometry.Riemannian.Exp.CompleteDomain
 import DifferentialGeometry.Geometry.Riemannian.Exp.NormalNeighborhood
+import DifferentialGeometry.Geometry.Riemannian.MFDerivAlongCurve
+import DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
+import DifferentialGeometry.Geometry.Riemannian.TangentNormDiamond
+import DifferentialGeometry.Geometry.Riemannian.RiemannianDistContinuity
+import DifferentialGeometry.Geometry.Riemannian.GaussLemma
+import DifferentialGeometry.Geometry.Riemannian.GeodesicConvexity
+import DifferentialGeometry.Geometry.Riemannian.HopfRinow
+import DifferentialGeometry.Geometry.Riemannian.RadialSurjectivity
+import DifferentialGeometry.Geometry.Riemannian.Variation.ParallelTransport
+import DifferentialGeometry.Geometry.Riemannian.Variation.ParallelLocalODE
+import DifferentialGeometry.Geometry.Riemannian.Variation.PerpFrame
+import DifferentialGeometry.Geometry.Riemannian.Variation.SecondVariation
+import DifferentialGeometry.Geometry.Riemannian.Variation.SecondVariationMinimiser
+import DifferentialGeometry.Geometry.Riemannian.Variation.FixedChartIdentities
+import DifferentialGeometry.Geometry.Riemannian.Topology.SemilocallySimplyConnected
+import DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.Basic
+import DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.CountablePi1
+import DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.CoveringMap
+import DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.Manifold
+import DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.Riemannian
+import DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.LiftedMetricSmoothness
+import DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.ChartPullback
+import DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.TruncateHomotopy
+import DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.TruncationLift
+import DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.Lifts
+import DifferentialGeometry.Geometry.Riemannian.BonnetMyers.RicciBound
+import DifferentialGeometry.Geometry.Riemannian.BonnetMyers.LengthBound
+import DifferentialGeometry.Geometry.Riemannian.BonnetMyers.Headlines
 
 import DifferentialGeometry.Analysis.Sobolev.Solutions.FriedrichsCommutator
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.NonSmooth
@@ -747,6 +786,7 @@ import DifferentialGeometry.Integral.Connection.ChartBridge.Riemann
 import DifferentialGeometry.Integral.Connection.ChartBridge.Ricci
 import DifferentialGeometry.Integral.Connection.ChartBridge.RiemannBasisIdentity
 import DifferentialGeometry.Integral.Connection.ChartBridge.RiemannBasisIdentityAlpha
+import DifferentialGeometry.Integral.Connection.ChartBridge.RiemannBasisBracket
 import DifferentialGeometry.Integral.Connection.RicciIdentitySmoothFrame
 import DifferentialGeometry.Integral.Connection.TensorRicciCommutator
 import DifferentialGeometry.Integral.Connection.TensorThirdOrderWeitzenbock
@@ -864,6 +904,7 @@ import DifferentialGeometry.Analysis.Sobolev.Tensor.NormBasics
 import DifferentialGeometry.Analysis.Sobolev.Tensor.ChartLocality
 import DifferentialGeometry.Analysis.Sobolev.Tensor.PouWeightedNorm
 import DifferentialGeometry.Analysis.Sobolev.Tensor.PouWeightedHsNorm
+import DifferentialGeometry.Analysis.Sobolev.Tensor.ComponentRawVsChartCompBridge
 import DifferentialGeometry.Analysis.Laplacian.TensorRegularity.ChartPrimitives
 import DifferentialGeometry.Analysis.Laplacian.TensorRegularity.ChartInvGramMatrixPullback
 import DifferentialGeometry.Analysis.Laplacian.TensorRegularity.ChartFrameCoordMatrixPullback
@@ -1234,7 +1275,6 @@ import DifferentialGeometry.PDE.RicciFlow.HebeyBlock.IntrinsicCovAtomL2Fiber
 import DifferentialGeometry.PDE.RicciFlow.HebeyBlock.FiberNormRiemannianBridge
 import DifferentialGeometry.PDE.RicciFlow.HebeyBlock.OffCentreFibreCore
 import DifferentialGeometry.Integral.Connection.SmoothBilinearSectionBddAbove
-import DifferentialGeometry.Integral.Connection.TensorRSChartFiberFromModelOpNormUnconditional
 import DifferentialGeometry.PDE.RicciFlow.HebeyBlock.TangentBundleTrivOpNormUnconditional
 import DifferentialGeometry.PDE.RicciFlow.HebeyBlock.ChartLeviCivitaParallelCLMUnconditional
 import DifferentialGeometry.PDE.RicciFlow.HebeyBlock.IntrinsicSlotOpNormRiem
