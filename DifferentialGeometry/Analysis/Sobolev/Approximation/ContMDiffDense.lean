@@ -1,7 +1,7 @@
 import DifferentialGeometry.Analysis.Sobolev.Approximation.ContMDiffDenseHelpers
 import DifferentialGeometry.Analysis.Sobolev.Tools.StrictStrongSupport
-import DifferentialGeometry.Analysis.Sobolev.Chart.CrossChartBoundStrictMemWkp
-import DifferentialGeometry.Analysis.Sobolev.Chart.BanachManifold
+import DifferentialGeometry.Analysis.Sobolev.Chart.CrossChartBounds.CrossChartBoundStrictMemWkp
+import DifferentialGeometry.Analysis.Sobolev.Chart.BanachCompleteness.BanachManifold
 
 /-!
 # Smooth-density theorem for `W^{1,p}_chart(M)` on a closed Riemannian manifold

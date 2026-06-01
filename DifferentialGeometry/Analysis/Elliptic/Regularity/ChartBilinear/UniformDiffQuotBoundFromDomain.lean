@@ -1,7 +1,7 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartBilinear.UniformDiffQuotBound
 import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartBilinear.UniformDiffQuotGTotalBound
-import DifferentialGeometry.Analysis.Sobolev.Nirenberg.SubstitutionIdentityNonSmooth
-import DifferentialGeometry.Analysis.Sobolev.Nirenberg.SubstitutionNonSmooth
+import DifferentialGeometry.Analysis.Sobolev.Nirenberg.SubstitutionIdentity.SubstitutionIdentityNonSmooth
+import DifferentialGeometry.Analysis.Sobolev.Nirenberg.SubstitutionIdentity.SubstitutionNonSmooth
 
 /-!
 # Unconditional uniform-in-`h` `L²` bound on the difference quotient of the

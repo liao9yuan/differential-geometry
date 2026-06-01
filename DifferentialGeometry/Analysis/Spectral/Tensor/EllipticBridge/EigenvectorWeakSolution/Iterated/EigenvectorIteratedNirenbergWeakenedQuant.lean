@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Iterated.EigenvectorIteratedNirenbergWeakened
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.TensorNonSmoothDiffQuotQuant
-import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevQuant
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.IteratedSobolevQuant
 
 /-!
 # Quantitative weakened Nirenberg interior `W^{2,2}` regularity of the iterated mixed partial

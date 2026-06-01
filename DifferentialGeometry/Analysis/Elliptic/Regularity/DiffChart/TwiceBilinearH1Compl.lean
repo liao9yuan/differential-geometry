@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.BilinearH1Compl
 import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.BilinearH1ComplFromDomainPow
-import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolev
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.IteratedSobolev
 
 /-!
 # Twice-differentiated chart-bilinear identity

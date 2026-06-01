@@ -1,7 +1,7 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.BilinearH1ComplResidualClosure
 import DifferentialGeometry.Analysis.Elliptic.Regularity.FChartResidual.LpDecomposition
 import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.BilinearH1ComplFromDomainPow
-import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothMul
+import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity.SmoothMul
 import DifferentialGeometry.Analysis.Sobolev.Manifold.RellichManifold
 
 /-!

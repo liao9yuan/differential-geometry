@@ -2,7 +2,7 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.BilinearH1Com
 import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.BilinearH1ComplResidualClosure
 import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.BilinearH1ComplFromDomainPow
 import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.LpIdentity
-import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevBanach
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.Completeness.IteratedSobolevBanach
 
 /-!
 # Unconditional discharge of `MemW1p 2 fChartResidual` for the smooth case

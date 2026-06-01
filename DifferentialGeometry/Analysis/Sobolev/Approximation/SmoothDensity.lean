@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Approximation.ContMDiffDenseHelpers
-import DifferentialGeometry.Analysis.Sobolev.Chart.CrossChartBound
-import DifferentialGeometry.Analysis.Sobolev.Euclidean.MultiplyQuant
+import DifferentialGeometry.Analysis.Sobolev.Chart.CrossChartBounds.CrossChartBound
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuant
 
 /-!
 # Per-chart strong-support smooth approximation in `W^{1,p}_chart(M)`

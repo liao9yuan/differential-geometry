@@ -2,7 +2,7 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.BilinearH1Com
 import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.BilinearH1ComplViaH3
 import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartPushed.MemWkpThreeSmooth
 import DifferentialGeometry.Analysis.Elliptic.Regularity.FChartResidual.ResidualMemW1p
-import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolev
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.IteratedSobolev
 
 /-!
 # Chart-side `W^{1,2}` regularity of `chosenFChartDeriv` on the chart target

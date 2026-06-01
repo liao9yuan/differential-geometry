@@ -1,8 +1,8 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartPushed.MemWkpThreeSmooth
 import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.BilinearH1ComplFromDomainPow
 import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.DifferentiatedCrossTermIBP
-import DifferentialGeometry.Analysis.Sobolev.Euclidean.SmoothCoefWeakPartialIBP
-import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolev
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.SmoothCoefWeakPartialIBP
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.IteratedSobolev
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Density
 
 /-!

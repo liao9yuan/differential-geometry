@@ -1,5 +1,5 @@
-import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevBanach
-import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevHalfSpace
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.Completeness.IteratedSobolevBanach
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.SupportAndDomain.IteratedSobolevHalfSpace
 
 /-!
 # Sequential completeness of the iterated Euclidean half-space Sobolev space `W^{k,p}_0`

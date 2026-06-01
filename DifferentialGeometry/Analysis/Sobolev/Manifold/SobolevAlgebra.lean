@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MorreyManifold
-import DifferentialGeometry.Analysis.Sobolev.Euclidean.MultiplyQuant
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuant
 import DifferentialGeometry.Analysis.Sobolev.Tools.StrictStrongSupport
 import DifferentialGeometry.Analysis.Sobolev.Manifold.IteratedSobolevEmbedding
 import DifferentialGeometry.Analysis.Sobolev.Approximation.ContMDiffDenseHelpers

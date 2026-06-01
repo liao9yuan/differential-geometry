@@ -2,7 +2,7 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.VariationalIde
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.FChartEffRegularity
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.MixedPartials
 import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.DifferentiatedCrossTermIBP
-import DifferentialGeometry.Analysis.Sobolev.Euclidean.MultiplyQuantK
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuantK
 
 /-!
 # Polymorphic-in-`K` regularity propagator for the per-step effective source

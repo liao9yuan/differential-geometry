@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.ManifoldH2.NonSmooth
 import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.ChartData
-import DifferentialGeometry.Analysis.Sobolev.Nirenberg.SubstitutionIdentityNonSmooth
+import DifferentialGeometry.Analysis.Sobolev.Nirenberg.SubstitutionIdentity.SubstitutionIdentityNonSmooth
 
 /-!
 # Manifold-level non-smooth `H²` interior regularity for `laplacianDomain g`

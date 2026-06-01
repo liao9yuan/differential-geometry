@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.RHS.EigenvectorDifferentiatedRHS
-import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevQuant
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.IteratedSobolevQuant
 
 /-!
 # Explicit-norm `eLpNorm` bound for the differentiated chart-RHS numerator

@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.WeakSolution.WeakSolutionHeadline
-import DifferentialGeometry.Analysis.Sobolev.Nirenberg.H2Regularity
+import DifferentialGeometry.Analysis.Sobolev.Nirenberg.H2Regularity.H2Regularity
 
 /-!
 # Interior `H²` regularity for the chart components of a tensor weak solution

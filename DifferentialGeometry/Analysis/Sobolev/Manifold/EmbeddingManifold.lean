@@ -1,7 +1,7 @@
 import DifferentialGeometry.Analysis.Sobolev.Manifold.Embedding
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridge
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridgeUniform
-import DifferentialGeometry.Analysis.Sobolev.Chart.Atlas
+import DifferentialGeometry.Analysis.Sobolev.Chart.AtlasNorm.Atlas
 import DifferentialGeometry.Analysis.Sobolev.Manifold.Rellich
 import DifferentialGeometry.Analysis.Integration.Measure.Family
 import Mathlib.MeasureTheory.Function.LpSeminorm.TriangleInequality

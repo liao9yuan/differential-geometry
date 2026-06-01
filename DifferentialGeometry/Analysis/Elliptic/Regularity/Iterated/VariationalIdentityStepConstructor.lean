@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.DifferentiatedData
 import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.DifferentiatedCrossTermIBP
-import DifferentialGeometry.Analysis.Sobolev.Euclidean.SmoothCoefWeakPartialIBP
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.SmoothCoefWeakPartialIBP
 
 /-!
 # Scaffolding for the polymorphic inductive step of the iterated chart-bilinear

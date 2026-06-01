@@ -1,7 +1,7 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Hessian.ChartAlphaWeakRaw
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Hessian.PairingLapDom
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Hessian.TensorChartSmooth
-import DifferentialGeometry.Analysis.Sobolev.Chart.MeasurablePullback
+import DifferentialGeometry.Analysis.Sobolev.Chart.ChartTransition.MeasurablePullback
 
 /-!
 # Chart-invariant tensor-corrected Hessian pairing as a global `Lp 2 μ_g` class

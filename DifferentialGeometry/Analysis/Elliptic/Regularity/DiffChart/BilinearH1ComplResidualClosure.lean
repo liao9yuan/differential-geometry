@@ -4,7 +4,7 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.FChartResidual.LpDecomp
 import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.LpIdentity
 import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.LaplacianDensityExt
 import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.VariationalIntegralForm
-import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothMul
+import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity.SmoothMul
 
 /-!
 # Final chain: image membership, iterated closure, and residual MemW1p discharge

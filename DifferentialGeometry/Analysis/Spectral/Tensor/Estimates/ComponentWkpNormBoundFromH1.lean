@@ -3,7 +3,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ComponentSobolevB
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.PartialL2BoundFromH1
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ChosenWeakPartialFderivBridge
 import DifferentialGeometry.Analysis.Sobolev.Intrinsic.EquivalenceReverse
-import DifferentialGeometry.Analysis.Sobolev.Chart.AtlasIndependence
+import DifferentialGeometry.Analysis.Sobolev.Chart.AtlasNorm.AtlasIndependence
 
 /-!
 # Uniform-in-`S` chart-Sobolev `W^{1,2}` bound for tensor chart-frame scalar

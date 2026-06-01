@@ -10,9 +10,9 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.TensorChartT
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.TensorChartTransitionTransport
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.ChartTransitionTransportCLM
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.CovGrad.EigenvectorCovGradLeibniz
-import DifferentialGeometry.Analysis.Sobolev.Chart.TransitionQMP
-import DifferentialGeometry.Analysis.Sobolev.Chart.TransitionPipeline
-import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevEmbedding
+import DifferentialGeometry.Analysis.Sobolev.Chart.ChartTransition.TransitionQMP
+import DifferentialGeometry.Analysis.Sobolev.Chart.ChartTransition.TransitionPipeline
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.Embedding.IteratedSobolevEmbedding
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Density
 
 /-!

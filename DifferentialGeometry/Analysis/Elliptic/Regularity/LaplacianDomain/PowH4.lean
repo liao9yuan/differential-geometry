@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.H2RegularityStep
 import DifferentialGeometry.Analysis.Elliptic.Regularity.ManifoldH2.NonSmooth
-import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothMul
+import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity.SmoothMul
 
 /-!
 # Chart-Sobolev `H⁴` regularity for the iterated Laplacian domain at `k = 2`

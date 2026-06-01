@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartBilinear.H1Compl
 import DifferentialGeometry.Analysis.Sobolev.Tools.DifferenceQuotientWeakLimitLoc
-import DifferentialGeometry.Analysis.Sobolev.Nirenberg.H2Regularity
+import DifferentialGeometry.Analysis.Sobolev.Nirenberg.H2Regularity.H2Regularity
 
 /-!
 # Per-chart `H²` interior regularity for non-smooth weak solutions

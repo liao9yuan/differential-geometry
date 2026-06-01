@@ -3,10 +3,10 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.TwiceDerivedH
 import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartPushed.MemWkpThreeSmooth
 import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartPushed.MemWkpThree
 import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.PowH2kBridge
-import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolev
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.IteratedSobolev
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Density
-import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiply
-import DifferentialGeometry.Analysis.Sobolev.Euclidean.MultiplyQuantK
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.Multiply
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuantK
 
 /-!
 # Final assembly: chart-`H⁴` regularity of the chart-pushed function

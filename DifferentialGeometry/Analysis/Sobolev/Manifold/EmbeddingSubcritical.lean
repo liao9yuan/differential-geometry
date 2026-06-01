@@ -4,7 +4,7 @@ import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridge
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridgeUniform
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Density
 import DifferentialGeometry.Analysis.Sobolev.Manifold.RellichManifold
-import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity
+import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity.SmoothDensity
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Setup
 import DifferentialGeometry.Analysis.Integration.Measure.Family
 import Mathlib.MeasureTheory.Function.LpSeminorm.Indicator

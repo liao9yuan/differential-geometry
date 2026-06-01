@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Sobolev.Nirenberg.NonSmooth
+import DifferentialGeometry.Analysis.Sobolev.Nirenberg.H2Regularity.NonSmooth
 
 /-!
 # Construction of `SmoothApproximation` from a smooth weak solution

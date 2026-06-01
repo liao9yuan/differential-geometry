@@ -1,7 +1,7 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.CovGrad.EigenvectorCovGradComponent
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Cutoff.CutoffChartComponentWkpNorm
-import DifferentialGeometry.Analysis.Sobolev.Euclidean.MultiplyQuantK
-import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevQuant
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuantK
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.IteratedSobolevQuant
 
 /-!
 # Quantitative iterated-Sobolev norm bounds for the eigenvector partition-of-unity

@@ -1,9 +1,9 @@
 import DifferentialGeometry.Analysis.Sobolev.IntrinsicFlow.HilbertSpace
-import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.SpectralPouH2Identify
+import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.PouSobolevIso.SpectralPouH2Identify
 import DifferentialGeometry.Analysis.Sobolev.Manifold.IteratedSobolevEmbedding
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MorreyManifoldHigherOrder
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ComponentSobolevBound
-import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.FiberNormRiemannianBridge
+import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.FiberNorm.FiberNormRiemannianBridge
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.TensorSectionL2BoundByComponents
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingManifoldC0
 import Mathlib.Geometry.Manifold.ContMDiff.Basic

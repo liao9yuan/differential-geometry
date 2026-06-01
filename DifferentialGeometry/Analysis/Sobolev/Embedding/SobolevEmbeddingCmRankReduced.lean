@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCmOrderCollapse
-import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.NablaTensorFormula
-import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.ChristoffelCkBound
+import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.NablaTensor.NablaTensorFormula
+import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.ChartParallelTransportOpNorm.ChristoffelCkBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.CovGrad.EigenvectorCovGradChartIdentity
 
 /-!

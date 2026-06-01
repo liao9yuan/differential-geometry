@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Approximation.ContMDiffDense
-import DifferentialGeometry.Analysis.Sobolev.Chart.CrossChartBoundStrictMemWkpHigherOrder
-import DifferentialGeometry.Analysis.Sobolev.Euclidean.MultiplyQuantK
+import DifferentialGeometry.Analysis.Sobolev.Chart.CrossChartBounds.CrossChartBoundStrictMemWkpHigherOrder
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuantK
 
 /-!
 # Smooth-density theorem for `W^{k,p}_chart(M)` at arbitrary order `k`

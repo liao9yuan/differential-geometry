@@ -2,7 +2,7 @@ import DifferentialGeometry.Analysis.Sobolev.Manifold.IteratedSobolevEmbedding
 import DifferentialGeometry.Analysis.Sobolev.WithBoundary.EmbeddingSubcritical
 import DifferentialGeometry.Analysis.Sobolev.WithBoundary.EuclideanMorrey
 import DifferentialGeometry.Analysis.Sobolev.WithBoundary.Chart
-import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevHalfSpace
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.SupportAndDomain.IteratedSobolevHalfSpace
 
 /-!
 # Iterated Sobolev embedding `W^{k,p}(M) ↪ W^{k-1, p_1}(M)` and `↪ C^0(M)`,

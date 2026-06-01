@@ -1,7 +1,7 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.CutoffChartComponentMemWkp
-import DifferentialGeometry.Analysis.Sobolev.Euclidean.CompChainRuleK
-import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevQuant
-import DifferentialGeometry.Analysis.Sobolev.Euclidean.MultiplyQuantK
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.ChainRule.CompChainRuleK
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.IteratedSobolevQuant
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuantK
 
 /-!
 # A quantitative iterated-Sobolev norm bound for the cutoff tensor `L²` chart

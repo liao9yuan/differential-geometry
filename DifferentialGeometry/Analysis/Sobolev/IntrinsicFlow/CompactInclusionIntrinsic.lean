@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.Spectrum.CompactInclusion
-import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.TensorChartComponentSobolevIntrinsic
+import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.TensorChartComponentSobolev.TensorChartComponentSobolevIntrinsic
 
 /-!
 # Compactness of the H¹ → L² inclusion for tensor sections (chart-locality-free)

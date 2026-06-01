@@ -1,5 +1,5 @@
-import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedL2
-import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevHalfSpace
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.IteratedL2
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.SupportAndDomain.IteratedSobolevHalfSpace
 
 /-!
 # `L²`-convention iterated Euclidean Sobolev norm and inner product on

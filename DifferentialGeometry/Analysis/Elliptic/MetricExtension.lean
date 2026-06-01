@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Sobolev.Nirenberg.Euclidean
+import DifferentialGeometry.Analysis.Sobolev.Nirenberg.H2Regularity.Euclidean
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.Family
 import DifferentialGeometry.Geometry.Operator.Hessian
 import Mathlib.Analysis.InnerProductSpace.EuclideanDist

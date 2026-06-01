@@ -3,7 +3,7 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.ChosenThirdMix
 import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartPushed.MemWkpThreeSmooth
 import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartPushed.MemWkpThree
 import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.DerivedData
-import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolev
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.IteratedSobolev
 import DifferentialGeometry.Analysis.Sobolev.Approximation.SmoothDensity
 import Mathlib.Analysis.Calculus.FDeriv.Symmetric
 

@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.EigenvectorArbitraryKRegularity
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Iterated.EigenvectorIteratedData
-import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevEmbedding
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.Embedding.IteratedSobolevEmbedding
 
 /-!
 # A compactly-supported smooth representative of the eigenvector chart component

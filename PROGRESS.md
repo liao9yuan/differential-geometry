@@ -29,6 +29,19 @@ Flat Areas regrouped into Concept sub-folders (Defs/Basic/Aspect pattern; build-
 - round 2+3 (commit 8a7496ff): Geometry/Exponential {Smoothness,ChartFlow}; Analysis/Heat {Smoothing,Semigroup};
   Analysis/ODE/Flow; Analysis/Elliptic/TensorRegularity {Bootstrap,WeakSolution,CovDeriv}; Analysis/Spectral/Tensor
   {Spectrum,Variational,UniformChartBounds,NormEstimates,CovGrad}; Analysis/Parabolic {DeTurckRicci,AbstractSemigroup}.
+- ConnectionLaplacian grouping (commit bcf4abb0): the unified 84-file dir → 8 concepts {GreenIdentityAndIBP,
+  RiemannianFiberNormSq, ChartCoordinateExpansion, ChartReprDerivativeBounds, CovApplyAndSlotCorrectionBounds,
+  ChartFiberTrivialisationOpNorm, RawConnLapPointwiseFiberBounds, RawConnLapL2SobolevBounds} (lean-researcher partition).
+- Sobolev grouping: 4 sub-areas → concepts (lean-researcher partition): Chart {ChartTransition,CrossChartBounds,
+  AtlasNorm,BanachCompleteness,SmoothDensity;Defs@root}; Nirenberg {TestFunction,SubstitutionIdentity,
+  ChartBilinearDischarge,MasterInequality,CrossTermBoundsNonSmooth,H2Regularity}; HebeyBlock {ChartParallelTransportOpNorm,
+  ChristoffelCorrectionL2,FiberNorm,NablaTensor,TensorChartComponentSobolev,PouSobolevIso}; Euclidean {IteratedSobolevSpace,
+  Completeness,ChainRule,Multiplication,Embedding,SupportAndDomain;Setup,Density@root}.
+GRANULARITY PASS COMPLETE: every genuinely-oversized multi-concept flat Area (25–84 files) is now concept-organized.
+Remaining ≥18-file dirs are either External/DeGiorgi (vendored, untouchable) or coherent single concepts
+(RSTensor, Elliptic/Regularity/{Iterated,DiffChart}, ODE/TimeDependentFlow/*, DivergenceTheorem/WithBoundary,
+RicciFlow/Pullback) at acceptable R1 granularity. NOT YET DONE (optional R2 polish): per-concept aggregator/headline
+files (Concept.lean re-exports) — deferred; the root DifferentialGeometry.lean already imports every leaf directly.
 - CROSS-PILLAR CONSOLIDATION (by reasoning nature): the scattered analytic connection-Laplacian estimate cluster
   (33 flat in Geometry/Connection + 10 in Geometry/Connection/Laplacian + 1 in Geometry/Curvature) was fixpoint-
   analyzed (/tmp/_moveA.json) and the 36 purely-analytic files moved → Analysis/Elliptic/ConnectionLaplacian

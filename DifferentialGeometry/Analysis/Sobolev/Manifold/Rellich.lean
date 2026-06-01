@@ -1,6 +1,6 @@
-import DifferentialGeometry.Analysis.Sobolev.Euclidean.Rellich
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.Embedding.Rellich
 import DifferentialGeometry.Analysis.Sobolev.Chart.Defs
-import DifferentialGeometry.Analysis.Sobolev.Chart.Atlas
+import DifferentialGeometry.Analysis.Sobolev.Chart.AtlasNorm.Atlas
 import DifferentialGeometry.Analysis.Integration.Measure.Glue
 import DifferentialGeometry.Analysis.Integration.Measure.Family
 import DifferentialGeometry.Analysis.Integration.Measure.Properties

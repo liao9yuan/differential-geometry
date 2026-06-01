@@ -2,7 +2,7 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.BilinearH1Com
 import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.CLMLeibniz
 import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.PerChart
 import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.SmoothMulH1Compl
-import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothMul
+import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity.SmoothMul
 
 /-!
 # Hypothesis-free wiring for `DiffChartBilinearH1ComplData` from `laplacianDomainPow g 2`

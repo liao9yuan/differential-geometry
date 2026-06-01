@@ -1,5 +1,5 @@
-import DifferentialGeometry.Analysis.Sobolev.Euclidean.Morrey
-import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevHalfSpace
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.Embedding.Morrey
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.SupportAndDomain.IteratedSobolevHalfSpace
 
 /-!
 # Morrey-type embedding on Euclidean half-space balls

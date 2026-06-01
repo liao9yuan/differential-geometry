@@ -1,7 +1,7 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Hessian.LpClass
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Hessian.PairingChart
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Ricci.PairingCLM
-import DifferentialGeometry.Analysis.Sobolev.Chart.MeasurablePullback
+import DifferentialGeometry.Analysis.Sobolev.Chart.ChartTransition.MeasurablePullback
 import DifferentialGeometry.Analysis.Sobolev.Manifold.Rellich
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridge
 import Mathlib.MeasureTheory.Function.LpSeminorm.TriangleInequality

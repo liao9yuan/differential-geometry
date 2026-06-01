@@ -1,7 +1,7 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartBilinear.H1Compl
 import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.L2Inclusion
 import DifferentialGeometry.Analysis.Sobolev.Chart.Defs
-import DifferentialGeometry.Analysis.Sobolev.Chart.MeasurablePullback
+import DifferentialGeometry.Analysis.Sobolev.Chart.ChartTransition.MeasurablePullback
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridge
 import DifferentialGeometry.Analysis.Integration.Measure.Glue
 import DifferentialGeometry.Analysis.Integration.Measure.Invariance

@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.ChartAlphaReprL2BoundOnPouTsupport
-import DifferentialGeometry.Analysis.Sobolev.Chart.CrossChartBoundStrict
+import DifferentialGeometry.Analysis.Sobolev.Chart.CrossChartBounds.CrossChartBoundStrict
 
 /-!
 # Per-pair `(α, β)` chart change-of-variables bound for the partition-of-unity-

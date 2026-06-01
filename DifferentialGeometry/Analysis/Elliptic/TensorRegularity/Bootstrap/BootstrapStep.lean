@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.NirenbergH2
-import DifferentialGeometry.Analysis.Sobolev.Nirenberg.Iteration
-import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolev
+import DifferentialGeometry.Analysis.Sobolev.Nirenberg.H2Regularity.Iteration
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.IteratedSobolev
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Density
 
 /-!

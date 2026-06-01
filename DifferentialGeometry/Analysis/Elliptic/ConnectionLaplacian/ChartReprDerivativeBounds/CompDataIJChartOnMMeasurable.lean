@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.CovDerivChartFormLowerOrder
-import DifferentialGeometry.Analysis.Sobolev.Chart.MeasurablePullback
+import DifferentialGeometry.Analysis.Sobolev.Chart.ChartTransition.MeasurablePullback
 
 /-!
 # Borel measurability on `M` of the chart-`α` pulled-back iterated-Fréchet-derivative

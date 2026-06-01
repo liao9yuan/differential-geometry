@@ -2,10 +2,10 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.DerivedDataCo
 import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.DerivedH2Interior
 import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartPushed.MemWkpThree
 import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.BilinearH1ComplViaH3
-import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolev
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.IteratedSobolev
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Density
-import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiply
-import DifferentialGeometry.Analysis.Sobolev.Euclidean.MultiplyQuantK
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.Multiply
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuantK
 
 /-!
 # Final unconditional chart-`H³` regularity of the chart-pushed function

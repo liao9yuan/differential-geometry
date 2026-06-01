@@ -2,7 +2,7 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.BilinearH1Com
 import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.ChartData
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.H2RegularityStep
 import DifferentialGeometry.Analysis.Sobolev.Chart.Defs
-import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolev
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.IteratedSobolev
 import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.VariationalIdentityIntegral
 
 /-!

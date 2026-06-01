@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.AbstractChartPullCutoff
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.TensorChartTransition
-import DifferentialGeometry.Analysis.Sobolev.Chart.CrossChartBoundStrict
+import DifferentialGeometry.Analysis.Sobolev.Chart.CrossChartBounds.CrossChartBoundStrict
 
 /-!
 # The chart-transition transport operator on tensor `L²` chart components

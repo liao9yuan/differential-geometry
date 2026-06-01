@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.Operator.ChartLocalLaplacian
-import DifferentialGeometry.Analysis.Sobolev.Nirenberg.H2Regularity
+import DifferentialGeometry.Analysis.Sobolev.Nirenberg.H2Regularity.H2Regularity
 
 /-!
 # Per-chart interior `H²` regularity for chart-pulled smooth weak solutions

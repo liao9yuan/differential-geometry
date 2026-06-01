@@ -1,10 +1,10 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.BilinearH1ComplResidual
 import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.CLMChartFormula
-import DifferentialGeometry.Analysis.Sobolev.Chart.StrictCutoffPushedRawBound
-import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothMulQuant
+import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity.StrictCutoffPushedRawBound
+import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity.SmoothMulQuant
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MorreyManifoldHigherOrder
 import DifferentialGeometry.Analysis.Sobolev.Manifold.IteratedSobolevEmbedding
-import DifferentialGeometry.Analysis.Sobolev.Euclidean.MultiplyQuantK
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuantK
 
 /-!
 # Chart-target bilinear bound for the smooth Leibniz residual

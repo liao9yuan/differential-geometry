@@ -1,7 +1,7 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.BilinearH1ComplFromDomainPow
 import DifferentialGeometry.Analysis.Elliptic.Regularity.FChartResidual.ResidualMemW1p
 import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.DifferentiatedCrossTermIBP
-import DifferentialGeometry.Analysis.Sobolev.Euclidean.SmoothCoefWeakPartialIBP
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.SmoothCoefWeakPartialIBP
 import Mathlib.Analysis.Calculus.FDeriv.Symmetric
 
 /-!

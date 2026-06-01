@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Chart.Defs
-import DifferentialGeometry.Analysis.Sobolev.Chart.Atlas
+import DifferentialGeometry.Analysis.Sobolev.Chart.AtlasNorm.Atlas
 import Mathlib.MeasureTheory.Function.LpSeminorm.Basic
 import Mathlib.MeasureTheory.Function.LpSeminorm.CompareExp
 import Mathlib.MeasureTheory.Function.LpSpace.Basic
