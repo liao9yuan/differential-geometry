@@ -1,6 +1,6 @@
 import DifferentialGeometry.Riemannian.Connection.BochnerConcrete
 import DifferentialGeometry.Integration.DivergenceTheorem.WithBoundary.Laplacian
-import DifferentialGeometry.Integration.DivergenceTheorem.WithBoundary.ModelBoundary
+import DifferentialGeometry.Riemannian.Boundary.ModelBoundary
 import DifferentialGeometry.Riemannian.Curvature.Riemann
 
 /-!

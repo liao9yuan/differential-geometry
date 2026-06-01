@@ -1,4 +1,4 @@
-import DifferentialGeometry.Integration.DivergenceTheorem.WithBoundary.InducedMetric
+import DifferentialGeometry.Riemannian.Boundary.InducedMetric
 import DifferentialGeometry.Riemannian.Operator.Gradient
 import Mathlib.Analysis.InnerProductSpace.Basic
 import Mathlib.Analysis.SpecialFunctions.Pow.Real

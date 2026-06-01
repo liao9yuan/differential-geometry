@@ -1,4 +1,4 @@
-import DifferentialGeometry.Integration.DivergenceTheorem.WithBoundary.BoundaryManifold
+import DifferentialGeometry.Riemannian.Boundary.BoundaryManifold
 import DifferentialGeometry.Integration.Measure.ChartDensity
 import Mathlib.Geometry.Manifold.VectorBundle.Riemannian
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent

@@ -1,4 +1,4 @@
-import DifferentialGeometry.Integration.DivergenceTheorem.WithBoundary.ModelBoundary
+import DifferentialGeometry.Riemannian.Boundary.ModelBoundary
 import Mathlib.Geometry.Manifold.IsManifold.Basic
 import Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary
 import Mathlib.Geometry.Manifold.ChartedSpace

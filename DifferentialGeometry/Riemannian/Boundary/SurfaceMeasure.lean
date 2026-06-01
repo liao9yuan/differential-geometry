@@ -1,4 +1,4 @@
-import DifferentialGeometry.Integration.DivergenceTheorem.WithBoundary.InducedMetric
+import DifferentialGeometry.Riemannian.Boundary.InducedMetric
 import DifferentialGeometry.Integration.Measure.Invariance
 import DifferentialGeometry.Integration.Measure.Properties
 

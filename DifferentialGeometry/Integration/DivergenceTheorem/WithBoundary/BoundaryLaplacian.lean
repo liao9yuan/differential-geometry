@@ -1,5 +1,5 @@
-import DifferentialGeometry.Integration.DivergenceTheorem.WithBoundary.InducedMetric
-import DifferentialGeometry.Integration.DivergenceTheorem.WithBoundary.SurfaceMeasure
+import DifferentialGeometry.Riemannian.Boundary.InducedMetric
+import DifferentialGeometry.Riemannian.Boundary.SurfaceMeasure
 import DifferentialGeometry.Riemannian.Operator.Laplacian
 
 /-!

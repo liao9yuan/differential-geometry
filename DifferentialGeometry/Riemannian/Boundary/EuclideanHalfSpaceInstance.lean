@@ -1,5 +1,5 @@
-import DifferentialGeometry.Integration.DivergenceTheorem.WithBoundary.ModelBoundary
-import DifferentialGeometry.Integration.DivergenceTheorem.WithBoundary.Orientation
+import DifferentialGeometry.Riemannian.Boundary.ModelBoundary
+import DifferentialGeometry.Riemannian.Boundary.Orientation
 import Mathlib.Geometry.Manifold.Instances.Real
 import Mathlib.Geometry.Manifold.MFDeriv.Atlas
 import Mathlib.Geometry.Manifold.MFDeriv.Basic

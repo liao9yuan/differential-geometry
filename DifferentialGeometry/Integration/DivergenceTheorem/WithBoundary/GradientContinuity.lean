@@ -1,6 +1,6 @@
 import DifferentialGeometry.Integration.DivergenceTheorem.WithBoundary.Gradient
 import DifferentialGeometry.Integration.DivergenceTheorem.WithBoundary.PartialDerivWithin
-import DifferentialGeometry.Integration.DivergenceTheorem.WithBoundary.EuclideanHalfSpaceInstance
+import DifferentialGeometry.Riemannian.Boundary.EuclideanHalfSpaceInstance
 import DifferentialGeometry.Integration.Measure.Properties
 import Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary
 import Mathlib.Geometry.Manifold.Instances.Real

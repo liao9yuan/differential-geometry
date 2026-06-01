@@ -1,6 +1,6 @@
 import DifferentialGeometry.Riemannian.Operator.NormGradSq
 import DifferentialGeometry.Integration.DivergenceTheorem.WithBoundary.GreenFull
-import DifferentialGeometry.Integration.DivergenceTheorem.WithBoundary.SecondFundamentalForm
+import DifferentialGeometry.Riemannian.Boundary.SecondFundamentalForm
 import DifferentialGeometry.Integration.DivergenceTheorem.WithBoundary.BoundaryLaplacian
 
 /-!

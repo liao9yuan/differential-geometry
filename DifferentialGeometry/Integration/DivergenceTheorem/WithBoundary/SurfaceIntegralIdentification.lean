@@ -1,7 +1,7 @@
 import DifferentialGeometry.Integration.DivergenceTheorem.WithBoundary.GreenWithBoundary
-import DifferentialGeometry.Integration.DivergenceTheorem.WithBoundary.OutwardNormal
-import DifferentialGeometry.Integration.DivergenceTheorem.WithBoundary.SurfaceMeasure
-import DifferentialGeometry.Integration.DivergenceTheorem.WithBoundary.EuclideanHalfSpaceInstance
+import DifferentialGeometry.Riemannian.Boundary.OutwardNormal
+import DifferentialGeometry.Riemannian.Boundary.SurfaceMeasure
+import DifferentialGeometry.Riemannian.Boundary.EuclideanHalfSpaceInstance
 import Mathlib.MeasureTheory.Integral.Bochner.Basic
 
 /-!

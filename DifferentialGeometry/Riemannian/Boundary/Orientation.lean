@@ -1,4 +1,4 @@
-import DifferentialGeometry.Integration.DivergenceTheorem.WithBoundary.OutwardNormal
+import DifferentialGeometry.Riemannian.Boundary.OutwardNormal
 
 /-!
 # Orientation-preservation of chart transitions on a manifold-with-boundary

@@ -1,4 +1,4 @@
-import DifferentialGeometry.Integration.DivergenceTheorem.WithBoundary.OutwardNormal
+import DifferentialGeometry.Riemannian.Boundary.OutwardNormal
 import DifferentialGeometry.Riemannian.Operator.Hessian
 
 /-!
