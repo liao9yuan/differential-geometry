@@ -1,4 +1,4 @@
-import DifferentialGeometry.Riemannian.AlongCurve
+import DifferentialGeometry.Riemannian.Connection.AlongCurve
 import DifferentialGeometry.Riemannian.Geodesic.Equation
 import DifferentialGeometry.Riemannian.Connection.Chart.NablaComponents
 import DifferentialGeometry.Integration.Measure.ChartDensity

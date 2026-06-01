@@ -1,4 +1,4 @@
-import DifferentialGeometry.Riemannian.Variation.ParallelTransport
+import DifferentialGeometry.Riemannian.Comparison.Variation.ParallelTransport
 
 set_option linter.unusedSectionVars false
 

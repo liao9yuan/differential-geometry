@@ -1,4 +1,4 @@
-import DifferentialGeometry.Riemannian.Variation.SecondVariation
+import DifferentialGeometry.Riemannian.Comparison.Variation.SecondVariation
 import DifferentialGeometry.Riemannian.Exponential.ExpVariationSmooth
 import DifferentialGeometry.Riemannian.Exponential.IntrinsicMfderivAtZero
 import DifferentialGeometry.Riemannian.Exponential.MinimizingGeodesic

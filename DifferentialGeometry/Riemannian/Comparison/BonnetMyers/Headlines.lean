@@ -1,9 +1,9 @@
-import DifferentialGeometry.Riemannian.BonnetMyers.RicciBound
-import DifferentialGeometry.Riemannian.BonnetMyers.LengthBound
-import DifferentialGeometry.Riemannian.HopfRinow
+import DifferentialGeometry.Riemannian.Comparison.BonnetMyers.RicciBound
+import DifferentialGeometry.Riemannian.Comparison.BonnetMyers.LengthBound
+import DifferentialGeometry.Riemannian.Comparison.HopfRinow
 import DifferentialGeometry.Riemannian.Exponential.MinimizingGeodesic
-import DifferentialGeometry.Riemannian.Variation.PerpFrame
-import DifferentialGeometry.Riemannian.MFDerivAlongCurve
+import DifferentialGeometry.Riemannian.Comparison.Variation.PerpFrame
+import DifferentialGeometry.Riemannian.Connection.MFDerivAlongCurve
 import DifferentialGeometry.Riemannian.Topology.UniversalCover.Lifts
 import DifferentialGeometry.Riemannian.Connection.ChartBridge.RiemannBasisBracket
 import DifferentialGeometry.Riemannian.Topology.SemilocallySimplyConnected

@@ -1,7 +1,7 @@
 import DifferentialGeometry.Riemannian.Geodesic.Equation
 import DifferentialGeometry.Riemannian.Geodesic.Existence
 import DifferentialGeometry.Riemannian.Geodesic.Uniqueness
-import DifferentialGeometry.Riemannian.Variation.SecondVariation
+import DifferentialGeometry.Riemannian.Comparison.Variation.SecondVariation
 import Mathlib.Geometry.Manifold.Riemannian.PathELength
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 

@@ -1,8 +1,8 @@
 import DifferentialGeometry.Riemannian.Exponential.Definition
 import DifferentialGeometry.Riemannian.Exponential.MfderivAtZero
 import DifferentialGeometry.Riemannian.Exponential.OffZeroRegularity
-import DifferentialGeometry.Riemannian.NormalCoordinates
-import DifferentialGeometry.Riemannian.InjectivityRadius
+import DifferentialGeometry.Riemannian.Comparison.NormalCoordinates
+import DifferentialGeometry.Riemannian.Comparison.InjectivityRadius
 import DifferentialGeometry.Riemannian.Geodesic.Equation
 import DifferentialGeometry.Riemannian.Geodesic.Uniqueness
 import DifferentialGeometry.Riemannian.Geodesic.MaximalInterval
@@ -11,7 +11,7 @@ import DifferentialGeometry.Riemannian.Exponential.RescaleSmallnessUniform
 import DifferentialGeometry.Riemannian.Exponential.RescaledLift
 import DifferentialGeometry.Riemannian.Exponential.UniformExistence
 import DifferentialGeometry.Integration.Measure.ChartDensity
-import DifferentialGeometry.Riemannian.Variation.SecondVariation
+import DifferentialGeometry.Riemannian.Comparison.Variation.SecondVariation
 import Mathlib.Geometry.Manifold.Riemannian.PathELength
 
 set_option linter.unusedSectionVars false

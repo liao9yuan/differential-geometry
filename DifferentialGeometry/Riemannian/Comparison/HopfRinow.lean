@@ -1,4 +1,4 @@
-import DifferentialGeometry.Riemannian.GaussLemma
+import DifferentialGeometry.Riemannian.Exponential.GaussLemma
 import DifferentialGeometry.Riemannian.Geodesic.Equation
 import DifferentialGeometry.Riemannian.Geodesic.Existence
 import DifferentialGeometry.Riemannian.Geodesic.MaximalInterval
@@ -8,8 +8,8 @@ import DifferentialGeometry.Riemannian.Geodesic.CrossVFReduction
 import DifferentialGeometry.Riemannian.Geodesic.ProjDerivative
 import DifferentialGeometry.Riemannian.Exponential.Definition
 import DifferentialGeometry.Riemannian.Exponential.SmoothnessUnconditional
-import DifferentialGeometry.Riemannian.AlongCurve
-import DifferentialGeometry.Riemannian.MFDerivAlongCurve
+import DifferentialGeometry.Riemannian.Connection.AlongCurve
+import DifferentialGeometry.Riemannian.Connection.MFDerivAlongCurve
 import DifferentialGeometry.Integration.Measure.ChartDensity
 import DifferentialGeometry.Riemannian.Connection.LeviCivita
 import Mathlib.Analysis.Calculus.MeanValue

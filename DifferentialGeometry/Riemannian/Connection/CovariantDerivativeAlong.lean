@@ -1,5 +1,5 @@
-import DifferentialGeometry.Riemannian.AlongCurve
-import DifferentialGeometry.Riemannian.MFDerivAlongCurve
+import DifferentialGeometry.Riemannian.Connection.AlongCurve
+import DifferentialGeometry.Riemannian.Connection.MFDerivAlongCurve
 import DifferentialGeometry.Riemannian.Geodesic.Equation
 import DifferentialGeometry.Riemannian.Geodesic.ChartTransition
 

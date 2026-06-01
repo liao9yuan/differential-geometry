@@ -1,8 +1,8 @@
-import DifferentialGeometry.Riemannian.Variation.ParallelTransport
-import DifferentialGeometry.Riemannian.Variation.FixedChartIdentities
-import DifferentialGeometry.Riemannian.AlongCurve
-import DifferentialGeometry.Riemannian.CovariantDerivativeAlong
-import DifferentialGeometry.Riemannian.MFDerivAlongCurve
+import DifferentialGeometry.Riemannian.Comparison.Variation.ParallelTransport
+import DifferentialGeometry.Riemannian.Comparison.Variation.FixedChartIdentities
+import DifferentialGeometry.Riemannian.Connection.AlongCurve
+import DifferentialGeometry.Riemannian.Connection.CovariantDerivativeAlong
+import DifferentialGeometry.Riemannian.Connection.MFDerivAlongCurve
 import DifferentialGeometry.Riemannian.Geodesic.Equation
 import DifferentialGeometry.Riemannian.Connection.Curvature
 import DifferentialGeometry.Riemannian.Connection.LeviCivita

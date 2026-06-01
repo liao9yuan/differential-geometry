@@ -3,7 +3,7 @@ import DifferentialGeometry.Riemannian.Geodesic.GeodesicEquationBridge
 import DifferentialGeometry.Riemannian.Geodesic.Uniqueness
 import DifferentialGeometry.Riemannian.Geodesic.ProjDerivative
 import DifferentialGeometry.Riemannian.Geodesic.ChartTransition
-import DifferentialGeometry.Riemannian.AlongCurve
+import DifferentialGeometry.Riemannian.Connection.AlongCurve
 import DifferentialGeometry.Integration.Measure.ChartDensity
 import Mathlib.Geometry.Manifold.IntegralCurve.Basic
 import Mathlib.Analysis.Calculus.FDeriv.CompCLM

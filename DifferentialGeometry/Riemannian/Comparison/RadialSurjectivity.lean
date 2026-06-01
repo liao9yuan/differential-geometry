@@ -1,9 +1,9 @@
-import DifferentialGeometry.Riemannian.GaussLemma
-import DifferentialGeometry.Riemannian.HopfRinow
+import DifferentialGeometry.Riemannian.Exponential.GaussLemma
+import DifferentialGeometry.Riemannian.Comparison.HopfRinow
 import DifferentialGeometry.Riemannian.Exponential.Definition
 import DifferentialGeometry.Riemannian.Exponential.LocalDiffeomorphism
-import DifferentialGeometry.Riemannian.NormalCoordinates
-import DifferentialGeometry.Riemannian.RiemannianDistContinuity
+import DifferentialGeometry.Riemannian.Comparison.NormalCoordinates
+import DifferentialGeometry.Riemannian.Comparison.RiemannianDistContinuity
 import DifferentialGeometry.Integration.Measure.ChartDensity
 import Mathlib.Geometry.Manifold.Riemannian.Basic
 import Mathlib.Geometry.Manifold.Riemannian.PathELength

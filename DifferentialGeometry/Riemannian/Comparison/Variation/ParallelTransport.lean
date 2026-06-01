@@ -1,8 +1,8 @@
-import DifferentialGeometry.Riemannian.AlongCurve
-import DifferentialGeometry.Riemannian.CovariantDerivativeAlong
+import DifferentialGeometry.Riemannian.Connection.AlongCurve
+import DifferentialGeometry.Riemannian.Connection.CovariantDerivativeAlong
 import DifferentialGeometry.Riemannian.Geodesic.Equation
 import DifferentialGeometry.Riemannian.Geodesic.ChartTransition
-import DifferentialGeometry.Riemannian.Variation.ParallelLocalODE
+import DifferentialGeometry.Riemannian.Comparison.Variation.ParallelLocalODE
 import DifferentialGeometry.Riemannian.Connection.LeviCivita
 import DifferentialGeometry.Riemannian.Connection.Chart.NablaComponents
 import DifferentialGeometry.Integration.Measure.ChartDensity

@@ -1,5 +1,5 @@
-import DifferentialGeometry.Riemannian.Variation.ParallelTransport
-import DifferentialGeometry.Riemannian.AlongCurve
+import DifferentialGeometry.Riemannian.Comparison.Variation.ParallelTransport
+import DifferentialGeometry.Riemannian.Connection.AlongCurve
 import DifferentialGeometry.Riemannian.Curvature.Riemann
 import DifferentialGeometry.Riemannian.Connection.LeviCivita
 import DifferentialGeometry.Riemannian.Connection.Curvature

@@ -1,4 +1,4 @@
-import DifferentialGeometry.Riemannian.NormalCoordinates
+import DifferentialGeometry.Riemannian.Comparison.NormalCoordinates
 import Mathlib.Data.ENNReal.Real
 
 set_option linter.unusedSectionVars false

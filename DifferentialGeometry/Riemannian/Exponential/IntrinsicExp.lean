@@ -1,8 +1,8 @@
-import DifferentialGeometry.Riemannian.HopfRinow
+import DifferentialGeometry.Riemannian.Comparison.HopfRinow
 import DifferentialGeometry.Riemannian.Geodesic.Equation
 import DifferentialGeometry.Riemannian.Geodesic.CrossVFReduction
 import DifferentialGeometry.Riemannian.Exponential.Definition
-import DifferentialGeometry.Riemannian.TangentNormDiamond
+import DifferentialGeometry.Riemannian.Comparison.TangentNormDiamond
 
 set_option linter.unusedSectionVars false
 

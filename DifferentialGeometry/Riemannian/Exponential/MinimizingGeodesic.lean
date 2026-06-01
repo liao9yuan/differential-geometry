@@ -1,8 +1,8 @@
 import DifferentialGeometry.Riemannian.Exponential.IntrinsicExp
 import DifferentialGeometry.Riemannian.Exponential.IntrinsicExpContinuity
-import DifferentialGeometry.Riemannian.GaussLemma
-import DifferentialGeometry.Riemannian.NormalCoordinates
-import DifferentialGeometry.Riemannian.Variation.SecondVariation
+import DifferentialGeometry.Riemannian.Exponential.GaussLemma
+import DifferentialGeometry.Riemannian.Comparison.NormalCoordinates
+import DifferentialGeometry.Riemannian.Comparison.Variation.SecondVariation
 import Mathlib.Topology.Order.Compact
 import Mathlib.Geometry.Manifold.Riemannian.PathELength
 

@@ -1,6 +1,6 @@
 import DifferentialGeometry.Riemannian.Topology.UniversalCover.Riemannian
 import DifferentialGeometry.Riemannian.Topology.UniversalCover.ChartPullback
-import DifferentialGeometry.Riemannian.BonnetMyers.RicciBound
+import DifferentialGeometry.Riemannian.Comparison.BonnetMyers.RicciBound
 import DifferentialGeometry.Riemannian.Connection.Ricci
 import DifferentialGeometry.Riemannian.Connection.LeviCivita
 import DifferentialGeometry.Riemannian.Connection.CurvatureBundling

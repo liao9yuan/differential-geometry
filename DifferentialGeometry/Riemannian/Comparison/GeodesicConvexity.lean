@@ -1,4 +1,4 @@
-import DifferentialGeometry.Riemannian.GaussLemma
+import DifferentialGeometry.Riemannian.Exponential.GaussLemma
 import DifferentialGeometry.Riemannian.Exponential.IntrinsicExp
 import DifferentialGeometry.Riemannian.Exponential.IntrinsicExpContinuity
 import Mathlib.Topology.Connected.PathConnected
