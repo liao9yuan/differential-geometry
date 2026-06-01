@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Parabolic.ShortTime.HScaleLipschitz
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.HScaleLipschitz
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HamiltonDeTurckPullbackFlat
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Cartan.EvaluationFormChainRule
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RemainderShortTimeExistence

@@ -457,18 +457,6 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.InvGramPerturb
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciSecondOrderPart
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciSymbol
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciSymbolFormula
-import DifferentialGeometry.Analysis.Parabolic.ShortTime.BareLaplacianSpectralMatch
-import DifferentialGeometry.Analysis.Parabolic.ShortTime.DeTurckInteriorTimeRegularity
-import DifferentialGeometry.Analysis.Parabolic.ShortTime.DeTurckRicciPde
-import DifferentialGeometry.Analysis.Parabolic.ShortTime.DeTurckRicciRHSSymmetric
-import DifferentialGeometry.Analysis.Parabolic.ShortTime.DuhamelIntegralTimeDeriv
-import DifferentialGeometry.Analysis.Parabolic.ShortTime.ForcingPerMode
-import DifferentialGeometry.Analysis.Parabolic.ShortTime.HScaleLipschitz
-import DifferentialGeometry.Analysis.Parabolic.ShortTime.InteriorAllscaleTimeContinuity
-import DifferentialGeometry.Analysis.Parabolic.ShortTime.MildSolutionTimeH1
-import DifferentialGeometry.Analysis.Parabolic.ShortTime.RealizeTransport
-import DifferentialGeometry.Analysis.Parabolic.ShortTime.SolutionC2Continuous
-import DifferentialGeometry.Analysis.Parabolic.ShortTime.WeylEigenvalueCountingBound
 import DifferentialGeometry.Analysis.Parabolic.StrictParabolicity
 import DifferentialGeometry.Analysis.Parabolic.TensorHeatDuhamelMildSolution
 import DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.Semigroup
@@ -667,7 +655,6 @@ import DifferentialGeometry.Analysis.Sobolev.WithBoundary.Intrinsic.Algebra
 import DifferentialGeometry.Analysis.Sobolev.WithBoundary.Intrinsic.ChartEquivalence
 import DifferentialGeometry.Analysis.Sobolev.WithBoundary.Intrinsic.Lp
 import DifferentialGeometry.Analysis.Sobolev.WithBoundary.Intrinsic.Trace
-import DifferentialGeometry.Analysis.Spectral.Intrinsic.CompactSAResolvent
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.CompactSAResolventIntrinsic
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.ConnectionLaplacianMaximalRegularity
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.Linearization
@@ -838,7 +825,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.PouComponent
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.PouComponentBound.ChartAlphaPouSqReprL2WtwokTwoBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.PouComponentBound.ChartAlphaReprL2BoundOnPouTsupport
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.PouComponentBound.CutoffChartComponentMemWkp
-import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.PouComponentBound.DetOpNormBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.PouComponentBound.PouCutoffComponentBridge
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.Representation.TensorChartFrameSection
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.Representation.TensorL2ChartComponentExt
@@ -880,7 +866,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.Spectrum.CompactResolvent
 import DifferentialGeometry.Analysis.Spectral.Tensor.Spectrum.Defs
 import DifferentialGeometry.Analysis.Spectral.Tensor.Spectrum.EigenBasis
 import DifferentialGeometry.Analysis.Spectral.Tensor.Spectrum.Resolvent
-import DifferentialGeometry.Analysis.Spectral.Tensor.TensorRSModelEvalBasis
 import DifferentialGeometry.Analysis.Spectral.Tensor.TrivProj.ChartTwistIdentity
 import DifferentialGeometry.Analysis.Spectral.Tensor.TrivProj.CovNormBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.TrivProj.FDerivDecomp
@@ -1022,8 +1007,8 @@ import DifferentialGeometry.Geometry.Connection.TensorNabla.Tensor0SPartialEval
 import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorExtension
 import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorRSCovariantDerivativeCongrLocally
 import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorRSNabla
-import DifferentialGeometry.Geometry.Connection.WithBoundary.BochnerConcrete
 import DifferentialGeometry.Geometry.Curvature.Bochner.BochnerConcrete
+import DifferentialGeometry.Geometry.Curvature.Bochner.BochnerConcreteWithBoundary
 import DifferentialGeometry.Geometry.Curvature.Bochner.OrthonormalFrameTrace
 import DifferentialGeometry.Geometry.Curvature.Bochner.PointwiseTensorBochner
 import DifferentialGeometry.Geometry.Curvature.Bochner.WeitzenbockIdentity
@@ -1125,6 +1110,18 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Naturality.RicciTen
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.PullbackConnection
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.PushforwardVF
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.TimeDerivativeChainRule
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.BareLaplacianSpectralMatch
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckInteriorTimeRegularity
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckRicciPde
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckRicciRHSSymmetric
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DuhamelIntegralTimeDeriv
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.ForcingPerMode
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.HScaleLipschitz
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.InteriorAllscaleTimeContinuity
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.MildSolutionTimeH1
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.RealizeTransport
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.SolutionC2Continuous
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.WeylEigenvalueCountingBound
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeAssembly.BasepointMotion
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeAssembly.ConjugatingDiffeoFamily
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeAssembly.EvalFormChainRule
@@ -1207,6 +1204,7 @@ import DifferentialGeometry.Tensor.Alternating.Curry
 import DifferentialGeometry.Tensor.Alternating.FDeriv
 import DifferentialGeometry.Tensor.Alternating.Flip
 import DifferentialGeometry.Tensor.Alternating.Wedge
+import DifferentialGeometry.Tensor.Auxiliary.DetOpNormBound
 import DifferentialGeometry.Tensor.Auxiliary.Fin
 import DifferentialGeometry.Tensor.Auxiliary.LinearIsometryContDiff
 import DifferentialGeometry.Tensor.Auxiliary.MultiKroneckerDelta
@@ -1252,6 +1250,7 @@ import DifferentialGeometry.Tensor.RSTensor.BundleTrivialization.TensorRSBundleL
 import DifferentialGeometry.Tensor.RSTensor.Coordinates.Components
 import DifferentialGeometry.Tensor.RSTensor.Coordinates.CoordinateBasis
 import DifferentialGeometry.Tensor.RSTensor.Coordinates.Field
+import DifferentialGeometry.Tensor.RSTensor.Coordinates.TensorRSModelEvalBasis
 import DifferentialGeometry.Tensor.RSTensor.Defs
 import DifferentialGeometry.Tensor.RSTensor.Derivation.Contract
 import DifferentialGeometry.Tensor.RSTensor.Derivation.GradientBundleEquiv

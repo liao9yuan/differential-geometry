@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.UniformChartBounds.SlotUniformBound
-import DifferentialGeometry.Analysis.Spectral.Tensor.TensorRSModelEvalBasis
+import DifferentialGeometry.Tensor.RSTensor.Coordinates.TensorRSModelEvalBasis
 import DifferentialGeometry.Analysis.Spectral.Tensor.TrivProj.ChartTwistIdentity
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0S.ChartLeviCivitaParallelExtend
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0S.ChartTensor0SCovariantDerivative

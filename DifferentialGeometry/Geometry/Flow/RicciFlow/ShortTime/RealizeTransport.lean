@@ -1,5 +1,5 @@
-import DifferentialGeometry.Analysis.Parabolic.ShortTime.WeylEigenvalueCountingBound
-import DifferentialGeometry.Analysis.Parabolic.ShortTime.BareLaplacianSpectralMatch
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.WeylEigenvalueCountingBound
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.BareLaplacianSpectralMatch
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HamiltonDeTurckPullbackFlat
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Cartan.EvaluationFormChainRule
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RemainderShortTimeExistence
