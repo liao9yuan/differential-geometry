@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.AbstractChartPullCutoff
-import DifferentialGeometry.Analysis.Laplacian.Regularity.ChartBilinear.H1Compl
+import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartBilinear.H1Compl
 import DifferentialGeometry.Integration.L2.Hilbert.DenseSubset
 
 /-!

@@ -2,7 +2,7 @@ import DifferentialGeometry.Flow.RicciFlow.Pullback.CartanFormula
 import DifferentialGeometry.Flow.DeTurck.LieDerivativeMetric
 import DifferentialGeometry.Flow.DeTurck.VectorField
 import DifferentialGeometry.Flow.RicciFlow.Pullback.PushforwardVF
-import DifferentialGeometry.Integral.Connection.LeviCivita
+import DifferentialGeometry.Riemannian.Connection.LeviCivita
 import Mathlib.Analysis.Calculus.Deriv.Basic
 import Mathlib.Analysis.Calculus.Deriv.Add
 

@@ -1,5 +1,5 @@
-import DifferentialGeometry.Integral.Connection.ConnectionLaplacian
-import DifferentialGeometry.Integral.Connection.TensorConnLaplacian
+import DifferentialGeometry.Riemannian.Connection.ConnectionLaplacian
+import DifferentialGeometry.Riemannian.Connection.TensorConnLaplacian
 import DifferentialGeometry.Integration.L2.SmoothSections.Defs
 import DifferentialGeometry.Tensor.RSTensor.Defs
 

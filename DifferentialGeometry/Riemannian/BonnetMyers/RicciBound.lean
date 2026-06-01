@@ -1,4 +1,4 @@
-import DifferentialGeometry.Integral.Connection.Ricci
+import DifferentialGeometry.Riemannian.Connection.Ricci
 import DifferentialGeometry.Integration.Measure.ChartDensity
 
 /-!

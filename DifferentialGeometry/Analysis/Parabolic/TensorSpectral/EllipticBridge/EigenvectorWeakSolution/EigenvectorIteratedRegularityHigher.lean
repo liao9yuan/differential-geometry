@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.EigenvectorIteratedScaffold
-import DifferentialGeometry.Analysis.Laplacian.Regularity.DiffChart.TwiceDerivedData
+import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.TwiceDerivedData
 
 /-!
 # Structural machinery of the arbitrary-order eigenvector chart-component bootstrap

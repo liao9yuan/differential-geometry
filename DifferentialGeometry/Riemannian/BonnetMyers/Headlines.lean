@@ -5,7 +5,7 @@ import DifferentialGeometry.Riemannian.Exponential.MinimizingGeodesic
 import DifferentialGeometry.Riemannian.Variation.PerpFrame
 import DifferentialGeometry.Riemannian.MFDerivAlongCurve
 import DifferentialGeometry.Riemannian.Topology.UniversalCover.Lifts
-import DifferentialGeometry.Integral.Connection.ChartBridge.RiemannBasisBracket
+import DifferentialGeometry.Riemannian.Connection.ChartBridge.RiemannBasisBracket
 import DifferentialGeometry.Riemannian.Topology.SemilocallySimplyConnected
 import Mathlib.Geometry.Manifold.Riemannian.Basic
 import Mathlib.Topology.EMetricSpace.Diam

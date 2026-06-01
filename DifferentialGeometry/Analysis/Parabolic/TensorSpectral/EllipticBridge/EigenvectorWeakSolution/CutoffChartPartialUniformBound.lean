@@ -2,8 +2,8 @@ import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.Abs
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.ChartPartialUniformBound
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.Estimates.CovL2BoundFromH1
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.Estimates.ChristoffelBound
-import DifferentialGeometry.Analysis.Laplacian.TensorRegularity.CovDerivChartFormLowerOrder
-import DifferentialGeometry.Analysis.Laplacian.Regularity.SmoothFChartResidual.BilinearBound
+import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDerivChartFormLowerOrder
+import DifferentialGeometry.Analysis.Elliptic.Regularity.SmoothFChartResidual.BilinearBound
 
 /-!
 # A uniform `L²` bound for the chosen weak chart-partials of the cutoff chart component

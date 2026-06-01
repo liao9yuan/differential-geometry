@@ -1,7 +1,7 @@
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.Estimates.ChristoffelBound
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.NormComparison
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.Estimates.ComponentL2BoundUniform
-import DifferentialGeometry.Integral.Connection.ChartTensorRSCovariantDerivative
+import DifferentialGeometry.Riemannian.Connection.ChartTensorRSCovariantDerivative
 
 /-!
 # Pointwise norm bound for the Christoffel slot-correction pieces

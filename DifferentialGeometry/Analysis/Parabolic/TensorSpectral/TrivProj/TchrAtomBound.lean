@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.TrivProj.Bridge
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.TrivProj.CovNormBound
-import DifferentialGeometry.Integral.Connection.ChartTensorRSCovariantDerivative
+import DifferentialGeometry.Riemannian.Connection.ChartTensorRSCovariantDerivative
 
 /-!
 # Pointwise bound for the Christoffel-correction trivialisation atom

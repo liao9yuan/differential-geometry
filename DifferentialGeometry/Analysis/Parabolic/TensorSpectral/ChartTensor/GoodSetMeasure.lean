@@ -1,5 +1,5 @@
-import DifferentialGeometry.Integral.Connection.LeviCivitaChartLocal
-import DifferentialGeometry.Analysis.Laplacian.MetricExtension
+import DifferentialGeometry.Riemannian.Connection.LeviCivitaChartLocal
+import DifferentialGeometry.Analysis.Elliptic.MetricExtension
 import Mathlib.MeasureTheory.Measure.Lebesgue.EqHaar
 
 /-!

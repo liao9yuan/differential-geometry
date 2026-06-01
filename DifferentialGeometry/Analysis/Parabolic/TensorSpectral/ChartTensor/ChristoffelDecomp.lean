@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensor.Components
-import DifferentialGeometry.Integral.Connection.ChartSection
+import DifferentialGeometry.Riemannian.Connection.ChartSection
 import Mathlib.Analysis.Calculus.FDeriv.Comp
 
 /-!

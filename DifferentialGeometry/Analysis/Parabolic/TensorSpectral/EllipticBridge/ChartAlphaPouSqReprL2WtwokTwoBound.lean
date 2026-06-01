@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.ChartAlphaPouAlphaPouBetaCovBound
-import DifferentialGeometry.Integral.Connection.RawTensorConnLapL2WtwokTwoBound
+import DifferentialGeometry.Riemannian.Connection.RawTensorConnLapL2WtwokTwoBound
 
 /-!
 # Chart-`α` POU(α)²-weighted L² bound for the chart-pulled representation by the

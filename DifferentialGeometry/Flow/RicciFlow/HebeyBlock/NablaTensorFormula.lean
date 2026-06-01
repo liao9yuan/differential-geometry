@@ -1,4 +1,4 @@
-import DifferentialGeometry.Integral.Connection.ChartTensorRSCovariantDerivative
+import DifferentialGeometry.Riemannian.Connection.ChartTensorRSCovariantDerivative
 import DifferentialGeometry.Analysis.Sobolev.Tensor.PouWeightedNorm
 import DifferentialGeometry.Analysis.Sobolev.Tensor.PouWeightedHsNorm
 import DifferentialGeometry.Flow.RicciFlow.IntrinsicSobolev.Inclusion

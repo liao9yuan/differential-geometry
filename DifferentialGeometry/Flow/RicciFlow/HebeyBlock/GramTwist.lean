@@ -1,5 +1,5 @@
 import DifferentialGeometry.Metric.Basic
-import DifferentialGeometry.Integral.Connection.ChartMetric
+import DifferentialGeometry.Riemannian.Connection.ChartMetric
 import DifferentialGeometry.Analysis.Sobolev.Tensor.PouWeightedNorm
 import DifferentialGeometry.Analysis.Sobolev.Tensor.PouWeightedHsNorm
 

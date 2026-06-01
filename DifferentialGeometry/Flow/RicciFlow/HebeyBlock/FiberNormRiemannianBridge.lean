@@ -1,5 +1,5 @@
-import DifferentialGeometry.Integral.Connection.TensorRSChartFiberToModelOpNormUnconditional
-import DifferentialGeometry.Integral.Connection.TensorRSChartFiberFromModelOpNormUnconditional
+import DifferentialGeometry.Riemannian.Connection.TensorRSChartFiberToModelOpNormUnconditional
+import DifferentialGeometry.Riemannian.Connection.TensorRSChartFiberFromModelOpNormUnconditional
 import DifferentialGeometry.Tensor.RSTensor.TensorRSBundleLocalityIdentities
 
 /-!

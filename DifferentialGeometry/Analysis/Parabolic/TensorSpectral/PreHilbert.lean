@@ -1,9 +1,9 @@
 import DifferentialGeometry.Integration.L2.SmoothSections.PreHilbert
 import DifferentialGeometry.Integration.L2.SmoothSections.Integrability
 import DifferentialGeometry.Integration.L2.PointwiseInner.Algebra
-import DifferentialGeometry.Integral.Connection.TensorRSNabla
-import DifferentialGeometry.Integral.Connection.Curvature
-import DifferentialGeometry.Integral.Connection.LeviCivita
+import DifferentialGeometry.Riemannian.Connection.TensorRSNabla
+import DifferentialGeometry.Riemannian.Connection.Curvature
+import DifferentialGeometry.Riemannian.Connection.LeviCivita
 import DifferentialGeometry.Integration.Measure.Properties
 import DifferentialGeometry.Tensor.Multilinear.MetricLowering
 import DifferentialGeometry.Tensor.Multilinear.BundleSmoothEval

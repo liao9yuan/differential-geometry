@@ -11,7 +11,7 @@ import DifferentialGeometry.Riemannian.Exponential.SmoothnessUnconditional
 import DifferentialGeometry.Riemannian.AlongCurve
 import DifferentialGeometry.Riemannian.MFDerivAlongCurve
 import DifferentialGeometry.Integration.Measure.ChartDensity
-import DifferentialGeometry.Integral.Connection.LeviCivita
+import DifferentialGeometry.Riemannian.Connection.LeviCivita
 import Mathlib.Analysis.Calculus.MeanValue
 import Mathlib.Geometry.Manifold.Riemannian.Basic
 import Mathlib.Geometry.Manifold.Riemannian.PathELength

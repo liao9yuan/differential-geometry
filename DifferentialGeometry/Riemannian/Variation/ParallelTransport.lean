@@ -3,7 +3,7 @@ import DifferentialGeometry.Riemannian.CovariantDerivativeAlong
 import DifferentialGeometry.Riemannian.Geodesic.Equation
 import DifferentialGeometry.Riemannian.Geodesic.ChartTransition
 import DifferentialGeometry.Riemannian.Variation.ParallelLocalODE
-import DifferentialGeometry.Integral.Connection.LeviCivita
+import DifferentialGeometry.Riemannian.Connection.LeviCivita
 import DifferentialGeometry.Riemannian.Connection.Chart.NablaComponents
 import DifferentialGeometry.Integration.Measure.ChartDensity
 import Mathlib.Analysis.ODE.PicardLindelof

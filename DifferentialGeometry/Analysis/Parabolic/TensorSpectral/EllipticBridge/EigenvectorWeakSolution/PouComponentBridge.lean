@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Laplacian.TensorRegularity.WeakSolutionHeadline
+import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.WeakSolutionHeadline
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.CanonicalTensorRepr
 
 /-!

@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Heat.Smoothing
 import DifferentialGeometry.Analysis.Heat.HeatSemigroupIteratedDomain
-import DifferentialGeometry.Analysis.Laplacian.Regularity.LaplacianDomain.PowH2kBridge
+import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.PowH2kBridge
 
 /-!
 # Bridge-driven smoothing of the heat semigroup

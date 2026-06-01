@@ -4,7 +4,7 @@ import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothMulQuant
 import DifferentialGeometry.Analysis.Sobolev.Chart.CrossChartBoundStrictMemWkpHigherOrder
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Density
 import DifferentialGeometry.Integration.Measure.Family
-import DifferentialGeometry.Analysis.Laplacian.Regularity.SmoothFChartResidual.BilinearBound
+import DifferentialGeometry.Analysis.Elliptic.Regularity.SmoothFChartResidual.BilinearBound
 
 /-!
 # Tensor chart-component scalar `W^{k,p}` chart-Sobolev bound

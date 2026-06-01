@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.TensorChartBilinearData
-import DifferentialGeometry.Analysis.Laplacian.Regularity.DiffChart.BilinearH1Compl
+import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.BilinearH1Compl
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.SmoothCoefWeakPartialIBP
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolev
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Density

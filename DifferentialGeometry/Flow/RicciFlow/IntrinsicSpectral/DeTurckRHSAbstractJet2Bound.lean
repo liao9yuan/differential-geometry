@@ -1,9 +1,9 @@
 import DifferentialGeometry.Flow.RicciFlow.IntrinsicSpectral.DeTurckRHSPointwiseLipschitz
 import DifferentialGeometry.Flow.RicciFlow.IntrinsicSpectral.DeTurckCoefficients.LieMatrixChartBridge
 import DifferentialGeometry.Flow.RicciFlow.LieDerivativePairing
-import DifferentialGeometry.Integral.Connection.ChartBridge.Ricci
-import DifferentialGeometry.Integral.Connection.ChartBridge.RiemannBasisIdentity
-import DifferentialGeometry.Integral.Connection.ChartBridge.RiemannBasisIdentityAlpha
+import DifferentialGeometry.Riemannian.Connection.ChartBridge.Ricci
+import DifferentialGeometry.Riemannian.Connection.ChartBridge.RiemannBasisIdentity
+import DifferentialGeometry.Riemannian.Connection.ChartBridge.RiemannBasisIdentityAlpha
 
 /-!
 # The abstract chart-frame component of the Ricci–DeTurck RHS difference, reduced to

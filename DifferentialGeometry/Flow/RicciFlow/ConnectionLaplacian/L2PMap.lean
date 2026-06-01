@@ -1,5 +1,5 @@
 import DifferentialGeometry.Flow.RicciFlow.ConnectionLaplacian.PointwiseMixed
-import DifferentialGeometry.Integral.Connection.RawTensorConnLapIterL2WtwokTwoBound
+import DifferentialGeometry.Riemannian.Connection.RawTensorConnLapIterL2WtwokTwoBound
 import DifferentialGeometry.Integration.L2.Hilbert.Defs
 import DifferentialGeometry.Integration.L2.Hilbert.Inherited
 import DifferentialGeometry.Integration.L2.Hilbert.DenseSubset

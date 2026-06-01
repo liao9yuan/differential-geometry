@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.EigenvectorVariationalIdentity
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.TensorNonSmoothDiffQuot
-import DifferentialGeometry.Analysis.Laplacian.Regularity.ChartBilinear.UniformDiffQuotBoundCanonical
+import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartBilinear.UniformDiffQuotBoundCanonical
 import DifferentialGeometry.Analysis.Sobolev.Approximation.SmoothDensity
 
 /-!

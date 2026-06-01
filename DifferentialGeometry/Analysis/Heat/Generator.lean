@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Heat.SmoothingSpectralLift
-import DifferentialGeometry.Analysis.Laplacian.LichnerowiczSpectral
+import DifferentialGeometry.Analysis.Elliptic.LichnerowiczSpectral
 
 /-!
 # Generator identification for the heat semigroup

@@ -2,10 +2,10 @@ import DifferentialGeometry.Riemannian.BonnetMyers.RicciBound
 import DifferentialGeometry.Riemannian.Variation.ParallelTransport
 import DifferentialGeometry.Riemannian.Variation.SecondVariation
 import DifferentialGeometry.Riemannian.Variation.SecondVariationMinimiser
-import DifferentialGeometry.Integral.Connection.Ricci
-import DifferentialGeometry.Integral.Connection.Curvature
-import DifferentialGeometry.Integral.Connection.LeviCivita
-import DifferentialGeometry.Integral.Connection.Bochner
+import DifferentialGeometry.Riemannian.Connection.Ricci
+import DifferentialGeometry.Riemannian.Connection.Curvature
+import DifferentialGeometry.Riemannian.Connection.LeviCivita
+import DifferentialGeometry.Riemannian.Connection.Bochner
 import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 

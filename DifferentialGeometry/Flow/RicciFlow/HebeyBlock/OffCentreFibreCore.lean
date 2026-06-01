@@ -1,5 +1,5 @@
 import DifferentialGeometry.Flow.RicciFlow.HebeyBlock.FiberNormRiemannianBridge
-import DifferentialGeometry.Integral.Connection.TensorRSChartFiberFromModelOpNormUnconditional
+import DifferentialGeometry.Riemannian.Connection.TensorRSChartFiberFromModelOpNormUnconditional
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.Estimates.TensorSectionL2BoundByComponents
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensor.Components
 

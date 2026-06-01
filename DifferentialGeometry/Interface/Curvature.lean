@@ -1,5 +1,5 @@
-import DifferentialGeometry.Integral.Connection.Ricci
-import DifferentialGeometry.Realized.CurvatureTensor
+import DifferentialGeometry.Riemannian.Connection.Ricci
+import DifferentialGeometry.Riemannian.Connection.Realized.CurvatureTensor
 
 /-!
 # Public curvature adapters

@@ -2,9 +2,9 @@ import DifferentialGeometry.Flow.RicciFlow.DeTurckRHS
 import DifferentialGeometry.Flow.ParabolicShortTime
 import DifferentialGeometry.Flow.RicciFlow.StrictParabolicAtSelf
 import DifferentialGeometry.Flow.RicciFlow.Pullback.CartanFormula
-import DifferentialGeometry.Integral.Connection.Ricci
-import DifferentialGeometry.Integral.Connection.LeviCivita
-import DifferentialGeometry.Integral.Connection.CotangentExtension
+import DifferentialGeometry.Riemannian.Connection.Ricci
+import DifferentialGeometry.Riemannian.Connection.LeviCivita
+import DifferentialGeometry.Riemannian.Connection.CotangentExtension
 import DifferentialGeometry.Flow.DeTurck.VectorFieldSmooth
 import DifferentialGeometry.Flow.DeTurck.LieDerivativeMetric
 import DifferentialGeometry.Integration.DivergenceTheorem.LocalFormula

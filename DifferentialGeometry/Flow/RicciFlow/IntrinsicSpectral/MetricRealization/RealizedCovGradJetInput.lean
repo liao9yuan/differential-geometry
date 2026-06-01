@@ -1,7 +1,7 @@
 import DifferentialGeometry.Flow.RicciFlow.IntrinsicSpectral.MetricRealization.RealizedJet2CovGradBound
-import DifferentialGeometry.Integral.Connection.TensorRSChartFiberToModelOpNormUnconditional
+import DifferentialGeometry.Riemannian.Connection.TensorRSChartFiberToModelOpNormUnconditional
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.Estimates.ComponentL2BoundUniform
-import DifferentialGeometry.Analysis.Laplacian.TensorRegularity.CovDerivComponentSecondFormula
+import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDerivComponentSecondFormula
 
 /-!
 # The pointwise covariant-gradient jet input for the chart `2`-jet seminorm bound

@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.TensorChartBilinearData
-import DifferentialGeometry.Analysis.Laplacian.Regularity.ChartHk.H2NonSmoothQuant
+import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartHk.H2NonSmoothQuant
 
 /-!
 # Quantitative non-smooth interior `H²` regularity for a tensor chart component

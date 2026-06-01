@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Laplacian.TensorRegularity.CovDerivChartForm
+import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDerivChartForm
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.Estimates.CovL2BoundFromH1
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.Estimates.ComponentL2BoundUniform
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensor.GoodSetMeasure

@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Heat.SmoothingBridge
 import DifferentialGeometry.Analysis.Heat.HeatSemigroupIteratedDomain
-import DifferentialGeometry.Analysis.Laplacian.Regularity.ChartPushed.SideH2kBridge
+import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartPushed.SideH2kBridge
 
 /-!
 # Truly unconditional smoothing of the heat semigroup

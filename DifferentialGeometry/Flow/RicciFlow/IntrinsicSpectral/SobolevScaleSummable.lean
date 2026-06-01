@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.SobolevScale.Defs
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.SobolevScale.Inclusion
-import DifferentialGeometry.Integral.Connection.TensorConnLapGreenDivergenceIdentityGeneral
+import DifferentialGeometry.Riemannian.Connection.TensorConnLapGreenDivergenceIdentityGeneral
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.EigenvectorSmoothToL2
 
 /-!

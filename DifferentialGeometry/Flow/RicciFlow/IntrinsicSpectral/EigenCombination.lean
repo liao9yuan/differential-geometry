@@ -1,6 +1,6 @@
 import DifferentialGeometry.Flow.RicciFlow.IntrinsicSpectral.FaithfulH1Embedding
 import DifferentialGeometry.Flow.RicciFlow.IntrinsicSpectral.CompactSAResolventIntrinsic
-import DifferentialGeometry.Analysis.Laplacian.TensorRegularity.TensorAllOrdersRegularity
+import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.TensorAllOrdersRegularity
 
 /-!
 # Finite eigen-combinations as smooth weak solutions and their spectral identities

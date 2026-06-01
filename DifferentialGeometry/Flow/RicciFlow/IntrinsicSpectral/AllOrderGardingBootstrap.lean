@@ -1,7 +1,7 @@
 import DifferentialGeometry.Flow.RicciFlow.SobolevEmbeddingCm
-import DifferentialGeometry.Integral.Connection.CovGradRoughLapCurvL2Bound
-import DifferentialGeometry.Integral.Connection.TensorConnLapGradientL2Bound
-import DifferentialGeometry.Integral.Connection.IntegratedOrder2Garding
+import DifferentialGeometry.Riemannian.Connection.CovGradRoughLapCurvL2Bound
+import DifferentialGeometry.Riemannian.Connection.TensorConnLapGradientL2Bound
+import DifferentialGeometry.Riemannian.Connection.IntegratedOrder2Garding
 import DifferentialGeometry.Integration.L2.Hilbert.DenseSubset
 
 /-!

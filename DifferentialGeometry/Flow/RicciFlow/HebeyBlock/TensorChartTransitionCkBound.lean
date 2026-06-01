@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.TensorChartTransition
-import DifferentialGeometry.Analysis.Laplacian.MetricExtension
+import DifferentialGeometry.Analysis.Elliptic.MetricExtension
 
 namespace DifferentialGeometry.PDE.RicciFlow.HebeyBlock
 

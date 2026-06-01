@@ -1,6 +1,6 @@
 import DifferentialGeometry.Metric.Basic
-import DifferentialGeometry.Analysis.Laplacian.MetricBounds
-import DifferentialGeometry.Integral.Connection.CotangentExtension
+import DifferentialGeometry.Analysis.Elliptic.MetricBounds
+import DifferentialGeometry.Riemannian.Connection.CotangentExtension
 import Mathlib.Geometry.Manifold.VectorBundle.Riemannian
 import Mathlib.Geometry.Manifold.VectorBundle.Hom
 import Mathlib.Analysis.InnerProductSpace.Basic

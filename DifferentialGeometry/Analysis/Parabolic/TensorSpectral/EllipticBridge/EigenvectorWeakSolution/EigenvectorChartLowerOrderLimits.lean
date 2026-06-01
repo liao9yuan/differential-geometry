@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Laplacian.TensorRegularity.WeakSolutionGlobal
+import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.WeakSolutionGlobal
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.EigenvectorChartPartialL2
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.PouComponentBridge
 

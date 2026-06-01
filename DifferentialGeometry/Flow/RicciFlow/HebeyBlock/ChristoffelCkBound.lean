@@ -1,5 +1,5 @@
 import DifferentialGeometry.Metric.Basic
-import DifferentialGeometry.Integral.Connection.LeviCivitaChartLocal
+import DifferentialGeometry.Riemannian.Connection.LeviCivitaChartLocal
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.TrivProj.FDerivDecomp
 import DifferentialGeometry.Analysis.Sobolev.Tensor.ChartComponents
 

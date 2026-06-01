@@ -1,6 +1,6 @@
 import DifferentialGeometry.Flow.DeTurck.ConnectionDifference
 import DifferentialGeometry.Riemannian.Operator.Gradient
-import DifferentialGeometry.Integral.Connection.ChartBridge.Hessian
+import DifferentialGeometry.Riemannian.Connection.ChartBridge.Hessian
 
 /-!
 # The DeTurck vector field as the metric trace of the connection-difference tensor

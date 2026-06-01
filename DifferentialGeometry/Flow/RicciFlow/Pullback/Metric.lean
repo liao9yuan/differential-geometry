@@ -1,5 +1,5 @@
 import DifferentialGeometry.Metric.Basic
-import DifferentialGeometry.Integral.Connection.CotangentExtension
+import DifferentialGeometry.Riemannian.Connection.CotangentExtension
 import Mathlib.Geometry.Manifold.Diffeomorph
 import Mathlib.Geometry.Manifold.LocalDiffeomorph
 import Mathlib.Geometry.Manifold.VectorBundle.Riemannian

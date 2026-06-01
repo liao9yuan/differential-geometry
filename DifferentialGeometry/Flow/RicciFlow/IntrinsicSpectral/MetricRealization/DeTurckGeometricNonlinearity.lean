@@ -1,7 +1,7 @@
 import DifferentialGeometry.Flow.RicciFlow.IntrinsicSpectral.MetricRealization.TensorHsRealize
 import DifferentialGeometry.Flow.RicciFlow.IntrinsicSpectral.FaithfulH1Embedding
 import DifferentialGeometry.Flow.RicciFlow.DeTurckRHSSection
-import DifferentialGeometry.Integral.Connection.RawTensorConnLapIterL2WtwokTwoBound
+import DifferentialGeometry.Riemannian.Connection.RawTensorConnLapIterL2WtwokTwoBound
 
 /-!
 # The geometric Ricci–DeTurck nonlinearity on the spectral Sobolev scale

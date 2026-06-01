@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.PreHilbert
-import DifferentialGeometry.Integral.Connection.ChartTensorRSCovariantDerivative
+import DifferentialGeometry.Riemannian.Connection.ChartTensorRSCovariantDerivative
 import DifferentialGeometry.Integration.Measure.ChartDensity
 import DifferentialGeometry.Integration.Measure.Glue
 import Mathlib.Algebra.Order.Chebyshev

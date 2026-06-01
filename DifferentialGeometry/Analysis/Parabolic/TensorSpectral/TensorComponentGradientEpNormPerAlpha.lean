@@ -3,7 +3,7 @@ import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.TensorComponentGra
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.TrivProj.Bridge
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.TensorChartTwistUniformBound
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.GradNormChartBound
-import DifferentialGeometry.Analysis.Laplacian.MetricBounds
+import DifferentialGeometry.Analysis.Elliptic.MetricBounds
 
 /-!
 # Per-`α` `eLpNorm` bound on the metric self-inner-product square-root of the

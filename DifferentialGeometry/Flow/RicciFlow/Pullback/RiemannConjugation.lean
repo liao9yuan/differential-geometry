@@ -1,8 +1,8 @@
 import DifferentialGeometry.Flow.RicciFlow.Pullback.LeviCivitaConjugation
 import DifferentialGeometry.Flow.RicciFlow.Pullback.MLieBracketNaturality
 import DifferentialGeometry.Flow.RicciFlow.Pullback.PullbackConnection
-import DifferentialGeometry.Integral.Connection.Curvature
-import DifferentialGeometry.Integral.Connection.CurvatureBundling
+import DifferentialGeometry.Riemannian.Connection.Curvature
+import DifferentialGeometry.Riemannian.Connection.CurvatureBundling
 
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback
 

@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Laplacian.Regularity.LaplacianDomain.L2Inclusion
+import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.L2Inclusion
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.H1Compl
 
 /-!

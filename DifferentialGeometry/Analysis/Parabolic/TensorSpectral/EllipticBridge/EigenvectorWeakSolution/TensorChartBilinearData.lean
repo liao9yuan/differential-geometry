@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Laplacian.Regularity.ChartBilinear.H1Compl
+import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartBilinear.H1Compl
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.CanonicalTensorRepr
 
 /-!

@@ -3,10 +3,10 @@ import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartGramUniformCo
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.H1Compl
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensor.InnerLowerBound
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.TensorChartComponentSobolevBound
-import DifferentialGeometry.Analysis.Laplacian.MetricBounds
-import DifferentialGeometry.Integral.Connection.LeviCivitaChartLocal
-import DifferentialGeometry.Integral.Connection.ChartTensor0SCovariantDerivative
-import DifferentialGeometry.Integral.Connection.ChartMetric
+import DifferentialGeometry.Analysis.Elliptic.MetricBounds
+import DifferentialGeometry.Riemannian.Connection.LeviCivitaChartLocal
+import DifferentialGeometry.Riemannian.Connection.ChartTensor0SCovariantDerivative
+import DifferentialGeometry.Riemannian.Connection.ChartMetric
 import DifferentialGeometry.Integration.Measure.Properties
 
 /-!

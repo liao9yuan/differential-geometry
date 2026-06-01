@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensor.ChristoffelDecomp
-import DifferentialGeometry.Integral.Connection.LeviCivitaChartLocal
+import DifferentialGeometry.Riemannian.Connection.LeviCivitaChartLocal
 
 /-!
 # Christoffel-style decomposition of `fderiv (tensorTrivProj ∘ φ⁻¹)`

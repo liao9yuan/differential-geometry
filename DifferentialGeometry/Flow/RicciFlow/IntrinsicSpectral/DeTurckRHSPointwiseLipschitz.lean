@@ -1,8 +1,8 @@
 import DifferentialGeometry.Flow.RicciFlow.HebeyBlock.FiberNormRiemannianBridge
 import DifferentialGeometry.Flow.RicciFlow.SmoothQuasilinear
 import DifferentialGeometry.Flow.RicciFlow.DeTurckRHSSection
-import DifferentialGeometry.Integral.Connection.TensorExtension
-import DifferentialGeometry.Integral.Connection.IteratedTensorCovDeriv
+import DifferentialGeometry.Riemannian.Connection.TensorExtension
+import DifferentialGeometry.Riemannian.Connection.IteratedTensorCovDeriv
 import DifferentialGeometry.Flow.RicciFlow.IntrinsicSpectral.DeTurckCoefficients.RicciDiffAffine
 import DifferentialGeometry.Flow.RicciFlow.IntrinsicSpectral.DeTurckCoefficients.LieSummandLipschitz
 

@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Heat.SpectralBounds
-import DifferentialGeometry.Analysis.Laplacian.Regularity.Iterated.LaplacianDomain
+import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.LaplacianDomain
 import Mathlib.Data.Nat.Choose.Sum
 
 /-!

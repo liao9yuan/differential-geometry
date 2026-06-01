@@ -1,6 +1,6 @@
 import DifferentialGeometry.Flow.RicciFlow.ODE.TimeDependentFlow.SmoothInSpace.VariationalODE
 import DifferentialGeometry.Flow.RicciFlow.ODE.TimeDependentFlow.VariationalFlow
-import DifferentialGeometry.Integral.Connection.LeviCivita
+import DifferentialGeometry.Riemannian.Connection.LeviCivita
 
 /-!
 # Lifting the Euclidean variational ODE to the manifold

@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Laplacian.TensorRegularity.ChartWeakIdentity
+import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.ChartWeakIdentity
 
 /-!
 # Partition-of-unity Leibniz identity for chart-Euclidean tensor components

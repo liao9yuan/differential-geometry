@@ -1,6 +1,6 @@
 import DifferentialGeometry.Flow.RicciFlow.HebeyBlock.G5PerAlphaIntrinsic
 import DifferentialGeometry.Flow.RicciFlow.HebeyBlock.FiberNormRiemannianBridge
-import DifferentialGeometry.Integral.Connection.SlotCorrectionChartKernel
+import DifferentialGeometry.Riemannian.Connection.SlotCorrectionChartKernel
 
 /-!
 # Riemannian-norm uniform op-norm bound for the chart-frame slot corrections
