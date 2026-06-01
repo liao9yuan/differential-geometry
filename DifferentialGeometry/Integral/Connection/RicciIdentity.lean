@@ -1,6 +1,6 @@
 import DifferentialGeometry.Integral.Connection.Ricci
 import DifferentialGeometry.Integral.Connection.ChartBridge.Gradient
-import DifferentialGeometry.Geometry.Laplacian
+import DifferentialGeometry.Riemannian.Operator.Laplacian
 
 /-!
 # Ricci identities for vectors and 1-forms; trace-commutator identity for the gradient

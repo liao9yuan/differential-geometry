@@ -1,7 +1,7 @@
 import DifferentialGeometry.Integral.Connection.BochnerConcrete
-import DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.Laplacian
-import DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.ModelBoundary
-import DifferentialGeometry.Geometry.Curvature.Riemann
+import DifferentialGeometry.Integration.DivergenceTheorem.WithBoundary.Laplacian
+import DifferentialGeometry.Integration.DivergenceTheorem.WithBoundary.ModelBoundary
+import DifferentialGeometry.Riemannian.Curvature.Riemann
 
 /-!
 # Pointwise Bochner-Weitzenböck identity, with-boundary track (concrete form)

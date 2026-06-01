@@ -1,7 +1,7 @@
 import DifferentialGeometry.Integral.Connection.ChartFrameNormGlobalSmoothCoordBasisExpansion
 import DifferentialGeometry.Integral.Connection.TensorRSNabla
 import DifferentialGeometry.Integral.Connection.Curvature
-import DifferentialGeometry.Integral.L2.SmoothSections.Defs
+import DifferentialGeometry.Integration.L2.SmoothSections.Defs
 
 /-!
 # Leibniz expansion of `cov_RS (covApply B^α_i T₀) b (∂_l b)` in the

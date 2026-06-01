@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Gradient
+import DifferentialGeometry.Riemannian.Operator.Gradient
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.GramInvUniformEigenvalueLowerBound
 import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
 import Mathlib.Algebra.Order.BigOperators.Group.Finset

@@ -1,7 +1,7 @@
 import DifferentialGeometry.Analysis.Laplacian.WithBoundary.Neumann.FullH1Compl
 import DifferentialGeometry.Analysis.Laplacian.WithBoundary.Neumann.FullSmoothBridge
-import DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.GreenFull
-import DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.SurfaceIntegralIdentification
+import DifferentialGeometry.Integration.DivergenceTheorem.WithBoundary.GreenFull
+import DifferentialGeometry.Integration.DivergenceTheorem.WithBoundary.SurfaceIntegralIdentification
 
 /-!
 # Smooth bridge for the full Neumann variational Laplacian

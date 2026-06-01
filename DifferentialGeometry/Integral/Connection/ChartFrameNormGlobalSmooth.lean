@@ -1,7 +1,7 @@
 import DifferentialGeometry.Integral.Connection.RicciIdentitySmoothFrame
 import DifferentialGeometry.Integral.Connection.LeviCivitaChartSmooth
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensor.GoodSetMeasure
-import DifferentialGeometry.Integral.Measure.Glue
+import DifferentialGeometry.Integration.Measure.Glue
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensor.InnerLowerBound
 
 /-!

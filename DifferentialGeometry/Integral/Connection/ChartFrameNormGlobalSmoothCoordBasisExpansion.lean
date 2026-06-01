@@ -1,5 +1,5 @@
 import DifferentialGeometry.Integral.Connection.ChartFrameNormGlobalSmooth
-import DifferentialGeometry.Geometry.Gradient
+import DifferentialGeometry.Riemannian.Operator.Gradient
 
 /-!
 # Coordinate-basis expansion of the chart-α globally smooth orthonormal frame

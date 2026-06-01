@@ -1,8 +1,8 @@
 import DifferentialGeometry.Tensor.RSTensor.Defs
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian
-import DifferentialGeometry.Integral.L2.PointwiseInner.Defs
-import DifferentialGeometry.Integral.L2.PointwiseInner.Algebra
-import DifferentialGeometry.Integral.Measure.ChartDensity
+import DifferentialGeometry.Integration.L2.PointwiseInner.Defs
+import DifferentialGeometry.Integration.L2.PointwiseInner.Algebra
+import DifferentialGeometry.Integration.Measure.ChartDensity
 import DifferentialGeometry.Tensor.Multilinear.Basis
 import Mathlib.Analysis.LocallyConvex.Bounded
 import Mathlib.Analysis.Calculus.ContDiff.FiniteDimension

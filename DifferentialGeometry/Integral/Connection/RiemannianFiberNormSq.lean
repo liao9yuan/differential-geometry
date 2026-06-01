@@ -1,5 +1,5 @@
 import DifferentialGeometry.Tensor.RSTensor.Defs
-import DifferentialGeometry.Integral.Measure.ChartDensity
+import DifferentialGeometry.Integration.Measure.ChartDensity
 import Mathlib.Analysis.InnerProductSpace.PiL2
 import Mathlib.Analysis.InnerProductSpace.Basic
 import Mathlib.Topology.VectorBundle.Riemannian

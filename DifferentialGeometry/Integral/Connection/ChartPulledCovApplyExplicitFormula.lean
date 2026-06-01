@@ -1,6 +1,6 @@
 import DifferentialGeometry.Integral.Connection.ChartTensorRSCovariantDerivativeAgreement
 import DifferentialGeometry.Integral.Connection.Curvature
-import DifferentialGeometry.Integral.L2.SmoothSections.Defs
+import DifferentialGeometry.Integration.L2.SmoothSections.Defs
 
 open DifferentialGeometry.Integral.L2 (SmoothCcTensor)
 

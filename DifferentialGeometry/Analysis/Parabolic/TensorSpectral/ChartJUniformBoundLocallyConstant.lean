@@ -1,5 +1,5 @@
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian
-import DifferentialGeometry.Integral.Measure.Invariance
+import DifferentialGeometry.Integration.Measure.Invariance
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Geometry.Manifold.VectorBundle.Basic
 import Mathlib.Topology.Order.Compact

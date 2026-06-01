@@ -2,7 +2,7 @@ import DifferentialGeometry.Integral.Connection.TensorRSNabla
 import DifferentialGeometry.Integral.Connection.LeviCivita
 import DifferentialGeometry.Integral.Connection.Tensor0SCovariantDerivativeAgreementSucc
 import DifferentialGeometry.Integral.Connection.RicciIdentitySmoothFrame
-import DifferentialGeometry.Integral.L2.PointwiseInner.Algebra
+import DifferentialGeometry.Integration.L2.PointwiseInner.Algebra
 import DifferentialGeometry.Tensor.Multilinear.BundleSmoothEval
 
 /-!

@@ -13,7 +13,7 @@ import DifferentialGeometry.Integral.Connection.LeviCivitaChartLocal
 import DifferentialGeometry.Integral.Connection.TensorConnLaplacian
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensor.Components
 import DifferentialGeometry.Analysis.Laplacian.TensorRegularity.CovDerivIntrinsicComponent
-import DifferentialGeometry.Integral.L2.SmoothSections.Defs
+import DifferentialGeometry.Integration.L2.SmoothSections.Defs
 
 /-!
 # Chart-pulled representation infrastructure for `rawTensorConnLap`

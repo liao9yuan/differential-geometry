@@ -3,8 +3,8 @@ import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensor.InnerL
 import DifferentialGeometry.Tensor.RSTensor.Defs
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian
 import DifferentialGeometry.Tensor.RSTensor.TangentRiemannian
-import DifferentialGeometry.Integral.L2.PointwiseInner.Defs
-import DifferentialGeometry.Integral.L2.PointwiseInner.DualMetric
+import DifferentialGeometry.Integration.L2.PointwiseInner.Defs
+import DifferentialGeometry.Integration.L2.PointwiseInner.DualMetric
 import Mathlib.Analysis.Normed.Module.Basic
 import Mathlib.Analysis.Normed.Operator.NormedSpace
 import Mathlib.Topology.Algebra.Module.Multilinear.Topology

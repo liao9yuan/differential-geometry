@@ -1,4 +1,4 @@
-import DifferentialGeometry.Integral.Measure.Glue
+import DifferentialGeometry.Integration.Measure.Glue
 import Mathlib.Geometry.Manifold.PartitionOfUnity
 
 /-!

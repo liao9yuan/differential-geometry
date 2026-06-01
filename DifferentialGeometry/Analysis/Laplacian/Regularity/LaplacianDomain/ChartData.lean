@@ -8,8 +8,8 @@ import DifferentialGeometry.Analysis.Laplacian.Regularity.H1Compl.WeakPartialLim
 import DifferentialGeometry.Analysis.Laplacian.Regularity.LaplacianDomain.VariationalIdentityIntegral
 import DifferentialGeometry.Analysis.Laplacian.Operator.Operator
 import DifferentialGeometry.Analysis.Sobolev.Manifold.Rellich
-import DifferentialGeometry.Geometry.Gradient
-import DifferentialGeometry.Geometry.Laplacian
+import DifferentialGeometry.Riemannian.Operator.Gradient
+import DifferentialGeometry.Riemannian.Operator.Laplacian
 import Mathlib.MeasureTheory.Function.LpSpace.Basic
 import Mathlib.MeasureTheory.Function.LpSpace.Complete
 import Mathlib.MeasureTheory.Integral.Bochner.ContinuousLinearMap

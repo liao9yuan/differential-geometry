@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.PreHilbert
-import DifferentialGeometry.Integral.L2.Hilbert.Defs
-import DifferentialGeometry.Integral.L2.Hilbert.Inherited
+import DifferentialGeometry.Integration.L2.Hilbert.Defs
+import DifferentialGeometry.Integration.L2.Hilbert.Inherited
 import Mathlib.Topology.UniformSpace.Completion
 import Mathlib.Topology.Algebra.GroupCompletion
 import Mathlib.Analysis.Normed.Group.Completion

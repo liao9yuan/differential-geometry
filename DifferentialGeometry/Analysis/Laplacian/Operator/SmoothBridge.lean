@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Laplacian.Operator.DirichletForm
 import DifferentialGeometry.Analysis.Laplacian.MetricBounds
-import DifferentialGeometry.Geometry.Gradient
+import DifferentialGeometry.Riemannian.Operator.Gradient
 import DifferentialGeometry.Analysis.Laplacian.Operator.Variational
 
 /-!

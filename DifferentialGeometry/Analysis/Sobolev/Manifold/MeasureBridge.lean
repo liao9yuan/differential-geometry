@@ -1,8 +1,8 @@
 import DifferentialGeometry.Analysis.Sobolev.Chart.Defs
 import DifferentialGeometry.Analysis.Sobolev.Manifold.Rellich
-import DifferentialGeometry.Integral.Measure.Glue
-import DifferentialGeometry.Integral.Measure.ChartDensity
-import DifferentialGeometry.Integral.Measure.Invariance
+import DifferentialGeometry.Integration.Measure.Glue
+import DifferentialGeometry.Integration.Measure.ChartDensity
+import DifferentialGeometry.Integration.Measure.Invariance
 import Mathlib.MeasureTheory.Function.LpSeminorm.Basic
 import Mathlib.MeasureTheory.Measure.Haar.Unique
 import Mathlib.MeasureTheory.Measure.Lebesgue.EqHaar

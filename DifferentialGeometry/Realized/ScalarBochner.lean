@@ -4,7 +4,7 @@ import DifferentialGeometry.Realized.CurvatureComponents
 import DifferentialGeometry.Realized.TensorRicciIdentity
 import DifferentialGeometry.Realized.LeviCivita.MetricCompatibility
 import DifferentialGeometry.Realized.LeviCivita.Torsion
-import DifferentialGeometry.Coordinates.CoordinateFrame
+import DifferentialGeometry.Riemannian.Connection.Chart.CoordinateFrame
 import DifferentialGeometry.Tensor.RSTensor.CoordinateBasis
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SMetric

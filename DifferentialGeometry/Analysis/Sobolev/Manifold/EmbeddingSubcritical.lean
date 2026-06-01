@@ -6,7 +6,7 @@ import DifferentialGeometry.Analysis.Sobolev.Euclidean.Density
 import DifferentialGeometry.Analysis.Sobolev.Manifold.RellichManifold
 import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Init
-import DifferentialGeometry.Integral.Measure.Family
+import DifferentialGeometry.Integration.Measure.Family
 import Mathlib.MeasureTheory.Function.LpSeminorm.Indicator
 import Mathlib.MeasureTheory.Function.LpSeminorm.TriangleInequality
 import Mathlib.MeasureTheory.Function.LpSpace.Complete

@@ -1,6 +1,6 @@
 import DifferentialGeometry.Integral.Connection.TensorConnLapGreenDivergenceIdentity
-import DifferentialGeometry.Integral.L2.SmoothSections.Integrability
-import DifferentialGeometry.Integral.L2.Pairing.CauchySchwarz
+import DifferentialGeometry.Integration.L2.SmoothSections.Integrability
+import DifferentialGeometry.Integration.L2.Pairing.CauchySchwarz
 
 /-!
 # The order-`1` covariant-gradient `L²` control from the `(0, 2)` Green identity

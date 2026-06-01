@@ -1,7 +1,7 @@
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.Rellich.Diagonal
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.Estimates.TensorSectionL2BoundByComponents
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.H1Compl
-import DifferentialGeometry.Integral.L2.Hilbert.Defs
+import DifferentialGeometry.Integration.L2.Hilbert.Defs
 import Mathlib.MeasureTheory.Function.LpSeminorm.TriangleInequality
 import Mathlib.Topology.MetricSpace.Cauchy
 

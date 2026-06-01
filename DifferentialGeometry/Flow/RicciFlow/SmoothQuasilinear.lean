@@ -7,9 +7,9 @@ import DifferentialGeometry.Integral.Connection.LeviCivita
 import DifferentialGeometry.Integral.Connection.CotangentExtension
 import DifferentialGeometry.Flow.DeTurck.VectorFieldSmooth
 import DifferentialGeometry.Flow.DeTurck.LieDerivativeMetric
-import DifferentialGeometry.Integral.DivergenceTheorem.LocalFormula
-import DifferentialGeometry.Geometry.Curvature.Ricci
-import DifferentialGeometry.Geometry.Curvature.Riemann
+import DifferentialGeometry.Integration.DivergenceTheorem.LocalFormula
+import DifferentialGeometry.Riemannian.Curvature.Ricci
+import DifferentialGeometry.Riemannian.Curvature.Riemann
 import Mathlib.Geometry.Manifold.ContMDiff.Basic
 
 namespace DifferentialGeometry.PDE.RicciFlow

@@ -1,6 +1,6 @@
 import DifferentialGeometry.Realized.ScalarBochner
 import DifferentialGeometry.Realized.CurvatureTensor
-import DifferentialGeometry.Coordinates.Tensor
+import DifferentialGeometry.Riemannian.Connection.Chart.Tensor
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SMetric
 set_option autoImplicit false
 set_option linter.style.longLine false

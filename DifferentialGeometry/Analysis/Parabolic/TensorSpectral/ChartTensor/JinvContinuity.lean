@@ -1,6 +1,6 @@
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian
 import DifferentialGeometry.Tensor.RSTensor.ChartJacobianSmoothness
-import DifferentialGeometry.Integral.Measure.ChartDensity
+import DifferentialGeometry.Integration.Measure.ChartDensity
 import Mathlib.Analysis.Normed.Operator.NormedSpace
 import Mathlib.Analysis.Normed.Operator.Bilinear
 

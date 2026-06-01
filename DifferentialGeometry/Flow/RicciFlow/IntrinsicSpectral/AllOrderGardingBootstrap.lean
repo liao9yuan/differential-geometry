@@ -2,7 +2,7 @@ import DifferentialGeometry.Flow.RicciFlow.SobolevEmbeddingCm
 import DifferentialGeometry.Integral.Connection.CovGradRoughLapCurvL2Bound
 import DifferentialGeometry.Integral.Connection.TensorConnLapGradientL2Bound
 import DifferentialGeometry.Integral.Connection.IntegratedOrder2Garding
-import DifferentialGeometry.Integral.L2.Hilbert.DenseSubset
+import DifferentialGeometry.Integration.L2.Hilbert.DenseSubset
 
 /-!
 # The all-order intrinsic Gårding bootstrap

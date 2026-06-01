@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Chart.DensityInfra
 import DifferentialGeometry.Analysis.Sobolev.Chart.TransitionDiffeo
-import DifferentialGeometry.Integral.Measure.Invariance
+import DifferentialGeometry.Integration.Measure.Invariance
 
 /-!
 # Chart-pullback smoothness and chart-transition pipeline

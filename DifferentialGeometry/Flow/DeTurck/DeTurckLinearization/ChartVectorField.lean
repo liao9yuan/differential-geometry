@@ -1,5 +1,5 @@
 import DifferentialGeometry.Flow.DeTurck.RicciLinearization.RicciSymbol
-import DifferentialGeometry.Geometry.HessianTrace
+import DifferentialGeometry.Riemannian.Operator.HessianTrace
 
 /-!
 # Chart-coordinate components of the DeTurck vector field

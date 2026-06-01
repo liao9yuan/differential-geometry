@@ -13,7 +13,7 @@ import DifferentialGeometry.Integral.Connection.ChartTensorRSCovariantDerivative
 import DifferentialGeometry.Integral.Connection.SlotCorrectionChartKernel
 import DifferentialGeometry.Integral.Connection.TensorRSChartFiberFromModelOpNormUnconditional
 import DifferentialGeometry.Integral.Connection.TensorRSChartFiberToModelOpNormUnconditional
-import DifferentialGeometry.Integral.Measure.ChartDensity
+import DifferentialGeometry.Integration.Measure.ChartDensity
 import Mathlib.MeasureTheory.Integral.IntegrableOn
 
 /-!

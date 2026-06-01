@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolev
-import DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.PartialDerivWithin
-import DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.EuclideanHalfSpaceInstance
+import DifferentialGeometry.Integration.DivergenceTheorem.WithBoundary.PartialDerivWithin
+import DifferentialGeometry.Integration.DivergenceTheorem.WithBoundary.EuclideanHalfSpaceInstance
 import Mathlib.MeasureTheory.Measure.Lebesgue.EqHaar
 import Mathlib.MeasureTheory.Constructions.BorelSpace.Basic
 

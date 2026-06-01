@@ -1,10 +1,10 @@
 import DifferentialGeometry.Analysis.Laplacian.Operator.ChartLocalLaplacian
 import DifferentialGeometry.Analysis.Laplacian.Operator.ChartMeasureEquiv
 import DifferentialGeometry.Analysis.Laplacian.MetricExtension
-import DifferentialGeometry.Geometry.Gradient
-import DifferentialGeometry.Geometry.Laplacian
-import DifferentialGeometry.Integral.DivergenceTheorem.Green
-import DifferentialGeometry.Integral.Measure.ChartDensity
+import DifferentialGeometry.Riemannian.Operator.Gradient
+import DifferentialGeometry.Riemannian.Operator.Laplacian
+import DifferentialGeometry.Integration.DivergenceTheorem.Green
+import DifferentialGeometry.Integration.Measure.ChartDensity
 import Mathlib.Analysis.Calculus.FDeriv.Equiv
 import Mathlib.Analysis.Calculus.FDeriv.Comp
 import Mathlib.MeasureTheory.Integral.Bochner.Set

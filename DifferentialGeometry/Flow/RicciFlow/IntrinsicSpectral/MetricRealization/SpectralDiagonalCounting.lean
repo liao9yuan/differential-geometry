@@ -1,6 +1,6 @@
 import DifferentialGeometry.Flow.RicciFlow.IntrinsicSpectral.MetricRealization.SpectralWeylCounting
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.EigenvectorSmoothToL2
-import DifferentialGeometry.Integral.Measure.Invariance
+import DifferentialGeometry.Integration.Measure.Invariance
 
 /-!
 # The reproducing-kernel integration step of the spectral Weyl-counting reduction

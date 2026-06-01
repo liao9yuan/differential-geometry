@@ -1,7 +1,7 @@
-import DifferentialGeometry.Geometry.NormGradSq
-import DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.GreenFull
-import DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.SecondFundamentalForm
-import DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.BoundaryLaplacian
+import DifferentialGeometry.Riemannian.Operator.NormGradSq
+import DifferentialGeometry.Integration.DivergenceTheorem.WithBoundary.GreenFull
+import DifferentialGeometry.Integration.DivergenceTheorem.WithBoundary.SecondFundamentalForm
+import DifferentialGeometry.Integration.DivergenceTheorem.WithBoundary.BoundaryLaplacian
 
 /-!
 # Reilly's identity on a compact Riemannian manifold-with-boundary

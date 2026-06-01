@@ -1,7 +1,7 @@
 import DifferentialGeometry.Integral.Connection.ConnectionLaplacian
 import DifferentialGeometry.Integral.Connection.ChartBridge.Laplacian
 import DifferentialGeometry.Integral.Connection.ChartBridge.HessFrobenius
-import DifferentialGeometry.Geometry.NormGradSq
+import DifferentialGeometry.Riemannian.Operator.NormGradSq
 
 /-!
 # Coordinate-free Bochner-Weitzenböck identity

@@ -2,8 +2,8 @@ import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensor.InnerP
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensor.Components
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.Estimates.ComponentL2Bound
 import DifferentialGeometry.Analysis.Sobolev.Manifold.Rellich
-import DifferentialGeometry.Integral.L2.SmoothSections.Integrability
-import DifferentialGeometry.Integral.L2.Pairing.Defs
+import DifferentialGeometry.Integration.L2.SmoothSections.Integrability
+import DifferentialGeometry.Integration.L2.Pairing.Defs
 import Mathlib.MeasureTheory.Function.LpSpace.Basic
 import Mathlib.MeasureTheory.Integral.Bochner.Basic
 

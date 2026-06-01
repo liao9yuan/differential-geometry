@@ -3,10 +3,10 @@ import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannianBundle
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SInnerSectionContinuity
 import DifferentialGeometry.Tensor.RSTensor.TensorRSRiemannian
-import DifferentialGeometry.Integral.L2.PointwiseInner.Defs
-import DifferentialGeometry.Integral.L2.PointwiseInner.Algebra
-import DifferentialGeometry.Integral.L2.PointwiseInner.DualMetric
-import DifferentialGeometry.Integral.Measure.ChartDensity
+import DifferentialGeometry.Integration.L2.PointwiseInner.Defs
+import DifferentialGeometry.Integration.L2.PointwiseInner.Algebra
+import DifferentialGeometry.Integration.L2.PointwiseInner.DualMetric
+import DifferentialGeometry.Integration.Measure.ChartDensity
 import DifferentialGeometry.Tensor.Multilinear.Basis
 import Mathlib.Analysis.LocallyConvex.Bounded
 import Mathlib.Analysis.Normed.Module.FiniteDimension

@@ -1,7 +1,7 @@
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.Estimates.ChristoffelCorrectionL2Bound
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.H1Compl
-import DifferentialGeometry.Integral.L2.SmoothSections.Integrability
-import DifferentialGeometry.Integral.L2.SmoothSections.PreHilbert
+import DifferentialGeometry.Integration.L2.SmoothSections.Integrability
+import DifferentialGeometry.Integration.L2.SmoothSections.PreHilbert
 import Mathlib.MeasureTheory.Function.LpSeminorm.Basic
 
 /-!

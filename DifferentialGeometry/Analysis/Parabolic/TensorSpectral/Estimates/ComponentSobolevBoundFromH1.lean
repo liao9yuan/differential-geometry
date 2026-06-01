@@ -3,7 +3,7 @@ import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensor.Intrin
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.H1Compl
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.PreHilbert
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.Estimates.ComponentSobolevBound
-import DifferentialGeometry.Integral.L2.SmoothSections.PreHilbert
+import DifferentialGeometry.Integration.L2.SmoothSections.PreHilbert
 import Mathlib.MeasureTheory.Function.LpSeminorm.Basic
 
 /-!

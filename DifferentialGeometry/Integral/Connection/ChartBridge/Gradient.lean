@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Gradient
+import DifferentialGeometry.Riemannian.Operator.Gradient
 import DifferentialGeometry.Integral.Connection.CotangentExtension
 
 /-!

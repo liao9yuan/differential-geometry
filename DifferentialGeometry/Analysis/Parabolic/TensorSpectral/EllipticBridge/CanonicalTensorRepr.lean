@@ -2,8 +2,8 @@ import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.Estimates.Componen
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.Estimates.ChristoffelBound
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.H1Compl
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridge
-import DifferentialGeometry.Integral.L2.Hilbert.Defs
-import DifferentialGeometry.Integral.L2.Hilbert.Inherited
+import DifferentialGeometry.Integration.L2.Hilbert.Defs
+import DifferentialGeometry.Integration.L2.Hilbert.Inherited
 import Mathlib.MeasureTheory.Function.LpSpace.Basic
 import Mathlib.MeasureTheory.Function.LpSpace.Complete
 import Mathlib.Topology.UniformSpace.Completion

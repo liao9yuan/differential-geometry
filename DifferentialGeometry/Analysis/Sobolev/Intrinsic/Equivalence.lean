@@ -1,9 +1,9 @@
 import DifferentialGeometry.Analysis.Sobolev.Chart.Defs
 import DifferentialGeometry.Analysis.Sobolev.Intrinsic.Defs
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridge
-import DifferentialGeometry.Integral.DivergenceTheorem.TangentAction
-import DifferentialGeometry.Integral.Measure.Properties
-import DifferentialGeometry.Integral.Measure.Glue
+import DifferentialGeometry.Integration.DivergenceTheorem.TangentAction
+import DifferentialGeometry.Integration.Measure.Properties
+import DifferentialGeometry.Integration.Measure.Glue
 import Mathlib.Analysis.Calculus.BumpFunction.FiniteDimension
 import Mathlib.Analysis.InnerProductSpace.EuclideanDist
 import Mathlib.MeasureTheory.Function.LpSeminorm.Basic

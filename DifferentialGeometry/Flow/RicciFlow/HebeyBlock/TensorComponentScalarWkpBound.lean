@@ -3,7 +3,7 @@ import DifferentialGeometry.Analysis.Sobolev.Tensor.PouWeightedHsNorm
 import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothMulQuant
 import DifferentialGeometry.Analysis.Sobolev.Chart.CrossChartBoundStrictMemWkpHigherOrder
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Density
-import DifferentialGeometry.Integral.Measure.Family
+import DifferentialGeometry.Integration.Measure.Family
 import DifferentialGeometry.Analysis.Laplacian.Regularity.SmoothFChartResidual.BilinearBound
 
 /-!

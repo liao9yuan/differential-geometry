@@ -1,8 +1,8 @@
 import DifferentialGeometry.Integral.Connection.RiemannianFiberNormSq
 import DifferentialGeometry.Integral.Connection.RiemannianFiberNormSqRiemannOpVWFactorBound
-import DifferentialGeometry.Integral.L2.PointwiseInner.SlotPermutation
-import DifferentialGeometry.Integral.L2.PointwiseInner.DualMetric
-import DifferentialGeometry.Integral.L2.Pairing.Defs
+import DifferentialGeometry.Integration.L2.PointwiseInner.SlotPermutation
+import DifferentialGeometry.Integration.L2.PointwiseInner.DualMetric
+import DifferentialGeometry.Integration.L2.Pairing.Defs
 import DifferentialGeometry.Tensor.RSTensor.TensorRSRiemannianBundle
 import Mathlib.Analysis.InnerProductSpace.PiL2
 import Mathlib.Logic.Equiv.Fin.Basic

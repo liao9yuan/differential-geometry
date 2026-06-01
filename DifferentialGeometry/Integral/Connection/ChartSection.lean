@@ -4,7 +4,7 @@ import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Geometry.Manifold.MFDeriv.FDeriv
 import Mathlib.Geometry.Manifold.MFDeriv.Atlas
 import Mathlib.Geometry.Manifold.ContMDiff.Atlas
-import DifferentialGeometry.Integral.Measure.ChartDensity
+import DifferentialGeometry.Integration.Measure.ChartDensity
 
 /-!
 # Chart-trivialised representation of a tangent-bundle section

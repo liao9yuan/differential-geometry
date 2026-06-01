@@ -1,9 +1,9 @@
-import DifferentialGeometry.Integral.DivergenceTheorem.Closed
-import DifferentialGeometry.Integral.DivergenceTheorem.Green
-import DifferentialGeometry.Geometry.Gradient
-import DifferentialGeometry.Geometry.Laplacian
-import DifferentialGeometry.Geometry.NormGradSq
-import DifferentialGeometry.Integral.Measure.Properties
+import DifferentialGeometry.Integration.DivergenceTheorem.Closed
+import DifferentialGeometry.Integration.DivergenceTheorem.Green
+import DifferentialGeometry.Riemannian.Operator.Gradient
+import DifferentialGeometry.Riemannian.Operator.Laplacian
+import DifferentialGeometry.Riemannian.Operator.NormGradSq
+import DifferentialGeometry.Integration.Measure.Properties
 import DifferentialGeometry.Integral.Connection.BochnerConcrete
 import DifferentialGeometry.Integral.Connection.ChartBridge.Hessian
 import DifferentialGeometry.Tensor.RSTensor.TangentRiemannian

@@ -1,5 +1,5 @@
 import DifferentialGeometry.Integral.Connection.TensorRSMetricCompatible
-import DifferentialGeometry.Integral.DivergenceTheorem.IntegrationByParts
+import DifferentialGeometry.Integration.DivergenceTheorem.IntegrationByParts
 
 /-!
 # Integration by parts for the covariant derivative of `(r, s)`-tensor fields

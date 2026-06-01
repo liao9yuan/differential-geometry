@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Laplacian.Regularity.LaplacianDomain.L2Inclusion
 import DifferentialGeometry.Analysis.Laplacian.MetricBounds
-import DifferentialGeometry.Geometry.NormGradSq
+import DifferentialGeometry.Riemannian.Operator.NormGradSq
 import Mathlib.Analysis.Normed.Operator.Extend
 
 /-!

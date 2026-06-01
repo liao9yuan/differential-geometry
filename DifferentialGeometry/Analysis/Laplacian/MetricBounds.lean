@@ -1,6 +1,6 @@
-import DifferentialGeometry.Integral.Measure.ChartDensity
-import DifferentialGeometry.Integral.Measure.Glue
-import DifferentialGeometry.Integral.Measure.Family
+import DifferentialGeometry.Integration.Measure.ChartDensity
+import DifferentialGeometry.Integration.Measure.Glue
+import DifferentialGeometry.Integration.Measure.Family
 import DifferentialGeometry.Tensor.RSTensor.Defs
 
 /-!

@@ -1,7 +1,7 @@
 import DifferentialGeometry.Integral.Connection.TensorRSNabla
 import DifferentialGeometry.Integral.Connection.ConnectionLaplacian
 import DifferentialGeometry.Integral.Connection.Bochner
-import DifferentialGeometry.Integral.L2.SmoothSections.Defs
+import DifferentialGeometry.Integration.L2.SmoothSections.Defs
 
 /-!
 # The connection Laplacian on `(r, s)`-tensor sections

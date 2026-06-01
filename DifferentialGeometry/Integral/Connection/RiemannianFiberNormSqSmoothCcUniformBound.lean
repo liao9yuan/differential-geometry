@@ -1,5 +1,5 @@
 import DifferentialGeometry.Integral.Connection.RiemannianFiberNormSqLeChartAlphaSummandSum
-import DifferentialGeometry.Integral.Measure.Family
+import DifferentialGeometry.Integration.Measure.Family
 import Mathlib.Topology.Order.Compact
 
 /-!

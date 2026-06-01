@@ -1,6 +1,6 @@
 import DifferentialGeometry.Integral.Connection.ChartFrameNormGlobalSmoothCoordBasisExpansion
 import DifferentialGeometry.Integral.Connection.LeviCivita
-import DifferentialGeometry.Integral.DivergenceTheorem.ChartInvariance
+import DifferentialGeometry.Integration.DivergenceTheorem.ChartInvariance
 
 /-!
 # The Voss–Weyl divergence equals the Levi-Civita covariant frame-trace

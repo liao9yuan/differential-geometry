@@ -1,7 +1,7 @@
-import DifferentialGeometry.Geometry.Gradient
-import DifferentialGeometry.Integral.DivergenceTheorem.Green
-import DifferentialGeometry.Integral.DivergenceTheorem.Closed
-import DifferentialGeometry.Integral.Measure.Properties
+import DifferentialGeometry.Riemannian.Operator.Gradient
+import DifferentialGeometry.Integration.DivergenceTheorem.Green
+import DifferentialGeometry.Integration.DivergenceTheorem.Closed
+import DifferentialGeometry.Integration.Measure.Properties
 import DifferentialGeometry.Tensor.RSTensor.TangentRiemannian
 import Mathlib.Analysis.InnerProductSpace.Defs
 import Mathlib.MeasureTheory.Integral.Bochner.Basic

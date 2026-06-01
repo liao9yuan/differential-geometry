@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Laplacian.Regularity.GradInner.LaplacianCandidate
-import DifferentialGeometry.Geometry.Gradient
+import DifferentialGeometry.Riemannian.Operator.Gradient
 
 /-!
 # Chart-local expression for the metric-Riesz dual norm of the Ricci covector

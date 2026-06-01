@@ -1,5 +1,5 @@
 import DifferentialGeometry.Realized.Curvature
-import DifferentialGeometry.Coordinates.Tensor
+import DifferentialGeometry.Riemannian.Connection.Chart.Tensor
 import DifferentialGeometry.Tensor.RSTensor.CotangentRiemannian
 import DifferentialGeometry.Tensor.RSTensor.Contract
 import DifferentialGeometry.Tensor.RSTensor.Field

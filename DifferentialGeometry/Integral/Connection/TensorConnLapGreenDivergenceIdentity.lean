@@ -8,8 +8,8 @@ import DifferentialGeometry.Integral.Connection.TensorRicciCommutator
 import DifferentialGeometry.Integral.Connection.Bochner
 import DifferentialGeometry.Integral.Connection.RicciIdentitySmoothFrame
 import DifferentialGeometry.Integral.Connection.ChartBridge.Hessian
-import DifferentialGeometry.Integral.DivergenceTheorem.Proper
-import DifferentialGeometry.Geometry.MetricSharpSmooth
+import DifferentialGeometry.Integration.DivergenceTheorem.Proper
+import DifferentialGeometry.Riemannian.Operator.MetricSharpSmooth
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensor.GoodSetMeasure
 
 /-!

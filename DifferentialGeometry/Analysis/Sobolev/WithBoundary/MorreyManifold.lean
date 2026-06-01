@@ -3,7 +3,7 @@ import DifferentialGeometry.Analysis.Sobolev.WithBoundary.EmbeddingSubcritical
 import DifferentialGeometry.Analysis.Sobolev.WithBoundary.IteratedSobolevEmbedding
 import DifferentialGeometry.Analysis.Sobolev.WithBoundary.Chart
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MorreyManifold
-import DifferentialGeometry.Integral.Measure.Family
+import DifferentialGeometry.Integration.Measure.Family
 import DifferentialGeometry.External.DeGiorgi.SobolevSpace.Witnesses
 
 /-!

@@ -1,5 +1,5 @@
 import DifferentialGeometry.Integral.Connection.ChartTensorRSSecondCovariantDerivative
-import DifferentialGeometry.Integral.L2.SmoothSections.Defs
+import DifferentialGeometry.Integration.L2.SmoothSections.Defs
 
 /-!
 # Global smooth extension of the `(r,s)`-tensor covariant derivative along the chart

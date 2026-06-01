@@ -19,7 +19,7 @@ import DifferentialGeometry.Flow.RicciFlow.ShortTimeAssembly.ConjugatingDiffeoFa
 import DifferentialGeometry.Flow.RicciFlow.ShortTimeAssembly.FlatAssemblyInterior
 import DifferentialGeometry.Flow.RicciFlow.ShortTimeAssembly.RicciFlowPdeAtZero
 import DifferentialGeometry.Flow.RicciFlow.ShortTimeFlow.ConjugatingFlowData
-import DifferentialGeometry.Integral.Measure.ChartDensity
+import DifferentialGeometry.Integration.Measure.ChartDensity
 
 namespace DifferentialGeometry.PDE.RicciFlow
 

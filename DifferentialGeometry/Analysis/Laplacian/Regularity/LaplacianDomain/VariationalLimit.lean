@@ -10,8 +10,8 @@ import DifferentialGeometry.Analysis.Laplacian.Regularity.GradInner.CLM
 import DifferentialGeometry.Analysis.Laplacian.Regularity.SmoothScalar.MulLp
 import DifferentialGeometry.Analysis.Laplacian.Operator.SmoothBridge
 import DifferentialGeometry.Analysis.Laplacian.Operator.Operator
-import DifferentialGeometry.Geometry.Gradient
-import DifferentialGeometry.Geometry.Laplacian
+import DifferentialGeometry.Riemannian.Operator.Gradient
+import DifferentialGeometry.Riemannian.Operator.Laplacian
 import Mathlib.MeasureTheory.Function.LpSpace.Basic
 import Mathlib.MeasureTheory.Function.LpSpace.Complete
 import Mathlib.MeasureTheory.Integral.Bochner.Set

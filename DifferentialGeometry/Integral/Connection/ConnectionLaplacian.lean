@@ -1,5 +1,5 @@
 import DifferentialGeometry.Integral.Connection.RicciIdentitySmoothFrame
-import DifferentialGeometry.Geometry.HessianTrace
+import DifferentialGeometry.Riemannian.Operator.HessianTrace
 
 /-!
 # The connection Laplacian on tensor sections

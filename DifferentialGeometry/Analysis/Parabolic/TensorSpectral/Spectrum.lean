@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.CompactResolvent
-import DifferentialGeometry.Integral.L2.Hilbert.DenseSubset
+import DifferentialGeometry.Integration.L2.Hilbert.DenseSubset
 import Mathlib.Analysis.InnerProductSpace.Spectrum
 import Mathlib.Analysis.Normed.Operator.FredholmAlternative
 

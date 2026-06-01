@@ -3,7 +3,7 @@ import DifferentialGeometry.Analysis.Laplacian.Regularity.LaplacianDomain.Smooth
 import DifferentialGeometry.Analysis.Laplacian.Regularity.SmoothScalar.MulLp
 import DifferentialGeometry.Analysis.Laplacian.Regularity.LaplacianDomain.L2Inclusion
 import DifferentialGeometry.Analysis.Laplacian.Regularity.LaplacianDomain.ChartData
-import DifferentialGeometry.Geometry.NormGradSq
+import DifferentialGeometry.Riemannian.Operator.NormGradSq
 
 /-!
 # Leibniz identity for `gradInnerCLM` on `H1Compl`

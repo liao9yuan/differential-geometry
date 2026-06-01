@@ -1,8 +1,8 @@
 import DifferentialGeometry.Analysis.Laplacian.MetricExtension
 import DifferentialGeometry.Analysis.Laplacian.Operator.ChartMeasureEquiv
-import DifferentialGeometry.Geometry.Gradient
-import DifferentialGeometry.Geometry.Laplacian
-import DifferentialGeometry.Integral.DivergenceTheorem.Green
+import DifferentialGeometry.Riemannian.Operator.Gradient
+import DifferentialGeometry.Riemannian.Operator.Laplacian
+import DifferentialGeometry.Integration.DivergenceTheorem.Green
 import Mathlib.Analysis.Calculus.ContDiff.Basic
 import Mathlib.Analysis.Calculus.FDeriv.Basic
 import Mathlib.Topology.Algebra.Support

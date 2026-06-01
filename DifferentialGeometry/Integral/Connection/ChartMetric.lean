@@ -1,6 +1,6 @@
-import DifferentialGeometry.Geometry.Hessian
-import DifferentialGeometry.Geometry.HessianTrace
-import DifferentialGeometry.Geometry.Curvature.Ricci
+import DifferentialGeometry.Riemannian.Operator.Hessian
+import DifferentialGeometry.Riemannian.Operator.HessianTrace
+import DifferentialGeometry.Riemannian.Curvature.Ricci
 
 /-!
 # Chart-level metric / Christoffel identities

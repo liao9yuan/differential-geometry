@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.AbstractChartPullCutoff
 import DifferentialGeometry.Analysis.Laplacian.Regularity.ChartBilinear.H1Compl
-import DifferentialGeometry.Integral.L2.Hilbert.DenseSubset
+import DifferentialGeometry.Integration.L2.Hilbert.DenseSubset
 
 /-!
 # A quantitative weighted-`eLpNorm` bound for the cutoff Euclidean chart component

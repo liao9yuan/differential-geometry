@@ -3,7 +3,7 @@ import DifferentialGeometry.Flow.RicciFlow.SobolevEmbedding
 import DifferentialGeometry.Flow.RicciFlow.IntrinsicSobolev.HilbertSpace
 import DifferentialGeometry.Flow.RicciFlow.DeTurckRHS
 import DifferentialGeometry.Flow.RicciFlow.DeTurckRHSSection
-import DifferentialGeometry.Integral.L2.SmoothSections.Integrability
+import DifferentialGeometry.Integration.L2.SmoothSections.Integrability
 import DifferentialGeometry.Integral.Connection.SmoothBilinearSectionBddAbove
 
 noncomputable section

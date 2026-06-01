@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Laplacian.TensorRegularity.ChartPrimitives
-import DifferentialGeometry.Integral.Measure.ChartDensity
+import DifferentialGeometry.Integration.Measure.ChartDensity
 import DifferentialGeometry.External.DeGiorgi.SobolevSpace.WeakDerivatives
 
 /-!

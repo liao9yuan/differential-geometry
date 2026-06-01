@@ -1,8 +1,8 @@
 import DifferentialGeometry.Analysis.Laplacian.Regularity.LaplacianDomain.VariationalLimit
 import DifferentialGeometry.Analysis.Sobolev.Intrinsic.EquivalenceReverse
-import DifferentialGeometry.Integral.DivergenceTheorem.POUReduction
-import DifferentialGeometry.Geometry.Laplacian
-import DifferentialGeometry.Geometry.Gradient
+import DifferentialGeometry.Integration.DivergenceTheorem.POUReduction
+import DifferentialGeometry.Riemannian.Operator.Laplacian
+import DifferentialGeometry.Riemannian.Operator.Gradient
 
 /-!
 # Leibniz rule for `Δ_g` and the `fHLeibniz`/`(pouScalar α v).oneSubLap` bridge

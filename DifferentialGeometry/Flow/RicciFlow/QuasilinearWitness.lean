@@ -1,7 +1,7 @@
 import DifferentialGeometry.Metric.Basic
 import DifferentialGeometry.Flow.DeTurck.Transformation
 import DifferentialGeometry.Flow.ParabolicShortTime
-import DifferentialGeometry.Integral.Measure.ChartDensity
+import DifferentialGeometry.Integration.Measure.ChartDensity
 import Mathlib.Geometry.Manifold.ContMDiff.Basic
 
 /-!

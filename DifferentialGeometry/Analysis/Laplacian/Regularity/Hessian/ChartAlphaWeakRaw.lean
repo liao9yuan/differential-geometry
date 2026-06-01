@@ -3,7 +3,7 @@ import DifferentialGeometry.Analysis.Laplacian.Regularity.ChartPushed.WeakPartia
 import DifferentialGeometry.Analysis.Laplacian.Regularity.DiffChart.BilinearH1ComplFromDomainPow
 import DifferentialGeometry.Analysis.Laplacian.Regularity.Hessian.TensorChartSmooth
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolev
-import DifferentialGeometry.Geometry.Hessian
+import DifferentialGeometry.Riemannian.Operator.Hessian
 import DifferentialGeometry.Integral.Connection.ChartMetric
 
 /-!

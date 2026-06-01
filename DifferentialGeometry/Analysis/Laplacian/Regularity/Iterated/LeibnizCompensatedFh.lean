@@ -1,7 +1,7 @@
 import DifferentialGeometry.Analysis.Laplacian.Regularity.GradInner.CLM
 import DifferentialGeometry.Analysis.Laplacian.Regularity.SmoothScalar.MulLp
 import DifferentialGeometry.Analysis.Laplacian.Operator.Operator
-import DifferentialGeometry.Geometry.Laplacian
+import DifferentialGeometry.Riemannian.Operator.Laplacian
 
 /-!
 # The Leibniz-compensated `L²` class on the chart at `α`

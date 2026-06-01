@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.HessianTrace
+import DifferentialGeometry.Riemannian.Operator.HessianTrace
 
 /-!
 # Principal symbols of second-order operators on tensor fields

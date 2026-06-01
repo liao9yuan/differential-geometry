@@ -1,5 +1,5 @@
 import DifferentialGeometry.Integral.Connection.RawTensorConnLapPerChartL2Bound
-import DifferentialGeometry.Integral.Measure.ChartTargetManifoldL2Bridge
+import DifferentialGeometry.Integration.Measure.ChartTargetManifoldL2Bridge
 
 /-!
 # Manifold L² bound for the raw tensor connection Laplacian via a chart-target

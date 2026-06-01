@@ -7,7 +7,7 @@ import DifferentialGeometry.Analysis.Laplacian.MetricBounds
 import DifferentialGeometry.Integral.Connection.LeviCivitaChartLocal
 import DifferentialGeometry.Integral.Connection.ChartTensor0SCovariantDerivative
 import DifferentialGeometry.Integral.Connection.ChartMetric
-import DifferentialGeometry.Integral.Measure.Properties
+import DifferentialGeometry.Integration.Measure.Properties
 
 /-!
 # Intrinsic g-metric `L²` bound on the chart Christoffel-correction atom

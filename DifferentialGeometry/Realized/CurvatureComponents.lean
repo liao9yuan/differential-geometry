@@ -1,7 +1,7 @@
 import DifferentialGeometry.Realized.CurvatureTensor
 import DifferentialGeometry.Realized.TensorRicciIdentity
-import DifferentialGeometry.Coordinates.NablaComponents.Basic
-import DifferentialGeometry.Coordinates.NablaComponents.OneForm
+import DifferentialGeometry.Riemannian.Connection.Chart.NablaComponents.Basic
+import DifferentialGeometry.Riemannian.Connection.Chart.NablaComponents.OneForm
 import DifferentialGeometry.Tensor.RSTensor.Components
 
 set_option autoImplicit false

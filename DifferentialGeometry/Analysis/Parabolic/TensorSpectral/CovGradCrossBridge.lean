@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.CovGrad
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.CovariantLeibniz
-import DifferentialGeometry.Integral.L2.PointwiseInner.SlotPermutation
+import DifferentialGeometry.Integration.L2.PointwiseInner.SlotPermutation
 import Mathlib.Data.Fin.Tuple.Basic
 import Mathlib.Algebra.BigOperators.Fin
 import Mathlib.Logic.Equiv.Fin.Basic

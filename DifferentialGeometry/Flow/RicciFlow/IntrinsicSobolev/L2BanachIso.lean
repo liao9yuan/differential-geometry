@@ -1,6 +1,6 @@
 import DifferentialGeometry.Flow.RicciFlow.IntrinsicSobolev.HilbertSpace
-import DifferentialGeometry.Integral.L2.Hilbert.Defs
-import DifferentialGeometry.Integral.L2.Hilbert.Inherited
+import DifferentialGeometry.Integration.L2.Hilbert.Defs
+import DifferentialGeometry.Integration.L2.Hilbert.Inherited
 import DifferentialGeometry.Analysis.Sobolev.Tensor.PouWeightedHsNormReverseBase
 import Mathlib.Analysis.Normed.Operator.Extend
 
