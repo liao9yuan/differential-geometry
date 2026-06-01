@@ -1,4 +1,4 @@
-import DifferentialGeometry.Metric.Basic
+import DifferentialGeometry.Riemannian.Metric.Basic
 import DifferentialGeometry.Analysis.Elliptic.MetricBounds
 import DifferentialGeometry.Riemannian.Connection.CotangentExtension
 import Mathlib.Geometry.Manifold.VectorBundle.Riemannian

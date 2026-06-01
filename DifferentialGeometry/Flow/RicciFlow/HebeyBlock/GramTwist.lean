@@ -1,4 +1,4 @@
-import DifferentialGeometry.Metric.Basic
+import DifferentialGeometry.Riemannian.Metric.Basic
 import DifferentialGeometry.Riemannian.Connection.ChartMetric
 import DifferentialGeometry.Analysis.Sobolev.Tensor.PouWeightedNorm
 import DifferentialGeometry.Analysis.Sobolev.Tensor.PouWeightedHsNorm

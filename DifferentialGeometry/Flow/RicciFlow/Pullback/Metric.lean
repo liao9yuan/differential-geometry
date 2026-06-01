@@ -1,4 +1,4 @@
-import DifferentialGeometry.Metric.Basic
+import DifferentialGeometry.Riemannian.Metric.Basic
 import DifferentialGeometry.Riemannian.Connection.CotangentExtension
 import Mathlib.Geometry.Manifold.Diffeomorph
 import Mathlib.Geometry.Manifold.LocalDiffeomorph

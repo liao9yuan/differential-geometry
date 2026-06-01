@@ -1,4 +1,4 @@
-import DifferentialGeometry.Metric.Basic
+import DifferentialGeometry.Riemannian.Metric.Basic
 import DifferentialGeometry.Riemannian.Connection.Ricci
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.Existence
 import DifferentialGeometry.Flow.DeTurck.Symbol

@@ -1296,4 +1296,3 @@ import DifferentialGeometry.Flow.RicciFlow.ShortTimeAssembly.FlowPushforwardCont
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.SobolevScale.Order2Equivalence
 
 -- Public consumption-facing facade
-import DifferentialGeometry.Interface

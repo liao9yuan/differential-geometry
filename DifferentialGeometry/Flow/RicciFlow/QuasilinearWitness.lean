@@ -1,4 +1,4 @@
-import DifferentialGeometry.Metric.Basic
+import DifferentialGeometry.Riemannian.Metric.Basic
 import DifferentialGeometry.Flow.DeTurck.Transformation
 import DifferentialGeometry.Flow.ParabolicShortTime
 import DifferentialGeometry.Integration.Measure.ChartDensity

@@ -1,4 +1,4 @@
-import DifferentialGeometry.Metric.Basic
+import DifferentialGeometry.Riemannian.Metric.Basic
 import DifferentialGeometry.Riemannian.Connection.Ricci
 import DifferentialGeometry.Flow.ParabolicShortTime
 import DifferentialGeometry.Flow.DeTurck.VectorField
