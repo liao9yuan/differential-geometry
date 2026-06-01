@@ -9,6 +9,11 @@
 !/lean-toolchain
 !/README.md
 !/.gitignore
+!/CLAUDE.md
+!/STRUCTURE.md
+!/NAMING.md
+!/MIGRATION_PLAN.md
+!/PROGRESS.md
 # end of whitelist
 
 .lake/
