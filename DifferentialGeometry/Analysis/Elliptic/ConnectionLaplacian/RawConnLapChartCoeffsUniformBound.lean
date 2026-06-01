@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapChartComponentSecondCovDerivFormula
-import DifferentialGeometry.Geometry.Connection.LeviCivitaChartSmooth
+import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartSmooth
 import DifferentialGeometry.Analysis.Sobolev.Chart.DensityInfra
 
 /-!

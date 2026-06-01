@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.SlotCorrectionChartCompFormula
-import DifferentialGeometry.Geometry.Connection.LeviCivitaChartSmooth
+import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartSmooth
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartLeviCivitaParallelCLMOpNorm
 import DifferentialGeometry.Analysis.Spectral.Tensor.SlotUniformBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.SlotChartSourceContMDiff

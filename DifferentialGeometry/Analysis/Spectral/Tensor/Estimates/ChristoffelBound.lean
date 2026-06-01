@@ -1,5 +1,5 @@
-import DifferentialGeometry.Geometry.Connection.LeviCivitaChartLocal
-import DifferentialGeometry.Geometry.Connection.LeviCivitaChartMetric
+import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartLocal
+import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartMetric
 import DifferentialGeometry.Analysis.Integration.Measure.Glue
 import Mathlib.Analysis.Calculus.ContDiff.Basic
 import Mathlib.Topology.Order.Compact

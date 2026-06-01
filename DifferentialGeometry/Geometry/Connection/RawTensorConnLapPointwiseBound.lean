@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Connection.TensorConnLaplacianChart
+import DifferentialGeometry.Geometry.Connection.Laplacian.TensorConnLaplacianChart
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartTensorRSCovariantDerivativeOpNorm
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawTensorConnLap2ndApplicationOpNorm
 

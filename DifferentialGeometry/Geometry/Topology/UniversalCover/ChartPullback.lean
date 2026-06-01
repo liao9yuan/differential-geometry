@@ -3,8 +3,8 @@ import DifferentialGeometry.Geometry.Topology.UniversalCover.LiftedMetricSmoothn
 import DifferentialGeometry.Geometry.Topology.UniversalCover.Riemannian
 import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import DifferentialGeometry.Geometry.Operator.Hessian
-import DifferentialGeometry.Geometry.Curvature.Riemann
-import DifferentialGeometry.Geometry.Curvature.Ricci
+import DifferentialGeometry.Geometry.Curvature.Riemann.Riemann
+import DifferentialGeometry.Geometry.Curvature.Riemann.Ricci
 import DifferentialGeometry.Geometry.Geodesic.Equation
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Topology.VectorBundle.Basic

@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartPulledCovDerivChartCompBound
-import DifferentialGeometry.Geometry.Connection.LeviCivitaChartSmooth
+import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartSmooth
 
 /-!
 # Bound on the Fréchet derivative of the chart-pulled intrinsic piece of the

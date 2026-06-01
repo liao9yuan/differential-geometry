@@ -8,10 +8,10 @@ import DifferentialGeometry.Geometry.Geodesic.CrossVFReduction
 import DifferentialGeometry.Geometry.Geodesic.ProjDerivative
 import DifferentialGeometry.Geometry.Exponential.Definition
 import DifferentialGeometry.Geometry.Exponential.SmoothnessUnconditional
-import DifferentialGeometry.Geometry.Connection.AlongCurve
-import DifferentialGeometry.Geometry.Connection.MFDerivAlongCurve
+import DifferentialGeometry.Geometry.Connection.ParallelTransport.AlongCurve
+import DifferentialGeometry.Geometry.Connection.ParallelTransport.MFDerivAlongCurve
 import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
-import DifferentialGeometry.Geometry.Connection.LeviCivita
+import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivita
 import Mathlib.Analysis.Calculus.MeanValue
 import Mathlib.Geometry.Manifold.Riemannian.Basic
 import Mathlib.Geometry.Manifold.Riemannian.PathELength

@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Curvature.RicciIdentity
+import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciIdentity
 import DifferentialGeometry.Geometry.Connection.ChartBridge.Gradient
 
 /-!

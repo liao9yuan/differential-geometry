@@ -1,7 +1,7 @@
 import DifferentialGeometry.Geometry.Connection.ChartBridge.Ricci
 import DifferentialGeometry.Geometry.Connection.ChartBridge.Hessian
-import DifferentialGeometry.Geometry.Curvature.CurvatureBundling
-import DifferentialGeometry.Geometry.Connection.ChartLieBracket
+import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.CurvatureBundling
+import DifferentialGeometry.Geometry.Connection.ChartFrame.ChartLieBracket
 import DifferentialGeometry.Geometry.Connection.CovApplyCovRSChartBasisExtension
 
 /-!

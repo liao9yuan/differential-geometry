@@ -1,5 +1,5 @@
 import DifferentialGeometry.Geometry.Connection.ChartFrameNormGlobalSmoothCoordBasisExpansion
-import DifferentialGeometry.Geometry.Connection.LeviCivita
+import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivita
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.ChartInvariance
 
 /-!

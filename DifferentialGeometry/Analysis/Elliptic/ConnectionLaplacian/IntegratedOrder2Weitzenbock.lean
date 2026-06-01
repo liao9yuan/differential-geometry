@@ -1,5 +1,5 @@
-import DifferentialGeometry.Geometry.Connection.TensorConnLapGreenIntertwinerGen
-import DifferentialGeometry.Geometry.Connection.TensorConnLapGradientL2Bound
+import DifferentialGeometry.Geometry.Connection.Laplacian.TensorConnLapGreenIntertwinerGen
+import DifferentialGeometry.Geometry.Connection.Laplacian.TensorConnLapGradientL2Bound
 import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Integrability
 import DifferentialGeometry.Analysis.Integration.L2.Pairing.CauchySchwarz
 

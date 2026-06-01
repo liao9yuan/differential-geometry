@@ -1,8 +1,8 @@
 import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.TangentBundleTrivOpNorm
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ChristoffelBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.InnerLowerBound
-import DifferentialGeometry.Geometry.Connection.LeviCivitaChartLocal
-import DifferentialGeometry.Geometry.Connection.ChartTensor0SCovariantDerivative
+import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartLocal
+import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.ChartTensor0SCovariantDerivative
 
 /-!
 # Unconditional uniform operator-norm bounds for the chart Levi-Civita parallel CLM

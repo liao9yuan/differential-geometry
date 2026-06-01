@@ -1,6 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.VectorField
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.ChartVectorField
-import DifferentialGeometry.Geometry.Connection.ChartLeviCivitaParallelExtend
+import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.ChartLeviCivitaParallelExtend
 
 /-!
 # Chart-coordinate decomposition of the bundled DeTurck vector field

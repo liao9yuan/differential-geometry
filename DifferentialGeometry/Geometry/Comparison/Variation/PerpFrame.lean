@@ -1,5 +1,5 @@
-import DifferentialGeometry.Geometry.Connection.AlongCurve
-import DifferentialGeometry.Geometry.Connection.CovariantDerivativeAlong
+import DifferentialGeometry.Geometry.Connection.ParallelTransport.AlongCurve
+import DifferentialGeometry.Geometry.Connection.ParallelTransport.CovariantDerivativeAlong
 import DifferentialGeometry.Geometry.Comparison.Variation.ParallelTransport
 import DifferentialGeometry.Geometry.Comparison.Variation.ParallelTransportSmooth
 import Mathlib.Geometry.Manifold.PartitionOfUnity

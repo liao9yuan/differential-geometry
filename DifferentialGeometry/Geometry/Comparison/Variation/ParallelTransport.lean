@@ -1,9 +1,9 @@
-import DifferentialGeometry.Geometry.Connection.AlongCurve
-import DifferentialGeometry.Geometry.Connection.CovariantDerivativeAlong
+import DifferentialGeometry.Geometry.Connection.ParallelTransport.AlongCurve
+import DifferentialGeometry.Geometry.Connection.ParallelTransport.CovariantDerivativeAlong
 import DifferentialGeometry.Geometry.Geodesic.Equation
 import DifferentialGeometry.Geometry.Geodesic.ChartTransition
 import DifferentialGeometry.Geometry.Comparison.Variation.ParallelLocalODE
-import DifferentialGeometry.Geometry.Connection.LeviCivita
+import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivita
 import DifferentialGeometry.Geometry.Connection.Chart.NablaComponents
 import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import Mathlib.Analysis.ODE.PicardLindelof

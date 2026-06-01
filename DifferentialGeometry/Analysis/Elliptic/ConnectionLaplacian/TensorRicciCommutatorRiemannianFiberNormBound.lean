@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Curvature.TensorRicciCommutator
+import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.TensorRicciCommutator
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSqLe
 import Mathlib.Topology.Order.Compact
 

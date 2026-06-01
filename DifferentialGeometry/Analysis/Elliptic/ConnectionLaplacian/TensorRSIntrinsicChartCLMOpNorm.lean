@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Connection.ChartTensorRSCovariantDerivative
+import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.ChartTensorRSCovariantDerivative
 import DifferentialGeometry.Geometry.Connection.TensorRSChartFiberOpNorm
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartJUniformBoundLocallyConstant
 

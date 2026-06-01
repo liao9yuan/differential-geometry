@@ -1,9 +1,9 @@
 import DifferentialGeometry.Geometry.Comparison.Variation.ParallelTransport
-import DifferentialGeometry.Geometry.Connection.AlongCurve
-import DifferentialGeometry.Geometry.Curvature.Riemann
-import DifferentialGeometry.Geometry.Connection.LeviCivita
-import DifferentialGeometry.Geometry.Curvature.Curvature
-import DifferentialGeometry.Geometry.Curvature.RicciIdentity
+import DifferentialGeometry.Geometry.Connection.ParallelTransport.AlongCurve
+import DifferentialGeometry.Geometry.Curvature.Riemann.Riemann
+import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivita
+import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.Curvature
+import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciIdentity
 import DifferentialGeometry.Geometry.Connection.ChartBridge.Riemann
 import DifferentialGeometry.Geometry.Connection.ChartBridge.Ricci
 import DifferentialGeometry.Geometry.Connection.ChartBridge.RiemannBasisBracket

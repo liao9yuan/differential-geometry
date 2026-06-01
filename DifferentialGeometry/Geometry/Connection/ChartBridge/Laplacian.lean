@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Connection.ConnectionLaplacian
+import DifferentialGeometry.Geometry.Connection.Laplacian.ConnectionLaplacian
 import DifferentialGeometry.Geometry.Connection.ChartBridge.Hessian
 
 /-!

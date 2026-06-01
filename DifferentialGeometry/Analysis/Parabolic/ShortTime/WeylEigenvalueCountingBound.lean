@@ -27,7 +27,7 @@ open classical analytic gap.
 -/
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.SpectralWeylCounting
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.SpectralDiagonalCounting
-import DifferentialGeometry.Analysis.Spectral.Intrinsic.EigenCombination
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.EigenCombination
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.TensorHsRealize
 
 namespace DifferentialGeometry.PDE.RicciFlow

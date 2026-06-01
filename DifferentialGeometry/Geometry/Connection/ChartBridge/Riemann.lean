@@ -1,7 +1,7 @@
-import DifferentialGeometry.Geometry.Curvature.Curvature
-import DifferentialGeometry.Geometry.Curvature.CurvatureBundling
-import DifferentialGeometry.Geometry.Connection.LeviCivita
-import DifferentialGeometry.Geometry.Curvature.Riemann
+import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.Curvature
+import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.CurvatureBundling
+import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivita
+import DifferentialGeometry.Geometry.Curvature.Riemann.Riemann
 
 /-!
 # Bridge between the chart Riemann tensor and the abstract Riemann operator

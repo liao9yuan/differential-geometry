@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Curvature.RicciConnection
+import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnection
 import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 
 /-!

@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Connection.ChartTensorRSSecondCovariantDerivative
+import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.ChartTensorRSSecondCovariantDerivative
 import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Defs
 
 /-!

@@ -1,5 +1,5 @@
 import DifferentialGeometry.Geometry.Operator.Gradient
-import DifferentialGeometry.Geometry.Connection.CotangentExtension
+import DifferentialGeometry.Geometry.Connection.TensorNabla.CotangentExtension
 
 /-!
 # Bridge between the chart-local gradient and the metric dual of the differential

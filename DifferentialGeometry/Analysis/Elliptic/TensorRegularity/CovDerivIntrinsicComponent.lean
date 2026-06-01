@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Connection.ChartTensorRSCurryFactor
+import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.ChartTensorRSCurryFactor
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.ChartPrimitives
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.ChristoffelDecomp
 

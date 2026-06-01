@@ -1,6 +1,6 @@
-import DifferentialGeometry.Geometry.Curvature.RicciConnection
+import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnection
 import DifferentialGeometry.Geometry.Connection.ChartBridge.Riemann
-import DifferentialGeometry.Geometry.Curvature.Ricci
+import DifferentialGeometry.Geometry.Curvature.Riemann.Ricci
 
 /-!
 # Bridge between the chart Ricci carrier and the abstract Ricci tensor

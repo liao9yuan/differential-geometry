@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Connection.TensorConnLaplacian
+import DifferentialGeometry.Geometry.Connection.Laplacian.TensorConnLaplacian
 
 /-!
 # Locality of the raw connection Laplacian on `(r, s)`-tensor sections

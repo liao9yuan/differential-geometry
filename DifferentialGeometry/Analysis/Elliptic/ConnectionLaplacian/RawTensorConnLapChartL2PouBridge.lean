@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Connection.TensorConnLaplacianL2Bound
+import DifferentialGeometry.Geometry.Connection.Laplacian.TensorConnLaplacianL2Bound
 import DifferentialGeometry.Analysis.Sobolev.Manifold.Rellich
 import DifferentialGeometry.Analysis.Sobolev.Chart.CompletenessLp
 

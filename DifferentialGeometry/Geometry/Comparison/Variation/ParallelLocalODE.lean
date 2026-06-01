@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Connection.AlongCurve
+import DifferentialGeometry.Geometry.Connection.ParallelTransport.AlongCurve
 import DifferentialGeometry.Geometry.Geodesic.Equation
 import DifferentialGeometry.Geometry.Connection.Chart.NablaComponents
 import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity

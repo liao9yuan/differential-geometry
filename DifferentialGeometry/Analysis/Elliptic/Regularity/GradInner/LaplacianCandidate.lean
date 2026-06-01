@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.LpIdentity
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Hessian.LpClass
-import DifferentialGeometry.Geometry.Curvature.BochnerConcrete
+import DifferentialGeometry.Geometry.Curvature.Bochner.BochnerConcrete
 
 /-!
 # Candidate `Lp` class for the Bochner cross-term

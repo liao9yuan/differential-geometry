@@ -1,6 +1,6 @@
 import DifferentialGeometry.Geometry.Connection.ChartFrameNormGlobalSmoothCoordBasisExpansion
-import DifferentialGeometry.Geometry.Connection.TensorRSNabla
-import DifferentialGeometry.Geometry.Curvature.Curvature
+import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorRSNabla
+import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.Curvature
 import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Defs
 
 /-!

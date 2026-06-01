@@ -4,9 +4,9 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.H1Compl
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.InnerLowerBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.TensorChartComponentSobolevBound
 import DifferentialGeometry.Analysis.Elliptic.MetricBounds
-import DifferentialGeometry.Geometry.Connection.LeviCivitaChartLocal
-import DifferentialGeometry.Geometry.Connection.ChartTensor0SCovariantDerivative
-import DifferentialGeometry.Geometry.Connection.ChartMetric
+import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartLocal
+import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.ChartTensor0SCovariantDerivative
+import DifferentialGeometry.Geometry.Connection.ChartFrame.ChartMetric
 import DifferentialGeometry.Analysis.Integration.Measure.Properties
 
 /-!

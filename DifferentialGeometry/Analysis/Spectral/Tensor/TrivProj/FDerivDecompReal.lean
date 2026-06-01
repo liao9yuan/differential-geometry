@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.TrivProj.FDerivDecomp
-import DifferentialGeometry.Geometry.Connection.ChartTensorRSCovariantDerivativeAgreement
+import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.ChartTensorRSCovariantDerivativeAgreement
 
 /-!
 # Concrete Christoffel-style decomposition of `fderiv (tensorTrivProj ∘ φ⁻¹)`
