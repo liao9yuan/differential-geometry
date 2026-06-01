@@ -38,7 +38,25 @@ RicciFlow general→Analysis, flow-specific→Geometry/Flow/RicciFlow).
 - ☑ Flow dissolved by reasoning nature (DeTurck + RicciFlow distributed)
 - ◐ file-name optimization: 12 safe effort-suffix strips applied (build pending)
 
-## REMAINING (large per-file content passes; workflow CANNOT help — its subagents read the wrong branch/worktree)
+## DONE round 3 (file reorg by reasoning nature + names) — all green
+- ☑ Geometry rename; Flow dissolved; Realized deleted; Integration→Analysis fold; D1/D3/boundary/Integration
+- ☑ 81 effort/cryptic file RENAMES → content names (12 + 69); attributed (McCarthy/Kudryashov/Liao) files untouched
+- ☑ Folder-organizing: 86-file EigenvectorWeakSolution → 8 concept sub-folders; ODE TimeDependentFlow double-nest flattened
+- ☑ 6 read-only planning agents (Agent tool reads md2 correctly — only the WORKFLOW tool reads the wrong worktree)
+NOTE: most files are already single-cluster → R5 declaration-splitting largely UNNEEDED; merge-clusters are >500L
+so they stay split (rename-only) per STRUCTURE §1. The FILE-level architecture + file-names are COMPLETE.
+
+## REMAINING — DISTINCT next phases (not file-reorg; need review or the master rename-map)
+- DECL-name cleanup (theorem names, NAMING.md): leaked node-IDs bm_c_*/h1_/h2_/h3_/stub_ in declaration names
+  across Comparison/Geodesic/SmoothDependence etc. This is THEOREM renaming (global identifier replace + build),
+  NOT file reorg; per NAMING.md the orchestrator owns the master rename-map (collision care). Large separate pass.
+- Semantic dedups: Exponential's 4 iterations of `expMap_contMDiffAt_zero` (FinalClosure/SmoothnessClose/
+  SmoothnessUnconditional/Unconditional) — keep ONE, delete the redundant 3 (needs a which-is-canonical decision).
+  Plus the agents' MERGE suggestions (Semigroup/Smoothing) — better done as concept sub-folders if at all.
+- Namespace alignment: namespaces stale (DifferentialGeometry.{Riemannian,Integral,PDE,Realized}.*) vs paths;
+  OPTIONAL per STRUCTURE §6 (decoupled). Large all-references rewrite.
+
+## (superseded note below)
 - File-rename clusters that need MERGE not strip: Exponential effort-cluster (Final/FinalClosure/Unconditional/
   SmoothnessClose/SmoothnessUnconditional/UnifiedPackaging — all "exp C∞-at-0" facets → collapse to ~3 content files);
   CovGradRoughLapCommutator{Close2,Close3,DoubleUnfold,Assembly}; Order2Defect* route-named files.
