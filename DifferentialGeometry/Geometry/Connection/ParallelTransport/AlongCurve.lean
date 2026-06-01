@@ -1,5 +1,5 @@
 import DifferentialGeometry.Geometry.Geodesic.Equation
-import DifferentialGeometry.Geometry.Operator.MetricCompatibility
+import DifferentialGeometry.Geometry.Connection.MetricCompatibility.ChartGramChristoffel
 import Mathlib.Analysis.ODE.Gronwall
 
 set_option linter.unusedSectionVars false

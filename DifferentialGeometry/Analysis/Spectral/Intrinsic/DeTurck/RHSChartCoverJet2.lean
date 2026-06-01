@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRHSAbstractJet2Bound
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RHSAbstractJet2Bound
 
 /-!
 # Manifold chart-cover packaging of the Ricci–DeTurck `2`-jet frame-component bound

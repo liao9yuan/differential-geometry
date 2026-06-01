@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.CovDerivChartForm
+import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.ChartForm
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ChristoffelCorrection.CovL2BoundFromH1
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ChartComponent.ComponentL2BoundUniform
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.ChartGeometry.GoodSetMeasure

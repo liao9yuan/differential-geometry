@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.Flow.PointwiseMixed
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.L2Operator.PointwiseMixed
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapL2SobolevBounds.RawTensorConnLapIterL2WtwokTwoBound
 import DifferentialGeometry.Analysis.Integration.L2.Hilbert.Defs
 import DifferentialGeometry.Analysis.Integration.L2.Hilbert.Inherited

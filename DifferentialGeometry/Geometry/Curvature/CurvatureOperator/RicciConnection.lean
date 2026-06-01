@@ -1,7 +1,7 @@
 import Mathlib.LinearAlgebra.Trace
 import Mathlib.LinearAlgebra.Dimension.Free
 import Mathlib.LinearAlgebra.Dual.Defs
-import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.Curvature
+import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.Defs
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.CurvatureBundling
 import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorExtension
 

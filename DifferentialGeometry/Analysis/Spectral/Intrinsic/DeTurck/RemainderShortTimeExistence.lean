@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.LocallyLipschitzExistence
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.CompactSAResolventIntrinsic
-import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckNonlinearitySpectral
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.NonlinearitySpectral
 
 /-!
 # Strong short-time existence for the Ricci–DeTurck first-order remainder

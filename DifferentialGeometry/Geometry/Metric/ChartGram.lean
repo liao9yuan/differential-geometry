@@ -1,3 +1,4 @@
+import DifferentialGeometry.Geometry.Metric.Basic
 import Mathlib.Geometry.Manifold.VectorBundle.Riemannian
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Geometry.Manifold.VectorBundle.Hom
@@ -70,11 +71,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- Alias for the smooth Riemannian metric on the tangent bundle of a smooth manifold,
-specialised to smoothness `∞`. -/
-abbrev SmoothRiemannianMetric (I : ModelWithCorners ℝ E H) (M : Type*)
-    [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] : Type _ :=
-  Bundle.ContMDiffRiemannianMetric I ∞ E (TangentSpace I : M → Type _)
+export DifferentialGeometry (SmoothRiemannianMetric)
 
 /-- The fixed model-space basis used throughout the chart-local construction. It is the
 image of the standard `EuclideanSpace.basisFun` under the inverse of the canonical

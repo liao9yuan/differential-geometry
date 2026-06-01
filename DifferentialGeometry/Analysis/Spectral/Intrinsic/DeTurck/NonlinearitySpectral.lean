@@ -2,7 +2,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.Defs
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.Inclusion
 import DifferentialGeometry.Analysis.Spectral.Tensor.Spectrum.CompactResolvent
 import DifferentialGeometry.Geometry.Flow.RicciFlow.DeTurckRHS
-import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckPrincipalPartMatch
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.PrincipalPartMatch
 
 /-!
 # Design of the Ricci–DeTurck nonlinearity on the spectral Sobolev scale

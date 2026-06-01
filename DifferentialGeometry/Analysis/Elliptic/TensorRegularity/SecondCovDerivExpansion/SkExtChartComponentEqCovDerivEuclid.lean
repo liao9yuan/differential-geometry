@@ -1,6 +1,6 @@
 import DifferentialGeometry.Geometry.Connection.CovApplyCovRSChartBasisExtension
-import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.CovDerivComponentSecondFormula
-import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.CovDerivChartForm
+import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.ComponentSecondFormula
+import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.ChartForm
 
 /-!
 # Equality of the chart-α raw component of the globally smooth extension with the

@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Sobolev.Nirenberg.ChartBilinearDischarge.SubstitutionDischargeIBPExpand
+import DifferentialGeometry.Analysis.Sobolev.Nirenberg.ChartBilinearDischarge.SubstitutionIBPExpand
 
 /-!
 # Discharge of the per-`(i, j)` IBP and integrability hypotheses

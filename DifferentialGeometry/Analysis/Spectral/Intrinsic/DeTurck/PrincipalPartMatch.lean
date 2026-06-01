@@ -1,5 +1,5 @@
-import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.DeTurckRicciStrictParabolic
-import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckLinearization
+import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.RHSStrictParabolic
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.Linearization
 
 /-!
 # Principal-part match between the Ricci–DeTurck RHS and the rough Laplacian

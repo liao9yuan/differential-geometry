@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.AbstractSemigroup.AbstractSpectralSemigroupContinuity
-import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.HeatSemigroupIntrinsic
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.Intrinsic
 import Mathlib.Analysis.SpecialFunctions.ExpDeriv
 import Mathlib.Analysis.SpecialFunctions.Log.Basic
 import Mathlib.Analysis.Calculus.MeanValue

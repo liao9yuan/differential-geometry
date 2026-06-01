@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.Curvature
+import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.Defs
 import DifferentialGeometry.Bundle.Frame
 import Mathlib.Geometry.Manifold.VectorBundle.LocalFrame
 import Mathlib.Geometry.Manifold.VectorBundle.Tensoriality

@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Sobolev.IntrinsicFlow.HilbertSpace
+import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.HilbertSpace
 import DifferentialGeometry.Analysis.Integration.L2.Hilbert.Defs
 import DifferentialGeometry.Analysis.Integration.L2.Hilbert.Inherited
 import DifferentialGeometry.Analysis.Sobolev.Tensor.PouWeightedHsNormReverseOrderZero

@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Sobolev.Nirenberg.ChartBilinearDischarge.SubstitutionDischargeSmoothApprox
+import DifferentialGeometry.Analysis.Sobolev.Nirenberg.ChartBilinearDischarge.SubstitutionSmoothApprox
 
 /-!
 # Gradient L² convergence of the smooth approximating Nirenberg sequence

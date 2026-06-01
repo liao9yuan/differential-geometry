@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.SecondCovDerivExpansion.SkExtChartComponentEqCovDerivEuclid
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.SecondCovDerivExpansion.ChartProjectionSecondCovDerivViaSkExt
-import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.CovDerivComponentSecondFormula
+import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.ComponentSecondFormula
 
 /-!
 # Expansion of the chart-α first covariant-derivative component of the global

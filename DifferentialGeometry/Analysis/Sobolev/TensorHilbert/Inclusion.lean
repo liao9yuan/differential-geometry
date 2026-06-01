@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Sobolev.IntrinsicFlow.HilbertSpace
+import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.HilbertSpace
 import DifferentialGeometry.Analysis.Sobolev.Approximation.SmoothDensity
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components.Defs
 import Mathlib.Analysis.Normed.Operator.Extend

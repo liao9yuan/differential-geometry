@@ -3,7 +3,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.DeTurckRHSSection
 import DifferentialGeometry.Tensor.Multilinear.BundleSmoothEval
 import DifferentialGeometry.Geometry.Connection.TensorNabla.CotangentExtension
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Regularity.EigenvectorTensorHsToWtwokTwo
-import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckNonlinearitySpectral
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.NonlinearitySpectral
 
 /-!
 # Realizing a smooth `(0,2)`-tensor section as a smooth Riemannian metric perturbation

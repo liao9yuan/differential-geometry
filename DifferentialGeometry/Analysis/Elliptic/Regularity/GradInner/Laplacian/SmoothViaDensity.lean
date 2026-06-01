@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Elliptic.Regularity.Hessian.SmoothCaseLpClassAssembly
+import DifferentialGeometry.Analysis.Elliptic.Regularity.Hessian.SmoothCaseLpClass
 import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.Laplacian.Smooth
 
 /-!

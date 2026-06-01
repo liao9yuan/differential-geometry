@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Sobolev.IntrinsicFlow.HilbertSpace
+import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.HilbertSpace
 
 /-!
 # Density of smooth compactly-supported sections in the intrinsic Sobolev

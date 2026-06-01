@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.CovDerivChartFormLowerOrder
+import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.ChartFormLowerOrder
 
 /-!
 # The chart-frame tensor-metric Gram matrix and its smooth inverse

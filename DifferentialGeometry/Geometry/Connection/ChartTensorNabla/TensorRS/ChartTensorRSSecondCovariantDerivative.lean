@@ -1,5 +1,5 @@
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.TensorRS.ChartTensorRSCovariantDerivativeAgreement
-import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.Curvature
+import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.Defs
 
 /-!
 # Chart-coordinate expression for the second covariant derivative on the

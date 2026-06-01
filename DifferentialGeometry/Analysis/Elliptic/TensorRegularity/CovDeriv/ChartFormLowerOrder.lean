@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.CovDerivChartForm
+import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.ChartForm
 
 /-!
 # Chart-coordinate lower-order remainder of the tensor `H^1` Dirichlet integrand

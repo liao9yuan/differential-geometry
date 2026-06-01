@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.CovDerivChartFormLowerOrder
+import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.ChartFormLowerOrder
 import DifferentialGeometry.Analysis.Sobolev.Chart.ChartTransition.MeasurablePullback
 
 /-!

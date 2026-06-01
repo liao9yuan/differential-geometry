@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.HeatSemigroupBoundedC0Intrinsic
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.BoundedC0Intrinsic
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.Semigroup.MildSolutionExistence
 
 /-!

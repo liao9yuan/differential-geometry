@@ -1,7 +1,7 @@
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.TensorRS.ChartTensorRSCovariantDerivative
 import DifferentialGeometry.Analysis.Sobolev.Tensor.PouWeightedNorm
 import DifferentialGeometry.Analysis.Sobolev.Tensor.PouWeightedHsNorm
-import DifferentialGeometry.Analysis.Sobolev.IntrinsicFlow.Inclusion
+import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.Inclusion
 import DifferentialGeometry.Tensor.Multilinear.HsBoundOp
 
 namespace DifferentialGeometry.PDE.RicciFlow.HebeyBlock

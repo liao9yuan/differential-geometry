@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Sobolev.IntrinsicFlow.HilbertSpace
+import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.HilbertSpace
 import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.PouSobolevIso.SpectralPouH2Identify
 import DifferentialGeometry.Analysis.Sobolev.Manifold.IteratedSobolevEmbedding
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MorreyManifoldHigherOrder

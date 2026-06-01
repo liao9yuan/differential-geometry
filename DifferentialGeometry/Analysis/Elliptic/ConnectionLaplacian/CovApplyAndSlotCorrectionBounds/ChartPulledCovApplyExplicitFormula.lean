@@ -1,5 +1,5 @@
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.TensorRS.ChartTensorRSCovariantDerivativeAgreement
-import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.Curvature
+import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.Defs
 import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Defs
 
 open DifferentialGeometry.Integral.L2 (SmoothCcTensor)

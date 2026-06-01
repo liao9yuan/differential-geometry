@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.Curvature
+import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.Defs
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciIdentitySmoothFrame
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.Defs
 import DifferentialGeometry.Geometry.Connection.LeviCivita.ChristoffelCorrectionBasepoint

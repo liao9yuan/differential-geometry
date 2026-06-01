@@ -4,7 +4,7 @@ import DifferentialGeometry.Geometry.Connection.ParallelTransport.AlongCurve
 import DifferentialGeometry.Geometry.Connection.ParallelTransport.CovariantDerivativeAlong
 import DifferentialGeometry.Geometry.Connection.ParallelTransport.MFDerivAlongCurve
 import DifferentialGeometry.Geometry.Geodesic.Equation
-import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.Curvature
+import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.Defs
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciIdentity
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnection

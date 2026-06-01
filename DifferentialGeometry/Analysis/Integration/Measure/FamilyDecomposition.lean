@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Integration.Measure.MeasureFamilyDefs
+import DifferentialGeometry.Analysis.Integration.Measure.FamilyDefs
 import Mathlib.Analysis.Calculus.Deriv.Mul
 import Mathlib.Analysis.Calculus.Deriv.Add
 import Mathlib.Analysis.Calculus.ParametricIntegral

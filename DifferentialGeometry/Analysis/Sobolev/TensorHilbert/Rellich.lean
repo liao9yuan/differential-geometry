@@ -1,5 +1,5 @@
-import DifferentialGeometry.Analysis.Sobolev.IntrinsicFlow.HilbertSpace
-import DifferentialGeometry.Analysis.Sobolev.IntrinsicFlow.Inclusion
+import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.HilbertSpace
+import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.Inclusion
 import Mathlib.Analysis.Normed.Operator.Compact
 
 /-!

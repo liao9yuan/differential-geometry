@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.DeTurckRicciRHSSmoothQuasilinear
+import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.RHSSmoothQuasilinear
 import DifferentialGeometry.Geometry.Flow.LieDerivativeChartFrameIdentity
 
 /-!

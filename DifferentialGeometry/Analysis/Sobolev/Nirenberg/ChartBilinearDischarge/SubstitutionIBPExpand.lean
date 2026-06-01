@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Sobolev.Nirenberg.ChartBilinearDischarge.SubstitutionDischargeSmoothApprox
+import DifferentialGeometry.Analysis.Sobolev.Nirenberg.ChartBilinearDischarge.SubstitutionSmoothApprox
 
 /-!
 # IBP-expanded chart-bilinear variational identity

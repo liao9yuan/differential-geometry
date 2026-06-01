@@ -1,6 +1,6 @@
-import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckLinearization
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.Linearization
 import DifferentialGeometry.Analysis.Sobolev.Embedding.TensorSobolevEmbeddingCm
-import DifferentialGeometry.Analysis.Sobolev.IntrinsicFlow.HilbertSpace
+import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.HilbertSpace
 import DifferentialGeometry.Geometry.Flow.RicciFlow.DeTurckRHS
 import DifferentialGeometry.Geometry.Flow.RicciFlow.DeTurckRHSSection
 import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Integrability

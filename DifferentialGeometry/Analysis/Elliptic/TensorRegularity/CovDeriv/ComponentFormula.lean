@@ -1,5 +1,5 @@
-import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.CovDerivIntrinsicComponent
-import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.CovDerivSlotCorrectionComponent
+import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.IntrinsicComponent
+import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.SlotCorrectionComponent
 
 /-!
 # The chart-coordinate covariant-derivative component formula

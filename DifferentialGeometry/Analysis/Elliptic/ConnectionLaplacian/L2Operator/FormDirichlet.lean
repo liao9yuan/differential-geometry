@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.Flow.L2PMap
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.L2Operator.L2PMap
 
 /-!
 # Dirichlet form associated to the connection Laplacian

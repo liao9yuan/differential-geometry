@@ -1,5 +1,5 @@
-import DifferentialGeometry.Analysis.Sobolev.IntrinsicFlow.L2BanachIso
-import DifferentialGeometry.Analysis.Sobolev.IntrinsicFlow.Rellich
+import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.L2BanachIso
+import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.Rellich
 import DifferentialGeometry.Analysis.Spectral.Tensor.Spectrum.Resolvent
 
 /-!
