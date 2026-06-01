@@ -48,7 +48,7 @@ tensor — itself a separate chart-Christoffel computation; in this file we keep
 * `frobeniusSq_grad_vector_eq_chartHessFrobeniusSq` — unconditional identity bridging the
   orthonormal-frame Frobenius squared `frobeniusSq_grad_vector g (∇f) x` to the
   chart-coordinate metric Frobenius squared `chartHessFrobeniusSq g f x`.
-* `bochner_pointwise_concrete_unconditional` — unconditional pointwise Bochner identity,
+* `bochner_pointwise_grad_normSq_of_boundaryless` — unconditional pointwise Bochner identity,
   using the orthonormal-frame Frobenius squared and the abstract Ricci tensor.
 * `bochner_pointwise_concrete_metric_unconditional` — unconditional metric form, using
   the chart-coordinate metric Frobenius squared and the abstract Ricci tensor.
@@ -532,20 +532,21 @@ theorem frobeniusSq_grad_vector_eq_chartHessFrobeniusSq
 
 /-! ## Step 5: unconditional pointwise Bochner-Weitzenböck identity (concrete form). -/
 
-/-- **Truly unconditional pointwise Bochner-Weitzenböck identity in concrete form.**
-For any smooth scalar `f : M → ℝ` on a smooth boundaryless Riemannian manifold, the
-pointwise identity
+/-- **Bochner-Weitzenböck identity for `|∇f|²` (concrete form).** For a smooth
+scalar `f : M → ℝ` on a boundaryless Riemannian manifold, the connection Laplacian
+of the squared gradient norm satisfies, at every point `x : M`,
 $$
   \Delta_g\bigl(g(\nabla f, \nabla f)\bigr)(x) =
     2\,|\nabla^2 f|_g^2(x) +
     2\,\mathrm{Ric}_x\bigl(\nabla f(x), \nabla f(x)\bigr) +
-    2\,g_x\bigl(\nabla f(x), \nabla(\Delta_g f)(x)\bigr)
+    2\,g_x\bigl(\nabla f(x), \nabla(\Delta_g f)(x)\bigr).
 $$
-holds at every point `x : M`, with `|\nabla^2 f|_g^2(x)` realised as the
-orthonormal-frame Frobenius squared `frobeniusSq_grad_vector g (∇f) x` and
-`\mathrm{Ric}_x(\nabla f, \nabla f)` as the abstract Ricci pairing
-`ricciTensor g x (∇f x) (∇f x)`. -/
-theorem bochner_pointwise_concrete_unconditional
+Here `|\nabla^2 f|_g^2(x)` is realised as the orthonormal-frame Hessian-Frobenius
+squared `frobeniusSq_grad_vector g (∇f) x` and `\mathrm{Ric}_x(\nabla f, \nabla f)`
+as the abstract Ricci pairing `ricciTensor g x (∇f x) (∇f x)`. The proof multiplies
+the abstract half-identity `bochner_pointwise_abstract_unconditional` by `2` and
+symmetrises the gradient cross term. -/
+theorem bochner_pointwise_grad_normSq_of_boundaryless
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (x : M) :
     Δ_g (I := I) g (normGradSqFun_contMDiff (I := I) g hf) x =
@@ -580,7 +581,7 @@ theorem bochner_pointwise_concrete_unconditional
   ring
 
 /-- **Truly unconditional pointwise Bochner-Weitzenböck identity in concrete form
-(metric-Frobenius variant).** Same identity as `bochner_pointwise_concrete_unconditional`
+(metric-Frobenius variant).** Same identity as `bochner_pointwise_grad_normSq_of_boundaryless`
 but with the orthonormal-frame Frobenius squared replaced by the chart-coordinate metric
 Frobenius squared `chartHessFrobeniusSq g f x`. The two are equal by
 `frobeniusSq_grad_vector_eq_chartHessFrobeniusSq`. -/
@@ -593,7 +594,7 @@ theorem bochner_pointwise_concrete_metric_unconditional
               (gradFun (I := I) g f x) (gradFun (I := I) g f x) +
         2 * g.inner x (gradFun (I := I) g f x)
             (gradFun (I := I) g (Δ_g (I := I) g hf) x) := by
-  rw [bochner_pointwise_concrete_unconditional (I := I) g hf x]
+  rw [bochner_pointwise_grad_normSq_of_boundaryless (I := I) g hf x]
   rw [frobeniusSq_grad_vector_eq_chartHessFrobeniusSq (I := I) g hf x]
 
 /-- **Non-negativity of the chart-coordinate metric Frobenius squared.** For any
@@ -610,19 +611,20 @@ theorem chartHessFrobeniusSq_nonneg
   exact frobeniusSq_grad_vector_nonneg (I := I) g
     (fun b : M => gradFun (I := I) g f b) x
 
-/-- **Half-form of the concrete pointwise Bochner-Weitzenböck identity
-(metric-Frobenius variant).** Dividing both sides of
-`bochner_pointwise_concrete_metric_unconditional` by `2` gives the conventional
-half identity
+/-- **Half-form Bochner-Weitzenböck identity for `|∇f|²` (chart-Frobenius form).**
+For a smooth scalar `f : M → ℝ` on a boundaryless Riemannian manifold, at every
+point `x : M`,
 $$
   \tfrac{1}{2}\,\Delta_g\bigl(g(\nabla f, \nabla f)\bigr)(x) =
     |\nabla^2 f|_g^2(x) +
     \mathrm{Ric}_x\bigl(\nabla f(x), \nabla f(x)\bigr) +
-    g_x\bigl(\nabla f(x), \nabla(\Delta_g f)(x)\bigr),
+    g_x\bigl(\nabla f(x), \nabla(\Delta_g f)(x)\bigr).
 $$
-with `|\nabla^2 f|_g^2(x) = \mathrm{chartHessFrobeniusSq}\,g\,f\,x` and the
-Ricci pairing in its abstract form `ricciTensor g x (∇f) (∇f)`. -/
-theorem bochner_pointwise_concrete_metric_unconditional_half
+The Hessian-Frobenius term `|\nabla^2 f|_g^2(x)` is taken in the chart-coordinate
+metric form `chartHessFrobeniusSq g f x` and the Ricci pairing in its abstract form
+`ricciTensor g x (∇f) (∇f)`. The proof divides
+`bochner_pointwise_concrete_metric_unconditional` by `2`. -/
+theorem bochner_pointwise_half_grad_normSq_of_boundaryless
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (x : M) :
     (1 / 2 : ℝ) * Δ_g (I := I) g (normGradSqFun_contMDiff (I := I) g hf) x =

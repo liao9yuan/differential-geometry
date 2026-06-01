@@ -265,7 +265,7 @@ theorem fderiv_tensorTrivProj_pullback_apply_eq_abstract_cov
           (fun b' => S.toSection b') X.toFun b =
         TensorRSNabla.tensorRSCovariantDerivative I M r s
           (LeviCivita (I := I) g) (fun b' => S.toSection b') b (X.toFun b) :=
-    chartTensorRSCovariantDerivative_eq_abstract
+    chartTensorRSCovariantDerivative_eq_abstract_on_chartLeviCivitaGoodSet
       (I := I) (M := M) g r s α S.toSection X hb
   rw [hcov_eq]
 

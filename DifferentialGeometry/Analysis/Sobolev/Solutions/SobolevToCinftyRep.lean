@@ -40,7 +40,7 @@ eigenfunction.
 ## Main results
 
 * `exists_continuous_representative_of_memWkpChart_isRegular` — the
-  faithful wrapper around `iterated_sobolev_embedding_chart_C0_H_k`,
+  faithful wrapper around `sobolev_embedding_chart_C0_Hk`,
   retaining the technical regularity hypothesis
   `RegularExponent.IsRegular (Module.finrank ℝ E : ℝ) 2 k` (i.e., for the
   Hilbert exponent `p = 2`, the iteration ladder
@@ -87,7 +87,7 @@ same as `riemannianMeasure (I := I) g (chartAtlasPOU I M)` by definition.
 
 Note. The `C^0` conclusion (continuity, no constants exposed) is the
 bare-bones existence statement. Quantitative `‖ũ‖_∞`-control is available
-from `iterated_sobolev_embedding_chart_C0_H_k` itself; it is suppressed
+from `sobolev_embedding_chart_C0_Hk` itself; it is suppressed
 here because the standard downstream applications (eigenfunction
 regularity) only require the existence of the continuous representative.
 -/
@@ -102,7 +102,7 @@ condition `RegularExponent.IsRegular n 2 k` admits a continuous function
 `ũ : M → ℝ` with `ũ =ᵐ[μ_g] u`, where
 `μ_g = riemannianVolumeMeasure I M g`.
 
-Faithful wrapper for `iterated_sobolev_embedding_chart_C0_H_k`. -/
+Faithful wrapper for `sobolev_embedding_chart_C0_Hk`. -/
 theorem exists_continuous_representative_of_memWkpChart_isRegular
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     [NeZero (Module.finrank ℝ E)]
@@ -114,7 +114,7 @@ theorem exists_continuous_representative_of_memWkpChart_isRegular
     ∃ ũ : M → ℝ, Continuous ũ ∧
       ũ =ᵐ[riemannianVolumeMeasure I M g] u := by
   obtain ⟨ũ, _C, hũ_cont, _hC_nn, hũ_ae, _hũ_bound⟩ :=
-    iterated_sobolev_embedding_chart_C0_H_k (I := I) (M := M) g hk hreg
+    sobolev_embedding_chart_C0_Hk (I := I) (M := M) g hk hreg
       hu_meas hu
   refine ⟨ũ, hũ_cont, ?_⟩
   -- Convert the chart-POU measure form into the canonical

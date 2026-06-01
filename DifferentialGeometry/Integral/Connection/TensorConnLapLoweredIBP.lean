@@ -351,7 +351,7 @@ theorem integral_tensorInner_covDeriv_split_eq
         - ∫ x, tensorInnerScalar (I := I) (M := M) g r s W S x
               * divergence_g (I := I) g V x
             ∂(riemannianVolumeMeasure (I := I) (M := M) g) :=
-  integral_tensorInner_covDeriv_eq (I := I) (M := M) g r s W S V
+  integral_tensorInner_covDeriv_integrationByParts (I := I) (M := M) g r s W S V
     (tensorInnerScalar_contMDiff (I := I) (M := M) g r s W S)
     hWcov_int hScov_int
 

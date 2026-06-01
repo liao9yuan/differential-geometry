@@ -170,7 +170,7 @@ theorem integral_inner_grad_eq_neg_integral_smul_laplacian_family
       -∫ x, f x * Δ_g (I := I) (g_fam t) hh x
         ∂(riemannianMeasureFamily (I := I) (M := M) g_fam t) := by
   rw [riemannianMeasureFamily_def]
-  exact integral_inner_grad_eq_neg_integral_smul_laplacian
+  exact green_first_integral_inner_grad_eq_neg_integral_smul_laplacian
     (I := I) (g_fam t) hf hh hh_supp
 
 /-- **Family form of Green's second identity.** For a smoothly time-parameterised
@@ -186,12 +186,12 @@ theorem integral_smul_laplacian_sub_eq_zero_family
             h x * Δ_g (I := I) (g_fam t) hf x)
         ∂(riemannianMeasureFamily (I := I) (M := M) g_fam t) = 0 := by
   rw [riemannianMeasureFamily_def]
-  exact integral_smul_laplacian_sub_eq_zero (I := I) (g_fam t) hf hh
+  exact green_second_integral_smul_laplacian_sub_eq_zero (I := I) (g_fam t) hf hh
 
 /-! ## Volume-variation formula re-export
 
 The clean volume-variation formula is established in
-`DifferentialGeometry.Integral.Measure.Family.volume_variation_formula_clean`.
+`DifferentialGeometry.Integral.Measure.Family.first_variation_of_volume`.
 We re-export it here under a name belonging to this directory for navigation
 convenience downstream. The hypotheses, namespaces, and statement are
 unchanged. -/
@@ -215,7 +215,7 @@ theorem volumeVariation_hasDerivAt
               + (1/2) * traceTimeDerivMetric (I := I) g_fam t₀ x * f t₀ x)
           ∂(riemannianMeasureFamily (I := I) (M := M) g_fam t₀))
       t₀ :=
-  volume_variation_formula_clean (I := I) (M := M) (g_fam := g_fam)
+  first_variation_of_volume (I := I) (M := M) (g_fam := g_fam)
     (f := f) (t₀ := t₀) hg hf
 
 end DivergenceTheorem

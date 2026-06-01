@@ -417,7 +417,7 @@ super-critical reconstruction bridge**: an `L²` tensor element whose canonical
 Euclidean chart components all lie in every chart-Sobolev order `W^{2k,2}` is the
 `L²` class of a genuine `C^∞` (`SmoothCcTensor`) section. This is the tensor
 analogue of the unconditional scalar bridge
-`memWkpChart_forall_implies_smooth_representative`
+`sobolev_smooth_representative_of_memWkpChart_forall`
 (`Analysis/Sobolev/Manifold/IteratedSobolevEmbeddingCInfty.lean`), composed with
 the global chart-frame reconstruction `tensorBundleSectionOfChartComponents` and
 the chart-component separation `tensorL2_eq_of_chartComponent_eq`.
@@ -435,7 +435,7 @@ whose canonical Euclidean chart-Sobolev components lie in `MemWkpChart g (2k) 2`
 for every order `k` (componentwise, encoded through the chart-frame scalar
 components `tensorChartComponent`) is the `L²` class of a genuine
 `SmoothCcTensor`. This is the tensor analogue of the scalar bridge
-`memWkpChart_forall_implies_smooth_representative`. It is isolated here, **never
+`sobolev_smooth_representative_of_memWkpChart_forall`. It is isolated here, **never
 assumed in a headline.** -/
 def TensorSuperCriticalReconstruct (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     Prop :=
@@ -478,7 +478,7 @@ richer than either input — `SpectralChartRegularity` supplies only chart-Sobol
 `MemWkp` regularity (an analytic estimate, not a smooth section), and
 `TensorSuperCriticalReconstruct` is the chart-to-section bridge (the tensor
 analogue of the accepted scalar bridge
-`memWkpChart_forall_implies_smooth_representative`). The reduction merely chains
+`sobolev_smooth_representative_of_memWkpChart_forall`). The reduction merely chains
 them through the chart-component data of each gate element. -/
 theorem spectralSmooth_realizesAsSmooth_of_reduction
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

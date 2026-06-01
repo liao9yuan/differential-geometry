@@ -159,7 +159,7 @@ theorem quasilinear_parabolic_metric_short_time_existence
     ∃ T : ℝ, ∃ g_fam : ℝ → SmoothRiemannianMetric I M,
       IsQuasilinearMetricParabolicSolution (I := I) F g₀ T g_fam := by
   -- Skeleton: actual proof composes the linearisation, the linear-tensor
-  -- existence below, and the abstract `semilinear_parabolic_existence`.
+  -- existence below, and the abstract `semilinear_mild_solution_existence`.
   sorry
 
 /-! ## Section C — Auxiliary: linear inhomogeneous tensor heat equation -/
@@ -219,7 +219,7 @@ theorem linear_tensor_parabolic_shortTime_exists
 
 The skeleton's two `theorem`s are deliberately *both* stubbed at the
 predicate-free public surface; the abstract existence machinery in
-`Analysis/Parabolic/QuasiLinear/Existence.lean::semilinear_parabolic_existence`
+`Analysis/Parabolic/QuasiLinear/Existence.lean::semilinear_mild_solution_existence`
 (which is fully proved, no `sorry`) gives the underlying Duhamel /
 Banach-fixed-point argument. To close `linear_tensor_parabolic_shortTime_exists`
 the open work is purely the existing-infrastructure lift to a

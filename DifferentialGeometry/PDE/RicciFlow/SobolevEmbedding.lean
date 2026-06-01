@@ -95,7 +95,7 @@ Riemannian manifold, each chart-frame scalar component
 compactly-supported function, hence lies in the chart-based `W^{k,2}` space
 at every order. When the supercritical threshold `n < 2k` holds (with
 `n = dim M`) and the exponent `2` is regular for order `k`, the scalar
-Hilbert-Sobolev embedding `iterated_sobolev_embedding_chart_C0_H_k` produces
+Hilbert-Sobolev embedding `sobolev_embedding_chart_C0_Hk` produces
 a continuous representative `ũ`, almost-everywhere equal to the component,
 whose sup-norm is controlled by a constant multiple of the chart-`W^{k,2}`
 norm of the component.
@@ -152,7 +152,7 @@ theorem tensorChartComponentScalar_embedding_C0
     DifferentialGeometry.Analysis.Sobolev.Chart.memWkpChart_of_contMDiff_k
       (I := I) (M := M) g (p := 2) (by norm_num) k h_smooth
   -- Apply the scalar Hilbert-Sobolev embedding `H^k ↪ C⁰` for `2k > n`.
-  exact DifferentialGeometry.Analysis.Sobolev.Chart.iterated_sobolev_embedding_chart_C0_H_k
+  exact DifferentialGeometry.Analysis.Sobolev.Chart.sobolev_embedding_chart_C0_Hk
     (I := I) (M := M) g hk hreg h_meas h_mem
 
 set_option synthInstance.maxHeartbeats 1600000 in

@@ -19,7 +19,7 @@ pointwise op-norm bound for the second-application term, in two stages:
 * a bound on `cov_RS T b v` for any vector `v ∈ T_b M`, obtained from
   `chartTensorRSCovariantDerivative_opNorm_le_pou_tsupport` after a
   smooth extension of `v` and the chart-frame agreement
-  `chartTensorRSCovariantDerivative_eq_abstract`. -/
+  `chartTensorRSCovariantDerivative_eq_abstract_on_chartLeviCivitaGoodSet`. -/
 
 noncomputable section
 

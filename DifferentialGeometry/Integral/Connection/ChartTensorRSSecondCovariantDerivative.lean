@@ -24,7 +24,7 @@ the section `covApply cov_RS X T`:
   chart push-forward of `X'(y)` — this is the source of the `∂_a ∂_b T^I_J`
   contributions once one unfolds the chart-trivialised representation of
   `covApply cov_RS X T` itself via the first-derivative formula
-  `chartTensorRSCovariantDerivative_eq_abstract`;
+  `chartTensorRSCovariantDerivative_eq_abstract_on_chartLeviCivitaGoodSet`;
 * the sum over input slots `k : Fin r` of the upper-slot Christoffel correction
   applied to `covApply cov_RS X T` (a Γ-correction from the *outer*
   `cov_RS` application);
@@ -35,7 +35,7 @@ the section `covApply cov_RS X T`:
 Two Γ-corrections appear overall, one from each `cov_RS` application: the
 inner one is folded into the chart-trivialised representation of
 `covApply cov_RS X T` via the first-derivative formula
-`chartTensorRSCovariantDerivative_eq_abstract` (which expresses
+`chartTensorRSCovariantDerivative_eq_abstract_on_chartLeviCivitaGoodSet` (which expresses
 `covApply cov_RS X T b = cov_RS T b (X b)` in chart coordinates with one
 Γ-correction), and the outer one appears as the explicit input-slot and
 output-slot Christoffel corrections in the chart-frame definition of
@@ -49,7 +49,7 @@ output-slot Christoffel corrections in the chart-frame definition of
 ## Implementation
 
 The proof is a direct application of the first-derivative agreement
-`chartTensorRSCovariantDerivative_eq_abstract` to the smooth `(r, s)`-tensor
+`chartTensorRSCovariantDerivative_eq_abstract_on_chartLeviCivitaGoodSet` to the smooth `(r, s)`-tensor
 section `covApply cov_RS X T`. Smoothness of `covApply cov_RS X T` is supplied
 by `covApply_contMDiffOn` from globally smooth `T` and `X`.
 -/
@@ -140,7 +140,7 @@ Each Christoffel correction here uses `chartLeviCivitaParallelCLM g α y X'`
 (i.e. the *outer* direction `X'`); the *inner* Γ-correction (one for each
 chart-coordinate `∂_a` acting on `(cov_RS T (X))^I_J`) is folded into the
 chart-trivialised representation of `covApply cov_RS X T` via the first-
-derivative agreement `chartTensorRSCovariantDerivative_eq_abstract` applied to
+derivative agreement `chartTensorRSCovariantDerivative_eq_abstract_on_chartLeviCivitaGoodSet` applied to
 the smooth section `covApply cov_RS X T`. Two Γ-corrections appear overall,
 one from each `cov_RS` application.
 
@@ -150,7 +150,7 @@ The intrinsic-Fréchet-derivative piece, evaluated at any vector
 chart-trivialised representation of `covApply cov_RS X T`; this is the source
 of the second-partial `∂_a ∂_b T^I_J` contributions, once one further unfolds
 the chart-trivialised representation of `covApply cov_RS X T` via the first-
-derivative formula `chartTensorRSCovariantDerivative_eq_abstract`. -/
+derivative formula `chartTensorRSCovariantDerivative_eq_abstract_on_chartLeviCivitaGoodSet`. -/
 theorem chartTensorRSSecondCovariantDerivative_eq_abstract
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T :
@@ -199,7 +199,7 @@ theorem chartTensorRSSecondCovariantDerivative_eq_abstract
   -- outer vector field `X'`, gives the chart-coordinate expression for the
   -- bundled `(r, s)`-tensor covariant derivative of `S` along `X'` at `y`.
   have hFirst :=
-    chartTensorRSCovariantDerivative_eq_abstract (I := I) (M := M)
+    chartTensorRSCovariantDerivative_eq_abstract_on_chartLeviCivitaGoodSet (I := I) (M := M)
       g r s α S X' (b := y) hy
   -- `S.toFun = covApply cov_RS X.toFun T.toFun` by definition.
   have hS_toFun : S.toFun =

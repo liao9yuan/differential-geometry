@@ -30,7 +30,7 @@ This file proves:
 * `koszul_local_uniqueness` — two covariant-derivative-on-a-set families that are both
   torsion-free and metric-compatible on `s` agree pointwise on `s`, when applied to
   differentiable tangent sections.
-* `koszul_global_uniqueness` — global pointwise uniqueness on differentiable inputs.
+* `koszul_levi_civita_unique_of_torsionFree_metricCompatible` — global pointwise uniqueness on differentiable inputs.
 
 The non-degeneracy step uses `ContMDiffSection.exists_eq_at` to extend an arbitrary
 tangent vector at a point to a smooth global tangent section, allowing the metric
@@ -243,11 +243,14 @@ bundled covariant derivatives may still differ on non-differentiable inputs.
 The Koszul argument therefore yields uniqueness on *differentiable inputs*, which is
 the form in which the downstream Levi-Civita-existence file consumes it. -/
 
-/-- **Koszul global uniqueness.** Two bundled covariant derivatives on the tangent
-bundle which are both torsion-free and metric-compatible (with respect to the same
-smooth Riemannian metric `g`) take the same value `cov.toFun Y x v` on every
-differentiable section `Y`, every point `x`, and every tangent vector `v`. -/
-theorem koszul_global_uniqueness
+/-- **Koszul uniqueness of the Levi-Civita connection.** If two bundled covariant
+derivatives `cov₁ cov₂` on the tangent bundle are both torsion-free
+(`cov.torsion = 0`) and metric-compatible with respect to the same smooth Riemannian
+metric `g`, then they agree, `cov₁.toFun Y x v = cov₂.toFun Y x v`, for every
+differentiable section `Y` (`MDiffAt (T% Y) x`), every point `x`, and every tangent
+vector `v`. Equality is only claimed on differentiable inputs, since the bundled
+`toFun` is unconstrained on non-differentiable sections. -/
+theorem koszul_levi_civita_unique_of_torsionFree_metricCompatible
     (cov₁ cov₂ : CovariantDerivative I E (TangentSpace I : M → Type _))
     (htor₁ : cov₁.torsion = 0) (htor₂ : cov₂.torsion = 0)
     (hMC₁ : IsMetricCompatible cov₁ g) (hMC₂ : IsMetricCompatible cov₂ g)

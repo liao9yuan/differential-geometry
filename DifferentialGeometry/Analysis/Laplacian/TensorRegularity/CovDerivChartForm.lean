@@ -424,7 +424,7 @@ The integrand `tensorCovDerivPointwiseInner` pairs the abstract bundled
 covariant-derivative values `tensorCovDerivAt`. On the chart-`α` Levi-Civita
 good set these agree with the chart-coordinate covariant derivative
 `chartTensorRSCovariantDerivative`, by the headline agreement
-`chartTensorRSCovariantDerivative_eq_abstract`. The agreement is stated with a
+`chartTensorRSCovariantDerivative_eq_abstract_on_chartLeviCivitaGoodSet`. The agreement is stated with a
 *global* smooth vector field `X`; since the chart-coordinate covariant
 derivative depends on `X` only through `X b`, the agreement transfers to the
 chart-coordinate basis vector field `chartBasisVecFiber α m`. -/
@@ -495,7 +495,7 @@ lemma tensorCovDerivAt_eq_chartTensorRSCovariantDerivative
   -- `hXfield`).
   have hXfield' : Xfield.toFun b = chartBasisVecFiber (I := I) α m b := hXfield
   -- The abstract agreement for the global field `Xfield`.
-  have hagree := chartTensorRSCovariantDerivative_eq_abstract (I := I) (M := M)
+  have hagree := chartTensorRSCovariantDerivative_eq_abstract_on_chartLeviCivitaGoodSet (I := I) (M := M)
     g r s α S.toSection Xfield hb
   -- The chart-coordinate covariant derivative's `X`-locality replaces the
   -- global field `Xfield.toFun` by `chartBasisVecFiber α m`.

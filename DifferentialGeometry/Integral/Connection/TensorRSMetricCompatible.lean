@@ -19,7 +19,7 @@ where `∇` on the right-hand side is the `(0, r + s)`-tensor covariant derivati
 of the metric-lowered tensor sections induced by the Levi-Civita connection.
 
 The proof is a direct reduction to the proven covariant-rank `(0, r + s)` case
-`tensorInnerPointwise_0s_hasMFDerivAt_metricCompatible`. The bridge is the
+`tensorInnerPointwise_0s_mfderiv_metricCompatible`. The bridge is the
 *lifted section*: for a smooth `(r, s)`-tensor section `S`, the assignment
 `y ↦ ofModel (lowerAllUpperIndices g r s y (toModel (S y)))` is a smooth
 section of the `(0, r + s)`-tensor bundle (`contMDiff_lifted_section`), so the
@@ -199,7 +199,7 @@ where `∇_v` denotes the metric-lowered directional covariant derivative
 
 The proof is a direct reduction to the proven covariant-rank-`(0, r + s)`
 metric-compatibility identity
-`tensorInnerPointwise_0s_hasMFDerivAt_metricCompatible`, applied to the smooth
+`tensorInnerPointwise_0s_mfderiv_metricCompatible`, applied to the smooth
 lifted sections `liftedTensorSection g r s W`, `liftedTensorSection g r s S`. -/
 theorem tensorInnerPointwise_hasMFDerivAt_metricCompatible
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -232,7 +232,7 @@ theorem tensorInnerPointwise_hasMFDerivAt_metricCompatible
   rw [hfun]
   -- Apply the covariant-rank-`(0, r + s)` metric-compatibility identity to the
   -- smooth lifted sections.
-  exact tensorInnerPointwise_0s_hasMFDerivAt_metricCompatible
+  exact tensorInnerPointwise_0s_mfderiv_metricCompatible
     (I := I) (M := M) g (r + s)
     (liftedTensorSection (I := I) (M := M) g r s W)
     (liftedTensorSection (I := I) (M := M) g r s S)

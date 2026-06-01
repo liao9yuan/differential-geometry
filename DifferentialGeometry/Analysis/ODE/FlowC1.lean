@@ -246,8 +246,11 @@ lemma exists_isPicardLindelof_of_contDiffOn_univ
     change Lf * ε ≤ a₀ / 2
     exact hLf_eps
 
-/-- From joint `C^1` of `f` on all of `ℝ × E` and a base point `(t₀, x₀)`, the local flow
-exists. -/
+/-- If the time-dependent vector field `f` is jointly `C^1` on all of `ℝ × E`, then around any
+base point `(t₀, x₀)` there exist a radius `r > 0`, a time half-width `ε > 0`, and a map
+`Φ : E × ℝ → E` that is an `IsLocalFlow` of `f` on `closedBall x₀ r ×ˢ Icc (t₀ - ε) (t₀ + ε)`.
+The flow is obtained from the Mathlib Picard–Lindelöf theorem applied to the data built by
+`exists_isPicardLindelof_of_contDiffOn_univ`. -/
 theorem exists_isLocalFlow_of_contDiffOn_univ
     (f : ℝ → E → E) (hf : ContDiffOn ℝ 1 (uncurry f) (Set.univ : Set (ℝ × E)))
     (t₀ : ℝ) (x₀ : E) :

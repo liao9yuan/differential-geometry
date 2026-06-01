@@ -757,17 +757,18 @@ lemma localDivergence_eq_coord_covariant_divergence
 /-! ## Headline: divergence equals the covariant frame-trace -/
 
 /-- **The Voss–Weyl divergence equals the Levi-Civita covariant frame-trace.**
-For a closed smooth Riemannian manifold `(M, g)`, a chart base point `α : M`, a
-smooth tangent vector field `Z`, and a base point `b` in the intersection of the
-chart-α partition-of-unity tsupport with the chart-α Levi-Civita good set, the
-global Voss–Weyl divergence `divergence_g g Z b` equals the covariant
-frame-trace
+For a smooth Riemannian metric `g`, a chart base point `α : M`, a smooth tangent
+vector field `Z`, and a base point `b` lying in the tsupport of the chart-α
+partition-of-unity bump and in the chart-α Levi-Civita good set, the Voss–Weyl
+divergence `divergence_g g Z b` equals the covariant frame-trace
 
   `∑ i, g(∇_{Fᵢ}Z, Fᵢ)`,
 
 where `Fᵢ := chartFrameNormGlobalSmooth g α i` is the globally smooth chart-α
-frame, `g(b)`-orthonormal on the intersection. -/
-theorem divergence_g_eq_leviCivita_frameTrace
+frame and `∇` is the Levi-Civita connection. Near the partition-of-unity tsupport
+the frame agrees with the Gram-Schmidt chart frame, so it is `g(b)`-orthonormal
+there. -/
+theorem voss_weyl_divergence_eq_leviCivita_frameTrace
     (g : SmoothRiemannianMetric I M) (α : M)
     (Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) {b : M}
     (hb_pou : b ∈ tsupport (fun x : M =>

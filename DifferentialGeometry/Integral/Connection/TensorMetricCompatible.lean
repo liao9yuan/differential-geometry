@@ -1230,19 +1230,20 @@ theorem tensorInnerPointwise_0s_hasMFDerivAt_metricCompatible_aux
 /-! ## Directional metric compatibility of the `(0, s)`-tensor connection -/
 
 open Tensor0SNabla in
-/-- **Directional metric compatibility of the `(0, s)`-tensor Levi-Civita
-connection — general covariant rank.** For two `(0, s)`-tensor sections `W`,
-`T` differentiable at `x` (in total-space form), and every tangent vector `v`,
-the directional derivative of the pointwise metric-induced inner product
-`y ↦ ⟨W y, T y⟩` decomposes by the covariant Leibniz rule:
+/-- Directional metric compatibility (covariant Leibniz rule) of the `(0, s)`-tensor
+Levi-Civita connection, for arbitrary covariant rank `s`. For two `(0, s)`-tensor
+sections `W`, `T` (given in total-space form) that are tensor-section
+differentiable at `x`, and every tangent vector `v`, the directional derivative
+at `x` (along `v`) of the pointwise metric-induced inner product
+`y ↦ tensorInnerPointwise_0s s g y (W y) (T y)` equals
 
-  `∇_v ⟨W, T⟩ = ⟨∇_v W, T⟩ + ⟨W, ∇_v T⟩`,
+  `⟨∇_v W, T⟩ + ⟨W, ∇_v T⟩`,
 
-where `∇` is the `(0, s)`-tensor covariant derivative induced by the
-Levi-Civita connection of `g`. This is the general-rank statement; the
-covariant-rank-`0` base case is
+where `∇` is `tensor0SCovariantDerivative` for the Levi-Civita connection of `g`.
+This is the general-rank statement, proved by induction on `s` from the
+covariant-rank-`0` base case
 `tensorInnerPointwise_0s_hasMFDerivAt_metricCompatible_zero`. -/
-theorem tensorInnerPointwise_0s_hasMFDerivAt_metricCompatible
+theorem tensorInnerPointwise_0s_mfderiv_metricCompatible
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (W T : Π x : M, Tensor0SSpace s I x) {x : M}
     (hW : TensorSectionMDiffAt (I := I) s W x)

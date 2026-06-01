@@ -1545,15 +1545,21 @@ private lemma eLpNorm_riemannianMeasure_le_const_mul_wkpNormChart
 /-! ## Headline: Morrey embedding `W^{1,p}_chart(M) ↪ C^0(M)` for `p > n` -/
 
 /-- **Manifold Morrey embedding** `W^{1,p}_chart(M) ↪ C^0(M)` for `p > n` on a
-closed Riemannian manifold. For every measurable `u ∈ W^{1,p}_chart(M)` there is
-a continuous representative `ũ : M → ℝ` (a.e. equal to `u` with respect to the
-Riemannian measure) with the sup-norm bound
+compact (closed) boundaryless Riemannian manifold, where `n = finrank ℝ E` is the
+dimension. For every measurable `u` with `MemWkpChart g 1 (ENNReal.ofReal p) u`
+there exist a constant `C ≥ 0` and a continuous representative `ũ : M → ℝ` such
+that `ũ = u` almost everywhere with respect to the Riemannian measure built from
+the canonical chart-atlas partition of unity, and the sup-norm bound
 
-  `‖ũ(x)‖ ≤ C · (wkpNormChart g 1 p u).toReal`
+  `‖ũ x‖ ≤ C · (wkpNormChart g 1 (ENNReal.ofReal p) u).toReal`
 
-for every `x : M`. The constant `C ≥ 0` depends only on the metric, the
-canonical chart-atlas POU, and the exponent `p`. -/
-theorem morrey_chart_C0_embedding
+holds for every `x : M`. The constant is the uniform smooth-Morrey sup-norm
+constant `Cmorrey` of `smooth_manifold_morrey_sup_bound_uniform`, depending only on
+`g`, the chart atlas, and `p`. The representative is obtained as the uniform limit
+of a sequence of smooth approximations to `u` (which is Cauchy in `C^0` by the
+smooth Morrey bound), with `ũ = u` a.e. coming from an a.e.-convergent subsequence
+of the `L^p` approximation. -/
+theorem morrey_C0_embedding_of_compact
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]

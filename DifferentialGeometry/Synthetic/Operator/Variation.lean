@@ -180,7 +180,7 @@ theorem connection_variation
         - (g_fam s).g X (bracket emb Y Z)
         + (g_fam s).g Y (bracket emb Z X)
         + (g_fam s).g Z (bracket emb X Y) :=
-    fun s => levi_civita_uniqueness emb (conn_fam s) (ha_fam s) (hal_fam s) (hl_fam s)
+    fun s => koszul_formula_of_metricCompatible_torsionFree emb (conn_fam s) (ha_fam s) (hal_fam s) (hl_fam s)
       (g_fam s) (h_mc s) (h_tf s) X Y Z
 
   -- Step 1: dt of LHS = dt of RHS (by functional equality)

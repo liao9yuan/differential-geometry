@@ -202,7 +202,7 @@ of `Δ_∇ T₀`:
 ⟨∇(Δ_∇ T₀), ∇T₀⟩_{L²} = − ‖Δ_∇ T₀‖²_{L²}.
 ```
 
-This is the `(0, 2)` Green identity `tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawConnLap`
+This is the `(0, 2)` Green identity `green_first_covGrad_l2Inner_eq_neg_rawTensorConnLap_of_closed`
 applied at the pair `(T₀, Δ_∇ T₀)`, together with the symmetry `tensorL2Inner_symm`
 of the global `L²` pairing. -/
 theorem covGrad_rawConnLap_l2Inner_covGrad_eq_neg_rawConnLap_normSq
@@ -221,7 +221,7 @@ theorem covGrad_rawConnLap_l2Inner_covGrad_eq_neg_rawConnLap_normSq
     (covGrad (I := I) (M := M) g 0 2 T₀).toFun]
   -- The `(0, 2)` Green identity at the pair `(T₀, ΔT₀)`:
   -- `⟨∇T₀, ∇(ΔT₀)⟩ = − ⟨Δ_∇T₀, ΔT₀⟩`.
-  rw [tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawConnLap (I := I) (M := M) g T₀ ΔT₀]
+  rw [green_first_covGrad_l2Inner_eq_neg_rawTensorConnLap_of_closed (I := I) (M := M) g T₀ ΔT₀]
   -- `− ⟨Δ_∇T₀, ΔT₀⟩ = − ‖Δ_∇T₀‖²` since `ΔT₀ = Δ_∇T₀` and the diagonal pairing
   -- is the squared `L²` norm.
   rw [hΔT₀_def]

@@ -626,10 +626,15 @@ private lemma indicator_supp_subset_closure
   intro hxΩ
   exact hx (subset_closure hxΩ)
 
-/-- **The Rellich-Kondrachov compact embedding theorem** for the Euclidean
-case. For an open bounded set `Ω ⊆ ℝ^d`, any sequence in `W^{1,p}_0(Ω)`
-that is bounded in both function and gradient norms has a subsequence
-converging in `L^p(Ω)`. -/
+/-- **Rellich–Kondrachov compact embedding** `W^{1,p}_0(Ω) ↪ L^p(Ω)`, sequential
+form, for a bounded open set `Ω ⊆ ℝ^d` and `1 ≤ p < ∞`. Given a sequence `u`
+whose terms all lie in `W^{1,p}_0(Ω)` and whose `L^p(Ω)` norms and weak-gradient
+component norms are uniformly bounded by `R`, there is a strictly increasing
+subsequence index `φ` and a limit `u_lim ∈ L^p(Ω)` such that `u (φ k) → u_lim`
+in `L^p(Ω)`. Proved by zero-extending each `u n` to `closure Ω` (compact in the
+finite-dimensional ambient space), applying the Fréchet–Kolmogorov criterion
+via the uniform translation estimate for `MemW01p` functions, and transferring
+the resulting `L^p(volume)` convergence back to `L^p(volume.restrict Ω)`. -/
 theorem rellich_kondrachov_W01p_seq
     {Ω : Set E}
     (hΩ_open : IsOpen Ω) (hΩ_bdd : Bornology.IsBounded Ω)

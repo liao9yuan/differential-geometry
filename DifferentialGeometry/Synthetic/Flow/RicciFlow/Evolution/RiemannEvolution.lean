@@ -483,9 +483,17 @@ theorem Q_rm_eq_hamilton
 -- 2.7  Corollary: Hamilton decomposition
 -- ============================================================
 
-/-- Hamilton decomposition at the scalar level:
-    the Riemann variation = ΔRm + Q_hamilton. -/
-theorem hamilton_decomposition
+/-- Hamilton's Riemann-curvature evolution under Ricci flow, evaluated on vectors `X, Y, Z`
+    and a covector `ω`: the time derivative of the Riemann tensor family equals the rough
+    Laplacian of `Rm` plus the quadratic-curvature term `Q_hamilton_scalar`.
+
+    Concretely `∂_t Rm(X,Y,Z)(ω) = (Δ_rough Rm)(X,Y,Z)(ω) + Q_hamilton_scalar(X,Y,Z,ω)`,
+    where `Q_hamilton_scalar` is a purely algebraic expression in `Rm`, `Rc`, `g`, `∇` and
+    the trace. The connection family is Levi-Civita (`h_lc`), torsion-free (`h_tf`), and
+    evolves by Ricci flow (`h_rf`); `2` is assumed invertible. The remaining hypotheses are
+    the structural product/closure rules and the smoothness-of-family assumptions needed to
+    differentiate the curvature in time, plus the metric-variation identity `h_decomp`. -/
+theorem hamilton_riemann_tensor_evolution_pointwise_of_ricci_flow
     (emb : DerivationEmbedding k R V)
     (td : TimeDerivativeData R A Time) [TimeRegularFam td] [TimeRegularFam2 td]
     (h_st : SpatialTemporalComm emb td)
@@ -1416,13 +1424,19 @@ theorem Q_rm_independent_eq_Q_rm
 -- 5.4  The Grand Evolution Theorem with Independent Q
 -- ============================================================
 
-/-- **Riemann curvature evolution under Ricci flow with independent Q.**
+/-- **Hamilton's Riemann-curvature evolution equation under Ricci flow** (tensor form).
 
-    ∂_t Rm = ΔRm + Q_rm_independent
+    The time derivative of the Riemann tensor family equals the rough Laplacian of `Rm`
+    plus the quadratic-curvature tensor `Q_rm_independent`:
+    `∂_t Rm = Δ_rough Rm + Q_rm_independent`, an identity of `TensorData R V 1 3`.
 
-    where Q_rm_independent evaluates to Q_hamilton_scalar — a purely algebraic
-    expression in Rm, Rc, g, ∇, atr.tr, sharp. No time derivatives appear in Q. -/
-theorem riemann_tensor_evolution_hamilton
+    `Q_rm_independent` is the Hamilton quadratic packaged as a tensor whose scalar
+    evaluation is `Q_hamilton_scalar` — a purely algebraic expression in `Rm`, `Rc`, `g`,
+    `∇` and the trace, containing no time derivatives. The connection family is Levi-Civita
+    (`h_lc`), torsion-free (`h_tf`), and evolves by Ricci flow (`h_rf`); `2` is assumed
+    invertible. The remaining hypotheses are the structural product/closure rules, the
+    smoothness-of-family assumptions, and the metric-variation identity `h_decomp`. -/
+theorem hamilton_riemann_tensor_evolution_of_ricci_flow
     (emb : DerivationEmbedding k R V)
     (td : TimeDerivativeData R A Time) [TimeRegularFam td] [TimeRegularFam2 td]
     (h_st : SpatialTemporalComm emb td)

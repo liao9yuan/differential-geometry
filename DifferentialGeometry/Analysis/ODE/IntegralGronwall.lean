@@ -74,7 +74,7 @@ set_option linter.unusedVariables false in
 /-- **Integral Grönwall inequality.** If `0 ≤ f` is continuous on `[0, T]` and
 satisfies `f(t) ≤ A + K · ∫₀ᵗ f` for every `t ∈ [0, T]`, then
 `f(t) ≤ A · exp(K t)` on `[0, T]`. -/
-theorem integral_gronwall_le
+theorem gronwall_integral_le
     {T A K : ℝ} (hT : 0 ≤ T) (hA : 0 ≤ A) (hK : 0 ≤ K)
     {f : ℝ → ℝ} (hf_cont : ContinuousOn f (Set.Icc 0 T))
     (hf_nn : ∀ t ∈ Set.Icc (0:ℝ) T, 0 ≤ f t)

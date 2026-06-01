@@ -148,7 +148,7 @@ lemma chartTensorRSCovariantDerivative_eq_tensorCovDerivAt_at
         extChartAt_source_eq_chartAt_source (I := I)]
     exact hb
   have hagree :=
-    chartTensorRSCovariantDerivative_eq_abstract
+    chartTensorRSCovariantDerivative_eq_abstract_on_chartLeviCivitaGoodSet
       (I := I) (M := M) g r s α S.toSection Y hb_goodSet
   change chartTensorRSCovariantDerivative (I := I) r s g α
       (fun b' => S.toSection b') Y.toFun b =

@@ -35,7 +35,7 @@ case) is
   + 2 · Ric(∇φ, ∇u)
 ```
 
-(derived from `bochner_pointwise_concrete_unconditional` by polarisation in
+(derived from `bochner_pointwise_grad_normSq_of_boundaryless` by polarisation in
 `(φ, u) ↦ (φ + u, φ + u) − (φ − u, φ − u)`). Rearranged into `(1-Δ_g)`-form,
 
 ```

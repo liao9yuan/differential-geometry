@@ -35,7 +35,7 @@ of `T`.
 
 ## Strategy
 
-1. Use the chart-frame agreement `chartTensorRSCovariantDerivative_eq_abstract`
+1. Use the chart-frame agreement `chartTensorRSCovariantDerivative_eq_abstract_on_chartLeviCivitaGoodSet`
    to identify `covApply cov_RS B T b` with the chart-frame value
    `chartTensorRSCovariantDerivative r s g α T.toSection.toFun B.toFun b` on
    the chart-α Levi-Civita good set (which contains the POU tsupport under

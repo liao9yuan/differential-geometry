@@ -160,9 +160,13 @@ theorem laplacianOp_heatSemigroupExplicitLift_zero_eq_neg_heatPower_one
 /-! ## Headline 2: time derivative identified with the variational Laplacian -/
 
 set_option maxHeartbeats 800000 in
-/-- **Headline 2.** The time derivative at `t > 0` of
-`s ↦ heatSemigroup g s u_0`, applied pointwise at `u_0`, equals
-`laplacianOp g` of the spectral lift of `heatSemigroup g t u_0`. -/
+/-- For `t > 0`, the trajectory `s ↦ heatSemigroup g s u_0` has time derivative
+at `s = t` equal to `laplacianOp g` applied to the explicit spectral lift of
+`heatSemigroup g t u_0` (the witness `heatSemigroupExplicitLift g 0 t u_0`, which
+lies in `laplacianDomain g`). This is the heat-equation identity
+`d/dt (e^{tΔ_g} u_0) = Δ_g (e^{tΔ_g} u_0)` in the `L²` trajectory, obtained from
+the operator-norm derivative `hasDerivAt_heatSemigroup` and the operator identity
+`laplacianOp_heatSemigroupExplicitLift_zero_eq_neg_heatPower_one`. -/
 theorem hasDerivAt_heatSemigroup_eq_laplacianOp
     (g : SmoothRiemannianMetric I M) {t : ℝ} (ht : 0 < t)
     (u_0 : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :

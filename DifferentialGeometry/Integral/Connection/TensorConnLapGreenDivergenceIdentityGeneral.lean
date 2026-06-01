@@ -31,7 +31,7 @@ through a single **Dirichlet current** vector field and a single application of
 the divergence theorem on the closed manifold.
 
 This generalizes the rank-`(0, 2)` headline
-`tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawConnLap`.  The proof structure is
+`green_first_covGrad_l2Inner_eq_neg_rawTensorConnLap_of_closed`.  The proof structure is
 identical: the whole Dirichlet-current chain — the current `1`-form, its musical
 sharp, the Bochner divergence identity, and the divergence theorem — is
 **rank-generic**.

@@ -31,7 +31,7 @@ of `u`.
 * `memWkpChart_forall_implies_contMDiff_m_representative` — the parametric
   theorem at arbitrary `m : ℕ`, hypothesis-bearing in a single bridge lemma
   `h_bridge`. The bridge has exactly the same shape as the existing
-  `morrey_chart_C0_embedding` (just at order `m`): it takes a chart-Sobolev
+  `morrey_C0_embedding_of_compact` (just at order `m`): it takes a chart-Sobolev
   membership at order `(m+1)` and a super-critical real exponent `p > n`,
   and produces a `ContMDiff I 𝓘(ℝ, ℝ) m` a.e.-representative.
 
@@ -197,12 +197,12 @@ def ChartSobolevSuperCriticalWitness
 
 We deliver the bridge-parametric form of the headline theorem. The bridge is
 supplied as an inline function hypothesis, having exactly the shape of the
-existing `morrey_chart_C0_embedding` (at order `m`): it consumes a
+existing `morrey_C0_embedding_of_compact` (at order `m`): it consumes a
 chart-Sobolev membership at a super-critical exponent and produces a
 `ContMDiff m` a.e.-representative on the same fixed manifold.
 
 At `m = 0`, the bridge is unconditional, available via
-`morrey_chart_C0_embedding`. We supply it directly below in
+`morrey_C0_embedding_of_compact`. We supply it directly below in
 `memWkpChart_forall_implies_contMDiff_zero_representative_via_bridge`.
 
 For `m ≥ 1`, the bridge requires a higher-order analog of
@@ -251,10 +251,10 @@ theorem memWkpChart_forall_implies_contMDiff_m_representative
 /-! ## Consistency check: `m = 0` recovers the existing `C^0` result
 
 The order-`0` bridge instantiation is automatic via
-`morrey_chart_C0_embedding`. We deliver the corresponding wrapper. -/
+`morrey_C0_embedding_of_compact`. We deliver the corresponding wrapper. -/
 
 /-- **Sanity check.** At `m = 0`, supplying the bridge from
-`morrey_chart_C0_embedding` to the parametric theorem yields the same
+`morrey_C0_embedding_of_compact` to the parametric theorem yields the same
 `ContMDiff 0` representative as `memWkpChart_forall_implies_contMDiff_zero_representative`. -/
 theorem memWkpChart_forall_implies_contMDiff_zero_representative_via_bridge
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
@@ -279,7 +279,7 @@ theorem memWkpChart_forall_implies_contMDiff_zero_representative_via_bridge
     rw [this] at hv
     exact hv
   obtain ⟨v_smooth, _C, hv_cont, _hC_nn, hv_ae, _hv_bound⟩ :=
-    morrey_chart_C0_embedding (I := I) (M := M) g hp_dim hv_meas hv1
+    morrey_C0_embedding_of_compact (I := I) (M := M) g hp_dim hv_meas hv1
   refine ⟨v_smooth, contMDiff_zero_iff.mpr hv_cont, ?_⟩
   -- Convert `riemannianMeasure g (chartAtlasPOU I M)` to `riemannianVolumeMeasure I M g`.
   rw [DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure_def]
@@ -633,7 +633,7 @@ theorem chartSobolevSuperCriticalWitness_of_h_all
 /-! ## Unconditional super-critical bridge: `MemWkpChart g (m+1) (ofReal p) u` with
 `p > n` yields a `ContMDiff m` representative
 
-This is the higher-order analogue of `morrey_chart_C0_embedding`. The proof composes:
+This is the higher-order analogue of `morrey_C0_embedding_of_compact`. The proof composes:
 
 * the unconditional `C^0` chain
   (`iterated_sobolev_embedding_chart_C0_unconditional`) to obtain a continuous
@@ -1113,12 +1113,17 @@ theorem memWkpChart_forall_implies_contMDiff_m_representative_uncond
   exact SuperCriticalBridge.memWkpChart_super_critical_implies_contMDiff_m_representative
     (I := I) (M := M) g m hp_dim hv_meas hv
 
-/-- **Unconditional `ContMDiff ∞` representative.**
+/-- **Sobolev-to-smooth representative.**
 
 For a closed Riemannian manifold modelled on an inner-product space of
-dimension `n ≥ 1`, the hypothesis `∀ k, MemWkpChart g (2k) 2 u` together
-with measurability of `u` yields a single smooth (`ContMDiff I 𝓘(ℝ, ℝ) ∞`)
-a.e.-representative.
+dimension `n ≥ 1`, a measurable `u` lying in `W^{2k,2}` for every `k`
+(`∀ k, MemWkpChart g (2k) 2 u`) admits a single smooth
+(`ContMDiff I 𝓘(ℝ, ℝ) ∞`) representative `u_smooth` equal to `u`
+almost everywhere for the canonical Riemannian volume measure.
+
+Here "closed" is encoded by `CompactSpace M`, `T2Space M`,
+`SigmaCompactSpace M`, and `I.Boundaryless`, and `n ≥ 1` by
+`NeZero (Module.finrank ℝ E)`.
 
 The proof picks the order-`0` representative `u_smooth` from
 `memWkpChart_forall_implies_contMDiff_m_representative_uncond`. For each
@@ -1128,7 +1133,7 @@ of the canonical Riemannian volume measure (via `Continuous.ae_eq_iff_eq`)
 upgrades a.e. equality of continuous functions to pointwise equality.
 Hence `u_smooth` itself is `ContMDiff m` for every `m : ℕ`, which gives
 `ContMDiff ∞` via Mathlib's `contMDiff_infty`. -/
-theorem memWkpChart_forall_implies_smooth_representative
+theorem sobolev_smooth_representative_of_memWkpChart_forall
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]

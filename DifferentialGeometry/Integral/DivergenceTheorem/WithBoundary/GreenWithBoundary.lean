@@ -136,10 +136,19 @@ section StokesGlobal
 
 variable [hI : HasSmoothBoundary E H I]
 
-/-- The global Stokes theorem rephrased through `boundaryFaceSum`: for any
-smooth tangent section `X`, the integral of `divergence_g_with_boundary g X`
-against the canonical Riemannian volume measure equals
-`boundaryFaceSum g X`. -/
+/-- For any smooth tangent section `X` on a compact smooth Riemannian
+manifold `(M, g)`, the integral of `divergence_g_with_boundary g X` against
+the canonical Riemannian volume measure equals `boundaryFaceSum g X`.
+
+This is a restatement of `stokes_compact_via_pou` through the packaged
+`boundaryFaceSum`. Both sides are volume integrals: `boundaryFaceSum g X` is
+by definition the partition-of-unity sum of the chart-local
+`chartBoundaryFaceIntegral` quantities, each of which is itself the
+chart-local volume integral of `localDivergenceWithin g α X`. So this is a
+tautological POU decomposition of the left-hand volume integral, not a
+reduction to a surface integral over `I.boundary M`; no `d(∂M)` surface
+integral appears here. The identification of `boundaryFaceSum` with an
+intrinsic boundary surface integral is not established in this file. -/
 theorem integral_divergence_with_boundary_eq_boundaryFaceSum
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -336,19 +345,29 @@ private lemma inner_grad_grad_integrable
     (I := I) g hf hh hh_int).integrable_of_hasCompactSupport
     (HasCompactSupport.of_compactSpace _)
 
-/-- **Green's first identity, with boundary contribution (closed manifold).**
-For smooth `f, h : M → ℝ` with `tsupport h ⊆ I.interior M` on a compact
-σ-compact Hausdorff smooth Riemannian manifold `(M, g)` whose model `I`
-admits a smooth boundary,
+/-- **Green's first identity (closed manifold-with-boundary, chart-local
+boundary term).** For smooth `f, h : M → ℝ` with `tsupport h ⊆ I.interior M`
+on a compact σ-compact Hausdorff smooth Riemannian manifold `(M, g)` whose
+model `I` admits a smooth boundary,
 $$\int_M \langle \nabla_g f, \nabla_g h\rangle_g\,d\mu_g
    + \int_M f \cdot \Delta_g^{(\partial)} h\,d\mu_g
-   = \sum_\alpha \chartBoundaryFaceIntegral{g, \alpha,\,
-       f\,\nabla_g h,\,\rho_\alpha},$$
-where the sum runs over the chart-atlas POU support set and
-`\rho := chartAtlasPOU I M`.
+   = \text{boundaryFaceSum}\,g\,(f\,\nabla_g h).$$
 
-The boundary face sum is packaged through `boundaryFaceSum` for the test
-section `f · ∇_g h`. -/
+The right-hand `boundaryFaceSum g (f · ∇_g h)` is the partition-of-unity sum
+of the chart-local `chartBoundaryFaceIntegral` quantities for the test
+section `f · ∇_g h`. As such it is a sum of chart-local VOLUME integrals of
+`localDivergenceWithin`, not a surface integral over `I.boundary M`: the
+identity is the with-boundary divergence theorem applied to `f · ∇_g h`, with
+the boundary contribution left in chart-local form. The reduction of this
+chart-local sum to a genuine `d(∂M)` surface integral against an outward unit
+normal is not performed here (it is achieved, conditionally, in
+`green_first_eq_boundary_surface_integral`).
+
+The proof applies the divergence Leibniz rule
+`divergence_g_with_boundary_smoothSmul`,
+`div_g^{(∂)}(f · ∇h) = f · Δ_g^{(∂)} h + ⟨∇f, ∇h⟩`, integrates against the
+volume measure, and evaluates the integral of the divergence via
+`integral_divergence_with_boundary_eq_boundaryFaceSum`. -/
 theorem green_first_with_boundary
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -517,17 +536,23 @@ inner-product terms (by symmetry of the metric) and yields a clean
 expression for `∫ (f · Δh − h · Δf)` in terms of two boundary face sums.
 -/
 
-/-- **Green's second identity, with boundary contribution (closed
-manifold).** For smooth `f, h : M → ℝ` with `tsupport f, tsupport h ⊆
+/-- **Green's second identity (closed manifold-with-boundary, chart-local
+boundary terms).** For smooth `f, h : M → ℝ` with `tsupport f, tsupport h ⊆
 I.interior M` on a compact σ-compact Hausdorff smooth Riemannian manifold
 `(M, g)` whose model `I` admits a smooth boundary,
 $$\int_M \bigl(f \cdot \Delta_g^{(\partial)} h
      - h \cdot \Delta_g^{(\partial)} f\bigr)\,d\mu_g
-   = \sum_\alpha \chartBoundaryFaceIntegral{g, \alpha,\,
-       f\,\nabla_g h,\,\rho_\alpha}
-     - \sum_\alpha \chartBoundaryFaceIntegral{g, \alpha,\,
-       h\,\nabla_g f,\,\rho_\alpha}.$$
--/
+   = \text{boundaryFaceSum}\,g\,(f\,\nabla_g h)
+     - \text{boundaryFaceSum}\,g\,(h\,\nabla_g f).$$
+
+As in `green_first_with_boundary`, each `boundaryFaceSum` is the
+partition-of-unity sum of the chart-local `chartBoundaryFaceIntegral`
+volume-integral proxies, not a surface integral over `I.boundary M`; the
+reduction to a genuine `d(∂M)` term is not performed here.
+
+The proof subtracts `green_first_with_boundary` applied to `(f, h)` from the
+swapped variant `green_first_with_boundary_swap`; the `⟨∇f, ∇h⟩` and
+`⟨∇h, ∇f⟩` integrals cancel by symmetry of the metric. -/
 theorem green_second_with_boundary
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)

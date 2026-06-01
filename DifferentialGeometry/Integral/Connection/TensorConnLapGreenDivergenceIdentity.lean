@@ -62,7 +62,7 @@ per-direction Bochner expansion then absorbs the frame-acceleration term
 
 * `divergence_dirichletVF_eq` — the pointwise Bochner divergence identity
   `div_g Z b = ⟨∇T, ∇v⟩_b + ⟨Δ_∇ T, v⟩_b`.
-* `tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawConnLap` — the headline Green
+* `green_first_covGrad_l2Inner_eq_neg_rawTensorConnLap_of_closed` — the headline Green
   identity.
 -/
 
@@ -683,8 +683,18 @@ smooth and, on a compact manifold, compactly supported).  Combined with the
 gradient-side bridge and the rough-Laplacian section identification, this yields
 the headline. -/
 
-/-- **The headline intrinsic `(0, 2)` connection-Laplacian Green identity.** -/
-theorem tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawConnLap
+/-- **Green / `L²`-adjoint identity for the rough connection Laplacian on a closed
+manifold.** For smooth compactly-supported `(0, 2)`-tensors `T, v`,
+`⟨∇T, ∇v⟩_{L²} = -⟨Δ_∇ T, v⟩_{L²}`, where `∇` is the covariant gradient `covGrad`,
+`Δ_∇` is the rough (connection) Laplacian `rawTensorConnLapSmooth`, and the inner
+products are the tensor `L²` inner products `tensorL2Inner` against the Riemannian
+volume measure. Equivalently, the rough Laplacian is the negative `L²`-adjoint of the
+covariant gradient. The manifold is assumed closed (compact and boundaryless, from the
+ambient `[CompactSpace M] [BoundarylessManifold I M]` instances), which makes the
+boundary term of the integration by parts vanish: the proof integrates the divergence
+of the Dirichlet vector field (which vanishes by compact support) and expands it via the
+pointwise Bochner divergence identity. -/
+theorem green_first_covGrad_l2Inner_eq_neg_rawTensorConnLap_of_closed
     (g : SmoothRiemannianMetric I M) (T v : SmoothCcTensor g 0 2) :
     tensorL2Inner (I := I) (M := M) g 0 (2 + 1)
         (covGrad (I := I) (M := M) g 0 2 T).toFun

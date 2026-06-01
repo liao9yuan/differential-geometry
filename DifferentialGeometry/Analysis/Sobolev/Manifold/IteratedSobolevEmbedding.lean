@@ -26,7 +26,7 @@ on `g`, `k`, `p`, `n`) such that
   exponent `p_1 = n p / (n - p)`, with norm bound (for `1 ≤ p < n`).
 * `iterated_sobolev_embedding_chart_C0` — Theorem 2: the headline iterated
   embedding for `kp > n`.
-* `iterated_sobolev_embedding_chart_C0_H_k` — Theorem 3: the
+* `sobolev_embedding_chart_C0_Hk` — Theorem 3: the
   Hilbert-Sobolev specialization at `p = 2`.
 -/
 
@@ -302,7 +302,7 @@ theorem iterated_sobolev_embedding_chart_C0_supercritical
   have hu_one : MemWkpChart (I := I) (M := M) g 1 (ENNReal.ofReal p) u :=
     MemWkpChart.le_one hk hu
   obtain ⟨ũ, C, hũ_cont, hC_nn, hũ_ae, hũ_bound⟩ :=
-    morrey_chart_C0_embedding (I := I) (M := M) g hp_dim hu_meas hu_one
+    morrey_C0_embedding_of_compact (I := I) (M := M) g hp_dim hu_meas hu_one
   refine ⟨ũ, C, hũ_cont, hC_nn, hũ_ae, ?_⟩
   intro x
   refine (hũ_bound x).trans ?_
@@ -1544,13 +1544,20 @@ theorem iterated_sobolev_embedding_chart_C0
     exact hkp
   exact IteratedC0.statement_holds_aux j g hp_one hreg hkp' hu_meas hu
 
-/-! ## Theorem C: `H^k = W^{k, 2}` specialization
+/-! ## Theorem C: `H^k = W^{k, 2}` specialization -/
 
-Setting `p = 2` and requiring `n < 2k` (equivalently `kp > n` with `p = 2`),
-this is the standard Hilbert-Sobolev embedding `H^k(M) ↪ C^0(M)` for
-`2k > n` on closed Riemannian manifolds. -/
-
-theorem iterated_sobolev_embedding_chart_C0_H_k
+/-- The Hilbert-Sobolev `C^0` embedding on a closed Riemannian manifold:
+when `n < 2k` (with `n = finrank ℝ E`), every measurable function `u` with
+`MemWkpChart g k 2 u` (membership in the order-`k`, exponent-`2` space
+`H^k = W^{k,2}`) admits a continuous representative `ũ`, equal to `u` almost
+everywhere with
+respect to the Riemannian measure of the canonical chart-atlas partition of
+unity, whose sup-norm is bounded by `C · (wkpNormChart g k 2 u).toReal` for some
+constant `0 ≤ C`. This is the `p = 2` specialization of
+`iterated_sobolev_embedding_chart_C0`, obtained by translating `n < 2k` into
+`kp > n` and `(2 : ℝ≥0∞) = ENNReal.ofReal 2`; the regularity hypothesis `hreg`
+records that `2` avoids the borderline exponents `n / m` for `1 ≤ m ≤ k`. -/
+theorem sobolev_embedding_chart_C0_Hk
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]

@@ -55,7 +55,7 @@ file. Here we provide:
   TangentSpace I b`. The definition matches the textbook trace formula
   `Δ_∇ V = ∑_i (∇_{B_i} ∇_{B_i} V - ∇_{∇_{B_i} B_i} V)`.
 
-* `connection_laplacian_grad_commutator` — the **trace identity** at the heart of Bochner.
+* `ricciTensor_gradFun_eq_frame_sum_riemannSec` — the **trace identity** at the heart of Bochner.
   It is the trace formulation of the vector Ricci identity (item 1) plus the basis
   expansion of the abstract Ricci tensor.
 -/
@@ -438,25 +438,25 @@ lemma localConnLap_vector_def
         (cov.toFun (covApply cov (B i) V) x (B i x) -
           cov.toFun V x (cov.toFun (B i) x (B i x))) := rfl
 
-/-- **Trace identity at the heart of Bochner.** Let `g` be a smooth Riemannian metric on
-`M`, let `f : M → ℝ` be a smooth scalar, let `w : M → TangentSpace I` be a smooth tangent
-vector field, and let `B : Fin n → Π b, TangentSpace I b` be a smooth global tangent
-frame agreeing with the canonical model basis `chartModelBasis E` at the point `x`.
-Then the Ricci tensor at `(∇f, w)` admits the model-basis representation
+/-- **Frame-trace expansion of the Ricci tensor at the gradient.** Let `g` be a smooth
+Riemannian metric on `M`, let `f : M → ℝ` be a smooth scalar, let `w` be a smooth tangent
+vector field, and let `B : Fin n → Π b, TangentSpace I b` be a smooth global tangent frame
+agreeing with the model basis `chartModelBasis E` at the point `x`. Then the Ricci tensor
+at `(∇f, w)` equals the `chartModelBasis E`-coordinate sum of the section-level Riemann
+curvature `riemannSec (LeviCivita g)` on the frame:
 $$
   \mathrm{Ric}_x\bigl(\nabla f,\, w\bigr) =
-    \sum_i (\mathrm{finBasis}\,\mathbb R\,E).\mathrm{repr}
+    \sum_i (\mathrm{chartModelBasis}\,E).\mathrm{repr}
       \bigl(R(B_i, w)(\nabla f)(x)\bigr)_i.
 $$
+Here `∇f` is `gradFun g f` and `R = riemannSec (LeviCivita g)`.
 
-This is the trace formulation of the vector Ricci identity (item 1) plus the basis
-expansion of the abstract Ricci tensor. It is the algebraic core ingredient of the
-downstream connection-Laplacian–gradient commutator identity
-$$
-  \Delta_\nabla(\nabla f)(x) = \nabla(\Delta_g f)(x) + \mathrm{Ric}^\sharp(\nabla f)(x),
-$$
-which the bundled `Δ_∇` setup will assemble. -/
-theorem connection_laplacian_grad_commutator [I.Boundaryless]
+The proof is the basis-trace expansion `ricciTensor_apply_smooth_basisSum`
+(with `Y := w`, `Z := ∇f`) composed with `ricciTensor_symm` to put the gradient in the
+first slot. This frame-trace identity is the algebraic ingredient consumed downstream when
+assembling the connection-Laplacian/gradient commutator
+`Δ_∇(∇f) = ∇(Δ_g f) + Ric^♯(∇f)`; that commutator itself is NOT proved here. -/
+theorem ricciTensor_gradFun_eq_frame_sum_riemannSec [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f)
     {w : Π b : M, TangentSpace I b}

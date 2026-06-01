@@ -609,7 +609,7 @@ private theorem bilinear_identity_of_supp_in_chartTarget
     chartTestPullback_contMDiff (I := I) (M := M) α hψ hψ_cs hψ_supp
   -- Green I (with f compactly supported, applied with f₁ := chartTestPullback ψ, h₁ := f):
   -- ∫ <grad chartTestPull ψ, grad f> dμ_g = -∫ chartTestPull ψ * Δ_g f dμ_g.
-  have h_green := integral_inner_grad_eq_neg_integral_smul_laplacian
+  have h_green := green_first_integral_inner_grad_eq_neg_integral_smul_laplacian
     (I := I) g hψM hf hf_cs
   -- Symmetry of metric → ∫ <grad f, grad chartTestPull ψ> = ∫ <grad chartTestPull ψ, grad f>.
   have h_LHS_swap_eq : ∀ x : M,

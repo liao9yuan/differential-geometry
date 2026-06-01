@@ -1287,7 +1287,7 @@ base time. The derivation proceeds through three reusable lemmas:
    `traceTimeDerivMetric gFam t x`.
 2. A per-chart variant `per_chart_integrand_hasDerivAt` isolating the
    pointwise derivative on the chart base set.
-3. The clean global theorem `volume_variation_formula_clean`, which
+3. The clean global theorem `first_variation_of_volume`, which
    exhibits the global derivative integrand explicitly. -/
 
 section CleanVolumeVariation
@@ -2526,15 +2526,20 @@ section CleanTheorem
 
 variable {g_fam : ℝ → SmoothRiemannianMetric I M}
 
-/-- **Clean volume variation formula.** The time derivative of
-`t ↦ ∫ f t d(vol_t)` along a regular family `g_fam` of Riemannian metrics and a
-regular integrand `f : ℝ → M → ℝ`, at a base time `t₀`, equals the integral of
-`∂_t f + ½ tr_g(∂_t g) · f` against the Riemannian volume measure at `t₀`.
+/-- **First variation of volume.** At a base time `t₀`, the map
+`s ↦ ∫ x, f s x ∂(riemannianMeasureFamily g_fam s)` has derivative
+`∫ x, (∂_t f + ½ · tr_g(∂_t g) · f) ∂(riemannianMeasureFamily g_fam t₀)`, where
+`∂_t f := deriv (fun s => f s x) t₀` and `tr_g(∂_t g) := traceTimeDerivMetric g_fam t₀ x`
+is the metric trace of the time-derivative of the metric; the conclusion is a
+`HasDerivAt` statement.
 
-Hypotheses: compact σ-compact Hausdorff manifold `M`, a regularity
-interface `MetricFamilyRegularAt g_fam t₀` for the metric family, and a
-regularity interface `FunctionRegularAt f t₀` for the integrand. -/
-theorem volume_variation_formula_clean
+Hypotheses: `M` is a compact, σ-compact, Hausdorff manifold; `g_fam` satisfies the
+regularity interface `MetricFamilyRegularAt g_fam t₀` (pointwise-in-time
+differentiability and joint `(t, x)`-continuity of the chart Gram-matrix entries and
+their time-derivatives) and `f` satisfies `FunctionRegularAt f t₀` (pointwise-in-time
+differentiability and joint `(t, x)`-continuity of `f` and its time-derivative). No
+joint smoothness of `(t, x) ↦ g_t(x)` is assumed. -/
+theorem first_variation_of_volume
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g_fam : ℝ → SmoothRiemannianMetric I M}
     {f : ℝ → M → ℝ} {t₀ : ℝ}

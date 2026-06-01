@@ -11,8 +11,8 @@ set_option linter.style.emptyLine false
 /-!
 # Time Evolution of the Gradient under Ricci Flow
 
-- `gradient_evolution`: ∂_t[g(t)(grad u, Y)] = 2 Rc(grad u, Y)
-- `gradient_squared_evolution`: ∂_t|∇u|² = 2 Rc(∇u,∇u) + 2 g(∇u, ∇(∂_t u))
+- `grad_evolution_of_ricci_flow`: ∂_t[g(t)(grad u, Y)] = 2 Rc(grad u, Y)
+- `grad_normSq_evolution_of_ricci_flow`: ∂_t|∇u|² = 2 Rc(∇u,∇u) + 2 g(∇u, ∇(∂_t u))
 -/
 
 open SyntheticTensor
@@ -28,13 +28,17 @@ variable [Field k] [CommRing R] [Algebra k R]
 variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
 variable [CommRing A] [Algebra R A]
 
-/-- Gradient evolution under Ricci flow for a time-independent scalar u.
+/-- Time evolution of the gradient under Ricci flow for a fixed scalar `u`:
+    `∂_t[g(t)(grad_s u, Y)] = 2 Rc(grad_t u, Y)`, the derivative being taken with
+    the metric frozen at `t` while the gradient sees the varying metric `g_fam s`.
 
-    g(s)(grad_s u, Y) = Y(u) is constant in s, so its total derivative is 0.
-    By the metric product rule, 0 = (∂_t g)(grad_t u, Y) + ∂_t[g(t)(grad_s u, Y)].
-    Under Ricci flow (∂_t g = -2Rc):
-      ∂_t[g(t)(grad_s u, Y)] = 2 Rc(grad_t u, Y). -/
-theorem gradient_evolution
+    Assumes the family `g_fam` evolves by Ricci flow (`h_rf : IsRicciFlow`, i.e.
+    `∂_t g = -2 Rc`) and that the metric pairing obeys the bilinear product rule
+    `h_mvp : MetricBilinProductRule`. The proof uses that `g(s)(grad_s u, Y) = Y(u)`
+    is independent of `s`, so its total derivative vanishes; the product rule then
+    splits this into the metric-variation term and the frozen-metric term, and
+    substituting `∂_t g = -2 Rc` gives the stated identity. -/
+theorem grad_evolution_of_ricci_flow
     (emb : DerivationEmbedding k R V)
     (td : TimeDerivativeData R A Time) [TimeRegularFam td]
     (atr : AbstractTrace R V)
@@ -96,10 +100,19 @@ def MetricFullProductRule
     td.dt_apply (fun s => (g_fam t).g (A s) (B t)) t +
     td.dt_apply (fun s => (g_fam t).g (A t) (B s)) t
 
-/-- Gradient squared evolution under Ricci flow:
+/-- Time evolution of the squared gradient norm under Ricci flow for a
+    time-dependent scalar `u`:
+    `∂_t|∇u|² = 2 Rc(∇u, ∇u) + 2 g(∇u, ∇(∂_t u))`.
 
-    ∂_t|∇u|² = 2 Rc(∇u, ∇u) + 2 g(∇u, ∇(∂_t u)). -/
-theorem gradient_squared_evolution
+    Assumes the metric evolves by Ricci flow (`h_rf : IsRicciFlow`), the metric
+    pairing obeys the full (both-arguments-varying) product rule
+    `h_mfp : MetricFullProductRule`, time and spatial derivatives commute on smooth
+    families (`h_st : SpatialTemporalComm`), and `u` is a smooth family (`hu`). The
+    proof expands `∂_t g(grad u, grad u)` by the full product rule, uses
+    `g`-symmetry to merge the two single-argument variation terms, rewrites the
+    frozen-metric term via `g(s)(grad_s u, Y) = Y(u)` and `SpatialTemporalComm`,
+    and substitutes `∂_t g = -2 Rc`. -/
+theorem grad_normSq_evolution_of_ricci_flow
     (emb : DerivationEmbedding k R V)
     (td : TimeDerivativeData R A Time) [TimeRegularFam td]
     (atr : AbstractTrace R V)

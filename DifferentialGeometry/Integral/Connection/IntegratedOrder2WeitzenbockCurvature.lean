@@ -7,7 +7,7 @@ import DifferentialGeometry.Integral.Connection.RiemannianFiberNormSqRiemannOpHi
 
 This file records the **curvature characterisation** of the rough-Laplacian /
 covariant-gradient commutator defect `Curv = Δ_∇(∇S) − ∇(Δ_∇ S)` appearing in the
-integrated order-`2` Weitzenböck identity `integrated_order2_weitzenbock`.
+integrated order-`2` Weitzenböck identity `weitzenbock_integrated_covGrad_l2_normSq`.
 
 Fibrewise, `Curv` is a sum of genuine curvature contractions `R_x(B_i, ·)(∇S)` —
 both differentiation directions being honest frame / coordinate vector fields

@@ -5,7 +5,7 @@ import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.CrossScaleParabolicTr
 # Unconditional small-time strong existence for a locally Lipschitz nonlinearity
 
 The locally-Lipschitz small-time cutoff
-`quasilinear_strong_existence_locallyLipschitz_smallTime_ofCompact`
+`de_simon_quasilinear_tensor_heat_short_time_existence_locally_lipschitz_of_compact_resolvent`
 (`MaxRegLocalLipschitz`) carries the analytic residual `hstay`: the constructed
 `H^{a+1}`-view solution field is assumed to stay, for a.e. time, in the closed
 ball `closedBall (ι u₀) R` on which the nonlinearity `N` is Lipschitz.  This
@@ -956,7 +956,7 @@ genuine quasi-linear tensor heat equation
 with the forcing `gforce` represented a.e. by `t ↦ N(field_{a+1} t)`.
 
 This is the unconditional variant of
-`quasilinear_strong_existence_locallyLipschitz_smallTime_ofCompact`: the
+`de_simon_quasilinear_tensor_heat_short_time_existence_locally_lipschitz_of_compact_resolvent`: the
 stays-in-ball residual `hstay` is **proved**, not assumed.  The construction runs
 the globally-Lipschitz truncated engine
 `quasilinear_strong_existence_truncated_smallTime_ofCompact` (whose truncated

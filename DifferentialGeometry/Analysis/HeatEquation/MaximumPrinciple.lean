@@ -40,7 +40,7 @@ argument.
 ## Main results
 
 * `laplacian_nonpos_at_max` : the spatial-maximum bound `Δ_g f x₀ ≤ 0`.
-* `heat_max_principle_weak_closed` : the weak parabolic maximum principle on
+* `weak_maximum_principle_of_closed` : the weak parabolic maximum principle on
   a closed Riemannian manifold.
 -/
 
@@ -606,13 +606,17 @@ section MaxPrinciple
 variable [I.Boundaryless] [T2Space M] [CompactSpace M]
 
 /-- **Weak parabolic maximum principle on a closed manifold.**
-For a closed Riemannian manifold `(M, g)`, let `u : ℝ → M → ℝ` satisfy:
-spatial smoothness `ContMDiff I 𝓘(ℝ, ℝ) ∞ (u t)` for every `t`; joint
-continuity on `[0, T] × M`; per-point time-derivative `Du t x` for
-`(t, x) ∈ (0, T) × M`; the heat sub-solution inequality
-`Du t x ≤ Δ_g (u t) x` on `(0, T) × M`; and the initial data `u 0 x ≤ 0`.
-Then `u t x ≤ 0` for every `(t, x) ∈ [0, T] × M`. -/
-theorem heat_max_principle_weak_closed
+A heat sub-solution `u : ℝ → M → ℝ` that is `≤ 0` at the initial time `t = 0`
+stays `≤ 0` on the whole closed parabolic cylinder `[0, T] × M`.
+
+The manifold `M` is closed: compact, boundaryless and Hausdorff (from the
+section's `[I.Boundaryless] [T2Space M] [CompactSpace M]`). The function `u` is
+assumed: spatially smooth, `ContMDiff I 𝓘(ℝ, ℝ) ∞ (u t)` for every `t`; jointly
+continuous on `[0, T] × M` (`hu_cont`); time-differentiable per point with
+derivative `Du t x` for `(t, x) ∈ (0, T) × M` (`h_t_diff`); a heat sub-solution,
+`Du t x ≤ Δ_g (u t) x` on `(0, T) × M` (`h_ineq`); and `≤ 0` at `t = 0`
+(`h_init`). The conclusion is `u t x ≤ 0` for every `(t, x) ∈ [0, T] × M`. -/
+theorem weak_maximum_principle_of_closed
     (g : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T)
     (u : ℝ → M → ℝ)
     (hu_smooth : ∀ t : ℝ, ContMDiff I 𝓘(ℝ, ℝ) ∞ (u t))

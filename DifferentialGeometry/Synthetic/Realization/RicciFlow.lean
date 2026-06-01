@@ -76,8 +76,8 @@ The only genuinely mathematical inputs are:
 
 The covariant derivative family is built internally as
 `fun t => concreteKoszulCov I M (g_fam t)`, and its Levi-Civita property
-follows automatically from `concreteKoszulCov_metric_compat` and
-`concreteKoszulCov_torsion_free`. The required smoothness instance
+follows automatically from `concreteKoszulCov_isMetricCompatibleMathlib` and
+`concreteKoszulCov_torsion_eq_zero`. The required smoothness instance
 `ContMDiffCovariantDerivative (concreteKoszulCov I M (g_fam t)) ∞` is declared
 as a global instance in `KoszulCov.lean` and auto-resolves here.
 
@@ -132,8 +132,8 @@ noncomputable def concreteRicciFlowBundle
         concrete_NablaTensorContractComm I M (concreteKoszulCov I M (g_fam t))
       levi_civita := fun t =>
         concreteIsLeviCivita I M (concreteKoszulCov I M (g_fam t)) (g_fam t)
-          (concreteKoszulCov_metric_compat I M (g_fam t))
-          (concreteKoszulCov_torsion_free I M (g_fam t)) }
+          (concreteKoszulCov_isMetricCompatibleMathlib I M (g_fam t))
+          (concreteKoszulCov_torsion_eq_zero I M (g_fam t)) }
   ricci_flow := h_ricci_flow
   nabla_time_product_rule :=
     concrete_nabla_time_product_rule I M

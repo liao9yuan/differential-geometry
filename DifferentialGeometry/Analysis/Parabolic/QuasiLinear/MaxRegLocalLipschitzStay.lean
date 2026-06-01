@@ -4,7 +4,7 @@ import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.MaxRegLocalLipschitz
 # Time-`L²` modulus of continuity at `t = 0` of the subcritical Duhamel field
 
 The locally-Lipschitz small-time cutoff
-`quasilinear_strong_existence_locallyLipschitz_smallTime_ofCompact`
+`de_simon_quasilinear_tensor_heat_short_time_existence_locally_lipschitz_of_compact_resolvent`
 (`MaxRegLocalLipschitz`) carries one genuine analytic hypothesis — that the
 constructed `H^{a+1}`-view solution field stays, for a.e. time, in the closed
 ball `closedBall (ι u₀) R` on which the nonlinearity `N` is Lipschitz.  This

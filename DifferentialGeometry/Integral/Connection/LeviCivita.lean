@@ -62,7 +62,7 @@ requires:
   derivatives on differentiable sections.
 
 * `[SigmaCompactSpace M]` — propagated from the `Koszul` file; required at section
-  scope to access `koszul_local_uniqueness` and `koszul_global_uniqueness`.
+  scope to access `koszul_local_uniqueness` and `koszul_levi_civita_unique_of_torsionFree_metricCompatible`.
 -/
 
 noncomputable section
@@ -419,7 +419,7 @@ theorem LeviCivita_unique (g : SmoothRiemannianMetric I M)
     {σ : Π x : M, TangentSpace I x} {x : M} (hσ : MDiffAt (T% σ) x)
     (v : TangentSpace I x) :
     cov.toFun σ x v = (LeviCivita (I := I) g).toFun σ x v :=
-  koszul_global_uniqueness cov (LeviCivita (I := I) g)
+  koszul_levi_civita_unique_of_torsionFree_metricCompatible cov (LeviCivita (I := I) g)
     htor (LeviCivita_torsion_eq_zero (I := I) g)
     hmc (LeviCivita_isMetricCompatible (I := I) g)
     hσ v

@@ -110,8 +110,8 @@ noncomputable def concreteRicciFlowBundleOn
             concrete_NablaTensorContractComm I M (concreteKoszulCov I M (g_fam t))
           levi_civita := fun t =>
             concreteIsLeviCivita I M (concreteKoszulCov I M (g_fam t)) (g_fam t)
-              (concreteKoszulCov_metric_compat I M (g_fam t))
-              (concreteKoszulCov_torsion_free I M (g_fam t)) }
+              (concreteKoszulCov_isMetricCompatibleMathlib I M (g_fam t))
+              (concreteKoszulCov_torsion_eq_zero I M (g_fam t)) }
       ricci_flow := h_ricci_flow
       nabla_time_product_rule :=
         concrete_nabla_time_product_ruleOn I M s hs h_st

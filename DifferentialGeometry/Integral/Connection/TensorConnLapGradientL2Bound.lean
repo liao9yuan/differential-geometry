@@ -8,7 +8,7 @@ import DifferentialGeometry.Integral.L2.Pairing.CauchySchwarz
 For a closed smooth Riemannian manifold `(M, g)` modelled on a real
 inner-product space `E`, this file extracts, from the integrated `(0, 2)`
 connection-Laplacian Green identity
-`tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawConnLap`, the first-order
+`green_first_covGrad_l2Inner_eq_neg_rawTensorConnLap_of_closed`, the first-order
 elliptic-regularity inequality
 
 ```
@@ -97,7 +97,7 @@ lemma tensorL2Norm_sq_toFun
 /-! ## The diagonal Green identity
 
 Specialise the `(0, 2)` connection-Laplacian Green identity
-`tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawConnLap` at `v := T`. -/
+`green_first_covGrad_l2Inner_eq_neg_rawTensorConnLap_of_closed` at `v := T`. -/
 
 set_option linter.unusedSectionVars false in
 /-- **Diagonal `(0, 2)` Green identity.** For a smooth compactly-supported
@@ -115,7 +115,7 @@ lemma tensorL2Inner_covGrad_self_eq_neg_rawConnLap_inner
         (covGrad (I := I) (M := M) g 0 2 T).toFun =
       - tensorL2Inner (I := I) (M := M) g 0 2
           (rawTensorConnLapSmooth (I := I) g 0 2 T).toFun T.toFun :=
-  tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawConnLap (I := I) (M := M) g T T
+  green_first_covGrad_l2Inner_eq_neg_rawTensorConnLap_of_closed (I := I) (M := M) g T T
 
 /-! ## The first-order elliptic-regularity control
 

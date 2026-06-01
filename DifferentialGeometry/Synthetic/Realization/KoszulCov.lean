@@ -982,10 +982,14 @@ combines:
    `concreteMetricDuality_g_eval`.
 -/
 
-/-- **Metric compatibility (Mathlib-level) for `concreteKoszulCov`**: the
-covariant derivative `concreteKoszulCov I M g` is compatible with the
-Riemannian metric `g`. -/
-theorem concreteKoszulCov_metric_compat
+/-- The concrete Koszul covariant derivative `concreteKoszulCov I M g` on the
+tangent bundle is metric-compatible with the Riemannian metric `g`, i.e. it
+satisfies the Mathlib-level predicate `IsMetricCompatibleMathlib`: for all smooth
+vector fields `X Y Z` and points `x`, the directional derivative of
+`y ↦ g_y(Y y, Z y)` along `X` equals `g_x(∇_X Y, Z) + g_x(Y, ∇_X Z)`. The proof
+transfers the Synthetic-layer compatibility carried by `concreteKoszulConnection_isLeviCivita`
+through the section bridge `concreteKoszulCov_apply_section`. -/
+theorem concreteKoszulCov_isMetricCompatibleMathlib
     (g : Bundle.ContMDiffRiemannianMetric I ω E (TangentSpace I : M → Type _)) :
     IsMetricCompatibleMathlib I M (concreteKoszulCov I M g) g := by
   -- Unfold the definition of `IsMetricCompatibleMathlib`.
@@ -993,7 +997,7 @@ theorem concreteKoszulCov_metric_compat
   -- Use the Synthetic `koszul_metric_compat` to get
   --   (embed X)(met.g Y Z) = met.g (conn X Y) Z + met.g Y (conn X Z)
   -- at the section level, then evaluate at `x`.
-  have h_synth := (concreteKoszulIsLeviCivita I M g).1 X Y Z
+  have h_synth := (concreteKoszulConnection_isLeviCivita I M g).1 X Y Z
   -- `h_synth : (concreteDerivationEmbedding I M).embed X ((concreteMetricDuality I M g).g Y Z)
   --            = (concreteMetricDuality I M g).g (concreteKoszulConnection I M g X Y) Z
   --              + (concreteMetricDuality I M g).g Y (concreteKoszulConnection I M g X Z)`
@@ -1355,9 +1359,13 @@ private theorem mlieBracket_1jet_invariant
 
 /-! #### The torsion-free theorem -/
 
-/-- **Torsion-free (Mathlib-level) for `concreteKoszulCov`**: the covariant
-derivative `concreteKoszulCov I M g` has vanishing torsion tensor. -/
-theorem concreteKoszulCov_torsion_free
+/-- The concrete Koszul covariant derivative `concreteKoszulCov I M g` on the
+tangent bundle is torsion-free: its Mathlib `CovariantDerivative.torsion` tensor
+is identically zero. The proof reduces via `torsion_eq_zero_iff` to the pointwise
+identity `∇_X Y − ∇_Y X = [X, Y]` for differentiable vector fields, which follows
+from the Synthetic-layer torsion-freeness carried by `concreteKoszulConnection_isLeviCivita`
+after replacing `X, Y` by smooth 1-jet extensions at the point. -/
+theorem concreteKoszulCov_torsion_eq_zero
     (g : Bundle.ContMDiffRiemannianMetric I ω E (TangentSpace I : M → Type _)) :
     (concreteKoszulCov I M g).torsion = 0 := by
   -- Apply `torsion_eq_zero_iff.mpr`: reduce to a pointwise identity for all
@@ -1402,7 +1410,7 @@ theorem concreteKoszulCov_torsion_free
   rw [h_LHS_Y, h_LHS_X]
   -- Step 3: Use the Synthetic `koszul_torsion_free` theorem.
   -- `IsTorsionFree emb conn` gives `conn X' Y' - conn Y' X' = bracket emb X' Y'`.
-  have h_tf := (concreteKoszulIsLeviCivita I M g).2
+  have h_tf := (concreteKoszulConnection_isLeviCivita I M g).2
   -- h_tf : IsTorsionFree (concreteDerivationEmbedding I M) (concreteKoszulConnection I M g)
   have h_tf_eq := h_tf X' Y'
   -- h_tf_eq : concreteKoszulConnection I M g X' Y' - concreteKoszulConnection I M g Y' X'

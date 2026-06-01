@@ -4790,10 +4790,12 @@ private theorem morrey_representative_of_W1pWitness
   · intro x hx
     exact h_sup_ũ x hx
 
-/-- Hölder representative for `MemW1pWitness`: there exists a continuous
-representative `ũ` of `u`, equal to `u` almost everywhere on `B(x₀, R/4)`, and
-satisfying a Hölder bound with exponent `1 - d/p` controlled by the gradient
-`L^p` norm. -/
+/-- Morrey's inequality (Hölder representative). For `p > d`, a `W^{1,p}`
+function `u` on the ball `B(x₀, R)` — given as a `MemW1pWitness` — has a
+continuous representative `ũ` that equals `u` almost everywhere on `B(x₀, R/4)`
+and is Hölder continuous there with exponent `1 - d/p`: on every pair of points
+of `B(x₀, R/4)` the increment is bounded by `C * dist x y ^ (1 - d/p)` times the
+`L^p` norm of the weak gradient over `B(x₀, R)`, for some `C ≥ 0`. -/
 theorem morrey_holder_representative
     {d : ℕ} [NeZero d] {p : ℝ} (hp : (d : ℝ) < p)
     {x₀ : EuclideanSpace ℝ (Fin d)} {R : ℝ} (hR : 0 < R)

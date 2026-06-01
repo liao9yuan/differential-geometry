@@ -35,7 +35,7 @@ turns into the `C^∞`-representative.
 
 ## Main results
 
-* `heatSemigroup_smooth_representative_unconditional` — for every `t > 0`,
+* `heatSemigroup_smooth_representative_of_closed` — for every `t > 0`,
   `heatSemigroup g t u_0` admits a `C^∞` a.e.-representative.
 * `heatSemigroup_smooth_in_space_and_time_unconditional` — the combined
   endpoint: a `C^∞` spatial representative at every `t > 0`, together with
@@ -118,17 +118,17 @@ theorem chartSideH2kBridge_heat_unconditional
 
 /-! ## Headline (1): unconditional spatial smoothing -/
 
-/-- **Truly unconditional smoothing of the heat semigroup**.
+/-- **Smoothing of the heat semigroup on a closed manifold**.
 
 For a closed Riemannian manifold `(M, g)`, `t > 0`, and any initial datum
 `u_0 ∈ Lp ℝ 2 μ_g`, the `Lp` element `heatSemigroup g t u_0` is a.e.-equal
 to a smooth function `u_smooth : M → ℝ` of class `C^∞`. No regularity
 hypothesis on `u_0` is required.
 
-The proof composes the unconditional chart-side bridge family
-`chartSideH2kBridge_heat_unconditional` with the bridge-form smoothing
-theorem `heatSemigroup_smooth_representative_of_chartSideBridges`. -/
-theorem heatSemigroup_smooth_representative_unconditional
+The proof feeds the chart-side bridge family `chartSideH2kBridge_heat_unconditional`
+into the bridge-form smoothing theorem
+`heatSemigroup_smooth_representative_of_chartSideBridges`. -/
+theorem heatSemigroup_smooth_representative_of_closed
     (g : SmoothRiemannianMetric I M)
     {t : ℝ} (ht : 0 < t)
     (u_0 : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :

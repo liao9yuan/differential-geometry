@@ -26,7 +26,7 @@ correction of the partial evaluation.
 
 ## Main results
 
-* `chartTensorRSCovariantDerivative_eq_abstract` — the headline agreement,
+* `chartTensorRSCovariantDerivative_eq_abstract_on_chartLeviCivitaGoodSet` — the headline agreement,
   for smooth `Cₛ^∞` sections, at a chart-α Levi-Civita good-set point `b`.
 -/
 
@@ -230,12 +230,19 @@ private lemma chartTensor0SSlotCorrection_partialEval_eq_chartTensorRSOutputSlot
 
 /-! ## Headline agreement -/
 
-/-- **Headline agreement.** For a smooth Riemannian manifold `(M, g)`, a
-chart-centre `α : M`, a smooth `(r, s)`-tensor section `T`, a smooth tangent
-vector field `X`, and any point `b` on the chart-α Levi-Civita good set,
-the chart-frame and bundled `(r, s)`-tensor covariant derivatives at `b`
-agree. -/
-theorem chartTensorRSCovariantDerivative_eq_abstract
+/-- The chart-frame `(r, s)`-tensor covariant derivative
+`chartTensorRSCovariantDerivative r s g α T X` agrees, at any point `b` of the
+chart-`α` Levi-Civita good set `chartLeviCivitaGoodSet α`, with the bundled
+`(r, s)`-tensor covariant derivative `tensorRSCovariantDerivative` of the
+Levi-Civita connection `LeviCivita g`.
+
+Here `g` is a smooth Riemannian metric, `α : M` is the chart centre, `T` is a
+smooth `Cₛ^∞` `(r, s)`-tensor section, and `X` is a smooth `Cₛ^∞` tangent
+vector field. The good-set membership `hb : b ∈ chartLeviCivitaGoodSet α` is a
+genuine validity-domain hypothesis: it places `b` in the chart-`α`
+trivialisation base set and the interior of the chart target, where the
+chart-frame construction is defined and differentiable. -/
+theorem chartTensorRSCovariantDerivative_eq_abstract_on_chartLeviCivitaGoodSet
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T :
       letI _h_top : TopologicalSpace

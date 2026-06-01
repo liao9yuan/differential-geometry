@@ -15,11 +15,11 @@ combines with the gradient and Laplacian to yield Green's identities.
 
 ## Main results
 
-* `integral_inner_grad_eq_neg_integral_smul_laplacian` (**Green's first identity**):
+* `green_first_integral_inner_grad_eq_neg_integral_smul_laplacian` (**Green's first identity**):
   for smooth `f, h : M → ℝ` with `h` having compact support,
   $$\int_M g(\nabla_g f, \nabla_g h)\,d\mu_g = -\int_M f \cdot \Delta_g h\,d\mu_g.$$
 
-* `integral_smul_laplacian_sub_eq_zero` (**Green's second identity**):
+* `green_second_integral_smul_laplacian_sub_eq_zero` (**Green's second identity**):
   on a closed manifold, for any smooth `f, h : M → ℝ`,
   $$\int_M (f \cdot \Delta_g h - h \cdot \Delta_g f)\,d\mu_g = 0.$$
 -/
@@ -62,12 +62,14 @@ metric yield the integrand `g.inner x (grad_g f x) (grad_g h x)`.
 Because the divergence of `grad_g h` equals the Laplacian `Δ_g h`, the right-
 hand side of the IBP identity becomes the integral of `f · Δ_g h`. -/
 
-/-- **Green's first identity.** For smooth `f, h : M → ℝ` with `h` having
-compact support on a σ-compact Hausdorff smooth Riemannian manifold `(M, g)`
-without boundary,
-$$\int_M g(\nabla_g f, \nabla_g h)\,d\mu_g = -\int_M f \cdot \Delta_g h\,d\mu_g.$$
--/
-theorem integral_inner_grad_eq_neg_integral_smul_laplacian
+/-- **Green's first identity.** For smooth `f, h : M → ℝ` on a σ-compact
+Hausdorff smooth Riemannian manifold `(M, g)` without boundary, with `h`
+compactly supported,
+$$\int_M g(\nabla_g f, \nabla_g h)\,d\mu_g = -\int_M f \cdot \Delta_g h\,d\mu_g,$$
+where the integrals are taken against the Riemannian volume measure `μ_g`.
+Only `h` is required to have compact support; `f` is an arbitrary smooth
+function. -/
+theorem green_first_integral_inner_grad_eq_neg_integral_smul_laplacian
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
     {f h : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (hh : ContMDiff I 𝓘(ℝ, ℝ) ∞ h)
@@ -189,10 +191,13 @@ private theorem integral_inner_grad_eq_neg_integral_smul_laplacian'
     integral_congr_ae (Filter.Eventually.of_forall hRHS_eq)
   rw [← hLHS_int, h_ibp, hRHS_int]
 
-/-- **Green's second identity.** For smooth `f, h : M → ℝ` on a closed (compact
-and boundaryless) smooth Riemannian manifold `(M, g)`,
-$$\int_M (f \cdot \Delta_g h - h \cdot \Delta_g f)\,d\mu_g = 0.$$ -/
-theorem integral_smul_laplacian_sub_eq_zero
+/-- **Green's second identity.** For smooth `f, h : M → ℝ` on a closed (compact,
+Hausdorff and boundaryless) smooth Riemannian manifold `(M, g)`,
+$$\int_M (f \cdot \Delta_g h - h \cdot \Delta_g f)\,d\mu_g = 0,$$
+where the integral is taken against the Riemannian volume measure `μ_g`. On a
+compact manifold every smooth function is compactly supported, so this follows
+by applying Green's first identity once in each argument. -/
+theorem green_second_integral_smul_laplacian_sub_eq_zero
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
     {f h : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (hh : ContMDiff I 𝓘(ℝ, ℝ) ∞ h) :
@@ -203,7 +208,7 @@ theorem integral_smul_laplacian_sub_eq_zero
   have hf_cs : HasCompactSupport f := HasCompactSupport.of_compactSpace _
   have hh_cs : HasCompactSupport h := HasCompactSupport.of_compactSpace _
   -- Green's first with `h` compactly supported.
-  have h1 := integral_inner_grad_eq_neg_integral_smul_laplacian (I := I) g hf hh hh_cs
+  have h1 := green_first_integral_inner_grad_eq_neg_integral_smul_laplacian (I := I) g hf hh hh_cs
   -- Symmetric variant with `f` compactly supported.
   have h2 := integral_inner_grad_eq_neg_integral_smul_laplacian' (I := I) g hf hh hf_cs
   -- From `h1` and `h2`: -∫ f * Δh = -∫ h * Δf, so ∫ f * Δh = ∫ h * Δf.

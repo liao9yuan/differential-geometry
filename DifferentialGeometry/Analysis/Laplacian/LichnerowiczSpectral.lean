@@ -17,7 +17,7 @@ The proof composes two ingredients:
 
 1. **Smooth representative.** For each spectral basis vector
    `b_i := resolventEigenbasisSigma g i`, the unconditional smoothing endpoint
-   of the heat semigroup (`heatSemigroup_smooth_representative_unconditional`)
+   of the heat semigroup (`heatSemigroup_smooth_representative_of_closed`)
    furnishes a smooth function on `M` whose `Lp` class equals `b_i`. The
    heat-semigroup action on basis vectors is multiplication by a nonzero
    exponential factor, so rescaling produces a smooth representative `f` with
@@ -25,13 +25,13 @@ The proof composes two ingredients:
    `lam = (1 - μ) / μ` is the Laplacian eigenvalue associated with
    `μ = i.1.val`).
 2. **The classical Lichnerowicz inequality.** Applied to `f`, the smooth
-   theorem `lichnerowicz_closed_unconditional` yields `n K ≤ lam`.
+   theorem `lichnerowicz_eigenvalue_ge_dim_mul_curvature_of_closed` yields `n K ≤ lam`.
 
 ## Main results
 
 * `laplacianEigenfunction_smooth_representative`: a smooth `f : M → ℝ` with
   `(b_i : M → ℝ) =ᵐ f` and `Δ_g f = -lam * f` pointwise.
-* `lichnerowicz_spectral_unconditional`: the spectral form
+* `lichnerowicz_spectral_eigenvalue_ge_dim_mul_curvature_of_closed`: the spectral form
   `n K ≤ laplacianEigenvalueOf i.1.val` for every basis index whose
   Laplacian eigenvalue is strictly positive.
 
@@ -169,7 +169,7 @@ theorem laplacianEigenfunction_smooth_representative
   set lam : ℝ := laplacianEigenvalueOf i.1.val with hlam_def
   -- Step 1: unconditional spatial smoothing at `t = 1`.
   obtain ⟨u_smooth, hu_smooth_smooth, hu_smooth_ae⟩ :=
-    heatSemigroup_smooth_representative_unconditional
+    heatSemigroup_smooth_representative_of_closed
       (I := I) (M := M) g (t := (1 : ℝ)) (by norm_num : (0 : ℝ) < 1) b_i
   -- Step 2: heat semigroup acts diagonally on basis vectors.
   have h_heat_basis : heatSemigroup (I := I) (M := M) g 1 b_i =
@@ -378,24 +378,25 @@ private lemma laplacianEigenvalueOf_pos_of_lt_one
 set_option maxHeartbeats 800000 in
 /-- **Lichnerowicz's eigenvalue inequality at the spectral level.**
 
-Let `(M, g)` be a closed Riemannian manifold of dimension `n := finrank ℝ E ≥ 2`,
-satisfying the Ricci lower bound `Ric ≥ (n - 1) K g` with `K > 0`. Then
-for every spectral basis index `i` whose Laplacian eigenvalue is strictly
-positive (equivalently, whose resolvent eigenvalue `μ` satisfies `μ < 1`),
-the Laplacian eigenvalue is bounded below by `n K`:
+On a closed Riemannian manifold `(M, g)` of dimension `n := finrank ℝ E ≥ 2`
+satisfying the Ricci lower bound `Ric ≥ (n - 1) K g` with `K > 0`, every
+spectral eigenbasis index `i` whose associated Laplacian eigenvalue
+`lam = laplacianEigenvalueOf i.1.val` is strictly positive satisfies the
+lower bound `n K ≤ lam`.
 
-`n K ≤ laplacianEigenvalueOf i.1.val`.
-
-The strict-positivity hypothesis `0 < laplacianEigenvalueOf i.1.val` excludes
-the trivial eigenspace consisting of locally constant functions (where
-`μ = 1` and `lam = 0`). The conclusion `n K ≤ lam` with `K > 0` is consistent
-only when `lam > 0`, so this hypothesis is in fact a necessary condition for
-the inequality.
+Here `i = ⟨μ, k⟩` ranges over the spectral basis of the variational Laplacian
+(`resolventEigenbasisSigma`), `μ` being a nonzero resolvent eigenvalue and
+`lam = (1 - μ) / μ` the corresponding Laplacian eigenvalue. The
+strict-positivity hypothesis `0 < lam` excludes the trivial eigenspace at
+`μ = 1` (`lam = 0`); since `n K > 0`, it is a necessary condition for the
+inequality, equivalently `μ < 1`. No smoothness hypothesis is placed on the
+basis vectors.
 
 The proof composes `laplacianEigenfunction_smooth_representative`, which
-produces a smooth eigenfunction `f` with `Δ_g f = -lam * f` pointwise, with
-`lichnerowicz_closed_unconditional`. -/
-theorem lichnerowicz_spectral_unconditional
+produces a smooth representative `f` of the basis vector with
+`Δ_g f = -lam * f` pointwise and L²-norm one, with the smooth Lichnerowicz
+inequality `lichnerowicz_eigenvalue_ge_dim_mul_curvature_of_closed` applied to `f`. -/
+theorem lichnerowicz_spectral_eigenvalue_ge_dim_mul_curvature_of_closed
     (g : SmoothRiemannianMetric I M)
     (hn_ge_two : 2 ≤ Module.finrank ℝ E)
     {K : ℝ} (hK : 0 < K)
@@ -445,7 +446,7 @@ theorem lichnerowicz_spectral_unconditional
       rw [h_b_i_norm]; norm_num
     linarith
   -- Step 3: apply Lichnerowicz.
-  exact lichnerowicz_closed_unconditional (I := I) (M := M) g hn_ge_two hK
+  exact lichnerowicz_eigenvalue_ge_dim_mul_curvature_of_closed (I := I) (M := M) g hn_ge_two hK
     hf hlam_pos h_eigen h_ricci h_f_sq_pos
 
 end Laplacian

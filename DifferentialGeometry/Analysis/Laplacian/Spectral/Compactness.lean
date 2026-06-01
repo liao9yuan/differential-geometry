@@ -543,41 +543,43 @@ The following theorems repackage the conditional spectral results from
 `IsCompactOperator (resolventL2 g)` hypothesis using the compactness
 theorem `resolventL2_isCompactOperator` proved above. -/
 
-/-- **Finite-dimensionality of nonzero resolvent eigenspaces, unconditional.**
-For a closed Riemannian manifold `(M, g)`, every eigenspace of
-`resolventL2 g` at a non-zero scalar is finite-dimensional.
-
-This is the unconditional version of the corresponding conditional
-result, with the compactness hypothesis discharged via
-`resolventL2_isCompactOperator`. -/
-theorem resolventEigenspace_finiteDim_unconditional
+/-- For a closed Riemannian manifold `(M, g)`, every eigenspace of the
+`L²`-side resolvent `resolventL2 g` at a non-zero scalar `μ` is
+finite-dimensional. Since a non-zero resolvent eigenvalue `μ` corresponds
+to the Laplacian eigenvalue `(1 - μ)/μ` (see `laplacianEigenvalueOf`),
+this is equivalently the statement that each Laplacian eigenspace is
+finite-dimensional. The compactness
+hypothesis on `resolventL2 g` required by `resolventEigenspace_finiteDim`
+is supplied by `resolventL2_isCompactOperator`. -/
+theorem resolventEigenspace_finiteDim_of_eigenvalue_ne_zero
     (g : SmoothRiemannianMetric I M)
     {μ : ℝ} (hμ : μ ≠ 0) :
     FiniteDimensional ℝ (resolventEigenspace (I := I) (M := M) g μ) :=
   resolventEigenspace_finiteDim (I := I) (M := M) g
     (resolventL2_isCompactOperator (I := I) (M := M) g) hμ
 
-/-- **Spectral totality, unconditional.** For a closed Riemannian manifold
-`(M, g)`, the eigenspaces of `resolventL2 g` span a dense subspace of
-`Lp ℝ 2 μ_g`: the orthogonal complement of their supremum is trivial.
-
-This is the unconditional version of the corresponding conditional
-result, with the compactness hypothesis discharged via
+/-- For a closed Riemannian manifold `(M, g)`, the eigenspaces of the
+`L²`-side resolvent `resolventL2 g` span a dense subspace of
+`Lp ℝ 2 μ_g`: the orthogonal complement of the supremum of
+`resolventEigenspace g μ` over all `μ` is trivial. This is the
+completeness half of the spectral theorem for the compact self-adjoint
+operator `resolventL2 g`. The compactness hypothesis required by
+`resolventEigenspaces_iSup_orthogonal_eq_bot` is supplied by
 `resolventL2_isCompactOperator`. -/
-theorem resolventEigenspaces_iSup_orthogonal_eq_bot_unconditional
+theorem resolventEigenspaces_iSup_orthogonal_eq_bot_on_closed
     (g : SmoothRiemannianMetric I M) :
     (⨆ μ : ℝ, resolventEigenspace (I := I) (M := M) g μ)ᗮ = ⊥ :=
   resolventEigenspaces_iSup_orthogonal_eq_bot (I := I) (M := M) g
     (resolventL2_isCompactOperator (I := I) (M := M) g)
 
-/-- **Discreteness of the resolvent spectrum, unconditional.** For a
-closed Riemannian manifold `(M, g)` and any `ε > 0`, only finitely many
-eigenvalues `μ` of `resolventL2 g` satisfy `|μ| ≥ ε`.
-
-This is the unconditional version of the corresponding conditional
-result, with the compactness hypothesis discharged via
+/-- For a closed Riemannian manifold `(M, g)` and any `ε > 0`, only
+finitely many eigenvalues `μ` of the `L²`-side resolvent `resolventL2 g`
+satisfy `ε ≤ |μ|`. Thus the resolvent spectrum can accumulate only at
+`0`; equivalently, the Laplacian spectrum has no finite accumulation
+point. The compactness hypothesis required by
+`resolvent_eigenvalues_finite_above` is supplied by
 `resolventL2_isCompactOperator`. -/
-theorem resolvent_eigenvalues_finite_above_unconditional
+theorem resolvent_eigenvalues_finite_above_on_closed
     (g : SmoothRiemannianMetric I M) {ε : ℝ} (hε : 0 < ε) :
     Set.Finite { μ : ℝ |
       Module.End.HasEigenvalue

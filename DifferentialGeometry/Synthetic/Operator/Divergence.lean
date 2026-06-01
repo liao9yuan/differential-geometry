@@ -213,8 +213,13 @@ lemma raise_lower_id_11 (met : MetricDuality R V) (atr : AbstractTrace R V)
   rw [hm, hn]
   exact key (m 0) (n 0)
 
-/-- Metric-based divergence equals trace of connection endomorphism. -/
-theorem divergence_eq_tr_conn_endo
+/-- The divergence of a vector field `X` equals the trace of its connection
+    endomorphism `conn_endo conn X : W ↦ conn W X`, i.e. `div X = tr (W ↦ ∇_W X)`.
+    Here `conn` is a connection satisfying the usual additivity and Leibniz
+    axioms in both arguments (`ha`, `hl`, `conn_add_left`, `conn_smul_left`),
+    `met` supplies the metric duality used to lower the covariant differential,
+    and `atr` is the abstract trace. -/
+theorem divergence_eq_trace_conn_endo
     (emb : DerivationEmbedding k R V) (met : MetricDuality R V)
     (atr : AbstractTrace R V) (conn : V → V → V)
     (ha : ∀ X Y Z : V, conn X (Y + Z) = conn X Y + conn X Z)
@@ -242,8 +247,8 @@ theorem divergence_smul
     divergence emb met atr conn ha hl conn_add_left conn_smul_left (f • X) =
     f * divergence emb met atr conn ha hl conn_add_left conn_smul_left X +
     action emb X f := by
-  rw [divergence_eq_tr_conn_endo emb met atr conn ha hl conn_add_left conn_smul_left (f • X),
-      divergence_eq_tr_conn_endo emb met atr conn ha hl conn_add_left conn_smul_left X]
+  rw [divergence_eq_trace_conn_endo emb met atr conn ha hl conn_add_left conn_smul_left (f • X),
+      divergence_eq_trace_conn_endo emb met atr conn ha hl conn_add_left conn_smul_left X]
   have h_endo : conn_endo conn conn_add_left conn_smul_left (f • X) =
       (df_covector emb f).smulRight X + f • conn_endo conn conn_add_left conn_smul_left X := by
     ext W

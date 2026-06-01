@@ -1269,8 +1269,11 @@ set_option maxHeartbeats 1000000 in
 -- construction via `Lp` completeness, and the Minkowski sum-bound for the global
 -- limit. Elaboration of the unified proof body exceeds the default heartbeat
 -- budget for a single declaration.
-/-- Compact embedding `W^{1,p}_chart(M) ↪ L^p(M, μ_g)` on a closed Riemannian
-manifold, in subsequence-extraction form. -/
+/-- Rellich-Kondrachov on a closed Riemannian manifold, in subsequence form: if
+`1 < p` and a sequence `u : ℕ → M → ℝ` has chart Sobolev `W^{1,p}` norms
+(`wkpNormChart`) uniformly bounded by `R`, then some subsequence `u ∘ φ` converges
+in `L^p` of the Riemannian measure (built from the chart partition-of-unity atlas)
+to a limit `u_lim ∈ L^p`. Here `M` is compact and boundaryless (hence closed). -/
 theorem rellich_kondrachov_chart_seq
     {E H : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
     [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [I.Boundaryless]

@@ -264,14 +264,14 @@ lemma secondCovDeriv_weitzenbock
   -- Step 3: Rm block symmetry: g(Rm(X,gf)gf, Y) = -g(Rm(X,gf)Y, gf)
   have rm_flip : met.g (Rm emb conn X gf gf) Y = - met.g (Rm emb conn X gf Y) gf := by
     -- Block symmetry: g(Rm(X,gf)gf, Y) = g(Rm(gf,Y)X, gf)
-    have h_block1 := Rm_symm_blocks emb conn ha conn_add_left met h_mc h_tf X gf gf Y
+    have h_block1 := Rm_pair_symm_of_metricCompatible_torsionFree emb conn ha conn_add_left met h_mc h_tf X gf gf Y
     -- Antisymmetry: Rm(gf,Y) = -Rm(Y,gf)
     have h_anti : Rm emb conn gf Y X = -(Rm emb conn Y gf X) := Rm_antisymm emb conn conn_add_left gf Y X
     have h_neg : met.g (Rm emb conn gf Y X) gf = -met.g (Rm emb conn Y gf X) gf := by
       rw [h_anti, show -(Rm emb conn Y gf X) = (-1 : R) • Rm emb conn Y gf X
         from (neg_one_smul R _).symm, met.g_smul_left]; ring
     -- Block symmetry: g(Rm(Y,gf)X, gf) = g(Rm(X,gf)Y, gf)
-    have h_block2 := Rm_symm_blocks emb conn ha conn_add_left met h_mc h_tf Y gf X gf
+    have h_block2 := Rm_pair_symm_of_metricCompatible_torsionFree emb conn ha conn_add_left met h_mc h_tf Y gf X gf
     -- Chain: g(Rm(X,gf)gf, Y) = g(Rm(gf,Y)X, gf) [h_block1]
     --      = -g(Rm(Y,gf)X, gf) [h_neg]
     --      = -g(Rm(X,gf)Y, gf) [h_block2]
@@ -292,14 +292,16 @@ lemma secondCovDeriv_weitzenbock
 -- 6. Bochner pointwise identity
 -- ============================================================
 
-/-- Pointwise Bochner-Weitzenböck identity:
-    Hess(|∇f|², X, Y) = 2g(∇²_{∇f,X}∇f, Y) - 2g(Rm(X,∇f)Y, ∇f) + 2g(∇_X∇f, ∇_Y∇f).
+/-- **Bochner-Weitzenböck**, untraced pointwise form: for a metric-compatible
+    torsion-free connection, the Hessian of `|∇f|²` evaluated on `X, Y` equals
+    `Hess(|∇f|²)(X,Y) = 2 g(∇²_{∇f,X}∇f, Y) - 2 g(Rm(X,∇f)Y, ∇f) + 2 g(∇_X∇f, ∇_Y∇f)`.
 
-    The trace of the first term gives g(∇f, ∇(Δf)) + Rc(∇f, ∇f),
-    the trace of the second gives -Rc(∇f, ∇f) (absorbed),
-    and the trace of the third gives |∇²f|².
-    Combined: Δ|∇f|² = 2|∇²f|² + 2Rc(∇f, ∇f) + 2g(∇f, ∇(Δf)). -/
-theorem bochner_pointwise
+    Tracing this identity in `(X,Y)` yields the familiar scalar Bochner formula
+    `Δ|∇f|² = 2|∇²f|² + 2 Rc(∇f, ∇f) + 2 g(∇f, ∇(Δf))`, but only the untraced
+    bilinear identity above is proved here. Hypotheses `h_mc`, `h_tf` assume the
+    connection is metric-compatible and torsion-free, and `Invertible (2 : R)` is
+    used to divide. -/
+theorem bochner_hess_gradNormSq_of_metricCompatible_torsionFree
     (emb : DerivationEmbedding k R V)
     (conn : V → V → V)
     (ha : ∀ X Y Z : V, conn X (Y + Z) = conn X Y + conn X Z)

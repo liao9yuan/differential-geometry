@@ -26,7 +26,7 @@ lift of `covGrad_l2NormSq_le_rawConnLap_mul_self`.
 
 ## Order-`2` Gårding from the curvature cross term
 
-The integrated order-`2` Weitzenböck identity `integrated_order2_weitzenbock`
+The integrated order-`2` Weitzenböck identity `weitzenbock_integrated_covGrad_l2_normSq`
 gives, at every rank,
 
 ```
@@ -239,7 +239,7 @@ theorem secondCovGrad_l2NormSq_le_of_cross_bound
                 (rawTensorConnLapSmooth (I := I) g 0 s S)).toFun
             (covGrad (I := I) (M := M) g 0 s S).toFun := by
     rw [hnHess_def, hnLap_def]
-    exact integrated_order2_weitzenbock (I := I) (M := M) g s S
+    exact weitzenbock_integrated_covGrad_l2_normSq (I := I) (M := M) g s S
   -- The order-`1` control: `nGrad² ≤ nLap · nS`.
   have horder1 : nGrad ^ 2 ≤ nLap * nS := by
     rw [hnGrad_def, hnLap_def, hnS_def]

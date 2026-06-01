@@ -50,7 +50,7 @@ prefer the `y`-parametrisation.
 ## Strategy
 
 1. Apply the first-derivative chart agreement
-   `chartTensorRSCovariantDerivative_eq_abstract` to rewrite
+   `chartTensorRSCovariantDerivative_eq_abstract_on_chartLeviCivitaGoodSet` to rewrite
    `cov_RS T b (B b)` as the chart-frame value
    `chartTensorRSCovariantDerivative r s g α T B b`.
 2. Unfold via `chartTensorRSCovariantDerivative_def` into the three-piece sum
@@ -198,7 +198,7 @@ theorem chart_pulled_covApply_explicit_formula
   --   = `chartTensorRSCovariantDerivative r s g α T.toFun B.toFun b`
   --   via the first-derivative chart agreement.
   have hAgree :=
-    chartTensorRSCovariantDerivative_eq_abstract (I := I) (M := M)
+    chartTensorRSCovariantDerivative_eq_abstract_on_chartLeviCivitaGoodSet (I := I) (M := M)
       g r s α T B (b := b) hb
   -- `tensorRSChartE_section_repr r s α (covApply ...) b` is by definition
   -- `triv.continuousLinearMapAt ℝ b ((covApply cov_RS B T) b)`, and

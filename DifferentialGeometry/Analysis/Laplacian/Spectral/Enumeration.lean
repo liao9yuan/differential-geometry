@@ -28,7 +28,7 @@ ascending enumeration `n ↦ λ_n` of the distinct nonzero Laplacian eigenvalues
   is infinite, `laplacianEigenvalueAscending g` is strictly increasing.
 * `laplacianEigenvalueAscending_mem_of_infinite`: each iterate lies in the
   eigenvalue set.
-* `tendsto_laplacianEigenvalueAscending_atTop`: under the same hypothesis,
+* `laplacianEigenvalueAscending_tendsto_atTop_of_infinite`: under the same hypothesis,
   `laplacianEigenvalueAscending g n → ∞` as `n → ∞`.
 * `laplacianEigenvalueAscending_zero_eq_sInf`: the first iterate equals the
   infimum of the eigenvalue set when it is nonempty (`λ_0 = λ_1` in the
@@ -114,12 +114,12 @@ private lemma resolvent_val_eq_of_laplacianEigenvalueOf
   field_simp
   linarith
 
-/-- For any threshold `N`, only finitely many distinct nonzero Laplacian
-eigenvalues are `≤ N`.
+/-- For any threshold `N`, the set of distinct nonzero Laplacian eigenvalues
+that are `≤ N` is finite.
 
-The proof translates `λ = (1 - μ)/μ ≤ N` (with `μ ∈ (0, 1)`) to
-`μ ≥ 1 / (N + 1)`, then applies the unconditional finiteness of
-resolvent eigenvalues on `{|μ| ≥ ε}`. -/
+The proof translates `λ = (1 - μ)/μ ≤ N` (with `μ ∈ (0, 1)`) into the bound
+`μ ≥ 1 / (N + 1)`, then applies the finiteness of the resolvent eigenvalues on
+the shell `{|μ| ≥ ε}` with `ε = 1 / (N + 1)`. -/
 theorem nonzeroLaplacianEigenvalueSet_finite_below
     (g : SmoothRiemannianMetric I M) (N : ℝ) :
     Set.Finite { lam : ℝ |
@@ -134,7 +134,7 @@ theorem nonzeroLaplacianEigenvalueSet_finite_below
         Set.Finite { μ : ℝ |
           Module.End.HasEigenvalue
             ((resolventL2 (I := I) (M := M) g).toLinearMap) μ ∧ ε ≤ |μ| } :=
-      resolvent_eigenvalues_finite_above_unconditional
+      resolvent_eigenvalues_finite_above_on_closed
         (I := I) (M := M) g hε_pos
     -- Strategy: show that the image of S under `f lam := 1/(lam+1)` is a
     -- subset of the shell, and the map is injective on S. Then `S` is
@@ -409,9 +409,10 @@ theorem laplacianEigenvalueAscending_strictMono_of_infinite
 
 /-! ## Tendsto: the enumeration tends to infinity -/
 
-/-- Under the infinity hypothesis, `laplacianEigenvalueAscending g n` tends to
-infinity as `n → ∞`. -/
-theorem tendsto_laplacianEigenvalueAscending_atTop
+/-- If the set of distinct nonzero Laplacian eigenvalues is infinite, then the
+ascending enumeration `laplacianEigenvalueAscending g n` tends to `+∞` as
+`n → ∞`. -/
+theorem laplacianEigenvalueAscending_tendsto_atTop_of_infinite
     (g : SmoothRiemannianMetric I M)
     (h_inf : (nonzeroLaplacianEigenvalueSet (I := I) (M := M) g).Infinite) :
     Filter.Tendsto (laplacianEigenvalueAscending (I := I) (M := M) g)

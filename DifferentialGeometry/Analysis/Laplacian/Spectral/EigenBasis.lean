@@ -154,7 +154,7 @@ end NonzeroResolventEigenvalue
 
 We exhibit the underlying set of nonzero eigenvalues as a countable union of
 finite shells `{|μ| ≥ 1/(n+1)}`, each of which is finite by the discrete-
-spectrum theorem `resolvent_eigenvalues_finite_above_unconditional`. -/
+spectrum theorem `resolvent_eigenvalues_finite_above_on_closed`. -/
 
 /-- The set of nonzero eigenvalues of `R = resolventL2 g`, exhibited as the
 countable union over `n : ℕ` of the finite shells `{μ | μ ≠ 0 ∧ HasEigenvalue
@@ -198,7 +198,7 @@ theorem nonzero_resolvent_eigenvalues_set_countable
   intro n
   -- The shell `{μ | HasEigenvalue ... μ ∧ 1/(n+1) ≤ |μ|}` is finite.
   have h_pos : (0 : ℝ) < 1 / (n + 1) := by positivity
-  exact (resolvent_eigenvalues_finite_above_unconditional
+  exact (resolvent_eigenvalues_finite_above_on_closed
     (I := I) (M := M) g h_pos).countable
 
 /-- The subtype `{μ : ℝ // μ ≠ 0 ∧ HasEigenvalue ... μ}` (i.e.
@@ -262,7 +262,7 @@ instance NonzeroResolventEigenvalue.instFiniteDimensional
     (μ : NonzeroResolventEigenvalue (I := I) (M := M) g) :
     FiniteDimensional ℝ
       (resolventEigenspace (I := I) (M := M) g μ.val) :=
-  resolventEigenspace_finiteDim_unconditional (I := I) (M := M) g μ.val_ne_zero
+  resolventEigenspace_finiteDim_of_eigenvalue_ne_zero (I := I) (M := M) g μ.val_ne_zero
 
 /-! ## Per-eigenspace orthonormal basis -/
 
@@ -474,7 +474,7 @@ theorem span_resolventEigenbasisVec_eq_iSup_eigenspace
 /-! ## Density: the orthogonal complement of the eigenbasis span is `⊥`
 
 The orthogonal complement of `iSup over all real μ` of the eigenspaces is
-trivial by `resolventEigenspaces_iSup_orthogonal_eq_bot_unconditional`. The
+trivial by `resolventEigenspaces_iSup_orthogonal_eq_bot_on_closed`. The
 zero eigenspace is `⊥`, so dropping it from the iSup is harmless. -/
 
 /-- The orthogonal complement of the supremum (over nonzero eigenvalues) of
@@ -496,7 +496,7 @@ theorem nonzero_iSup_resolventEigenspace_orthogonal_eq_bot
         resolventEigenspace (I := I) (M := M) g μ.val) =
       (⨆ μ : ℝ, resolventEigenspace (I := I) (M := M) g μ) by
     rw [h_iSup_eq]
-    exact resolventEigenspaces_iSup_orthogonal_eq_bot_unconditional
+    exact resolventEigenspaces_iSup_orthogonal_eq_bot_on_closed
       (I := I) (M := M) g
   -- We prove the two iSups are equal by mutual ≤.
   refine le_antisymm ?_ ?_

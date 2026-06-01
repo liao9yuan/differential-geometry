@@ -236,10 +236,14 @@ noncomputable def concreteKoszulConnection
 
 /-! ### Koszul connection is Levi-Civita -/
 
-/-- The concrete Koszul connection is the Levi-Civita connection: it is both
-metric-compatible and torsion-free. This follows directly from the Synthetic
-layer's `levi_civita_exists`. -/
-theorem concreteKoszulIsLeviCivita
+/-- The concrete Koszul connection `concreteKoszulConnection I M g` on smooth tangent
+sections is a Levi-Civita connection for the metric `g`: it is metric-compatible and
+torsion-free (`IsLeviCivita`).
+
+This instantiates the Synthetic-layer existence result `levi_civita_exists` at the
+concrete derivation embedding `concreteDerivationEmbedding I M` and the concrete metric
+duality `concreteMetricDuality I M g`. -/
+theorem concreteKoszulConnection_isLeviCivita
     (g : Bundle.ContMDiffRiemannianMetric I ω E (TangentSpace I : M → Type _)) :
     IsLeviCivita (concreteDerivationEmbedding I M)
       (concreteKoszulConnection I M g)
@@ -287,10 +291,15 @@ theorem concreteKoszul_leibniz
 
 /-! ### Uniqueness: any Levi-Civita connection equals the Koszul connection -/
 
-/-- Any connection that is both metric-compatible and torsion-free must equal
-the Koszul connection. This is the concrete instantiation of
-`levi_civita_unique` from the Synthetic layer. -/
-theorem concreteKoszul_unique
+/-- Uniqueness of the Levi-Civita connection in the concrete setting: any connection
+`conn` on smooth tangent sections that is additive in each argument (`ha`, `hal`),
+satisfies the Leibniz rule with respect to `concreteDerivationEmbedding I M` (`hl`), and
+is metric-compatible (`h_mc`) and torsion-free (`h_tf`) agrees with the concrete Koszul
+connection `concreteKoszulConnection I M g`.
+
+This instantiates the Synthetic-layer uniqueness result `levi_civita_unique` at the
+concrete derivation embedding and metric duality. -/
+theorem concreteKoszulConnection_unique_of_isLeviCivita
     (g : Bundle.ContMDiffRiemannianMetric I ω E (TangentSpace I : M → Type _))
     (conn : V_k I M → V_k I M → V_k I M)
     (ha : ∀ X Y Z, conn X (Y + Z) = conn X Y + conn X Z)

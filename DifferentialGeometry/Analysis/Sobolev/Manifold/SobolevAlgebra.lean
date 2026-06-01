@@ -49,7 +49,7 @@ The fully bilinear estimate
 requires a manifold-level `C^{0,α}` Hölder Morrey embedding (or equivalent
 `C^1` Sobolev embedding for `p > n`), so that the gradient of `u` in chart
 coordinates can be bounded by `wkpNormChart u`. The current
-`morrey_chart_C0_embedding` gives only the `C^0` bound. Extending to the
+`morrey_C0_embedding_of_compact` gives only the `C^0` bound. Extending to the
 bilinear estimate is intentionally outside the scope of this development.
 -/
 
@@ -618,7 +618,7 @@ for all smooth `u v : M → ℝ`. The constant `C ≥ 0` depends on `g`, `p`, an
 manifold geometry, but not on `u` or `v`.
 
 The proof combines per-chart Leibniz expansions with the manifold Morrey
-embedding `morrey_chart_C0_embedding` (delivered via the smooth-input variant
+embedding `morrey_C0_embedding_of_compact` (delivered via the smooth-input variant
 `smooth_manifold_morrey_sup_bound_uniform`).
 -/
 

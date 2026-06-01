@@ -37,9 +37,9 @@ unconditionally, so a positive existence time always exists.
 
 * `duhamelCM_contractingWith` — `duhamelCM` is a contraction whenever
   `(L : ℝ) * T < 1`.
-* `semilinear_parabolic_existence` — existence of a positive time `T` and
+* `semilinear_mild_solution_existence` — existence of a positive time `T` and
   a continuous mild solution on `[0, T]`.
-* `semilinear_parabolic_unique` — two continuous mild solutions on the
+* `semilinear_mild_solution_unique` — two continuous mild solutions on the
   same interval `[0, T]` (with `(L : ℝ) * T < 1`) coincide.
 -/
 
@@ -230,7 +230,7 @@ The existence time `T := 1 / (L + 1)` is positive and makes the
 nonlinear Duhamel map a contraction on the path space; its unique fixed
 point, extended off `[0, T]` by `Set.IccExtend`, is the mild
 solution. -/
-theorem semilinear_parabolic_existence (S : BoundedC0Semigroup X)
+theorem semilinear_mild_solution_existence (S : BoundedC0Semigroup X)
     (u₀ : X) {N : X → X} {L : ℝ≥0} (hN : LipschitzWith L N) :
     ∃ T : ℝ, 0 < T ∧ ∃ u : ℝ → X,
       ContinuousOn u (Set.Icc 0 T) ∧
@@ -370,7 +370,7 @@ Duhamel integral equation with the same initial datum `u₀` coincide on
 Each solution restricts to a fixed point of the contracting Duhamel
 self-map `duhamelCM`; uniqueness of the Banach fixed point forces the
 two restrictions — hence the two paths on `[0, T]` — to be equal. -/
-theorem semilinear_parabolic_unique (S : BoundedC0Semigroup X) (u₀ : X)
+theorem semilinear_mild_solution_unique (S : BoundedC0Semigroup X) (u₀ : X)
     {N : X → X} {L : ℝ≥0} (hN : LipschitzWith L N) {T : ℝ} (hT : 0 < T)
     (hTL : (L : ℝ) * T < 1) {u v : ℝ → X}
     (hu : ContinuousOn u (Set.Icc 0 T)) (hv : ContinuousOn v (Set.Icc 0 T))

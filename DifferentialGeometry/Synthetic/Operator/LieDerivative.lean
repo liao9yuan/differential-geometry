@@ -35,8 +35,10 @@ private lemma g_sub_right (met : MetricDuality R V) (A B C : V) :
     met.g A (B - C) = met.g A B - met.g A C := by
   rw [met.g_symm A (B - C), g_sub_left, met.g_symm B, met.g_symm C]
 
-/-- The Lie derivative of the metric equals the symmetrized covariant derivative. -/
-theorem lieDerivMetric_eq_nabla
+/-- For a metric-compatible (`h_mc`), torsion-free (`h_tf`) connection `conn`, the Lie
+derivative of the metric along `X` equals the symmetrized covariant derivative of `X`:
+`(L_X g)(Y, Z) = g(∇_Y X, Z) + g(Y, ∇_Z X)`. -/
+theorem lieDerivMetric_eq_symmetrized_conn_of_isLeviCivita
     (emb : DerivationEmbedding k R V)
     (met : MetricDuality R V)
     (conn : V → V → V)

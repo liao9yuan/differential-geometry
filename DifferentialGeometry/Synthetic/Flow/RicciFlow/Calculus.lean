@@ -62,14 +62,14 @@ variable [CommRing A] [Algebra R A]
 /-- Scalar curvature evolution under Ricci flow:
     ∂_t R = 2|Rc|² + metric_trace_g(t)(∂_t Rc).
 
-    Extracted from `scalar_curvature_evolution` using the bundled data. -/
+    Extracted from `hamilton_scalar_curvature_evolution_of_ricci_flow` using the bundled data. -/
 theorem RicciFlowData.dt_R (D : RicciFlowData k R V Time A) (t : Time) :
     D.td.dt_apply (fun s => ScalarCurvature D.emb (D.conn_fam s) (D.ha_fam s) (D.hal_fam s) (D.hsl_fam s) (D.hl_fam s) D.atr (D.g_fam s)) t =
     2 * ricci_norm_sq D.emb (D.conn_fam t) (D.ha_fam t) (D.hal_fam t) (D.hsl_fam t) (D.hl_fam t) D.atr (D.g_fam t) +
     metric_trace (D.g_fam t) D.atr (0 : Fin 2) (0 : Fin 1)
       (dt_tensor D.td t (fun s => ricciForm_tensor D.emb (D.conn_fam s) (D.ha_fam s) (D.hal_fam s) (D.hsl_fam s) (D.hl_fam s) D.atr)
         D.h_Rc_smooth) ![] ![] :=
-  scalar_curvature_evolution D.emb D.td D.atr D.g_fam D.h_met D.conn_fam
+  hamilton_scalar_curvature_evolution_of_ricci_flow D.emb D.td D.atr D.g_fam D.h_met D.conn_fam
     D.ha_fam D.hal_fam D.hsl_fam D.hl_fam D.h_Rc_smooth D.ricci_flow D.h_sc_prod t
 
 /-- Gradient evolution under Ricci flow for a time-independent scalar:
@@ -79,7 +79,7 @@ theorem RicciFlowData.dt_grad (D : RicciFlowData k R V Time A)
     D.td.dt_apply (fun s => (D.g_fam t).g (grad D.emb (D.g_fam s) u) Y) t =
     2 * ricciForm_tensor D.emb (D.conn_fam t) (D.ha_fam t) (D.hal_fam t) (D.hsl_fam t) (D.hl_fam t) D.atr
       ![grad D.emb (D.g_fam t) u, Y] ![] :=
-  gradient_evolution D.emb D.td D.atr D.g_fam D.h_met D.conn_fam
+  grad_evolution_of_ricci_flow D.emb D.td D.atr D.g_fam D.h_met D.conn_fam
     D.ha_fam D.hal_fam D.hsl_fam D.hl_fam D.ricci_flow D.h_mvp u Y t
 
 /-- Gradient squared evolution under Ricci flow:
@@ -94,7 +94,7 @@ theorem RicciFlowData.dt_grad_sq (D : RicciFlowData k R V Time A)
       ![grad D.emb (D.g_fam t) (u t), grad D.emb (D.g_fam t) (u t)] ![] +
     2 * (D.g_fam t).g (grad D.emb (D.g_fam t) (u t))
                       (grad D.emb (D.g_fam t) (D.td.dt_apply u t)) :=
-  gradient_squared_evolution D.emb D.td D.atr D.g_fam D.h_met D.conn_fam
+  grad_normSq_evolution_of_ricci_flow D.emb D.td D.atr D.g_fam D.h_met D.conn_fam
     D.ha_fam D.hal_fam D.hsl_fam D.hl_fam D.ricci_flow D.h_mfp D.spatial_temporal_comm u hu t
 
 /-- Laplacian evolution under Ricci flow:
@@ -111,7 +111,7 @@ theorem RicciFlowData.dt_laplacian (D : RicciFlowData k R V Time A)
       (hessian_fam t) +
     metric_trace (D.g_fam t) D.atr (0 : Fin 2) (0 : Fin 1)
       (dt_tensor D.td t hessian_fam h_hess_smooth) ![] ![] :=
-  laplacian_evolution D.emb D.td D.atr D.g_fam D.h_met D.conn_fam
+  hamilton_laplacian_evolution_of_ricci_flow D.emb D.td D.atr D.g_fam D.h_met D.conn_fam
     D.ha_fam D.hal_fam D.hsl_fam D.hl_fam D.ricci_flow hessian_fam h_hess_smooth h_lap_prod t
 
 /-- Ricci tensor evolution (pointwise extraction):

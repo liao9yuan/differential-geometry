@@ -53,7 +53,7 @@ hyperplane).
 ## Scope note
 
 The headline iterated `C^0`-embedding on `M` requires the manifold-side
-Morrey embedding (`morrey_chart_C0_embedding`) at the super-critical
+Morrey embedding (`morrey_C0_embedding_of_compact`) at the super-critical
 exponent and the manifold-side measure bridge to the riemannian measure,
 both of which are currently provided only in the boundaryless setting.
 Establishing those in the with-boundary setting is downstream

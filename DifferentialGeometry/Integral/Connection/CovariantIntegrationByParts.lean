@@ -29,7 +29,7 @@ directional derivative `V(f)` via the directional metric-compatibility identity
   **combined integration-by-parts identity**: the integral of
   `⟨∇_V W, S⟩ + ⟨W, ∇_V S⟩ + ⟨W, S⟩ · divᵍ V` vanishes. This form requires no
   separate integrability hypotheses.
-* `integral_tensorInner_covDeriv_eq` — the **split integration-by-parts
+* `integral_tensorInner_covDeriv_integrationByParts` — the **split integration-by-parts
   identity** in the form `∫ ⟨W, ∇_V S⟩ = -∫ ⟨∇_V W, S⟩ - ∫ ⟨W, S⟩ · divᵍ V`,
   obtained from the combined identity once the two cross terms are known to be
   integrable.
@@ -281,16 +281,20 @@ Once the two cross terms `⟨∇_V W, S⟩` and `⟨W, ∇_V S⟩` are known to 
 integrable, the combined identity rearranges into the standard
 `∫ ⟨W, ∇_V S⟩ = -∫ ⟨∇_V W, S⟩ - ∫ ⟨W, S⟩ · divᵍ V` form. -/
 
-/-- **Covariant integration by parts (split form).** For a closed smooth
-Riemannian manifold `(M, g)`, a smooth tangent vector field `V`, and smooth
-`(r, s)`-tensor sections `W`, `S` whose pointwise inner product is smooth, with
-the two covariant cross terms integrable,
+/-- **Covariant integration by parts (split form).** On a closed smooth
+Riemannian manifold `(M, g)`, for a smooth tangent vector field `V` and smooth
+`(r, s)`-tensor sections `W`, `S`,
 
   `∫_M ⟨W, ∇_V S⟩ dvol_g
      = -∫_M ⟨∇_V W, S⟩ dvol_g - ∫_M ⟨W, S⟩ · divᵍ V dvol_g`,
 
-where `∇_V` is the metric-lowered directional covariant derivative. -/
-theorem integral_tensorInner_covDeriv_eq
+where `∇_V` is the metric-lowered directional covariant derivative
+`loweredCovDerivAt` and `⟨·, ·⟩` is the covariant inner product of the
+metric-lowered tensors. The hypotheses are that the pointwise inner product
+`y ↦ ⟨W y, S y⟩` is smooth (`hWS`) and that the two covariant cross terms
+`⟨∇_V W, S⟩` and `⟨W, ∇_V S⟩` are integrable against `dvol_g` (`hWcov_int`,
+`hScov_int`); these let the combined identity be split term by term. -/
+theorem integral_tensorInner_covDeriv_integrationByParts
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (W S : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯)
     (V : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)

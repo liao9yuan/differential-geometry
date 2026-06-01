@@ -25,7 +25,7 @@ boundary).
 
 The volume-variation formula is re-exported in this directory under a
 navigationally-convenient name, without modifying its hypotheses. The
-underlying `volume_variation_formula_clean` does not require
+underlying `first_variation_of_volume` does not require
 `[I.Boundaryless]`, so the same formula applies in the with-boundary
 setting unchanged.
 
@@ -346,7 +346,7 @@ end StokesGlobal
 /-! ## Volume-variation formula re-export
 
 The clean volume-variation formula
-`DifferentialGeometry.Integral.Measure.Family.volume_variation_formula_clean`
+`DifferentialGeometry.Integral.Measure.Family.first_variation_of_volume`
 does not require `[I.Boundaryless]`: it relies only on the chart-by-chart
 formulation of the Riemannian volume measure and on Jacobi's formula for
 the determinant of a smooth matrix family, neither of which uses the
@@ -365,7 +365,7 @@ $$\int_M \bigl(\partial_t f\bigr|_{t_0}
       f(t_0, \cdot)\bigr)\,d\mu_{g(t_0)}.$$
 
 This is `DifferentialGeometry.Integral.DivergenceTheorem.volumeVariation_hasDerivAt`
-with the underlying `volume_variation_formula_clean` requiring no
+with the underlying `first_variation_of_volume` requiring no
 `[I.Boundaryless]` assumption — the same formula applies in the
 with-boundary setting unchanged. -/
 theorem volumeVariation_hasDerivAt_with_boundary
@@ -380,7 +380,7 @@ theorem volumeVariation_hasDerivAt_with_boundary
               + (1/2) * traceTimeDerivMetric (I := I) g_fam t₀ x * f t₀ x)
           ∂(riemannianMeasureFamily (I := I) (M := M) g_fam t₀))
       t₀ :=
-  volume_variation_formula_clean (I := I) (M := M) (g_fam := g_fam)
+  first_variation_of_volume (I := I) (M := M) (g_fam := g_fam)
     (f := f) (t₀ := t₀) hg hf
 
 end WithBoundary

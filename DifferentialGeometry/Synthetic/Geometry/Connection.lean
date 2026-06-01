@@ -185,7 +185,12 @@ variable {k R V : Type*}
 variable [Field k] [CommRing R] [Algebra k R]
 variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
 
-theorem first_bianchi (emb : DerivationEmbedding k R V) (conn : V → V → V)
+/-- **First Bianchi identity.** For a torsion-free connection `conn` (additive in its
+second argument), the cyclic sum of the Riemann curvature endomorphism vanishes:
+`Rm(X,Y)Z + Rm(Y,Z)X + Rm(Z,X)Y = 0`. The proof rewrites the cyclic sum, using
+torsion-freeness to turn second-order terms into single covariant derivatives of
+brackets, and closes with the Jacobi identity for the bracket. -/
+theorem bianchi_first_Rm_cyclic_sum_zero_of_torsionFree (emb : DerivationEmbedding k R V) (conn : V → V → V)
     (ha : ∀ X Y Z, conn X (Y + Z) = conn X Y + conn X Z)
     (_hal : ∀ X Y Z, conn (X + Y) Z = conn X Z + conn Y Z)
     (h_tf : IsTorsionFree emb conn)
@@ -217,7 +222,7 @@ theorem first_bianchi (emb : DerivationEmbedding k R V) (conn : V → V → V)
 end Bianchi
 
 -- ============================================================
--- Koszul formula (levi_civita_uniqueness)
+-- Koszul formula (koszul_formula_of_metricCompatible_torsionFree)
 -- ============================================================
 
 section Koszul
@@ -238,10 +243,13 @@ private theorem g_sub_right' (met : MetricDuality R V) (A B C : V) :
     met.g A (B - C) = met.g A B - met.g A C := by
   rw [met.g_symm A (B - C), g_sub_left' met B C A, met.g_symm B A, met.g_symm C A]
 
-/-- Koszul formula: any metric-compatible torsion-free connection satisfies
-    2·g(∇_X Y, Z) = X(g(Y,Z)) + Y(g(Z,X)) - Z(g(X,Y))
-                   - g(X, [Y,Z]) + g(Y, [Z,X]) + g(Z, [X,Y]). -/
-theorem levi_civita_uniqueness
+/-- **Koszul formula.** Any metric-compatible, torsion-free connection `conn` satisfies
+`2·g(∇_X Y, Z) = X(g(Y,Z)) + Y(g(Z,X)) - Z(g(X,Y)) - g(X,[Y,Z]) + g(Y,[Z,X]) + g(Z,[X,Y])`.
+This expresses the connection in terms of the metric and brackets; it is the identity
+underlying uniqueness of the Levi-Civita connection (uniqueness itself is a separate
+statement). The proof expands the brackets via torsion-freeness, distributes the metric
+over the resulting differences, and applies metric compatibility three times. -/
+theorem koszul_formula_of_metricCompatible_torsionFree
     (emb : DerivationEmbedding k R V)
     (conn : V → V → V)
     (_ha : ∀ X Y Z, conn X (Y + Z) = conn X Y + conn X Z)
@@ -276,9 +284,12 @@ variable {k R V : Type*}
 variable [Field k] [CommRing R] [Algebra k R]
 variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
 
-/-- g(Rm(X,Y)Z, W) = -g(Rm(X,Y)W, Z): the Riemann curvature is skew-symmetric
-    in the last two arguments with respect to the metric. -/
-theorem Rm_metric_antisymm
+/-- For a metric-compatible connection, the Riemann curvature is skew-symmetric in its
+last two arguments with respect to the metric: `g(Rm(X,Y)Z, W) = -g(Rm(X,Y)W, Z)`.
+The proof differentiates the metric-compatibility identity a second time to expand
+`X(Y(g(Z,W)))` and `Y(X(g(Z,W)))`, uses `action_bracket` for the `[X,Y]` term, and
+collects the curvature terms so the cross terms cancel. -/
+theorem Rm_metric_skew_last_two_of_metricCompatible
     (emb : DerivationEmbedding k R V)
     (conn : V → V → V)
     (met : MetricDuality R V)
@@ -345,7 +356,12 @@ noncomputable def covDerivRm (emb : DerivationEmbedding k R V) (conn : V → V �
   conn X (Rm emb conn Y Z W) - Rm emb conn (conn X Y) Z W
   - Rm emb conn Y (conn X Z) W - Rm emb conn Y Z (conn X W)
 
-theorem second_bianchi
+/-- **Second Bianchi identity.** For a torsion-free connection `conn` (additive in each
+argument), the cyclic sum of covariant derivatives of the Riemann tensor vanishes:
+`(∇_X Rm)(Y,Z)W + (∇_Y Rm)(Z,X)W + (∇_Z Rm)(X,Y)W = 0`, where `∇ Rm` is `covDerivRm`.
+The proof expands all twelve second-order terms, pairs them via torsion-freeness into
+covariant derivatives of double brackets, and closes with the Jacobi identity. -/
+theorem bianchi_second_covDerivRm_cyclic_sum_zero_of_torsionFree
     (emb : DerivationEmbedding k R V)
     (conn : V → V → V)
     (ha : ∀ X Y Z, conn X (Y + Z) = conn X Y + conn X Z)
@@ -355,7 +371,7 @@ theorem second_bianchi
     covDerivRm emb conn X Y Z W + covDerivRm emb conn Y Z X W +
     covDerivRm emb conn Z X Y W = 0 := by
   -- ∇_X Rm(Y,Z)W = conn X (Rm Y Z W) - Rm(∇XY,Z)W - Rm(Y,∇XZ)W - Rm(Y,Z,∇XW)
-  -- Use first_bianchi on the bracket-level structure:
+  -- Use bianchi_first_Rm_cyclic_sum_zero_of_torsionFree on the bracket-level structure:
   -- After expanding, the sum telescopes to bracket(bracket) terms which vanish by Jacobi.
   have t : ∀ A B, bracket emb A B = conn A B - conn B A := fun A B => (h_tf A B).symm
   have sl : ∀ A B C, conn (A - B) C = conn A C - conn B C := conn_sub_left conn hal

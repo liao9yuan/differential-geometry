@@ -39,7 +39,7 @@ theorem MetricDuality.g_sub_right (met : MetricDuality R V) (A B C : V) :
 end MetricHelpers
 
 -- ============================================================
--- Rm_symm_blocks: g(Rm(X,Y)Z, W) = g(Rm(Z,W)X, Y)
+-- Rm_pair_symm_of_metricCompatible_torsionFree: g(Rm(X,Y)Z, W) = g(Rm(Z,W)X, Y)
 -- ============================================================
 
 section RmSymmBlocks
@@ -55,13 +55,15 @@ private theorem metric_bianchi
     (h_tf : IsTorsionFree emb conn) (A B C D : V) :
     met.g (Rm emb conn A B C) D + met.g (Rm emb conn B C A) D +
     met.g (Rm emb conn C A B) D = 0 := by
-  have h := first_bianchi emb conn ha hal h_tf A B C
+  have h := bianchi_first_Rm_cyclic_sum_zero_of_torsionFree emb conn ha hal h_tf A B C
   have hc : Rm emb conn C A B = -(Rm emb conn A B C + Rm emb conn B C A) :=
     eq_neg_of_add_eq_zero_right h
   rw [hc, met.g_neg_left, met.g_add_left]; ring
 
-/-- Block symmetry: g(Rm(X,Y)Z, W) = g(Rm(Z,W)X, Y). Needs char ≠ 2. -/
-theorem Rm_symm_blocks
+/-- Pair (block) symmetry of the Riemann curvature tensor:
+`g(Rm(X,Y)Z, W) = g(Rm(Z,W)X, Y)`, for a metric-compatible (`h_mc`), torsion-free
+(`h_tf`) connection. Requires `2` invertible in `R` (characteristic `≠ 2`). -/
+theorem Rm_pair_symm_of_metricCompatible_torsionFree
     (emb : DerivationEmbedding k R V) (conn : V → V → V)
     (ha : ∀ X Y Z, conn X (Y + Z) = conn X Y + conn X Z)
     (hal : ∀ X Y Z, conn (X + Y) Z = conn X Z + conn Y Z)
@@ -72,7 +74,7 @@ theorem Rm_symm_blocks
     (X Y Z W : V) :
     met.g (Rm emb conn X Y Z) W = met.g (Rm emb conn Z W X) Y := by
   have mb := metric_bianchi emb conn ha hal met h_tf
-  have anti34 := Rm_metric_antisymm emb conn met h_mc
+  have anti34 := Rm_metric_skew_last_two_of_metricCompatible emb conn met h_mc
   have anti_comb : ∀ A B C D,
       met.g (Rm emb conn A B C) D = met.g (Rm emb conn B A D) C := by
     intro A B C D
@@ -519,7 +521,7 @@ theorem levi_civita_unique (emb : DerivationEmbedding k R V)
     eq_of_sub_eq_zero hsuff
   apply char_ne_2_of_invertible_two
   have spec := koszul_connection_spec emb met X Y Z
-  have koszul := levi_civita_uniqueness emb conn ha hal hl met h_mc h_tf X Y Z
+  have koszul := koszul_formula_of_metricCompatible_torsionFree emb conn ha hal hl met h_mc h_tf X Y Z
   simp only [koszul_rhs] at spec
   linear_combination koszul - spec
 
@@ -705,7 +707,7 @@ variable {k R V : Type*}
 variable [Field k] [CommRing R] [Algebra k R]
 variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
 
-/-- The second Bianchi identity at the vector level (= second_bianchi restated). -/
+/-- The second Bianchi identity at the vector level (= bianchi_second_covDerivRm_cyclic_sum_zero_of_torsionFree restated). -/
 theorem covDerivRm_sum_endo
     (emb : DerivationEmbedding k R V) (conn : V → V → V)
     (ha : ∀ X Y Z, conn X (Y + Z) = conn X Y + conn X Z)
@@ -713,6 +715,6 @@ theorem covDerivRm_sum_endo
     (h_tf : IsTorsionFree emb conn) (X Y Z W : V) :
     covDerivRm emb conn X Y Z W + covDerivRm emb conn Y Z X W +
     covDerivRm emb conn Z X Y W = 0 :=
-  second_bianchi emb conn ha hal h_tf X Y Z W
+  bianchi_second_covDerivRm_cyclic_sum_zero_of_torsionFree emb conn ha hal h_tf X Y Z W
 
 end ContractedBianchi

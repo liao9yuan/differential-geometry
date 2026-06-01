@@ -133,11 +133,19 @@ theorem connection_evolution_combined
         2 * (-rcd X Y Z - rcd Y X Z + rcd Z X Y + metric_var_form td g_fam h_met t ![n X Y, Z] ![]) := by ring
     _ = 0 := by rw [palatini]; ring
 
-/-- Connection evolution (pure connection variation, using metric product rule):
-    dt(s → g(t)(conn(s)_X Y, Z))(t) = -(∇_X Ric)(Y,Z) - (∇_Y Ric)(X,Z) + (∇_Z Ric)(X,Y).
+/-- Pure-connection variation of the Levi-Civita connection along a Ricci flow:
+    freezing the metric at time `t`, the time derivative of `s ↦ g(t)(∇(s)_X Y, Z)`
+    equals `-(∇_X Rc)(Y,Z) - (∇_Y Rc)(X,Z) + (∇_Z Rc)(X,Y)`, where `∇ Rc` is the
+    covariant derivative of the Ricci form `ricci_cov_deriv`.
 
-    The hypothesis `h_decomp` is the metric product rule, which splits the time
-    derivative of g(s)(V(s), W) into a metric-variation term and a pure-vector term. -/
+    Hypotheses: `g_fam`/`conn_fam` are a smooth family of metrics with their bilinear
+    Levi-Civita connections (`h_lc`) solving the Ricci flow (`h_rf`), and `2` is
+    invertible in `R`. `h_decomp` is the supplied metric product rule, splitting the
+    time derivative of `s ↦ g(s)(F(s), W)` into the metric-variation term
+    `metric_var_form` (the `s`-dependence of `g`) and the frozen-metric vector term
+    (the `s`-dependence of `F`). The result subtracts off the metric-variation term
+    that appears in `connection_evolution_combined`, leaving the pure connection
+    variation. -/
 theorem connection_evolution
     (emb : DerivationEmbedding k R V)
     (td : TimeDerivativeData R A Time) [TimeRegularFam td]

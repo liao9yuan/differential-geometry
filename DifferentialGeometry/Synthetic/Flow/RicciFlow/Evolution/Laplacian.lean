@@ -12,7 +12,7 @@ set_option linter.style.emptyLine false
 # Time Evolution of the Laplacian under Ricci Flow
 
 - `hessian_raise_variation`: variation of the raised Hessian
-- `laplacian_evolution`: ∂_t(Δu) = 2⟨Rc, Hess(u)⟩ + metric_trace(∂_t Hess)
+- `hamilton_laplacian_evolution_of_ricci_flow`: ∂_t(Δu) = 2⟨Rc, Hess(u)⟩ + metric_trace(∂_t Hess)
 -/
 
 open SyntheticTensor
@@ -109,16 +109,23 @@ def LaplacianProductRule
     metric_trace (g_fam t) atr (0 : Fin 2) (0 : Fin 1)
       (dt_tensor td t hessian_fam h_hess_smooth) ![] ![]
 
-/-- Laplacian evolution under Ricci flow:
+/-- Laplacian (metric-trace of the Hessian) evolution under Ricci flow:
+    the time derivative of `metric_trace (g(t)) Hess` equals
+    `2⟨Rc, Hess⟩ + metric_trace_t(∂_t Hess)`.
 
-    ∂_t(Δu) = 2⟨Rc, Hess(u)⟩ + metric_trace_t(∂_t Hess)
+    Here `⟨Rc, Hess⟩ = tensor_inner_02 (g(t)) Rc Hess` is the metric inner product
+    of the two `(0,2)`-tensors, `Rc` is `ricciForm_tensor` of the time-`t` connection,
+    and the second summand is the `g(t)`-trace of the time derivative of the supplied
+    Hessian family.
 
-    where ⟨Rc, Hess(u)⟩ = tr(Rc♯ ∘ Hess♯) is the tensor inner product,
-    and the second term is the metric trace of the time derivative of the Hessian.
-
-    The proof substitutes the Ricci flow equation (∂_t g = -2Rc) into the
-    product rule and simplifies -⟨-2Rc, Hess(u)⟩ = 2⟨Rc, Hess(u)⟩. -/
-theorem laplacian_evolution
+    The Laplacian itself is stated abstractly as the `g(s)`-trace of an externally
+    supplied `(0,2)` Hessian family `hessian_fam`. Two structural hypotheses are
+    assumed: `h_rf : IsRicciFlow` (the metric evolves by `∂_t g = -2 Rc`) and
+    `h_lap_prod : LaplacianProductRule` (the product rule splitting `∂_t` of the trace
+    into a metric-variation term and a Hessian-variation term). The proof feeds the
+    Ricci flow equation `metric_var_form = -2 • Rc` into the product rule and simplifies
+    `-⟨-2 Rc, Hess⟩ = 2⟨Rc, Hess⟩`. -/
+theorem hamilton_laplacian_evolution_of_ricci_flow
     (emb : DerivationEmbedding k R V)
     (td : TimeDerivativeData R A Time) [TimeRegularFam td]
     (atr : AbstractTrace R V)

@@ -317,14 +317,16 @@ theorem w1pNormIntrinsicLp_le_const_mul_wkpNormChart_smooth
   rw [hCb_eq]
   linarith
 
-/-- **Headline Theorem 2 (smooth-input fallback)**: norm comparison. There
-is a finite constant `C ≥ 0` such that for every smooth `u` with non-zero
-chart norm, `w1pNormIntrinsicLp ≤ ENNReal.ofReal C * wkpNormChart`.
+/-- Per-`u` norm comparison on a closed Riemannian manifold for `1 ≤ p < ∞`:
+for every smooth, measurable `u` with `MemWkpChart g 1 p u` and non-zero
+chart norm, there is a finite constant `C ≥ 0` with
+`w1pNormIntrinsicLp g p u ≤ ENNReal.ofReal C * wkpNormChart g 1 p u`.
 
-The constant `C` depends on `u` (the smooth case is sufficient since the
-intrinsic-`L^p` norm is bounded by the chart-norm-times-a-finite-constant
-ratio for any specific smooth function). For a uniform constant over all
-`u`, the chart-bridge is required.
+The constant `C` is chosen per `u` (it is the explicit ratio
+`‖·‖_intrinsic / ‖·‖_chart + 1` of the two finite norms), so it is not
+uniform in `u`; the uniform-in-`u` constant is established separately by the
+chart-bridge development below. Proof forwards to
+`w1pNormIntrinsicLp_le_const_mul_wkpNormChart_smooth`.
 -/
 theorem w1pNormIntrinsicLp_le_const_mul_wkpNormChart
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]

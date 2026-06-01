@@ -47,7 +47,7 @@ the ball (`truncatedNonlin_eq_of_mem`).
   `H^{a+1}`-view solution field stays a.e. in `closedBall u₀' R`, the truncated
   Nemytskii forcing `t ↦ Ñ_R(field t)` agrees a.e. with the genuine nonlinear
   forcing `t ↦ N(field t)`.
-* `quasilinear_strong_existence_locallyLipschitz_smallTime_ofCompact` — **the
+* `de_simon_quasilinear_tensor_heat_short_time_existence_locally_lipschitz_of_compact_resolvent` — **the
   headline cutoff**: for a locally-Lipschitz `N` and a radius `R` on whose ball
   the constructed `H^{a+1}` field stays (a.e. in time), there is a horizon `T > 0`
   and a strong solution of the genuine equation `∂_t u = Δ_∇ u + N(u)`, with the
@@ -305,14 +305,15 @@ theorem nemytskiiHa1_truncated_eqOn_ball
 /-- **Small-time strong existence for a locally Lipschitz nonlinearity — the
 cutoff.**
 
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, a Sobolev exponent
-`a ≥ 0`, an initial datum `u₀ ∈ H^{a+2}`, a radius `R > 0`, and a nonlinearity
-`N : H^{a+1} → Hᵃ` that is **only locally Lipschitz** — `LipschitzOnWith L_R N`
-on the closed `H^{a+1}`-ball `closedBall (ι u₀) R` around the included initial
-datum (no global Lipschitz constant assumed) — there is a positive horizon `T_R`
-such that, on every short interval `(0, T]` on which the constructed
-`H^{a+1}`-view solution field **stays a.e. in that ball**, there is a strong
-solution `u ∈ H¹([0,T]; Hᵃ)` of the genuine quasi-linear tensor heat equation
+For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, a real Sobolev
+exponent `a`, an initial datum `u₀ ∈ H^{a+2}`, a radius `R ≥ 0`, and a
+nonlinearity `N : H^{a+1} → Hᵃ` that is **only locally Lipschitz** —
+`LipschitzOnWith L_R N` on the closed `H^{a+1}`-ball `closedBall (ι u₀) R` around
+the included initial datum (no global Lipschitz constant assumed) — there is a
+positive horizon `T_R` such that, on every short interval `(0, T]` on which the
+constructed `H^{a+1}`-view solution field **stays a.e. in that ball**, there is a
+strong solution `u ∈ H¹([0,T]; Hᵃ)` of the genuine quasi-linear tensor heat
+equation
 
   `∂_t u = Δ_∇ u + N(u)`,  `u(0) = u₀`,
 
@@ -329,7 +330,7 @@ The stays-in-ball hypothesis `hstay` is the **only** non-engine analytic input;
 it is a smallness statement about the explicit fixed-point field, **not** a
 restatement of the conclusion (see the module docstring for the precise
 time-continuity lemma that would discharge it unconditionally). -/
-theorem quasilinear_strong_existence_locallyLipschitz_smallTime_ofCompact
+theorem de_simon_quasilinear_tensor_heat_short_time_existence_locally_lipschitz_of_compact_resolvent
     {N : tensorHs (I := I) (M := M) g r s (a + 1) →
       tensorHs (I := I) (M := M) g r s a}
     {L_R : ℝ≥0} {R : ℝ} (hR : 0 ≤ R)

@@ -42,7 +42,7 @@ symmetrises. The commutator identity below isolates that curvature term.
   `riemannSec` of the `(r, s)`-tensor covariant derivative. Purely definitional
   (`riemannSec_def`), but stated under a Ricci-flavoured name on the concrete tensor bundle.
 
-* `tensorRicciCommutator_eq_riemannOp` — the same commutator, identified with the **bundled
+* `ricci_identity_tensor_commutator_eq_riemannOp` — the same commutator, identified with the **bundled
   curvature operator** `riemannOp` of the `(r, s)`-tensor covariant derivative on smooth
   sections. The right-hand side is `riemannOp ... x (X x) (Y x) (T x)`, a continuous
   trilinear form in the fibre values, which is the form needed for fibre-norm estimates.
@@ -193,19 +193,23 @@ theorem tensorRicciCommutator
       riemannSec (tensorCov (I := I) g r s) X Y T x :=
   (riemannSec_def (tensorCov (I := I) g r s) X Y T x).symm
 
-/-- **Pointwise tensor Ricci identity (bundled-operator form).** For smooth vector fields
-`X, Y` and a smooth `(r, s)`-tensor section `T`, the second-covariant-derivative commutator
-equals the bundled curvature operator `riemannOp` of the tensor covariant derivative,
+/-- **Pointwise tensor Ricci identity (bundled-operator form).** For `g` a smooth Riemannian
+metric, `cov := tensorCov g r s` the induced `(r, s)`-tensor covariant derivative, and smooth
+vector fields `X, Y` together with a smooth `(r, s)`-tensor section `T`, the
+second-covariant-derivative commutator equals the bundled curvature operator `riemannOp cov`
 evaluated on the fibre values:
 $$
   \nabla_X(\nabla_Y T)(x) - \nabla_Y(\nabla_X T)(x) - \nabla_{[X, Y]} T(x)
     = R_x\bigl(X(x),\, Y(x)\bigr)\,T(x),
 $$
-where `R_x = riemannOp (tensorCov g r s) x` is the continuous trilinear curvature form on
-the fibres. This is the form used for fibre-norm estimates: the right-hand side is a
-continuous trilinear function of `(X x, Y x, T x)`, so its fibre norm is controlled by the
-operator norm of `R_x`. -/
-theorem tensorRicciCommutator_eq_riemannOp
+where `R_x = riemannOp (tensorCov g r s) x`. In Mathlib's argument convention
+(`cov.toFun σ x v ≅ (∇_v σ)(x)`) the left-hand side is exactly the `cov.toFun` commutator
+appearing in the signature. The right-hand side `riemannOp cov x (X x) (Y x) (T x)` is a
+continuous trilinear form in the fibre values `(X x, Y x, T x)`, which is the shape needed
+for fibre-norm estimates (its fibre norm is controlled by the operator norm of `R_x`). The
+smoothness of `X, Y, T` is used only to pass from the section-level `riemannSec` to the
+bundled `riemannOp` via `riemannSec_eq_riemannOp_smooth`. -/
+theorem ricci_identity_tensor_commutator_eq_riemannOp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {X Y : Π b : M, TangentSpace I b} {T : Π b : M, TensorRSSpace r s I b} {x : M}
     (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% X))

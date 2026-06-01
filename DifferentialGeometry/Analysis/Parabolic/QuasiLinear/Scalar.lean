@@ -58,7 +58,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 /-! ## Short-time existence for the quasi-linear scalar heat equation
 
 Instantiating the abstract semilinear existence theorem
-`semilinear_parabolic_existence` with the scalar spectral heat semigroup
+`semilinear_mild_solution_existence` with the scalar spectral heat semigroup
 and a globally Lipschitz nonlinearity yields a continuous short-time
 mild solution of the quasi-linear scalar heat equation. The abstract
 Duhamel terms `S t u₀` and `S (t - τ) (N (u τ))` unfold definitionally —
@@ -92,7 +92,7 @@ theorem scalar_quasilinear_local_existence
   -- Apply the abstract semilinear existence theorem to the scalar
   -- spectral heat semigroup.
   obtain ⟨T, hT_pos, u, hu_cont, hu_zero, hu_eq⟩ :=
-    semilinear_parabolic_existence
+    semilinear_mild_solution_existence
       (scalarHsBoundedC0Semigroup (I := I) (M := M) g σ) u₀ hN
   refine ⟨T, hT_pos, u, hu_cont, hu_zero, ?_⟩
   -- The abstract Duhamel terms coincide with the concrete heat-semigroup
@@ -104,7 +104,7 @@ theorem scalar_quasilinear_local_existence
 /-! ## Uniqueness for the quasi-linear scalar heat equation
 
 Instantiating the abstract semilinear uniqueness theorem
-`semilinear_parabolic_unique` with the scalar spectral heat semigroup:
+`semilinear_mild_solution_unique` with the scalar spectral heat semigroup:
 two continuous mild solutions on the same interval `[0, T]` with
 `(L : ℝ) * T < 1` coincide. -/
 
@@ -132,8 +132,8 @@ theorem scalar_quasilinear_local_unique
           heatSemigroupHsExt (I := I) (M := M) g σ (t - τ) (N (v τ))) :
     Set.EqOn u v (Set.Icc 0 T) := by
   -- Translate the concrete Duhamel equations into the abstract form
-  -- expected by `semilinear_parabolic_unique`, then apply it.
-  refine semilinear_parabolic_unique
+  -- expected by `semilinear_mild_solution_unique`, then apply it.
+  refine semilinear_mild_solution_unique
     (scalarHsBoundedC0Semigroup (I := I) (M := M) g σ) u₀ hN
     hT hTL hu hv ?_ ?_
   · intro t ht

@@ -29,7 +29,7 @@ pointwise on `∂M`.
 
 For smooth `u, v : FullSmoothScalar g` with the Neumann condition on `u`:
 
-1. Apply `green_first_full` (the with-boundary Green's first identity in
+1. Apply `green_first_eq_boundary_surface_integral` (the with-boundary Green's first identity in
    full smooth form) with `f := v.toFun` and `h := u.toFun`, obtaining
    $$
    \int \langle \nabla v, \nabla u\rangle\,d\mu_g
@@ -470,7 +470,7 @@ lemma FullSmoothScalar.oneSubLapClassicalLp_ae_oneSubLap
 under the Neumann condition
 
 For full smooth `u, v` with the Neumann condition `g(ν, ∇u) = 0` on
-`∂M`, Green's first identity (`green_first_full`) reduces to
+`∂M`, Green's first identity (`green_first_eq_boundary_surface_integral`) reduces to
 $$
 \int g(\nabla u, \nabla v)\,d\mu_g
    \;=\;
@@ -521,7 +521,7 @@ theorem fullSmoothScalarH1Inner_eq_integral_oneSubLapClassical_mul_neumann
   -- of `v · g(ν, ∇u) dS`, which vanishes pointwise by the Neumann
   -- condition on `u`.
   have h_green :=
-    green_first_full (M := M) (n := n) g v.smooth u.smooth h_chart_iden h_int
+    green_first_eq_boundary_surface_integral (M := M) (n := n) g v.smooth u.smooth h_chart_iden h_int
   -- Boundary integrand vanishes pointwise.
   have h_bdy_zero : ∀ x : (I_half n).boundary M,
       v.toFun x.val *
@@ -735,7 +735,7 @@ completion (not just smooth lifts). The proof extends the smooth-lift
 identity by density.
 
 The smooth-test hypotheses `h_chart_iden` and `h_int` are the per-chart
-identification predicates from the Green's-identity API (`green_first_full`),
+identification predicates from the Green's-identity API (`green_first_eq_boundary_surface_integral`),
 delivered as explicit hypotheses from the surface-identification work. -/
 theorem smoothToH1ComplFullNeumann_bilin_eq_lpFunctional_neumann
     {g : SmoothRiemannianMetric (I_half n) M}
@@ -792,7 +792,7 @@ lift of `u` is the resolvent of `(1 - Δ_g)` applied to the L² class of
 
 The smooth-test hypotheses `h_chart_iden` and `h_int` are passed in
 explicitly: they are the per-chart identification predicates from the
-Green's-identity API delivered by `green_first_full`. -/
+Green's-identity API delivered by `green_first_eq_boundary_surface_integral`. -/
 theorem smoothToH1ComplFullNeumann_eq_resolventFullNeumann_oneSubLap_neumann
     {g : SmoothRiemannianMetric (I_half n) M}
     (u : FullSmoothScalar g)

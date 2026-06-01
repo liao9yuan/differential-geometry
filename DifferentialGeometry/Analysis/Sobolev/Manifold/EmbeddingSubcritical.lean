@@ -23,7 +23,7 @@ chart-based Sobolev space `W^{1,p}_chart(M)` (defined in `Chart.lean`) into
 
 ## Main results
 
-* `sobolev_embedding_chart_subcritical` — the headline statement: there is a
+* `sobolev_embedding_subcritical_of_closed` — the headline statement: there is a
   finite constant `C ≥ 0` such that for every `u ∈ W^{1,p}_chart(M)`,
   `eLpNorm u (ENNReal.ofReal p*) μ_g ≤ ENNReal.ofReal C * wkpNormChart g 1 p u`.
 
@@ -1145,11 +1145,15 @@ private theorem sobolev_embedding_chart_subcritical_measurable
   exact h_max_le
 
 /-- Sub-critical Sobolev embedding `W^{1,p}_chart(M) ↪ L^{p*}(M, μ_g)` on a closed
-Riemannian manifold. There is a finite constant `C ≥ 0` (depending on the metric,
-the canonical chart-atlas partition of unity, and `p`) such that for every
-`u ∈ W^{1,p}_chart(M)`, `eLpNorm u (p*) μ_g ≤ ENNReal.ofReal C * wkpNormChart g 1 p u`,
-where `p* = n*p/(n-p)` is the Sobolev conjugate exponent. -/
-theorem sobolev_embedding_chart_subcritical
+(compact, boundaryless) smooth Riemannian manifold `(M, g)` modelled on a
+finite-dimensional real inner-product space `E` of dimension `n ≥ 1`. For a
+sub-critical exponent `1 ≤ p < n` and a measurable `u ∈ W^{1,p}_chart(M)`, there
+exists a finite constant `C ≥ 0` (depending on the metric, the canonical
+chart-atlas partition of unity, and `p`) with
+`eLpNorm u (ENNReal.ofReal p*) μ_g ≤ ENNReal.ofReal C * wkpNormChart g 1 p u`,
+where `p* = n*p/(n-p)` is the Sobolev conjugate exponent and `μ_g` is the
+Riemannian measure built from the chart-atlas partition of unity. -/
+theorem sobolev_embedding_subcritical_of_closed
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]

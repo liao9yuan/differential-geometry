@@ -48,7 +48,7 @@ open DifferentialGeometry.Analysis.Parabolic.QuasiLinear
 /-! ## Short-time existence for the quasi-linear tensor heat equation
 
 Instantiating the abstract semilinear existence theorem
-`semilinear_parabolic_existence` with the intrinsic tensor heat semigroup
+`semilinear_mild_solution_existence` with the intrinsic tensor heat semigroup
 and a globally Lipschitz nonlinearity yields a continuous short-time mild
 solution of the quasi-linear tensor heat equation. The abstract Duhamel
 terms `S t u₀` and `S (t - τ) (N (u τ))` unfold definitionally — the
@@ -80,7 +80,7 @@ theorem tensor_quasilinear_heat_mild_solution_existence_intrinsic
   -- Apply the abstract semilinear existence theorem to the intrinsic
   -- tensor heat semigroup.
   obtain ⟨T, hT_pos, u, hu_cont, hu_zero, hu_eq⟩ :=
-    semilinear_parabolic_existence
+    semilinear_mild_solution_existence
       (tensorBoundedC0Semigroup (I := I) (M := M) g r s) T_0 hN
   refine ⟨T, hT_pos, u, hu_cont, hu_zero, ?_⟩
   -- The abstract Duhamel terms coincide with the concrete heat-semigroup
@@ -92,7 +92,7 @@ theorem tensor_quasilinear_heat_mild_solution_existence_intrinsic
 /-! ## Uniqueness for the quasi-linear tensor heat equation
 
 Instantiating the abstract semilinear uniqueness theorem
-`semilinear_parabolic_unique` with the intrinsic tensor heat semigroup:
+`semilinear_mild_solution_unique` with the intrinsic tensor heat semigroup:
 two continuous mild solutions on the same interval `[0, T]` with
 `(L : ℝ) * T < 1` coincide. -/
 
@@ -119,8 +119,8 @@ theorem tensor_quasilinear_parabolic_unique
           tensorHeatSemigroup g r s (t - τ) (N (v τ))) :
     Set.EqOn u v (Set.Icc 0 T) := by
   -- Translate the concrete Duhamel equations into the abstract form
-  -- expected by `semilinear_parabolic_unique`, then apply it.
-  refine semilinear_parabolic_unique
+  -- expected by `semilinear_mild_solution_unique`, then apply it.
+  refine semilinear_mild_solution_unique
     (tensorBoundedC0Semigroup (I := I) (M := M) g r s) T_0 hN
     hT hTL hu hv ?_ ?_
   · intro t ht

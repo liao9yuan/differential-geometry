@@ -271,14 +271,20 @@ variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
 variable [CommRing A] [Algebra R A]
 
 /-- Scalar curvature evolution under Ricci flow:
+    `∂_t R = 2|Rc|² + metric_trace_{g(t)}(∂_t Rc)`.
 
-    ∂_t R = 2|Rc|² + metric_trace_g(t)(∂_t Rc)
+    The second term is left as the metric trace of the time derivative of the
+    Ricci tensor; this is the exact conclusion, and the further identification
+    of that trace with `ΔR` (contracted second Bianchi) is NOT performed here.
 
-    The first term arises from the metric variation (∂_t g = -2Rc induces
-    ∂_t(g⁻¹) = 2Rc♯, contributing 2|Rc|² to the trace).
-    The second term is the Ricci variation trace, identified with ΔR
-    via the contracted second Bianchi identity (proved separately). -/
-theorem scalar_curvature_evolution
+    Proved by combining two assumed structural inputs and the flow equation:
+    `h_sc_prod` (`ScalarCurvatureProductRule`) gives the decomposition of
+    `∂_t R` into the negated metric-variation/Ricci inner product plus the
+    Ricci-variation trace, and `h_rf` (`IsRicciFlow`) supplies the flow
+    equation `metric_var_form = -2 • Rc`. Substituting the latter into the
+    inner product yields `-⟨-2 • Rc, Rc⟩ = 2|Rc|²` (`ricci_norm_sq`), via
+    `tensor_inner_02_smul_left` and `tensor_inner_02_ricciForm`. -/
+theorem hamilton_scalar_curvature_evolution_of_ricci_flow
     (emb : DerivationEmbedding k R V)
     (td : TimeDerivativeData R A Time) [TimeRegularFam td]
     (atr : AbstractTrace R V)

@@ -40,7 +40,7 @@ the single defect field `Curv`, never differentiating the curvature.
   collapse `⟨∇(Δ_∇ S), ∇S⟩_{L²} = − ‖Δ_∇ S‖²_{L²}` at rank `s`.
 * `rawConnLap_l2Inner_covGrad_split_gen` — the cross-pairing split
   `⟨Δ_∇(∇S), ∇S⟩_{L²} = − ‖Δ_∇ S‖²_{L²} + ⟨Curv, ∇S⟩_{L²}`.
-* `integrated_order2_weitzenbock` — **the integrated Weitzenböck identity**
+* `weitzenbock_integrated_covGrad_l2_normSq` — **the integrated Weitzenböck identity**
   `‖∇²S‖²_{L²} = ‖Δ_∇ S‖²_{L²} − ⟨Curv, ∇S⟩_{L²}`, with `Curv` the commutator
   defect.
 
@@ -185,19 +185,24 @@ lemma rawConnLap_l2Inner_covGrad_split_gen
 
 set_option linter.unusedSectionVars false in
 /-- **The integrated order-`2` Weitzenböck identity at arbitrary covariant rank.**
-For a smooth compactly-supported `(0, s)`-tensor field `S` on a closed Riemannian
-manifold, writing `∇S := covGrad g 0 s S`, `Δ_∇ S := rawTensorConnLapSmooth g 0 s S`,
-and `Curv := Δ_∇(∇S) − ∇(Δ_∇ S)`, the diagonal `L²` self-pairing of the iterated
-covariant gradient `∇²S` equals the squared `L²` norm of the rough Laplacian minus
-the curvature cross term:
+For a smooth compactly-supported `(0, s)`-tensor field `S` on a closed (compact,
+boundaryless) Riemannian manifold, the squared `L²` norm of the iterated covariant
+gradient `∇²S := covGrad g 0 (s+1) (covGrad g 0 s S)` equals the squared `L²` norm
+of the rough Laplacian `Δ_∇ S := rawTensorConnLapSmooth g 0 s S` minus the `L²`
+cross term against the commutator defect:
 
 ```
-‖∇²S‖²_{L²} = ‖Δ_∇ S‖²_{L²} − ⟨Curv, ∇S⟩_{L²}.
+‖∇²S‖²_{L²} = ‖Δ_∇ S‖²_{L²} − ⟨Curv, ∇S⟩_{L²},
 ```
 
-The proof is the diagonal Green identity at rank `s + 1`, the cross-pairing split
-through the commutator, and the linearity of the global `L²` pairing. -/
-theorem integrated_order2_weitzenbock
+where `∇S := covGrad g 0 s S` and `Curv := Δ_∇(∇S) − ∇(Δ_∇ S)` is the
+rough-Laplacian / covariant-gradient commutator defect (a `(0, s + 1)`-tensor field).
+
+The proof chains the diagonal Green identity at rank `s + 1`
+(`covGrad_l2Inner_self_eq_neg_rawConnLap_inner_gen`) with the cross-pairing split
+through the commutator (`rawConnLap_l2Inner_covGrad_split_gen`), then closes by
+ring arithmetic on the resulting linear `L²` pairings. -/
+theorem weitzenbock_integrated_covGrad_l2_normSq
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
     tensorL2Norm (I := I) (M := M) g 0 (s + 1 + 1)
         (covGrad (I := I) (M := M) g 0 (s + 1)

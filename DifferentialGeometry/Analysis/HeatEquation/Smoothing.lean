@@ -26,7 +26,7 @@ the `L²` element `heatSemigroup g t u_0` is a.e.-equal to a smooth function
   regularity hypothesis, produce a `C^∞` representative of
   `heatSemigroup g t u_0`. The chart-Sobolev `C^∞` smoothing is supplied
   unconditionally by
-  `memWkpChart_forall_implies_smooth_representative`
+  `sobolev_smooth_representative_of_memWkpChart_forall`
   (`Analysis/Sobolev/Manifold/IteratedSobolevEmbeddingCInfty.lean`).
 * `heatSemigroup_contMDiff_in_time` (headline (2)) — the smoothness of
   `t ↦ heatSemigroup g t u_0` on `(0, ∞)` as a map into `Lp`. This part
@@ -77,7 +77,7 @@ class `C^∞`.
 The hypothesis `h_iterated_regularity` captures the elliptic-regularity
 output supplied by the chart-bilinear Nirenberg machinery and inductive
 elliptic regularity. The chart-Sobolev `W^{∞,2} ↪ C^∞` step is provided
-unconditionally by `memWkpChart_forall_implies_smooth_representative`. -/
+unconditionally by `sobolev_smooth_representative_of_memWkpChart_forall`. -/
 
 /-- **Headline (1): smoothing property of the heat semigroup**.
 
@@ -215,7 +215,7 @@ theorem heatSemigroup_smooth_representative
       (h_iterated_regularity k)
   -- Step 6: apply the unconditional smooth representative theorem to `u_meas`.
   obtain ⟨u_smooth, h_smooth, h_smooth_ae_meas⟩ :=
-    DifferentialGeometry.Analysis.Sobolev.Chart.memWkpChart_forall_implies_smooth_representative
+    DifferentialGeometry.Analysis.Sobolev.Chart.sobolev_smooth_representative_of_memWkpChart_forall
       (I := I) (M := M) g (u := u_meas) hu_meas_meas h_iter_meas
   refine ⟨u_smooth, h_smooth, ?_⟩
   exact hu_coe_ae_meas.trans h_smooth_ae_meas.symm

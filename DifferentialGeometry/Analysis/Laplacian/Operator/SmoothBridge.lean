@@ -115,7 +115,7 @@ theorem smoothScalarH1Inner_eq_integral_oneSubLap_mul
         ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
   unfold smoothScalarH1Inner
   -- Apply Green's first identity to swap the gradient term for `-∫ v · Δ_g u`.
-  -- `integral_inner_grad_eq_neg_integral_smul_laplacian`:
+  -- `green_first_integral_inner_grad_eq_neg_integral_smul_laplacian`:
   --   `∫ g(grad u, grad v) = -∫ u · Δ_g v` (when v is compactly supported).
   -- For the symmetric variant putting Δ on u, use the result with roles of u, v swapped:
   --   `∫ g(grad v, grad u) = -∫ v · Δ_g u`.
@@ -134,7 +134,7 @@ theorem smoothScalarH1Inner_eq_integral_oneSubLap_mul
           ∂(riemannianVolumeMeasure (I := I) (M := M) g) =
         -∫ x, v.toFun x * Δ_g (I := I) g u.smooth x
           ∂(riemannianVolumeMeasure (I := I) (M := M) g) :=
-    integral_inner_grad_eq_neg_integral_smul_laplacian (I := I) g v.smooth u.smooth hu_cs
+    green_first_integral_inner_grad_eq_neg_integral_smul_laplacian (I := I) g v.smooth u.smooth hu_cs
   -- Symmetry of g: `∫ g(grad u, grad v) = ∫ g(grad v, grad u)`.
   have hsymm :
       (∫ x, g.inner x ((grad_g (I := I) g u.smooth :

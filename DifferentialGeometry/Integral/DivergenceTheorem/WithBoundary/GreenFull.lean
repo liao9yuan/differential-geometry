@@ -61,7 +61,7 @@ The two key ingredients consumed from earlier files:
 
 ## Main result
 
-* `green_first_full` — Green's first identity with boundary contribution for
+* `green_first_eq_boundary_surface_integral` — Green's first identity with boundary contribution for
   arbitrary smooth `h` on a compact half-space-modelled manifold-with-boundary,
   with the boundary correction expressed as a surface integral over `∂M`
   against the outward unit normal.
@@ -357,21 +357,25 @@ private lemma integrable_divergence_g_with_boundary
 
 end IntegrabilityHelpers
 
-/-! ## Green's first identity, full smooth case
+/-! ## Green's first identity with a boundary surface integral
 
-For arbitrary smooth scalars `f, h : M → ℝ` on a compact half-space-modelled
-smooth manifold-with-boundary `(M, g)`, Green's first identity reads
+For smooth scalars `f, h : M → ℝ` on a compact half-space-modelled smooth
+manifold-with-boundary `(M, g)`, Green's first identity reads
 
   `∫_M ⟨∇f, ∇h⟩_g dμ_g + ∫_M f · Δ_g h dμ_g
      = ∫_{∂M} f · g(ν, ∇h) dS`,
 
-where `ν := outwardNormal g` and `dS := surfaceMeasure g`.
+where `ν := outwardNormal g` and `dS := surfaceMeasure g`. Here the boundary
+term is a genuine surface integral over `∂M`; this form is conditional on a
+per-chart surface-integral identification hypothesis (from
+`SurfaceIntegralIdentification.lean`) and an integrability hypothesis on the
+boundary integrand — see the theorem docstring.
 
 The proof applies the global Stokes theorem to `Y := f · ∇h` (using
 `grad_g_full_section` for the gradient packaging), the divergence Leibniz rule
-for the pointwise expansion, the per-chart identification hypothesis (from
-`SurfaceIntegralIdentification.lean`) for the boundary sum identification, and
-finally `integral_add` to split the volume integral. -/
+for the pointwise expansion, the supplied per-chart identification hypothesis
+for the boundary sum identification, and finally `integral_add` to split the
+volume integral. -/
 
 section GreenFull
 
@@ -381,30 +385,34 @@ variable {M : Type*} [TopologicalSpace M]
   [IsManifold (modelWithCornersEuclideanHalfSpace n) ∞ M]
   [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-/-- **Green's first identity, full smooth case (closed half-space-modelled
-manifold-with-boundary).** For arbitrary smooth `f, h : M → ℝ` on a compact
-half-space-modelled smooth manifold-with-boundary `(M, g)`,
+/-- **Green's first identity with a boundary surface integral.** For smooth
+`f, h : M → ℝ` on a compact (`T2`, σ-compact) half-space-modelled smooth
+manifold-with-boundary `(M, g)`,
 $$\int_M \langle \nabla_g f, \nabla_g h\rangle_g\,d\mu_g
    + \int_M f \cdot \Delta_g h\,d\mu_g
    = \int_{\partial M} f\cdot g(\nu, \nabla_g h)\,dS,$$
 where `ν := outwardNormal g` and `dS := surfaceMeasure g`.
 
-The proof has three structural ingredients.
+Unlike `green_first_with_boundary`, the right-hand side here is a genuine
+surface integral over the boundary `∂M` against `surfaceMeasure`, and `h` need
+not be interior-supported. This identification of the boundary term is not
+proved internally: it is supplied through two explicit hypotheses, so the
+statement is conditional on them.
 
-1. **Stokes' theorem** applied to `Y := f · ∇h` (where `∇h` is packaged as the
-   full smooth gradient section via `grad_g_full_section`):
-   `∫ divergence_g_with_boundary g Y = boundaryFaceSum g Y`.
+- `h_chart_iden`: for each chart in the partition-of-unity support set, the
+  per-chart boundary face integral equals the corresponding piece of the
+  surface integral (`chartFaceIntegralEqualsSurfaceIntegralOnChart`, from
+  `SurfaceIntegralIdentification.lean`). Summing these is what turns the
+  abstract `boundaryFaceSum` into the surface integral over `∂M`.
+- `h_int`: the boundary integrand `b ↦ g(ν, f·∇h)` is integrable against
+  `surfaceMeasure`.
 
-2. **Divergence Leibniz rule**: pointwise,
-   `divergence_g_with_boundary g (f · ∇h) = f · Δ_g h + ⟨∇f, ∇h⟩`.
-
-3. **Boundary face sum identification (per-chart hypothesis)**:
-   `boundaryFaceSum g Y = ∫_{∂M} f · g(ν, ∇h) dS`.
-
-The per-chart identification predicate `chartFaceIntegralEqualsSurfaceIntegralOnChart`
-and the integrability hypothesis `h_int` on the surface integrand are
-consumed from the upstream API in `SurfaceIntegralIdentification.lean`. -/
-theorem green_first_full
+Given these, the proof combines Stokes' theorem applied to `Y := f · ∇h`
+(gradient packaged via `grad_g_full_section`), the pointwise divergence Leibniz
+rule `divergence_g_with_boundary g (f · ∇h) = f · Δ_g h + ⟨∇f, ∇h⟩`, the
+identification `boundaryFaceSum g Y = ∫_{∂M} f · g(ν, ∇h) dS`, and `integral_add`
+to split the volume integral. -/
+theorem green_first_eq_boundary_surface_integral
     (g : SmoothRiemannianMetric (modelWithCornersEuclideanHalfSpace n) M)
     {f h : M → ℝ}
     (hf : ContMDiff (modelWithCornersEuclideanHalfSpace n) 𝓘(ℝ, ℝ) ∞ f)
