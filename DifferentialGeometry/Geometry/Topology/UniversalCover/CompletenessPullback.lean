@@ -2,7 +2,7 @@ import DifferentialGeometry.Geometry.Topology.UniversalCover.Riemannian
 import DifferentialGeometry.Geometry.Topology.UniversalCover.ChartPullback
 import DifferentialGeometry.Geometry.Comparison.BonnetMyers.RicciBound
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnection
-import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivita
+import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.CurvatureBundling
 import DifferentialGeometry.Geometry.Connection.ChartBridge.Ricci
 import Mathlib.Topology.Covering

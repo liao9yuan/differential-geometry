@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.Bootstrap.Bootstrap
+import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.Bootstrap.IteratedRegularityBootstrap
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.Bootstrap.BootstrapMixed
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.Bootstrap.BootstrapStep
 

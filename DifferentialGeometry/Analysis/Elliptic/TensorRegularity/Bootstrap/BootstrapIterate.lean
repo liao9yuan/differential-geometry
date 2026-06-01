@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.Bootstrap.Bootstrap
+import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.Bootstrap.IteratedRegularityBootstrap
 
 /-!
 # The iterated tensor-component interior elliptic a-priori estimate

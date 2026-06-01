@@ -2,7 +2,7 @@ import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Agreement.Chart
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0S.ChartLeviCivitaParallelExtend
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0S.ChartTensor0SSlotShift
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0S.Tensor0SIntrinsicChartCurryFactor
-import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivita
+import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 
 /-!
 # Auxiliary bridges for the agreement of the chart-frame `(0, s)`-tensor

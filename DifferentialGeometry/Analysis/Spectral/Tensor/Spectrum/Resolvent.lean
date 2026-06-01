@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Spectral.Tensor.Variational.Variational
+import DifferentialGeometry.Analysis.Spectral.Tensor.Variational.Defs
 import Mathlib.Analysis.Normed.Operator.Compact
 import Mathlib.Analysis.InnerProductSpace.Adjoint
 

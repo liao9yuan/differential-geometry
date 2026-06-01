@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Sobolev.Euclidean.ChainRule.ChainRule
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.ChainRule.Defs
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.Multiply
 import DifferentialGeometry.Analysis.Sobolev.Tools.WeakPartialLimit
 import DifferentialGeometry.External.DeGiorgi.BallExtension.RoughInput

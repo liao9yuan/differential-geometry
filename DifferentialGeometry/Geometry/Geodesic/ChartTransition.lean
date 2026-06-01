@@ -1,3 +1,5 @@
+import DifferentialGeometry.Geometry.Geodesic.ChartTransitionMap
+import DifferentialGeometry.Geometry.Geodesic.ChartTransitionJacobian
 import DifferentialGeometry.Geometry.Geodesic.Equation
 import DifferentialGeometry.Geometry.Operator.MetricCompatibility
 import DifferentialGeometry.Analysis.Integration.Measure.Invariance
@@ -8,44 +10,34 @@ import Mathlib.Analysis.Calculus.ContDiff.FiniteDimension
 set_option linter.unusedSectionVars false
 
 /-!
-# Chart-transition derivative as a CLM
+# Chart-transition metric transformation laws (Gram, inverse-Gram, Christoffel)
 
 For two basepoints `α β : M` on a smooth manifold, the chart-transition map
 $$T_{\alpha\beta}\;:=\;\varphi_\beta\,\circ\,\varphi_\alpha^{-1}\;:\;E\to E$$
-is smooth on the open set
-`((extChartAt I α).symm ≫ extChartAt I β).source ⊆ E`. Its Fréchet derivative
-at a point `x` of the overlap is a continuous linear map `E →L[ℝ] E`, which
-plays the role of the (one-sided) chart-transition Jacobian whenever a
-downstream development needs to push tangent data from chart-α coordinates
-to chart-β coordinates.
+and its Fréchet-derivative CLM `chartTransitionAt α β x : E →L[ℝ] E` are
+developed in the upstream sibling `ChartTransitionMap`; the index-level
+Jacobian entries `chartTransitionJacEntry` and their Kronecker-delta identities
+are developed in `ChartTransitionJacobian`. Both are re-exported automatically
+through the imports below.
 
-This file packages:
+This file develops the *metric* transformation laws under `T_{αβ}`:
 
-* `chartTransitionSource α β` — the open set in `E` on which `T_{αβ}` is
-  smooth, namely the source of the partial-equiv composition
-  `(extChartAt I α).symm ≫ extChartAt I β`.
-* `chartTransitionMap α β` — the function `T_{αβ}` itself, packaged as
-  `extChartAt I β ∘ (extChartAt I α).symm`.
-* `chartTransitionAt α β x` — the Fréchet derivative
-  `fderiv ℝ (chartTransitionMap α β) x`, kept as a continuous linear map
-  `E →L[ℝ] E`. Outside the smooth overlap, this falls back to the
-  Mathlib default value of `fderiv`, which is zero.
-* `chartTransitionMap_contDiffOn` — smoothness of `T_{αβ}` on its natural
-  source.
-* `chartTransitionAt_smooth` — smoothness of `x ↦ chartTransitionAt α β x`
-  as a map into `E →L[ℝ] E`.
-* `chartTransitionMap_apply_extChartAt`, `chartTransitionSource_mem_nhds_of_overlap`,
-  `chartTransitionSource_of_boundaryless` — value at a point in the overlap,
-  membership of the source in the neighbourhood filter at a point lying in
-  both `M`-chart sources, and the equivalent formulation for boundaryless
-  models.
+* `chartInvGramMatrix_eq_sum_chartTransition` — the contravariant
+  transformation law for the inverse Gram matrix.
+* `partialDeriv_chartGramOnE_eq_sum_chartTransition` — the differentiated
+  covariant Gram-pullback identity.
+* `chartChristoffel_transform` and `chartChristoffelContraction_transform` —
+  the chart-Christoffel transformation law (symbol level and
+  bilinear-contraction level), with the inhomogeneous second-derivative
+  correction `chartTransitionSecondDerivCorrection`.
+* the moving-foot chain rules `chartTransitionJacEntry_comp_hasDerivAt`,
+  `chartCoord_chartTransitionAt_comp_hasDerivAt`, and the foot-slot
+  cancellation `fderiv_chartTransitionAt_apply_eq_pushCorrection`.
 
-The transformation law for chart-Christoffel symbols under `T_{αβ}` is a
-separate development: it requires unfolding the chart-coordinate
-Christoffel symbol from the metric and applying the change-of-variable
-formula for second derivatives. That derivation is outside the scope of
-this file; what is recorded here is the smoothness pre-requisite shared
-by every downstream consumer.
+These derivations unfold the chart-coordinate Christoffel symbol from the
+metric and apply the change-of-variable formula for second derivatives, on
+top of the smoothness and inverse-Jacobian prerequisites supplied by the two
+upstream sibling files.
 -/
 
 noncomputable section
@@ -65,422 +57,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpa
   [Module.Finite ℝ E] [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-
-/-- The open subset of `E` on which the chart-transition map `T_{αβ} :=
-extChartAt I β ∘ (extChartAt I α).symm` is naturally defined and smooth.
-It is the source of the `PartialEquiv` composition
-`(extChartAt I α).symm ≫ extChartAt I β`. -/
-def chartTransitionSource (α β : M) : Set E :=
-  ((extChartAt I α).symm ≫ extChartAt I β).source
-
-omit [IsManifold I ∞ M] in
-lemma chartTransitionSource_def (α β : M) :
-    chartTransitionSource (I := I) α β =
-      ((extChartAt I α).symm ≫ extChartAt I β).source := rfl
-
-/-- The chart-transition map itself, as a function `E → E`. Outside the
-natural source it returns the partial-equiv coercion's default value, which
-we never inspect in practice. -/
-def chartTransitionMap (α β : M) : E → E :=
-  extChartAt I β ∘ (extChartAt I α).symm
-
-omit [IsManifold I ∞ M] in
-lemma chartTransitionMap_def (α β : M) :
-    chartTransitionMap (I := I) α β =
-      extChartAt I β ∘ (extChartAt I α).symm := rfl
-
-omit [IsManifold I ∞ M] in
-lemma chartTransitionMap_apply (α β : M) (x : E) :
-    chartTransitionMap (I := I) α β x =
-      extChartAt I β ((extChartAt I α).symm x) := rfl
-
-/-- For a manifold point `x : M` in both chart sources, the chart-transition
-map sends the chart-α image of `x` to the chart-β image of `x`. -/
-lemma chartTransitionMap_apply_extChartAt
-    (α β : M) {x : M} (hx_α : x ∈ (chartAt H α).source) :
-    chartTransitionMap (I := I) α β ((extChartAt I α) x) = extChartAt I β x := by
-  unfold chartTransitionMap
-  have hx_src : x ∈ (extChartAt I α).source := by
-    rw [extChartAt_source (I := I)]
-    exact hx_α
-  change extChartAt I β ((extChartAt I α).symm ((extChartAt I α) x)) = extChartAt I β x
-  rw [(extChartAt I α).left_inv hx_src]
-
-/-- Smoothness of `T_{αβ}` on its natural source. This is the manifold-
-infrastructure lemma `contDiffOn_ext_coord_change` packaged using our local
-identifiers `chartTransitionSource` and `chartTransitionMap`. -/
-theorem chartTransitionMap_contDiffOn (α β : M) :
-    ContDiffOn ℝ ∞ (chartTransitionMap (I := I) α β)
-      (chartTransitionSource (I := I) α β) := by
-  have h := (contDiffOn_ext_coord_change (I := I) (n := ∞) β α)
-  exact h
-
-omit [IsManifold I ∞ M] in
-/-- Membership lemma: if a manifold point `x` lies in both chart sources, then
-its chart-α image lies in `chartTransitionSource α β`. -/
-lemma extChartAt_mem_chartTransitionSource
-    (α β : M) {x : M}
-    (hx_α : x ∈ (chartAt H α).source) (hx_β : x ∈ (chartAt H β).source) :
-    (extChartAt I α) x ∈ chartTransitionSource (I := I) α β := by
-  unfold chartTransitionSource
-  have hx_α_src : x ∈ (extChartAt I α).source := by
-    rw [extChartAt_source (I := I)]; exact hx_α
-  have hx_β_src : x ∈ (extChartAt I β).source := by
-    rw [extChartAt_source (I := I)]; exact hx_β
-  refine ⟨?_, ?_⟩
-  · exact (extChartAt I α).map_source hx_α_src
-  · have h_inv : (extChartAt I α).symm ((extChartAt I α) x) = x :=
-      (extChartAt I α).left_inv hx_α_src
-    change (extChartAt I α).symm ((extChartAt I α) x) ∈ (extChartAt I β).source
-    rw [h_inv]
-    exact hx_β_src
-
-/-- The chart-transition source is open in `E`, in the boundaryless setting.
-This is the version that matches §4.4 hypotheses (project-internal "no
-boundary"). -/
-theorem chartTransitionSource_isOpen [I.Boundaryless] (α β : M) :
-    IsOpen (chartTransitionSource (I := I) α β) := by
-  unfold chartTransitionSource
-  have : ((extChartAt I α).symm ≫ extChartAt I β).source =
-      ((chartAt H α).extend I).symm.source ∩
-        ((chartAt H α).extend I).symm ⁻¹' ((chartAt H β).extend I).source := by
-    rfl
-  rw [this]
-  have h1 : IsOpen (((chartAt H α).extend I).symm.source) := by
-    change IsOpen ((chartAt H α).extend I).target
-    exact (chartAt H α).isOpen_extend_target (I := I)
-  have h2_cont : ContinuousOn ((chartAt H α).extend I).symm
-      ((chartAt H α).extend I).symm.source := by
-    change ContinuousOn ((chartAt H α).extend I).symm ((chartAt H α).extend I).target
-    exact (chartAt H α).continuousOn_extend_symm (I := I)
-  have h3 : IsOpen ((chartAt H β).extend I).source :=
-    (chartAt H β).isOpen_extend_source (I := I)
-  exact h2_cont.isOpen_inter_preimage h1 h3
-
-/-- The Fréchet derivative of the chart-transition map at a point `x`, as a
-continuous linear map `E →L[ℝ] E`. Outside the smooth overlap this falls
-back to Mathlib's default `fderiv` value, which is the zero map. -/
-def chartTransitionAt (α β : M) (x : E) : E →L[ℝ] E :=
-  fderiv ℝ (chartTransitionMap (I := I) α β) x
-
-omit [IsManifold I ∞ M] in
-lemma chartTransitionAt_def (α β : M) (x : E) :
-    chartTransitionAt (I := I) α β x =
-      fderiv ℝ (chartTransitionMap (I := I) α β) x := rfl
-
-/-- The chart-transition map is `ContDiffAt` at any interior point of its
-natural source, in the boundaryless setting. -/
-theorem chartTransitionMap_contDiffAt [I.Boundaryless]
-    (α β : M) {x : E}
-    (hx : x ∈ chartTransitionSource (I := I) α β) :
-    ContDiffAt ℝ ∞ (chartTransitionMap (I := I) α β) x := by
-  have h_open : IsOpen (chartTransitionSource (I := I) α β) :=
-    chartTransitionSource_isOpen (I := I) α β
-  have h_on : ContDiffOn ℝ ∞ (chartTransitionMap (I := I) α β)
-      (chartTransitionSource (I := I) α β) :=
-    chartTransitionMap_contDiffOn (I := I) α β
-  exact (h_on.contDiffAt (h_open.mem_nhds hx))
-
-/-- The chart-transition map is differentiable at any point of its source,
-in the boundaryless setting. -/
-theorem chartTransitionMap_differentiableAt [I.Boundaryless]
-    (α β : M) {x : E}
-    (hx : x ∈ chartTransitionSource (I := I) α β) :
-    DifferentiableAt ℝ (chartTransitionMap (I := I) α β) x :=
-  (chartTransitionMap_contDiffAt (I := I) α β hx).differentiableAt (by
-    decide)
-
-/-- Smoothness of `x ↦ chartTransitionAt α β x` as a map into the CLM space
-`E →L[ℝ] E`, on the open overlap, in the boundaryless setting. -/
-theorem chartTransitionAt_smooth [I.Boundaryless] (α β : M) :
-    ContDiffOn ℝ ∞
-      (fun x => (chartTransitionAt (I := I) α β x : E →L[ℝ] E))
-      (chartTransitionSource (I := I) α β) := by
-  have h_open : IsOpen (chartTransitionSource (I := I) α β) :=
-    chartTransitionSource_isOpen (I := I) α β
-  have h_smooth :
-      ContDiffOn ℝ ∞ (chartTransitionMap (I := I) α β)
-        (chartTransitionSource (I := I) α β) :=
-    chartTransitionMap_contDiffOn (I := I) α β
-  have h_top : (∞ + 1) ≤ ∞ := by
-    simp
-  refine h_smooth.fderiv_of_isOpen h_open ?_
-  exact h_top
-
-/-- Pointwise equality: at any point `x` of the overlap, the chart-transition
-CLM equals the Fréchet derivative of the chart-transition map. -/
-@[simp] lemma chartTransitionAt_apply_eq_fderiv (α β : M) (x : E) (v : E) :
-    chartTransitionAt (I := I) α β x v =
-      fderiv ℝ (chartTransitionMap (I := I) α β) x v := rfl
-
-/-- The chart-transition map from a chart back to itself is the identity, on
-the natural source. (This is the partial-equiv left-inverse rewritten.) -/
-lemma chartTransitionMap_self_apply
-    (α : M) {x : E}
-    (hx : x ∈ (extChartAt I α).target) :
-    chartTransitionMap (I := I) α α x = x := by
-  unfold chartTransitionMap
-  change extChartAt I α ((extChartAt I α).symm x) = x
-  exact (extChartAt I α).right_inv hx
-
-/-- For two chart-base points `α, β` and any manifold point `x` in both chart
-sources, the value of the chart-transition map at the chart-α image of `x`
-is the chart-β image of `x`. (Restated for emphasis; identical content to
-`chartTransitionMap_apply_extChartAt`.) -/
-lemma chartTransitionMap_value_on_overlap
-    (α β : M) {x : M}
-    (hx_α : x ∈ (chartAt H α).source) :
-    chartTransitionMap (I := I) α β ((extChartAt I α) x) = extChartAt I β x :=
-  chartTransitionMap_apply_extChartAt (I := I) α β hx_α
-
-/-- The chart-transition map is continuous on its natural source. -/
-theorem chartTransitionMap_continuousOn (α β : M) :
-    ContinuousOn (chartTransitionMap (I := I) α β)
-      (chartTransitionSource (I := I) α β) :=
-  (chartTransitionMap_contDiffOn (I := I) α β).continuousOn
-
-/-- In the boundaryless setting, the chart-transition map is `ContinuousAt`
-at every point of the overlap. -/
-theorem chartTransitionMap_continuousAt [I.Boundaryless]
-    (α β : M) {x : E}
-    (hx : x ∈ chartTransitionSource (I := I) α β) :
-    ContinuousAt (chartTransitionMap (I := I) α β) x := by
-  have h_open : IsOpen (chartTransitionSource (I := I) α β) :=
-    chartTransitionSource_isOpen (I := I) α β
-  exact (chartTransitionMap_continuousOn (I := I) α β).continuousAt (h_open.mem_nhds hx)
-
-/-- Composition identity: `T_{βα}(T_{αβ}(extChartAt I α p)) = extChartAt I α p`
-whenever `p` is in both chart sources. -/
-lemma chartTransitionMap_comp_self_extChartAt
-    (α β : M) {p : M}
-    (hp_α : p ∈ (chartAt H α).source)
-    (hp_β : p ∈ (chartAt H β).source) :
-    chartTransitionMap (I := I) β α
-        (chartTransitionMap (I := I) α β ((extChartAt I α) p)) =
-      (extChartAt I α) p := by
-  have h1 : chartTransitionMap (I := I) α β ((extChartAt I α) p) =
-      extChartAt I β p :=
-    chartTransitionMap_apply_extChartAt (I := I) α β hp_α
-  rw [h1]
-  exact chartTransitionMap_apply_extChartAt (I := I) β α hp_β
-
-/-- Pointwise inverse identity on the source: for every `y` in the source of the
-chart-transition `T_{αβ}`, applying `T_{βα}` afterwards returns `y`. -/
-lemma chartTransitionMap_comp_self_of_mem_source
-    (α β : M) {y : E} (hy : y ∈ chartTransitionSource (I := I) α β) :
-    chartTransitionMap (I := I) β α (chartTransitionMap (I := I) α β y) = y := by
-  obtain ⟨hy_tgt, hy_pre⟩ := hy
-  have hy_pre' : (extChartAt I α).symm y ∈ (extChartAt I β).source := hy_pre
-  change extChartAt I α
-      ((extChartAt I β).symm (extChartAt I β ((extChartAt I α).symm y))) = y
-  rw [(extChartAt I β).left_inv hy_pre']
-  exact (extChartAt I α).right_inv hy_tgt
-
-/-- The chart-transition map `T_{αβ}` sends the source `chartTransitionSource α β`
-into the source `chartTransitionSource β α`. -/
-lemma chartTransitionMap_mapsTo_source [I.Boundaryless]
-    (α β : M) :
-    Set.MapsTo (chartTransitionMap (I := I) α β)
-      (chartTransitionSource (I := I) α β)
-      (chartTransitionSource (I := I) β α) := by
-  intro y hy
-  obtain ⟨hy_tgt, hy_pre⟩ := hy
-  have hy_pre' : (extChartAt I α).symm y ∈ (extChartAt I β).source := hy_pre
-  refine ⟨?_, ?_⟩
-  · change extChartAt I β ((extChartAt I α).symm y) ∈ (extChartAt I β).target
-    exact (extChartAt I β).map_source hy_pre'
-  · change (extChartAt I β).symm
-        (extChartAt I β ((extChartAt I α).symm y)) ∈ (extChartAt I α).source
-    rw [(extChartAt I β).left_inv hy_pre']
-    exact (extChartAt I α).map_target hy_tgt
-
-/-- **Mutual-inverse Jacobian identity.** For `y` in the chart-transition source,
-the chart-transition CLM at `T_{αβ} y` for the reverse transition composed with
-the chart-transition CLM at `y` for the forward transition is the identity:
-`(chartTransitionAt β α (T_{αβ} y)) ∘ (chartTransitionAt α β y) = id`. -/
-theorem chartTransitionAt_comp_chartTransitionAt [I.Boundaryless]
-    (α β : M) {y : E} (hy : y ∈ chartTransitionSource (I := I) α β) :
-    (chartTransitionAt (I := I) β α (chartTransitionMap (I := I) α β y)).comp
-        (chartTransitionAt (I := I) α β y) =
-      ContinuousLinearMap.id ℝ E := by
-  classical
-  have h_open : IsOpen (chartTransitionSource (I := I) α β) :=
-    chartTransitionSource_isOpen (I := I) α β
-  have h_nhds : chartTransitionSource (I := I) α β ∈ nhds y :=
-    h_open.mem_nhds hy
-  have h_eq : (chartTransitionMap (I := I) β α ∘ chartTransitionMap (I := I) α β)
-      =ᶠ[nhds y] id := by
-    filter_upwards [h_nhds] with z hz
-    simp only [Function.comp_apply, id_eq]
-    exact chartTransitionMap_comp_self_of_mem_source (I := I) α β hz
-  have hdiff_f : DifferentiableAt ℝ (chartTransitionMap (I := I) α β) y :=
-    chartTransitionMap_differentiableAt (I := I) α β hy
-  have hy' : chartTransitionMap (I := I) α β y ∈ chartTransitionSource (I := I) β α :=
-    chartTransitionMap_mapsTo_source (I := I) α β hy
-  have hdiff_g : DifferentiableAt ℝ (chartTransitionMap (I := I) β α)
-      (chartTransitionMap (I := I) α β y) :=
-    chartTransitionMap_differentiableAt (I := I) β α hy'
-  have h_fderiv_comp :
-      fderiv ℝ (chartTransitionMap (I := I) β α ∘ chartTransitionMap (I := I) α β) y =
-        (fderiv ℝ (chartTransitionMap (I := I) β α)
-            (chartTransitionMap (I := I) α β y)).comp
-          (fderiv ℝ (chartTransitionMap (I := I) α β) y) :=
-    fderiv_comp y hdiff_g hdiff_f
-  have h_fderiv_id : fderiv ℝ (id : E → E) y = ContinuousLinearMap.id ℝ E :=
-    fderiv_id
-  have h_chain : fderiv ℝ
-      (chartTransitionMap (I := I) β α ∘ chartTransitionMap (I := I) α β) y =
-      ContinuousLinearMap.id ℝ E := by
-    rw [h_eq.fderiv_eq, h_fderiv_id]
-  rw [chartTransitionAt_def, chartTransitionAt_def]
-  rw [← h_fderiv_comp, h_chain]
-
-/-- **Mutual-inverse Jacobian identity, other order.** For `y` in the source of
-`T_{αβ}`, the forward CLM at `y` composed *after* the reverse CLM at `T_{αβ} y`
-is the identity: `(chartTransitionAt α β y) ∘ (chartTransitionAt β α (T_{αβ} y)) = id`. -/
-theorem chartTransitionAt_comp_chartTransitionAt' [I.Boundaryless]
-    (α β : M) {y : E} (hy : y ∈ chartTransitionSource (I := I) α β) :
-    (chartTransitionAt (I := I) α β y).comp
-        (chartTransitionAt (I := I) β α (chartTransitionMap (I := I) α β y)) =
-      ContinuousLinearMap.id ℝ E := by
-  have hy' : chartTransitionMap (I := I) α β y ∈ chartTransitionSource (I := I) β α :=
-    chartTransitionMap_mapsTo_source (I := I) α β hy
-  have hback : chartTransitionMap (I := I) β α (chartTransitionMap (I := I) α β y) = y :=
-    chartTransitionMap_comp_self_of_mem_source (I := I) α β hy
-  have h := chartTransitionAt_comp_chartTransitionAt (I := I) β α hy'
-  rw [hback] at h
-  exact h
-
-/-- The `(i, a)`-entry of the chart-transition Fréchet derivative
-`chartTransitionAt α β x : E →L[ℝ] E` in the canonical model-space basis
-`chartModelBasis E`: the `i`-th coordinate of `(chartTransitionAt α β x)(e_a)`. -/
-def chartTransitionJacEntry (α β : M) (x : E)
-    (i a : Fin (Module.finrank ℝ E)) : ℝ :=
-  (chartModelBasis E).repr
-    (chartTransitionAt (I := I) α β x ((chartModelBasis E) a)) i
-
-@[simp] lemma chartTransitionJacEntry_def (α β : M) (x : E)
-    (i a : Fin (Module.finrank ℝ E)) :
-    chartTransitionJacEntry (I := I) α β x i a =
-      (chartModelBasis E).repr
-        (chartTransitionAt (I := I) α β x
-          ((chartModelBasis E) a)) i := rfl
-
-/-- **Entry form of the mutual-inverse Jacobian identity.** Summing the forward
-Jacobian entries against the reverse Jacobian entries (evaluated at `T_{αβ} y`)
-yields the Kronecker delta. This is the index-level statement of
-`chartTransitionAt_comp_chartTransitionAt`, in the form directly consumed by the
-inverse-Gram pullback. -/
-theorem chartTransitionJacEntry_mul_sum [I.Boundaryless]
-    (α β : M) {y : E} (hy : y ∈ chartTransitionSource (I := I) α β)
-    (c i : Fin (Module.finrank ℝ E)) :
-    ∑ a : Fin (Module.finrank ℝ E),
-        chartTransitionJacEntry (I := I) α β y a i *
-        chartTransitionJacEntry (I := I) β α
-          (chartTransitionMap (I := I) α β y) c a =
-      (if c = i then (1 : ℝ) else 0) := by
-  classical
-  have hcomp := chartTransitionAt_comp_chartTransitionAt (I := I) α β hy
-  have happly :
-      (chartTransitionAt (I := I) β α (chartTransitionMap (I := I) α β y))
-          (chartTransitionAt (I := I) α β y ((chartModelBasis E) i)) =
-        (chartModelBasis E) i := by
-    have := congrArg (fun L : E →L[ℝ] E => L ((chartModelBasis E) i)) hcomp
-    simpa using this
-  have hexpand :
-      chartTransitionAt (I := I) α β y ((chartModelBasis E) i) =
-        ∑ a : Fin (Module.finrank ℝ E),
-          chartTransitionJacEntry (I := I) α β y a i • (chartModelBasis E) a := by
-    conv_lhs => rw [← (chartModelBasis E).sum_repr
-      (chartTransitionAt (I := I) α β y ((chartModelBasis E) i))]
-    rfl
-  rw [hexpand, map_sum] at happly
-  have hcoord : (chartModelBasis E).repr
-      (∑ a, chartTransitionAt (I := I) β α (chartTransitionMap (I := I) α β y)
-          (chartTransitionJacEntry (I := I) α β y a i • (chartModelBasis E) a)) c =
-      (chartModelBasis E).repr ((chartModelBasis E) i) c :=
-    congrArg (fun w => (chartModelBasis E).repr w c) happly
-  have hlhs :
-      (chartModelBasis E).repr
-        (∑ a, chartTransitionAt (I := I) β α (chartTransitionMap (I := I) α β y)
-            (chartTransitionJacEntry (I := I) α β y a i • (chartModelBasis E) a)) c =
-      ∑ a, chartTransitionJacEntry (I := I) α β y a i *
-        chartTransitionJacEntry (I := I) β α
-          (chartTransitionMap (I := I) α β y) c a := by
-    rw [map_sum]
-    rw [Finsupp.finset_sum_apply]
-    refine Finset.sum_congr rfl ?_
-    intro a _
-    rw [map_smul, map_smul]
-    simp only [Finsupp.smul_apply, smul_eq_mul, chartTransitionJacEntry_def]
-  rw [hlhs] at hcoord
-  rw [hcoord]
-  have hrepr : (chartModelBasis E).repr ((chartModelBasis E) i) c =
-      (if c = i then (1 : ℝ) else 0) := by
-    rw [(chartModelBasis E).repr_self i, Finsupp.single_apply]
-    by_cases h : c = i
-    · subst h; simp
-    · rw [if_neg (fun hh : i = c => h hh.symm), if_neg h]
-  exact hrepr
-
-/-- **Entry form of the mutual-inverse Jacobian identity, other order.** Summing
-the forward Jacobian entries (at `y`) against the reverse Jacobian entries (at
-`T_{αβ} y`), contracting on the inner index, yields the Kronecker delta. This is
-the index-level statement of `chartTransitionAt_comp_chartTransitionAt'`. -/
-theorem chartTransitionJacEntry_mul_sum' [I.Boundaryless]
-    (α β : M) {y : E} (hy : y ∈ chartTransitionSource (I := I) α β)
-    (b i : Fin (Module.finrank ℝ E)) :
-    ∑ m : Fin (Module.finrank ℝ E),
-        chartTransitionJacEntry (I := I) α β y b m *
-        chartTransitionJacEntry (I := I) β α
-          (chartTransitionMap (I := I) α β y) m i =
-      (if b = i then (1 : ℝ) else 0) := by
-  classical
-  have hcomp := chartTransitionAt_comp_chartTransitionAt' (I := I) α β hy
-  have happly :
-      (chartTransitionAt (I := I) α β y)
-          (chartTransitionAt (I := I) β α (chartTransitionMap (I := I) α β y)
-            ((chartModelBasis E) i)) =
-        (chartModelBasis E) i := by
-    have := congrArg (fun L : E →L[ℝ] E => L ((chartModelBasis E) i)) hcomp
-    simpa using this
-  have hexpand :
-      chartTransitionAt (I := I) β α (chartTransitionMap (I := I) α β y)
-          ((chartModelBasis E) i) =
-        ∑ m : Fin (Module.finrank ℝ E),
-          chartTransitionJacEntry (I := I) β α
-            (chartTransitionMap (I := I) α β y) m i • (chartModelBasis E) m := by
-    conv_lhs => rw [← (chartModelBasis E).sum_repr
-      (chartTransitionAt (I := I) β α (chartTransitionMap (I := I) α β y)
-        ((chartModelBasis E) i))]
-    rfl
-  rw [hexpand, map_sum] at happly
-  have hcoord : (chartModelBasis E).repr
-      (∑ m, chartTransitionAt (I := I) α β y
-          (chartTransitionJacEntry (I := I) β α
-            (chartTransitionMap (I := I) α β y) m i • (chartModelBasis E) m)) b =
-      (chartModelBasis E).repr ((chartModelBasis E) i) b :=
-    congrArg (fun w => (chartModelBasis E).repr w b) happly
-  have hlhs :
-      (chartModelBasis E).repr
-        (∑ m, chartTransitionAt (I := I) α β y
-            (chartTransitionJacEntry (I := I) β α
-              (chartTransitionMap (I := I) α β y) m i • (chartModelBasis E) m)) b =
-      ∑ m, chartTransitionJacEntry (I := I) α β y b m *
-        chartTransitionJacEntry (I := I) β α
-          (chartTransitionMap (I := I) α β y) m i := by
-    rw [map_sum, Finsupp.finset_sum_apply]
-    refine Finset.sum_congr rfl ?_
-    intro m _
-    rw [map_smul, map_smul]
-    simp only [Finsupp.smul_apply, smul_eq_mul, chartTransitionJacEntry_def]
-    ring
-  rw [hlhs] at hcoord
-  rw [hcoord]
-  rw [(chartModelBasis E).repr_self i, Finsupp.single_apply]
-  by_cases h : b = i
-  · subst h; simp
-  · rw [if_neg (fun hh : i = b => h hh.symm), if_neg h]
 
 omit [IsManifold I ∞ M] in
 private lemma fderivWithin_range_I_eq_fderiv' [I.Boundaryless]
@@ -1133,43 +709,6 @@ lemma chartCoord_chartTransitionAt (α β : M) (x : E) (v : E)
   intro i _
   rw [map_smul, Finsupp.smul_apply, smul_eq_mul]
   ring
-
-/-- The forward Jacobian at `x = extChartAt I α p` contracted on its lower index
-against the reverse Jacobian at `T x` collapses to a Kronecker delta:
-`∑ l, J^a_l(x) · K^l_d(T x) = δ_{a d}`, where `J = `forward Jacobian at `x`,
-`K = `reverse Jacobian at `T x`. This is `chartTransitionJacEntry_mul_sum'`
-packaged with the source-membership discharged from chart-source membership of
-`p`. -/
-lemma chartTransitionJacEntry_forward_reverse_collapse [I.Boundaryless]
-    (α β : M) {p : M}
-    (hp_α : p ∈ (chartAt H α).source) (hp_β : p ∈ (chartAt H β).source)
-    (a d : Fin (Module.finrank ℝ E)) :
-    ∑ l : Fin (Module.finrank ℝ E),
-        chartTransitionJacEntry (I := I) α β (extChartAt I α p) a l *
-        chartTransitionJacEntry (I := I) β α
-          (chartTransitionMap (I := I) α β (extChartAt I α p)) l d =
-      (if a = d then (1 : ℝ) else 0) := by
-  have hx_src : extChartAt I α p ∈ chartTransitionSource (I := I) α β :=
-    extChartAt_mem_chartTransitionSource (I := I) α β hp_α hp_β
-  exact chartTransitionJacEntry_mul_sum' (I := I) α β hx_src a d
-
-/-- The reverse Jacobian at `T x` contracted on its upper index against the
-forward Jacobian at `x` collapses to a Kronecker delta:
-`∑ a, J^a_i(x) · K^c_a(T x) = δ_{c i}`. This is `chartTransitionJacEntry_mul_sum`
-packaged with the source-membership discharged from chart-source membership of
-`p`. -/
-lemma chartTransitionJacEntry_reverse_forward_collapse [I.Boundaryless]
-    (α β : M) {p : M}
-    (hp_α : p ∈ (chartAt H α).source) (hp_β : p ∈ (chartAt H β).source)
-    (c i : Fin (Module.finrank ℝ E)) :
-    ∑ a : Fin (Module.finrank ℝ E),
-        chartTransitionJacEntry (I := I) α β (extChartAt I α p) a i *
-        chartTransitionJacEntry (I := I) β α
-          (chartTransitionMap (I := I) α β (extChartAt I α p)) c a =
-      (if c = i then (1 : ℝ) else 0) := by
-  have hx_src : extChartAt I α p ∈ chartTransitionSource (I := I) α β :=
-    extChartAt_mem_chartTransitionSource (I := I) α β hp_α hp_β
-  exact chartTransitionJacEntry_mul_sum (I := I) α β hx_src c i
 
 /-- The second-derivative ("`D²T`") inhomogeneous correction in the
 chart-Christoffel transformation law, as an `E`-valued bilinear contraction.

@@ -4,8 +4,8 @@ import DifferentialGeometry.Geometry.Comparison.Variation.SecondVariation
 import DifferentialGeometry.Geometry.Comparison.Variation.SecondVariationMinimiser
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnection
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.Curvature
-import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivita
-import DifferentialGeometry.Geometry.Curvature.Bochner.Bochner
+import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
+import DifferentialGeometry.Geometry.Curvature.Bochner.WeitzenbockIdentity
 import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 

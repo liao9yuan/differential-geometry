@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Heat.Semigroup.Semigroup
+import DifferentialGeometry.Analysis.Heat.Semigroup.Defs
 import DifferentialGeometry.Analysis.Heat.Semigroup.SpectralBounds
 import DifferentialGeometry.Analysis.Sobolev.Manifold.IteratedSobolevEmbedding
 import DifferentialGeometry.Analysis.Sobolev.Manifold.IteratedSobolevEmbeddingCInfty

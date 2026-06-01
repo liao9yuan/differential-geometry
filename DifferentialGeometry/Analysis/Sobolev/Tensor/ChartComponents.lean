@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components.Components
+import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components.Defs
 
 /-!
 # Chart-coordinate scalar components of an `(r, s)`-tensor section

@@ -3,7 +3,7 @@ import DifferentialGeometry.Geometry.Connection.ParallelTransport.CovariantDeriv
 import DifferentialGeometry.Geometry.Geodesic.Equation
 import DifferentialGeometry.Geometry.Geodesic.ChartTransition
 import DifferentialGeometry.Geometry.Comparison.Variation.ParallelLocalODE
-import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivita
+import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 import DifferentialGeometry.Geometry.Connection.Chart.NablaComponents.Basic
 import DifferentialGeometry.Geometry.Connection.Chart.NablaComponents.OneForm
 import DifferentialGeometry.Geometry.Connection.Chart.NablaComponents.TwoTensor

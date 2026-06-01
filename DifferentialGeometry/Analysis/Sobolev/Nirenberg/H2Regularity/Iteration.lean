@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Sobolev.Nirenberg.H2Regularity.H2Regularity
+import DifferentialGeometry.Analysis.Sobolev.Nirenberg.H2Regularity.SmoothWeakSolutionH2
 
 /-!
 # Iterated interior regularity for smooth weak solutions of uniformly

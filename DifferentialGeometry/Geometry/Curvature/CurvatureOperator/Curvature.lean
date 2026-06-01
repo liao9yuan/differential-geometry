@@ -7,7 +7,7 @@ import Mathlib.Geometry.Manifold.VectorField.LieBracket
 import Mathlib.Geometry.Manifold.MFDeriv.Basic
 import Mathlib.Geometry.Manifold.MFDeriv.NormedSpace
 import Mathlib.Topology.FiberBundle.Basic
-import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivita
+import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 
 /-!
 # The Riemann curvature operator of a covariant derivative

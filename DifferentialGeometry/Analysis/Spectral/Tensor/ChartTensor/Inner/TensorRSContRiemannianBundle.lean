@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Inner.Inner
+import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Inner.Defs
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Inner.InnerBridge
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Inner.LowerAllUpperIndices
 import DifferentialGeometry.Geometry.Metric.TensorInner.TensorRSRiemannianBundle

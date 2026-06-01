@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Heat.Semigroup.Semigroup
+import DifferentialGeometry.Analysis.Heat.Semigroup.Defs
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 import Mathlib.MeasureTheory.Integral.DominatedConvergence
 

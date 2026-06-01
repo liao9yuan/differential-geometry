@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartCoordinateExpansion.RawTensorConnLapChartFrameTrace
-import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components.Components
+import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components.Defs
 
 /-!
 # Chart-α (Idx, Jdx)-projection of the chart-frame trace identity

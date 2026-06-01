@@ -2,7 +2,7 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartBilinear.H1Compl
 import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartBilinear.H1ComplFromDom
 import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartHk.H2NonSmooth
 import DifferentialGeometry.Analysis.Elliptic.Regularity.ManifoldH2.Smooth
-import DifferentialGeometry.Analysis.Elliptic.Operator.Operator
+import DifferentialGeometry.Analysis.Elliptic.Operator.VariationalLaplacian
 import DifferentialGeometry.Analysis.Sobolev.Chart.Defs
 import Mathlib.MeasureTheory.Function.LpSeminorm.Basic
 

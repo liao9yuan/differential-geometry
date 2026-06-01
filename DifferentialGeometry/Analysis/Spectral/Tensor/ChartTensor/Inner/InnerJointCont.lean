@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Inner.Inner
+import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Inner.Defs
 import DifferentialGeometry.Tensor.RSTensor.Defs
 import Mathlib.Analysis.Normed.Module.FiniteDimension
 import Mathlib.LinearAlgebra.Basis.VectorSpace

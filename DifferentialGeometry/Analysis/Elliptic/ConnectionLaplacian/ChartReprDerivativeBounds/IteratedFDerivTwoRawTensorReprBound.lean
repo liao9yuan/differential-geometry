@@ -11,7 +11,7 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.CovApplyAndSlo
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartCoordinateExpansion.ChartFrameNormGlobalSmooth
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapPointwiseFiberBounds.RawTensorConnLapPointwiseBound
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartFiberTrivialisationOpNorm.TensorRSChartReprNormBound
-import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components.Components
+import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components.Defs
 
 /-!
 # Pointwise order-2 squared norm bound on the chart-pulled representation of

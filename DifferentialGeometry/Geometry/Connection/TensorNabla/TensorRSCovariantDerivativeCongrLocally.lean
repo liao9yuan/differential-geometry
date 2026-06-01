@@ -1,5 +1,5 @@
 import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorRSNabla
-import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivita
+import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 
 /-!
 # Locality of the `(r, s)`-tensor bundle Levi-Civita covariant derivative

@@ -11,7 +11,7 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartFiberTriv
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.CovApplyAndSlotCorrectionBounds.IntrinsicPieceFderivBound
 import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartLocal
 import DifferentialGeometry.Geometry.Connection.Laplacian.TensorConnLaplacian
-import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components.Components
+import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components.Defs
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.CovDerivIntrinsicComponent
 import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Defs
 

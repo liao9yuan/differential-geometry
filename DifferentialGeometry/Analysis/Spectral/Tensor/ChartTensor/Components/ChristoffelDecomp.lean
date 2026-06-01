@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components.Components
+import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components.Defs
 import DifferentialGeometry.Geometry.Connection.ChartFrame.ChartSection
 import Mathlib.Analysis.Calculus.FDeriv.Comp
 

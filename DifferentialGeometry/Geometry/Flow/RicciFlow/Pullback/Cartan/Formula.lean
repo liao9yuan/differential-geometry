@@ -1,5 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.LieDerivativeMetric
-import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivita
+import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 
 noncomputable section
 

@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.ChartPartial.EigenvectorWeakPartials
-import DifferentialGeometry.Analysis.Spectral.Tensor.Spectrum.Spectrum
+import DifferentialGeometry.Analysis.Spectral.Tensor.Spectrum.Defs
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovGradL2
 
 /-!

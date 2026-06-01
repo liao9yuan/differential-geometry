@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.IteratedSobolev
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Density
-import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity.SmoothDensity
+import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity.ChartSobolevDensity
 
 /-!
 # `eLpNorm`-of-Fréchet-derivative bound by `wkpNorm 2 2`

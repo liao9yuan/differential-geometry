@@ -8,7 +8,7 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartBilinear.H1ComplFr
 import DifferentialGeometry.Analysis.Elliptic.Regularity.H1Compl.WeakPartialLimit
 import DifferentialGeometry.Analysis.Elliptic.Regularity.H1Compl.GradientH1LipschitzBound
 import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartPushed.WeakPartialOnVolume
-import DifferentialGeometry.Analysis.Elliptic.Operator.Operator
+import DifferentialGeometry.Analysis.Elliptic.Operator.VariationalLaplacian
 import DifferentialGeometry.Analysis.Elliptic.Operator.SmoothBridge
 import DifferentialGeometry.Analysis.Elliptic.Operator.Variational
 import DifferentialGeometry.Geometry.Operator.NormGradSq

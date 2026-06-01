@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Curvature.Riemann.Riemann
+import DifferentialGeometry.Geometry.Curvature.Riemann.Defs
 import DifferentialGeometry.Geometry.Operator.HessianTrace
 
 /-!

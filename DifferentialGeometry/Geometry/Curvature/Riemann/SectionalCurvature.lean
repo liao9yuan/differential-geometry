@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Curvature.Riemann.Riemann
+import DifferentialGeometry.Geometry.Curvature.Riemann.Defs
 
 set_option linter.unusedSectionVars false
 

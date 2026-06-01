@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Curvature.Bochner.Bochner
+import DifferentialGeometry.Geometry.Curvature.Bochner.WeitzenbockIdentity
 
 /-!
 # Concrete pointwise Bochner-Weitzenböck identity, unconditional form

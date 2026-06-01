@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Heat.Smoothing.Smoothing
+import DifferentialGeometry.Analysis.Heat.Smoothing.SmoothRepresentative
 import DifferentialGeometry.Analysis.Heat.Smoothing.HeatSemigroupIteratedDomain
 import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.PowH2kBridge
 

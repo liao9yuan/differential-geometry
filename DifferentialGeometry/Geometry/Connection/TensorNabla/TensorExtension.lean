@@ -7,7 +7,7 @@ import Mathlib.Geometry.Manifold.MFDeriv.NormedSpace
 import Mathlib.Geometry.Manifold.ContMDiffMFDeriv
 import DifferentialGeometry.Bundle.Equiv
 import DifferentialGeometry.Bundle.Frame
-import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivita
+import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 import DifferentialGeometry.Geometry.Connection.TensorNabla.CotangentExtension
 
 /-!

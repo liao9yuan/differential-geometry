@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingManifoldC0
-import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovGrad
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.Defs
 
 /-!
 # The `C^m` tensor Sobolev embedding controlling iterated covariant derivatives

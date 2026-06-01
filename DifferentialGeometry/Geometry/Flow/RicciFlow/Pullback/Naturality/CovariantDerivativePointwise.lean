@@ -3,7 +3,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Defs
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Naturality.MLieBracket
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.PullbackConnection
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Naturality.CovariantDerivative
-import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivita
+import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Koszul
 
 /-!

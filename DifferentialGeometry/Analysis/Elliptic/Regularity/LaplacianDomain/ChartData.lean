@@ -6,7 +6,7 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.H1Compl.GradientH1Lipsc
 import DifferentialGeometry.Analysis.Elliptic.Regularity.H1Compl.ToLpChartBridge
 import DifferentialGeometry.Analysis.Elliptic.Regularity.H1Compl.WeakPartialLimit
 import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.VariationalIdentityIntegral
-import DifferentialGeometry.Analysis.Elliptic.Operator.Operator
+import DifferentialGeometry.Analysis.Elliptic.Operator.VariationalLaplacian
 import DifferentialGeometry.Analysis.Sobolev.Manifold.Rellich
 import DifferentialGeometry.Geometry.Operator.Gradient
 import DifferentialGeometry.Geometry.Operator.Laplacian

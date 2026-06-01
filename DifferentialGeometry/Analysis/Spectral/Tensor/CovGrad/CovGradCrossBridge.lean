@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovGrad
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.Defs
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovariantLeibniz
 import DifferentialGeometry.Geometry.Metric.PointwiseInner.SlotPermutation
 import Mathlib.Data.Fin.Tuple.Basic

@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Embedding.MorreyHigherOrder
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MorreyManifold
-import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity.SmoothDensity
+import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity.ChartSobolevDensity
 
 /-!
 # Higher-order manifold Morrey bound on closed Riemannian manifolds

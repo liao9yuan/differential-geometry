@@ -3,7 +3,7 @@ import DifferentialGeometry.Analysis.Sobolev.Tools.StrictStrongSupport
 import DifferentialGeometry.Analysis.Sobolev.Approximation.SmoothDensity
 import DifferentialGeometry.Analysis.Sobolev.Chart.ChartTransition.TransitionDiffeo
 import DifferentialGeometry.Analysis.Sobolev.Chart.ChartTransition.Transition
-import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity.SmoothDensity
+import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity.ChartSobolevDensity
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuant
 
 /-!

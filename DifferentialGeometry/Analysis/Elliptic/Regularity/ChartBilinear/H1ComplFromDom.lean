@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartBilinear.H1Compl
 import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartBilinear.Smooth
-import DifferentialGeometry.Analysis.Elliptic.Operator.Operator
+import DifferentialGeometry.Analysis.Elliptic.Operator.VariationalLaplacian
 import Mathlib.Analysis.Normed.Operator.Extend
 import Mathlib.MeasureTheory.Function.LpSpace.Basic
 import Mathlib.MeasureTheory.Function.L2Space

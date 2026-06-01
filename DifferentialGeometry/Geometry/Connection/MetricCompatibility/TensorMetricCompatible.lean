@@ -1,5 +1,5 @@
 import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorRSNabla
-import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivita
+import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Agreement.TensorSectionMDifferentiability
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciIdentitySmoothFrame
 import DifferentialGeometry.Geometry.Metric.PointwiseInner.Algebra

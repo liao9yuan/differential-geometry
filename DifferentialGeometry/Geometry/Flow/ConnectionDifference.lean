@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivita
+import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 
 /-!
 # The connection-difference tensor of two Riemannian metrics

@@ -1,7 +1,7 @@
 import DifferentialGeometry.Analysis.Sobolev.Chart.CrossChartBounds.CrossChartBoundStrict
 import DifferentialGeometry.Analysis.Sobolev.Chart.CrossChartBounds.CrossChartIdentity
 import DifferentialGeometry.Analysis.Sobolev.Chart.ChartTransition.TransitionDiffeo
-import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity.SmoothDensity
+import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity.ChartSobolevDensity
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuant
 
 /-!

@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Inner.Inner
+import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Inner.Defs
 import DifferentialGeometry.Geometry.Metric.TensorInner.Tensor0SRiemannian
 import DifferentialGeometry.Geometry.Metric.PointwiseInner.Defs
 import DifferentialGeometry.Geometry.Metric.PointwiseInner.DualMetric

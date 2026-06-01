@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity.SmoothDensity
+import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity.ChartSobolevDensity
 import DifferentialGeometry.Analysis.Sobolev.Chart.ChartTransition.ChartPullbackSmooth
 import DifferentialGeometry.Analysis.Sobolev.Chart.ChartTransition.Transition
 import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity.Defs

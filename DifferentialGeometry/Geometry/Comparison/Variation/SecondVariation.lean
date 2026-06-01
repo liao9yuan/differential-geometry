@@ -5,7 +5,7 @@ import DifferentialGeometry.Geometry.Connection.ParallelTransport.CovariantDeriv
 import DifferentialGeometry.Geometry.Connection.ParallelTransport.MFDerivAlongCurve
 import DifferentialGeometry.Geometry.Geodesic.Equation
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.Curvature
-import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivita
+import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciIdentity
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnection
 import DifferentialGeometry.Geometry.Metric.TensorInner.TangentRiemannian

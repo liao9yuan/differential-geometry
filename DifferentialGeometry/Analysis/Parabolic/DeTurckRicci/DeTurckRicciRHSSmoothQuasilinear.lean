@@ -3,13 +3,13 @@ import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.QuasilinearMetricSho
 import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.DeTurckRicciStrictParabolic
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Cartan.Formula
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnection
-import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivita
+import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 import DifferentialGeometry.Geometry.Connection.TensorNabla.CotangentExtension
 import DifferentialGeometry.Geometry.Flow.VectorFieldSmooth
 import DifferentialGeometry.Geometry.Flow.LieDerivativeMetric
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.LocalFormula
 import DifferentialGeometry.Geometry.Curvature.Riemann.Ricci
-import DifferentialGeometry.Geometry.Curvature.Riemann.Riemann
+import DifferentialGeometry.Geometry.Curvature.Riemann.Defs
 import Mathlib.Geometry.Manifold.ContMDiff.Basic
 
 namespace DifferentialGeometry.PDE.RicciFlow

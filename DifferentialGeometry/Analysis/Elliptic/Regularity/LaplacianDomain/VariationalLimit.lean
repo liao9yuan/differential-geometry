@@ -9,7 +9,7 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.VariationalIde
 import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.CLM.Defs
 import DifferentialGeometry.Analysis.Elliptic.Regularity.SmoothScalar.MulLp
 import DifferentialGeometry.Analysis.Elliptic.Operator.SmoothBridge
-import DifferentialGeometry.Analysis.Elliptic.Operator.Operator
+import DifferentialGeometry.Analysis.Elliptic.Operator.VariationalLaplacian
 import DifferentialGeometry.Geometry.Operator.Gradient
 import DifferentialGeometry.Geometry.Operator.Laplacian
 import Mathlib.MeasureTheory.Function.LpSpace.Basic

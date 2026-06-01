@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Heat.Semigroup.Semigroup
+import DifferentialGeometry.Analysis.Heat.Semigroup.Defs
 import Mathlib.Analysis.SpecialFunctions.Exp
 import Mathlib.Analysis.SpecialFunctions.ExpDeriv
 import Mathlib.Analysis.SpecialFunctions.Pow.Real

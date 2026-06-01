@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Sobolev.Euclidean.ChainRule.ChainRule
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.ChainRule.Defs
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.ChainRule.ChainRuleHigherK
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Density
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Completeness.IteratedSobolevBanach

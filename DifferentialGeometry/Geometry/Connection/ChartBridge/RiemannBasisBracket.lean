@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.CurvatureBundling
-import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivita
+import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 import DifferentialGeometry.Geometry.Connection.ChartBridge.Ricci
 import DifferentialGeometry.Bundle.Frame
 import Mathlib.Geometry.Manifold.VectorField.LieBracket

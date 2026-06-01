@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Sobolev.Nirenberg.H2Regularity.H2Regularity
+import DifferentialGeometry.Analysis.Sobolev.Nirenberg.H2Regularity.SmoothWeakSolutionH2
 import DifferentialGeometry.Analysis.Sobolev.Solutions.FriedrichsCommutator
 
 /-!

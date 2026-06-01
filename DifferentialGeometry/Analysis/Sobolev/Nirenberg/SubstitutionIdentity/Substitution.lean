@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Sobolev.Nirenberg.TestFunction.TestFunction
+import DifferentialGeometry.Analysis.Sobolev.Nirenberg.TestFunction.Defs
 
 /-!
 # Substitution of the interior-regularity test function and discrete

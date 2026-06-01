@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.WeakSolution.WeakSolution
+import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.WeakSolution.Defs
 
 /-!
 # Chart factorisation of the `L²` source pairing against the rotated test section
