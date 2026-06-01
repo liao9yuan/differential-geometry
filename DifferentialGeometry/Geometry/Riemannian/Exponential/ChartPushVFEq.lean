@@ -82,11 +82,6 @@ open DifferentialGeometry.Geometry.Riemannian.Geodesic
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-/-! ## Achart-equality from projection equality
-
-`achart` on `TM` only sees the projection, so two points with the same
-projection give the same achart. -/
-
 section AchartEquality
 
 /-- The achart on `TM` (indexed by `ModelProd H E`) depends only on the
@@ -94,19 +89,11 @@ projection: two points with equal projections give the same achart. -/
 lemma achart_modelProd_eq_of_proj_eq {q₁ q₂ : TangentBundle I M}
     (h : q₁.proj = q₂.proj) :
     achart (ModelProd H E) q₁ = achart (ModelProd H E) q₂ := by
-  -- `achart H₀ x = ⟨chartAt H₀ x, _⟩`, and `chartAt (ModelProd H E) q` only
-  -- depends on `q.1 = q.proj` (cf. `TangentBundle.chartAt`).
   refine Subtype.ext ?_
   change chartAt (ModelProd H E) q₁ = chartAt (ModelProd H E) q₂
   rw [TangentBundle.chartAt q₁, TangentBundle.chartAt q₂, h]
 
 end AchartEquality
-
-/-! ## Identifying `tangentCoordChange I.tangent` via the trivialisation
-
-For a point `q : TM` with `q.proj` in `(chartAt H α).source`, the
-trivialisation of `T(TM)` at `⟨α, 0⟩` evaluated linearly at `q` coincides
-with the coordinate change `tangentCoordChange I.tangent q ⟨α, 0⟩ q`. -/
 
 section TangentCoordChange
 
@@ -116,7 +103,6 @@ lemma mem_chartAt_modelProd_zero_source_iff
     (α : M) (q : TangentBundle I M) :
     q ∈ (chartAt (ModelProd H E) (⟨α, (0 : E)⟩ : TangentBundle I M)).source ↔
       q.proj ∈ (chartAt H α).source := by
-  -- `TangentBundle.mem_chart_source_iff` reduces it to first-coord membership.
   exact TangentBundle.mem_chart_source_iff (I := I) (M := M) q
     (⟨α, (0 : E)⟩ : TangentBundle I M)
 
@@ -132,12 +118,6 @@ lemma trivializationAt_tangent_continuousLinearMapAt_eq_core
       (tangentBundleCore I.tangent (TangentBundle I M)).coordChange
         (achart (ModelProd H E) q)
         (achart (ModelProd H E) (⟨α, (0 : E)⟩ : TangentBundle I M)) q := by
-  -- Instantiate `TangentBundle.continuousLinearMapAt_trivializationAt_eq_core`
-  -- at the manifold `TM`, model-with-corners `I.tangent`, model space
-  -- `E × E`, model topological space `ModelProd H E`. Base points: `b₀ = ⟨α, 0⟩`,
-  -- `b = q`. Hypothesis: `q ∈ (chartAt (ModelProd H E) ⟨α, 0⟩).source`,
-  -- equivalent to `q.proj ∈ (chartAt H α).source` via
-  -- `TangentBundle.mem_chart_source_iff`.
   have hq_src : q ∈
       (chartAt (ModelProd H E) (⟨α, (0 : E)⟩ : TangentBundle I M)).source :=
     (mem_chartAt_modelProd_zero_source_iff (I := I) α q).mpr hq
@@ -154,11 +134,6 @@ lemma tangentCoordChange_tangent_eq_triv
     tangentCoordChange I.tangent q (⟨α, (0 : E)⟩ : TangentBundle I M) q V =
       (trivializationAt (E × E) (TangentSpace I.tangent)
         (⟨α, (0 : E)⟩ : TangentBundle I M)).continuousLinearMapAt ℝ q V := by
-  -- `tangentCoordChange I.tangent q₁ q₂ z` is by definition the
-  -- `tangentBundleCore`-coordChange from the achart at `q₁` to the achart
-  -- at `q₂` evaluated at `z`. Rewrite using
-  -- `trivializationAt_tangent_continuousLinearMapAt_eq_core` (in the
-  -- reverse direction).
   rw [trivializationAt_tangent_continuousLinearMapAt_eq_core (I := I) α q hq]
   rfl
 
@@ -174,26 +149,16 @@ lemma tangentCoordChange_tangent_symm_apply
       ((trivializationAt (E × E) (TangentSpace I.tangent)
         (⟨α, (0 : E)⟩ : TangentBundle I M)).symm q v_fiber) = v_fiber := by
   classical
-  -- `q ∈ baseSet` iff `q.proj ∈ (chartAt H α).source` (via
-  -- `TangentBundle.trivializationAt_baseSet`).
   have hq_base : q ∈ (trivializationAt (E × E) (TangentSpace I.tangent)
       (⟨α, (0 : E)⟩ : TangentBundle I M)).baseSet := by
     rw [TangentBundle.trivializationAt_baseSet]
     exact (mem_chartAt_modelProd_zero_source_iff (I := I) α q).mpr hq
-  -- Rewrite the LHS via the trivialisation-CLM identification.
   rw [tangentCoordChange_tangent_eq_triv (I := I) α q hq]
-  -- Now the goal is `triv.continuousLinearMapAt ℝ q (triv.symm q v_fiber) = v_fiber`.
-  -- This is `Bundle.Trivialization.continuousLinearMapAt_symmL`, observing
-  -- that `triv.symm b = triv.symmL ℝ b` as a function.
-  -- Convert `triv.symm q v_fiber = triv.symmL ℝ q v_fiber` and apply the inverse lemma.
   set e := trivializationAt (E × E) (TangentSpace I.tangent)
     (⟨α, (0 : E)⟩ : TangentBundle I M)
   have hsymm : e.symm q v_fiber = e.symmL ℝ q v_fiber := by
-    -- `Trivialization.symmL_apply` (in `Mathlib/Topology/VectorBundle/Basic.lean`)
-    -- gives `e.symmL ℝ q v = e.symm q v` definitionally.
     rfl
   rw [hsymm]
-  -- Apply `continuousLinearMapAt_symmL`.
   exact e.continuousLinearMapAt_symmL hq_base v_fiber
 
 /-- Specialisation: applied to `geodesicVectorFieldChart g α q`, the
@@ -204,20 +169,11 @@ lemma tangentCoordChange_tangent_geodesicVF
     tangentCoordChange I.tangent q (⟨α, (0 : E)⟩ : TangentBundle I M) q
       (geodesicVectorFieldChart (I := I) g α q) =
         geodesicVectorFieldChartFiber (I := I) g α q := by
-  -- Unfold `geodesicVectorFieldChart` and apply `tangentCoordChange_tangent_symm_apply`.
   unfold geodesicVectorFieldChart
   exact tangentCoordChange_tangent_symm_apply (I := I) α q hq
     (geodesicVectorFieldChartFiber (I := I) g α q)
 
 end TangentCoordChange
-
-/-! ## Identifying `chartPushVF` with `chartPhaseVF`
-
-We package the previous identity in the form used by the bridge: when
-`f 0 = ⟨α, v⟩` (so `(f 0).proj = α`), the chart-pushed vector field
-`chartPushVF g α f 0 t` equals
-`chartPhaseVF g α (chartPushLift f 0 t)` for any `t` with
-`(f t).proj ∈ (chartAt H α).source`. -/
 
 section ChartPushVFEq
 
@@ -231,7 +187,6 @@ lemma achart_modelProd_f0_eq
     achart (ModelProd H E) (f 0) =
       achart (ModelProd H E) (⟨α, (0 : E)⟩ : TangentBundle I M) := by
   apply achart_modelProd_eq_of_proj_eq (I := I)
-  -- Goal: `(f 0).proj = (⟨α, (0 : E)⟩ : TangentBundle I M).proj`, i.e. `(f 0).proj = α`.
   exact hf0_proj
 
 /-- When `(f 0).proj = α`, `tangentCoordChange I.tangent q (f 0) q`
@@ -241,9 +196,6 @@ lemma tangentCoordChange_tangent_f0_eq
     (hf0_proj : (f 0).proj = α) (q : TangentBundle I M) :
     tangentCoordChange I.tangent q (f 0) q =
       tangentCoordChange I.tangent q (⟨α, (0 : E)⟩ : TangentBundle I M) q := by
-  -- `tangentCoordChange I.tangent q₁ q₂ z` is `coordChange (achart q₁) (achart q₂) z`.
-  -- The right-hand achart at `f 0` and at `⟨α, 0⟩` agree, so the coord changes
-  -- agree.
   change (tangentBundleCore I.tangent (TangentBundle I M)).coordChange
       (achart (ModelProd H E) q) (achart (ModelProd H E) (f 0)) q =
     (tangentBundleCore I.tangent (TangentBundle I M)).coordChange

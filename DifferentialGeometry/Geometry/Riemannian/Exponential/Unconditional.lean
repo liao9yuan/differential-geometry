@@ -91,8 +91,6 @@ open DifferentialGeometry.Geometry.Riemannian.Geodesic
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-/-! ## Helper: `x₀ := extChartAt I p p` lies in the chart-target interior -/
-
 section ChartTargetInterior
 
 variable [I.Boundaryless]
@@ -108,16 +106,6 @@ private lemma extChartAt_self_mem_interior_target (p : M) :
   exact extChartAt_target_subset_interior_of_boundaryless (I := I) p htgt
 
 end ChartTargetInterior
-
-/-! ## Zero-section orbit constancy: a small positive `t'` gives a
-chart-target-interior + symm-`p` witness
-
-By zero-section orbit constancy (eventually in `s`), for every
-sufficiently small positive `t'`, the chart-flow's orbit through
-`(x₀, 0)` is at `(x₀, 0)`. Combined with the V.4 combined-form
-existence, this yields a witness for the chart-target containment and
-symm-image conditions needed by
-`expMap_contMDiffAt_zero_of_chartFlowGeodesicMatch`. -/
 
 section ZeroSectionWitness
 

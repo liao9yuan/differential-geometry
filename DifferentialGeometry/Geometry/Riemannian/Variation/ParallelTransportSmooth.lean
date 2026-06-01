@@ -51,8 +51,6 @@ open DifferentialGeometry.Geometry.Riemannian.AlongCurve
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 
-/-! ## The chart-`α` parallel-transport vector field, and its joint smoothness -/
-
 /-- The right-hand side of the chart-`α` parallel-transport ODE as a time-dependent
 linear vector field on the model fibre: at time `s` and fibre value `y`,
 `parallelTransportVF g α γ s y = - Γ_α(u'(s), y)(u(s))`, where `u := chartCurve α γ`.
@@ -85,11 +83,8 @@ theorem parallelTransportVF_contDiffOn [I.Boundaryless]
       (W ×ˢ (Set.univ : Set E)) := by
   classical
   set u : ℝ → E := chartCurve (I := I) α γ with hu_def
-  -- The velocity `u' = deriv u` is `C^∞` on the open set `W`.
   have hderiv_cd : ContDiffOn ℝ ∞ (deriv u) W :=
     hu_cd.deriv_of_isOpen hW (by exact_mod_cast (le_refl (∞ : WithTop ℕ∞)))
-  -- Unfold the contraction and reduce to a sum of `C^∞` scalar coefficients times
-  -- the constant basis vectors.
   have huncurry :
       Function.uncurry (parallelTransportVF (I := I) g α γ) =
         fun z : ℝ × E =>
@@ -107,9 +102,6 @@ theorem parallelTransportVF_contDiffOn [I.Boundaryless]
   refine ContDiffOn.smul ?_ contDiffOn_const
   refine ContDiffOn.sum (fun i _ => ?_)
   refine ContDiffOn.sum (fun j _ => ?_)
-  -- The three scalar factors.
-  -- (1) `Γ^k_{ij}(u z.1)`: `chartChristoffel` is `C^∞` on the chart-target interior,
-  --     `u` maps `W` there, and `z ↦ z.1` is `C^∞`.
   have hΓ : ContDiffOn ℝ ∞
       (fun z : ℝ × E => chartChristoffel (I := I) g α i j k (u z.1))
       (W ×ˢ (Set.univ : Set E)) := by
@@ -122,8 +114,6 @@ theorem parallelTransportVF_contDiffOn [I.Boundaryless]
         (interior (extChartAt I α).target) :=
       fun z hz => hu_int z.1 hz.1
     exact hbase.comp hcomp hmaps
-  -- (2) `u'(z.1)^i = chartCoord i (deriv u z.1)`: `deriv u` is `C^∞` on `W` and
-  --     `chartCoord i` is a CLM.
   have hvi : ContDiffOn ℝ ∞
       (fun z : ℝ × E => chartCoord (E := E) i (deriv u z.1))
       (W ×ˢ (Set.univ : Set E)) := by
@@ -136,9 +126,7 @@ theorem parallelTransportVF_contDiffOn [I.Boundaryless]
         (fun z : ℝ × E => (((chartModelBasis E).coord i).toContinuousLinearMap)
           (deriv u z.1)) (W ×ˢ (Set.univ : Set E)) :=
       hCLM.comp_contDiffOn hcomp
-    -- `chartCoord i v = (chartModelBasis E).coord i v` (defeq through `repr`).
     exact hci
-  -- (3) `z.2^j = chartCoord j z.2`: `z ↦ z.2` is `C^∞` and `chartCoord j` is a CLM.
   have hwj : ContDiffOn ℝ ∞
       (fun z : ℝ × E => chartCoord (E := E) j z.2)
       (W ×ˢ (Set.univ : Set E)) := by
@@ -147,8 +135,6 @@ theorem parallelTransportVF_contDiffOn [I.Boundaryless]
     have hsnd : ContDiff ℝ ∞ (Prod.snd : ℝ × E → E) := contDiff_snd
     exact (hCLM.comp hsnd).contDiffOn
   exact (hΓ.mul hvi).mul hwj
-
-/-! ## Main theorem -/
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
@@ -173,24 +159,17 @@ theorem parallelTransport_section_contMDiffOn [I.Boundaryless]
         (Set.Icc 0 L) := by
   classical
   haveI : CompleteSpace E := FiniteDimensional.complete ℝ E
-  -- The global parallel-transport section, with its first three clauses.
   obtain ⟨V, hV0, hVdiff, hVpar⟩ :=
     exists_parallel_transport_on_Icc (I := I) g γ hγ hL v₀
   refine ⟨V, hV0, hVdiff, hVpar, ?_⟩
-  -- It remains to prove bundle-`C^∞` of `t ↦ ⟨γ t, V t⟩` on `Icc 0 L`.
   intro t₀ ht₀
-  -- Pin the chart at the fixed foot `α := γ t₀`.
   set α : M := γ t₀ with hα_def
   set Y : ℝ → E := chartRepAtBase (I := I) α γ V with hY_def
-  -- ### Step 1: a closed sub-interval `Icc a b ∋ t₀`, in `Icc 0 L`, on which `γ`
-  -- stays in `chartAt H α` and which is a neighbourhood of `t₀` within `Icc 0 L`.
-  -- The open set where `γ` is in the chart source at `α`.
   set W₀ : Set ℝ := γ ⁻¹' (chartAt H α).source with hW₀_def
   have hW₀_open : IsOpen W₀ := (chartAt H α).open_source.preimage hγ.continuous
   have ht₀_W₀ : t₀ ∈ W₀ := by
     rw [hW₀_def, mem_preimage]; exact mem_chart_source H α
   obtain ⟨ε, hε_pos, hball⟩ := Metric.isOpen_iff.mp hW₀_open t₀ ht₀_W₀
-  -- The open window `W := Ioo (t₀ - ε) (t₀ + ε) ⊆ W₀`.
   set W : Set ℝ := Set.Ioo (t₀ - ε) (t₀ + ε) with hW_def
   have hW_open : IsOpen W := isOpen_Ioo
   have hW_sub_W₀ : W ⊆ W₀ := by
@@ -199,7 +178,6 @@ theorem parallelTransport_section_contMDiffOn [I.Boundaryless]
     rw [Metric.mem_ball, Real.dist_eq, abs_lt]
     exact ⟨by linarith [hs.1], by linarith [hs.2]⟩
   have ht₀_W : t₀ ∈ W := ⟨by linarith, by linarith⟩
-  -- The closed sub-interval `Icc a b := Icc 0 L ∩ Icc (t₀ - ε/2) (t₀ + ε/2)`.
   set a : ℝ := max 0 (t₀ - ε / 2) with ha_def
   set b : ℝ := min L (t₀ + ε / 2) with hb_def
   have ht₀_lo : a ≤ t₀ := max_le ht₀.1 (by linarith)
@@ -217,7 +195,6 @@ theorem parallelTransport_section_contMDiffOn [I.Boundaryless]
       linarith
   have hIcc_src : ∀ s ∈ Set.Icc a b, γ s ∈ (chartAt H α).source :=
     fun s hs => hW_sub_W₀ (hIcc_sub_W hs)
-  -- `Icc a b` is a neighbourhood of `t₀` within `Icc 0 L`.
   have ht₀_mem_Icc : t₀ ∈ Set.Icc a b := ⟨ht₀_lo, ht₀_hi⟩
   have hIcc_eq : Set.Icc a b =
       Set.Icc (0:ℝ) L ∩ Set.Icc (t₀ - ε / 2) (t₀ + ε / 2) := by
@@ -226,8 +203,6 @@ theorem parallelTransport_section_contMDiffOn [I.Boundaryless]
     rw [hIcc_eq]
     refine Filter.inter_mem self_mem_nhdsWithin ?_
     exact mem_nhdsWithin_of_mem_nhds (Icc_mem_nhds (by linarith) (by linarith))
-  -- ### Step 2: smoothness inputs for the vector field on the open window `W`.
-  -- The chart-`α` curve `u := chartCurve α γ` is `C^∞` on `W` (⊆ chart source).
   have hu_cd : ContDiffOn ℝ ∞ (chartCurve (I := I) α γ) W := by
     have h_comp_mdiff : ContMDiffOn 𝓘(ℝ, ℝ) 𝓘(ℝ, E) ∞ ((extChartAt I α) ∘ γ) W := by
       have hφ : ContMDiffOn I 𝓘(ℝ, E) ∞ (extChartAt I α) (chartAt H α).source :=
@@ -235,7 +210,6 @@ theorem parallelTransport_section_contMDiffOn [I.Boundaryless]
       exact hφ.comp hγ.contMDiffOn (fun s hs => hW_sub_W₀ hs)
     have hfun : (chartCurve (I := I) α γ) = ((extChartAt I α) ∘ γ) := rfl
     rw [hfun]; exact contMDiffOn_iff_contDiffOn.mp h_comp_mdiff
-  -- On `W`, `u s = extChartAt I α (γ s) ∈ interior (extChartAt I α).target`.
   have hu_int : ∀ s ∈ W,
       chartCurve (I := I) α γ s ∈ interior (extChartAt I α).target := by
     intro s hs
@@ -247,30 +221,21 @@ theorem parallelTransport_section_contMDiffOn [I.Boundaryless]
     rw [hur]
     exact extChartAt_target_subset_interior_of_boundaryless (I := I) α
       ((extChartAt I α).map_source hs_ext_src)
-  -- The uncurried vector field is `C^∞` on `W ×ˢ univ`.
   have hVF_cd : ContDiffOn ℝ ∞
       (Function.uncurry (parallelTransportVF (I := I) g α γ))
       (W ×ˢ (Set.univ : Set E)) :=
     parallelTransportVF_contDiffOn (I := I) g α γ hW_open hu_cd hu_int
-  -- ### Step 3: `Y` solves the parallel-transport ODE on `Icc a b`.
-  -- For `s ∈ Icc a b`: the fixed-foot rep `Y` is differentiable at `s`
-  -- (`chartRepAtBase_differentiableAt`), and its derivative equals the vector field.
   have hY_ode_at : ∀ s ∈ Set.Icc a b,
       HasDerivAt Y (parallelTransportVF (I := I) g α γ s (Y s)) s := by
     intro s hs
     have hs0L : s ∈ Set.Icc (0:ℝ) L := hIcc_sub_Icc0L hs
     have hs_src : γ s ∈ (chartAt H α).source := hIcc_src s hs
-    -- Moving-foot differentiability at `s` (the `C¹` clause).
     have hVdiff_s : DifferentiableAt ℝ (chartRepAt (I := I) γ V s) s := hVdiff s hs0L
-    -- Fixed-foot differentiability at `s`.
     have hY_diff_s : DifferentiableAt ℝ Y s := by
       rw [hY_def]
       exact chartRepAtBase_differentiableAt (I := I) (n := ∞) (by simp) g γ V s α hγ
         hs_src hVdiff_s
     have hY_hd : HasDerivAt Y (deriv Y s) s := hY_diff_s.hasDerivAt
-    -- The chart-`α` covariant derivative of `Y` vanishes at `s`.
-    -- Foot invariance (β := α): `symmL_α (γ s) (chartCovDerivAlong g α γ Y s) =
-    --   covDerivAlong g γ V s = 0` (parallelism).
     have hfoot :
         (trivializationAt E (TangentSpace I) α).symmL ℝ (γ s)
             (chartCovDerivAlong (I := I) g α γ Y s) = 0 := by
@@ -279,7 +244,6 @@ theorem parallelTransport_section_contMDiffOn [I.Boundaryless]
       rw [hY_def]
       rw [hinv]
       exact hVpar s hs0L
-    -- Extract `chartCovDerivAlong g α γ Y s = 0` via the round-trip identity.
     have hbase : γ s ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
       rw [TangentBundle.trivializationAt_baseSet]; exact hs_src
     have hchart_zero : chartCovDerivAlong (I := I) g α γ Y s = 0 := by
@@ -288,19 +252,15 @@ theorem parallelTransport_section_contMDiffOn [I.Boundaryless]
       rw [(trivializationAt E (TangentSpace I) α).continuousLinearMapAt_symmL
         (R := ℝ) hbase, map_zero] at this
       exact this
-    -- Expand `chartCovDerivAlong g α γ Y s = deriv Y s + Γ_α(u'(s), Y s)(u s) = 0`.
     rw [chartCovDerivAlong_def] at hchart_zero
-    -- Hence `deriv Y s = - Γ_α(...) = parallelTransportVF g α γ s (Y s)`.
     have hderiv_eq : deriv Y s = parallelTransportVF (I := I) g α γ s (Y s) := by
       rw [parallelTransportVF]
       exact eq_neg_of_add_eq_zero_left hchart_zero
     rw [hderiv_eq] at hY_hd
     exact hY_hd
-  -- Upgrade to `HasDerivWithinAt` on `Icc a b`.
   have hY_ode : ∀ s ∈ Set.Icc a b,
       HasDerivWithinAt Y (parallelTransportVF (I := I) g α γ s (Y s)) (Set.Icc a b) s :=
     fun s hs => (hY_ode_at s hs).hasDerivWithinAt
-  -- ### Step 4: bootstrap `Y` to `C^∞` on `Icc a b`.
   have hY_smooth : ContDiffOn ℝ ∞ Y (Set.Icc a b) := by
     refine ODE.contDiffOn_enat_Icc_of_hasDerivWithinAt
       (f := parallelTransportVF (I := I) g α γ)
@@ -308,18 +268,12 @@ theorem parallelTransport_section_contMDiffOn [I.Boundaryless]
     · exact hVF_cd.mono (Set.prod_mono hIcc_sub_W (le_refl _))
     · exact hY_ode
     · exact fun s _ => Set.mem_univ _
-  -- ### Step 5: round-trip to bundle smoothness at `t₀`.
-  -- `ContDiffWithinAt ℝ ∞ Y (Icc 0 L) t₀`.
   have hY_cdwa : ContDiffWithinAt ℝ ∞ Y (Set.Icc (0:ℝ) L) t₀ :=
     (hY_smooth.contDiffWithinAt ht₀_mem_Icc).mono_of_mem_nhdsWithin hIcc_nhdsWithin
-  -- As a `ContMDiffWithinAt` of the fibre coordinate.
   have hY_cmwa : ContMDiffWithinAt 𝓘(ℝ, ℝ) 𝓘(ℝ, E) ∞ Y (Set.Icc (0:ℝ) L) t₀ :=
     hY_cdwa.contMDiffWithinAt
-  -- The fibre coordinate read in the pinned trivialisation at `γ t₀` equals `Y`
-  -- eventually within `Icc 0 L` near `t₀`.
   rw [Bundle.contMDiffWithinAt_totalSpace]
   refine ⟨(hγ t₀).contMDiffWithinAt, ?_⟩
-  -- The fibre coordinate `s ↦ (triv_{γ t₀} (mk' (γ s) (V s))).2`.
   have hbase₀ : γ t₀ ∈ (trivializationAt E (TangentSpace I) (γ t₀)).baseSet :=
     FiberBundle.mem_baseSet_trivializationAt E (TangentSpace I) (γ t₀)
   have hopen₀ : IsOpen (trivializationAt E (TangentSpace I) (γ t₀)).baseSet :=
@@ -334,20 +288,7 @@ theorem parallelTransport_section_contMDiffOn [I.Boundaryless]
     rw [hY_def, chartRepAtBase_apply]
     rw [(trivializationAt E (TangentSpace I) (γ t₀)).continuousLinearMapAt_apply (R := ℝ)]
     rw [(trivializationAt E (TangentSpace I) (γ t₀)).coe_linearMapAt_of_mem hs]
-  -- `Y` is `ContMDiffWithinAt`, and the fibre coordinate is eventually equal to it.
   exact hY_cmwa.congr_of_eventuallyEq heq (heq.eq_of_nhdsWithin ht₀)
-
-/-! ## Open-neighbourhood version
-
-The closed-interval smoothness above is upgraded to an *open neighbourhood*
-`Ioo (-δ) (L + δ)` of `Icc 0 L`.  This is the form consumed by the cut-off
-construction of a globally smooth perpendicular frame: the cut-off scalar is
-supported in an open neighbourhood of `Icc 0 L`, so the parallel-transport
-section must be bundle-smooth on such an open neighbourhood for the product to be
-globally `C^∞`.  The genuine domain of the parallel-transport construction is
-already an open window `Ioo (-step) (L + step)` (exposed by
-`exists_global_parallel_transport_on_Ioo`); the ODE bootstrap of the previous
-theorem applies verbatim at each interior point of that window. -/
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in

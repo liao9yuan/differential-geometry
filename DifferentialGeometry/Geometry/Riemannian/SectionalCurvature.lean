@@ -61,8 +61,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-/-! ## G.8.1 — Definition -/
-
 /-- **The lowered chart-coordinate Riemann tensor**
 `R_{ijkl}(α, y) := ∑_m g_{lm}(α, y) · R^m{}_{ijk}(α, y)`.
 Inherits the project's convention: `(j, k)` is the antisymmetric pair,
@@ -157,8 +155,6 @@ def sectionalCurvature (g : SmoothRiemannianMetric I M) (p : M)
       sectionalCurvatureNumerator (I := I) g p v w /
         sectionalCurvatureDenominator (I := I) g p v w := rfl
 
-/-! ## G.8.2 — Basic properties -/
-
 /-- **Cauchy–Schwarz for `g`**: `g(v, w)^2 ≤ g(v, v) * g(w, w)`. Discriminant
 argument on the non-negative quadratic `t ↦ g(t • v + w, t • v + w)`. -/
 private lemma chart_metric_cauchy_schwarz
@@ -191,8 +187,7 @@ private lemma chart_metric_cauchy_schwarz
     · rw [hw]; simp
     · exact (g.pos p w hw).le
   by_cases hA_zero : g.inner p v v = 0
-  · -- If g(v, v) = 0 then v = 0 (by positivity), so g(v, w) = 0 too.
-    have hv_zero : v = 0 := by
+  · have hv_zero : v = 0 := by
       by_contra hv_ne
       exact absurd hA_zero (ne_of_gt (g.pos p v hv_ne))
     have hB_zero : g.inner p v w = 0 := by
@@ -200,8 +195,7 @@ private lemma chart_metric_cauchy_schwarz
       simp
     rw [hB_zero, hA_zero]
     simp
-  · -- `g.inner p v v > 0`. Substitute `t = -g(v, w) / g(v, v)` into the quadratic.
-    have hA_pos : 0 < g.inner p v v :=
+  · have hA_pos : 0 < g.inner p v v :=
       lt_of_le_of_ne hA_nonneg (Ne.symm hA_zero)
     have h_at_t := hq_nonneg (-g.inner p v w / g.inner p v v)
     rw [hq_expand] at h_at_t
@@ -257,8 +251,6 @@ theorem sectionalCurvatureDenominator_eq_zero_of_right_smul
   have hR : g.inner p v (c • v) = c * g.inner p v v := by
     rw [ContinuousLinearMap.map_smul, smul_eq_mul]
   rw [hRR, hR]; ring
-
-/-! ## Scaling behaviour of numerator and denominator -/
 
 /-- Quadratic scaling of the numerator in `v`: `Num(c • v, w) = c^2 · Num(v, w)`. -/
 theorem sectionalCurvatureNumerator_smul_left
@@ -351,8 +343,6 @@ theorem sectionalCurvature_smul_right
       sectionalCurvatureNumerator_smul_right,
       sectionalCurvatureDenominator_smul_right,
       mul_div_mul_left _ _ (pow_ne_zero 2 hc)]
-
-/-! ## Junk value on linearly dependent pairs -/
 
 /-- Junk value on `(c • v, v)`: `K(c • v, v) = 0`. -/
 theorem sectionalCurvature_of_linearly_dependent_left
@@ -464,14 +454,6 @@ theorem sectionalCurvature_neg_smul_right
   rw [sectionalCurvature_neg_right (I := I) g p v (c • w),
       sectionalCurvature_smul_right (I := I) g p hc v w]
 
-/-! ## Hypothesis-bearing symmetry
-
-The symmetry `K(v, w) = K(w, v)` follows from the antisymmetry of the
-chart Riemann tensor in the first pair `(j, k)` (already proved) and the
-metric-compatibility antisymmetry in the second pair. We expose the
-result as a hypothesis-bearing form parallel to
-`ricciFun_symm_of_chartRicciTensor_symm`. -/
-
 /-- **Reindex helper.** Complete-reversal reindex of a 4-fold sum, obtained
 by six adjacent-swap applications of `Finset.sum_comm`. -/
 private lemma chartFourFold_reverse_sum
@@ -482,8 +464,6 @@ private lemma chartFourFold_reverse_sum
       (∑ i : Fin n, ∑ j : Fin n, ∑ k : Fin n, ∑ l : Fin n,
         β l * α i * β j * α k * T l k j i) := by
   classical
-  -- Six adjacent-swap `Finset.sum_comm` applications reverse the iteration
-  -- order from `(i, j, k, l)` to `(l, k, j, i)`. The body matches by `ring`.
   conv_lhs => enter [2, i, 2, j]; rw [Finset.sum_comm]
   conv_lhs => enter [2, i]; rw [Finset.sum_comm]
   rw [Finset.sum_comm]
@@ -508,8 +488,6 @@ theorem sectionalCurvatureNumerator_symm_of_chartRiemannLower_second_pair_antisy
     sectionalCurvatureNumerator (I := I) g p v w =
       sectionalCurvatureNumerator (I := I) g p w v := by
   classical
-  -- Combined symmetry `R_{ijkl} = R_{lkji}` from `R_{ijkl} = -R_{ikjl}` (proved)
-  -- and `R_{ikjl} = -R_{lkji}` (hypothesis).
   have h_combined : ∀ i j k l : Fin (Module.finrank ℝ E),
       chartRiemannLower (I := I) g p i j k l (extChartAt I p p) =
         chartRiemannLower (I := I) g p l k j i (extChartAt I p p) := by
@@ -557,7 +535,6 @@ end Riemannian
 end Geometry
 end DifferentialGeometry
 
--- TEMP AXIOM CHECK
 #print axioms DifferentialGeometry.Geometry.Riemannian.sectionalCurvature_neg_left
 #print axioms DifferentialGeometry.Geometry.Riemannian.sectionalCurvature_neg_right
 #print axioms DifferentialGeometry.Geometry.Riemannian.sectionalCurvature_neg_neg

@@ -45,17 +45,6 @@ open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 open DifferentialGeometry.Geometry.Riemannian.Variation
 
-/-! ## Abstract `g`-Gram–Schmidt of a `g`-linearly-independent family
-
-For a positive-definite symmetric bilinear form `B : E →L[ℝ] E →L[ℝ] ℝ` and a
-`B`-linearly-independent family `v : Fin m → E`, the hand-rolled Gram–Schmidt
-recursion produces a `B`-orthonormal family `bGramSchmidt B v : Fin m → E`. This
-is the pointwise algebraic core (no smoothness, no chart data) underlying the
-parallel perpendicular frame; it is the inner-product `B := g.inner (γ 0)`
-specialisation of the established chart-frame orthonormalisation, written
-abstractly so it applies to a basis of the `g`-orthogonal complement of the
-geodesic velocity. -/
-
 namespace PerpFrameAux
 
 variable {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
@@ -160,8 +149,7 @@ private theorem bGramSchmidt_orth_strong_aux
     have hne : bGramSchmidtRaw B v i ≠ 0 := by rw [hraw]; exact hLI.ne_zero i
     refine ⟨hne, ?_, ?_⟩
     · intro j hj; rw [hi_val] at hj; omega
-    · -- ⟨e_i, e_i⟩ = 1, with raw_i = v i ≠ 0.
-      exact bGramSchmidt_self_norm B Bpos v i hne
+    · exact bGramSchmidt_self_norm B Bpos v i hne
   | succ k ih =>
     intro i hi_le
     by_cases hi_lt : i.val ≤ k
@@ -173,7 +161,6 @@ private theorem bGramSchmidt_orth_strong_aux
             B (bGramSchmidt B v j') (bGramSchmidt B v j) = 0) ∧
           B (bGramSchmidt B v j) (bGramSchmidt B v j) = 1 :=
         fun j hj => ih j (by omega)
-      -- Step 1: orthogonality of raw_i to each e_j with j.val < i.val.
       have horth_raw : ∀ j : Fin m, j.val < i.val →
           B (bGramSchmidt B v j) (bGramSchmidtRaw B v i) = 0 := by
         intro j hj_lt
@@ -194,8 +181,7 @@ private theorem bGramSchmidt_orth_strong_aux
               B (bGramSchmidt B v j) (v i) := by
           set j_inFin : Fin i.val := ⟨j.val, hj_lt⟩
           rw [Finset.sum_eq_single j_inFin]
-          · -- the j' = j term: B(v i, e_j) * B(e_j, e_j) = B(v i, e_j) = B(e_j, v i).
-            have hj_eq : (⟨j_inFin.val, lt_trans j_inFin.isLt i.isLt⟩ : Fin m) = j :=
+          · have hj_eq : (⟨j_inFin.val, lt_trans j_inFin.isLt i.isLt⟩ : Fin m) = j :=
               Fin.ext rfl
             rw [hj_eq, (ih_below j hj_lt).2.2, mul_one, Bsymm]
           · intro j' _ hj'
@@ -215,7 +201,6 @@ private theorem bGramSchmidt_orth_strong_aux
               rw [hzero, mul_zero]
           · intro h; exact absurd (Finset.mem_univ j_inFin) h
         rw [hsum_eq, Bsymm (bGramSchmidt B v j) (v i)]; ring
-      -- Step 2: raw_i ≠ 0 (else v i ∈ span of earlier e's ⊆ span of earlier v's).
       have hraw_ne : bGramSchmidtRaw B v i ≠ 0 := by
         intro hraw_zero
         have hv_eq : v i =
@@ -228,7 +213,6 @@ private theorem bGramSchmidt_orth_strong_aux
                   bGramSchmidt B v ⟨j'.val, lt_trans j'.isLt i.isLt⟩ = 0 := by
             simpa [bGramSchmidtRaw] using hraw_zero
           exact sub_eq_zero.mp h_eq
-        -- e_j ∈ span {v 0, …, v (i-1)} for all j < i.
         have h_e_in_span : ∀ kk : ℕ, ∀ mm : Fin m, mm.val ≤ kk → mm.val < i.val →
             bGramSchmidt B v mm ∈
               Submodule.span ℝ
@@ -272,7 +256,6 @@ private theorem bGramSchmidt_orth_strong_aux
           apply Submodule.smul_mem
           have hj'_le : j'.val ≤ k := by have := j'.isLt; omega
           exact h_e_in_span k ⟨j'.val, lt_trans j'.isLt i.isLt⟩ hj'_le j'.isLt
-        -- Contradiction with LI.
         have hset_eq :
             ((fun n : Fin i.val => v ⟨n.val, lt_trans n.isLt i.isLt⟩) '' Set.univ) =
               (v '' {n : Fin m | n.val < i.val}) := by
@@ -285,7 +268,6 @@ private theorem bGramSchmidt_orth_strong_aux
         rw [hset_eq] at hvi_in_span
         have hi_notin : i ∉ {n : Fin m | n.val < i.val} := by simp [Set.mem_setOf_eq]
         exact hLI.notMem_span_image hi_notin hvi_in_span
-      -- Step 3: orthogonality + unit-norm of e_i.
       set s : ℝ := Real.sqrt (B (bGramSchmidtRaw B v i) (bGramSchmidtRaw B v i))
         with hs_def
       have hei_eq : bGramSchmidt B v i = s⁻¹ • bGramSchmidtRaw B v i := by
@@ -328,7 +310,6 @@ private theorem bGramSchmidt_mem
     (W : Submodule ℝ F) (hv : ∀ k, v k ∈ W) (i : Fin m) :
     bGramSchmidt B v i ∈ W := by
   classical
-  -- Strong recursion on `i.val`.
   induction hk : i.val using Nat.strong_induction_on generalizing i with
   | _ n ih =>
     subst hk
@@ -379,40 +360,25 @@ theorem perp_to_velocity_preserved_of_parallel
     ∀ t ∈ Set.Icc (0 : ℝ) L,
       g.inner (γ t) (V t) (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ) : E) = 0 := by
   classical
-  -- The genuine Riemannian inner product as a function of the parameter.
   set vel : ℝ → ∀ s, TangentSpace I (γ s) :=
     fun _ s => (mfderiv 𝓘(ℝ, ℝ) I γ s (1 : ℝ) : E) with hvel_def
   set f : ℝ → ℝ := fun t => g.inner (γ t) (V t)
     (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ) : E) with hf_def
-  -- We show: `f` is constant on `Icc 0 L`, equal to `f 0 = 0`.
-  -- For the constancy engine we need: (a) `f` continuous on `Icc 0 L`,
-  -- (b) `HasDerivWithinAt f 0 (Ici t) t` for every `t ∈ Ico 0 L`.
-  -- Both follow from a local computation in the chart pinned at the foot `γ t`.
-  --
-  -- ### Local statement at a foot time `t₀ ∈ Icc 0 L`.
-  -- In the chart at `α := γ t₀`, the chart-coordinate representations of `V` and
-  -- the velocity field are `Vrep := chartRepAt γ V t₀` and
-  -- `urep := chartRepAt γ (velocity) t₀`. On a neighbourhood of `t₀` (where `γ s`
-  -- stays in the chart's base set) the round-trip `symmL ∘ continuousLinearMapAt`
-  -- is the identity, so `f` agrees with the chart-Gram form of `Vrep`, `urep`.
   have hlocal : ∀ t₀ ∈ Set.Icc (0 : ℝ) L, HasDerivAt f 0 t₀ := by
     intro t₀ ht₀
     set α : M := γ t₀ with hα_def
     set Vrep : ℝ → E := chartRepAt (I := I) γ V t₀ with hVrep_def
     set urep : ℝ → E :=
       chartRepAt (I := I) γ (fun s => (mfderiv 𝓘(ℝ, ℝ) I γ s (1 : ℝ) : E)) t₀ with hurep_def
-    -- `γ t₀ = α` lies in the base set of the trivialisation/chart at `α`.
     have hbase_t₀ : γ t₀ ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
       rw [TangentBundle.trivializationAt_baseSet]
       exact mem_chart_source H (γ t₀)
-    -- The base set is an open neighbourhood of times whose curve point sits in it.
     have hbaseSet_open : IsOpen (trivializationAt E (TangentSpace I) α).baseSet :=
       (trivializationAt E (TangentSpace I) α).open_baseSet
     have hsrc_open : IsOpen {s : ℝ | γ s ∈ (trivializationAt E (TangentSpace I) α).baseSet} :=
       hbaseSet_open.preimage hγ.continuous
     have hsrc_mem : {s : ℝ | γ s ∈ (trivializationAt E (TangentSpace I) α).baseSet} ∈ 𝓝 t₀ :=
       hsrc_open.mem_nhds hbase_t₀
-    -- ### Round trip: on this neighbourhood, the section equals `symmL ∘ rep`.
     have hVround : ∀ s ∈ {s : ℝ | γ s ∈ (trivializationAt E (TangentSpace I) α).baseSet},
         (trivializationAt E (TangentSpace I) α).symmL ℝ (γ s) (Vrep s) = V s := by
       intro s hs
@@ -426,13 +392,11 @@ theorem perp_to_velocity_preserved_of_parallel
       simpa [hurep_def, chartRepAt_apply] using
         (trivializationAt E (TangentSpace I) α).symmL_continuousLinearMapAt
           (R := ℝ) hs ((mfderiv 𝓘(ℝ, ℝ) I γ s (1 : ℝ) : E))
-    -- ### `f` agrees with the chart-Gram form of `Vrep`, `urep` near `t₀`.
     have hf_eq : f =ᶠ[𝓝 t₀]
         fun s => AlongCurve.chartGramAlongCurve (I := I) g α γ Vrep urep s := by
       filter_upwards [hsrc_mem] with s hs
       have hVs := hVround s hs
       have hus := huround s hs
-      -- `f s = g.inner (γ s) (symmL (γ s) (Vrep s)) (symmL (γ s) (urep s))`.
       have : f s = g.inner (γ s)
           ((trivializationAt E (TangentSpace I) α).symmL ℝ (γ s) (Vrep s))
           ((trivializationAt E (TangentSpace I) α).symmL ℝ (γ s) (urep s)) := by
@@ -440,7 +404,6 @@ theorem perp_to_velocity_preserved_of_parallel
       rw [this, inner_eq_chartGramOnE_bilinear_on_baseSet (I := I) g α (Vrep s) (urep s)]
       rw [AlongCurve.chartGramAlongCurve_def]
       refine Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun j _ => ?_))
-      -- `chartGramMatrix g α (γ s) = chartGramOnE g α · (chartCurve α γ s)`.
       have hinv : (extChartAt I α).symm (chartCurve (I := I) α γ s) = γ s := by
         rw [chartCurve_def]
         refine (extChartAt I α).left_inv ?_
@@ -448,8 +411,6 @@ theorem perp_to_velocity_preserved_of_parallel
         rw [TangentBundle.trivializationAt_baseSet] at hs
         exact hs
       rw [DifferentialGeometry.Integral.DivergenceTheorem.chartGramOnE_def, hinv]
-    -- ### The chart trajectory has the prescribed velocity at `t₀`.
-    -- `u := chartCurve α γ`, with `u(t₀) ∈ interior target`.
     have hu_hasDerivAt :
         HasDerivAt (chartCurve (I := I) α γ)
           (deriv (chartCurve (I := I) α γ) t₀) t₀ := by
@@ -466,16 +427,13 @@ theorem perp_to_velocity_preserved_of_parallel
         rw [extChartAt_source]; exact mem_chart_source H (γ t₀)
       exact DifferentialGeometry.Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
         (I := I) α ((extChartAt I α).map_source hxsrc)
-    -- ### `Vrep` is differentiable at `t₀` (foot regularity hypothesis).
     have hVrep_hasDerivAt : HasDerivAt Vrep (deriv Vrep t₀) t₀ :=
       ((hVdiff t₀ ht₀).hasDerivAt)
-    -- ### The open neighbourhood of times whose curve point sits in the chart source.
     set U : Set ℝ := γ ⁻¹' (chartAt H α).source with hU_def
     have hU_open : IsOpen U := (chartAt H α).open_source.preimage hγ.continuous
     have ht₀_U : t₀ ∈ U := by
       rw [hU_def, Set.mem_preimage]; exact mem_chart_source H (γ t₀)
     have hU_nhds : U ∈ 𝓝 t₀ := hU_open.mem_nhds ht₀_U
-    -- The chart trajectory `chartCurve α γ = extChartAt I α ∘ γ` is `C^∞` on `U`.
     have hu_cdiffOn : ContDiffOn ℝ ∞ (chartCurve (I := I) α γ) U := by
       have h_comp_mdiff :
           ContMDiffOn 𝓘(ℝ, ℝ) 𝓘(ℝ, E) ∞ ((extChartAt I α) ∘ γ) U := by
@@ -487,7 +445,6 @@ theorem perp_to_velocity_preserved_of_parallel
       have hfun : (chartCurve (I := I) α γ) = ((extChartAt I α) ∘ γ) := rfl
       rw [hfun]
       exact contMDiffOn_iff_contDiffOn.mp h_comp_mdiff
-    -- ### `urep` equals `deriv u` on `U` (chain-rule identity for the velocity coordinate).
     have hurep_eqOn : Set.EqOn urep (deriv (chartCurve (I := I) α γ)) U := by
       intro s hs
       have hs' : γ s ∈ (chartAt H α).source := hs
@@ -497,7 +454,6 @@ theorem perp_to_velocity_preserved_of_parallel
       rfl
     have hurep_eq : urep =ᶠ[𝓝 t₀] deriv (chartCurve (I := I) α γ) :=
       hurep_eqOn.eventuallyEq_of_mem hU_nhds
-    -- `deriv u` is `C^∞` on `U`, hence differentiable at `t₀`.
     have hu_deriv_hasDerivAt :
         HasDerivAt (deriv (chartCurve (I := I) α γ))
           (deriv (deriv (chartCurve (I := I) α γ)) t₀) t₀ := by
@@ -508,15 +464,12 @@ theorem perp_to_velocity_preserved_of_parallel
         hU_nhds).hasDerivAt
     have hurep_hasDerivAt : HasDerivAt urep (deriv (deriv (chartCurve (I := I) α γ)) t₀) t₀ :=
       hu_deriv_hasDerivAt.congr_of_eventuallyEq hurep_eq
-    -- ### The chart-Gram form has derivative `0` at `t₀` by the covariant product rule.
     have hgram :=
       AlongCurve.chartGramAlongCurve_hasDerivAt_covariant (I := I) g α γ Vrep urep
         (uPrime := fun _ => deriv (chartCurve (I := I) α γ) t₀)
         (Vprime := fun _ => deriv Vrep t₀)
         (Wprime := fun _ => deriv (deriv (chartCurve (I := I) α γ)) t₀)
         hu_hasDerivAt hmem_int hVrep_hasDerivAt hurep_hasDerivAt
-    -- The two covariant correction terms equal the foot-chart covariant derivatives.
-    -- For `Vrep`: `chartCovDerivAlong g α γ Vrep t₀ = covDerivAlong's chart coord = 0`.
     have hcorrV :
         deriv Vrep t₀ +
           chartChristoffelContraction (I := I) g α
@@ -527,7 +480,6 @@ theorem perp_to_velocity_preserved_of_parallel
         exact (covDerivAlong_eq_zero_iff (I := I) g γ V t₀).mp (hVpar t₀ ht₀)
       rw [chartCovDerivAlong_def] at this
       exact this
-    -- For `urep`: the velocity field is parallel because `γ` is a geodesic.
     have hcorru :
         deriv (deriv (chartCurve (I := I) α γ)) t₀ +
           chartChristoffelContraction (I := I) g α
@@ -543,32 +495,23 @@ theorem perp_to_velocity_preserved_of_parallel
         exact (covDerivAlong_eq_zero_iff (I := I) g γ
           (fun s => (mfderiv 𝓘(ℝ, ℝ) I γ s (1 : ℝ) : E)) t₀).mp hvel0
       rw [chartCovDerivAlong_def] at hchart0
-      -- `deriv urep t₀ = deriv (deriv u) t₀` since `urep =ᶠ deriv u` near `t₀`.
       rw [hurep_eq.deriv_eq] at hchart0
       exact hchart0
-    -- Substitute the vanishing corrections into the derivative value: it is `0`.
     have hderiv0 : HasDerivAt
         (fun s => AlongCurve.chartGramAlongCurve (I := I) g α γ Vrep urep s) 0 t₀ := by
-      -- The two covariant-correction terms (`Vprime + Γ(u', V)` and
-      -- `Wprime + Γ(u', W)`) vanish at `t₀`, so the whole derivative value is `0`.
       convert hgram using 1
       simp only [hcorrV, hcorru]
       simp
-    -- Transfer the derivative back to `f`.
     exact hderiv0.congr_of_eventuallyEq hf_eq
-  -- ### `f` is continuous on `Icc 0 L` and has zero right-derivative on `Ico 0 L`.
   have hcont : ContinuousOn f (Set.Icc 0 L) :=
     fun t ht => ((hlocal t ht).continuousAt).continuousWithinAt
   have hderivWithin : ∀ x ∈ Set.Ico (0 : ℝ) L, HasDerivWithinAt f 0 (Set.Ici x) x := by
     intro x hx
     exact (hlocal x (Set.mem_Icc_of_Ico hx)).hasDerivWithinAt
-  -- ### Constancy on `Icc 0 L`.
   have hconst : ∀ x ∈ Set.Icc (0 : ℝ) L, f x = f 0 :=
     constant_of_has_deriv_right_zero hcont hderivWithin
-  -- ### Conclude: `f t = f 0 = 0`.
   intro t ht
   have hft := hconst t ht
-  -- `f t = f 0` and `f 0 = g.inner (γ 0) (V 0) (dγ_0 1) = 0` by hypothesis.
   rw [hf_def] at hft
   simp only at hft
   rw [hft]

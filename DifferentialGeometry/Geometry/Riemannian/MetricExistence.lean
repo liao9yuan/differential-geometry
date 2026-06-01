@@ -45,9 +45,7 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDim
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## Finite-dimensional coercivity ⟹ von-Neumann boundedness -/
-
-/-- A symmetric positive-definite continuous bilinear form on a finite-dimensional
+/-- A positive-definite continuous bilinear form on a finite-dimensional
 inner-product space is coercive, hence the sub-`1` ellipsoid `{v | g v v < 1}` is bounded
 (equivalently, von-Neumann bounded). -/
 theorem posDef_isVonNBounded (g : E →L[ℝ] E →L[ℝ] ℝ)
@@ -93,16 +91,12 @@ theorem posDef_isVonNBounded (g : E →L[ℝ] E →L[ℝ] ℝ)
   calc ‖v‖ = Real.sqrt (‖v‖ ^ 2) := (Real.sqrt_sq (norm_nonneg _)).symm
     _ ≤ Real.sqrt (1 / c) := Real.sqrt_le_sqrt h3.le
 
-/-! ## The Euclidean form on the model fibre -/
-
 /-- The inner product on the model fibre `E`, packaged as an `ℝ`-bilinear continuous form.
 This is `innerSL ℝ` viewed with its `ℝ`-linear type. -/
 def euclForm (E : Type*) [NormedAddCommGroup E] [InnerProductSpace ℝ E] :
     E →L[ℝ] E →L[ℝ] ℝ := innerSL ℝ
 
 @[simp] lemma euclForm_apply (v w : E) : euclForm E v w = inner ℝ v w := rfl
-
-/-! ## The chart-local pulled-back metric -/
 
 /-- The fibrewise linear coordinate map of the tangent trivialization at `x₀`, viewed (via the
 reducible defeq `TangentSpace I x = E`) as a continuous linear endomorphism of `E`. -/
@@ -138,8 +132,6 @@ lemma localFiber_pos (x₀ : M) {x : M}
     exact ((trivializationAt E (TangentSpace I) x₀).continuousLinearEquivAt
       ℝ x hx).map_ne_zero_iff.mpr hv
   positivity
-
-/-! ## Smoothness of the chart-local metric as a section -/
 
 /-- The fibrewise coordinate map of the trivialization of the `1`-form bundle
 `x ↦ TangentSpace I x →L ℝ` acts by post-composition with the inverse coordinate map of the
@@ -219,8 +211,6 @@ lemma localFiber_contMDiffOn (x₀ : M) :
   intro x hx
   exact coord_localFiber x₀ hx
 
-/-! ## The convex set of fiberwise symmetric positive-definite forms -/
-
 /-- The set of symmetric positive-definite continuous bilinear forms on the fibre
 `TangentSpace I x`. -/
 def posDefForms (x : M) : Set (TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ) :=
@@ -243,8 +233,6 @@ lemma convex_posDefForms (x : M) : Convex ℝ (posDefForms (I := I) x) := by
     · rw [← ha'] at hab ⊢; simp only [zero_add] at hab ⊢
       rw [hab]; simpa using h2
 
-/-! ## Existence of a smooth Riemannian metric -/
-
 /-- **Existence of a smooth Riemannian metric.** The tangent bundle of a smooth, σ-compact,
 Hausdorff manifold modelled on a finite-dimensional inner-product space admits a smooth
 Riemannian metric: a smooth, fiberwise symmetric positive-definite `(0,2)`-tensor field.
@@ -256,7 +244,6 @@ von-Neumann boundedness of the assembled metric. -/
 theorem nonempty_contMDiffRiemannianMetric_of_sigmaCompact
     [SigmaCompactSpace M] [T2Space M] :
     Nonempty (Bundle.ContMDiffRiemannianMetric I ∞ E (TangentSpace I : M → Type _)) := by
-  -- Glue the chart-local metrics into a single global smooth fiberwise pos-def symmetric form.
   obtain ⟨s, hs⟩ :=
     exists_contMDiffSection_forall_mem_convex_of_local (M := M) (n := (⊤ : ℕ∞)) I
       (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
@@ -270,16 +257,12 @@ theorem nonempty_contMDiffRiemannianMetric_of_sigmaCompact
         intro y hy
         exact ⟨fun v w => localFiber_symm (I := I) x₀ y v w,
           fun v hv => localFiber_pos (I := I) x₀ hy v hv⟩)
-  -- Assemble the metric structure.
   refine ⟨{
     inner := fun x => s x
     symm := fun x v w => (hs x).1 v w
     pos := fun x v hv => (hs x).2 v hv
     isVonNBounded := fun x => ?_
     contMDiff := s.contMDiff }⟩
-  -- The von-Neumann boundedness comes from finite-dimensional coercivity of the pos-def form.
-  -- The fibre `TangentSpace I x` is reducibly the model fibre `E`, so the coercivity lemma
-  -- applies to `s x` viewed as a form on `E`.
   exact posDef_isVonNBounded (E := E) ((s x : E →L[ℝ] E →L[ℝ] ℝ))
     (fun v hv => (hs x).2 v hv)
 

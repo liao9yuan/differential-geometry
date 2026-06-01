@@ -87,14 +87,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 
-/-! ## Pointwise flat map and its inverse
-
-For each `x : M`, the metric `g.inner x` defines a continuous bilinear form on
-`TangentSpace I x`. Currying gives a linear map `metricFlatLinear g x` from
-the tangent space into its `ℝ`-linear dual; positive-definiteness makes this
-map injective, and hence (by finite-dimensionality and equality of dimensions)
-a linear equivalence. -/
-
 /-- The "musical flat" linear map at `x : M`: sends a tangent vector `v` to the
 linear functional `w ↦ g.inner x v w`. -/
 def metricFlatLinear (g : SmoothRiemannianMetric I M) (x : M) :
@@ -121,8 +113,6 @@ lemma metricFlatLinear_injective (g : SmoothRiemannianMetric I M) (x : M) :
     intro z
     have h := congrArg (fun L : TangentSpace I x →ₗ[ℝ] ℝ => L z) hvw
     simp only [metricFlatLinear_apply] at h
-    -- Goal: `g.inner x (v - w) z = 0`. By bilinearity, this equals
-    -- `g.inner x v z - g.inner x w z`, which is `0` by `h`.
     have hsub : g.inner x (v - w) z = g.inner x v z - g.inner x w z := by
       rw [map_sub, ContinuousLinearMap.sub_apply]
     rw [hsub, sub_eq_zero]
@@ -167,8 +157,6 @@ lemma metricFlatMap_apply_symm (g : SmoothRiemannianMetric I M) (x : M)
   rw [metricFlatMap_apply] at hh
   exact hh
 
-/-! ## Pointwise gradient (sharp) -/
-
 /-- The pointwise gradient (sharp) of a covector at a point. -/
 def metricSharp (g : SmoothRiemannianMetric I M) (x : M)
     (α : TangentSpace I x →ₗ[ℝ] ℝ) : TangentSpace I x :=
@@ -190,8 +178,6 @@ lemma inner_metricSharp_right (g : SmoothRiemannianMetric I M) (x : M)
     g.inner x w (metricSharp (I := I) g x α) = α w := by
   rw [g.symm x w (metricSharp (I := I) g x α)]
   exact inner_metricSharp (I := I) g x α w
-
-/-! ## The gradient as a function -/
 
 /-- The pointwise gradient of a function `f : M → ℝ` at `x : M`. -/
 def gradFun (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M) :
@@ -227,8 +213,6 @@ lemma gradFun_eq_zero_of_mfderiv_eq_zero
     rw [hf]; rfl
   rw [htoLM]
   exact LinearEquiv.map_zero _
-
-/-! ## Inverse Gram matrix and its smoothness -/
 
 /-- The inverse Gram matrix at `(α, x)`. On the chart base set this is the
 matrix inverse of the (positive-definite) Gram matrix; off the base set it is a
@@ -313,8 +297,6 @@ lemma chartInvGramMatrix_entry_contMDiffOn
       (fun x : M => chartInvGramMatrix (I := I) g α x i j)
       (trivializationAt E (TangentSpace I) α).baseSet := by
   classical
-  -- On the base set, `A⁻¹ = Ring.inverse A.det • adjugate A`. Hence the (i,j) entry is
-  -- `Ring.inverse (det A) * adjugate A i j = (det A)⁻¹ * adjugate A i j`.
   have hcongr : ∀ x ∈ (trivializationAt E (TangentSpace I) α).baseSet,
       chartInvGramMatrix (I := I) g α x i j =
         ((chartGramMatrix (I := I) g α x).det)⁻¹ *
@@ -324,19 +306,16 @@ lemma chartInvGramMatrix_entry_contMDiffOn
     have hdet_ne : (chartGramMatrix (I := I) g α x).det ≠ 0 := ne_of_gt hdet_pos
     unfold chartInvGramMatrix
     rw [Matrix.inv_def]
-    -- Now `A⁻¹ i j = (det⁻¹ʳ • adjugate A) i j`.
     change (Ring.inverse (chartGramMatrix (I := I) g α x).det •
             (chartGramMatrix (I := I) g α x).adjugate) i j =
       ((chartGramMatrix (I := I) g α x).det)⁻¹ *
           (chartGramMatrix (I := I) g α x).adjugate i j
     rw [Matrix.smul_apply, smul_eq_mul]
     congr 1
-    -- For `ℝ` (a field), `Ring.inverse a = a⁻¹` (and `Ring.inverse 0 = 0`).
     exact Ring.inverse_eq_inv _
   refine ContMDiffOn.congr ?_ hcongr
   refine ContMDiffOn.mul ?_ ?_
-  · -- `(det · )⁻¹` is smooth where `det · ≠ 0`.
-    have hdet_smooth : ContMDiffOn I 𝓘(ℝ) ∞
+  · have hdet_smooth : ContMDiffOn I 𝓘(ℝ) ∞
         (fun x : M => (chartGramMatrix (I := I) g α x).det)
         (trivializationAt E (TangentSpace I) α).baseSet :=
       chartGramMatrix_det_contMDiffOn (I := I) g α
@@ -348,13 +327,6 @@ lemma chartInvGramMatrix_entry_contMDiffOn
     have h_at := hdet_smooth x hx
     exact hsmooth_inv.contMDiffAt.comp_contMDiffWithinAt x h_at
   · exact chartGramMatrix_adjugate_entry_contMDiffOn (I := I) g α i j
-
-/-! ## `L¹` entry sum of the inverse Gram matrix
-
-The pointwise sum of absolute values of all entries of the chart-`α` inverse
-Gram matrix. This is a non-negative real-valued function on `M`, continuous on
-the chart-`α` source. It plays the role of a pointwise operator-norm proxy in
-chart-bridge estimates for the gradient. -/
 
 /-- The chart-`α` inverse-Gram-matrix `L¹` entry sum at `x : M`. This is the
 sum of absolute values of all entries of the inverse Gram matrix. -/
@@ -378,7 +350,6 @@ lemma chartInvGramMatrix_l1Sum_continuousOn
   classical
   unfold chartInvGramMatrix_l1Sum
   refine continuousOn_finset_sum _ (fun ij _ => ?_)
-  -- The trivialization base set coincides with the chart source definitionally.
   have h_base_eq :
       (trivializationAt E (TangentSpace I) α).baseSet = (chartAt H α).source := rfl
   have h1 :
@@ -393,8 +364,6 @@ lemma chartInvGramMatrix_l1Sum_continuousOn
     rw [h_base_eq] at this
     exact this
   exact h_cont.abs
-
-/-! ## Chart-local representation of the gradient -/
 
 /-- The `i`-th chart-basis component of the gradient at `x`, in the chart at `α`.
 This is `∑_j G^{ij}(x) · ∂_j f̃(φ x)`. -/
@@ -419,8 +388,6 @@ def gradChartLocal (g : SmoothRiemannianMetric I M) (α : M) (f : M → ℝ) (x 
   ∑ i : Fin (Module.finrank ℝ E),
     gradChartCoeff (I := I) g α f i x •
       chartBasisVecFiber (I := I) α i x
-
-/-! ## A version of `mfderiv_chartBasisVecFiber` requiring only `MDifferentiableAt` -/
 
 /-- A version of `mfderiv_chartBasisVecFiber` that requires only
 `MDifferentiableAt I 𝓘(ℝ, ℝ) f x` rather than full smoothness of `f`. -/
@@ -448,26 +415,12 @@ lemma mfderiv_chartBasisVecFiber_of_mdifferentiableAt
       mfderiv I 𝓘(ℝ, ℝ) ((scalarOnE (I := I) α f) ∘ (extChartAt I α)) x :=
     Filter.EventuallyEq.mfderiv_eq hcong
   rw [hmfderiv_cong]
-  -- Differentiability of `scalarOnE α f` at `φ x`. Use that
-  -- `scalarOnE α f = f ∘ (extChartAt I α).symm`, plus the fact that the symm
-  -- map is mdiff at `φ x` and `f` is mdiff at `x = symm(φ x)`.
   have hphi_mdiff : MDifferentiableAt I 𝓘(ℝ, E) (extChartAt I α) x :=
     mdifferentiableAt_extChartAt (I := I) (x := α) hxchart
-  -- Use `EventuallyEq.mdifferentiableAt_iff` to lift `MDifferentiableAt` from `f` to the
-  -- composition. Actually we already have `hcong`, we can use the symmetric form
-  -- giving us `MDifferentiableAt (scalarOnE α f ∘ φ) x`.
   have hcomp_mdiff : MDifferentiableAt I 𝓘(ℝ, ℝ)
       ((scalarOnE (I := I) α f) ∘ (extChartAt I α)) x := by
     have h := hcong.mdifferentiableAt_iff (𝕜 := ℝ) (I := I) (I' := 𝓘(ℝ, ℝ))
     exact h.mp hf
-  -- We need `MDifferentiableAt 𝓘(ℝ, E) 𝓘(ℝ, ℝ) (scalarOnE α f) (φ x)`. This follows
-  -- because the composition `(scalarOnE α f) ∘ φ = (something differentiable at x)`
-  -- and `φ` is a local diffeomorphism (in particular has nonsingular mfderiv).
-  -- We use a more direct argument: the `extChartAt I α` near `x` is essentially the
-  -- chart map; reading off the chain rule and the fact that the chart map is locally
-  -- a homeomorphism, we can extract differentiability of the composite at `φ x`.
-  -- Alternative: use that `scalarOnE α f =ᶠ[𝓝 (φ x)] f ∘ (φ.symm)`, and `f ∘ φ.symm`
-  -- is mdiff at `φ x`.
   have hphi_symm_mdiff : MDifferentiableAt 𝓘(ℝ, E) I (extChartAt I α).symm (φ x) := by
     have hcontMDiffOn : ContMDiffOn 𝓘(ℝ, E) I ∞ (extChartAt I α).symm
         (extChartAt I α).target := contMDiffOn_extChartAt_symm (I := I) α
@@ -478,19 +431,16 @@ lemma mfderiv_chartBasisVecFiber_of_mdifferentiableAt
       (hcontMDiffOn (φ x) (interior_subset hx_int)).contMDiffAt htgt_int
     exact hcont_at.mdifferentiableAt (by simp)
   have hsymm_at_x : (extChartAt I α).symm (φ x) = x := φ.left_inv hxsrc
-  -- `f ∘ (extChartAt I α).symm` is mdiff at `φ x`.
   have hf_at_symm : MDifferentiableAt I 𝓘(ℝ, ℝ) f ((extChartAt I α).symm (φ x)) := by
     rw [hsymm_at_x]; exact hf
   have hf_comp_symm : MDifferentiableAt 𝓘(ℝ, E) 𝓘(ℝ, ℝ)
       (f ∘ (extChartAt I α).symm) (φ x) :=
     hf_at_symm.comp (φ x) hphi_symm_mdiff
-  -- And `(scalarOnE α f) = f ∘ (extChartAt I α).symm` definitionally.
   have hscalar_eq : (scalarOnE (I := I) α f) = f ∘ (extChartAt I α).symm := by
     funext y; rfl
   have hg_mdiff : MDifferentiableAt 𝓘(ℝ, E) 𝓘(ℝ, ℝ)
       (scalarOnE (I := I) α f) (φ x) := by
     rw [hscalar_eq]; exact hf_comp_symm
-  -- Now apply chain rule.
   have hchain :
       mfderiv I 𝓘(ℝ, ℝ) ((scalarOnE (I := I) α f) ∘ (extChartAt I α)) x =
         (mfderiv 𝓘(ℝ, E) 𝓘(ℝ, ℝ) (scalarOnE (I := I) α f) (φ x)).comp
@@ -500,7 +450,6 @@ lemma mfderiv_chartBasisVecFiber_of_mdifferentiableAt
   rw [show mfderiv 𝓘(ℝ, E) 𝓘(ℝ, ℝ) (scalarOnE (I := I) α f) (φ x)
       = fderiv ℝ (scalarOnE (I := I) α f) (φ x) from
         mfderiv_eq_fderiv (𝕜 := ℝ) (f := scalarOnE (I := I) α f)]
-  -- Identify `mfderiv (extChartAt I α) x (chartBasisVecFiber α i x) = (chartModelBasis E) i`.
   have hmfderiv_chartBasis :
       mfderiv I 𝓘(ℝ, E) (extChartAt I α) x
           (chartBasisVecFiber (I := I) α i x)
@@ -526,8 +475,6 @@ lemma mfderiv_chartBasisVecFiber_of_mdifferentiableAt
   rw [hmfderiv_chartBasis]
   rfl
 
-/-! ## Identification of `gradChartLocal` with `gradFun` -/
-
 /-- The inner product of `gradChartLocal` with a chart-basis frame vector `e_k` is
 the `k`-th chart-pullback partial derivative of `f`. Pure linear-algebra step. -/
 lemma inner_gradChartLocal_chartBasis
@@ -539,7 +486,6 @@ lemma inner_gradChartLocal_chartBasis
       = partialDeriv (E := E) k (scalarOnE (I := I) α f) (extChartAt I α x) := by
   classical
   unfold gradChartLocal
-  -- LHS: g.inner x (∑ i, a_i • e_i) e_k = ∑ i, a_i * G_{ik} where a_i = gradChartCoeff i x.
   rw [show g.inner x (∑ i, gradChartCoeff (I := I) g α f i x •
             chartBasisVecFiber (I := I) α i x)
           (chartBasisVecFiber (I := I) α k x) =
@@ -547,8 +493,7 @@ lemma inner_gradChartLocal_chartBasis
           g.inner x (chartBasisVecFiber (I := I) α i x)
             (chartBasisVecFiber (I := I) α k x) from ?_]
   swap
-  · -- finite-sum expansion of g.inner.
-    rw [show (g.inner x (∑ i, gradChartCoeff (I := I) g α f i x •
+  · rw [show (g.inner x (∑ i, gradChartCoeff (I := I) g α f i x •
               chartBasisVecFiber (I := I) α i x)) =
           (∑ i, gradChartCoeff (I := I) g α f i x •
               g.inner x (chartBasisVecFiber (I := I) α i x)) from ?_]
@@ -560,7 +505,6 @@ lemma inner_gradChartLocal_chartBasis
       refine Finset.sum_congr rfl ?_
       intro i _
       rw [map_smul]
-  -- Substitute `gradChartCoeff i x = ∑ j, G^{ij} ∂f j`.
   have ha : ∀ i, gradChartCoeff (I := I) g α f i x =
       ∑ j, chartInvGramMatrix (I := I) g α x i j *
         partialDeriv (E := E) j (scalarOnE (I := I) α f) (extChartAt I α x) := fun i => rfl
@@ -574,10 +518,7 @@ lemma inner_gradChartLocal_chartBasis
   · refine Finset.sum_congr rfl ?_
     intro i _
     rw [ha i]
-    -- chartGramMatrix g α x i k = g.inner x (e_i x) (e_k x)
     rfl
-  -- Now interchange sums and use the Gram-inverse identity.
-  -- ∑ i, (∑ j, Ginv_{ij} ∂f j) * G_{ik} = ∑ j, (∑ i, Ginv_{ij} G_{ik}) * ∂f j.
   rw [show ∑ i, (∑ j, chartInvGramMatrix (I := I) g α x i j *
               partialDeriv (E := E) j (scalarOnE (I := I) α f)
                 (extChartAt I α x)) *
@@ -586,9 +527,7 @@ lemma inner_gradChartLocal_chartBasis
               chartGramMatrix (I := I) g α x i k) *
             partialDeriv (E := E) j (scalarOnE (I := I) α f) (extChartAt I α x) from ?_]
   swap
-  · -- Step 1: factor each summand: (∑ j, Ginv ij * dfj) * G ik = ∑ j, (Ginv ij * dfj) * G ik
-    -- = ∑ j, (Ginv ij * G ik) * dfj.
-    rw [show ∑ i, (∑ j, chartInvGramMatrix (I := I) g α x i j *
+  · rw [show ∑ i, (∑ j, chartInvGramMatrix (I := I) g α x i j *
                 partialDeriv (E := E) j (scalarOnE (I := I) α f)
                   (extChartAt I α x)) *
                   chartGramMatrix (I := I) g α x i k =
@@ -606,8 +545,6 @@ lemma inner_gradChartLocal_chartBasis
       refine Finset.sum_congr rfl ?_
       intro j _
       ring
-  -- Now use ∑ i, Ginv_{ij} * G_{ik} = δ_{jk}, by the Gram-mul-inverse identity (G * G⁻¹ = 1)
-  -- combined with the symmetry of G.
   have hsym : ∀ i, chartGramMatrix (I := I) g α x i k =
       chartGramMatrix (I := I) g α x k i := fun i => g.symm x _ _
   have hkron : ∀ j, (∑ i, chartInvGramMatrix (I := I) g α x i j *
@@ -623,7 +560,6 @@ lemma inner_gradChartLocal_chartBasis
       intro i _
       rw [hsym i]
       ring
-    -- ∑ i, G_{k,i} * Ginv_{i,j} = (G * Ginv)_{k,j} = (1)_{k,j} = δ_{k,j}.
     have hidentity : (chartGramMatrix (I := I) g α x *
           chartInvGramMatrix (I := I) g α x) k j =
         if k = j then (1 : ℝ) else 0 := by
@@ -656,24 +592,19 @@ lemma gradChartLocal_eq_gradFun
   classical
   have hxchart : x ∈ (chartAt H α).source := by
     rw [trivializationAt_baseSet_eq_chartAt_source (I := I)] at hx; exact hx
-  -- Set up an explicit CLM into ℝ for the mfderiv to avoid TangentSpace-vs-ℝ confusion.
   set f' : TangentSpace I x →L[ℝ] ℝ := mfderiv I 𝓘(ℝ, ℝ) f x with hf'_def
-  -- The mfderiv evaluation: `mfderiv f x v = f' v` (by hf'_def, definitional).
   have hmfderiv_basis : ∀ k, f' (chartBasisVecFiber (I := I) α k x) =
       partialDeriv (E := E) k (scalarOnE (I := I) α f) (extChartAt I α x) := by
     intro k
     rw [hf'_def]
     exact mfderiv_chartBasisVecFiber_of_mdifferentiableAt
       (I := I) α hf hxchart hx_int k
-  -- Both sides are determined by their inner product with arbitrary tangent vectors.
   apply metricFlatLinear_injective (I := I) g x
   ext v
   change g.inner x (gradChartLocal (I := I) g α f x) v =
     g.inner x (gradFun (I := I) g f x) v
   rw [inner_gradFun (I := I) g f x v]
-  -- Replace `mfderiv f x v` by `f' v`.
   change g.inner x (gradChartLocal (I := I) g α f x) v = f' v
-  -- Decompose `v = ∑ k, c k • e_k x`.
   set b : Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I x) :=
     chartBasisFamily (I := I) α hx
   set c : Fin (Module.finrank ℝ E) → ℝ := fun k => b.repr v k
@@ -684,16 +615,12 @@ lemma gradChartLocal_eq_gradFun
     intro k _
     rw [chartBasisFamily_apply (I := I) α hx k]
   rw [hv_decomp]
-  -- Both sides are linear in `v`, so commute with the finite sum.
-  -- LHS: g.inner x (gradChartLocal g α f x) (∑ k, c k • e_k x)
-  -- RHS: f' (∑ k, c k • e_k x)
   rw [show g.inner x (gradChartLocal (I := I) g α f x)
         (∑ k, c k • chartBasisVecFiber (I := I) α k x) =
         ∑ k, c k * g.inner x (gradChartLocal (I := I) g α f x)
           (chartBasisVecFiber (I := I) α k x) from ?_]
   swap
-  · -- Apply `g.inner x` linearity in the second argument over the sum.
-    rw [map_sum]
+  · rw [map_sum]
     refine Finset.sum_congr rfl ?_
     intro k _
     rw [ContinuousLinearMap.map_smul, smul_eq_mul]
@@ -708,14 +635,6 @@ lemma gradChartLocal_eq_gradFun
   intro k _
   congr 1
   rw [inner_gradChartLocal_chartBasis (I := I) g α f hx k, hmfderiv_basis k]
-
-/-! ## Pointwise grad-norm chart bound
-
-A pointwise upper bound for `g.inner x (gradFun g f x) (gradFun g f x)` in
-terms of the chart-`α` inverse-Gram-matrix `L¹` entry sum and the sum of squares
-of the chart-pullback partial derivatives of `f`. On a boundaryless model this
-public bound only requires `hx ∈ (chartAt H α).source` and pointwise
-differentiability of `f` at `x`. -/
 
 /-- The pointwise `g`-norm bound on the gradient: for `f` differentiable at `x`
 and `x` in the chart-`α` source on a boundaryless model,
@@ -733,8 +652,6 @@ theorem g_inner_gradFun_le_chartInvGramMatrix_l1Sum_mul_sum_sq_partials
           (partialDeriv (E := E) k (scalarOnE (I := I) α f)
             (extChartAt I α x)) ^ 2 := by
   classical
-  -- Derive the trivialization-base-set membership and the chart-target
-  -- interior membership from `hx` and the boundaryless assumption.
   have hbase : x ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
     rw [trivializationAt_baseSet_eq_chartAt_source]; exact hx
   have hx_int : extChartAt I α x ∈ interior (extChartAt I α).target := by
@@ -743,12 +660,10 @@ theorem g_inner_gradFun_le_chartInvGramMatrix_l1Sum_mul_sum_sq_partials
     have hxtgt : extChartAt I α x ∈ (extChartAt I α).target :=
       (extChartAt I α).map_source hxsrc
     exact extChartAt_target_subset_interior_of_boundaryless (I := I) α hxtgt
-  -- Step 1: identify `gradFun` with `gradChartLocal` at `x`.
   have hgrad_eq :
       gradFun (I := I) g f x = gradChartLocal (I := I) g α f x :=
     (gradChartLocal_eq_gradFun (I := I) g α hf hbase hx_int).symm
   rw [hgrad_eq]
-  -- Step 2: write `gradChartLocal = ∑ i, c i • e_i x` with `c i = gradChartCoeff i x`.
   set c : Fin (Module.finrank ℝ E) → ℝ := fun i =>
     gradChartCoeff (I := I) g α f i x with hc_def
   have hgcl_eq :
@@ -757,7 +672,6 @@ theorem g_inner_gradFun_le_chartInvGramMatrix_l1Sum_mul_sum_sq_partials
     unfold gradChartLocal
     rfl
   rw [hgcl_eq]
-  -- Step 3: `g.inner = cᵀ G c` via `chartGramMatrix_dotProduct_mulVec`.
   set Gmat : Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
     chartGramMatrix (I := I) g α x with hGmat_def
   have hG_form : g.inner x
@@ -766,7 +680,6 @@ theorem g_inner_gradFun_le_chartInvGramMatrix_l1Sum_mul_sum_sq_partials
       = dotProduct (star c) (Matrix.mulVec Gmat c) :=
     (chartGramMatrix_dotProduct_mulVec (I := I) g α x c).symm
   rw [hG_form]
-  -- Step 4: `c = G⁻¹ d`, where `d j = partialDeriv j (scalarOnE α f) (φ x)`.
   set d : Fin (Module.finrank ℝ E) → ℝ := fun j =>
     partialDeriv (E := E) j (scalarOnE (I := I) α f) (extChartAt I α x)
     with hd_def
@@ -775,7 +688,6 @@ theorem g_inner_gradFun_le_chartInvGramMatrix_l1Sum_mul_sum_sq_partials
   have hc_eq : ∀ i, c i = ∑ j, Ginv i j * d j := by
     intro i
     rfl
-  -- Expand `cᵀ G c = ∑_{ij} c_i G_{ij} c_j`.
   have hcGc_expand :
       dotProduct (star c) (Matrix.mulVec Gmat c) =
         ∑ i, ∑ j, c i * c j * Gmat i j := by
@@ -789,11 +701,9 @@ theorem g_inner_gradFun_le_chartInvGramMatrix_l1Sum_mul_sum_sq_partials
         ∑ j', Gmat i j' * c j' := rfl
     ring
   rw [hcGc_expand]
-  -- Reduction `∑_{ij} c_i G_{ij} c_j = ∑_{jk} G⁻¹_{jk} d_j d_k`.
   have h_cGc_eq_dGd :
       (∑ i, ∑ j, c i * c j * Gmat i j) =
         ∑ j, ∑ k, Ginv j k * d j * d k := by
-    -- Rearrange: `∑_{ij} c_i c_j G_{ij} = ∑_j c_j (∑_i c_i G_{ij})`.
     have hstep1 :
         (∑ i, ∑ j, c i * c j * Gmat i j) =
           ∑ j, c j * (∑ i, c i * Gmat i j) := by
@@ -805,7 +715,6 @@ theorem g_inner_gradFun_le_chartInvGramMatrix_l1Sum_mul_sum_sq_partials
       intro i _
       ring
     rw [hstep1]
-    -- `∑_i c_i G_{ij} = (G c)_j = d_j` (since `c = G⁻¹ d`).
     have h_dot_sum : ∀ j, (∑ i, c i * Gmat i j) = d j := by
       intro j
       have hsym : ∀ i, Gmat i j = Gmat j i := fun i => g.symm x _ _
@@ -862,8 +771,6 @@ theorem g_inner_gradFun_le_chartInvGramMatrix_l1Sum_mul_sum_sq_partials
     intro k _
     ring
   rw [h_cGc_eq_dGd]
-  -- Bound `∑_{jk} G⁻¹_{jk} d_j d_k ≤ (∑_{jk} |G⁻¹_{jk}|) · (∑ k, d_k²)`.
-  -- Use `|d_j| ≤ √D` and `|d_k| ≤ √D`, so `|d_j d_k| ≤ D` with `D := ∑ k, d_k²`.
   set D : ℝ := ∑ k, (d k) ^ 2 with hD_def
   have hD_nn : 0 ≤ D := Finset.sum_nonneg (fun _ _ => sq_nonneg _)
   have hd_sq_le : ∀ j, (d j) ^ 2 ≤ D := by
@@ -905,8 +812,6 @@ theorem g_inner_gradFun_le_chartInvGramMatrix_l1Sum_mul_sum_sq_partials
     exact mul_le_mul_of_nonneg_left (h_dj_dk_le_D j k) (abs_nonneg _)
   exact h_main_le
 
-/-! ## Smoothness of `gradFun` -/
-
 /-- `gradChartCoeff g α f i` is `C^∞` on the smoothness domain (the chart base
 set restricted to where the chart map lands in the interior of the chart target). -/
 private lemma gradChartCoeff_contMDiffOn
@@ -919,8 +824,7 @@ private lemma gradChartCoeff_contMDiffOn
   classical
   refine contMDiffOn_finset_sum (fun j _ => ?_)
   refine ContMDiffOn.mul ?_ ?_
-  · -- `chartInvGramMatrix g α x i j` is smooth on the chart base set.
-    have h1 : ContMDiffOn I 𝓘(ℝ) ∞
+  · have h1 : ContMDiffOn I 𝓘(ℝ) ∞
         (fun x => chartInvGramMatrix (I := I) g α x i j)
         (trivializationAt E (TangentSpace I) α).baseSet :=
       chartInvGramMatrix_entry_contMDiffOn (I := I) g α i j
@@ -930,8 +834,7 @@ private lemma gradChartCoeff_contMDiffOn
     have := hx.1
     rw [extChartAt_source_eq_chartAt_source (I := I)] at this
     exact this
-  · -- The chart-pulled-back partial derivative is smooth on the smoothness domain.
-    have hpartial : ContDiffOn ℝ ∞
+  · have hpartial : ContDiffOn ℝ ∞
         (partialDeriv (E := E) j (scalarOnE (I := I) α f))
         (interior (extChartAt I α).target) := by
       have hbase : ContDiffOn ℝ ∞
@@ -974,8 +877,6 @@ private lemma gradChartLocal_contMDiffOn_total
       ((extChartAt I α).source ∩
         (extChartAt I α) ⁻¹' interior (extChartAt I α).target) := by
   classical
-  -- Each summand is `gradChartCoeff α f i x • chartBasisVecFiber α i x`, smooth.
-  -- Sum them.
   have hcoeff : ∀ i, ContMDiffOn I 𝓘(ℝ) ∞ (gradChartCoeff (I := I) g α f i)
       ((extChartAt I α).source ∩
         (extChartAt I α) ⁻¹' interior (extChartAt I α).target) :=
@@ -998,7 +899,6 @@ private lemma gradChartLocal_contMDiffOn_total
         (extChartAt I α) ⁻¹' interior (extChartAt I α).target) := by
     intro i
     exact (hcoeff i).smul_section (hbasis i)
-  -- Sum.
   have hsum : ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞
       (fun x : M => TotalSpace.mk' E x
         (∑ i, gradChartCoeff (I := I) g α f i x •
@@ -1059,14 +959,11 @@ lemma gradFun_contMDiff_total [I.Boundaryless]
       (chartAt H x).source := by
     refine hsmooth_local.congr ?_
     intro y hy
-    -- Need: `gradFun = gradChartLocal` here. `heq_on_src` gives `gradChartLocal = gradFun`.
     have h := heq_on_src y hy
     change TotalSpace.mk' E y (gradFun (I := I) g f y) =
       TotalSpace.mk' E y (gradChartLocal (I := I) g x f y)
     rw [h]
   exact (hsmooth_local2 x hx_src).contMDiffAt (hsrc_open.mem_nhds hx_src)
-
-/-! ## The smooth gradient as a `ContMDiffSection` -/
 
 /-- The smooth gradient of a smooth scalar function `f` (with smoothness proof
 `hf`) as a smooth tangent-bundle section. -/
@@ -1081,8 +978,6 @@ def grad_g [I.Boundaryless]
     (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (x : M) :
     (grad_g (I := I) g hf : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x =
       gradFun (I := I) g f x := rfl
-
-/-! ## Duality with the tangent-section action -/
 
 /-- **Duality of gradient and directional derivative.** The action of a smooth
 tangent section `X` on a smooth scalar `f` at `x` — the directional derivative
@@ -1099,8 +994,6 @@ theorem tangentSectionAction_eq_inner_grad_g [I.Boundaryless]
   rw [inner_gradFun_right (I := I) g f x (X x)]
   rfl
 
-/-! ## Symmetry -/
-
 /-- The metric inner product on two gradients is symmetric. -/
 theorem inner_grad_g_symm [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
@@ -1111,8 +1004,6 @@ theorem inner_grad_g_symm [I.Boundaryless]
       g.inner x ((grad_g (I := I) g hh : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x)
         ((grad_g (I := I) g hf : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x) :=
   g.symm x _ _
-
-/-! ## Compact support -/
 
 /-- If `f` is locally zero near `x`, then the gradient of `f` vanishes at `x`. -/
 lemma gradFun_eq_zero_of_eventuallyEq_zero

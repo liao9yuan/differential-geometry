@@ -67,15 +67,6 @@ theorem Δ_g_contMDiff [I.Boundaryless] [T2Space M]
     ContMDiff I 𝓘(ℝ, ℝ) ∞ (Δ_g (I := I) g hf) :=
   divergence_g_contMDiff (I := I) g (grad_g (I := I) g hf)
 
-/-! ## Linearity of the Laplacian
-
-The Laplacian is `ℝ`-linear in `f`: this follows from `ℝ`-linearity of the
-gradient (in turn from `ℝ`-linearity of the differential and the linear
-structure on tangent spaces, going through the linear-algebraic Riesz map) and
-`ℝ`-linearity of the divergence (proved in `POUReduction.lean`). We prove the
-sum rule directly by noting that the gradient of a sum is the sum of gradients,
-modulo a pointwise check; `divergence_g_add` then gives the result. -/
-
 /-- The pointwise gradient of a sum of differentiable functions is the sum of the
 gradients. -/
 lemma gradFun_add
@@ -85,13 +76,11 @@ lemma gradFun_add
     (hh : MDifferentiableAt I 𝓘(ℝ, ℝ) h x) :
     gradFun (I := I) g (f + h) x =
       gradFun (I := I) g f x + gradFun (I := I) g h x := by
-  -- Apply `metricFlatMap` injectivity and check the equation pointwise on `v`.
   apply metricFlatLinear_injective (I := I) g x
   ext v
   change g.inner x (gradFun (I := I) g (f + h) x) v =
     g.inner x (gradFun (I := I) g f x + gradFun (I := I) g h x) v
   rw [inner_gradFun (I := I) g (f + h) x v]
-  -- Set the CLMs to ℝ for clean type handling. (`TangentSpace 𝓘(ℝ, ℝ) y = ℝ` definitionally.)
   set d : TangentSpace I x →L[ℝ] ℝ := mfderiv I 𝓘(ℝ, ℝ) (f + h) x with hd_def
   set d_f : TangentSpace I x →L[ℝ] ℝ := mfderiv I 𝓘(ℝ, ℝ) f x with hd_f_def
   set d_h : TangentSpace I x →L[ℝ] ℝ := mfderiv I 𝓘(ℝ, ℝ) h x with hd_h_def
@@ -102,7 +91,6 @@ lemma gradFun_add
       have hHah : HasMFDerivAt I 𝓘(ℝ, ℝ) h x d_h := by
         rw [hd_h_def]; exact hh.hasMFDerivAt
       exact hHaf.add hHah
-    -- `mfderiv (f + h) x = d_f + d_h` from `HasMFDerivAt`.
     rw [hd_def]
     exact hAddDeriv.mfderiv
   change d v = g.inner x (gradFun (I := I) g f x + gradFun (I := I) g h x) v
@@ -133,14 +121,6 @@ theorem Δ_g_add [I.Boundaryless] [T2Space M]
     (x : M) :
     Δ_g (I := I) g (hf.add hh) x = Δ_g (I := I) g hf x + Δ_g (I := I) g hh x := by
   classical
-  -- Step 1: replace divergence_g g (grad_g g (hf + hh)) by divergence_g g (grad_g g hf + grad_g g hh).
-  -- We do this by rewriting the gradient section pointwise and using the linearity of
-  -- divergence_g, which holds at the pointwise level via `divergence_g_add`.
-  -- The cleaner way: produce the pointwise equality
-  --   grad_g (hf + hh) x = grad_g hf x + grad_g hh x  for all x
-  -- as an equality of smooth sections (via `ContMDiffSection.ext`), then apply
-  -- `divergence_g_add` (which gives `divergence_g g (X + Y) = divergence_g g X +
-  -- divergence_g g Y` pointwise).
   have hsection_eq : (grad_g (I := I) g (hf.add hh) :
       Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) =
       (grad_g (I := I) g hf : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) +
@@ -156,8 +136,6 @@ theorem Δ_g_add [I.Boundaryless] [T2Space M]
   rw [hsection_eq]
   exact divergence_g_add (I := I) g _ _ x
 
-/-! ## Laplacian of a constant -/
-
 /-- The gradient of a constant function vanishes. -/
 @[simp] lemma gradFun_const
     (g : SmoothRiemannianMetric I M) (c : ℝ) (x : M) :
@@ -170,7 +148,6 @@ theorem Δ_g_add [I.Boundaryless] [T2Space M]
     (g : SmoothRiemannianMetric I M) (c : ℝ) (x : M) :
     Δ_g (I := I) g (contMDiff_const : ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun _ : M => c)) x = 0 := by
   classical
-  -- The gradient section is identically zero; divergence of zero is zero.
   have hsection_eq : (grad_g (I := I) g
       (contMDiff_const : ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun _ : M => c)) :
       Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) =

@@ -25,14 +25,13 @@ Outline (Hatcher, Prop. 1.36, 1.39):
    the sheets over each fibre realises evenly-covered neighbourhoods, so
    `proj` is a covering map.
 3. Path-connectedness (`UniversalCover.pathConnectedSpace`): every
-   point `⟨x, ⟦γ⟧⟩` is connected to the basepoint by the truncation lift
-   `s ↦ ⟨γ s, ⟦γ.truncate 0 s⟧⟩`.
+   point `⟨x, ⟦γ⟧⟩` is connected to the basepoint by the subpath lift
+   `s ↦ ⟨γ s, ⟦γ.subpath 0 s⟧⟩`.
 4. Simple connectedness (`UniversalCover.simplyConnectedSpace`): a loop
-   in the cover lifts a loop in `X` and is null-homotopic via
-   `IsCoveringMap.liftHomotopy`.
-
-The aggregate "bundled triple" `pi1-universal-cover-construction` is
-exposed implicitly via the combination of (1)-(4) above.
+   in the cover projects to a loop in `X`, agrees with the subpath lift of
+   that projection by uniqueness of path lifts (`IsCoveringMap.liftPath`),
+   and is null-homotopic via injectivity of the induced map on homotopy
+   classes (`IsCoveringMap.injective_path_homotopic_map`).
 -/
 
 open Set Function Filter
@@ -74,13 +73,11 @@ theorem uc_sheet_bijection_on_good_U
         DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover X → X)
       (basicOpen p U hU hp) U := by
   refine ⟨?_, ?_, ?_⟩
-  · -- MapsTo: q ∈ basicOpen ⇒ q.1 = η 1 ∈ U.
-    intro q hq
+  · intro q hq
     obtain ⟨η, hηU, _⟩ := hq
     have : η 1 ∈ U := hηU 1
     simpa [proj, Path.target] using this
-  · -- InjOn: two preimages with the same projected point must be equal.
-    intro q hq q' hq' hqq'
+  · intro q hq q' hq' hqq'
     obtain ⟨xq, cq⟩ := q
     obtain ⟨xq', cq'⟩ := q'
     obtain ⟨η, hηU, hqeq⟩ := hq
@@ -133,8 +130,7 @@ theorem uc_sheet_bijection_on_good_U
             (Path.Homotopic.Quotient.mk η') := by rw [hbase]
       _ = Path.Homotopic.Quotient.mk η' := by
             rw [Path.Homotopic.Quotient.refl_trans]
-  · -- SurjOn: any y ∈ U is reached by a path in U from p.1.
-    intro y hy
+  · intro y hy
     have hjoined : JoinedIn U p.1 y := hUpc.joinedIn _ hp _ hy
     refine ⟨⟨y, p.2.trans (Path.Homotopic.Quotient.mk hjoined.somePath)⟩, ?_, rfl⟩
     refine ⟨hjoined.somePath, ?_, rfl⟩
@@ -359,7 +355,6 @@ theorem UniversalCover.proj_isCoveringMap :
     exact hUloops
   have hsheet_inj : ∀ p : Fx, (sheet p).InjOn proj := fun p => (hsheet_bij p).2.1
   have hsheet_surj : ∀ p : Fx, (sheet p).SurjOn proj U := fun p => (hsheet_bij p).2.2
-  -- Discreteness of Fx.
   haveI hFx_disc : DiscreteTopology Fx := by
     rw [discreteTopology_iff_isOpen_singleton]
     intro p
@@ -384,7 +379,6 @@ theorem UniversalCover.proj_isCoveringMap :
     exact (hsheet_open p).preimage continuous_subtype_val
   refine ⟨hFx_disc, U, hxU, hUopen, hUopen.preimage proj_continuous, ?_⟩
   classical
-  -- theSheet : preimage → Fx via Classical.choose of exhaustiveness.
   let theSheet : ((proj :
       DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover X → X)
       ⁻¹' U) → Fx := fun q => (hsheet_exhaust q.1 q.2).choose
@@ -399,7 +393,6 @@ theorem UniversalCover.proj_isCoveringMap :
     have hmem : q.1 ∈ sheet (theSheet q) ∩ sheet p := ⟨htheSheet_mem q, hqp⟩
     rw [hdisj] at hmem
     exact hmem
-  -- inv: U × Fx → proj⁻¹U via the surjectivity witness.
   let theInv : (U × Fx) → ((proj :
       DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover X → X)
       ⁻¹' U) := fun yp =>
@@ -528,13 +521,10 @@ theorem uc_subpathLift_continuous {x : X} (γ : _root_.Path (default : X) x) :
   refine continuous_iff_continuousAt.mpr fun s₀ => ?_
   rw [ContinuousAt, Filter.tendsto_def]
   intro N hN
-  -- Reduce `N` to a basic open `S = basicOpen p V` containing `T s₀`.
   obtain ⟨S, ⟨⟨p, V, hVopen, hpV, rfl⟩, hTs₀S⟩, hSN⟩ :=
     (basis_assemble (X := X)).nhds_hasBasis.mem_iff.mp hN
-  -- Membership of `T s₀` in the basic open gives a connecting path `η₀` in `V`.
   obtain ⟨η₀, hη₀V, hη₀eq⟩ := hTs₀S
   simp only [uc_subpathLift] at hη₀eq
-  -- Tube lemma: a neighbourhood `J` of `s₀` over which `γ.subpath s₀ s` stays in `V`.
   have hcont_fam :
       Continuous (fun st : unitInterval × unitInterval =>
         γ.subpath s₀ st.1 st.2) := by
@@ -552,7 +542,6 @@ theorem uc_subpathLift_continuous {x : X} (γ : _root_.Path (default : X) x) :
     rintro ⟨s, t⟩ ⟨hs, -⟩
     simp only [Set.mem_singleton_iff] at hs
     simp only [Set.mem_setOf_eq, hs, Path.subpath_self, Path.refl_apply]
-    -- `γ.subpath s₀ s₀ t = γ s₀ = (T s₀).1 ∈ V` since `η₀ 1 = γ s₀ ∈ V`.
     have : γ s₀ ∈ V := by
       have h := hη₀V 1
       rw [Path.target] at h
@@ -561,26 +550,21 @@ theorem uc_subpathLift_continuous {x : X} (γ : _root_.Path (default : X) x) :
   obtain ⟨J, K, hJopen, _hKopen, hs₀J, _hKuniv, hJK⟩ :=
     generalized_tube_lemma (isCompact_singleton (x := s₀)) (isCompact_univ) hopen hsub
   have hs₀J' : s₀ ∈ J := hs₀J rfl
-  -- For `s ∈ J`, the subpath `γ.subpath s₀ s` stays in `V`.
   have hsubV : ∀ s ∈ J, ∀ t, γ.subpath s₀ s t ∈ V := by
     intro s hs t
     have : (s, t) ∈ J ×ˢ K := ⟨hs, _hKuniv (Set.mem_univ t)⟩
     exact hJK this
   refine Filter.mem_of_superset (hJopen.mem_nhds hs₀J') ?_
   intro s hsJ
-  -- Show `T s ∈ basicOpen p V`, connecting path `η₀.trans (γ.subpath s₀ s)`.
   apply hSN
   refine ⟨η₀.trans (γ.subpath s₀ s), ?_, ?_⟩
-  · -- the connecting path stays in `V`.
-    intro t
+  · intro t
     rw [Path.trans_apply]
     split_ifs with h
     · exact hη₀V _
     · rw [Path.subpath]
       exact hsubV s hsJ _
-  · -- the quotient identity.
-    -- `(T s).2 = ⟦γ.subpath 0 s⟧.cast`; expand via subpath additivity.
-    change (_root_.Path.Homotopic.Quotient.mk (γ.subpath 0 s)).cast γ.source.symm rfl =
+  · change (_root_.Path.Homotopic.Quotient.mk (γ.subpath 0 s)).cast γ.source.symm rfl =
       p.2.trans (_root_.Path.Homotopic.Quotient.mk (η₀.trans (γ.subpath s₀ s)))
     have hadd :
         (_root_.Path.Homotopic.Quotient.mk (γ.subpath 0 s)
@@ -590,7 +574,6 @@ theorem uc_subpathLift_continuous {x : X} (γ : _root_.Path (default : X) x) :
       rw [← _root_.Path.Homotopic.Quotient.mk_trans]
       exact (_root_.Path.Homotopic.Quotient.eq.mpr
         ⟨Path.Homotopy.subpathTransSubpath γ 0 s₀ s⟩).symm
-    -- expand `(T s₀).2` from `hη₀eq : ⟦γ.subpath 0 s₀⟧.cast = p.2.trans ⟦η₀⟧`.
     have hcast :
         (_root_.Path.Homotopic.Quotient.mk (γ.subpath 0 s)).cast γ.source.symm rfl =
           ((_root_.Path.Homotopic.Quotient.mk (γ.subpath 0 s₀)).cast γ.source.symm rfl).trans
@@ -673,15 +656,12 @@ classes of loops, `⟦δ⟧ = ⟦Path.refl⟧` as well. -/
 theorem uc_basePoint_loops_nullhomotopic
     (δ : _root_.Path (basePoint (X := X)) basePoint) :
     _root_.Path.Homotopic δ (_root_.Path.refl basePoint) := by
-  -- The projected loop in `X`, as a continuous map.
   have hproj : proj (basePoint (X := X)) = default := rfl
   set γX : C(unitInterval, X) :=
     ⟨proj ∘ δ, proj_continuous.comp δ.continuous⟩ with hγXdef
-  -- `δ` and the subpath lift of `proj ∘ δ` are both lifts starting at basePoint.
   have hcov : IsCoveringMap
       (proj : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover X → X) :=
     UniversalCover.proj_isCoveringMap
-  -- View `proj ∘ δ` as a path from `default` to `default`.
   set γ : _root_.Path (default : X) default :=
     { toFun := proj ∘ δ
       continuous_toFun := proj_continuous.comp δ.continuous
@@ -691,7 +671,6 @@ theorem uc_basePoint_loops_nullhomotopic
       target' := by
         change proj (δ 1) = default
         rw [δ.target]; rfl } with hγdef
-  -- `δ` as a continuous map is the lift of `γX` starting at `basePoint`.
   have hδlift : (⟨δ, δ.continuous⟩ : C(unitInterval,
       DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover X)) =
       hcov.liftPath γX basePoint (by simp [hγXdef, proj, δ.source]) := by
@@ -699,7 +678,6 @@ theorem uc_basePoint_loops_nullhomotopic
     refine ⟨?_, ?_⟩
     · ext t; rfl
     · exact δ.source
-  -- The subpath lift of `γ`, as a continuous map, is also the lift of `γX`.
   have hSlift : (⟨uc_subpathLift γ, uc_subpathLift_continuous γ⟩ : C(unitInterval,
       DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover X)) =
       hcov.liftPath γX basePoint (by simp [hγXdef, proj, δ.source]) := by
@@ -709,7 +687,6 @@ theorem uc_basePoint_loops_nullhomotopic
       simp only [ContinuousMap.coe_mk, Function.comp_apply, hγXdef]
       exact uc_subpathLift_proj γ t
     · exact uc_subpathLift_zero γ
-  -- Hence `δ = uc_subpathLift γ`; in particular `δ 1 = uc_subpathLift γ 1`.
   have hδeq : (δ : unitInterval →
       DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover X) =
       uc_subpathLift γ := by
@@ -721,20 +698,16 @@ theorem uc_basePoint_loops_nullhomotopic
     have h1 : δ 1 = uc_subpathLift γ 1 := congrFun hδeq 1
     rw [uc_subpathLift_one] at h1
     rw [← h1, δ.target]
-  -- Comparing second components: `⟦refl default⟧ = ⟦γ⟧`.
   have hclass : (_root_.Path.Homotopic.Quotient.mk (_root_.Path.refl (default : X))) =
       _root_.Path.Homotopic.Quotient.mk γ := by
     have hsnd := (Sigma.ext_iff.mp hend).2
-    -- both first components are `default`, so the `HEq` is an equality.
     exact eq_of_heq hsnd
-  -- Transport to a homotopy of the loops `δ` and `refl basePoint`.
   have hmapInj := hcov.injective_path_homotopic_map basePoint basePoint
   rw [← _root_.Path.Homotopic.Quotient.eq]
   apply hmapInj
   change (_root_.Path.Homotopic.Quotient.mk δ).map ⟨proj, proj_continuous⟩ =
     (_root_.Path.Homotopic.Quotient.mk (_root_.Path.refl basePoint)).map ⟨proj, proj_continuous⟩
   rw [← _root_.Path.Homotopic.Quotient.mk_map, ← _root_.Path.Homotopic.Quotient.mk_map]
-  -- `δ.map proj = γ` and `(refl basePoint).map proj = refl default`.
   have hδmap : (_root_.Path.Homotopic.Quotient.mk
       (δ.map (proj_continuous (X := X)))) =
       _root_.Path.Homotopic.Quotient.mk γ := by
@@ -758,12 +731,10 @@ instance UniversalCover.simplyConnectedSpace :
       (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover X) := by
   rw [simply_connected_iff_loops_nullhomotopic]
   refine ⟨inferInstance, fun e γ => ?_⟩
-  -- Conjugate the loop at `e` to a loop at the basepoint.
   set β : _root_.Path (basePoint (X := X)) e := (uc_joined_basePoint e).somePath with hβ
   set δ : _root_.Path (basePoint (X := X)) basePoint :=
     β.trans (γ.trans β.symm) with hδ
   have hδnull := uc_basePoint_loops_nullhomotopic δ
-  -- In the quotient: `⟦δ⟧ = ⟦β⟧.trans (⟦γ⟧.trans ⟦β⟧.symm)`.
   rw [← _root_.Path.Homotopic.Quotient.eq] at hδnull ⊢
   have hδquot :
       (_root_.Path.Homotopic.Quotient.mk δ) =
@@ -774,11 +745,9 @@ instance UniversalCover.simplyConnectedSpace :
     rw [hδ]
     simp only [_root_.Path.Homotopic.Quotient.mk_trans, _root_.Path.Homotopic.Quotient.mk_symm]
   rw [hδquot, _root_.Path.Homotopic.Quotient.mk_refl] at hδnull
-  -- Cancel `β` on both sides to get `⟦γ⟧ = ⟦refl e⟧`.
   rw [_root_.Path.Homotopic.Quotient.mk_refl]
   set B := _root_.Path.Homotopic.Quotient.mk β with hB
   set G := _root_.Path.Homotopic.Quotient.mk γ with hG
-  -- `hδnull : B.trans (G.trans B.symm) = refl basePoint`.
   have key : (B.symm.trans (B.trans (G.trans B.symm))).trans B = G := by
     rw [← _root_.Path.Homotopic.Quotient.trans_assoc,
       ← _root_.Path.Homotopic.Quotient.trans_assoc,

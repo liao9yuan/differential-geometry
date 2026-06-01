@@ -50,14 +50,6 @@ open DifferentialGeometry.Geometry.Riemannian.AlongCurve
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 
-/-! ## Chart-local ODE form of `∇_{γ'} V = 0`
-
-The chart-local covariant derivative along `γ` is `D V / dt = V'(t) +
-Γ_α(u'(t), V(t))(u(t))`, so the parallel-transport equation
-`∇_{γ'} V = 0` is the linear ODE `dV/dt = -Γ(γ(t))[γ'(t)] · V`. This
-node records the explicit linear-ODE shape that downstream
-Picard-Lindelöf / Gronwall arguments consume. -/
-
 /-- **parallel-ode-chart-local.** The parallel-transport condition
 `(D V / dt)(t) = 0` in the chart at `α` is equivalent to the linear
 ODE `V'(t) = - Γ_α(u'(t), V(t))(u(t))`. -/
@@ -73,16 +65,7 @@ theorem parallel_ode_chart_local
   refine Iff.and Iff.rfl ?_
   refine forall_congr' (fun t => ?_)
   refine imp_congr_right (fun _ => ?_)
-  -- `(fun _ => 0) t - X = -X`
   simp [zero_sub]
-
-/-! ## Local existence + uniqueness on a compact interval
-
-A continuous time-dependent linear vector field on a compact interval
-has a unique global solution given any initial value. This is the
-substantive proof obligation: the linear bound rules out finite-time
-blow-up, so the solution provided by Picard-Lindelöf extends to the
-full compact interval. -/
 
 /-- **parallel-local-existence-uniqueness.** On a compact interval
 `[a, b] ∋ t₀`, the linear parallel-transport ODE has a solution
@@ -117,18 +100,6 @@ theorem parallel_local_existence_uniqueness [I.Boundaryless]
   exact parallel_local_uniqueness_on_Icc (I := I) g α γ uPrime hab ht₀ huCont
     huCurveCont hsource hY_deriv hY'_deriv (hY_init.trans hY'_init.symm)
 
-/-! ## Chart-overlap consistency
-
-Solutions in two overlapping charts at a common point are related by
-the linear change-of-frame; equivalently the parallel-transport
-condition is chart-invariant, as recorded in the global Levi-Civita
-construction. -/
-
--- The chart-transition foot-slot derivative helpers
--- (`chartCoord_fderiv_chartTransitionAt_general`,
--- `fderiv_chartTransitionAt_apply_eq_pushCorrection`) are public in
--- `Geodesic/ChartTransition.lean` and are in scope via the `Geodesic` open above.
-
 /-- **parallel-chart-overlap-consistency.** The chart-α coordinate
 representation `Yα` of a tangent-field along `γ` and its chart-β
 counterpart `Yβ` are related by the chart-transition Jacobian
@@ -157,28 +128,23 @@ theorem parallel_chart_overlap_consistency [I.Boundaryless]
                   (chartCurve (I := I) α γ t) (Yα t))
       s := by
   classical
-  -- Abbreviations for the chart-β transformed velocity / section.
   set uPrimeβ : ℝ → E := fun t =>
     chartTransitionAt (I := I) α β (chartCurve (I := I) α γ t) (uPrimeα t) with huPrimeβ
   set Yβ : ℝ → E := fun t =>
     chartTransitionAt (I := I) α β (chartCurve (I := I) α γ t) (Yα t) with hYβ
   refine ⟨?_, ?_⟩
-  · -- The chart-β curve has the prescribed derivative `uPrimeβ t`.
-    intro t ht
-    -- Open neighbourhood of `t` on which `γ` stays in both chart sources.
+  · intro t ht
     set U : Set ℝ := γ ⁻¹' ((chartAt H α).source ∩ (chartAt H β).source) with hU_def
     have hU_open : IsOpen U :=
       ((chartAt H α).open_source.inter (chartAt H β).open_source).preimage hγ
     have htU : t ∈ U := hαβ t ht
     have hU_nhds : U ∈ 𝓝 t := hU_open.mem_nhds htU
-    -- On `U`, `chartCurve β γ = chartTransitionMap α β ∘ chartCurve α γ`.
     have hcurve_eq : (chartCurve (I := I) β γ) =ᶠ[𝓝 t]
         (fun s => chartTransitionMap (I := I) α β (chartCurve (I := I) α γ s)) := by
       filter_upwards [hU_nhds] with σ hσ
       obtain ⟨hσα, _hσβ⟩ := hσ
       rw [chartCurve_def, chartCurve_def]
       exact (chartTransitionMap_apply_extChartAt (I := I) α β hσα).symm
-    -- Chain rule for the composition.
     have huα : HasDerivAt (chartCurve (I := I) α γ) (uPrimeα t) t :=
       IsParallelChart.chartCurve_hasDerivAt hpar ht
     have hsrc_t : chartCurve (I := I) α γ t ∈ chartTransitionSource (I := I) α β :=
@@ -191,22 +157,17 @@ theorem parallel_chart_overlap_consistency [I.Boundaryless]
         (chartTransitionAt (I := I) α β (chartCurve (I := I) α γ t) (uPrimeα t)) t := by
       have := hTdiff.hasFDerivAt.comp_hasDerivAt t huα
       simpa [chartTransitionAt_def] using this
-    -- Transfer to `chartCurve β γ` via the local equality.
     exact (hcomp.congr_of_eventuallyEq hcurve_eq)
-  · -- The chart-β ODE: `Yβ'(t) = - Γ_β(uPrimeβ t, Yβ t)(u_β t)`.
-    intro t ht
-    -- Manifold point and source memberships.
+  · intro t ht
     obtain ⟨htα, htβ⟩ := hαβ t ht
     set x : E := chartCurve (I := I) α γ t with hx_def
     have hsrc_t : x ∈ chartTransitionSource (I := I) α β :=
       extChartAt_mem_chartTransitionSource (I := I) α β htα htβ
-    -- Derivatives of the chart-α curve and the chart-α section.
     have huα : HasDerivAt (chartCurve (I := I) α γ) (uPrimeα t) t :=
       IsParallelChart.chartCurve_hasDerivAt hpar ht
     have hYαd : HasDerivAt Yα
         (- chartChristoffelContraction (I := I) g α (uPrimeα t) (Yα t) x) t :=
       IsParallelChart.hasDerivAt hpar ht
-    -- The transition-CLM along the chart-α curve is differentiable.
     have hAdiff : DifferentiableAt ℝ
         (fun z => (chartTransitionAt (I := I) α β z : E →L[ℝ] E)) x := by
       have h_open : IsOpen (chartTransitionSource (I := I) α β) :=
@@ -217,22 +178,18 @@ theorem parallel_chart_overlap_consistency [I.Boundaryless]
         (fun s => (chartTransitionAt (I := I) α β (chartCurve (I := I) α γ s) : E →L[ℝ] E))
         ((fderiv ℝ (fun z => chartTransitionAt (I := I) α β z) x) (uPrimeα t)) t :=
       hAdiff.hasFDerivAt.comp_hasDerivAt t huα
-    -- Product (CLM-application) rule for `Yβ t = (T_{αβ}(u_α t)) (Yα t)`.
     have hYβd : HasDerivAt Yβ
         (((fderiv ℝ (fun z => chartTransitionAt (I := I) α β z) x) (uPrimeα t)) (Yα t)
           + chartTransitionAt (I := I) α β x
               (- chartChristoffelContraction (I := I) g α (uPrimeα t) (Yα t) x)) t := by
       have := hcA.clm_apply hYαd
       simpa [hYβ, hx_def] using this
-    -- Rewrite the derivative value into the chart-β Christoffel contraction.
-    -- Step 1: the foot-slot derivative = forward push of the second-derivative correction.
     have hfoot :
         ((fderiv ℝ (fun z => chartTransitionAt (I := I) α β z) x) (uPrimeα t)) (Yα t) =
           chartTransitionAt (I := I) α β x
             (chartTransitionSecondDerivCorrection (I := I) α β (uPrimeα t) (Yα t) x) :=
       fderiv_chartTransitionAt_apply_eq_pushCorrection (I := I) α β hsrc_t
         (uPrimeα t) (Yα t)
-    -- Step 2: the Christoffel transformation law (α → β at the manifold point γ t).
     have hxeq : x = extChartAt I α (γ t) := by rw [hx_def, chartCurve_def]
     have htransform :
         chartChristoffelContraction (I := I) g α (uPrimeα t) (Yα t) x =
@@ -245,20 +202,16 @@ theorem parallel_chart_overlap_consistency [I.Boundaryless]
       rw [hxeq]
       exact chartChristoffelContraction_transform (I := I) g α β htα htβ
         (uPrimeα t) (Yα t)
-    -- Identify the chart-β curve / velocity / section in terms of the maps.
     have huβ_eq : chartCurve (I := I) β γ t = chartTransitionMap (I := I) α β x := by
       rw [hx_def, chartCurve_def, chartCurve_def,
         chartTransitionMap_apply_extChartAt (I := I) α β htα]
-    -- The derivative value `D = foot + T_{αβ}(x)(-Γ_α)` collapses to `-Γ_β`.
     have hDcollapse :
         ((fderiv ℝ (fun z => chartTransitionAt (I := I) α β z) x) (uPrimeα t)) (Yα t)
           + chartTransitionAt (I := I) α β x
               (- chartChristoffelContraction (I := I) g α (uPrimeα t) (Yα t) x)
           = - chartChristoffelContraction (I := I) g β
               (uPrimeβ t) (Yβ t) (chartCurve (I := I) β γ t) := by
-      -- Push everything through `chartTransitionAt α β x` (a linear map).
       rw [hfoot, map_neg, ← sub_eq_add_neg, ← map_sub]
-      -- `corr - Γ_α = - chartTransitionAt β α (Tx) (Γ_β(...))`.
       have hsub :
           chartTransitionSecondDerivCorrection (I := I) α β (uPrimeα t) (Yα t) x -
               chartChristoffelContraction (I := I) g α (uPrimeα t) (Yα t) x =
@@ -269,7 +222,6 @@ theorem parallel_chart_overlap_consistency [I.Boundaryless]
                   (chartTransitionMap (I := I) α β x)) := by
         rw [htransform]; abel
       rw [hsub, map_neg]
-      -- `chartTransitionAt α β x ∘ chartTransitionAt β α (Tx) = id`.
       have hinv := chartTransitionAt_comp_chartTransitionAt' (I := I) α β hsrc_t
       have hid := congrArg (fun L : E →L[ℝ] E => L
           (chartChristoffelContraction (I := I) g β
@@ -278,7 +230,6 @@ theorem parallel_chart_overlap_consistency [I.Boundaryless]
             (chartTransitionMap (I := I) α β x))) hinv
       simp only [ContinuousLinearMap.comp_apply, ContinuousLinearMap.id_apply] at hid
       rw [hid, huβ_eq]
-    -- Conclude: `HasDerivAt Yβ (- Γ_β(uPrimeβ, Yβ)(u_β)) t`, matching the predicate.
     have hgoal : HasDerivAt Yβ
         ((fun _ : ℝ => (0 : E)) t -
           chartChristoffelContraction (I := I) g β (uPrimeβ t) (Yβ t)
@@ -286,31 +237,6 @@ theorem parallel_chart_overlap_consistency [I.Boundaryless]
       rw [hDcollapse] at hYβd
       simpa using hYβd
     exact hgoal
-
-/-! ## Single-chart extension
-
-Inside one fixed chart `α`, on an open interval `Ioo a b` where `γ`
-stays in the chart source, the chart-local linear parallel-transport
-ODE has a solution with any prescribed initial value, unique on that
-interval.
-
-The naive "single `V : ℝ → E`, parallel in *every* chart at once"
-formulation is mathematically false on a non-parallelizable manifold:
-by `parallel_chart_overlap_consistency`, if `V` is parallel in chart
-`α` on `s`, the chart-`β` representation of the *same* tangent section
-is `t ↦ chartTransitionAt α β (chartCurve α γ t) (V t)`, which differs
-from `V` whenever the transition Jacobian is nontrivial (e.g. on `S²`).
-A genuinely chart-independent global parallel transport must therefore
-carry the transition Jacobian between charts — i.e. be a bundle
-`SectionAlongCurve` glued by `parallel_chart_overlap_consistency` — so
-the honest local primitive is the single-fixed-chart statement below.
-
-A bare `∃! V : ℝ → E` would also be unsound even within one chart: the
-predicate `IsParallelChart … V (Ioo a b)` constrains `V` only on
-`Ioo a b`, so any function agreeing with a solution there but differing
-off the interval would satisfy it too. Uniqueness is therefore stated
-as `Set.EqOn … (Ioo a b)`, the genuine content delivered by
-`parallel_local_existence_uniqueness`. -/
 
 /-- **parallel-single-chart-extension.** Fix a chart basepoint `α` and
 an open interval `Ioo a b ∋ t₀` on which `γ` stays in the chart source
@@ -345,19 +271,13 @@ theorem parallel_global_extension [I.Boundaryless]
           IsParallelChart (I := I) g α γ
             (fun t => deriv (chartCurve (I := I) α γ) t) V' (Set.Ioo a b)) →
         Set.EqOn V V' (Set.Ioo a b)) := by
-  -- The chart-local existence primitive on `Icc a b`. (Uniqueness on the
-  -- *open* interval is obtained below via Grönwall, so only the existence
-  -- half of `parallel_local_existence_uniqueness` is needed here.)
   obtain ⟨Y, ⟨hY_deriv, hY_init⟩, -⟩ :=
     parallel_local_existence_uniqueness (I := I) g α γ
       (fun t => deriv (chartCurve (I := I) α γ) t) hab (Set.mem_Icc_of_Ioo ht₀)
       huCont huCurveCont hsource v₀
-  -- `Icc a b ∈ 𝓝 t` for `t ∈ Ioo a b`, so `HasDerivWithinAt (Icc a b)`
-  -- upgrades to two-sided `HasDerivAt` at interior points.
   have hIccNhds : ∀ t ∈ Set.Ioo a b, Set.Icc a b ∈ 𝓝 t := by
     intro t ht
     exact Filter.mem_of_superset (Ioo_mem_nhds ht.1 ht.2) Set.Ioo_subset_Icc_self
-  -- Package the existence witness `Y` as `IsParallelChart` on `Ioo a b`.
   have hY_par : IsParallelChart (I := I) g α γ
       (fun t => deriv (chartCurve (I := I) α γ) t) Y (Set.Ioo a b) := by
     refine ⟨fun t ht => huDeriv t ht, ?_⟩
@@ -366,10 +286,6 @@ theorem parallel_global_extension [I.Boundaryless]
     have hd := (hY_deriv t hin).hasDerivAt (hIccNhds t ht)
     simpa using hd
   refine ⟨Y, ⟨hY_init, hY_par⟩, ?_⟩
-  -- Uniqueness on the open interval via Grönwall: any competing parallel
-  -- section sharing the value at `t₀` agrees with `Y` on `Ioo a b`. The
-  -- Lipschitz constant comes from the uniform operator-norm bound on the
-  -- Christoffel contraction over the compact `Icc a b`, restricted to `Ioo`.
   obtain ⟨K, hK_Icc⟩ :=
     parallel_lipschitz_bound_on_compact (I := I) g α γ
       (fun t => deriv (chartCurve (I := I) α γ) t) hab huCont huCurveCont hsource
@@ -379,15 +295,6 @@ theorem parallel_global_extension [I.Boundaryless]
   intro V' ⟨hV'_init, hV'_par⟩
   exact IsParallelChart.unique_of_initial hY_par hV'_par hK_Ioo ht₀
     (hY_init.trans hV'_init.symm)
-
-/-! ## Packaging as a `SectionAlongCurve`
-
-Wrap the unique single-chart solution from `parallel_global_extension`
-as a `SectionAlongCurve I M γ`. Because the honest existence statement
-is local to one fixed chart `α` and one open interval `Ioo a b`, the
-parallel-transport section is now indexed by that chart-and-segment
-data. Expose the initial-value lemma and the parallelism lemma in the
-chart at `α` on `Ioo a b`. -/
 
 /-- The data pinning down a single-chart parallel-transport problem on
 an open segment: a chart basepoint `α`, an open interval `Ioo a b`
@@ -457,14 +364,6 @@ theorem parallelTransport_isParallel [I.Boundaryless]
       (parallelTransport (I := I) g α γ hd v₀).toFun (Set.Ioo a b) :=
   (parallelTransport_spec (I := I) g α γ hd v₀).2
 
-/-! ## Metric compatibility: parallel transport preserves the inner
-product
-
-Because the Levi-Civita connection is metric-compatible, two parallel
-sections `V` and `W` along `γ` satisfy
-`d/dt ⟨V(t), W(t)⟩_g = 0`; hence the inner product is constant along
-`γ`. -/
-
 /-- **Local constancy of the chart-Gram inner product of two parallel
 sections.** If `V` and `W` are both parallel along `γ` in the chart at
 `α` on a set `s ⊆ ℝ`, and `γ` maps `s` into the chart source, then the
@@ -487,7 +386,6 @@ theorem chartGramAlongCurve_hasDerivAt_zero_of_parallel [I.Boundaryless]
     HasDerivAt (fun τ => AlongCurve.chartGramAlongCurve (I := I) g α γ V W τ)
       0 t := by
   have hts : t ∈ s := mem_of_mem_nhds ht
-  -- Curve velocity, parallelism derivatives, and interior membership at `t`.
   have huPrime : HasDerivAt (AlongCurve.chartCurve (I := I) α γ)
       (deriv (AlongCurve.chartCurve (I := I) α γ) t) t :=
     (AlongCurve.IsParallelChart.chartCurve_hasDerivAt hV hts)
@@ -501,7 +399,6 @@ theorem chartGramAlongCurve_hasDerivAt_zero_of_parallel [I.Boundaryless]
           (deriv (AlongCurve.chartCurve (I := I) α γ) t) (W t)
           (AlongCurve.chartCurve (I := I) α γ t)) t :=
     AlongCurve.IsParallelChart.hasDerivAt hW hts
-  -- `u(t)` lies in the interior of the chart target.
   have hmem : AlongCurve.chartCurve (I := I) α γ t ∈
       interior (extChartAt I α).target := by
     have hxsrc : γ t ∈ (extChartAt I α).source := by
@@ -511,7 +408,6 @@ theorem chartGramAlongCurve_hasDerivAt_zero_of_parallel [I.Boundaryless]
       (extChartAt I α).map_source hxsrc
     exact DifferentialGeometry.Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
       (I := I) α hxtarget
-  -- Apply the covariant product rule with the chosen `Vprime`, `Wprime`.
   have hbase := AlongCurve.chartGramAlongCurve_hasDerivAt_covariant
     (I := I) g α γ V W
     (uPrime := fun τ => deriv (AlongCurve.chartCurve (I := I) α γ) τ)
@@ -522,7 +418,6 @@ theorem chartGramAlongCurve_hasDerivAt_zero_of_parallel [I.Boundaryless]
       (deriv (AlongCurve.chartCurve (I := I) α γ) t) (W t)
       (AlongCurve.chartCurve (I := I) α γ t))
     huPrime hmem hVd hWd
-  -- The covariant correction terms vanish: `V'(t) + Γ(u', V) = 0` etc.
   have hVzero :
       (- chartChristoffelContraction (I := I) g α
           (deriv (AlongCurve.chartCurve (I := I) α γ) t) (V t)
@@ -539,7 +434,6 @@ theorem chartGramAlongCurve_hasDerivAt_zero_of_parallel [I.Boundaryless]
             (deriv (AlongCurve.chartCurve (I := I) α γ) t) (W t)
             (AlongCurve.chartCurve (I := I) α γ t) = 0 := by
     rw [neg_add_cancel]
-  -- Substitute the zero corrections; the derivative value collapses to `0`.
   rw [hVzero, hWzero] at hbase
   simpa using hbase
 
@@ -575,44 +469,25 @@ theorem parallelTransport_preserves_inner_product [I.Boundaryless]
   set W : ℝ → E := (parallelTransport (I := I) g α γ hd w₀).toFun with hW_def
   set f : ℝ → ℝ := fun τ =>
     AlongCurve.chartGramAlongCurve (I := I) g α γ V W τ with hf_def
-  -- The open segment `Ioo a b` is open; `γ` stays in the chart source there.
   set o : Set ℝ := Set.Ioo a b with ho_def
   have ho_open : IsOpen o := isOpen_Ioo
   have hsrc_o : ∀ τ ∈ o, γ τ ∈ (chartAt H α).source :=
     fun τ hτ => hd.hsource τ (Set.mem_Icc_of_Ioo hτ)
-  -- `V` and `W` are parallel in the chart at `α` on `o`.
   have hVparo : IsParallelChart (I := I) g α γ
       (fun τ => deriv (AlongCurve.chartCurve (I := I) α γ) τ) V o :=
     parallelTransport_isParallel (I := I) g α γ hd v₀
   have hWparo : IsParallelChart (I := I) g α γ
       (fun τ => deriv (AlongCurve.chartCurve (I := I) α γ) τ) W o :=
     parallelTransport_isParallel (I := I) g α γ hd w₀
-  -- `f` has derivative `0` at every point of the open interval `o`.
   have hderiv : ∀ τ ∈ o, HasDerivAt f 0 τ := by
     intro τ hτ
     exact chartGramAlongCurve_hasDerivAt_zero_of_parallel (I := I) g α γ
       hVparo hWparo hsrc_o (ho_open.mem_nhds hτ)
-  -- `f` is constant on the (pre)connected open interval `o`.
   have hconst : ∀ x ∈ o, f x = f t₀ :=
     fun x hx => ho_open.is_const_of_deriv_eq_zero isPreconnected_Ioo
       (fun τ hτ => (hderiv τ hτ).differentiableAt.differentiableWithinAt)
       (fun τ hτ => (hderiv τ hτ).deriv) hx hd.ht₀
   exact hconst t ht
-
-/-! ## Cross-chart global parallel transport on a compact interval
-
-The honest single-chart `parallelTransport` lives in one chart `α` on one
-open segment. To build a *globally defined* parallel transport along all of
-`γ` on a compact interval `[0, L]` — a genuine bundle section
-`V : ∀ t, TangentSpace I (γ t)` with vanishing *intrinsic* covariant
-derivative `covDerivAlong g γ V` — one chops `[0, L]` into finitely many
-sub-intervals (via the Lebesgue number of the chart-source cover of the
-compact curve image), solves the linear parallel-transport ODE in a single
-chart on each piece, and glues. The intrinsic vanishing is read off in the
-chart pinned at the *moving foot* `γ t`; the bridge from a fixed-chart
-solution to the moving-foot chart is the trivialisation-composite identity
-below, which says that the chart-`(γ t)` coordinate of a fixed-chart-`α`
-section is its chart-transition push. -/
 
 /-- **Trivialisation composite is the chart transition Jacobian.** For two
 basepoints `α β : M` and a manifold point `b` lying in both chart sources,
@@ -627,12 +502,10 @@ theorem trivCoord_comp_symmL_eq_chartTransitionAt [I.Boundaryless]
     (trivializationAt E (TangentSpace I) β).continuousLinearMapAt ℝ b
         ((trivializationAt E (TangentSpace I) α).symmL ℝ b v) =
       Geodesic.chartTransitionAt (I := I) α β (extChartAt I α b) v := by
-  -- Rewrite both trivialisation CLMs via the tangent-bundle core coordinate change.
   have hαsrc : b ∈ (chartAt H α).source := hα
   have hβsrc : b ∈ (chartAt H β).source := hβ
   rw [TangentBundle.continuousLinearMapAt_trivializationAt_eq_core (I := I) hβsrc,
     TangentBundle.symmL_trivializationAt_eq_core (I := I) hαsrc]
-  -- The composite of the two coordinate changes is the single coordinate change `α → β`.
   have hb_self : b ∈ (chartAt H b).source := mem_chart_source H b
   have hmem : b ∈ (tangentBundleCore I M).baseSet (achart H α)
       ∩ (tangentBundleCore I M).baseSet (achart H b)

@@ -49,8 +49,6 @@ open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 open DifferentialGeometry.Geometry.Riemannian.Variation
 
-/-! ## Trace identity: sum of sectional curvatures equals Ricci -/
-
 /-- The Ricci curvature `Ric(X, X)` of a unit vector `X ∈ T_x M` equals
 the sum `∑_i ⟨R(e_i, X) X, e_i⟩_g` over any `g`-orthonormal family
 `e : Fin (Module.finrank ℝ E - 1) → T_x M` orthogonal to `X`.
@@ -68,15 +66,11 @@ theorem ricci_eq_sum_sectional_curvature_of_orthonormal_perp_frame
         g.inner x (riemannOp (LeviCivita (I := I) g) x (e i) X X) (e i))
       = ricciTensor (I := I) g x X X := by
   classical
-  -- Set up: write n = (n - 1) + 1, using NeZero (Module.finrank ℝ E).
   have hn_pos : 0 < Module.finrank ℝ E := Nat.pos_of_ne_zero (NeZero.ne _)
   have hn_eq : Module.finrank ℝ E - 1 + 1 = Module.finrank ℝ E :=
     Nat.succ_pred_eq_of_pos hn_pos
-  -- Build an n-element basis B : Fin n → T_x M from {X, e_0, ..., e_{n-2}}.
-  -- Construct B' : Fin (n - 1 + 1) → E via Fin.cases, then transport to Fin n via hn_eq.
   let B' : Fin (Module.finrank ℝ E - 1 + 1) → E := Fin.cases X e
   let B : Fin (Module.finrank ℝ E) → E := fun i => B' (Fin.cast hn_eq.symm i)
-  -- B 0 = X.
   have hB_zero : B (⟨0, hn_pos⟩ : Fin (Module.finrank ℝ E)) = X := by
     change B' (Fin.cast hn_eq.symm ⟨0, hn_pos⟩) = X
     have hcast_eq : Fin.cast hn_eq.symm (⟨0, hn_pos⟩ : Fin (Module.finrank ℝ E)) =
@@ -85,14 +79,12 @@ theorem ricci_eq_sum_sectional_curvature_of_orthonormal_perp_frame
       rfl
     rw [hcast_eq]
     rfl
-  -- σ i : Fin n with val = i.val + 1, for i : Fin (n - 1).
   have hσ_lt : ∀ i : Fin (Module.finrank ℝ E - 1), i.val + 1 < Module.finrank ℝ E := by
     intro i
     have hi : i.val < Module.finrank ℝ E - 1 := i.isLt
     omega
   let σ : Fin (Module.finrank ℝ E - 1) → Fin (Module.finrank ℝ E) :=
     fun i => ⟨i.val + 1, hσ_lt i⟩
-  -- B (σ i) = e i.
   have hB_succ : ∀ i : Fin (Module.finrank ℝ E - 1), B (σ i) = e i := by
     intro i
     change B' (Fin.cast hn_eq.symm (σ i)) = e i
@@ -101,7 +93,6 @@ theorem ricci_eq_sum_sectional_curvature_of_orthonormal_perp_frame
       rfl
     rw [hsucc_eq]
     rfl
-  -- B is g-orthonormal.
   have hB_orth : ∀ i j : Fin (Module.finrank ℝ E),
       g.inner x (B i) (B j) = if i = j then (1 : ℝ) else 0 := by
     intro i j
@@ -165,9 +156,7 @@ theorem ricci_eq_sum_sectional_curvature_of_orthonormal_perp_frame
           have hval := congrArg Fin.val hσ_eq
           change k.val + 1 = l.val + 1 at hval
           omega
-  -- Apply the orthonormal trace formula for Ricci.
   rw [ricciTensor_eq_orthonormal_trace (I := I) g x X X B hB_orth]
-  -- Split sum: Fin n ≃ Fin (n - 1 + 1) via finCongr hn_eq.
   have hsum_split :
       ∑ i : Fin (Module.finrank ℝ E),
           g.inner x (riemannOp (LeviCivita (I := I) g) x (B i) X X) (B i) =
@@ -198,7 +187,6 @@ theorem ricci_eq_sum_sectional_curvature_of_orthonormal_perp_frame
       rfl
     rw [heq, hB_succ]
   rw [hsum_split]
-  -- R(X, X) X = 0 by antisymmetry of R in the first two slots.
   have hR_self : riemannOp (LeviCivita (I := I) g) x X X X = 0 := by
     have h := riemannOp_swap (LeviCivita (I := I) g) x X X X
     have hsum : riemannOp (LeviCivita (I := I) g) x X X X +
@@ -211,10 +199,7 @@ theorem ricci_eq_sum_sectional_curvature_of_orthonormal_perp_frame
     · exact absurd h2_zero (by norm_num)
     · exact hv_zero
   rw [hR_self]
-  -- g.inner x 0 X = 0, so first term vanishes.
   simp only [map_zero, ContinuousLinearMap.zero_apply, zero_add]
-
-/-! ## Sum-index-form frame evaluation -/
 
 /-- Pointwise integrand identity used by `sum_index_form_frame_evaluation`.
 At each `t ∈ [0, L]`, the sum of per-`i` index-form integrands for
@@ -251,15 +236,12 @@ theorem sum_index_form_integrand_eval
                 * ricciTensor (I := I) g (γ t) (uPrime t) (uPrime t) := by
   classical
   intro t ht
-  -- Shorthands
   set sinπL : ℝ := Real.sin (Real.pi * t / L) with hsinπL
   set cosπL : ℝ := Real.cos (Real.pi * t / L) with hcosπL
   set piOverL : ℝ := Real.pi / L with hpiOverL
-  -- Step 1: derivative of the scalar weight `s ↦ sin(π s / L)` at `t`.
   have h_weight_hasDeriv :
       HasDerivAt (fun s : ℝ => Real.sin (Real.pi * s / L))
         (piOverL * cosπL) t := by
-    -- chain rule: deriv (sin (πs/L)) = cos(πs/L) * (π/L)
     have hid : HasDerivAt (fun s : ℝ => s) 1 t := hasDerivAt_id t
     have h_lin : HasDerivAt (fun s : ℝ => Real.pi * s) (Real.pi * 1) t :=
       hid.const_mul Real.pi
@@ -273,18 +255,12 @@ theorem sum_index_form_integrand_eval
       (Real.hasDerivAt_sin (Real.pi * t / L)).comp t hinner
     have hsin' : HasDerivAt (fun s : ℝ => Real.sin (Real.pi * s / L))
         (Real.cos (Real.pi * t / L) * (Real.pi / L)) t := hsin
-    -- Convert to piOverL * cosπL form.
     have : Real.cos (Real.pi * t / L) * (Real.pi / L) = piOverL * cosπL := by
       simp [piOverL, cosπL, mul_comm]
     rw [this] at hsin'
     exact hsin'
-  -- Step 2: gammaPrime at `t` (the chart velocity) is `uPrime t`.
   have h_gammaPrime : (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ) : E) = uPrime t :=
     _huPrimeEq t ht
-  -- Step 3: For each i, ∇_t V_i(t) = piOverL * cos(πt/L) • (e i).toFun t.
-  -- Intrinsic Leibniz rule: `covDerivAlong g γ (sin • e_i) t
-  --   = (deriv sin t) • e_i t + sin t • covDerivAlong g γ e_i t`,
-  -- and the second summand vanishes by parallelism `_hParallel`.
   have h_nabla_V :
       ∀ i : Fin (Module.finrank ℝ E - 1),
         covDerivAlong (I := I) g γ

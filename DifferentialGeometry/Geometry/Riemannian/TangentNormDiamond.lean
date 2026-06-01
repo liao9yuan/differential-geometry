@@ -62,20 +62,11 @@ theorem tensor0SBundle_enorm_eq_riemannianBundle_enorm
     letI _rb : Bundle.RiemannianBundle (TangentSpace I : M → Type _) :=
       ⟨cg.toRiemannianMetric⟩
     ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x v v)) := by
-  -- Unfold the locally-installed `RiemannianBundle` structure so the fibre
-  -- enorm `‖v‖ₑ` refers to the `cg.toRiemannianMetric`-derived inner-product
-  -- norm on `TangentSpace I x`.
   letI cg : Bundle.ContinuousRiemannianMetric E (TangentSpace I : M → Type _) :=
     g.toContinuousRiemannianMetric
   letI _rb : Bundle.RiemannianBundle (TangentSpace I : M → Type _) :=
     ⟨cg.toRiemannianMetric⟩
-  -- Rewrite the extended norm to `ENNReal.ofReal ‖v‖` and then expand the
-  -- inner-product-space norm as the square root of the diagonal inner product.
   rw [← ofReal_norm_eq_enorm, norm_eq_sqrt_real_inner]
-  -- The fibre inner product on `TangentSpace I x` is, by the installed
-  -- Riemannian-bundle instance `rb = ⟨cg.toRiemannianMetric⟩`, the metric
-  -- `g.inner x`.  The two sides agree definitionally through the
-  -- `RiemannianMetric.toCore` inner product.
   have hinner : (inner ℝ v v : ℝ) = g.inner x v v := rfl
   rw [hinner]
 

@@ -90,11 +90,8 @@ theorem chartBasisVecFiber_lifted
         α' i x' =
       chartBasisVecFiber (I := I) (M := M)
         (proj (X := M) α') i (proj (X := M) x') := by
-  let _ := g  -- suppress unused-variable warning
-  -- The membership in `(chartAt H α').source` is the same as in
-  -- `(coverChartAt α').source` by the charted-space instance.
+  let _ := g
   have hx'_cover : x' ∈ (coverChartAt α').source := hx'
-  -- Unpack the source structure to extract `proj x' ∈ (chartAt H (proj α')).source`.
   have hx'_inter : x' ∈ (localSection (M := M) α').source ∩
       (localSection (M := M) α') ⁻¹' (chartAt H (proj α')).source := by
     have hsrc : ((coverChartAt α') :
@@ -105,15 +102,12 @@ theorem chartBasisVecFiber_lifted
       coverChartAt_source_eq α'
     rw [hsrc] at hx'_cover; exact hx'_cover
   obtain ⟨_hLSsrc, hLSchart⟩ := hx'_inter
-  -- `localSection α' x' = proj x'`, so `proj x' ∈ (chartAt H (proj α')).source`.
   have hLS_x' : (localSection α') x' = proj x' := by
     have := congrArg (fun f => f x') (proj_eq_localSection α')
     simpa using this.symm
   have hprojx'_chartM : proj x' ∈ (chartAt H (proj α')).source := by
     rw [Set.mem_preimage, hLS_x'] at hLSchart
     exact hLSchart
-  -- Replace `.symm` by `.symmL ℝ _` on both sides (definitional equality from
-  -- the `@[simps -fullyApplied apply]` attribute on `symmL`).
   have hLHS_symm :
       chartBasisVecFiber (I := I)
           (M := DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
@@ -139,9 +133,6 @@ theorem chartBasisVecFiber_lifted
           (proj α')).symmL ℝ (proj x') (chartModelBasis E i)
     rw [Bundle.Trivialization.symmL_apply]
   rw [hLHS_symm, hRHS_symm]
-  -- Both sides are now `triv.symmL ℝ b (chartModelBasis E i)`. Rewrite via
-  -- the `_eq_core` lemma on each side and apply
-  -- `uc_tangentBundleCore_coordChange_agree`.
   have hSymmL :
       ((trivializationAt E (TangentSpace I :
           DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M
@@ -153,13 +144,9 @@ theorem chartBasisVecFiber_lifted
           (b₀ := α') (b := x') hx',
         TangentBundle.symmL_trivializationAt_eq_core (I := I) (M := M)
           (b₀ := proj α') (b := proj x') hprojx'_chartM]
-    -- Now both sides are tangent-bundle coordChanges; apply the agree lemma.
     exact uc_tangentBundleCore_coordChange_agree (I := I) α' x'
       ⟨hx', mem_chart_source H x'⟩
-  -- Apply the equality of continuous linear maps to the model-basis vector.
   have hAt := congrArg (fun L : E →L[ℝ] E => L (chartModelBasis E i)) hSymmL
-  -- The fibre-type identification `TangentSpace I x' = E` is definitional,
-  -- and the resulting equation lives in `E`; we just hand it over.
   exact hAt
 
 /-- **`chartGramMatrix` is natural under universal-cover projection.**
@@ -188,21 +175,14 @@ theorem chartGramMatrix_lifted
         (liftedMetric (I := I) g) α' x' i j =
       chartGramMatrix (M := M) g
         (proj (X := M) α') (proj (X := M) x') i j := by
-  -- Unfold both sides via the `rfl`-style `chartGramMatrix_apply` simp lemma.
   rw [DifferentialGeometry.Integral.Measure.chartGramMatrix_apply
         (I := I)
         (M := DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
         (liftedMetric (I := I) g) α' x' i j,
       DifferentialGeometry.Integral.Measure.chartGramMatrix_apply
         (I := I) (M := M) g (proj α') (proj x') i j]
-  -- Rewrite the two cover-side chart-basis fibre vectors at `x'` via the
-  -- proven naturality lemma, replacing them by the base-side fibre vectors
-  -- at `proj x'`.
   rw [chartBasisVecFiber_lifted (I := I) (M := M) g α' i x' hx',
       chartBasisVecFiber_lifted (I := I) (M := M) g α' j x' hx']
-  -- The remaining equality is the defining identity of the lifted inner
-  -- product: `(liftedMetric g).inner x' v w = g.inner (proj x') v w` is
-  -- `rfl` from the `liftedMetric` `def`.
   rfl
 
 /-- **Chart-basepoint coordinate identity under the universal cover.**
@@ -217,17 +197,12 @@ lemma extChartAt_proj_eq
     (α' : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
     (x' : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :
     extChartAt I α' x' = extChartAt I (proj (X := M) α') (proj (X := M) x') := by
-  -- `extChartAt I α' = (coverChartAt α').extend I` by the charted-space instance,
-  -- and `extChartAt I (proj α') = (chartAt H (proj α')).extend I` by definition.
   have hConj := (uc_coverChartAt_extend_conjugacy (I := I) α').1
   have := congrArg (fun f => f x') hConj
   simp only [Function.comp_apply] at this
-  -- `localSection α' x' = proj x'` because `localSection α'` coincides
-  -- with `proj` as a function.
   have hLS : (localSection α') x' = proj x' := by
     have := congrArg (fun f => f x') (proj_eq_localSection α')
     simpa using this.symm
-  -- Convert through `coverChartAt`'s extend to `extChartAt` and rewrite.
   change ((coverChartAt α').extend I) x' = _ at this
   rw [hLS] at this
   exact this
@@ -292,35 +267,24 @@ theorem chartChristoffel_lifted
       chartChristoffel (M := M) g (proj (X := M) α') i j k
         (extChartAt I (proj (X := M) α') (proj (X := M) x')) := by
   classical
-  -- Common chart-coordinate base point.
   set y₀ : E := extChartAt I α' x' with hy₀_def
-  -- `extChartAt I α' x' = extChartAt I (proj α') (proj x')` (chart-basepoint identity).
   have hy_eq : extChartAt I α' x' = extChartAt I (proj α') (proj x') :=
     extChartAt_proj_eq (I := I) (M := M) α' x'
-  -- Rewrite the RHS to also be evaluated at `y₀`.
   rw [show extChartAt I (proj (X := M) α') (proj (X := M) x') = y₀ from hy_eq.symm]
-  -- Unfold `chartChristoffel_def` on both sides.
   rw [DifferentialGeometry.Integral.DivergenceTheorem.chartChristoffel_def
         (I := I)
         (M := DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
         (liftedMetric (I := I) g) α' i j k y₀,
       DifferentialGeometry.Integral.DivergenceTheorem.chartChristoffel_def
         (I := I) (M := M) g (proj α') i j k y₀]
-  -- The shared structure is `(1/2) * ∑ l, A k l * B l`. We show pointwise
-  -- equality of the summands. Both factors will be shown equal:
-  -- (i) the inverse-Gram coefficient `A k l`;
-  -- (ii) the partial-derivative bracket `B l`.
   congr 1
   refine Finset.sum_congr rfl ?_
   intro l _
-  -- Cover-side manifold point under the chart inverse: it is exactly `x'`.
   have hx'_ext : x' ∈ (extChartAt I α').source := by
     rw [extChartAt_source]; exact hx'
   have hsymm_LHS : (extChartAt I α').symm y₀ = x' := by
     rw [hy₀_def]
     exact (extChartAt I α').left_inv hx'_ext
-  -- Base-side: `proj x' ∈ (chartAt H (proj α')).source`, extracted from `hx'`
-  -- via the source-structure description.
   have hx'_inter : x' ∈ (localSection (M := M) α').source ∩
       (localSection (M := M) α') ⁻¹' (chartAt H (proj α')).source := by
     have hsrc : ((coverChartAt α') :
@@ -341,17 +305,9 @@ theorem chartChristoffel_lifted
   have hproj_x'_ext : proj x' ∈ (extChartAt I (proj α')).source := by
     rw [extChartAt_source]; exact hproj_x'_chart
   have hsymm_RHS : (extChartAt I (proj α')).symm y₀ = proj x' := by
-    -- `y₀ = extChartAt I (proj α') (proj x')` (using `hy_eq`).
     rw [hy₀_def, hy_eq]
     exact (extChartAt I (proj α')).left_inv hproj_x'_ext
-  -- Rewrite the inverse-Gram coefficients on both sides via the manifold-point
-  -- identifications.
   rw [hsymm_LHS, hsymm_RHS]
-  -- Now both inverse-Gram factors are evaluated at the same `(k, l)` indices,
-  -- on the cover at `x'`, on the base at `proj x'`. They agree because
-  -- the Gram matrices agree at corresponding points by `chartGramMatrix_lifted`,
-  -- so their inverses (entrywise) agree.
-  -- Step A: Show the matrices agree as full matrices.
   have hGramMatEq :
       chartGramMatrix
           (M := DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
@@ -359,28 +315,18 @@ theorem chartChristoffel_lifted
         chartGramMatrix (M := M) g (proj α') (proj x') := by
     ext p q
     exact chartGramMatrix_lifted (I := I) (M := M) g α' x' p q hx'
-  -- Step B: From matrix equality, the inverse-Gram entries agree.
   have hInvGramEq :
       chartInvGramMatrix
           (M := DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
           (liftedMetric (I := I) g) α' x' k l =
         chartInvGramMatrix (M := M) g (proj α') (proj x') k l := by
-    -- `chartInvGramMatrix` is definitionally the `Matrix.inverse` (`⁻¹`) of
-    -- `chartGramMatrix`.
     change (chartGramMatrix
           (M := DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
           (liftedMetric (I := I) g) α' x')⁻¹ k l =
         (chartGramMatrix (M := M) g (proj α') (proj x'))⁻¹ k l
     rw [hGramMatEq]
   rw [hInvGramEq]
-  -- Now the only remaining piece is that the partial-derivative bracket agrees.
   congr 1
-  -- The bracket is `∂_i G_{l j} + ∂_j G_{l i} - ∂_l G_{i j}` (of the lifted
-  -- vs. base `chartGramOnE`). We will show each of the three `partialDeriv`
-  -- terms agrees individually. They all reduce to the same `fderiv`-eq via
-  -- `Filter.EventuallyEq.fderiv_eq`.
-  -- Build the `=ᶠ[𝓝 y₀]` between `chartGramOnE` on lifted vs base, for
-  -- any pair of indices `(p, q)`.
   have hGramOnE_eventuallyEq :
       ∀ (p q : Fin (Module.finrank ℝ E)),
         chartGramOnE
@@ -389,20 +335,10 @@ theorem chartChristoffel_lifted
           =ᶠ[𝓝 y₀]
         chartGramOnE (M := M) g (proj α') p q := by
     intro p q
-    -- Carve out the open neighborhood of `y₀` on which both functions agree.
-    -- The two preimage conditions:
-    -- (a) `(extChartAt I α').symm y ∈ (chartAt H α').source`;
-    -- (b) `(extChartAt I (proj α')).symm y ∈ (localSection α').target`.
-    -- The cover-side condition is open by continuityAt of the chart inverse;
-    -- so is the base-side condition.
-    -- Cover-side preimage is a nbhd of y₀:
-    -- Source of the cover-chart at `α'`, with explicit space annotation.
     set ECov : OpenPartialHomeomorph
         (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) H :=
       coverChartAt α' with hECov_def
     have hContCoverInv : ContinuousAt (ECov.extend I).symm y₀ := by
-      -- `y₀ = ECov.extend I x'` so this is continuityAt the
-      -- image of `x' ∈ ECov.source`.
       have : (ECov.extend I) x' = y₀ := by
         rw [hy₀_def]
         rfl
@@ -410,8 +346,6 @@ theorem chartChristoffel_lifted
       exact OpenPartialHomeomorph.continuousAt_extend_symm (I := I) ECov hx'
     have hOpenCoverSrc : IsOpen ECov.source := ECov.open_source
     have hCoverSrc_mem : (ECov.extend I).symm y₀ ∈ ECov.source := by
-      -- `(ECov.extend I).symm y₀ = x'` since
-      -- `y₀ = (ECov.extend I) x'` and `x' ∈ source`.
       have hy₀_alt : (ECov.extend I) x' = y₀ := by
         rw [hy₀_def]; rfl
       have : (ECov.extend I).symm ((ECov.extend I) x') = x' :=
@@ -419,13 +353,10 @@ theorem chartChristoffel_lifted
       rw [hy₀_alt] at this
       rw [this]
       exact hx'
-    -- The cover-side condition is in 𝓝 y₀.
     have hPreCover : (ECov.extend I).symm ⁻¹' ECov.source ∈ 𝓝 y₀ :=
       hContCoverInv (hOpenCoverSrc.mem_nhds hCoverSrc_mem)
-    -- Base-side: similar treatment for `(localSection α').target`.
     set EBase : OpenPartialHomeomorph M H := chartAt H (proj α') with hEBase_def
     have hContBaseInv : ContinuousAt (EBase.extend I).symm y₀ := by
-      -- `y₀ = (EBase.extend I) (proj x')` by `hy_eq`.
       have hy₀_base : (EBase.extend I) (proj x') = y₀ := by
         change extChartAt I (proj α') (proj x') = y₀
         exact hy_eq.symm
@@ -434,7 +365,6 @@ theorem chartChristoffel_lifted
         EBase hproj_x'_chart
     have hOpenLSTgt : IsOpen (localSection α').target := (localSection α').open_target
     have hLSTgt_mem : (EBase.extend I).symm y₀ ∈ (localSection α').target := by
-      -- `(EBase.extend I).symm y₀ = proj x'` and `proj x' ∈ target`.
       have hy₀_base : (EBase.extend I) (proj x') = y₀ := by
         change extChartAt I (proj α') (proj x') = y₀
         exact hy_eq.symm
@@ -442,44 +372,30 @@ theorem chartChristoffel_lifted
         OpenPartialHomeomorph.extend_left_inv (I := I) EBase hproj_x'_chart
       rw [hy₀_base] at hinv
       rw [hinv]
-      -- `proj x' ∈ (localSection α').target`: since `localSection α' x' = proj x'`
-      -- and `x' ∈ (localSection α').source`, `map_source` gives it.
       have := (localSection α').map_source hx'_LSsrc
       rwa [hLS_x'] at this
     have hPreBase : (EBase.extend I).symm ⁻¹' (localSection α').target ∈ 𝓝 y₀ :=
       hContBaseInv (hOpenLSTgt.mem_nhds hLSTgt_mem)
-    -- Combine and filter-upwards.
     filter_upwards [hPreCover, hPreBase] with y hyCover hyBase
-    -- `hyCover : (ECov.extend I).symm y ∈ ECov.source`.
-    -- `hyBase  : (EBase.extend I).symm y ∈ (localSection α').target`.
-    -- Goal: `chartGramOnE (liftedMetric g) α' p q y = chartGramOnE g (proj α') p q y`.
     change chartGramMatrix
             (M := DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
             (liftedMetric (I := I) g) α' ((extChartAt I α').symm y) p q
         = chartGramMatrix (M := M) g (proj α')
             ((extChartAt I (proj α')).symm y) p q
-    -- Identify `(extChartAt I α').symm y` with `(localSection α').symm ∘ chart-inverse`.
     have hConjSymm := (uc_coverChartAt_extend_conjugacy (I := I) α').2
     have hSymmDecomp : (extChartAt I α').symm y =
         (localSection α').symm ((EBase.extend I).symm y) := by
       change (ECov.extend I).symm y = (localSection α').symm ((EBase.extend I).symm y)
       have := congrArg (fun f => f y) hConjSymm
       simpa [Function.comp_apply] using this
-    -- Apply `chartGramMatrix_lifted` at the cover-side point.
-    -- `chartAt H α' = ECov = coverChartAt α'` by the charted-space instance.
     have hsrc_cover_y : (extChartAt I α').symm y ∈ (chartAt H α').source := by
       change (ECov.extend I).symm y ∈ ECov.source
       exact hyCover
-    -- Apply the Gram-matrix naturality at `(extChartAt I α').symm y`.
     rw [chartGramMatrix_lifted (I := I) (M := M) g α'
           ((extChartAt I α').symm y) p q hsrc_cover_y]
-    -- Now show `proj ((extChartAt I α').symm y) = (extChartAt I (proj α')).symm y`.
     have hProj_eq : proj ((extChartAt I α').symm y)
         = (extChartAt I (proj α')).symm y := by
       rw [hSymmDecomp]
-      -- `proj ((localSection α').symm w) = w` on `(localSection α').target`,
-      -- via `proj = localSection` and `left_inv` / `right_inv` of the
-      -- partial homeomorphism.
       have hproj_eq_LS :
           proj ((localSection α').symm ((EBase.extend I).symm y))
             = (localSection α')
@@ -491,8 +407,6 @@ theorem chartChristoffel_lifted
       rw [hproj_eq_LS, (localSection α').right_inv hyBase]
       rfl
     rw [hProj_eq]
-  -- Combine into the three partialDeriv terms. The triplet is
-  -- `partialDeriv i G_{l j} + partialDeriv j G_{l i} - partialDeriv l G_{i j}`.
   have hP_ij_lj :
       partialDeriv (E := E) i
           (chartGramOnE
@@ -500,7 +414,6 @@ theorem chartChristoffel_lifted
             (liftedMetric (I := I) g) α' l j) y₀
         = partialDeriv (E := E) i
             (chartGramOnE (M := M) g (proj α') l j) y₀ := by
-    -- `partialDeriv i u y = fderiv ℝ u y (chartModelBasis E i)`.
     change fderiv ℝ
         (chartGramOnE
           (M := DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
@@ -574,7 +487,6 @@ theorem chartChristoffelContraction_lifted
         (M := M) g (proj (X := M) α') v w
         (extChartAt I (proj (X := M) α') (proj (X := M) x')) := by
   classical
-  -- Unfold via the `rfl`-style `chartChristoffelContraction_def` on both sides.
   rw [DifferentialGeometry.Geometry.Riemannian.Geodesic.chartChristoffelContraction_def
         (I := I)
         (M := DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
@@ -582,22 +494,13 @@ theorem chartChristoffelContraction_lifted
       DifferentialGeometry.Geometry.Riemannian.Geodesic.chartChristoffelContraction_def
         (I := I) (M := M) g (proj α') v w
         (extChartAt I (proj (X := M) α') (proj (X := M) x'))]
-  -- Outer sum over `k`. The summands differ only in the Christoffel factor.
   refine Finset.sum_congr rfl ?_
   intro k _
-  -- Both summands are `(<inner sum>) • chartModelBasis E k`. Equate the scalars.
   congr 1
-  -- Inner sum over `i`.
   refine Finset.sum_congr rfl ?_
   intro i _
-  -- Inner-inner sum over `j`.
   refine Finset.sum_congr rfl ?_
   intro j _
-  -- Each summand is `Γ^k_{ij}(_,_)(y) * chartCoord i v * chartCoord j w`.
-  -- The `chartCoord` factors are identical on both sides; only the Γ-factor
-  -- changes between the lifted and the base metric. Apply `chartChristoffel_lifted`
-  -- to rewrite the cover-side Christoffel factor at `extChartAt I α' x'` into
-  -- the base-side Christoffel factor at `extChartAt I (proj α') (proj x')`.
   rw [chartChristoffel_lifted (I := I) (M := M) g α' x' hx' i j k]
 
 /-- **Eventually-equal form of `chartChristoffel_lifted`.**
@@ -628,8 +531,6 @@ lemma chartChristoffel_lifted_eventuallyEq
     (fun y => chartChristoffel (M := M) g (proj (X := M) α') i j k y) := by
   classical
   set y₀ : E := extChartAt I α' x' with hy₀_def
-  -- The open neighbourhood: y belongs to the chart target AND its inverse image
-  -- lies in the cover-chart source.
   have hx'_ext : x' ∈ (extChartAt I α').source := by
     rw [extChartAt_source]; exact hx'
   have hContInv : ContinuousAt (extChartAt I α').symm y₀ := by
@@ -646,7 +547,6 @@ lemma chartChristoffel_lifted_eventuallyEq
   have hPreImage :
       (extChartAt I α').symm ⁻¹' (chartAt H α').source ∈ 𝓝 y₀ :=
     hContInv (hOpenSrc.mem_nhds hSrc_mem)
-  -- Also need y ∈ (extChartAt I α').target so right_inv applies.
   have hTargetOpen : IsOpen (extChartAt I α').target :=
     isOpen_extChartAt_target (I := I) α'
   have hy₀_target : y₀ ∈ (extChartAt I α').target := by
@@ -654,21 +554,13 @@ lemma chartChristoffel_lifted_eventuallyEq
   have hTgtMem : (extChartAt I α').target ∈ 𝓝 y₀ :=
     hTargetOpen.mem_nhds hy₀_target
   filter_upwards [hPreImage, hTgtMem] with y hyPre hyTgt
-  -- hyPre : (extChartAt I α').symm y ∈ (chartAt H α').source
-  -- hyTgt : y ∈ (extChartAt I α').target
   set x'_y :
       DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M :=
     (extChartAt I α').symm y with hx'_y_def
   have hx'_y_src : x'_y ∈ (chartAt H α').source := hyPre
-  -- extChartAt I α' x'_y = y by left_inv at target.
   have hExt_x'_y : extChartAt I α' x'_y = y := by
     rw [hx'_y_def]; exact (extChartAt I α').right_inv hyTgt
-  -- Apply chartChristoffel_lifted at x'_y.
   have hLifted := chartChristoffel_lifted (I := I) (M := M) g α' x'_y hx'_y_src i j k
-  -- LHS: chartChristoffel (liftedMetric g) α' i j k (extChartAt I α' x'_y)
-  --    = chartChristoffel (liftedMetric g) α' i j k y    (by hExt_x'_y)
-  -- RHS: chartChristoffel g (proj α') i j k (extChartAt I (proj α') (proj x'_y))
-  -- and extChartAt I (proj α') (proj x'_y) = extChartAt I α' x'_y = y.
   have hExt_proj_x'_y :
       extChartAt I (proj (X := M) α') (proj (X := M) x'_y) =
         extChartAt I α' x'_y :=
@@ -702,20 +594,16 @@ theorem chartRiemannTensor_lifted
       chartRiemannTensor (M := M) g (proj (X := M) α') i j k l
         (extChartAt I (proj (X := M) α') (proj (X := M) x')) := by
   classical
-  -- Common chart-coordinate base point.
   set y₀ : E := extChartAt I α' x' with hy₀_def
-  -- Rewrite the RHS evaluation point to `y₀`.
   have hy_eq : extChartAt I α' x' = extChartAt I (proj α') (proj x') :=
     extChartAt_proj_eq (I := I) (M := M) α' x'
   rw [show extChartAt I (proj (X := M) α') (proj (X := M) x') = y₀ from hy_eq.symm]
-  -- Unfold `chartRiemannTensor_def` on both sides.
   rw [DifferentialGeometry.Integral.DivergenceTheorem.chartRiemannTensor_def
         (I := I)
         (M := DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
         (liftedMetric (I := I) g) α' i j k l y₀,
       DifferentialGeometry.Integral.DivergenceTheorem.chartRiemannTensor_def
         (I := I) (M := M) g (proj α') i j k l y₀]
-  -- The chart-Christoffel pointwise equality at `y₀`.
   have hChristAt : ∀ (a b c : Fin (Module.finrank ℝ E)),
       chartChristoffel
           (M := DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
@@ -726,7 +614,6 @@ theorem chartRiemannTensor_lifted
     rw [show extChartAt I α' x' = y₀ from rfl,
         show extChartAt I (proj (X := M) α') (proj (X := M) x') = y₀ from hy_eq.symm] at h
     exact h
-  -- The chart-Christoffel eventually-equal-at-y₀ statement.
   have hChristEvEq : ∀ (a b c : Fin (Module.finrank ℝ E)),
       (fun y => chartChristoffel
           (M := DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
@@ -735,9 +622,7 @@ theorem chartRiemannTensor_lifted
       (fun y => chartChristoffel (M := M) g (proj α') a b c y) := by
     intro a b c
     have := chartChristoffel_lifted_eventuallyEq (I := I) (M := M) g α' x' hx' a b c
-    -- This is already at y₀ = extChartAt I α' x'.
     exact this
-  -- Partial-derivative equalities at y₀.
   have hPartialDeriv : ∀ (n : Fin (Module.finrank ℝ E)) (a b c : Fin (Module.finrank ℝ E)),
       partialDeriv (E := E) n
           (chartChristoffel
@@ -746,7 +631,6 @@ theorem chartRiemannTensor_lifted
         = partialDeriv (E := E) n
             (chartChristoffel (M := M) g (proj α') a b c) y₀ := by
     intro n a b c
-    -- `partialDeriv n u y = fderiv ℝ u y (chartModelBasis E n)`.
     change fderiv ℝ
         (chartChristoffel
           (M := DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
@@ -756,10 +640,7 @@ theorem chartRiemannTensor_lifted
           (chartChristoffel (M := M) g (proj α') a b c) y₀
         (DifferentialGeometry.Integral.Measure.chartModelBasis E n)
     rw [Filter.EventuallyEq.fderiv_eq (hChristEvEq a b c)]
-  -- Rewrite the two partialDeriv terms.
   rw [hPartialDeriv j i k l, hPartialDeriv k i j l]
-  -- Rewrite the sum of products.
-  -- Sum: ∑ m, (Γ^l_{j m}(α',y₀) · Γ^m_{i k}(α',y₀) - Γ^l_{k m}(α',y₀) · Γ^m_{i j}(α',y₀))
   congr 1
   refine Finset.sum_congr rfl ?_
   intro m _
@@ -788,7 +669,6 @@ theorem chartRicciTensor_lifted
       chartRicciTensor (M := M) g (proj (X := M) α') i k
         (extChartAt I (proj (X := M) α') (proj (X := M) x')) := by
   classical
-  -- Unfold `chartRicciTensor_def` on both sides.
   rw [DifferentialGeometry.Integral.DivergenceTheorem.chartRicciTensor_def
         (I := I)
         (M := DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
@@ -796,7 +676,6 @@ theorem chartRicciTensor_lifted
       DifferentialGeometry.Integral.DivergenceTheorem.chartRicciTensor_def
         (I := I) (M := M) g (proj α') i k
         (extChartAt I (proj (X := M) α') (proj (X := M) x'))]
-  -- Sum over `j` of chartRiemannTensor entries — apply naturality term-by-term.
   refine Finset.sum_congr rfl ?_
   intro j _
   exact chartRiemannTensor_lifted (I := I) (M := M) g α' x' hx' i j k j

@@ -79,20 +79,14 @@ theorem continuous_riemannianEDist
     letI : IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x) :=
       ⟨g.inner, g.contMDiff.continuous, fun _ _ _ ↦ rfl⟩
     Continuous (fun q : M ↦ riemannianEDist I p q) := by
-  -- Install the fibre-bundle Riemannian instances from the metric data.
   letI : RiemannianBundle (fun (x : M) ↦ TangentSpace I x) :=
     ⟨g.toRiemannianMetric⟩
   letI : IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x) :=
     ⟨g.inner, g.contMDiff.continuous, fun _ _ _ ↦ rfl⟩
-  -- A finite-dimensional manifold is locally compact, hence (being Hausdorff) regular.
   haveI : LocallyCompactSpace M :=
     Manifold.locallyCompact_of_finiteDimensional (M := M) I
   haveI : RegularSpace M := inferInstance
-  -- Build the canonical pseudo-emetric structure; its topology is defeq to the
-  -- manifold topology and its `edist` is `riemannianEDist I`.
   letI : PseudoEMetricSpace M := PseudoEMetricSpace.ofRiemannianMetric I M
-  -- `edist p q = riemannianEDist I p q` definitionally, so continuity of `edist`
-  -- (the second argument varying, the first fixed) transfers.
   exact (continuous_const.edist continuous_id)
 
 /-- **Continuity on the finite locus of the real Riemannian distance from a fixed
@@ -118,8 +112,6 @@ theorem continuousOn_riemannianEDist_toReal_on_finite
     ⟨g.toRiemannianMetric⟩
   letI : IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x) :=
     ⟨g.inner, g.contMDiff.continuous, fun _ _ _ ↦ rfl⟩
-  -- `toReal` is continuous on `{a ≠ ∞}`; compose with the continuous `riemannianEDist`,
-  -- restricting the source to the finite locus.
   refine ENNReal.continuousOn_toReal.comp'
     (continuous_riemannianEDist g p).continuousOn (fun q hq ↦ ?_)
   exact hq

@@ -99,13 +99,6 @@ theorem image_empty :
 
 end HasFiniteAtlasIndexOnCompact
 
-/-! ## The model-space example
-
-The model space `H`, viewed as a charted space over itself via `chartedSpaceSelf`,
-has finite chart-image on every compact set — in fact, its chart-selection is
-globally constant: `chartAt H b = OpenPartialHomeomorph.refl H` for every `b : H`.
-Hence the image of any set is either empty or `{refl H}`, both finite. -/
-
 /-- The model space `H`, viewed as a charted space over itself via
 `chartedSpaceSelf`, has finite chart-image on every compact set. The chart
 selection is globally constant equal to `OpenPartialHomeomorph.refl H`. -/
@@ -113,14 +106,9 @@ theorem hasFiniteAtlasIndexOnCompact_self
     (H : Type*) [TopologicalSpace H] :
     HasFiniteAtlasIndexOnCompact H H := by
   intro K _hK
-  -- For the self-chart, `chartAt H b = OpenPartialHomeomorph.refl H` for every
-  -- `b : H`. Hence the image of any set under `chartAt H` is a subset of the
-  -- singleton `{OpenPartialHomeomorph.refl H}`, which is finite.
   refine Set.Finite.subset (Set.finite_singleton (OpenPartialHomeomorph.refl H))
     ?_
   rintro e ⟨b, _hb, hbe⟩
-  -- `chartAt H b = OpenPartialHomeomorph.refl H` for every `b : H` by
-  -- definition of `chartedSpaceSelf`.
   have h_eq : chartAt H b = OpenPartialHomeomorph.refl H := chartAt_self_eq
   rw [← hbe, h_eq]
   exact Set.mem_singleton _

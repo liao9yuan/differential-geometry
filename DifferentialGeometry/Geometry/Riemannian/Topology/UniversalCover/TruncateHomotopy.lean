@@ -30,8 +30,6 @@ namespace UniversalCover
 
 open Set unitInterval
 
-/-! ### `concatTrans`: iterated `Path.trans` of a `Fin`-indexed family -/
-
 /-- Iterated `Path.trans` of a `Fin k`-indexed family of compatible-endpoint
 paths. Wrapper around Mathlib's `Path.concat`.
 
@@ -44,20 +42,6 @@ def concatTrans {X : Type*} [TopologicalSpace X]
     (F : (i : Fin k) → _root_.Path (p i.castSucc) (p i.succ)) :
     _root_.Path (p 0) (p (Fin.last k)) :=
   _root_.Path.concat p F
-
-/-! ### Bridge: `truncateOfLE` is homotopic to `subpath`
-
-Two paths from `γ.extend t₀ = γ ⟨t₀, _⟩` to `γ.extend t₁ = γ ⟨t₁, _⟩`,
-following `γ` on `[t₀, t₁]`:
-
-* `γ.truncateOfLE h` saturates outside `[t₀, t₁]` and is identity inside:
-  `s ↦ γ.extend (min (max s t₀) t₁)`.
-
-* `γ.subpath ⟨t₀, _⟩ ⟨t₁, _⟩` is a linear reparametrisation:
-  `s ↦ γ.extend ((1-s) * t₀ + s * t₁)`.
-
-A straight-line interpolation between the two reparametrisations of `[0,1]`
-exhibits the homotopy. -/
 
 namespace TruncateHomotopy
 
@@ -177,8 +161,6 @@ lemma truncateOfLE_homotopic_subpath
       change γ.extend t₁ = (γ.truncateOfLE h) 1
       rw [_root_.Path.target]
 
-/-! ### Helper: `Path.concat` commutes with `Path.cast` -/
-
 /-- Two `Path.concat`s over pointwise-equal index families are equal up to
 `Path.cast`. The proof is by induction on `k`. -/
 lemma Path_concat_cast_eq {X : Type*} [TopologicalSpace X] :
@@ -202,23 +184,15 @@ lemma Path_concat_cast_eq {X : Type*} [TopologicalSpace X] :
         (fun i => F i.castSucc)
       apply _root_.Path.ext
       ext s
-      -- Both sides are `(prefix.trans last).toFun s` where prefix toFuns match by IH
-      -- and last is the same path up to `cast`.
       change (_root_.Path.trans _ _) s = (_root_.Path.trans _ _) s
       simp only [_root_.Path.trans_apply]
       split_ifs with hs
-      · -- s ≤ 1/2: both are the prefix concat at `2s`.
-        have h2s_mem : 2 * (s : ℝ) ∈ I :=
+      · have h2s_mem : 2 * (s : ℝ) ∈ I :=
           (mul_pos_mem_iff zero_lt_two).2 ⟨s.2.1, hs⟩
-        -- Use IH: prefix concats are `cast`-equal.
         have key := congr_fun (congr_arg DFunLike.coe ih) ⟨2 * (s : ℝ), h2s_mem⟩
-        -- `key : ((concat p' (...)) ⟨2s, _⟩ : X) = ((concat p ...).cast _ _) ⟨2s, _⟩`.
         rw [_root_.Path.cast_coe] at key
         exact key
-      · -- s > 1/2: both are `(F (last n)).cast _ _` at `2s - 1` and `F (last n)` at `2s - 1`.
-        rfl
-
-/-! ### Main lemma -/
+      · rfl
 
 /-- **Headline lemma.** A path on `[0,1]` is path-homotopic to the
 concatenation of finitely many of its truncated sub-segments, given a
@@ -241,88 +215,64 @@ lemma Path.trans_truncate_homotopic
           show b = γ.extend ((t (Fin.last k) : I) : ℝ)
           rw [htlast]
           simp)) := by
-  -- Truncation family.
   set F : (i : Fin k) →
       _root_.Path (γ.extend ((t i.castSucc : I) : ℝ)) (γ.extend ((t i.succ : I) : ℝ)) :=
     fun i => γ.truncateOfLE
       (show ((t i.castSucc : I) : ℝ) ≤ ((t i.succ : I) : ℝ) from
         htmono (Fin.castSucc_le_succ i)) with hFdef
-  -- Subpath family (with endpoints `γ (t i)`).
   set G : (i : Fin k) →
       _root_.Path (γ (t i.castSucc : I)) (γ (t i.succ : I)) :=
     fun i => γ.subpath (t i.castSucc) (t i.succ) with hGdef
-  -- Pointwise equality of the two index families.
   have hpEq : ∀ i : Fin (k + 1),
       γ.extend ((t i : I) : ℝ) = γ (t i : I) :=
     fun i => _root_.Path.extend_extends' γ (t i : (Icc 0 1 : Set ℝ))
-  -- Recast subpath family to use `γ.extend ((t i : I) : ℝ)` endpoints.
   set G' : (i : Fin k) →
       _root_.Path (γ.extend ((t i.castSucc : I) : ℝ)) (γ.extend ((t i.succ : I) : ℝ)) :=
     fun i => (G i).cast (hpEq i.castSucc) (hpEq i.succ) with hG'def
-  -- Per-segment homotopy `F i ≃ G' i` via bridge.
   have hFG' : ∀ i : Fin k, (F i).Homotopic (G' i) := by
     intro i
     have hbridge := truncateOfLE_homotopic_subpath γ
       (h := htmono (Fin.castSucc_le_succ i))
       (ht₀ := (t i.castSucc).2) (ht₁ := (t i.succ).2)
-    -- After unfolding, the `⟨↑(t i.castSucc), _⟩` and `(t i.castSucc : I)` are the same.
     convert hbridge using 2
-  -- Step 1: Lift to `concatTrans` via `Path.Homotopic.concat_hcomp`.
   have hConcat_FG' :
       (concatTrans (p := fun i => γ.extend ((t i : I) : ℝ)) F).Homotopic
         (concatTrans (p := fun i => γ.extend ((t i : I) : ℝ)) G') := by
     unfold concatTrans
     exact _root_.Path.Homotopic.concat_hcomp (n := k)
       (fun i => γ.extend ((t i : I) : ℝ)) F G' hFG'
-  -- Step 2: `concatTrans G'` (over `γ.extend ∘ t`) equals (cast of) `concat (γ ∘ t) G`.
   have hConcat_G'_G :
       (concatTrans (p := fun i => γ.extend ((t i : I) : ℝ)) G' : _root_.Path _ _)
         = (_root_.Path.concat (fun i => γ (t i : I)) G).cast (hpEq 0) (hpEq (Fin.last k)) := by
-    -- Apply `Path_concat_cast_eq` with `p := γ ∘ t`, `p' := γ.extend ∘ t`, `heq := (hpEq · |>.symm)`.
     have hpEq' : ∀ i : Fin (k + 1), γ (t i : I) = γ.extend ((t i : I) : ℝ) :=
       fun i => (hpEq i).symm
     have := Path_concat_cast_eq (k := k)
       (p := fun i => γ (t i : I))
       (p' := fun i => γ.extend ((t i : I) : ℝ))
       hpEq' G
-    -- `this : concat (γ.extend ∘ t) (fun i => (G i).cast (hpEq i.castSucc) (hpEq i.succ))
-    --   = (concat (γ ∘ t) G).cast (hpEq 0) (hpEq (last k))`.
-    -- The LHS matches `concatTrans G'` since `(hpEq i).symm.symm = hpEq i`.
     convert this using 1
-  -- Step 3: `(concat (γ ∘ t) G).Homotopic (γ.subpath (t 0) (t (last k)))` via Mathlib.
   have hConcat_G_subpath :
       (_root_.Path.concat (fun i => γ (t i : I)) G).Homotopic
         (γ.subpath (t 0) (t (Fin.last k))) := by
     have := _root_.Path.Homotopic.concat_subpath γ t
     convert this using 1
-  -- Step 4: Cast everything to `Path a b` and show the subpath cast equals `γ`.
-  -- We cast `γ.subpath (t 0) (t (last k))` to `Path a b` using the endpoint identifications.
   have h0 : a = γ.extend ((t 0 : I) : ℝ) := by rw [ht0]; simp
   have hk : b = γ.extend ((t (Fin.last k) : I) : ℝ) := by rw [htlast]; simp
   have h0' : a = γ (t 0 : I) := by rw [ht0]; simp
   have hk' : b = γ (t (Fin.last k) : I) := by rw [htlast]; simp
-  -- The subpath, cast to `Path a b`, equals `γ` (after simp via `subpath_zero_one`).
   have step4 :
       ((γ.subpath (t 0) (t (Fin.last k))).cast h0' hk' : _root_.Path a b) = γ := by
-    -- Reduce `γ.subpath (t 0) (t (last k))` via `ht0` and `htlast` to `γ.subpath 0 1 = γ.cast _ _`,
-    -- then the outer cast composes to give `γ`.
     apply _root_.Path.ext
     ext s
-    -- We unfold `cast_coe` and `subpath_zero_one` pointwise.
-    -- `(γ.subpath (t 0) (t (last k))).cast h0' hk' s = γ.subpath (t 0) (t (last k)) s`
-    -- by `cast_coe`. And `γ.subpath (t 0) (t (last k)) s = γ (Icc.convexCombo (t 0) (t (last k)) s)`.
-    -- With `t 0 = 0` and `t (last k) = 1`, `Icc.convexCombo 0 1 s = s`, so the result is `γ s`.
     rw [_root_.Path.cast_coe]
     change γ (Icc.convexCombo (t 0 : I) (t (Fin.last k) : I) s) = γ s
     congr 1
     apply Subtype.ext
     simp [ht0, htlast]
-  -- ((concatTrans F).cast h0 hk).Homotopic ((concatTrans G').cast h0 hk)
   have step1 :
       ((concatTrans (p := fun i => γ.extend ((t i : I) : ℝ)) F).cast h0 hk).Homotopic
         ((concatTrans (p := fun i => γ.extend ((t i : I) : ℝ)) G').cast h0 hk) :=
     _root_.Path.Homotopic.pathCast hConcat_FG' h0 hk
-  -- (concatTrans G').cast h0 hk = (concat (γ ∘ t) G).cast h0' hk' (both equal as Path a b).
   have step2 :
       ((concatTrans (p := fun i => γ.extend ((t i : I) : ℝ)) G').cast h0 hk : _root_.Path a b)
         = (_root_.Path.concat (fun i => γ (t i : I)) G).cast h0' hk' := by
@@ -330,12 +280,10 @@ lemma Path.trans_truncate_homotopic
     ext s
     rw [hConcat_G'_G]
     simp [_root_.Path.cast_coe]
-  -- ((concat (γ ∘ t) G).cast h0' hk').Homotopic ((γ.subpath (t 0) (t (last k))).cast h0' hk')
   have step3 :
       ((_root_.Path.concat (fun i => γ (t i : I)) G).cast h0' hk').Homotopic
         ((γ.subpath (t 0) (t (Fin.last k))).cast h0' hk') :=
     _root_.Path.Homotopic.pathCast hConcat_G_subpath h0' hk'
-  -- Chain: step1 -> step2 (rewrite) -> step3 -> step4 (rewrite).
   have chain1 :
       ((concatTrans (p := fun i => γ.extend ((t i : I) : ℝ)) F).cast h0 hk).Homotopic
         ((_root_.Path.concat (fun i => γ (t i : I)) G).cast h0' hk') := by
@@ -344,7 +292,6 @@ lemma Path.trans_truncate_homotopic
       ((concatTrans (p := fun i => γ.extend ((t i : I) : ℝ)) F).cast h0 hk).Homotopic
         ((γ.subpath (t 0) (t (Fin.last k))).cast h0' hk') :=
     chain1.trans step3
-  -- Combine `step4` (an equation) with the universal `Homotopic.refl` to get a `Homotopic`.
   have step4_h :
       ((γ.subpath (t 0) (t (Fin.last k))).cast h0' hk').Homotopic γ := by
     rw [step4]

@@ -7,10 +7,11 @@ import Mathlib.Topology.Homotopy.Lifting
 /-!
 # Truncation-lift slice-topology continuity
 
-Three lemmas for the truncation lift `s ↦ ⟨γ s, q.2.trans ⟦γ.truncate 0 s⟧⟩`
+Material for the truncation lift `s ↦ ⟨γ s, q.2.trans ⟦γ.truncate 0 s⟧⟩`
 into the universal cover. The first lemma (`uc_trans_truncate_class`) is
-proved here; the remaining two are stated with proper signatures and proofs
-are deferred.
+fully proved here. The remaining two declarations
+(`uc_truncLift_continuous`, `uc_liftPath_one_eq`) are placeholder stubs
+whose conclusion is currently `True`, recording the intended results.
 -/
 
 noncomputable section
@@ -43,13 +44,10 @@ lemma uc_trans_truncate_class
       (γ.truncateOfLE h0).trans (γ.truncateOfLE h0s) with hq_def
   have h_0_s : (0 : ℝ) ≤ s := le_trans h0 h0s
   refine _root_.Quotient.sound ?_
-  -- The right-hand index function.
   let rhsIdx : I → ℝ := fun t =>
       if (t : ℝ) ≤ 1 / 2 then min (2 * (t : ℝ)) s₀
       else min (max (2 * (t : ℝ) - 1) s₀) s
-  -- The left-hand index function.
   let lhsIdx : I → ℝ := fun t => min (t : ℝ) s
-  -- Continuity of `rhsIdx`.
   have hcont_rhsIdx : Continuous rhsIdx := by
     refine Continuous.if_le
       (f' := fun t : I => min (2 * (t : ℝ)) s₀)
@@ -76,10 +74,8 @@ lemma uc_trans_truncate_class
         have hsub : (2 : ℝ) * (1 / 2) - 1 = 0 := by ring
         rw [hsub, max_eq_right h0, min_eq_left h0s]
       rw [h1, h2]
-  -- Continuity of `lhsIdx`.
   have hcont_lhsIdx : Continuous lhsIdx :=
     continuous_subtype_val.min continuous_const
-  -- Pointwise formula: `p t = γ.extend (lhsIdx t)`.
   have hp_apply : ∀ t : I, p t = γ.extend (lhsIdx t) := by
     intro t
     change (γ.truncateOfLE _) t = _
@@ -91,7 +87,6 @@ lemma uc_trans_truncate_class
     congr 1
     have h_t_nn : (0 : ℝ) ≤ (t : ℝ) := t.2.1
     rw [max_eq_left h_t_nn]
-  -- Pointwise formula: `q t = γ.extend (rhsIdx t)`.
   have hq_apply : ∀ t : I, q t = γ.extend (rhsIdx t) := by
     intro t
     change ((γ.truncateOfLE h0).trans (γ.truncateOfLE h0s)) t = _
@@ -101,7 +96,6 @@ lemma uc_trans_truncate_class
       have h2t_nn : (0 : ℝ) ≤ 2 * (t : ℝ) := by
         have : (0 : ℝ) ≤ (t : ℝ) := t.2.1
         linarith
-      -- `γ.truncateOfLE h0 = (γ.truncate 0 s₀).cast _ _`, so coercion agrees.
       change (γ.truncate 0 s₀) _ = _
       change γ.extend (min (max (2 * (t : ℝ)) 0) s₀) = γ.extend (rhsIdx t)
       rw [max_eq_left h2t_nn]
@@ -110,7 +104,6 @@ lemma uc_trans_truncate_class
       change (γ.truncate s₀ s) _ = _
       change γ.extend (min (max (2 * (t : ℝ) - 1) s₀) s) = γ.extend (rhsIdx t)
       simp only [rhsIdx, if_neg ht]
-  -- Build the homotopy: H(u, t) = γ.extend ((1-u) * lhsIdx t + u * rhsIdx t).
   refine ⟨{
     toFun := fun ut => γ.extend
       ((1 - (ut.1 : ℝ)) * lhsIdx ut.2 + (ut.1 : ℝ) * rhsIdx ut.2)
@@ -178,7 +171,8 @@ lemma uc_trans_truncate_class
       rw [p.target]
 
 set_option linter.unusedVariables false in
-/-- Continuity of the truncation lift in the slice topology. -/
+/-- Placeholder stub (conclusion `True`) for the intended statement that the
+truncation lift is continuous in the slice topology. -/
 lemma uc_truncLift_continuous
     {X : Type*} [TopologicalSpace X] [Inhabited X]
     {a b : X} (γ : _root_.Path a b)
@@ -186,7 +180,8 @@ lemma uc_truncLift_continuous
     True := trivial
 
 set_option linter.unusedVariables false in
-/-- Value at `1` of the lift of a path starting at the basepoint. -/
+/-- Placeholder stub (conclusion `True`) for the intended statement about the
+value at `1` of the lift of a path starting at the basepoint. -/
 lemma uc_liftPath_one_eq
     {X : Type*} [TopologicalSpace X] [Inhabited X]
     [ConnectedSpace X] [LocPathConnectedSpace X]

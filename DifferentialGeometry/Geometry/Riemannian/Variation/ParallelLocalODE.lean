@@ -40,8 +40,7 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Geometry.Riemannian.AlongCurve
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 
-/-- **chart-christoffel-clm-continuous-on-compact.** The chart
-Christoffel contraction continuous-linear-map
+/-- The chart Christoffel contraction continuous-linear-map
 `t ↦ Γ_α(u'(t), ·)(u(t))` is continuous on a compact sub-interval
 `[a, b]` whenever `u'` and `u` are continuous on `[a, b]` and `u`
 takes values in the chart source. -/
@@ -55,14 +54,9 @@ theorem chart_christoffel_clm_continuous_on_compact [I.Boundaryless]
       chartChristoffelContractionRightCLM (I := I) g α (uPrime t)
         (chartCurve (I := I) α γ t)) (Set.Icc a b) := by
   classical
-  -- Reduce continuity of the CLM-valued map to continuity of its pointwise
-  -- evaluation on each fixed `w : E`, using finite-dimensionality of `E`.
   refine (continuousOn_clm_apply (𝕜 := ℝ) (E := E) (F := E)
     (s := Set.Icc a b)).mpr ?_
   intro w
-  -- Continuity of the curve `chartCurve` on `[a, b]` is given by `hγ`; it
-  -- additionally takes values in the interior of `(extChartAt I α).target`
-  -- by `hsource` and `[I.Boundaryless]`.
   have hcurve_int : ∀ t ∈ Set.Icc a b,
       chartCurve (I := I) α γ t ∈ interior (extChartAt I α).target := by
     intro t ht
@@ -73,13 +67,9 @@ theorem chart_christoffel_clm_continuous_on_compact [I.Boundaryless]
       change extChartAt I α (γ t) ∈ (extChartAt I α).target
       exact (extChartAt I α).map_source hxsrc
     exact extChartAt_target_subset_interior_of_boundaryless (I := I) α hxtarget
-  -- Continuity of `chartCoord i` on `E`: it is the `i`-th basis-coordinate,
-  -- a continuous linear functional in finite dimension.
   have hcoord : ∀ i : Fin (Module.finrank ℝ E),
       Continuous fun v : E => chartCoord (E := E) i v := by
     intro i
-    -- Rewrite via `equivFun` (the `ι → R` form of `repr` for finite `ι`) to
-    -- get a continuous-linear map on a finite-dimensional space.
     have heq : (fun v : E => chartCoord (E := E) i v)
         = fun v : E => (chartModelBasis E).equivFun v i := by
       funext v
@@ -88,9 +78,6 @@ theorem chart_christoffel_clm_continuous_on_compact [I.Boundaryless]
     have hef : Continuous fun v : E => (chartModelBasis E).equivFun v :=
       ((chartModelBasis E).equivFun.toLinearMap).continuous_of_finiteDimensional
     exact (continuous_apply i).comp hef
-  -- Continuity of each Christoffel scalar `t ↦ Γ^k_{ij}(chartCurve t)` on
-  -- `[a, b]` follows by composing `chartChristoffel_contDiffOn_interior` with
-  -- the curve.
   have hΓ : ∀ i j k : Fin (Module.finrank ℝ E),
       ContinuousOn (fun t : ℝ =>
         chartChristoffel (I := I) g α i j k (chartCurve (I := I) α γ t))
@@ -100,7 +87,6 @@ theorem chart_christoffel_clm_continuous_on_compact [I.Boundaryless]
         (interior (extChartAt I α).target) :=
       (chartChristoffel_contDiffOn_interior (I := I) g α i j k).continuousOn
     exact hsm.comp hγ hcurve_int
-  -- The sum-form of the integrand at fixed `w`.
   set F : ℝ → E := fun t : ℝ =>
     ∑ k : Fin (Module.finrank ℝ E),
       (∑ i : Fin (Module.finrank ℝ E),
@@ -110,21 +96,14 @@ theorem chart_christoffel_clm_continuous_on_compact [I.Boundaryless]
             chartCoord (E := E) i (uPrime t) *
             chartCoord (E := E) j w) •
         chartModelBasis E k with hF_def
-  -- The integrand equals `F` pointwise via the definition of
-  -- `chartChristoffelContraction` (and the `*RightCLM_apply` rfl-unfolding).
   have hEq : ∀ t ∈ Set.Icc a b,
       chartChristoffelContractionRightCLM (I := I) g α (uPrime t)
           (chartCurve (I := I) α γ t) w = F t := by
     intro t _
     simp [F, chartChristoffelContractionRightCLM_apply,
       chartChristoffelContraction_def]
-  -- It suffices to show `ContinuousOn F (Set.Icc a b)`, which transfers
-  -- back to the goal via `hEq` (`CLM-thing = F` on `Icc a b`).
   suffices hF_cont : ContinuousOn F (Set.Icc a b) from
     hF_cont.congr (fun t ht => (hEq t ht).symm)
-  -- Assemble: `F` is a finite sum of `(scalar) • (constant basis vector)`,
-  -- where the scalar is a finite sum of triple products of continuous-on
-  -- functions.
   refine continuousOn_finset_sum _ (fun k _ => ?_)
   refine ContinuousOn.smul ?_ continuousOn_const
   refine continuousOn_finset_sum _ (fun i _ => ?_)
@@ -134,7 +113,7 @@ theorem chart_christoffel_clm_continuous_on_compact [I.Boundaryless]
   · exact ((hcoord i).comp_continuousOn hu)
   · exact continuousOn_const
 
-/-- **parallel-lipschitz-bound-on-compact.** Continuity of
+/-- Continuity of
 `t ↦ chartChristoffelContractionRightCLM g α (u'(t)) (u(t))` on the
 compact interval `[a, b]` yields a uniform Lipschitz constant `K` for
 the parallel-transport vector field on `[a, b]`. -/
@@ -147,17 +126,14 @@ theorem parallel_lipschitz_bound_on_compact [I.Boundaryless]
     ∃ K : NNReal,
       ParallelTransportLipschitzBound (I := I) g α γ uPrime K
         (Set.Icc a b) := by
-  -- Continuity of the CLM-valued function on the compact interval.
   have hCLM : ContinuousOn
       (fun t : ℝ => chartChristoffelContractionRightCLM (I := I) g α (uPrime t)
         (chartCurve (I := I) α γ t)) (Set.Icc a b) :=
     chart_christoffel_clm_continuous_on_compact g α γ uPrime hu hγ hsource
-  -- Hence continuity of its NNReal-valued operator norm.
   have hN : ContinuousOn
       (fun t : ℝ => ‖chartChristoffelContractionRightCLM (I := I) g α (uPrime t)
         (chartCurve (I := I) α γ t)‖₊) (Set.Icc a b) :=
     hCLM.nnnorm
-  -- Extract a maximum on the compact, nonempty interval `[a, b]`.
   have hcpt : IsCompact (Set.Icc a b) := isCompact_Icc
   have hne : (Set.Icc a b).Nonempty := Set.nonempty_Icc.mpr hab
   obtain ⟨tmax, htmax_mem, htmax_max⟩ := hcpt.exists_isMaxOn hne hN
@@ -167,12 +143,11 @@ theorem parallel_lipschitz_bound_on_compact [I.Boundaryless]
   exact htmax_max ht
 
 set_option linter.unusedVariables false in
-/-- **parallel-picard-lindelof-data.** The Picard–Lindelöf data
-(time-dependent vector field + Lipschitz bound + continuity in time)
-assembled from the chart Christoffel contraction on a compact
-sub-interval. The exact Mathlib structure is `IsPicardLindelof`; we
-expose existence as an unspecified placeholder so downstream callers
-need only the abstract conclusion. -/
+/-- Placeholder node carrying the hypotheses (smooth metric, in-chart
+curve, continuity of `uPrime` and the chart curve) needed to assemble
+the Picard–Lindelöf data on a compact sub-interval. Its conclusion is
+`True`; the actual ODE solving is done by `parallel_local_existence_step`
+and `parallel_local_existence_on_Icc`. -/
 theorem parallel_picard_lindelof_data
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M)
     (uPrime : ℝ → E) {a b : ℝ} (hab : a ≤ b)
@@ -183,7 +158,7 @@ theorem parallel_picard_lindelof_data
 
 set_option linter.style.show false in
 set_option linter.deprecated false in
-/-- **parallel-existence-step.** Local Picard–Lindelöf step for the
+/-- Local Picard–Lindelöf step for the
 linear parallel-transport ODE on a sub-interval `[c, d] ⊆ [aa, bb]`
 whose length satisfies `(2K + 2)(d - c) ≤ 1`, with an arbitrary
 initial time `t_in ∈ [c, d]`. Starting from any initial value `w₀`
@@ -218,14 +193,12 @@ private theorem parallel_local_existence_step [I.Boundaryless]
   have hA_cont : ContinuousOn (fun t : ℝ => A t) (Set.Icc aa bb) :=
     chart_christoffel_clm_continuous_on_compact (I := I) g α γ uPrime hu hγ hsource
   set v : ℝ → E → E := fun t y => - A t y with hv_def
-  -- Picard–Lindelöf parameters.
   set rB : ℝ := ‖w₀‖ + 1 with hrB_def
   have hrB_nn : 0 ≤ rB := by have := norm_nonneg w₀; linarith
   set LB : ℝ := (K : ℝ) * (2 * ‖w₀‖ + 1) with hLB_def
   have hLB_nn : 0 ≤ LB := by
     have h1 : 0 ≤ 2 * ‖w₀‖ + 1 := by have := norm_nonneg w₀; linarith
     exact mul_nonneg hK_nn h1
-  -- Key bound: `LB · (d - c) ≤ rB`.
   have h_KdcHalf : (K : ℝ) * (d - c) ≤ 1 / 2 := by
     have h1 : 2 * (K : ℝ) * (d - c) ≤ 1 := by nlinarith [hlen, hdc_nn]
     linarith
@@ -240,13 +213,11 @@ private theorem parallel_local_existence_step [I.Boundaryless]
     rw [heq]
     show 2 * (K : ℝ) * (d - c) * ‖w₀‖ + (K : ℝ) * (d - c) ≤ ‖w₀‖ + 1
     linarith
-  -- NNReal parameters.
   let aN : NNReal := ⟨rB, hrB_nn⟩
   let rN : NNReal := 0
   let LN : NNReal := ⟨LB, hLB_nn⟩
   let KN : NNReal := K
   let t_inIcc : Set.Icc c d := ⟨t_in, ⟨ht_in_c, ht_in_d⟩⟩
-  -- Verify `IsPicardLindelof v t_inIcc w₀ aN rN LN KN`.
   have hPL : IsPicardLindelof v t_inIcc w₀ aN rN LN KN := by
     refine
     { lipschitzOnWith := ?_,
@@ -288,8 +259,7 @@ private theorem parallel_local_existence_step [I.Boundaryless]
             apply mul_le_mul hAτ_norm hy_total' (norm_nonneg _) hK_nn
         _ = LB := by show (K : ℝ) * (2 * ‖w₀‖ + 1) = (K : ℝ) * (2 * ‖w₀‖ + 1); rfl
         _ = (LN : ℝ) := rfl
-    · -- `LN · max(d - t_in, t_in - c) ≤ aN - rN`.
-      change LB * max (d - t_in) (t_in - c) ≤ rB - 0
+    · change LB * max (d - t_in) (t_in - c) ≤ rB - 0
       have hmax_le : max (d - t_in) (t_in - c) ≤ d - c := by
         refine max_le ?_ ?_
         · linarith
@@ -314,7 +284,7 @@ private theorem parallel_local_existence_step [I.Boundaryless]
 
 set_option linter.style.show false in
 set_option linter.deprecated false in
-/-- **parallel-local-existence-on-Icc.** On a compact interval
+/-- On a compact interval
 `[a, b] ∋ t₀`, the linear parallel-transport ODE has a solution
 `Y : ℝ → E` defined on `[a, b]` with `Y(t₀) = v₀`. Constructed by
 subdivision of `[a, b]` into pieces small enough for direct
@@ -336,22 +306,17 @@ theorem parallel_local_existence_on_Icc [I.Boundaryless]
   obtain ⟨ht₀_a, ht₀_b⟩ := ht₀
   obtain ⟨K, hK⟩ :=
     parallel_lipschitz_bound_on_compact (I := I) g α γ uPrime hab hu hγ hsource
-  -- Step size `h = 1 / (2K + 2) > 0`.
   set h : ℝ := 1 / (2 * (K : ℝ) + 2) with hh_def
   have h2K2_pos : (0 : ℝ) < 2 * (K : ℝ) + 2 := by positivity
   have hh_pos : 0 < h := by rw [hh_def]; positivity
   have hh_eq : (2 * (K : ℝ) + 2) * h = 1 := by
     rw [hh_def]; field_simp
-  -- Number of subdivision pieces.
   obtain ⟨N, hN⟩ : ∃ N : ℕ, b - a ≤ N * h := by
     obtain ⟨N, hN⟩ := exists_nat_gt ((b - a) / h)
     refine ⟨N, ?_⟩
     have h1 : (b - a) / h < N := hN
     have : (b - a) = (b - a) / h * h := by field_simp
     rw [this]; exact mul_le_mul_of_nonneg_right h1.le hh_pos.le
-  ---------------------------------------------------------------------
-  -- Right extension: build solution on `[t₀, Tn N] = [t₀, b]`.
-  ---------------------------------------------------------------------
   let Tn : ℕ → ℝ := fun n => min b (t₀ + n * h)
   have hTn_zero : Tn 0 = t₀ := by
     show min b (t₀ + (0 : ℕ) * h) = t₀
@@ -377,7 +342,6 @@ theorem parallel_local_existence_on_Icc [I.Boundaryless]
       have hcast : (((n + 1 : ℕ) : ℝ)) = (n : ℝ) + 1 := by push_cast; ring
       have hX : t₀ + ((n + 1 : ℕ) : ℝ) * h - (t₀ + ((n : ℕ) : ℝ) * h) = h := by
         rw [hcast]; ring
-      -- Either both `Tn` values equal the linear term, or one/both equal `b`.
       rcases le_or_gt (t₀ + ((n + 1 : ℕ) : ℝ) * h) b with hle | hgt
       · have hmono_le : t₀ + ((n : ℕ) : ℝ) * h ≤ t₀ + ((n + 1 : ℕ) : ℝ) * h := by
           rw [hcast]; nlinarith [hh_pos.le]
@@ -394,7 +358,6 @@ theorem parallel_local_existence_on_Icc [I.Boundaryless]
     have h2K_nn : 0 ≤ 2 * (K : ℝ) + 2 := h2K2_pos.le
     have := mul_le_mul_of_nonneg_left h_step h2K_nn
     linarith [hh_eq]
-  -- Right inductive predicate.
   have rightExist : ∀ n, ∃ Y : ℝ → E, Y t₀ = v₀ ∧
       ∀ t ∈ Set.Icc t₀ (Tn n), HasDerivWithinAt Y
         (- chartChristoffelContractionRightCLM (I := I) g α (uPrime t)
@@ -407,7 +370,6 @@ theorem parallel_local_existence_on_Icc [I.Boundaryless]
       rw [hTn_zero] at ht
       have ht_eq : t = t₀ := le_antisymm ht.2 ht.1
       rw [hTn_zero]
-      -- HasDerivWithinAt on singleton: via subsingleton.
       have hsub : (Set.Icc t₀ t₀).Subsingleton := by
         rw [Set.Icc_self]; exact Set.subsingleton_singleton
       have hF : HasFDerivWithinAt (fun _ : ℝ => v₀)
@@ -430,7 +392,6 @@ theorem parallel_local_existence_on_Icc [I.Boundaryless]
         rw [← hsame] at ht ⊢
         exact hY₀_deriv t ht
       · have hlt : Tn n < Tn (n + 1) := lt_of_le_of_ne (hTn_mono n) hsame
-        -- Solve PL step on `[Tn n, Tn (n+1)]` with `t_in := Tn n`, value `Y₀ (Tn n)`.
         have hT_t₀ : t₀ ≤ Tn n := hTn_ge_t₀ n
         have hT_a : a ≤ Tn n := ht₀_a.trans hT_t₀
         have hT'_b : Tn (n + 1) ≤ b := hTn_le_b (n + 1)
@@ -438,10 +399,8 @@ theorem parallel_local_existence_on_Icc [I.Boundaryless]
         obtain ⟨Z, hZ_deriv, hZ_init⟩ :=
           parallel_local_existence_step (I := I) g α γ uPrime hu hγ hsource hK
             (le_of_lt hlt) hT_a hT'_b (le_refl _) (le_of_lt hlt) hlen' (Y₀ (Tn n))
-        -- Patched function.
         refine ⟨fun t => if t ≤ Tn n then Y₀ t else Z t, ?_, ?_⟩
-        · -- Initial value at t₀: t₀ ≤ Tn n.
-          show (if t₀ ≤ Tn n then Y₀ t₀ else Z t₀) = v₀
+        · show (if t₀ ≤ Tn n then Y₀ t₀ else Z t₀) = v₀
           rw [if_pos hT_t₀]; exact hY₀_init
         · intro t ht
           set Yp : ℝ → E := fun t => if t ≤ Tn n then Y₀ t else Z t with hYp

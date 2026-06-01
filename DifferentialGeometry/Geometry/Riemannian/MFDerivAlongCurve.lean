@@ -40,8 +40,8 @@ second-variation length-bound development).
   as continuity of `t ↦ fderiv (extChartAt I α ∘ γ) t 1`.
 
 * `chartCoord_mfderiv_along_curve_continuousOn` —
-  the same continuity, packaged for a compact base set `s`. This is
-  the chart-fixed counterpart of `mfderiv_along_curve_continuousOn_of_contMDiff`.
+  the same continuity, packaged for a compact base set `s` contained in
+  the chart-`α` preimage.
 
 * `raw_mfderiv_eq_symmL_apply_fderiv` —
   the **raw-form rewrite identity**: for `γ t ∈ (chartAt H α).source`,
@@ -78,8 +78,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 namespace MFDerivAlongCurve
 
-/-! ### Chain-rule identity -/
-
 /-- **Chart-`α`-coordinate of `mfderiv γ t 1` equals `fderiv (extChartAt I α ∘ γ) t 1`.**
 
 For a `C^∞` curve `γ : ℝ → M` and a chart basepoint `α : M`, at any
@@ -97,26 +95,21 @@ theorem chartCoord_mfderiv_along_curve_eq_fderiv
     ((trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ (γ t))
         ((mfderiv 𝓘(ℝ, ℝ) I γ t : ℝ →L[ℝ] _) (1 : ℝ)) =
       (fderiv ℝ ((extChartAt I α) ∘ γ) t : ℝ →L[ℝ] E) (1 : ℝ) := by
-  -- Rewrite the trivialization CLM as the mfderiv of `extChartAt`.
   rw [TangentBundle.continuousLinearMapAt_trivializationAt (I := I)
         (x₀ := α) (x := γ t) ht]
-  -- mdifferentiabilities.
   have hγ_mdiff : MDifferentiableAt 𝓘(ℝ, ℝ) I γ t :=
     (hγ.contMDiffAt).mdifferentiableAt (by simp)
   have hφ_mdiff : MDifferentiableAt I 𝓘(ℝ, E) (extChartAt I α) (γ t) :=
     mdifferentiableAt_extChartAt (I := I) (x := α) ht
-  -- Chain rule on the composed manifold map.
   have hchain :
       mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, E) ((extChartAt I α) ∘ γ) t =
         (mfderiv I 𝓘(ℝ, E) (extChartAt I α) (γ t)).comp
           (mfderiv 𝓘(ℝ, ℝ) I γ t) :=
     mfderiv_comp t hφ_mdiff hγ_mdiff
-  -- For maps between model spaces, `mfderiv = fderiv`.
   have hmf_eq_f :
       mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, E) ((extChartAt I α) ∘ γ) t =
         fderiv ℝ ((extChartAt I α) ∘ γ) t :=
     mfderiv_eq_fderiv (𝕜 := ℝ) (f := (extChartAt I α) ∘ γ) (x := t)
-  -- Apply both sides to `(1 : ℝ)`.
   have hRHS :
       (fderiv ℝ ((extChartAt I α) ∘ γ) t : ℝ →L[ℝ] E) (1 : ℝ) =
         ((mfderiv I 𝓘(ℝ, E) (extChartAt I α) (γ t)).comp
@@ -141,32 +134,25 @@ theorem chartCoord_mfderiv_along_curve_eq_fderiv_of_mdifferentiableAt
     ((trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ (γ t))
         ((mfderiv 𝓘(ℝ, ℝ) I γ t : ℝ →L[ℝ] _) (1 : ℝ)) =
       (fderiv ℝ ((extChartAt I α) ∘ γ) t : ℝ →L[ℝ] E) (1 : ℝ) := by
-  -- Rewrite the trivialization CLM as the mfderiv of `extChartAt`.
   rw [TangentBundle.continuousLinearMapAt_trivializationAt (I := I)
         (x₀ := α) (x := γ t) ht]
-  -- mdifferentiabilities (the curve one is now a direct hypothesis).
   have hφ_mdiff : MDifferentiableAt I 𝓘(ℝ, E) (extChartAt I α) (γ t) :=
     mdifferentiableAt_extChartAt (I := I) (x := α) ht
-  -- Chain rule on the composed manifold map.
   have hchain :
       mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, E) ((extChartAt I α) ∘ γ) t =
         (mfderiv I 𝓘(ℝ, E) (extChartAt I α) (γ t)).comp
           (mfderiv 𝓘(ℝ, ℝ) I γ t) :=
     mfderiv_comp t hφ_mdiff hγ
-  -- For maps between model spaces, `mfderiv = fderiv`.
   have hmf_eq_f :
       mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, E) ((extChartAt I α) ∘ γ) t =
         fderiv ℝ ((extChartAt I α) ∘ γ) t :=
     mfderiv_eq_fderiv (𝕜 := ℝ) (f := (extChartAt I α) ∘ γ) (x := t)
-  -- Apply both sides to `(1 : ℝ)`.
   have hRHS :
       (fderiv ℝ ((extChartAt I α) ∘ γ) t : ℝ →L[ℝ] E) (1 : ℝ) =
         ((mfderiv I 𝓘(ℝ, E) (extChartAt I α) (γ t)).comp
             (mfderiv 𝓘(ℝ, ℝ) I γ t)) (1 : ℝ) := by
     rw [← hmf_eq_f, hchain]; rfl
   rw [hRHS]; rfl
-
-/-! ### Continuity of the chart-`α`-pullback derivative -/
 
 /-- The chart-`α`-pullback `t ↦ (fderiv ℝ (extChartAt I α ∘ γ) t : ℝ → E) 1`
 is continuous on the open set `U := γ ⁻¹ ((chartAt H α).source)`. -/
@@ -177,13 +163,11 @@ theorem continuousOn_fderiv_extChartAt_comp_curve
       (γ ⁻¹' (chartAt H α).source) := by
   classical
   set U : Set ℝ := γ ⁻¹' (chartAt H α).source with hU_def
-  -- `U` is open in `ℝ`.
   have hU_open : IsOpen U := by
     have : IsOpen (chartAt H α).source := by
       rw [← extChartAt_source (I := I)]
       exact isOpen_extChartAt_source (I := I) α
     exact hγ.continuous.isOpen_preimage _ this
-  -- The composition `extChartAt I α ∘ γ` is `C^∞` on `U` in the manifold sense.
   have h_comp_mdiff :
       ContMDiffOn 𝓘(ℝ, ℝ) 𝓘(ℝ, E) ∞ ((extChartAt I α) ∘ γ) U := by
     have hφ : ContMDiffOn I 𝓘(ℝ, E) ∞ (extChartAt I α)
@@ -192,26 +176,20 @@ theorem continuousOn_fderiv_extChartAt_comp_curve
     have hγU : ContMDiffOn 𝓘(ℝ, ℝ) I ∞ γ U := hγ.contMDiffOn
     have hmaps : MapsTo γ U (chartAt H α).source := fun _ ht => ht
     exact hφ.comp hγU hmaps
-  -- Reduce to ordinary `ContDiffOn` between vector spaces.
   have h_comp_diff :
       ContDiffOn ℝ ∞ ((extChartAt I α) ∘ γ) U :=
     contMDiffOn_iff_contDiffOn.mp h_comp_mdiff
-  -- `fderivWithin` of a `C^∞` function on an open set is continuous.
   have h1le : (1 : ℕ∞) ≤ (∞ : WithTop ℕ∞) := by
     exact_mod_cast (le_top : (1 : ℕ∞) ≤ ⊤)
   have h_fdW :
       ContinuousOn (fderivWithin ℝ ((extChartAt I α) ∘ γ) U) U :=
     h_comp_diff.continuousOn_fderivWithin hU_open.uniqueDiffOn h1le
-  -- On the open set `U`, `fderivWithin = fderiv`.
   have h_fderiv_cont :
       ContinuousOn (fun t : ℝ => fderiv ℝ ((extChartAt I α) ∘ γ) t) U := by
     refine h_fdW.congr ?_
     intro t ht
     exact (fderivWithin_of_isOpen hU_open ht).symm
-  -- Apply at the canonical basis vector `1 : ℝ`.
   exact h_fderiv_cont.clm_apply continuousOn_const
-
-/-! ### Headline (chart-`α`-coordinate form) -/
 
 /-- **Continuity of the chart-`α`-coordinate of the velocity along a smooth curve.**
 
@@ -225,16 +203,11 @@ theorem continuousOn_chartCoord_mfderiv_along_curve
         (((trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ (γ t))
           ((mfderiv 𝓘(ℝ, ℝ) I γ t : ℝ →L[ℝ] _) (1 : ℝ)) : E))
       (γ ⁻¹' (chartAt H α).source) := by
-  -- Pointwise equality with the (continuous) chart-pulled-back derivative,
-  -- on the open set where both make sense.
   refine ContinuousOn.congr
     (continuousOn_fderiv_extChartAt_comp_curve (I := I) (M := M) (γ := γ) hγ α) ?_
   intro t ht
-  -- Apply the chain-rule identity.
   exact (chartCoord_mfderiv_along_curve_eq_fderiv (I := I) (M := M) (γ := γ) hγ
     α (t := t) ht)
-
-/-! ### Compact-set packaging -/
 
 /-- **Compact-domain version of the chart-`α`-coordinate continuity.**
 
@@ -253,15 +226,6 @@ theorem chartCoord_mfderiv_along_curve_continuousOn
   exact (continuousOn_chartCoord_mfderiv_along_curve (I := I) (M := M)
     (γ := γ) hγ α).mono hs_sub
 
-/-! ### Raw `E`-valued chart-form identity
-
-For a `C^∞` curve `γ : ℝ → M` and a chart basepoint `α : M`, on the chart-pullback
-preimage `U(α) := γ ⁻¹ ((chartAt H α).source)`, the raw `mfderiv γ t 1 : E`
-(using the literal definitional identification `TangentSpace I (γ t) = E`)
-factors through the `α`-trivialization's inverse-CLM and the chart-pulled-back
-ordinary `fderiv`. This is the substantive **rewrite** identity for going
-between the raw form and the chart-`α`-coordinate form. -/
-
 /-- **Raw form equals `symmL` of chart-pulled-back `fderiv`.**
 
 For `t : ℝ` with `γ t ∈ (chartAt H α).source`, the raw mfderiv-velocity along
@@ -277,16 +241,12 @@ theorem raw_mfderiv_eq_symmL_apply_fderiv
     ((mfderiv 𝓘(ℝ, ℝ) I γ t : ℝ →L[ℝ] _) (1 : ℝ) : E) =
       ((trivializationAt E (TangentSpace I) α).symmL ℝ (γ t))
         ((fderiv ℝ ((extChartAt I α) ∘ γ) t : ℝ →L[ℝ] E) (1 : ℝ)) := by
-  -- The trivialization `α`-coordinate form of the velocity.
   have hCC : ((trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ (γ t))
       ((mfderiv 𝓘(ℝ, ℝ) I γ t : ℝ →L[ℝ] _) (1 : ℝ)) =
         (fderiv ℝ ((extChartAt I α) ∘ γ) t : ℝ →L[ℝ] E) (1 : ℝ) :=
     chartCoord_mfderiv_along_curve_eq_fderiv (I := I) (M := M) (γ := γ) hγ α ht
-  -- Apply `symmL` to both sides and use the `symmL ∘ continuousLinearMapAt = id` identity
-  -- on the chart base set.
   have hbaseSet : γ t ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
     rw [TangentBundle.trivializationAt_baseSet]; exact ht
-  -- `symmL b (continuousLinearMapAt b y) = y` for `b ∈ baseSet` and `y : E b`.
   have hround :
       ((trivializationAt E (TangentSpace I) α).symmL ℝ (γ t))
           (((trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ (γ t))
@@ -294,7 +254,6 @@ theorem raw_mfderiv_eq_symmL_apply_fderiv
         ((mfderiv 𝓘(ℝ, ℝ) I γ t : ℝ →L[ℝ] _) (1 : ℝ)) :=
     (trivializationAt E (TangentSpace I) α).symmL_continuousLinearMapAt
       (R := ℝ) hbaseSet _
-  -- Combine.
   calc ((mfderiv 𝓘(ℝ, ℝ) I γ t : ℝ →L[ℝ] _) (1 : ℝ) : E)
       = ((trivializationAt E (TangentSpace I) α).symmL ℝ (γ t))
           (((trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ (γ t))
@@ -320,15 +279,11 @@ theorem raw_mfderiv_eq_symmL_apply_fderiv_of_mdifferentiableAt
     ((mfderiv 𝓘(ℝ, ℝ) I γ t : ℝ →L[ℝ] _) (1 : ℝ) : E) =
       ((trivializationAt E (TangentSpace I) α).symmL ℝ (γ t))
         ((fderiv ℝ ((extChartAt I α) ∘ γ) t : ℝ →L[ℝ] E) (1 : ℝ)) := by
-  -- The trivialization `α`-coordinate form of the velocity, via the
-  -- `MDifferentiableAt`-only chain-rule variant.
   have hCC : ((trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ (γ t))
       ((mfderiv 𝓘(ℝ, ℝ) I γ t : ℝ →L[ℝ] _) (1 : ℝ)) =
         (fderiv ℝ ((extChartAt I α) ∘ γ) t : ℝ →L[ℝ] E) (1 : ℝ) :=
     chartCoord_mfderiv_along_curve_eq_fderiv_of_mdifferentiableAt
       (I := I) (M := M) (γ := γ) hγ α ht
-  -- Apply `symmL` to both sides and use the `symmL ∘ continuousLinearMapAt = id`
-  -- identity on the chart base set.
   have hbaseSet : γ t ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
     rw [TangentBundle.trivializationAt_baseSet]; exact ht
   have hround :
@@ -345,22 +300,9 @@ theorem raw_mfderiv_eq_symmL_apply_fderiv_of_mdifferentiableAt
     _ = ((trivializationAt E (TangentSpace I) α).symmL ℝ (γ t))
           ((fderiv ℝ ((extChartAt I α) ∘ γ) t : ℝ →L[ℝ] E) (1 : ℝ)) := by rw [hCC]
 
-/-! ### Bundled tangent map continuity along the curve
-
-The tangent map of `γ`, evaluated at the input `⟨t, 1⟩ : TangentBundle 𝓘(ℝ, ℝ) ℝ`,
-produces a continuous `TangentBundle I M`-valued function of `t`. This is the
-substantive bundle-level continuity packaging the raw `mfderiv γ t 1 : E`
-(via the defeq `TangentSpace I (γ t) = E`) and the base-point `γ t : M`
-into a single continuous bundle-section-style map.
-
-The continuity follows from Mathlib's `ContMDiff.continuous_tangentMap` applied
-to the smooth curve `γ`, combined with the smoothness of the canonical input
-`t ↦ ⟨t, 1⟩ : ℝ → TangentBundle 𝓘(ℝ, ℝ) ℝ` (the unit-vector lift).
--/
-
 /-- **Tangent-bundle-valued unit-tangent map along a smooth curve is continuous.**
 
-For a `C^∞` curve `γ : ℝ → M`, the function
+For a `C^n` curve `γ : ℝ → M` with `1 ≤ n`, the function
   `t ↦ tangentMap 𝓘(ℝ, ℝ) I γ ⟨t, 1⟩ : ℝ → TangentBundle I M`
 is continuous on `ℝ`. By definition of `tangentMap`, this equals
 `t ↦ ⟨γ t, mfderiv 𝓘(ℝ, ℝ) I γ t 1⟩ : ℝ → TangentBundle I M`,
@@ -374,11 +316,8 @@ theorem continuous_tangentMap_unitLift
     {γ : ℝ → M} {n : WithTop ℕ∞} (hn : 1 ≤ n) (hγ : ContMDiff 𝓘(ℝ, ℝ) I n γ) :
     Continuous (fun t : ℝ =>
       tangentMap 𝓘(ℝ, ℝ) I γ (⟨t, (1 : ℝ)⟩ : TangentBundle 𝓘(ℝ, ℝ) ℝ)) := by
-  -- `tangentMap γ` is continuous on `TangentBundle 𝓘(ℝ, ℝ) ℝ`.
   have h_tan_cont : Continuous (tangentMap 𝓘(ℝ, ℝ) I γ) :=
     hγ.continuous_tangentMap hn
-  -- The input `t ↦ ⟨t, 1⟩ : ℝ → TangentBundle 𝓘(ℝ, ℝ) ℝ` is continuous.
-  -- Use `tangentBundleModelSpaceHomeomorph` to identify `TangentBundle 𝓘(ℝ, ℝ) ℝ ≃ₜ ℝ × ℝ`.
   have h_input_cont :
       Continuous (fun t : ℝ =>
         (⟨t, (1 : ℝ)⟩ : TangentBundle 𝓘(ℝ, ℝ) ℝ)) := by
@@ -391,54 +330,10 @@ theorem continuous_tangentMap_unitLift
     exact h_homeo.comp h_pair
   exact h_tan_cont.comp h_input_cont
 
-/-! ### Hand-off note for the raw `E`-valued mfderiv continuity
-
-The raw `E`-valued continuity of `t ↦ (mfderiv γ t 1 : E)` on the chart-pullback
-preimage `γ ⁻¹ ((chartAt H α).source)` reduces, via the bundle-level continuity
-above (`continuous_tangentMap_unitLift`), to a **fibre-extraction** problem from
-`TangentBundle I M → E` on the chart-trivialisation source. Concretely, on
-`π ⁻¹ ((chartAt H α).source) ⊆ TangentBundle I M`, the dependent-snd
-`⟨b, v⟩ ↦ v : TangentSpace I b = E` equals
-`(triv α).symmL ℝ b ∘ ((triv α)·)._snd`,
-where the second factor is continuous (forward trivialisation is continuous on
-its source) and the first factor is the **CLM-valued continuity of the inverse
-trivialisation**:
-
-  `b ↦ ((trivializationAt E (TangentSpace I) α).symmL ℝ b : E →L[ℝ] E)`
-  is `ContinuousOn` on `(chartAt H α).source`.
-
-This CLM-valued `symmL` continuity is the precise residual infrastructure piece.
-By `TangentBundle.symmL_trivializationAt`, the family on the chart source
-identifies with the manifold derivative
-`mfderiv[range I] (extChartAt I α).symm (extChartAt I α b)`,
-whose CLM-valued continuity in `b` requires either:
-
-* the `Hom`-bundle smoothness pipeline applied to the `(extChartAt I α).symm`
-  side and re-expressing via `contMDiffOn_coordChangeL` between two fixed
-  trivialisations, picking up an auxiliary trivialisation on the inverse-chart
-  image; or
-* a direct `ContDiffOn 𝓘(ℝ, E) (fderivWithin ...)` continuity argument applied
-  to the inverse extended chart, then transported through the manifold
-  identifications.
-
-The downstream consumer (the second-variation length bound) can extract the raw
-`E`-valued continuity locally on each chart-pullback patch via this residual,
-combined with `raw_mfderiv_eq_symmL_apply_fderiv` and the existing
-`continuousOn_chartCoord_mfderiv_along_curve`. -/
-
-/-! ### Lebesgue-number-style chart cover for a compact parameter set
-
-For a `C^∞` curve `γ : ℝ → M` and a compact subset `s ⊆ ℝ`, the family of
-open sets `{γ ⁻¹ ((chartAt H (γ t₀)).source) : t₀ ∈ s}` covers `s`, and
-hence by compactness admits a finite subcover. This is the standard
-chart-patching setup used in downstream length-bound and integrability
-arguments. -/
-
 /-- The open chart-pullback cover `{U(α) : α ∈ M}` covers `ℝ` (via `γ`)
 in the following sense: every `t : ℝ` lies in `γ ⁻¹ ((chartAt H (γ t)).source)`. -/
 theorem mem_chartPullback_self {γ : ℝ → M} (t : ℝ) :
     t ∈ γ ⁻¹' (chartAt H (γ t)).source := by
-  -- `γ t ∈ (chartAt H (γ t)).source` by `mem_chart_source`.
   exact mem_chart_source H (γ t)
 
 /-- For any subset `s ⊆ ℝ` and `C^∞` curve `γ : ℝ → M`, the family
@@ -450,7 +345,6 @@ theorem chartPullback_cover_compact
   intro t ht
   refine mem_iUnion_of_mem t ?_
   refine mem_iUnion_of_mem ht ?_
-  -- `γ t ∈ (chartAt H (γ t)).source` by `mem_chart_source`.
   exact mem_chart_source H (γ t)
 
 /-- A compact set `s ⊆ ℝ` admits a finite chart-pullback subcover
@@ -464,17 +358,14 @@ theorem exists_finite_chartPullback_subcover
     ∃ T : Set ℝ, T ⊆ s ∧ Set.Finite T ∧
       s ⊆ ⋃ t₀ ∈ T, γ ⁻¹' (chartAt H (γ t₀)).source := by
   classical
-  -- Each member of the cover is open.
   have hopen : ∀ t₀ : ℝ, t₀ ∈ s → IsOpen (γ ⁻¹' (chartAt H (γ t₀)).source) := by
     intro t₀ _
     have : IsOpen (chartAt H (γ t₀)).source := by
       rw [← extChartAt_source (I := I)]
       exact isOpen_extChartAt_source (I := I) (γ t₀)
     exact hγ.continuous.isOpen_preimage _ this
-  -- Build the open cover.
   have hcover : s ⊆ ⋃ t₀ ∈ s, γ ⁻¹' (chartAt H (γ t₀)).source :=
     chartPullback_cover_compact (I := I) (M := M) (γ := γ) hγ hs
-  -- Extract a finite subcover via compactness.
   exact hs.elim_finite_subcover_image hopen hcover
 
 end MFDerivAlongCurve

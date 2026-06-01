@@ -54,30 +54,25 @@ open DifferentialGeometry.Geometry.Riemannian.Variation
 open DifferentialGeometry.Geometry.Riemannian.AlongCurve
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
 
-/-! ## Compactness sub-leaves -/
-
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H]
 
-/-- **bm-c-tangent-closedBall-compact.** The closed ball of radius `R` in
-the tangent space `T_p M` is compact, because `T_p M` is finite-dimensional
-(it is canonically isomorphic to the model fibre `E`). Pure composition of
-Mathlib `FiniteDimensional.proper_real` and `isCompact_closedBall`. -/
+/-- The closed ball of radius `R` in the tangent space `T_p M` is compact,
+because `T_p M` is finite-dimensional (it is canonically isomorphic to the
+model fibre `E`). Pure composition of Mathlib `FiniteDimensional.proper_real`
+and `isCompact_closedBall`. -/
 theorem tangent_closedBall_isCompact
     {M : Type*}
     (I : ModelWithCorners ℝ E H)
     [TopologicalSpace M] [ChartedSpace H M]
     (p : M) {R : ℝ} (_hR : 0 ≤ R) :
     IsCompact (Metric.closedBall (0 : TangentSpace I p) R) := by
-  -- `TangentSpace I p` is definitionally `E`, a finite-dimensional real normed space,
-  -- hence a `ProperSpace`. On a `ProperSpace`, closed balls are compact.
   haveI : ProperSpace E := FiniteDimensional.proper_real E
   exact isCompact_closedBall (0 : TangentSpace I p) R
 
-/-- **bm-c-continuous-image-of-compact-is-compact.** Continuous image of a
-compact set is compact. Apply `IsCompact.image` to
+/-- Continuous image of a compact set is compact. Apply `IsCompact.image` to
 `tangent_closedBall_isCompact` together with the continuity of `expMap`. -/
 theorem isCompact_image_closedBall_under_expMap
     {M : Type*}
@@ -90,15 +85,12 @@ theorem isCompact_image_closedBall_under_expMap
     [IsRiemannianManifold I M] [CompleteSpace M]
     (p : M) {R : ℝ} (hR : 0 ≤ R) :
     IsCompact ((expMap g p) '' Metric.closedBall (0 : TangentSpace I p) R) := by
-  -- Continuous image of the compact closed ball in `T_p M`.
   have hcompact : IsCompact (Metric.closedBall (0 : TangentSpace I p) R) :=
     tangent_closedBall_isCompact (E := E) I p hR
   have hcont : Continuous (expMap (I := I) g p) :=
     DifferentialGeometry.Geometry.Riemannian.HopfRinow.bm_c_expMap_continuous_of_geodesic_complete
       g p
   exact hcompact.image hcont
-
-/-! ## Pairwise edist bound -/
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
@@ -137,36 +129,26 @@ theorem bonnet_myers_pairwise_edist_le_of_ricci_bound
     edist x y ≤ ENNReal.ofReal (Real.pi / Real.sqrt K) := by
   classical
   haveI hCE : CompleteSpace E := FiniteDimensional.complete ℝ E
-  -- `IsRiemannianManifold` identity: `edist = riemannianEDist I`.
   rw [IsRiemannianManifold.out (I := I) x y]
-  -- The intrinsic Riemannian distance is finite.
   have hne_top : Manifold.riemannianEDist I x y ≠ (⊤ : ℝ≥0∞) :=
     DifferentialGeometry.Geometry.Riemannian.Exponential.riemannianEDist_ne_top
       (I := I) x y
-  -- `r := (riemannianEDist I x y).toReal`, so `riemannianEDist I x y = ofReal r`.
   set r : ℝ := (Manifold.riemannianEDist I x y).toReal with hr_def
   have hr_nn : 0 ≤ r := ENNReal.toReal_nonneg
   have hdist_ofReal : Manifold.riemannianEDist I x y = ENNReal.ofReal r := by
     rw [hr_def, ENNReal.ofReal_toReal hne_top]
   rw [hdist_ofReal]
-  -- Reduce to the real-number bound `r ≤ π / √K`.
   refine ENNReal.ofReal_le_ofReal ?_
-  -- Step 1: the distance-realising launch velocity `v` at `x`.
   obtain ⟨v, hv_exp, hv_len⟩ :=
     DifferentialGeometry.Geometry.Riemannian.Exponential.hopf_rinow_expMapIntrinsic_surjective_minimizing
       (I := I) g hEnorm x y
-  -- `hv_len : √(g.inner x v v) = r`.
   rw [← hr_def] at hv_len
-  -- Split on whether `r = 0`.
   rcases eq_or_ne r 0 with hr0 | hr_ne
-  · -- `r = 0 ≤ π / √K`.
-    rw [hr0]
+  · rw [hr0]
     have hpi_nn : (0 : ℝ) ≤ Real.pi := Real.pi_nonneg
     have hsqrt_nn : (0 : ℝ) ≤ Real.sqrt K := Real.sqrt_nonneg K
     exact div_nonneg hpi_nn hsqrt_nn
-  -- POSITIVE CASE `r > 0`.
   have hr_pos' : 0 < r := lt_of_le_of_ne hr_nn (Ne.symm hr_ne)
-  -- The unit launch velocity `u := r⁻¹ • v` and the geodesic `γ`.
   set u : TangentSpace I x := r⁻¹ • v with hu_def
   set γ : ℝ → M :=
     DifferentialGeometry.Geometry.Riemannian.Exponential.intrinsicGeodesic
@@ -174,7 +156,6 @@ theorem bonnet_myers_pairwise_edist_le_of_ricci_bound
   set L : ℝ := r with hL_def
   have hL_nn : (0 : ℝ) ≤ L := hr_nn
   have hL_pos : (0 : ℝ) < L := hr_pos'
-  -- `g.inner x v v = r²` from `√(g.inner x v v) = r` and `g.inner ≥ 0`.
   have hvv_nn : 0 ≤ g.inner x v v := by
     rcases eq_or_ne v 0 with hv0 | hv0
     · rw [hv0]; simp
@@ -182,19 +163,15 @@ theorem bonnet_myers_pairwise_edist_le_of_ricci_bound
   have hvv_sq : g.inner x v v = L ^ 2 := by
     have := congrArg (· ^ 2) hv_len
     simpa [Real.sq_sqrt hvv_nn] using this
-  -- The launch velocity has unit `g`-norm: `g.inner x u u = 1`.
   have hu_unit : g.inner x u u = 1 := by
     have hbil : g.inner x u u = L⁻¹ * (L⁻¹ * g.inner x v v) := by
       rw [hu_def]
       simp only [map_smul, ContinuousLinearMap.smul_apply, smul_eq_mul]
     rw [hbil, hvv_sq]
     field_simp
-  -- `γ 0 = x`.
   have hγ0 : γ 0 = x :=
     DifferentialGeometry.Geometry.Riemannian.Exponential.intrinsicGeodesic_zero
       (I := I) g hEnorm x u
-  -- `γ L = y`: `γ r = intrinsicGeodesic x (r • u) 1 = expMapIntrinsic x (r • u)`,
-  -- and `r • u = r • (r⁻¹ • v) = v`, whose intrinsic exponential is `y`.
   have hru : r • u = v := by
     rw [hu_def, smul_smul, mul_inv_cancel₀ hr_ne, one_smul]
   have hγL : γ L = y := by
@@ -205,13 +182,11 @@ theorem bonnet_myers_pairwise_edist_le_of_ricci_bound
       DifferentialGeometry.Geometry.Riemannian.Exponential.intrinsicGeodesic_smul
         (I := I) g hEnorm x u r
     rw [hL_def, ← hsmul, hru]
-    -- `intrinsicGeodesic x v 1 = expMapIntrinsic x v = y`.
     have hexp :
         DifferentialGeometry.Geometry.Riemannian.Exponential.expMapIntrinsic
             (I := I) g hEnorm x v = y := hv_exp
     rw [DifferentialGeometry.Geometry.Riemannian.Exponential.expMapIntrinsic_def] at hexp
     exact hexp
-  -- `γ` is a complete geodesic, continuous, hence `C^∞` in time.
   have hγ_isGeo :
       DifferentialGeometry.Geometry.Riemannian.Geodesic.IsGeodesic (I := I) g γ :=
     DifferentialGeometry.Geometry.Riemannian.Exponential.intrinsicGeodesic_isGeodesic
@@ -228,8 +203,6 @@ theorem bonnet_myers_pairwise_edist_le_of_ricci_bound
       DifferentialGeometry.Geometry.Riemannian.Geodesic.IsGeodesicOn
         (I := I) g γ (Set.Icc 0 L) :=
     hγ_isGeo.isGeodesicOn (Set.Icc 0 L)
-  -- The unit-speed condition holds on the whole interval: the squared speed of
-  -- the intrinsic geodesic is constant `= g.inner x u u = 1`.
   have hγ_unit_mfderiv :
       ∀ t ∈ Set.Icc (0 : ℝ) L,
         g.inner (γ t) (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ))
@@ -242,34 +215,20 @@ theorem bonnet_myers_pairwise_edist_le_of_ricci_bound
       DifferentialGeometry.Geometry.Riemannian.Exponential.intrinsicGeodesic_speedSq_eq
         (I := I) g hEnorm x u t
     rw [hspeed, hu_unit]
-  -- The launch unit-speed datum at `t = 0` consumed by the frame constructor.
   have hUnit0 :
       g.inner (γ 0) (mfderiv 𝓘(ℝ, ℝ) I γ 0 (1 : ℝ))
         (mfderiv 𝓘(ℝ, ℝ) I γ 0 (1 : ℝ)) = 1 :=
     hγ_unit_mfderiv 0 ⟨le_refl 0, hL_nn⟩
-  -- The real-valued velocity field `uPrime`.
   let uPrime : ℝ → E := fun t : ℝ =>
     (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ) : E)
   have hγ_unit :
       ∀ t ∈ Set.Icc (0 : ℝ) L, g.inner (γ t) (uPrime t) (uPrime t) = 1 := by
     intro t ht
     exact hγ_unit_mfderiv t ht
-  -- The Hopf-Rinow style distance identity for `γ`.
   have hγ_edist : Manifold.riemannianEDist I x y = ENNReal.ofReal L := by
     rw [hL_def]; exact hdist_ofReal
-  -- Adjust the Ricci hypothesis to the form expected by the length-bound
-  -- assembly. The headline statement has the bound as
-  -- `((Module.finrank ℝ E : ℝ) - 1) * K`, while
-  -- `bonnet_myers_length_le_of_ricci_bound` reads
-  -- `(Module.finrank ℝ E - 1 : ℝ) * K`. These are syntactically equal.
   have hRic' :
       RicciBoundedBelow (I := I) g ((Module.finrank ℝ E - 1 : ℝ) * K) := _hRic
-  -- Arc-length minimisation property.
-  -- Hopf-Rinow gives `riemannianEDist I (γ 0) (γ L) = ENNReal.ofReal L`.
-  -- Combined with `pathELength_eq_arcLength` and the fundamental
-  -- inequality `riemannianEDist ≤ pathELength`, this yields
-  -- `arcLength g γ 0 L ≤ arcLength g η 0 L` for every endpoint-matching
-  -- competitor η.
   have hγ_min :
       ∀ η : ℝ → M, ContMDiffOn 𝓘(ℝ, ℝ) I 1 η (Set.Icc 0 L) →
         η 0 = γ 0 → η L = γ L →
@@ -277,17 +236,8 @@ theorem bonnet_myers_pairwise_edist_le_of_ricci_bound
             (I := I) g γ 0 L ≤
           DifferentialGeometry.Geometry.Riemannian.Variation.arcLength
             (I := I) g η 0 L := by
-    -- The chain `arcLength γ = L = riemannianEDist (γ 0)(γ L) ≤
-    -- pathELength η = arcLength η` is unfolded as a substantive
-    -- composition of `pathELength_eq_arcLength` and
-    -- `riemannianEDist_le_pathELength`, using the unit-speed identity
-    -- `hγ_unit` to evaluate `arcLength γ 0 L = L`.
-    --
-    -- Step A. Compute `arcLength γ 0 L = L` from unit-speed.
     have hγ_arcLength : DifferentialGeometry.Geometry.Riemannian.Variation.arcLength
         (I := I) g γ 0 L = L := by
-      -- The arc-length integrand for γ on `Icc 0 L` is identically 1
-      -- (by `hγ_unit` and `Real.sqrt_one`), and `∫ t in 0..L, 1 = L - 0 = L`.
       unfold DifferentialGeometry.Geometry.Riemannian.Variation.arcLength
       have hcongr :
           ∀ t ∈ Set.uIcc (0 : ℝ) L,
@@ -297,7 +247,6 @@ theorem bonnet_myers_pairwise_edist_le_of_ricci_bound
                   (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ)))
               = (1 : ℝ) := by
         intro t ht
-        -- Since `0 ≤ L`, the uIcc is `Icc 0 L`.
         have htIcc : t ∈ Set.Icc (0 : ℝ) L := by
           rw [Set.uIcc_of_le hL_nn] at ht
           exact ht
@@ -308,29 +257,17 @@ theorem bonnet_myers_pairwise_edist_le_of_ricci_bound
         rw [hone, Real.sqrt_one]
       rw [intervalIntegral.integral_congr hcongr]
       simp
-    -- Step B. The Hopf-Rinow distance identity, transported through
-    -- `hγ0` and `hγL`.
     have hdist_eq : Manifold.riemannianEDist I (γ 0) (γ L)
         = ENNReal.ofReal L := by
       have : Manifold.riemannianEDist I x y = ENNReal.ofReal L := hγ_edist
       rw [← hγ0, ← hγL] at this
       exact this
     intro η hη_C1 hη0 hηL
-    -- Step C. The arcLength integrand of η is non-negative, so
-    -- `arcLength η 0 L ≥ 0`.
     have hη_arcLength_nn :
         0 ≤ DifferentialGeometry.Geometry.Riemannian.Variation.arcLength
             (I := I) g η 0 L := by
       unfold DifferentialGeometry.Geometry.Riemannian.Variation.arcLength
       exact intervalIntegral.integral_nonneg hL_nn (fun t _ => Real.sqrt_nonneg _)
-    -- Step D. Integrability and per-time enorm identification for η on
-    -- `Icc 0 L`. The C¹ smoothness `hη_C1` is now given as a hypothesis
-    -- of the minimisation premise. The per-time enorm identification is
-    -- the explicit bundle-norm hypothesis `hEnorm` (the norm on each
-    -- fibre is the square root of `g.inner`). Integrability of the speed
-    -- follows from continuity of the integrand for the C¹ curve on the
-    -- compact interval, which we establish below.
-    -- (D.i) The per-time enorm identification, instantiated from `hEnorm`.
     have hη_enorm :
         ∀ t ∈ Set.Icc (0 : ℝ) L,
           ‖mfderiv 𝓘(ℝ, ℝ) I η t (1 : ℝ)‖ₑ
@@ -339,12 +276,6 @@ theorem bonnet_myers_pairwise_edist_le_of_ricci_bound
                   (mfderiv 𝓘(ℝ, ℝ) I η t (1 : ℝ))
                   (mfderiv 𝓘(ℝ, ℝ) I η t (1 : ℝ)))) :=
       fun t _ => hEnorm (η t) (mfderiv 𝓘(ℝ, ℝ) I η t (1 : ℝ))
-    -- (D.ii) Integrability of the speed integrand `√(g.inner η η'η')` on
-    -- `Icc 0 L`. The within-velocity speed is continuous on the compact
-    -- interval (the `(0,2)`-metric tensor `g.inner` is a smooth bundle section
-    -- — `g.contMDiff` — applied to the continuous within-velocity vector field
-    -- — `tangentMapWithin` continuity of the `C¹` curve `η`), and the `mfderiv`
-    -- form agrees a.e. on the co-null interior `Ioo 0 L`.
     have hUniqueη : UniqueMDiffOn 𝓘(ℝ, ℝ) (Set.Icc (0 : ℝ) L) := by
       intro u hu
       rw [uniqueMDiffWithinAt_iff_uniqueDiffWithinAt]

@@ -106,11 +106,8 @@ noncomputable instance instChartedSpace :
       => coverChartAt xt)
   chartAt := coverChartAt
   mem_chart_source xt := by
-    -- Source of `e.trans e'` is `e.source ∩ e ⁻¹' e'.source`.
     rw [coverChartAt, OpenPartialHomeomorph.trans_source]
     refine ⟨mem_source_localSection xt, ?_⟩
-    -- `localSection xt xt = proj xt` because the local section coincides
-    -- with `proj` as a function.
     have hfun := proj_eq_localSection xt
     have h1 : localSection xt xt = proj xt := by
       have := congrArg (fun f => f xt) hfun
@@ -119,7 +116,8 @@ noncomputable instance instChartedSpace :
     exact mem_chart_source H (proj xt)
   chart_mem_atlas xt := Set.mem_range_self xt
 
--- Aux: target of `coverChartAt a`.
+/-- The target of `coverChartAt a` equals the model chart's target intersected
+with the preimage, under the chart's inverse, of the local section's target. -/
 lemma coverChartAt_target_eq
     (a : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :
     ((coverChartAt a) :
@@ -130,7 +128,8 @@ lemma coverChartAt_target_eq
   unfold coverChartAt
   exact OpenPartialHomeomorph.trans_target _ _
 
--- Aux: source of `coverChartAt b`.
+/-- The source of `coverChartAt b` equals the local section's source intersected
+with the preimage, under the local section, of the model chart's source. -/
 lemma coverChartAt_source_eq
     (b : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :
     ((coverChartAt b) :
@@ -141,10 +140,9 @@ lemma coverChartAt_source_eq
   unfold coverChartAt
   exact OpenPartialHomeomorph.trans_source _ _
 
--- Aux: `localSection b ((localSection a).symm y) = y` for `y ∈ (localSection a).target`.
--- Both `localSection a` and `localSection b` coincide with `proj` as
--- functions; `proj` is the inverse of `(localSection a).symm` on
--- `(localSection a).target`.
+/-- For `y` in the target of `localSection a`, applying `localSection b` to
+`(localSection a).symm y` returns `y`: both local sections coincide with `proj`,
+which is the inverse of `(localSection a).symm` on `(localSection a).target`. -/
 lemma localSection_collapse
     (a b : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
     {y : M} (hy : y ∈ (localSection a).target) :
@@ -174,19 +172,14 @@ instance instIsManifold :
       (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) where
   compatible := by
     rintro e e' ⟨a, rfl⟩ ⟨b, rfl⟩
-    -- Goal: `(coverChartAt a).symm.trans (coverChartAt b) ∈ contDiffGroupoid ∞ I`.
-    -- Strategy: show this open partial homeomorphism is equivalent (`EqOnSource`)
-    -- to a restriction of the M-chart transition, which is in the groupoid.
     set CovT : OpenPartialHomeomorph H H :=
       (coverChartAt a).symm.trans (coverChartAt b) with hCovT_def
     set MTrans : OpenPartialHomeomorph H H :=
       (chartAt H (proj a)).symm.trans (chartAt H (proj b)) with hMTrans_def
-    -- The M-chart transition is in the groupoid by M's `IsManifold` structure.
     have hMTrans_in : MTrans ∈ contDiffGroupoid ∞ I :=
       StructureGroupoid.compatible (contDiffGroupoid ∞ I)
         (chart_mem_atlas H (proj a)) (chart_mem_atlas H (proj b))
     have hCovT_open : IsOpen CovT.source := CovT.open_source
-    -- Containment: CovT.source ⊆ MTrans.source.
     have hsub : CovT.source ⊆ MTrans.source := by
       intro h hh
       rw [hCovT_def, OpenPartialHomeomorph.trans_source] at hh
@@ -202,12 +195,10 @@ instance instIsManifold :
           = (localSection a).symm ((chartAt H (proj a)).symm h) := rfl
       rw [hSymm] at hin
       rwa [localSection_collapse a b hhCaTarget] at hin
-    -- Source of restricted M-transition equals CovT.source.
     have hMTrans_restr_src :
         (MTrans.restrOpen CovT.source hCovT_open).source = CovT.source := by
       rw [OpenPartialHomeomorph.restrOpen_source]
       exact Set.inter_eq_right.mpr hsub
-    -- The restriction is in the groupoid (closed under restriction).
     have hRestrIn :
         MTrans.restrOpen CovT.source hCovT_open ∈ contDiffGroupoid ∞ I := by
       have hCR : ClosedUnderRestriction (contDiffGroupoid ∞ I) := inferInstance
@@ -221,7 +212,6 @@ instance instIsManifold :
           hCovT_open.interior_eq]
       rw [h_eq] at hMR
       exact hMR
-    -- Show CovT ≈ MTrans.restrOpen.
     have hEq : CovT ≈ MTrans.restrOpen CovT.source hCovT_open := by
       refine ⟨?_, ?_⟩
       · rw [hMTrans_restr_src]
@@ -272,48 +262,34 @@ theorem proj_contMDiff :
       OpenPartialHomeomorph
         (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) H).open_source,
     ?_, ?_⟩
-  · -- `xt` lies in the source of its own chart.
-    -- `chartAt H xt = coverChartAt xt` by definition of `instChartedSpace`.
-    exact (mem_chart_source H
+  · exact (mem_chart_source H
       (M :=
         DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) xt)
-  -- Show `ContMDiffOn I I ∞ proj (coverChartAt xt).source`.
-  -- Step 1: relate `proj` to `(chartAt H (proj xt)).symm ∘ coverChartAt xt`
-  -- on the chart source.
-  -- `proj` agrees with the composition on the source.
   have hcongr :
       ∀ z ∈ ((coverChartAt xt) :
           OpenPartialHomeomorph
             (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) H).source,
         ((chartAt H (proj xt)).symm ∘ (coverChartAt xt)) z = proj z := by
     intro z hz
-    -- Unpack the source condition.
     rw [coverChartAt_source_eq] at hz
     obtain ⟨hzLS, hzLSproj⟩ := hz
     rw [Set.mem_preimage] at hzLSproj
-    -- `(coverChartAt xt) z = chartAt H (proj xt) (localSection xt z)` by `trans_apply`.
     have hCovApp : (coverChartAt xt) z
         = (chartAt H (proj xt)) ((localSection xt) z) := by
       unfold coverChartAt
       rw [OpenPartialHomeomorph.trans_apply]
-    -- `localSection xt z = proj z` since `localSection xt` agrees with `proj`.
     have hLSproj : (localSection xt) z = proj z := by
       have hfun := proj_eq_localSection xt
       have := congrArg (fun f => f z) hfun
       simpa using this.symm
-    -- `proj z ∈ (chartAt H (proj xt)).source`.
     have hprojSrc : proj z ∈ (chartAt H (proj xt)).source := by
       rw [← hLSproj]; exact hzLSproj
-    -- Combine.
     change (chartAt H (proj xt)).symm ((coverChartAt xt) z) = proj z
     rw [hCovApp, hLSproj]
     exact (chartAt H (proj xt)).left_inv hprojSrc
-  -- Step 2: prove smoothness of the composition.
-  -- Type-annotate `coverChartAt xt` to fix `H, M`.
   set CXT : OpenPartialHomeomorph
       (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) H :=
     coverChartAt xt with hCXT_def
-  -- `coverChartAt xt = chartAt H xt` (definitionally), smooth on its source.
   have h_chart_xt : ContMDiffOn I I ∞ (CXT : _ → H) CXT.source := by
     have hgoal :
         ContMDiffOn I I ∞
@@ -328,29 +304,20 @@ theorem proj_contMDiff :
             xt).source :=
       contMDiffOn_chart
     exact hgoal
-  -- `(chartAt H (proj xt)).symm` is smooth on the chart target.
   have h_chart_symm : ContMDiffOn I I ∞
       (chartAt H (M := M) (proj xt)).symm
       (chartAt H (M := M) (proj xt)).target := contMDiffOn_chart_symm
-  -- The image of `(coverChartAt xt).source` under `coverChartAt xt`
-  -- lies inside `(chartAt H (proj xt)).target`.
   have hMapsTo :
       CXT.source ⊆ (CXT : _ → H) ⁻¹' (chartAt H (M := M) (proj xt)).target := by
     intro z hz
-    -- Source of `e.trans e'` maps via `e.trans e'` into `e'.target`.
     have hmap : CXT z ∈ CXT.target := CXT.map_source hz
-    -- `(coverChartAt xt).target = (chartAt H (proj xt)).target ∩ ...`
     rw [hCXT_def, coverChartAt_target_eq] at hmap
     exact hmap.1
-  -- Compose: smooth ∘ smooth = smooth.
   have hcomp : ContMDiffOn I I ∞
       ((chartAt H (M := M) (proj xt)).symm ∘ (CXT : _ → H))
       CXT.source :=
     h_chart_symm.comp h_chart_xt hMapsTo
-  -- Transfer to `proj` via congruence on the source.
   rw [hCXT_def] at hcomp
-  -- `ContMDiffOn.congr` expects `f₁ y = f y` where `f` is the smooth function.
-  -- We have `comp z = proj z`, want `proj z = comp z` for the smooth `comp`.
   refine hcomp.congr ?_
   intro z hz
   exact (hcongr z hz).symm
@@ -364,7 +331,6 @@ trivialisation around that projection). -/
 instance instT2Space :
     T2Space
       (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) := by
-  -- `proj` is a covering map, so it is `IsSeparatedMap` (Mathlib).
   have hSep : IsSeparatedMap
       (proj :
         DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M → M) :=
@@ -372,18 +338,15 @@ instance instT2Space :
   refine ⟨?_⟩
   intro a b hab
   by_cases h : proj a = proj b
-  · -- Same fibre: use `IsSeparatedMap` to separate by disjoint opens.
-    obtain ⟨U, V, hUopen, hVopen, haU, hbV, hUVdisj⟩ := hSep a b h hab
+  · obtain ⟨U, V, hUopen, hVopen, haU, hbV, hUVdisj⟩ := hSep a b h hab
     exact ⟨U, V, hUopen, hVopen, haU, hbV, hUVdisj⟩
-  · -- Different fibres: separate the projections in `M`, then pull back.
-    obtain ⟨U, V, hUopen, hVopen, hpaU, hpbV, hUVdisj⟩ := t2_separation h
+  · obtain ⟨U, V, hUopen, hVopen, hpaU, hpbV, hUVdisj⟩ := t2_separation h
     have hpcont : Continuous
         (proj :
           DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M → M) :=
       UniversalCover.proj_isCoveringMap.continuous
     refine ⟨proj ⁻¹' U, proj ⁻¹' V,
       hUopen.preimage hpcont, hVopen.preimage hpcont, hpaU, hpbV, ?_⟩
-    -- Disjoint preimages of disjoint sets.
     rw [Set.disjoint_iff] at hUVdisj ⊢
     rintro z ⟨hzU, hzV⟩
     exact hUVdisj ⟨hzU, hzV⟩
@@ -477,21 +440,8 @@ theorem fibre_countable
       ((proj :
           DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M → M)
         ⁻¹' {x}) := by
-  -- The fibre `proj ⁻¹' {x}` is in bijection with
-  -- `Path.Homotopic.Quotient default x`. By path-connectedness, this is in
-  -- bijection with `Path.Homotopic.Quotient default default = FundamentalGroup M default`.
-  -- Refined countable basis of small path-connected opens with null-homotopic
-  -- ambient loops (from the second-countable / semi-locally-simply-connected
-  -- structure).
   obtain ⟨B, hBopen, hBpc, hBnull, hBbasis⟩ :=
     uc_pi1_countable_basis_refinement M
-  -- **Good-cover property** of the refined basis: any two points common to two
-  -- basis elements are joined by a path inside the intersection.  On a smooth
-  -- manifold this is supplied by a geodesically-convex (Whitehead) refinement
-  -- of the cover — convex chart balls have convex, hence path-connected,
-  -- pairwise intersections.  Establishing that refinement requires the
-  -- Riemannian-convexity infrastructure (exponential-map normal balls) and is
-  -- isolated here as the single remaining manifold-level obligation.
   have hpcInter :
       ∀ (m n : ℕ),
         ∀ a, a ∈ B m → a ∈ B n → ∀ b, b ∈ B m → b ∈ B n →
@@ -502,7 +452,6 @@ theorem fibre_countable
     fundamentalGroup_countable_of_secondCountable M default B hBopen hBpc hBnull hBbasis hpcInter
   haveI : PathConnectedSpace M := PathConnectedSpace.of_locPathConnectedSpace
   have hpath : Path (default : M) x := PathConnectedSpace.somePath default x
-  -- Bijection between `proj ⁻¹' {x}` and `Path.Homotopic.Quotient default x`.
   let e_fibre :
       ((proj :
           DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M → M)
@@ -519,8 +468,6 @@ theorem fibre_countable
         subst hy
         rfl
       right_inv := fun q => rfl }
-  -- Bijection between `Path.Homotopic.Quotient default x` and
-  -- `Path.Homotopic.Quotient default default` via concatenation with the path.
   let e_pathTrans :
       Path.Homotopic.Quotient (default : M) x ≃
         Path.Homotopic.Quotient (default : M) (default : M) :=
@@ -540,7 +487,6 @@ theorem fibre_countable
         simp only [Path.Homotopic.Quotient.mk_symm]
         rw [Path.Homotopic.Quotient.trans_assoc, Path.Homotopic.Quotient.trans_symm,
           Path.Homotopic.Quotient.trans_refl] }
-  -- `FundamentalGroup M default` is definitionally `Path.Homotopic.Quotient default default`.
   have hPHQ_countable :
       Countable (Path.Homotopic.Quotient (default : M) (default : M)) :=
     h_pi1_countable
@@ -731,40 +677,27 @@ instances can supply it via `locallyCompactSpaceBase` (or, equivalently,
 instance instLocallyCompactSpace [LocallyCompactSpace M] :
     LocallyCompactSpace
       (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) := by
-  -- `proj` is a covering map, hence a local homeomorphism.
   have hLH : IsLocalHomeomorph (proj :
       DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M → M) :=
     UniversalCover.proj_isCoveringMap.isLocalHomeomorph
   refine ⟨fun xt n hn => ?_⟩
-  -- Extract an `OpenPartialHomeomorph` around `xt`.
   obtain ⟨e, hxte, _hfe⟩ := hLH xt
-  -- `e.source` is open and contains `xt`, so `n ∩ e.source` is a neighbourhood
-  -- of `xt` in the universal cover.
   have hSrcNhd : e.source ∈ 𝓝 xt := e.open_source.mem_nhds hxte
   have hInterNhd : n ∩ e.source ∈ 𝓝 xt := Filter.inter_mem hn hSrcNhd
-  -- Push the neighbourhood across `e` to obtain a neighbourhood of `e xt` in `M`.
   have himg : e '' (n ∩ e.source) ∈ 𝓝 (e xt) :=
     e.image_mem_nhds hxte hInterNhd
-  -- Pick a compact neighbourhood `K` of `e xt` contained in `e '' (n ∩ e.source)`.
   obtain ⟨K, hK_nhd, hKsub, hKcomp⟩ :=
     LocallyCompactSpace.local_compact_nhds (e xt) (e '' (n ∩ e.source)) himg
-  -- The image being inside `e '' (n ∩ e.source)` implies `K ⊆ e.target`.
   have hKtgt : K ⊆ e.target := by
     intro y hy
     obtain ⟨a, ha, rfl⟩ := hKsub hy
     exact e.map_source ha.2
-  -- Pull `K` back through `e.symm`; it is compact (continuous image of compact).
   have hSymmComp : IsCompact (e.symm '' K) :=
     hKcomp.image_of_continuousOn (e.continuousOn_symm.mono hKtgt)
   refine ⟨e.symm '' K, ?_, ?_, hSymmComp⟩
-  · -- `e.symm '' K` is a neighbourhood of `xt`: under the bijection
-    -- `map e.symm (𝓝 (e xt)) = 𝓝 xt`, the set `K ∈ 𝓝 (e xt)` maps to
-    -- `e.symm '' K ∈ 𝓝 xt`.
-    rw [← e.symm_map_nhds_eq hxte]
+  · rw [← e.symm_map_nhds_eq hxte]
     exact Filter.image_mem_map hK_nhd
-  · -- `e.symm '' K ⊆ n`: for `y = e a` with `a ∈ n ∩ e.source`,
-    -- `e.symm y = a ∈ n` by `e.left_inv`.
-    rintro _ ⟨y, hyK, rfl⟩
+  · rintro _ ⟨y, hyK, rfl⟩
     obtain ⟨a, ha, rfl⟩ := hKsub hyK
     rw [e.left_inv ha.2]
     exact ha.1

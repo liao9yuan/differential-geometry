@@ -30,8 +30,8 @@ This file packages three classical properties of the normal chart:
   reads `g.inner p v w` for all `v, w : E`. The user-facing pullback
   identity is `normalChartAt_metric_pullback_at_origin`.
 
-* `normalChartAt_radial_image` — the radial-line property: for
-  sufficiently small `s` (i.e. `s • v` in the chart's symm-target),
+* `normalChartAt_expMap_smul` — the radial-line property: for
+  sufficiently small `s` (i.e. `s • v` in the chart's target),
   `normalChartAt g p (expMap g p (s • v)) = s • v`. This expresses, in
   the cleanest form, the property "Christoffel symbols vanish at `p` in
   normal coordinates": radial geodesics through `p` are straight lines
@@ -81,13 +81,6 @@ section NormalChart
 
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
-/-! ## The exponential-side partial diffeomorphism
-
-We re-extract the partial diffeomorphism produced by
-`exists_open_nhds_expMap_diffeoOn` and name its components. The
-`Classical.choose` data is opaque, so users should consume the named
-properties below rather than unfold the definition. -/
-
 /-- The exponential-side partial diffeomorphism at `p`: a
 `PartialDiffeomorph` containing `0 ∈ T_p M` in its source whose
 underlying function agrees with `v ↦ expMap g p v` on the source. -/
@@ -120,12 +113,6 @@ lemma p_mem_expMapDiffeo_target (g : SmoothRiemannianMetric I M) (p : M) :
     (zero_mem_expMapDiffeo_source (I := I) g p)
   rw [expMapDiffeo_zero] at h
   exact h
-
-/-! ## G.4.1 — The normal chart
-
-The normal chart at `p` is the `symm` of the exponential-side
-diffeomorphism. It maps a manifold neighborhood of `p` (the previous
-target) to an open neighborhood of `0` in `E` (the previous source). -/
 
 /-- **The normal coordinate chart at `p`.** -/
 def normalChartAt (g : SmoothRiemannianMetric I M) (p : M) :
@@ -168,7 +155,6 @@ theorem normalChartAt_source (g : SmoothRiemannianMetric I M) (p : M) :
 theorem normalChartAt_centre (g : SmoothRiemannianMetric I M) (p : M) :
     normalChartAt (I := I) g p p = (0 : E) := by
   classical
-  -- normalChartAt = expMapDiffeo.symm; expMapDiffeo 0 = p; so symm p = 0.
   have h_inv : (expMapDiffeo (I := I) g p).symm
       ((expMapDiffeo (I := I) g p) (0 : E)) = (0 : E) :=
     (expMapDiffeo (I := I) g p).left_inv (zero_mem_expMapDiffeo_source (I := I) g p)
@@ -185,7 +171,6 @@ lemma zero_mem_normalChartAt_target (g : SmoothRiemannianMetric I M) (p : M) :
 lemma normalChartAt_symm_zero (g : SmoothRiemannianMetric I M) (p : M) :
     (normalChartAt (I := I) g p).symm (0 : E) = p := by
   classical
-  -- normalChartAt.symm = expMapDiffeo (the original); at 0 it gives p.
   have : (normalChartAt (I := I) g p).symm (0 : E) =
       (expMapDiffeo (I := I) g p) (0 : E) := rfl
   rw [this]
@@ -212,10 +197,7 @@ lemma normalChartAt_symm_apply (g : SmoothRiemannianMetric I M) (p : M)
     (normalChartAt (I := I) g p).symm v =
       (expMap (I := I) g p (show TangentSpace I p from v) : M) := by
   classical
-  -- normalChartAt.symm = expMapDiffeo (as a function); apply via the eq lemma.
-  -- `.symm.source = .target` for `normalChartAt`, which is the expMapDiffeo source.
   have hv' : v ∈ (expMapDiffeo (I := I) g p).source := by
-    -- normalChartAt.symm.source = normalChartAt.target = expMapDiffeo.source.
     have : (normalChartAt (I := I) g p).symm.source =
         (normalChartAt (I := I) g p).target := rfl
     rw [this] at hv
@@ -238,14 +220,6 @@ lemma normalChartAt_symm_contMDiffOn (g : SmoothRiemannianMetric I M) (p : M) :
     ContMDiffOn 𝓘(ℝ, E) I 1 (normalChartAt (I := I) g p).symm
       (normalChartAt (I := I) g p).target :=
   (normalChartAt (I := I) g p).contMDiffOn_invFun
-
-/-! ## Differential of the normal chart at `p`
-
-The exponential map's manifold derivative at the origin is the identity
-(`mfderiv_expMap_at_zero`). The inverse function theorem's manifold
-form: for a `PartialDiffeomorph` at `n ≥ 1`, the differentials of the
-forward and reverse maps compose to the identity. Applied at the base
-point this yields `mfderiv (normalChartAt g p) p = id`. -/
 
 /-- The exponential-side diffeomorphism is differentiable at `0`. -/
 private lemma expMapDiffeo_mdifferentiableAt_zero
@@ -276,7 +250,6 @@ private lemma mfderiv_expMapDiffeo_at_zero
         (fun v : E => (expMap (I := I) g p (show TangentSpace I p from v) : M))
         (0 : E) := by
   classical
-  -- The two functions agree on a neighborhood of 0 (the open source).
   have h_eventually : expMapDiffeo (I := I) g p =ᶠ[nhds (0 : E)]
       (fun v : E => (expMap (I := I) g p (show TangentSpace I p from v) : M)) := by
     refine Filter.eventuallyEq_of_mem
@@ -305,7 +278,6 @@ private lemma mfderiv_normalChartAt_comp_expMapDiffeo
         (mfderiv 𝓘(ℝ, E) I (expMapDiffeo (I := I) g p) (0 : E)) =
       ContinuousLinearMap.id ℝ E := by
   classical
-  -- normalChartAt ∘ expMapDiffeo = id on a nbhd of 0 (by left-inverse on source).
   have h_eventually : (normalChartAt (I := I) g p) ∘ (expMapDiffeo (I := I) g p)
       =ᶠ[nhds (0 : E)] (_root_.id : E → E) := by
     refine Filter.eventuallyEq_of_mem
@@ -313,9 +285,7 @@ private lemma mfderiv_normalChartAt_comp_expMapDiffeo
         (zero_mem_expMapDiffeo_source (I := I) g p)) ?_
     intro v hv
     change (normalChartAt (I := I) g p) ((expMapDiffeo (I := I) g p) v) = v
-    -- normalChartAt = expMapDiffeo.symm; left_inv on source gives this.
     exact (expMapDiffeo (I := I) g p).left_inv hv
-  -- Combine.
   have h_mfderiv_id : mfderiv 𝓘(ℝ, E) 𝓘(ℝ, E) (_root_.id : E → E) (0 : E) =
       ContinuousLinearMap.id ℝ E := mfderiv_id
   have h_mfderiv_comp_eq :
@@ -323,7 +293,6 @@ private lemma mfderiv_normalChartAt_comp_expMapDiffeo
         (normalChartAt (I := I) g p ∘ expMapDiffeo (I := I) g p) (0 : E) =
       mfderiv 𝓘(ℝ, E) 𝓘(ℝ, E) (_root_.id : E → E) (0 : E) :=
     h_eventually.mfderiv_eq
-  -- mfderiv_comp at v=0 with intermediate point expMapDiffeo 0 = p.
   have h_normal_diff : MDifferentiableAt I 𝓘(ℝ, E) (normalChartAt (I := I) g p)
       ((expMapDiffeo (I := I) g p) (0 : E)) := by
     rw [expMapDiffeo_zero (I := I) g p]
@@ -334,9 +303,7 @@ private lemma mfderiv_normalChartAt_comp_expMapDiffeo
     (f := expMapDiffeo (I := I) g p)
     (g := normalChartAt (I := I) g p) (x := (0 : E))
     h_normal_diff h_expMap_diff
-  -- Substitute expMapDiffeo 0 = p.
   rw [expMapDiffeo_zero (I := I) g p] at h_chain
-  -- Combine.
   rw [h_chain, h_mfderiv_id] at h_mfderiv_comp_eq
   exact h_mfderiv_comp_eq
 
@@ -349,32 +316,21 @@ theorem mfderiv_normalChartAt_self (g : SmoothRiemannianMetric I M) (p : M) :
   classical
   have h := mfderiv_normalChartAt_comp_expMapDiffeo (I := I) g p
   rw [mfderiv_expMapDiffeo_at_zero_eq_id (I := I) g p] at h
-  -- h : (mfderiv normalChart at p) ∘L id = id, so mfderiv normalChart = id.
   simpa using h
 
-/-! ## G.4.2 — Metric pullback at the origin equals `g.inner p`
-
-The pullback of the metric `g.inner` via the normal chart, evaluated at
-`p`, applied to `v, w : E` is by definition
-`g.inner p ((D φ_p p)⁻¹ v) ((D φ_p p)⁻¹ w)` where
-`(D φ_p p)⁻¹ = D φ_p.symm 0 = mfderiv (expMap g p) 0 = id`. We state the
-result in the cleanest form: with `D φ_p p = id` (as above), the
-pullback at `p` of `(v, w)` equals `g.inner p v w`. -/
-
-/-- The exponential-side diffeomorphism's derivative at `0` is the
-identity (re-statement of `mfderiv_expMap_at_zero` for the
-`expMapDiffeo` wrapper). -/
+/-- The inverse of the normal chart has identity manifold derivative at
+`0`: since `(normalChartAt g p).symm` agrees with `expMapDiffeo g p` and
+the latter's derivative at `0` is the identity. -/
 theorem mfderiv_normalChartAt_symm_zero (g : SmoothRiemannianMetric I M) (p : M) :
     mfderiv 𝓘(ℝ, E) I (normalChartAt (I := I) g p).symm (0 : E) =
       ContinuousLinearMap.id ℝ E := by
-  -- normalChartAt.symm = expMapDiffeo, and the derivative is at 0.
   have h_eq : mfderiv 𝓘(ℝ, E) I (normalChartAt (I := I) g p).symm (0 : E) =
       mfderiv 𝓘(ℝ, E) I (expMapDiffeo (I := I) g p) (0 : E) := rfl
   rw [h_eq]
   exact mfderiv_expMapDiffeo_at_zero_eq_id (I := I) g p
 
-/-- **G.4.2 (intrinsic form): the metric pullback at the origin under
-the normal chart equals `g.inner p`.** Specifically, applying the
+/-- **The metric pullback at the origin under the normal chart equals
+`g.inner p`.** Specifically, applying the
 inverse-of-normal-chart's differential at the origin to vectors
 `v, w : E` (which gives `v, w` themselves by
 `mfderiv_normalChartAt_symm_zero`), the metric inner product equals
@@ -386,7 +342,6 @@ theorem normalChartAt_metric_pullback_at_origin
         (mfderiv 𝓘(ℝ, E) I (normalChartAt (I := I) g p).symm (0 : E) w) =
       g.inner p v w := by
   rw [mfderiv_normalChartAt_symm_zero (I := I) g p]
-  -- Both arguments become `id v`, `id w`, which are `v`, `w`.
   rfl
 
 /-- **Companion statement: the metric pullback at `p` in normal
@@ -402,16 +357,7 @@ theorem normalChartAt_metric_at_origin
       g.inner p v w :=
   normalChartAt_metric_pullback_at_origin (I := I) g p v w
 
-/-! ## G.4.3 — Radial geodesics are straight lines in the normal chart
-
-A scaled tangent vector `s • v` lying in the chart's target (= the
-exponential's source) is sent by `(normalChartAt g p).symm` to
-`expMap g p (s • v)`, and applying the chart back gives `s • v`. That
-is, the radial curve `s ↦ expMap g p (s • v)` in `M` has the linear
-chart-coordinate representation `s ↦ s • v`, so its chart-coordinate
-acceleration is zero. -/
-
-/-- **G.4.3 (the radial-line identity).** If `s • v` lies in the target
+/-- **The radial-line identity.** If `s • v` lies in the target
 of the normal chart at `p`, then the chart applied to the
 exponential-map image returns `s • v`. -/
 theorem normalChartAt_expMap_smul
@@ -420,19 +366,14 @@ theorem normalChartAt_expMap_smul
     normalChartAt (I := I) g p
       (expMap (I := I) g p (show TangentSpace I p from s • v)) = s • v := by
   classical
-  -- s • v lies in expMapDiffeo source; expMapDiffeo (s • v) = expMap (s • v);
-  -- so normalChartAt (= symm) of that equals s • v by left_inv.
   have hsv' : s • v ∈ (expMapDiffeo (I := I) g p).source := by
     rw [← normalChartAt_target_eq (I := I) g p]; exact hsv
-  -- expMapDiffeo applied at s • v equals expMap g p (s • v).
   have h_eq_exp : expMapDiffeo (I := I) g p (s • v) =
       (expMap (I := I) g p (show TangentSpace I p from s • v) : M) :=
     expMapDiffeo_apply_eq (I := I) g p hsv'
-  -- Apply normalChartAt (= symm) to both sides, use left_inv on the LHS.
   have h_inv : (expMapDiffeo (I := I) g p).symm
       ((expMapDiffeo (I := I) g p) (s • v)) = s • v :=
     (expMapDiffeo (I := I) g p).left_inv hsv'
-  -- normalChartAt = expMapDiffeo.symm as a function on E.
   have h_norm : normalChartAt (I := I) g p
       ((expMap (I := I) g p (show TangentSpace I p from s • v) : M)) = s • v := by
     rw [← h_eq_exp]; exact h_inv
@@ -450,7 +391,7 @@ def radialChartCurve (g : SmoothRiemannianMetric I M) (p : M) (v : E) : ℝ → 
       normalChartAt (I := I) g p
         (expMap (I := I) g p (show TangentSpace I p from s • v)) := rfl
 
-/-- **G.4.3 (curve identity).** On the open set of `s : ℝ` such that
+/-- **The radial curve identity.** On the open set of `s : ℝ` such that
 `s • v ∈ (normalChartAt g p).target`, the radial chart-coordinate curve
 equals the linear function `s ↦ s • v`. -/
 theorem radialChartCurve_eq_linear
@@ -499,7 +440,6 @@ theorem radialChartCurve_hasDerivAt_zero
     HasDerivAt (radialChartCurve (I := I) g p v) v (0 : ℝ) := by
   classical
   have h_linear : HasDerivAt (fun s : ℝ => s • v) v (0 : ℝ) := by
-    -- Derivative of s ↦ s • v at any point is v.
     simpa using (hasDerivAt_id (0 : ℝ)).smul_const v
   exact h_linear.congr_of_eventuallyEq
     (radialChartCurve_eventuallyEq (I := I) g p v)
@@ -512,36 +452,29 @@ theorem radialChartCurve_secondDeriv_zero
     HasDerivAt (fun s : ℝ => deriv (radialChartCurve (I := I) g p v) s)
       (0 : E) (0 : ℝ) := by
   classical
-  -- Eventually equal: deriv of radial curve = deriv of linear curve = constant v.
   have h_deriv_eq : (fun s : ℝ => deriv (radialChartCurve (I := I) g p v) s)
       =ᶠ[nhds (0 : ℝ)] (fun _ : ℝ => v) := by
-    -- Use eventually-equal: agrees with the linear curve, so derivs agree.
     have h_curve_eq := radialChartCurve_eventuallyEq (I := I) g p v
-    -- Pointwise: at any s in the radial domain, deriv = v.
     refine Filter.eventually_iff_exists_mem.mpr ?_
     refine ⟨radialDomain (I := I) g p v, ?_, ?_⟩
     · exact (radialDomain_isOpen (I := I) g p v).mem_nhds
         (zero_mem_radialDomain (I := I) g p v)
     · intro s hs
-      -- The curve equals s ↦ s • v in a neighborhood of s, so derivs agree.
       have hs_nhd : radialChartCurve (I := I) g p v =ᶠ[nhds s] (fun t : ℝ => t • v) := by
         refine Filter.eventuallyEq_of_mem
           ((radialDomain_isOpen (I := I) g p v).mem_nhds hs) ?_
         intro t ht
         exact radialChartCurve_eq_linear (I := I) g p v t ht
-      -- deriv via Filter.EventuallyEq.deriv_eq.
       have h_deriv : deriv (radialChartCurve (I := I) g p v) s =
           deriv (fun t : ℝ => t • v) s := hs_nhd.deriv_eq
-      -- The derivative of t ↦ t • v at s is v.
       have hlin : HasDerivAt (fun t : ℝ => t • v) v s := by
         simpa using (hasDerivAt_id s).smul_const v
       change deriv (radialChartCurve (I := I) g p v) s = v
       rw [h_deriv]; exact hlin.deriv
-  -- Apply HasDerivAt for the constant function v, transferred via eventually equality.
   have h_const : HasDerivAt (fun _ : ℝ => v) (0 : E) (0 : ℝ) := hasDerivAt_const 0 v
   exact h_const.congr_of_eventuallyEq h_deriv_eq
 
-/-- **G.4.3 (the acceleration-vanishing identity).** The second-order
+/-- **The acceleration-vanishing identity.** The second-order
 chart-coordinate acceleration of the radial geodesic
 `s ↦ expMap g p (s • v)` at `s = 0`, computed in normal coordinates at
 `p`, is zero. Combined with `radialChartCurve_hasDerivAt_zero` (first
@@ -574,9 +507,6 @@ theorem polarization_of_symm_quadratic_eventually_zero
   classical
   rcases Filter.eventually_iff_exists_mem.mp hzero with ⟨U, hU_mem, hU⟩
   rcases _root_.mem_nhds_iff.mp hU_mem with ⟨V, hV_sub, hV_open, hV_mem⟩
-  -- We need an open `W` around `(0, 0)` such that for every `p ∈ W`,
-  -- `p.1, p.2, p.1 + p.2 ∈ V`. Use `W := (V ∩ add⁻¹V) ×ˢ V` intersected
-  -- with the `+`-preimage.
   have h_add_cont : Continuous fun q : E × E => q.1 + q.2 :=
     continuous_fst.add continuous_snd
   have h_add_zero : (0 : E) + (0 : E) = 0 := by simp
@@ -608,14 +538,11 @@ theorem polarization_of_symm_quadratic_eventually_zero
   rw [h_expand] at h3
   have hsym' : B p.2 p.1 = B p.1 p.2 := hsymm p.2 p.1
   rw [hsym'] at h3
-  -- h3 : B p.1 p.1 + B p.1 p.2 + B p.1 p.2 + B p.2 p.2 = 0
   rw [h1, h2] at h3
-  -- h3 : 0 + B p.1 p.2 + B p.1 p.2 + 0 = 0
   have h_double : B p.1 p.2 + B p.1 p.2 = 0 := by
     have heq : (0 : F) + B p.1 p.2 + B p.1 p.2 + 0 = B p.1 p.2 + B p.1 p.2 := by abel
     rw [heq] at h3
     exact h3
-  -- Cancel 2 in ℝ-module: `x + x = 0` ⟹ `2 • x = 0` ⟹ `x = 0`.
   have h_two_smul : (2 : ℝ) • B p.1 p.2 = 0 := by
     rw [two_smul]; exact h_double
   rcases (smul_eq_zero.mp h_two_smul) with h2_eq | hresult

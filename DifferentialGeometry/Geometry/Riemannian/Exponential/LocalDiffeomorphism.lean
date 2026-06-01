@@ -57,8 +57,6 @@ section LocalDiffeomorph
 
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
-/-! ## The composite `extChartAt I p ∘ expMap g p` -/
-
 /-- The chart-pushed exponential map at `p`. -/
 private def chartedExpAt (g : SmoothRiemannianMetric I M) (p : M) : E → E :=
   fun v => (extChartAt I p) (expMap (I := I) g p (show TangentSpace I p from v))
@@ -91,7 +89,6 @@ private lemma chartedExpAt_hasFDerivAt_zero
     (g : SmoothRiemannianMetric I M) (p : M) :
     HasFDerivAt (chartedExpAt (I := I) g p) (ContinuousLinearMap.id ℝ E) (0 : E) := by
   classical
-  -- Manifold derivative of `expMap g p` at `0` is the identity.
   have hexp_mfd : HasMFDerivAt 𝓘(ℝ, E) I
       (fun v : E => (expMap (I := I) g p (show TangentSpace I p from v) : M))
       (0 : E) (ContinuousLinearMap.id ℝ E) := by
@@ -99,7 +96,6 @@ private lemma chartedExpAt_hasFDerivAt_zero
       one_ne_zero).hasMFDerivAt
     rw [mfderiv_expMap_at_zero (I := I) g p] at hm
     exact hm
-  -- Manifold derivative of `extChartAt I p` at `p` is the identity.
   have hext_hasMFD : HasMFDerivAt I 𝓘(ℝ, E) (extChartAt I p) p
       (ContinuousLinearMap.id ℝ E) := by
     have hm := ((contMDiffAt_extChartAt (I := I) (x := p) (n := 1)).mdifferentiableAt
@@ -131,8 +127,6 @@ private lemma chartedExpAt_hasFDerivAt_refl
       ContinuousLinearMap.id ℝ E := by
     ext v; simp
   rw [hcoe]; exact h
-
-/-! ## The IFT-produced `OpenPartialHomeomorph` -/
 
 /-- The Banach inverse function theorem applied to `chartedExpAt g p` at
 `0`, with derivative the identity continuous linear equiv. -/
@@ -177,13 +171,6 @@ private lemma chartedExpAtIFTHomeomorph_symm_contDiffAt
   rw [chartedExpAtIFTHomeomorph_symm_eq_localInverse]
   exact hinv
 
-/-! ## Constructing the nice open neighborhood of `0` in `E`
-
-We extract an open neighborhood `U` of `0 : E` with all needed
-properties packaged together, together with an open neighborhood `W`
-of `chartedExpAt g p 0` in `E` contained in the IFT homeomorph's target
-on which the inverse is `ContDiffOn 1`. -/
-
 private theorem exists_nice_open_nhds
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ (U : Set E) (W : Set E),
@@ -199,7 +186,6 @@ private theorem exists_nice_open_nhds
       ContDiffOn ℝ 1 (chartedExpAtIFTHomeomorph (I := I) g p).symm W ∧
       chartedExpAt (I := I) g p '' U ⊆ W := by
   classical
-  -- Smooth-symm open nbhd of chartedExpAt 0 in the IFT target.
   have hsymm_at := chartedExpAtIFTHomeomorph_symm_contDiffAt (I := I) g p
   obtain ⟨u_W, hu_W_nhd, hu_W_on⟩ : ∃ u ∈ 𝓝 (chartedExpAt (I := I) g p (0 : E)),
       ContDiffOn ℝ 1 (chartedExpAtIFTHomeomorph (I := I) g p).symm u :=
@@ -213,7 +199,6 @@ private theorem exists_nice_open_nhds
   have hW_sub_target : W ⊆ (chartedExpAtIFTHomeomorph (I := I) g p).target := fun _ h => h.2
   have hW_smooth : ContDiffOn ℝ 1 (chartedExpAtIFTHomeomorph (I := I) g p).symm W :=
     hu_W_on.mono (fun w hw => hu_W_sub hw.1)
-  -- Smooth-expMap open nbhd of 0.
   have hexp : ContMDiffAt 𝓘(ℝ, E) I 1
       (fun v : E => (expMap (I := I) g p (show TangentSpace I p from v) : M))
       (0 : E) :=
@@ -226,12 +211,10 @@ private theorem exists_nice_open_nhds
     (contMDiffAt_iff_contMDiffOn_nhds hone_ne_top).mp hexp
   rcases _root_.mem_nhds_iff.mp hu_smooth_nhd with
     ⟨u_open, hu_open_sub, hu_open_isOpen, hu_open_mem⟩
-  -- IFT-source openness.
   have hIFT_source_isOpen : IsOpen (chartedExpAtIFTHomeomorph (I := I) g p).source :=
     (chartedExpAtIFTHomeomorph (I := I) g p).open_source
   have h0_IFT : (0 : E) ∈ (chartedExpAtIFTHomeomorph (I := I) g p).source :=
     zero_mem_chartedExpAtIFTHomeomorph_source (I := I) g p
-  -- ContinuousOn expMap on u_open.
   have hcont_on_uopen : ContinuousOn
       (fun v : E => (expMap (I := I) g p (show TangentSpace I p from v) : M)) u_open :=
     ContMDiffOn.continuousOn (hu_smooth_on.mono hu_open_sub)
@@ -243,24 +226,18 @@ private theorem exists_nice_open_nhds
       expMap_zero (I := I) g p
     rw [hpt]
     exact mem_extChartAt_source (I := I) p
-  -- Use continuousOn_iff' to extract an open set whose intersection with u_open equals
-  -- the preimage of (extChartAt I p).source.
   obtain ⟨w_open, hw_open_isOpen, hw_open_eq⟩ :=
     continuousOn_iff'.mp hcont_on_uopen (extChartAt I p).source h_extSrc_open
-  -- ContinuousOn chartedExpAt on (IFT source). Since chartedExpAt agrees with the
-  -- open partial homeomorph, it's continuous on its source.
   have hcont_chartedExp : ContinuousOn (chartedExpAt (I := I) g p)
       (chartedExpAtIFTHomeomorph (I := I) g p).source := by
     have := (chartedExpAtIFTHomeomorph (I := I) g p).continuousOn_toFun
     exact this
   obtain ⟨w_chart, hw_chart_isOpen, hw_chart_eq⟩ :=
     continuousOn_iff'.mp hcont_chartedExp W hW_open
-  -- Now build U = IFT_source ∩ u_open ∩ w_open ∩ w_chart.
   set U : Set E := (chartedExpAtIFTHomeomorph (I := I) g p).source ∩ u_open ∩ w_open ∩ w_chart
     with hU_def
   have hU_isOpen : IsOpen U :=
     ((hIFT_source_isOpen.inter hu_open_isOpen).inter hw_open_isOpen).inter hw_chart_isOpen
-  -- 0 ∈ U. hw_open_eq : f ⁻¹' (ext.source) ∩ u_open = w_open ∩ u_open.
   have h0_w_open : (0 : E) ∈ w_open := by
     have h0_preim : (0 : E) ∈
         ((fun v : E => (expMap (I := I) g p (show TangentSpace I p from v) : M))
@@ -276,7 +253,6 @@ private theorem exists_nice_open_nhds
   have h0U : (0 : E) ∈ U := ⟨⟨⟨h0_IFT, hu_open_mem⟩, h0_w_open⟩, h0_w_chart⟩
   have hU_sub_IFT : U ⊆ (chartedExpAtIFTHomeomorph (I := I) g p).source :=
     fun _ h => h.1.1.1
-  -- Smooth expMap on U.
   have hU_smooth : ContMDiffOn 𝓘(ℝ, E) I 1
       (fun v : E => (expMap (I := I) g p (show TangentSpace I p from v) : M)) U := by
     apply hu_smooth_on.mono

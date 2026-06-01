@@ -145,7 +145,6 @@ theorem chartGramOnE_partialDeriv_eq_christoffel_sum_split
             chartGramOnE (I := I) g α l i y) := by
   classical
   have hytgt : y ∈ (extChartAt I α).target := interior_subset hy
-  -- Abbreviation for the bracket inside Γ.
   let S : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) →
           Fin (Module.finrank ℝ E) → ℝ :=
     fun a b c =>
@@ -156,8 +155,6 @@ theorem chartGramOnE_partialDeriv_eq_christoffel_sum_split
       partialDeriv (E := E) a (chartGramOnE (I := I) g α c b) y +
         partialDeriv (E := E) b (chartGramOnE (I := I) g α c a) y -
         partialDeriv (E := E) c (chartGramOnE (I := I) g α a b) y := fun _ _ _ => rfl
-  -- Identify `chartChristoffel a b c y` with the explicit chart-pulled formula
-  -- using `chartInvGramOnE` (this holds by `rfl`).
   have hsubst :
       (∑ l : Fin (Module.finrank ℝ E),
           chartChristoffel (I := I) g α k i l y *
@@ -174,7 +171,6 @@ theorem chartGramOnE_partialDeriv_eq_christoffel_sum_split
               chartInvGramOnE (I := I) g α l m y * S k j m) *
               chartGramOnE (I := I) g α l i y) := rfl
   rw [hsubst]
-  -- Distribute and swap inner sums to bring G_{l?} inside the m-sum.
   have hT1 :
       (∑ l : Fin (Module.finrank ℝ E),
         ((1 / 2 : ℝ) * ∑ m : Fin (Module.finrank ℝ E),
@@ -236,7 +232,6 @@ theorem chartGramOnE_partialDeriv_eq_christoffel_sum_split
     refine Finset.sum_congr rfl (fun l _ => ?_)
     ring
   rw [hT1, hT2]
-  -- Collapse the inner (∑_l G^{lm} G_{l?}) sums via the Gram-inverse pairing.
   have hcollapse1 : ∀ m : Fin (Module.finrank ℝ E),
       (∑ l : Fin (Module.finrank ℝ E),
           chartInvGramOnE (I := I) g α l m y *
@@ -271,7 +266,6 @@ theorem chartGramOnE_partialDeriv_eq_christoffel_sum_split
     congr 2
     · refine Finset.sum_congr rfl (fun m _ => ?_); rw [hcollapse1 m]
     · refine Finset.sum_congr rfl (fun m _ => ?_); rw [hcollapse2 m]]
-  -- Collapse each (∑_m S_{...m} (if m = ?)) to the single non-zero term.
   rw [show
       (∑ m : Fin (Module.finrank ℝ E),
           S k i m * (if m = j then (1 : ℝ) else 0)) =
@@ -292,13 +286,7 @@ theorem chartGramOnE_partialDeriv_eq_christoffel_sum_split
       simp [hmi]
     · intro hi
       exact absurd (Finset.mem_univ i) hi]
-  -- Now expand the definitions of `S k i j` and `S k j i` and simplify.
   rw [hS k i j, hS k j i]
-  -- After the ring rearrangement, use partial-derivative symmetry on Gram
-  -- entries to fold pairs that differ only by a swap of indices.
-  --   S k i j = ∂_k G_{ji} + ∂_i G_{jk} - ∂_j G_{ki}
-  --   S k j i = ∂_k G_{ij} + ∂_j G_{ik} - ∂_i G_{kj}
-  -- Apply ∂_? G_{ab} = ∂_? G_{ba}:
   rw [partialDeriv_chartGramOnE_swap_indices (I := I) g α k j i y,
       partialDeriv_chartGramOnE_swap_indices (I := I) g α i j k y,
       partialDeriv_chartGramOnE_swap_indices (I := I) g α j k i y,

@@ -73,8 +73,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 
-/-! ## Chart-local representation of the sharp -/
-
 /-- The `i`-th chart-basis component of `metricSharp g · (cv ·)` at `x`, in the
 chart at `α`. This is `∑_j G^{ij}(x) · cv_j(x)`, where
 `cv_j(x) := cv x (chartBasisVecFiber α j x)`. -/
@@ -103,13 +101,6 @@ def metricSharpChartLocal (g : SmoothRiemannianMetric I M) (α : M)
     metricSharpChartCoeff (I := I) g α cv i x •
       chartBasisVecFiber (I := I) α i x
 
-/-! ## The chart-local Riesz identity
-
-For `x` in the chart base set and any index `k`,
-`g_x(metricSharpChartLocal, e_k(x)) = cv_k(x)`. This is the pure linear-algebra
-step; its proof mirrors `inner_gradChartLocal_chartBasis` and
-`inner_ricciSharpChartLocal_chartBasis`. -/
-
 /-- The inner product of `metricSharpChartLocal` with a chart-basis frame vector
 `e_k` is the `k`-th chart-basis component `cv_k(x)` of the covector. -/
 lemma inner_metricSharpChartLocal_chartBasis
@@ -122,8 +113,6 @@ lemma inner_metricSharpChartLocal_chartBasis
       = cv x (chartBasisVecFiber (I := I) α k x) := by
   classical
   unfold metricSharpChartLocal
-  -- LHS: g.inner x (∑ i, a_i • e_i) e_k = ∑ i, a_i * G_{ik}
-  -- where `a_i = metricSharpChartCoeff i x`.
   rw [show g.inner x (∑ i, metricSharpChartCoeff (I := I) g α cv i x •
               chartBasisVecFiber (I := I) α i x)
             (chartBasisVecFiber (I := I) α k x) =
@@ -131,8 +120,7 @@ lemma inner_metricSharpChartLocal_chartBasis
             g.inner x (chartBasisVecFiber (I := I) α i x)
               (chartBasisVecFiber (I := I) α k x) from ?_]
   swap
-  · -- finite-sum expansion of g.inner.
-    rw [show (g.inner x (∑ i, metricSharpChartCoeff (I := I) g α cv i x •
+  · rw [show (g.inner x (∑ i, metricSharpChartCoeff (I := I) g α cv i x •
                 chartBasisVecFiber (I := I) α i x)) =
             (∑ i, metricSharpChartCoeff (I := I) g α cv i x •
                 g.inner x (chartBasisVecFiber (I := I) α i x)) from ?_]
@@ -144,7 +132,6 @@ lemma inner_metricSharpChartLocal_chartBasis
       refine Finset.sum_congr rfl ?_
       intro i _
       rw [map_smul]
-  -- Substitute `metricSharpChartCoeff i x = ∑ j, G⁻¹_{ij} cv_j(x)`.
   have ha : ∀ i, metricSharpChartCoeff (I := I) g α cv i x =
       ∑ j, chartInvGramMatrix (I := I) g α x i j *
         cv x (chartBasisVecFiber (I := I) α j x) := fun i => rfl
@@ -159,7 +146,6 @@ lemma inner_metricSharpChartLocal_chartBasis
     intro i _
     rw [ha i]
     rfl
-  -- Interchange sums and use the Gram-inverse identity.
   rw [show ∑ i, (∑ j, chartInvGramMatrix (I := I) g α x i j *
               cv x (chartBasisVecFiber (I := I) α j x)) *
                 chartGramMatrix (I := I) g α x i k =
@@ -183,7 +169,6 @@ lemma inner_metricSharpChartLocal_chartBasis
       refine Finset.sum_congr rfl ?_
       intro j _
       ring
-  -- Now use ∑ i, Ginv_{ij} * G_{ik} = δ_{jk}.
   have hsym : ∀ i, chartGramMatrix (I := I) g α x i k =
       chartGramMatrix (I := I) g α x k i := fun i => g.symm x _ _
   have hkron : ∀ j, (∑ i, chartInvGramMatrix (I := I) g α x i j *
@@ -219,12 +204,6 @@ lemma inner_metricSharpChartLocal_chartBasis
   · intro hk
     exact absurd (Finset.mem_univ k) hk
 
-/-! ## `metricSharpChartLocal` equals `metricSharp` on the base set
-
-Two tangent vectors agree iff their inner products with all chart-basis
-vectors agree (since `chartBasisFamily` is a basis). Combining the chart-local
-Riesz identity with the defining identity for `metricSharp`, we conclude. -/
-
 /-- On the chart base set, the chart-local linear-combination representative of
 the sharp equals the abstract pointwise sharp `metricSharp g x (cv x)`. -/
 lemma metricSharpChartLocal_eq_metricSharp
@@ -238,9 +217,7 @@ lemma metricSharpChartLocal_eq_metricSharp
   ext v
   change g.inner x (metricSharpChartLocal (I := I) g α cv x) v =
     g.inner x (metricSharp (I := I) g x (cv x)) v
-  -- Replace the RHS by `cv x v` via `inner_metricSharp`.
   rw [inner_metricSharp (I := I) g x (cv x) v]
-  -- Decompose `v = ∑ k, c k • e_k x`.
   set bs : Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I x) :=
     chartBasisFamily (I := I) α hx
   set c : Fin (Module.finrank ℝ E) → ℝ := fun k => bs.repr v k
@@ -251,7 +228,6 @@ lemma metricSharpChartLocal_eq_metricSharp
     intro k _
     rw [chartBasisFamily_apply (I := I) α hx k]
   rw [hv_decomp]
-  -- LHS and RHS are both linear in `v`, so commute with the finite sum.
   rw [show g.inner x (metricSharpChartLocal (I := I) g α cv x)
         (∑ k, c k • chartBasisVecFiber (I := I) α k x) =
         ∑ k, c k * g.inner x (metricSharpChartLocal (I := I) g α cv x)
@@ -273,8 +249,6 @@ lemma metricSharpChartLocal_eq_metricSharp
   congr 1
   rw [inner_metricSharpChartLocal_chartBasis (I := I) g α cv hx k]
 
-/-! ## Smoothness of the chart coefficients and the chart-local representative -/
-
 /-- `metricSharpChartCoeff g α cv i` is `C^∞` on the chart base set, given that
 the chart-basis covector components `b ↦ cv b (chartBasisVecFiber α j b)` are
 `C^∞` there. -/
@@ -291,8 +265,6 @@ lemma metricSharpChartCoeff_contMDiffOn
   classical
   refine contMDiffOn_finset_sum (fun j _ => ?_)
   refine ContMDiffOn.mul ?_ (hcv j)
-  -- `chartInvGramMatrix g α x i j` is smooth on the chart base set,
-  -- which coincides with `(chartAt H α).source`.
   have h1 : ContMDiffOn I 𝓘(ℝ) ∞
       (fun x : M => chartInvGramMatrix (I := I) g α x i j)
       (trivializationAt E (TangentSpace I) α).baseSet :=
@@ -343,8 +315,6 @@ lemma metricSharpChartLocal_contMDiffOn_total
     ContMDiffOn.sum_section (fun i _ => hsmul i)
   exact hsum
 
-/-! ## Global smoothness of the sharp -/
-
 /-- **Smoothness of the metric sharp of a smooth covector field.** On a
 boundaryless model, if the chart-basis components `b ↦ cv b (chartBasisVecFiber α j b)`
 of the covector field `cv` are `C^∞` on each chart source, then
@@ -361,12 +331,10 @@ lemma metricSharp_contMDiff_total [I.Boundaryless]
   intro x
   have hx_src : x ∈ (chartAt H x).source := mem_chart_source H x
   have hsrc_open : IsOpen ((chartAt H x).source) := (chartAt H x).open_source
-  -- The chart-local representative is smooth on the chart source.
   have hsmooth_local : ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞
       (fun y : M => TotalSpace.mk' E y (metricSharpChartLocal (I := I) g x cv y))
       (chartAt H x).source :=
     metricSharpChartLocal_contMDiffOn_total (I := I) g x (hcv x)
-  -- It coincides with the abstract sharp on the chart source (= base set).
   have heq_on_src : ∀ y ∈ (chartAt H x).source,
       metricSharpChartLocal (I := I) g x cv y = metricSharp (I := I) g y (cv y) := by
     intro y hy

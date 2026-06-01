@@ -47,23 +47,24 @@ and use it to derive the trace identity on the chart source.
 
 ## Main results
 
-* `chartHessTrace_eq_chartVossWeyl` : the chart-coordinate trace identity
+* `chartHessTrace_eq_laplacian` : the chart-coordinate trace identity
   `∑_{ij} g^{ij}\,(\operatorname{Hess} f)_{ij}(x) = (\Delta_g f)(x)` derived from
   the contracted Christoffel identity, valid on the chart source under
   `[I.Boundaryless]`.
-* `traceFun_hessFun_eq_laplacian` : the bilinear-form-trace identity
-  `traceFun (\operatorname{hessFun} g f) x = \Delta_g f(x)` (using the canonical
-  basis) under the contracted Christoffel hypothesis.
-* `laplacian_sq_le_dim_mul_frobenius_sq_chartContracted` : the Bochner /
-  Lichnerowicz dimension-Laplacian inequality, immediately discharging the
-  `htr` hypothesis from the basis-naive Cauchy–Schwarz bound.
+* `traceFun_hessFun_eq_chartHessTrace_of_orthonormal` : the bilinear-form-trace
+  identity `traceFun (\operatorname{hessFun} g f) x = \chartHessTrace g f x`
+  (using the canonical basis) under chart g-orthonormality at `x`.
+* `laplacian_sq_le_dim_mul_frobenius_sq_via_chartContracted` : the Bochner /
+  Lichnerowicz dimension-Laplacian inequality, discharging the `htr` hypothesis
+  from the basis-naive Cauchy–Schwarz bound via the trace identity and
+  orthonormality.
 
 The trace identity is presented in two parallel forms: a chart-coordinate form
-`chartHessTrace_eq_chartVossWeyl` matching the matrix expression
+`chartHessTrace_eq_laplacian` matching the matrix expression
 `∑_{ij} g^{ij}\,(\operatorname{Hess} f)_{ij}`, and a bilinear-form form
-`traceFun_hessFun_eq_laplacian` matching the canonical-basis trace of `hessFun`.
-The second form discharges the `htr` hypothesis of
-`laplacian_sq_le_dim_mul_frobenius_sq_of_trace_eq` directly.
+`traceFun_hessFun_eq_chartHessTrace_of_orthonormal` matching the canonical-basis
+trace of `hessFun`. The latter, combined with the trace identity, discharges the
+`htr` hypothesis of `laplacian_sq_le_dim_mul_frobenius_sq_of_trace_eq` directly.
 -/
 
 noncomputable section
@@ -81,31 +82,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
 open DifferentialGeometry.Integral.Measure
-
-/-! ## The contracted Christoffel identity
-
-The contracted Christoffel identity at a point `y ∈ E` (viewed as a chart-target
-coordinate point) and free index `j` reads
-$$
-\sum_{i, k} G^{i k}(\alpha, x_y)\,\Gamma^j{}_{i k}(g, \alpha)(y)
-  = -\,\frac{1}{D(\alpha, x_y)}\sum_l
-      \partial_l\bigl(D(\alpha, \cdot)\cdot G^{j l}(\alpha, \cdot)\bigr)(y),
-$$
-where `D = chartDensity` and `G^{ij}` is the inverse chart Gram matrix.
-This is purely a chart-coordinate algebraic identity: it follows from the
-symmetric definition of the Christoffel symbol of the second kind,
-$$
-\Gamma^k{}_{i j}(g, \alpha) =
-  \tfrac12 \sum_l G^{k l}(\alpha,\cdot)\,\bigl(\partial_i G_{l j}
-   + \partial_j G_{l i} - \partial_l G_{i j}\bigr),
-$$
-combined with Jacobi's formula for the derivative of the determinant,
-`∂_l \log\det G = G^{a b}\,\partial_l G_{a b}`.
-
-We state the identity here as a Prop (a *named hypothesis*); a downstream
-client may discharge it by Jacobi's formula. The downstream consumer
-of `traceFun_hessFun_eq_laplacian` only needs the identity at a single
-chart-target point of interest. -/
 
 /-- The pulled-back chart density, viewed as a scalar function on the chart
 target `(extChartAt I α).target ⊆ E`. Wrapper around `chartDensityOnE`
@@ -131,14 +107,6 @@ def ChartContractedChristoffelOn
             chartDensityOnE (I := I) g α y' *
               chartInvGramOnE (I := I) g α j l y') y
 
-/-! ## Pointwise expansion of `chartHessTrace` in chart coordinates
-
-The chart-coordinate trace `chartHessTrace` is, by the definition of
-`chartHessianTensor`, the sum
-`∑_{ij} G^{ij}(x)·(\partial_i \partial_j f̃ - ∑_k Γ^k_{ij}·\partial_k f̃)(φ x)`.
-This is the matrix sum we expand against the contracted Christoffel
-identity. -/
-
 /-- Pointwise expansion of `chartHessTrace` in chart coordinates: the trace
 splits into a "Hessian" term `∑_{ij} G^{ij}·\partial_i\partial_j f̃` and a
 "Christoffel correction" term `-∑_{ijk} G^{ij}·Γ^k_{ij}·\partial_k f̃`. -/
@@ -158,7 +126,6 @@ lemma chartHessTrace_expand
                     (scalarOnE (I := I) x f) (extChartAt I x x)) := by
   classical
   rw [chartHessTrace_def]
-  -- Distribute `G^{ij}` over the difference.
   rw [show
       (∑ i : Fin (Module.finrank ℝ E),
         ∑ j : Fin (Module.finrank ℝ E),
@@ -176,7 +143,6 @@ lemma chartHessTrace_expand
   · refine Finset.sum_congr rfl (fun i _ => ?_)
     refine Finset.sum_congr rfl (fun j _ => ?_)
     rw [chartHessianTensor_def]
-  -- Distribute and split into a difference of two double sums.
   rw [show
       (∑ i : Fin (Module.finrank ℝ E),
         ∑ j : Fin (Module.finrank ℝ E),
@@ -199,7 +165,6 @@ lemma chartHessTrace_expand
   · refine Finset.sum_congr rfl (fun i _ => ?_)
     refine Finset.sum_congr rfl (fun j _ => ?_)
     ring
-  -- Split the inner difference.
   rw [show
       (∑ i : Fin (Module.finrank ℝ E),
         ∑ j : Fin (Module.finrank ℝ E),
@@ -222,26 +187,13 @@ lemma chartHessTrace_expand
                   partialDeriv (E := E) k
                     (scalarOnE (I := I) x f) (extChartAt I x x))) from ?_]
   swap
-  · -- Inner: ∑_j (a - b) = ∑_j a - ∑_j b. Outer: ∑_i (a' - b') = ∑_i a' - ∑_i b'.
-    simp only [Finset.sum_sub_distrib]
-  -- Distribute the inner sum into the third double sum.
+  · simp only [Finset.sum_sub_distrib]
   congr 1
   refine Finset.sum_congr rfl (fun i _ => ?_)
   refine Finset.sum_congr rfl (fun j _ => ?_)
   rw [Finset.mul_sum]
   refine Finset.sum_congr rfl (fun k _ => ?_)
   ring
-
-/-! ## Pointwise expansion of `chartVossWeylLaplacian` by Leibniz
-
-The chart Voss–Weyl Laplacian, by the chain rule and Leibniz, splits into a
-"Hessian" term `∑_{ij} G^{ij}·\partial_i\partial_j f̃`, an "inverse-Gram
-gradient" term `∑_{ij}(\partial_i G^{ij})·\partial_j f̃`, and a "density
-gradient" term `(1/D)·∑_{ij} G^{ij}·\partial_j f̃·\partial_i D`.
-
-We prove this expansion by writing `chartVossWeylIntegrand i = u_i · v_i`
-with `u_i = gradChartCoeffOnE g α f i` and `v_i = chartDensityOnE g α`,
-applying the Leibniz rule, and rearranging. -/
 
 /-- Pointwise expansion of `chartVossWeylLaplacian` by the Leibniz rule
 applied to the integrand `(\sum_j G^{ij}·\partial_j f̃) · D`. -/
@@ -264,8 +216,6 @@ lemma chartVossWeylLaplacian_expand_hypBearing
                   (gradChartCoeffOnE (I := I) g α f i) (extChartAt I α x)) := by
   classical
   rw [chartVossWeylLaplacian_def]
-  -- Each summand: ∂_i (u_i · v) = (∂_i u_i) · v + u_i · (∂_i v),
-  -- where u_i = gradChartCoeffOnE g α f i and v = chartDensityOnE g α.
   have hsummand : ∀ i : Fin (Module.finrank ℝ E),
       partialDeriv (E := E) i
           (chartVossWeylIntegrand (I := I) g α f i)
@@ -281,7 +231,6 @@ lemma chartVossWeylLaplacian_expand_hypBearing
         (extChartAt I α x) := hgrad_diff i
     have hv : DifferentiableAt ℝ (chartDensityOnE (I := I) g α)
         (extChartAt I α x) := hdens_diff
-    -- chartVossWeylIntegrand = fun y => gradChartCoeffOnE i y * chartDensityOnE y.
     change partialDeriv (E := E) i
         (fun y : E => gradChartCoeffOnE (I := I) g α f i y *
           chartDensityOnE (I := I) g α y) (extChartAt I α x) =
@@ -294,7 +243,6 @@ lemma chartVossWeylLaplacian_expand_hypBearing
     rw [fderiv_fun_mul (𝕜 := ℝ) hu hv]
     simp [ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply,
       smul_eq_mul]
-  -- Rewrite the numerator using Leibniz.
   rw [show (∑ i : Fin (Module.finrank ℝ E),
             partialDeriv (E := E) i
               (chartVossWeylIntegrand (I := I) g α f i)
@@ -307,16 +255,8 @@ lemma chartVossWeylLaplacian_expand_hypBearing
               partialDeriv (E := E) i
                 (gradChartCoeffOnE (I := I) g α f i) (extChartAt I α x)) from
       Finset.sum_congr rfl (fun i _ => hsummand i)]
-  -- Goal: `(∑_i ...) / chartDensity = (1 / chartDensity) * (∑_i ...)`.
   rw [div_eq_mul_one_div]
   ring
-
-/-! ## Smoothness on the chart target
-
-The pulled-back density `chartDensityOnE` and inverse-Gram entries
-`chartInvGramOnE` are smooth on the chart target. The chart-pullback of
-a smooth function is smooth, hence `gradChartCoeffOnE` is smooth as a finite
-sum of products. -/
 
 /-- Each partial derivative of `scalarOnE` is `C^∞` on the interior of the
 chart target. (The boundaryless analogue of the with-boundary version in
@@ -333,12 +273,9 @@ private lemma partialDeriv_scalarOnE_contDiffOn_interior
     scalarOnE_contDiffOn (I := I) α hf
   have hf_int : ContDiffOn ℝ ∞ (scalarOnE (I := I) α f)
       (interior (extChartAt I α).target) := hf_target.mono interior_subset
-  -- `fderiv` of a smooth function is smooth on an open set.
   have hfderiv : ContDiffOn ℝ ∞ (fderiv ℝ (scalarOnE (I := I) α f))
       (interior (extChartAt I α).target) :=
     hf_int.fderiv_of_isOpen isOpen_interior (by rw [ENat.coe_top_add_one])
-  -- `partialDeriv j u y = fderiv ℝ u y (e_j)` is smooth as `clm_apply` of `fderiv`
-  -- applied to a constant.
   unfold partialDeriv
   exact hfderiv.clm_apply contDiffOn_const
 
@@ -379,18 +316,10 @@ lemma gradChartCoeffOnE_contDiffOn_interior
       (interior (extChartAt I α).target) := by
   classical
   unfold gradChartCoeffOnE
-  -- A finite sum of products of smooth functions is smooth.
   refine ContDiffOn.sum (fun j _ => ?_)
   refine ContDiffOn.mul ?_ ?_
   · exact (chartInvGramOnE_contDiffOn (I := I) g α i j).mono interior_subset
   · exact partialDeriv_scalarOnE_contDiffOn_interior (I := I) α hf j
-
-/-! ## Identification of `gradChartCoeffOnE` with the Hessian-like sum
-
-The pulled-back gradient coefficient `gradChartCoeffOnE` reads
-`∑_j G^{ij}(y) · ∂_j f̃(y)`, so its partial derivative `∂_i` produces the
-two-term sum
-`∑_j (∂_i G^{ij}) · ∂_j f̃ + ∑_j G^{ij} · ∂_i ∂_j f̃`. -/
 
 /-- Leibniz expansion of `∂_i (gradChartCoeffOnE i)`: it splits as
 `∑_j ((∂_i G^{ij})·∂_j f̃ + G^{ij}·∂_i ∂_j f̃)`. -/
@@ -406,12 +335,8 @@ lemma partialDeriv_gradChartCoeffOnE_expand
           chartInvGramOnE (I := I) g α i j y *
             chartIteratedPartialDeriv (I := I) α f i j y) := by
   classical
-  -- `gradChartCoeffOnE g α f i = fun y => ∑ j, G^{ij}(y) * ∂_j f̃(y)`.
-  -- `∂_i (∑_j h_j) = ∑_j ∂_i h_j` and Leibniz on each summand.
   have hop_int : IsOpen (interior (extChartAt I α).target) := isOpen_interior
   have hy_nhd : interior (extChartAt I α).target ∈ 𝓝 y := hop_int.mem_nhds hy
-  -- For each j, both `chartInvGramOnE g α i j` and `partialDeriv j (scalarOnE α f)`
-  -- are differentiable at y.
   have hG : ∀ j : Fin (Module.finrank ℝ E),
       DifferentiableAt ℝ (chartInvGramOnE (I := I) g α i j) y := by
     intro j
@@ -434,46 +359,33 @@ lemma partialDeriv_gradChartCoeffOnE_expand
         (partialDeriv (E := E) j (scalarOnE (I := I) α f)) y :=
       hcd_int.contDiffAt hy_nhd
     exact hcat.differentiableAt (by simp)
-  -- Differentiability of each product term, viewed in `partialDeriv` form.
   have hprod : ∀ j : Fin (Module.finrank ℝ E),
       DifferentiableAt ℝ
         (fun y' : E => chartInvGramOnE (I := I) g α i j y' *
           partialDeriv (E := E) j (scalarOnE (I := I) α f) y') y :=
     fun j => (hG j).fun_mul (hF j)
-  -- Step 1: ∂_i (∑_j h_{ij}) = ∑_j ∂_i h_{ij} via fderiv_fun_sum.
-  -- We replace `gradChartCoeffOnE g α f i` with its definitional unfolding by means of
-  -- `gradChartCoeffOnE_def` reading.
   have hgrad_split : partialDeriv (E := E) i
         (gradChartCoeffOnE (I := I) g α f i) y =
       ∑ j : Fin (Module.finrank ℝ E),
         partialDeriv (E := E) i
           (fun y' : E => chartInvGramOnE (I := I) g α i j y' *
             partialDeriv (E := E) j (scalarOnE (I := I) α f) y') y := by
-    -- LHS = `fderiv ℝ (gradChartCoeffOnE g α f i) y (e_i)`.
-    -- gradChartCoeffOnE g α f i = fun y' => ∑_j G^{ij}_{y'} · ∂_j f̃(y'), definitionally.
     change (fderiv ℝ (gradChartCoeffOnE (I := I) g α f i) y) ((chartModelBasis E) i) =
         ∑ j : Fin (Module.finrank ℝ E),
           partialDeriv (E := E) i
             (fun y' : E => chartInvGramOnE (I := I) g α i j y' *
               partialDeriv (E := E) j (scalarOnE (I := I) α f) y') y
-    -- Identify gradChartCoeffOnE g α f i with the explicit lambda.
     have h_eq_fn : (gradChartCoeffOnE (I := I) g α f i) =
         fun y' : E => ∑ j : Fin (Module.finrank ℝ E),
           chartInvGramOnE (I := I) g α i j y' *
             partialDeriv (E := E) j (scalarOnE (I := I) α f) y' := by
       funext y'; rfl
     rw [h_eq_fn]
-    -- Use fderiv_fun_sum directly on the lambda form.
     rw [fderiv_fun_sum (fun j _ => hprod j)]
     rw [ContinuousLinearMap.sum_apply]
-    -- After fderiv_fun_sum, each summand of LHS is `fderiv ℝ (fun y' => ...) y (e_i)`.
-    -- And each summand of RHS is `partialDeriv i (fun y' => ...) y`. By definition of
-    -- partialDeriv, these are equal.
     rfl
   rw [hgrad_split]
   refine Finset.sum_congr rfl (fun j _ => ?_)
-  -- Leibniz on each summand: ∂_i(G^{ij} · F_j) = (∂_i G^{ij}) · F_j + G^{ij} · (∂_i F_j).
-  -- Use the `partialDeriv`-level Leibniz rule.
   change partialDeriv (E := E) i
         (fun y' : E => chartInvGramOnE (I := I) g α i j y' *
           partialDeriv (E := E) j (scalarOnE (I := I) α f) y') y =
@@ -482,22 +394,12 @@ lemma partialDeriv_gradChartCoeffOnE_expand
           chartInvGramOnE (I := I) g α i j y *
             chartIteratedPartialDeriv (I := I) α f i j y
   unfold partialDeriv chartIteratedPartialDeriv
-  -- Goal: `fderiv ℝ (fun y' => G y' * fderiv ℝ scalarOnE y' (e_j)) y (e_i) = ...`
-  -- This is a Leibniz rule applied to a product `G(y') · h(y')` where
-  -- `h(y') := fderiv ℝ (scalarOnE α f) y' (e_j) = partialDeriv j (scalarOnE α f) y'`.
-  -- Use `fderiv_fun_mul`. Note `hF j` provides differentiability of `partialDeriv j (scalarOnE α f)`,
-  -- which definitionally equals `fun y' => fderiv ℝ (scalarOnE α f) y' (e_j)`.
   have hF_unfolded : DifferentiableAt ℝ
       (fun y' : E => fderiv ℝ (scalarOnE (I := I) α f) y' ((chartModelBasis E) j)) y :=
     hF j
   rw [fderiv_fun_mul (𝕜 := ℝ) (hG j) hF_unfolded]
-  -- `((c y · df) + ((dc) · c)) (b i) = c y · df (b i) + dc (b i) · c y`
-  -- where c = G^{ij} (so c y = G^{ij}_y), df = fderiv at y, dc = fderiv (G^{ij}) at y.
   simp only [ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply,
     smul_eq_mul]
-  -- Identify `(fderiv ℝ (partialDeriv j (scalarOnE α f)) y) (e_i)` (LHS, after simp) with
-  -- `partialDeriv i (partialDeriv j (scalarOnE α f)) y` (RHS): these are reflexively equal
-  -- by `partialDeriv_def`.
   change chartInvGramOnE (I := I) g α i j y *
       ((fderiv ℝ (partialDeriv (E := E) j (scalarOnE (I := I) α f)) y)
         ((chartModelBasis E) i)) +
@@ -509,12 +411,6 @@ lemma partialDeriv_gradChartCoeffOnE_expand
         ((fderiv ℝ (partialDeriv (E := E) j (scalarOnE (I := I) α f)) y)
           ((chartModelBasis E) i))
   ring
-
-/-! ## The trace identity in chart coordinates
-
-The headline-of-headlines: combining the Voss–Weyl expansion, the Hessian
-expansion, and the contracted Christoffel identity produces the chart-coordinate
-trace identity. -/
 
 /-- **Chart-coordinate trace identity** for the Hessian against the inverse
 Gram matrix. Hypothesis-bearing form: given the contracted Christoffel
@@ -535,21 +431,13 @@ theorem chartHessTrace_eq_laplacian
       ChartContractedChristoffelOn (I := I) g x (extChartAt I x x) j) :
     chartHessTrace (I := I) g f x = Δ_g (I := I) g hf x := by
   classical
-  -- Set notation.
   set y₀ : E := extChartAt I x x with hy₀_def
   set α : M := x with hα_def
-  -- Step 1: Voss–Weyl expansion of `Δ_g f`.
   have hxsrc : x ∈ (chartAt H α).source := mem_chart_source H x
   have hVW : Δ_g (I := I) g hf x = chartVossWeylLaplacian (I := I) g α f x :=
     voss_weyl_laplacian_formula_of_closed (I := I) g α hf hxsrc
   rw [hVW]
-  -- Step 2: Hessian expansion of `chartHessTrace`.
   rw [chartHessTrace_expand (I := I) g f x]
-  -- Step 3: Identify `chartInvGramMatrix g x x i j = chartInvGramOnE g x i j y₀`.
-  -- This holds because at `y = extChartAt I x x = y₀`, we have
-  -- `(extChartAt I x).symm y = x` (inverse), so
-  -- `chartInvGramOnE g x i j y = chartInvGramMatrix g x ((extChartAt I x).symm y) i j
-  --                            = chartInvGramMatrix g x x i j`.
   have hxsrc_ext : x ∈ (extChartAt I α).source := by
     rw [extChartAt_source_eq_chartAt_source (I := I)]
     exact hxsrc
@@ -561,7 +449,6 @@ theorem chartHessTrace_eq_laplacian
     intros i j
     rw [chartInvGramOnE_def]
     rw [hsymm_y₀]
-  -- Step 4: Rewrite both sides using `chartInvGramOnE`.
   rw [show (∑ i : Fin (Module.finrank ℝ E),
             ∑ j : Fin (Module.finrank ℝ E),
               chartInvGramMatrix (I := I) g x x i j *
@@ -591,7 +478,6 @@ theorem chartHessTrace_eq_laplacian
     refine Finset.sum_congr rfl (fun j _ => ?_)
     refine Finset.sum_congr rfl (fun k _ => ?_)
     rw [hG_eq i j]]
-  -- Step 5: Voss–Weyl expansion via Leibniz.
   have hxbase : x ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
     rw [trivializationAt_baseSet_eq_chartAt_source]; exact hxsrc
   have hy₀_target : y₀ ∈ (extChartAt I α).target :=
@@ -600,30 +486,24 @@ theorem chartHessTrace_eq_laplacian
     extChartAt_target_subset_interior_of_boundaryless (I := I) α hy₀_target
   have hy₀_nhd : interior (extChartAt I α).target ∈ 𝓝 y₀ :=
     isOpen_interior.mem_nhds hy₀_int
-  -- Differentiability of `gradChartCoeffOnE` at `y₀`.
   have hgrad_diff : ∀ i : Fin (Module.finrank ℝ E),
       DifferentiableAt ℝ (gradChartCoeffOnE (I := I) g α f i) y₀ := by
     intro i
     have h := gradChartCoeffOnE_contDiffOn_interior (I := I) g α hf i
     exact (h.contDiffAt hy₀_nhd).differentiableAt (by simp)
-  -- Differentiability of `chartDensityOnE` at `y₀`.
   have hdens_diff : DifferentiableAt ℝ (chartDensityOnE (I := I) g α) y₀ := by
     have hcd_target : ContDiffOn ℝ ∞ (chartDensityOnE (I := I) g α)
         (extChartAt I α).target := chartDensityOnE_contDiffOn (I := I) g α
     have hcd_int : ContDiffOn ℝ ∞ (chartDensityOnE (I := I) g α)
         (interior (extChartAt I α).target) := hcd_target.mono interior_subset
     exact (hcd_int.contDiffAt hy₀_nhd).differentiableAt (by simp)
-  -- Density positivity and equality.
   have hD_pos : 0 < chartDensity (I := I) g α x :=
     chartDensity_pos (I := I) g α hxbase
   have hD_eq : chartDensityOnE (I := I) g α y₀ = chartDensity (I := I) g α x := by
     unfold chartDensityOnE
     rw [hsymm_y₀]
-  -- Now apply the Voss–Weyl expansion.
   rw [chartVossWeylLaplacian_expand_hypBearing (I := I) g α f x
       hgrad_diff hdens_diff]
-  -- Step 6: Replace `partialDeriv i (gradChartCoeffOnE g α f i)` using
-  -- `partialDeriv_gradChartCoeffOnE_expand`.
   rw [show (∑ i : Fin (Module.finrank ℝ E),
               (gradChartCoeffOnE (I := I) g α f i (extChartAt I α x) *
                 partialDeriv (E := E) i
@@ -642,68 +522,6 @@ theorem chartHessTrace_eq_laplacian
                   chartIteratedPartialDeriv (I := I) α f i j y₀))) from by
     refine Finset.sum_congr rfl (fun i _ => ?_)
     rw [partialDeriv_gradChartCoeffOnE_expand (I := I) g α hf i hy₀_int]]
-  -- Step 7: We have a long expansion. The key observation is that we need
-  -- to show
-  -- LHS = `∑_{ij} G^{ij} ∂_i ∂_j f̃ - ∑_{ijk} G^{ij} Γ^k_{ij} ∂_k f̃`
-  -- equals
-  -- RHS = `(1/D) · ∑_i (gradCoeff_i · ∂_i D + D · (∑_j (∂_i G^{ij})·∂_j f̃ + ∑_j G^{ij}·∂_i∂_j f̃))`
-  -- After using `gradCoeff_i = ∑_j G^{ij}·∂_j f̃` and dividing:
-  -- = `(1/D) · D · ∑_{ij} G^{ij}·∂_i∂_j f̃ + (1/D) · ∑_i ∂_i D · ∑_j G^{ij}·∂_j f̃ + (1/D) · D · ∑_{ij}(∂_i G^{ij})·∂_j f̃`
-  -- = `∑_{ij} G^{ij}·∂_i∂_j f̃ + (1/D)·∑_{ij} G^{ij} · ∂_j f̃ · ∂_i D + ∑_{ij}(∂_i G^{ij})·∂_j f̃`
-  -- The `∑_{ij} G^{ij}·∂_i∂_j f̃` cancels with the matching term on LHS,
-  -- leaving us to prove that
-  -- `-∑_{ijk} G^{ij}·Γ^k_{ij}·∂_k f̃ =
-  --     (1/D)·∑_{ij} G^{ij}·∂_j f̃·∂_i D + ∑_{ij}(∂_i G^{ij})·∂_j f̃`.
-  -- Re-indexing `k → j` on LHS: `j` is dummy, so writing the LHS as
-  --   `-∑_{j} (∑_{i,k} G^{ik}·Γ^j_{ik}) · ∂_j f̃`
-  -- and using the contracted Christoffel identity for each `j`, this becomes
-  --   `+∑_j (1/D)·(∑_l ∂_l(D·G^{jl}))·∂_j f̃`.
-  -- Expanding `∂_l(D·G^{jl})` by Leibniz and shuffling indices, we obtain
-  --   `(1/D)·∑_{ij} G^{ij}·∂_j f̃·∂_i D + ∑_{ij}(∂_i G^{ij})·∂_j f̃`,
-  -- matching the RHS. (The shuffle uses `i↔l` after contracting.)
-  --
-  -- We now perform this computation using the `hcc` hypothesis.
-  --
-  -- First, abbreviate. Set:
-  --   T1 := `∑_{ij} G^{ij} ∂_i∂_j f̃`
-  --   T2 := `∑_{ijk} G^{ij} Γ^k_{ij} ∂_k f̃`
-  --   T3 := `(1/D) · ∑_i (gradCoeff_i · ∂_i D)`
-  --   T4 := `(1/D) · D · ∑_i ∑_j ((∂_i G^{ij}) · ∂_j f̃ + G^{ij} · ∂_i∂_j f̃)`
-  -- Goal: `T1 - T2 = T3 + T4`.
-  -- We'll do this with explicit `ring` shuffling using `hcc` to
-  -- replace the `T2` term.
-  -- For brevity, expand to a single combined identity using `ring_nf` style.
-  -- But `ring` cannot handle indexed sums with hypotheses.
-  -- We thus do it by hand.
-  --
-  -- Let's denote
-  --   D := chartDensityOnE g α y₀
-  --   G_{ij} := chartInvGramOnE g α i j y₀
-  --   F_i := partialDeriv i (scalarOnE α f) y₀
-  --   F_{ij} := chartIteratedPartialDeriv α f i j y₀
-  --   Γ^k_{ij} := chartChristoffel g α i j k y₀
-  --   D_i := partialDeriv i (chartDensityOnE g α) y₀
-  --   G_{ij}^{,i} := partialDeriv i (chartInvGramOnE g α i j) y₀
-  -- Then `gradChartCoeffOnE g α f i y₀ = ∑_j G_{ij} · F_j`.
-  -- The goal becomes:
-  --   `(∑_i ∑_j G_{ij} · F_{ij}) - (∑_i ∑_j ∑_k G_{ij} · Γ^k_{ij} · F_k) =
-  --      (1/D) · ∑_i ((∑_j G_{ij} · F_j) · D_i +
-  --        D · ∑_j (G_{ij}^{,i} · F_j + G_{ij} · F_{ij}))`.
-  -- Using `hcc j` for each `j`:
-  --   `∑_{i,k} G_{ik} · Γ^j_{ik} y₀ = -(1/D) · ∑_l ∂_l(D · G_{jl})(y₀)
-  --                                  = -(1/D) · ∑_l (∂_l D · G_{jl} + D · ∂_l G_{jl})`.
-  -- This is one of the "messy" Leibniz expansions. We expand each ∂_l(D · G_{jl})
-  -- using fderiv_fun_mul.
-  --
-  -- The cleanest way is to massage the goal so `ring` can finish, then
-  -- use `hcc j` as substitutions for the contracted-Christoffel sum.
-  --
-  -- We work out the two sides explicitly and use linear combinations with
-  -- `hcc j` to close. Concretely:
-  -- Express T2 using `hcc j` on `∑_{i,k} G_{ik} · Γ^j_{ik}`.
-  -- Note T2 has the index pattern `∑_{ij} G^{ij} Γ^k_{ij} ∂_k f̃`
-  -- which is `∑_k F_k · (∑_{ij} G^{ij}·Γ^k_{ij})`. We want to use
-  -- `hcc k` to rewrite this. So let's transform T2 carefully.
   have hT2_swap : (∑ i : Fin (Module.finrank ℝ E),
         ∑ j : Fin (Module.finrank ℝ E),
           ∑ k : Fin (Module.finrank ℝ E),
@@ -718,14 +536,6 @@ theorem chartHessTrace_eq_laplacian
           ∑ j : Fin (Module.finrank ℝ E),
             chartInvGramOnE (I := I) g α i j y₀ *
               chartChristoffel (I := I) g α i j k y₀)) := by
-    -- Strategy: swap (i, j) ↔ (k) using Fubini twice, then pull F_k out.
-    -- Use `simp_rw [Finset.sum_comm]` with care, or do manually.
-    -- We use a step-by-step manual approach.
-    -- Goal: ∑_i ∑_j ∑_k A_ijk * F_k = ∑_k F_k * ∑_i ∑_j A_ijk.
-    -- Where A_ijk := G_{ij} · Γ^k_{ij}.
-    -- This is just the rearrangement ∑_i ∑_j ∑_k A_ijk · F_k = ∑_k (∑_i ∑_j A_ijk) · F_k
-    -- = ∑_k F_k · (∑_i ∑_j A_ijk).
-    -- Step 1: pull F_k out of innermost sum (inside ∑_i ∑_j).
     rw [show (∑ i : Fin (Module.finrank ℝ E),
               ∑ j : Fin (Module.finrank ℝ E),
                 ∑ k : Fin (Module.finrank ℝ E),
@@ -743,8 +553,6 @@ theorem chartHessTrace_eq_laplacian
         refine Finset.sum_congr rfl (fun j _ => ?_)
         refine Finset.sum_congr rfl (fun k _ => ?_)
         ring]
-    -- Step 2: swap ∑_i and ∑_k (Fubini for finite sums).
-    -- We do: ∑_i ∑_j ∑_k → ∑_i ∑_k ∑_j (swap inner two) → ∑_k ∑_i ∑_j (swap outer two).
     rw [show (∑ i : Fin (Module.finrank ℝ E),
               ∑ j : Fin (Module.finrank ℝ E),
                 ∑ k : Fin (Module.finrank ℝ E),
@@ -760,13 +568,11 @@ theorem chartHessTrace_eq_laplacian
         refine Finset.sum_congr rfl (fun i _ => ?_)
         rw [Finset.sum_comm]]
     rw [Finset.sum_comm]
-    -- Step 3: factor F_k out of the inner ∑_i ∑_j.
     refine Finset.sum_congr rfl (fun k _ => ?_)
     rw [Finset.mul_sum]
     refine Finset.sum_congr rfl (fun i _ => ?_)
     rw [Finset.mul_sum]
   rw [hT2_swap]
-  -- Apply `hcc k` to each inner double sum.
   rw [show (∑ k : Fin (Module.finrank ℝ E),
         partialDeriv (E := E) k
             (scalarOnE (I := I) α f) y₀ *
@@ -785,7 +591,6 @@ theorem chartHessTrace_eq_laplacian
                     chartInvGramOnE (I := I) g α k l y') y₀)) from by
     refine Finset.sum_congr rfl (fun k _ => ?_)
     rw [hcc k]]
-  -- Step 8: Expand each `partialDeriv l (D · G^{kl})` by Leibniz.
   have hDens_diffAt : DifferentiableAt ℝ (chartDensityOnE (I := I) g α) y₀ :=
     hdens_diff
   have hG_diffAt : ∀ k l : Fin (Module.finrank ℝ E),
@@ -831,7 +636,6 @@ theorem chartHessTrace_eq_laplacian
     congr 2
     refine Finset.sum_congr rfl (fun l _ => ?_)
     rw [hLeibniz k l]]
-  -- Step 9: Expand `gradChartCoeffOnE g α f i y₀` and clean up.
   have hgrad_eval : ∀ i : Fin (Module.finrank ℝ E),
       gradChartCoeffOnE (I := I) g α f i y₀ =
         ∑ j : Fin (Module.finrank ℝ E),
@@ -859,60 +663,17 @@ theorem chartHessTrace_eq_laplacian
                     chartIteratedPartialDeriv (I := I) α f i j y₀))) from by
     refine Finset.sum_congr rfl (fun i _ => ?_)
     rw [hgrad_eval i]]
-  -- Step 10: Final algebra. We have:
-  --   Goal: T1 - T2 = T3 (where T2, T3 are now in normal form)
-  --   T1 := `∑_{ij} G^{ij}_{y₀} · F_{ij}`
-  --   T2 := `∑_k F_k · (-(1/D) · ∑_l (D_l · G^{kl} + D · G^{kl,l}))`
-  --   T3 := `(1/D) · ∑_i ((∑_j G^{ij} · F_j) · D_i + D · ∑_j (G^{ij,i} · F_j + G^{ij} · F_{ij}))`
-  -- Distribute (1/D) into T3:
-  --   T3 = (1/D) · ∑_{ij} G^{ij} · F_j · D_i + ∑_{ij} G^{ij,i} · F_j + ∑_{ij} G^{ij} · F_{ij}
-  -- And T2 simplifies:
-  --   T2 = -(1/D) · ∑_{kl} F_k · D_l · G^{kl} - ∑_{kl} F_k · G^{kl,l}
-  --      = -(1/D) · ∑_{ij} F_j · D_i · G^{ji} - ∑_{ij} F_j · G^{ji,i}  [renaming k→j, l→i]
-  --   Wait. Let me redo. T2 has indices (k, l). Treat l as outer to the
-  --   inner sum after distributing the `∑_l`:
-  --   T2 = ∑_k F_k · (-(1/D)) · ∑_l (D_l · G^{kl} + D · G^{kl,l})
-  --      = -(1/D) · ∑_{kl} F_k · (D_l · G^{kl} + D · G^{kl,l})
-  --      = -(1/D) · ∑_{kl} F_k · D_l · G^{kl} - ∑_{kl} F_k · G^{kl,l}
-  --   Renaming (k → i, l → j):
-  --      = -(1/D) · ∑_{ij} F_i · D_j · G^{ij} - ∑_{ij} F_i · G^{ij,j}
-  --   On RHS T3 (rename for matching):
-  --   T3 = (1/D) · ∑_{ij} G^{ij} · F_j · D_i + ∑_{ij} G^{ij,i} · F_j + ∑_{ij} G^{ij} · F_{ij}
-  --      with `i,j` used in the natural order. After renaming (i → j', j → i') and
-  --      noting G^{ij} = G^{ji} (chartInvGramOnE_symm... wait, this is the
-  --      transposed version of the symmetric matrix).
-  --
-  -- Actually we don't need the symmetry of G^{ij}. T2 has `G^{kl}` indexed
-  -- as a ChartContractedChristoffelOn `j = k` argument, which feeds in
-  -- `∂_l(D · G^{kl})`, so the index `l` is contracted on the second
-  -- chartInvGramOnE slot. For matching with T3, which has `G^{ij,i}` (∂_i
-  -- on first slot), we need to swap (i, l) — and yes, this requires
-  -- symmetry of G^{·,·}. Note that on the matrix level, `chartInvGramMatrix`
-  -- is the matrix inverse of `chartGramMatrix`. The latter is symmetric, hence
-  -- so is its inverse.
-  --
-  -- So we need: chartInvGramOnE g α i j y = chartInvGramOnE g α j i y.
-  -- This holds: see lemma chartInvGramOnE_symm below (provable from
-  -- the symmetry of the Gram matrix).
-  --
-  -- We now finish with explicit `ring`-based manipulation.
-  -- Step 10a: Symmetrise so that T2 and T3 use compatible indices.
-  -- We need the symmetry `G_{ij}(y₀) = G_{ji}(y₀)`.
   have hG_sym : ∀ i j : Fin (Module.finrank ℝ E),
       chartInvGramOnE (I := I) g α i j y₀ =
         chartInvGramOnE (I := I) g α j i y₀ := by
     intro i j
     unfold chartInvGramOnE chartInvGramMatrix
-    -- (G⁻¹) i j = (G⁻¹) j i because G is symmetric (Hermitian over ℝ).
     set z : M := (extChartAt I α).symm y₀
-    -- Use Matrix.IsHermitian.inv_isHermitian and read off (i, j).
     have hG_hermit : (chartGramMatrix (I := I) g α z).IsHermitian :=
       chartGramMatrix_isHermitian (I := I) g α z
     have hGinv_hermit : (chartGramMatrix (I := I) g α z)⁻¹.IsHermitian :=
       hG_hermit.inv
-    -- `hGinv_hermit.apply i j : star ((G⁻¹) j i) = (G⁻¹) i j`.
     have hentry := hGinv_hermit.apply i j
-    -- For ℝ entries, `star = id`, hence `(G⁻¹) j i = (G⁻¹) i j`.
     have hpoint : (chartGramMatrix (I := I) g α z)⁻¹ i j =
         (chartGramMatrix (I := I) g α z)⁻¹ j i := by
       have hstar : star ((chartGramMatrix (I := I) g α z)⁻¹ j i) =
@@ -921,140 +682,9 @@ theorem chartHessTrace_eq_laplacian
           (chartGramMatrix (I := I) g α z)⁻¹ j i from rfl] at hstar
       exact hstar.symm
     exact hpoint
-  -- Now do the final algebraic match. Move the `T2` to the RHS and prove
-  -- as `T1 = T2 + T3` (rearranged), then convert back.
-  -- We package the goal as a ring identity in terms of the abbreviated symbols.
-  -- Let:
-  --   D := chartDensityOnE g α y₀
-  --   G : Fin n → Fin n → ℝ, G i j := chartInvGramOnE g α i j y₀
-  --   F : Fin n → ℝ, F i := partialDeriv i (scalarOnE α f) y₀
-  --   FF : Fin n → Fin n → ℝ, FF i j := chartIteratedPartialDeriv α f i j y₀
-  --   D_∂ : Fin n → ℝ, D_∂ i := partialDeriv i (chartDensityOnE g α) y₀
-  --   G_∂ : Fin n → Fin n → ℝ, G_∂ i j := partialDeriv i (chartInvGramOnE g α i j) y₀
-  --   (note: G_∂ i j is `∂_i (G i j)`, i.e. the partial in the first
-  --   coordinate, applied to the function `y' ↦ G i j (y')`. So G_∂ i j is
-  --   only used along the diagonal in the index `i`.)
-  --
-  -- Then the goal reads:
-  --   (∑_i ∑_j G i j · FF i j) -
-  --     (∑_k F k · -(1/D) · ∑_l (D_∂ l · G k l + D · partialDeriv l (G k ·) y₀))
-  --   = (1/D) · ∑_i ((∑_j G i j · F j) · D_∂ i + D · ∑_j (G_∂ i j · F j + G i j · FF i j))
-  --
-  -- Let's compute term by term using `Finset.sum_*` and `ring` on each
-  -- summand. We rewrite the goal so both sides are sums of three "kinds"
-  -- of terms: `G·FF`, `(G_∂)·F`, `G·F·D_∂/D`. Use `Finset.sum_comm` to
-  -- match indices.
-  --
-  -- We do it with a `have h_combined` lemma that transforms both sides
-  -- into a canonical `∑_{ij}` form.
-  --
-  -- Note: We use hG_sym to swap (i, j) when needed. The key cross-index
-  -- swap happens when comparing T3's `G^{ij,i}` (∂ in first slot) with T2's
-  -- partialDeriv l (G k ·) (∂ in *some* slot of `chartInvGramOnE (k, l)`,
-  -- with l varying — really l is the partialDeriv direction, paired with
-  -- `chartInvGramOnE k l`, which expresses "∂ in the direction `l` of
-  -- the function `y' ↦ G^{kl}(y')`"). After symmetrising via hG_sym, the
-  -- two sides match.
-  --
-  -- The cleanest route: distribute everything, then perform a single
-  -- `ring`-style identity on each pair of indices.
-  --
-  -- Below we rewrite each side into a 3-sum form and verify equality.
-  --
-  -- Strategy: Expand all `(1/D) · ...` in T3, push into the inner ∑.
-  -- Likewise expand the `-(1/D)` in T2.
-  -- Then the goal becomes
-  --   `(∑_i ∑_j G i j · FF i j) - T2' = T1' + T2'' + T3'`
-  -- where `T1' = ∑_{ij} G^{ij} · FF^{ij}`. After cancellation, the remaining
-  -- terms can be matched by symmetry of G and ring.
-  --
-  -- Write the goal fully expanded using `Finset.mul_sum`, `Finset.sum_add_distrib`,
-  -- and then do a final `Finset.sum_congr` with `ring`-on-each-summand.
-  --
-  -- But there's a subtle issue: the partial derivatives `partialDeriv l
-  -- (chartInvGramOnE g α k l) y₀` on the LHS (T2 expansion) and
-  -- `partialDeriv i (chartInvGramOnE g α i j) y₀` on the RHS (T3
-  -- expansion) carry the partial-direction index *equal* to one of the
-  -- chartInvGram indices. After symmetrising via `hG_sym`, the sums match.
-  --
-  -- We perform the entire algebraic rearrangement in one step: rewrite
-  -- both sides in "canonical" form and then use a direct identity.
-  -- Note `chartDensityOnE g α y₀ = chartDensity g α x` and is positive,
-  -- hence non-zero.
   have hDOnE_ne : chartDensityOnE (I := I) g α y₀ ≠ 0 := by
     rw [hD_eq]; exact ne_of_gt hD_pos
   have hDx_ne : chartDensity (I := I) g α x ≠ 0 := ne_of_gt hD_pos
-  -- The goal is symbolically:
-  --   `(A) - (B) = (C)` where each is a sum.
-  -- Multiply both sides by D: `D · (A) - D · (B) = D · (C)`.
-  -- Since D ≠ 0, this is equivalent to the original goal.
-  -- We perform this via field_simp / ring-style manipulation on both sides.
-  -- But the most reliable route is to do it term-by-term.
-  --
-  -- Let A := ∑_{ij} G_{ij} · FF_{ij}
-  -- Let B := ∑_k F_k · -(1/D) · ∑_l (D_l · G_{kl} + D · G_{kl,l-on-second-slot}).
-  --        where G_{kl,l} := partialDeriv l (G_{k,·}) y₀  -- ∂ in "second" slot.
-  -- Let C := ∑_i ((∑_j G_{ij} · F_j) · D_i + D · ∑_j (G_{ij,i} · F_j + G_{ij} · FF_{ij})) / D.
-  --
-  -- We need: A - B = C.
-  --
-  -- Distribute B: B = -(1/D) · (∑_{kl} F_k · D_l · G_{kl} + D · ∑_{kl} F_k · G_{kl,l-second})
-  --                = -(1/D) · ∑_{kl} F_k · D_l · G_{kl}  -  ∑_{kl} F_k · G_{kl,l-second}
-  -- Hence -B = (1/D) · ∑_{kl} F_k · D_l · G_{kl} + ∑_{kl} F_k · G_{kl,l-second}
-  --
-  -- Distribute C: C = (1/D) · ∑_{ij} G_{ij} · F_j · D_i + ∑_{ij} G_{ij,i} · F_j + ∑_{ij} G_{ij} · FF_{ij}
-  --
-  -- Then A - B = A + (1/D) · ∑_{kl} F_k · D_l · G_{kl} + ∑_{kl} F_k · G_{kl,l-second}
-  --            = ∑_{ij} G_{ij} · FF_{ij} + (1/D) · ∑_{kl} F_k · D_l · G_{kl} + ∑_{kl} F_k · G_{kl,l-second}
-  -- And C = (1/D) · ∑_{ij} G_{ij} · F_j · D_i + ∑_{ij} G_{ij,i} · F_j + ∑_{ij} G_{ij} · FF_{ij}
-  --
-  -- Cancel `∑_{ij} G_{ij} · FF_{ij}`. Need:
-  --   (1/D) · ∑_{kl} F_k · D_l · G_{kl} + ∑_{kl} F_k · G_{kl,l-second}
-  --     = (1/D) · ∑_{ij} G_{ij} · F_j · D_i + ∑_{ij} G_{ij,i} · F_j
-  --
-  -- Renaming dummies on RHS: (i, j) → (l, k):
-  --   = (1/D) · ∑_{lk} G_{lk} · F_k · D_l + ∑_{lk} G_{lk,l} · F_k
-  -- And on LHS rename to match: (k, l) → (k, l) (already):
-  --   = (1/D) · ∑_{kl} F_k · D_l · G_{kl} + ∑_{kl} F_k · G_{kl,l-second}
-  --
-  -- Term 1: (1/D) · ∑_{kl} F_k · D_l · G_{kl} =? (1/D) · ∑_{lk} G_{lk} · F_k · D_l.
-  -- Both are `(1/D) · ∑_{kl} F_k · D_l · G_{kl}`. Yes, equal (just reordering).
-  --
-  -- Term 2: ∑_{kl} F_k · G_{kl,l-second} =? ∑_{lk} G_{lk,l} · F_k.
-  -- LHS: G_{kl,l-second} = partialDeriv l (chartInvGramOnE g α k ·) y₀ where the `·` is "second slot"
-  --   = partialDeriv l (fun y' => G k l y') y₀
-  -- RHS: G_{lk,l} = partialDeriv l (chartInvGramOnE g α l ·) y₀ where `·` is "second slot"
-  --   = partialDeriv l (fun y' => G l k y') y₀
-  -- These are NOT the same: LHS has `G k l`, RHS has `G l k`. We need symmetry
-  -- `G k l = G l k` which gives `partialDeriv l (G k ·) = partialDeriv l (G · k)`, i.e. the
-  -- two functions are pointwise equal.
-  -- Apply `hG_sym k l` pointwise: the function `y' ↦ G^{kl}(y')` equals
-  -- `y' ↦ G^{lk}(y')` for every `y'`, so their partial derivatives are equal.
-  --
-  -- We perform the symbolic match.
-
-  -- Now rewrite the goal carefully. Use `mul_comm`, `add_comm`, `Finset.sum_comm`,
-  -- and `Finset.sum_congr` to align both sides.
-  --
-  -- Final ring-based matching:
-  -- We use `field_simp` + `ring`-friendly form.
-  --
-  -- Plan: distribute everything into a normal form ∑_{ij} (...)/D = ∑_{ij} (...)/D
-  -- and verify by `ring`.
-
-  -- Let's directly conclude by the algebraic manipulation. We rewrite the
-  -- goal so that it becomes
-  --   ∑_{ij} (G_{ij} · FF_{ij} + F_j · G_{ji,j-second} + (1/D) · F_j · D_i · G_{ji})
-  --     - ∑_{ij} (G_{ij} · FF_{ij} - G_{ij,i} · F_j - (1/D) · G_{ij} · F_j · D_i) = 0
-  -- but this is confusing. Let's instead match every term explicitly.
-  --
-  -- Rewrite the entire goal by `field_simp` (multiply through by D), then
-  -- the goal becomes an integer polynomial identity over the indexed sums.
-
-  -- We perform the final algebraic step by a series of `Finset.sum_congr` /
-  -- `ring`-on-each-summand identities.
-
-  -- Begin: re-express RHS so the `(1/D)` is distributed.
   rw [show
       (1 / chartDensity (I := I) g α x) *
         ∑ i : Fin (Module.finrank ℝ E),
@@ -1083,7 +713,6 @@ theorem chartHessTrace_eq_laplacian
     congr 1
     refine Finset.sum_congr rfl (fun i _ => ?_)
     rw [Finset.sum_mul, Finset.mul_sum, ← Finset.sum_add_distrib]]
-  -- Now distribute `(1/D)` inside.
   rw [show (1 / chartDensity (I := I) g α x) *
         ∑ i : Fin (Module.finrank ℝ E),
           ∑ j : Fin (Module.finrank ℝ E),
@@ -1114,8 +743,6 @@ theorem chartHessTrace_eq_laplacian
     rw [Finset.mul_sum]
     refine Finset.sum_congr rfl (fun j _ => ?_)
     ring]
-  -- LHS expansion and cleanup. Distribute the inner `-(1/D) · ∑_l (...)` over
-  -- the surrounding `F_k · ` and the inner `(D_l · G_{kl} + D · partialDeriv l (G k ·))`.
   rw [show (∑ k : Fin (Module.finrank ℝ E),
             partialDeriv (E := E) k
                 (scalarOnE (I := I) α f) y₀ *
@@ -1140,20 +767,6 @@ theorem chartHessTrace_eq_laplacian
     rw [Finset.mul_sum]
     refine Finset.sum_congr rfl (fun l _ => ?_)
     ring]
-  -- Now the LHS has the form
-  -- LHS_full := ∑_i ∑_j G^{ij}_{y₀} · FF^{ij} - ∑_k ∑_l (...).
-  -- We need to identify `∑_k ∑_l ((F_k · -(1/D)) · (D_l · G_{kl} + D · ∂_l G_{kl}))`
-  -- with the symmetric companion term. We swap (k, l) ↔ (i, j) on this sum
-  -- via `Finset.sum_comm`, and then use the symmetry `G_{kl} = G_{lk}` to
-  -- align with the RHS.
-  --
-  -- After swapping the summation order, the LHS minus term has structure:
-  --   ∑_l ∑_k (...) = ∑_i ∑_j ... [renaming l → i, k → j]
-  --                = ∑_i ∑_j F_j · -(1/D) · (D_i · G_{ji} + D · ∂_i G_{ji})
-  -- Use hG_sym j i: G_{ji} = G_{ij}.
-  -- And `partialDeriv i (chartInvGramOnE g α j ·) y₀` = `partialDeriv i (chartInvGramOnE g α · j) y₀`
-  -- via pointwise function equality.
-  -- Apply `Finset.sum_comm` to swap.
   rw [show (∑ k : Fin (Module.finrank ℝ E),
             ∑ l : Fin (Module.finrank ℝ E),
               partialDeriv (E := E) k (scalarOnE (I := I) α f) y₀ *
@@ -1173,15 +786,6 @@ theorem chartHessTrace_eq_laplacian
                 partialDeriv (E := E) i
                   (chartInvGramOnE (I := I) g α j i) y₀)) from by
     rw [Finset.sum_comm]]
-  -- Now apply `hG_sym j i` to convert `chartInvGramOnE g α j i y₀ →
-  -- chartInvGramOnE g α i j y₀`, and convert
-  -- `partialDeriv i (chartInvGramOnE g α j ·) y₀ →
-  --   partialDeriv i (chartInvGramOnE g α · j) y₀`
-  -- via pointwise function equality.
-  --
-  -- For the partial derivative: the function `y' ↦ chartInvGramOnE g α j i y'`
-  -- and `y' ↦ chartInvGramOnE g α i j y'` are pointwise equal by `hG_sym`,
-  -- hence their partial derivatives are equal.
   have h_partial_swap : ∀ i j : Fin (Module.finrank ℝ E),
       partialDeriv (E := E) i (chartInvGramOnE (I := I) g α j i) y₀ =
         partialDeriv (E := E) i (chartInvGramOnE (I := I) g α i j) y₀ := by
@@ -1189,16 +793,12 @@ theorem chartHessTrace_eq_laplacian
     have hfun_eq : chartInvGramOnE (I := I) g α j i =
         chartInvGramOnE (I := I) g α i j := by
       funext y'
-      -- chartInvGramOnE g α j i y' = chartInvGramOnE g α i j y' for any y'.
       unfold chartInvGramOnE
-      -- chartInvGramMatrix g α (symm y') is a symmetric matrix (Hermitian, ℝ);
-      -- we need to apply that pointwise (at every y').
       set z' : M := (extChartAt I α).symm y'
       have hz_hermit : (chartGramMatrix (I := I) g α z').IsHermitian :=
         chartGramMatrix_isHermitian (I := I) g α z'
       have hzinv_hermit : (chartGramMatrix (I := I) g α z')⁻¹.IsHermitian :=
         hz_hermit.inv
-      -- `hzinv_hermit.apply i j : star ((G⁻¹) j i) = (G⁻¹) i j`.
       have hentry := hzinv_hermit.apply i j
       have hstar_eq : (chartGramMatrix (I := I) g α z')⁻¹ j i =
           (chartGramMatrix (I := I) g α z')⁻¹ i j := by
@@ -1233,12 +833,6 @@ theorem chartHessTrace_eq_laplacian
     refine Finset.sum_congr rfl (fun j _ => ?_)
     rw [hG_sym j i]
     rw [h_partial_swap i j]]
-  -- Now both sides are double sums indexed by (i, j). Convert to a single
-  -- "term-by-term" check: both sides have the form
-  --   ∑_i ∑_j [stuff_{ij}]
-  -- and we verify each summand by `ring` using `hD_ne`.
-  --
-  -- Final step: subtract LHS sum from goal, equate, and `ring`.
   rw [show (∑ i : Fin (Module.finrank ℝ E),
             ∑ j : Fin (Module.finrank ℝ E),
               chartInvGramOnE (I := I) g α i j y₀ *
@@ -1266,33 +860,16 @@ theorem chartHessTrace_eq_laplacian
     rw [← Finset.sum_sub_distrib]
     refine Finset.sum_congr rfl (fun i _ => ?_)
     rw [← Finset.sum_sub_distrib]]
-  -- And similarly the RHS.
-  -- Goal: a single ∑_i ∑_j of terms equals another ∑_i ∑_j of terms.
-  -- We close with `Finset.sum_congr` and ring on each summand, using
-  -- the equality `chartDensityOnE g α y₀ = chartDensity g α x` and the
-  -- non-vanishing of the density to clear `(1/D) · D = 1`.
   refine Finset.sum_congr rfl (fun i _ => ?_)
   refine Finset.sum_congr rfl (fun j _ => ?_)
-  -- The summand equality: each summand of LHS equals each summand of RHS.
-  -- Use `field_simp` to clear `1/D` then `ring`.
-  -- Goal contains `chartDensityOnE (I := I) g α y₀` and
-  -- `chartDensity (I := I) g α x`. They are equal by `hD_eq`.
   rw [hD_eq]
   field_simp
   ring
 
-/-! ## The trace identity in bilinear-form coordinates
-
-The matrix-form identity `chartHessTrace_eq_laplacian` is recast as a
-bilinear-form identity for `traceFun (hessFun g f)` directly. This is what
-the downstream `htr` consumer needs. -/
-
-/-- **Trace identity** for the bilinear form `hessFun g f`. Given the
-contracted Christoffel identity at the chart-target image of `x` and
-`[CompactSpace M]`, the trace of `hessFun g f` (against the canonical basis)
-equals the Laplacian of `f` at `x`, *provided* the chart Gram inverse equals
-the model identity at `x` (which holds when the chart-basis frame is
-g-orthonormal at `x`). -/
+/-- **Trace identity** for the bilinear form `hessFun g f`. Given that the chart
+Gram inverse equals the model identity at `x` (which holds when the chart-basis
+frame is g-orthonormal at `x`), the trace of `hessFun g f` against the canonical
+basis equals the chart-coordinate Hessian trace `chartHessTrace g f x`. -/
 theorem traceFun_hessFun_eq_chartHessTrace_of_orthonormal
     (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M)
     (h_orth : ∀ i j : Fin (Module.finrank ℝ E),
@@ -1301,9 +878,6 @@ theorem traceFun_hessFun_eq_chartHessTrace_of_orthonormal
       chartHessTrace (I := I) g f x := by
   classical
   rw [traceFun_hessFun, chartHessTrace_def]
-  -- Both sides are sums over `i j`. On RHS, the inner sum reduces to
-  -- the diagonal under the orthonormality assumption. We compute:
-  -- ∑_{ij} G^{ij} · H_{ij} = ∑_{i} 1 · H_{ii} + ∑_{i≠j} 0 · H_{ij} = ∑_i H_{ii}.
   symm
   refine Finset.sum_congr rfl (fun i _ => ?_)
   rw [Finset.sum_eq_single i]
@@ -1313,12 +887,6 @@ theorem traceFun_hessFun_eq_chartHessTrace_of_orthonormal
     rw [h_orth i j, if_neg hij, zero_mul]
   · intro hi
     exact absurd (Finset.mem_univ i) hi
-
-/-! ## Headline theorem
-
-The Bochner / Lichnerowicz dimension-Laplacian inequality, with the `htr`
-hypothesis discharged by combining the chart-coordinate trace identity
-`chartHessTrace_eq_laplacian` and the orthonormality condition. -/
 
 /-- **Trace identity (matrix form)**: the chart-coordinate trace of the Hessian
 tensor against the inverse Gram matrix equals the Laplace-Beltrami operator.
@@ -1357,7 +925,6 @@ theorem laplacian_sq_le_dim_mul_frobenius_sq_via_chartContracted
         ∑ j : Fin (Module.finrank ℝ E),
           (chartHessianTensor (I := I) g x f i j x)^2 := by
   classical
-  -- Compose `traceFun (hessFun g f) x = chartHessTrace g f x = Δ_g f x`.
   have h1 : traceFun (I := I) (M := M) (hessFun (I := I) g f) x =
       chartHessTrace (I := I) g f x :=
     traceFun_hessFun_eq_chartHessTrace_of_orthonormal (I := I) g f x h_orth
@@ -1367,22 +934,6 @@ theorem laplacian_sq_le_dim_mul_frobenius_sq_via_chartContracted
       Δ_g (I := I) g hf x := h1.trans h2
   exact laplacian_sq_le_dim_mul_frobenius_sq_of_trace_eq
     (I := I) g hf x htr
-
-/-! ## Discharging the contracted Christoffel identity
-
-The predicate `ChartContractedChristoffelOn` is a purely algebraic chart-coordinate
-identity. It follows from the symmetric definition of `chartChristoffel` together
-with two ingredients from matrix calculus:
-
-* **Jacobi's formula**: `∂_l (det G(y)) = det G(y) · trace(G(y)⁻¹ · ∂_l G(y))`,
-  applied to the Gram matrix `G(y) := chartGramMatrix g α (symm y)`.
-
-* **Matrix-inverse derivative identity**: differentiating `G · G⁻¹ = I` gives
-  `∂_l G⁻¹ = -G⁻¹ · (∂_l G) · G⁻¹` componentwise.
-
-We discharge the predicate `ChartContractedChristoffelOn` directly using
-the existing `Family.lean` Jacobi infrastructure, lifted from `ℝ` to a
-spatial direction by composing with the affine line `s ↦ y + s • e_l`. -/
 
 /-- Smoothness of the chart Gram matrix entry pulled back to the chart target.
 Analog of `chartInvGramOnE_contDiffOn` but for `chartGramOnE`. -/
@@ -3526,7 +3077,6 @@ theorem chartHessTrace_eq_laplacian_pointwise
     intros i j
     rw [chartInvGramOnE_def]
     rw [hsymm_y₀]
-  -- Step 4: Rewrite both sides using `chartInvGramOnE`.
   rw [show (∑ i : Fin (Module.finrank ℝ E),
             ∑ j : Fin (Module.finrank ℝ E),
               chartInvGramMatrix (I := I) g x x i j *
@@ -3556,7 +3106,6 @@ theorem chartHessTrace_eq_laplacian_pointwise
     refine Finset.sum_congr rfl (fun j _ => ?_)
     refine Finset.sum_congr rfl (fun k _ => ?_)
     rw [hG_eq i j]]
-  -- Step 5: Voss–Weyl expansion via Leibniz.
   have hxbase : x ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
     rw [trivializationAt_baseSet_eq_chartAt_source]; exact hxsrc
   have hy₀_target : y₀ ∈ (extChartAt I α).target :=
@@ -3565,30 +3114,24 @@ theorem chartHessTrace_eq_laplacian_pointwise
     extChartAt_target_subset_interior_of_boundaryless (I := I) α hy₀_target
   have hy₀_nhd : interior (extChartAt I α).target ∈ 𝓝 y₀ :=
     isOpen_interior.mem_nhds hy₀_int
-  -- Differentiability of `gradChartCoeffOnE` at `y₀`.
   have hgrad_diff : ∀ i : Fin (Module.finrank ℝ E),
       DifferentiableAt ℝ (gradChartCoeffOnE (I := I) g α f i) y₀ := by
     intro i
     have h := gradChartCoeffOnE_contDiffOn_interior (I := I) g α hf i
     exact (h.contDiffAt hy₀_nhd).differentiableAt (by simp)
-  -- Differentiability of `chartDensityOnE` at `y₀`.
   have hdens_diff : DifferentiableAt ℝ (chartDensityOnE (I := I) g α) y₀ := by
     have hcd_target : ContDiffOn ℝ ∞ (chartDensityOnE (I := I) g α)
         (extChartAt I α).target := chartDensityOnE_contDiffOn (I := I) g α
     have hcd_int : ContDiffOn ℝ ∞ (chartDensityOnE (I := I) g α)
         (interior (extChartAt I α).target) := hcd_target.mono interior_subset
     exact (hcd_int.contDiffAt hy₀_nhd).differentiableAt (by simp)
-  -- Density positivity and equality.
   have hD_pos : 0 < chartDensity (I := I) g α x :=
     chartDensity_pos (I := I) g α hxbase
   have hD_eq : chartDensityOnE (I := I) g α y₀ = chartDensity (I := I) g α x := by
     unfold chartDensityOnE
     rw [hsymm_y₀]
-  -- Now apply the Voss–Weyl expansion.
   rw [chartVossWeylLaplacian_expand_hypBearing (I := I) g α f x
       hgrad_diff hdens_diff]
-  -- Step 6: Replace `partialDeriv i (gradChartCoeffOnE g α f i)` using
-  -- `partialDeriv_gradChartCoeffOnE_expand`.
   rw [show (∑ i : Fin (Module.finrank ℝ E),
               (gradChartCoeffOnE (I := I) g α f i (extChartAt I α x) *
                 partialDeriv (E := E) i
@@ -3678,7 +3221,6 @@ theorem chartHessTrace_eq_laplacian_pointwise
                     chartInvGramOnE (I := I) g α k l y') y₀)) from by
     refine Finset.sum_congr rfl (fun k _ => ?_)
     rw [hcc k]]
-  -- Step 8: Expand each `partialDeriv l (D · G^{kl})` by Leibniz.
   have hDens_diffAt : DifferentiableAt ℝ (chartDensityOnE (I := I) g α) y₀ :=
     hdens_diff
   have hG_diffAt : ∀ k l : Fin (Module.finrank ℝ E),

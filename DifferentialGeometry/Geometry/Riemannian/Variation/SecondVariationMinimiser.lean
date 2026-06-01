@@ -45,8 +45,6 @@ open DifferentialGeometry.Geometry.Riemannian.AlongCurve
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 open DifferentialGeometry.Geometry.Riemannian.Exponential
 
-/-! ## Second-derivative test: a local minimum forces a non-negative second derivative -/
-
 /-- **Second-derivative test (non-negativity form).** If a real function `L`
 has a local minimum at `x₀`, has derivative `0` there (recorded via a first
 `HasDerivAt`), and has a second derivative `c` there (recorded as
@@ -60,16 +58,12 @@ theorem second_deriv_nonneg_of_isLocalMin {L : ℝ → ℝ} {x₀ c : ℝ}
     (hL'' : HasDerivAt (deriv L) c x₀) : 0 ≤ c := by
   by_contra hc
   push Not at hc
-  -- `deriv L x₀ = 0` and `deriv (deriv L) x₀ = c < 0`.
   have hderiv0 : deriv L x₀ = 0 := hL'.deriv
   have hsecond : deriv (deriv L) x₀ = c := hL''.deriv
-  -- The second-derivative (maximum) test makes `x₀` a local maximum.
   have hmax : IsLocalMax L x₀ :=
     isLocalMax_of_deriv_deriv_neg (by rw [hsecond]; exact hc) hderiv0 hL'.continuousAt
-  -- A point that is both a local minimum and a local maximum has `L` locally constant.
   have hconst : L =ᶠ[𝓝 x₀] (fun _ => L x₀) :=
     eventuallyEq_of_isMinFilter_of_isMaxFilter hmin hmax
-  -- Hence `deriv L` is eventually `0`, so its derivative at `x₀` is `0`.
   have hderiv_const : deriv L =ᶠ[𝓝 x₀] (fun _ => (0 : ℝ)) := by
     have := hconst.deriv
     refine this.trans ?_
@@ -78,8 +72,6 @@ theorem second_deriv_nonneg_of_isLocalMin {L : ℝ → ℝ} {x₀ c : ℝ}
   rw [hderiv_const.hasDerivAt_iff] at hL''0
   have : c = 0 := hL''0.unique (hasDerivAt_const x₀ (0 : ℝ))
   exact absurd this (ne_of_lt hc)
-
-/-! ## A bounded smooth reparametrisation with unit derivative at the origin -/
 
 /-- A bounded smooth reparametrisation of the line.  For `r > 0`,
 `reparam r s := (2 r / π) · arctan((π / (2 r)) · s)` is `C^∞`, vanishes at `0`,
@@ -113,19 +105,14 @@ theorem abs_reparam_lt (r : ℝ) (hr : 0 < r) (s : ℝ) : |reparam r s| < r := b
 theorem hasDerivAt_reparam_zero (r : ℝ) (hr : 0 < r) :
     HasDerivAt (reparam r) 1 0 := by
   have hpi : 0 < Real.pi := Real.pi_pos
-  -- Inner affine map `s ↦ (π / (2 r)) · s` has derivative `π / (2 r)` at `0`.
   have hinner : HasDerivAt (fun s : ℝ => (Real.pi / (2 * r)) * s)
       (Real.pi / (2 * r)) 0 := by
     simpa using (hasDerivAt_id (0 : ℝ)).const_mul (Real.pi / (2 * r))
-  -- `arctan` has derivative `1 / (1 + 0²) = 1` at the inner value `(π/(2r))·0 = 0`.
   have harctan : HasDerivAt Real.arctan (1 / (1 + ((Real.pi / (2 * r)) * (0 : ℝ)) ^ 2))
       ((Real.pi / (2 * r)) * (0 : ℝ)) :=
     Real.hasDerivAt_arctan _
-  -- Compose: `s ↦ arctan((π/(2r))·s)` has derivative `(arctan' 0) · (π/(2r))` at `0`.
   have hcomp := harctan.comp 0 hinner
-  -- Scale by the leading constant `2 r / π`.
   have hscaled := hcomp.const_mul (2 * r / Real.pi)
-  -- The resulting derivative simplifies to `1`.
   have hval : (2 * r / Real.pi) *
       ((1 / (1 + ((Real.pi / (2 * r)) * (0 : ℝ)) ^ 2)) * (Real.pi / (2 * r))) = 1 := by
     have hr' : (2 * r) ≠ 0 := by positivity
@@ -139,9 +126,7 @@ theorem hasDerivAt_reparam_zero (r : ℝ) (hr : 0 < r) :
   rw [hval] at this
   exact this
 
-/-! ## A smooth compactly-supported cut-off equal to `1` on `[0, L]` -/
-
-/-- A `C^8` cut-off `χ : ℝ → ℝ` with `χ = 1` on `[0, L]`, `χ = 0` outside the open
+/-- A `C^∞` cut-off `χ : ℝ → ℝ` with `χ = 1` on `[0, L]`, `χ = 0` outside the open
 interval `(-1, L+1)`, and `0 ≤ χ ≤ 1`.  Used to give the exponential variation a
 field of compact support in the curve parameter, so that the joint smoothness can
 be uniformised over the compact carrier by the tube lemma. -/
@@ -161,8 +146,6 @@ theorem exists_cutoff_one_on_Icc (L : ℝ) :
   have hcd : ContDiff ℝ ((⊤ : ℕ∞) : WithTop ℕ∞) (f : ℝ → ℝ) := by
     rw [← contMDiff_iff_contDiff]; exact f.contMDiff
   exact hcd
-
-/-! ## Exponential-map construction of a smooth endpoint-fixed variation -/
 
 section Construction
 
@@ -189,21 +172,16 @@ theorem contMDiff_smul_bundleField
   intro t₀
   rw [contMDiffAt_totalSpace]
   refine ⟨hγ t₀, ?_⟩
-  -- Fibre coordinate of the original section in the trivialisation at `γ t₀`.
   have hVfib := ((contMDiffAt_totalSpace (f := fun t : ℝ =>
     (TotalSpace.mk' E (E := (TangentSpace I : M → Type _)) (γ t) (V t)))).1 (hVbundle t₀)).2
-  -- Product with the smooth scalar `χ`.
   have hsmul := (hχ t₀).smul hVfib
   refine hsmul.congr_of_eventuallyEq ?_
-  -- Near `t₀`, `γ t` lies in the base set of the trivialisation at `γ t₀`, where the
-  -- fibre coordinate is fibrewise linear, so it commutes with `χ t • ·`.
   have hbase : ∀ᶠ t in 𝓝 t₀, γ t ∈ (trivializationAt E (TangentSpace I) (γ t₀)).baseSet := by
     have hmem : (γ t₀) ∈ (trivializationAt E (TangentSpace I) (γ t₀)).baseSet :=
       FiberBundle.mem_baseSet_trivializationAt' (γ t₀)
     exact (hγ t₀).continuousAt.preimage_mem_nhds
       ((trivializationAt E (TangentSpace I) (γ t₀)).open_baseSet.mem_nhds hmem)
   filter_upwards [hbase] with t ht
-  -- Fibrewise linearity: `(e ⟨b, χ•y⟩).2 = χ • (e ⟨b, y⟩).2`.
   simp only [TotalSpace.mk']
   rw [(trivializationAt E (TangentSpace I) (γ t₀)).apply_eq_prod_continuousLinearEquivAt ℝ
         (γ t) ht,
@@ -293,10 +271,8 @@ theorem exists_variation_realising_field_via_exp
         (mfderiv (𝓘(ℝ, ℝ)) I (fun s : ℝ => f s t) 0 (1 : ℝ) : E) = V t) ∧
       (∀ s : ℝ, f s 0 = γ 0) ∧ (∀ s : ℝ, f s L = γ L) := by
   classical
-  -- (1) A compactly-supported cut-off `χ`, equal to `1` on `[0, L]`.
   obtain ⟨χ, hχ_cd, hχ_one, hχ_zero, hχ_Icc⟩ := exists_cutoff_one_on_Icc L
   set Vc : ℝ → E := fun t => χ t • V t with hVc_def
-  -- The cut-off field is bundle-smooth.
   have hχ_smooth : ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (∞ : WithTop ℕ∞) χ := by
     rw [contMDiff_iff_contDiff]; exact hχ_cd
   have hVcbundle : ContMDiff 𝓘(ℝ, ℝ) I.tangent ∞
@@ -306,11 +282,9 @@ theorem exists_variation_realising_field_via_exp
     fun t => (TotalSpace.mk' E (E := (TangentSpace I : M → Type _)) (γ t) (Vc t)) with hV₀_def
   have hV₀proj : ∀ t, (V₀ t).proj = γ t := fun t => rfl
   have hV₀snd : ∀ t, (V₀ t).snd = Vc t := fun t => rfl
-  -- (2) The exponential variation map of the cut-off field.
   set F : ℝ × ℝ → M :=
     fun p => expMapIntrinsic (I := I) g hEnorm (γ p.2)
       ((p.1 • (V₀ p.2).snd : E) : TangentSpace I (γ p.2)) with hF_def
-  -- (3) The "good smoothness" set `U` (joint `ContMDiffAt 8`), and its openness.
   set U : Set (ℝ × ℝ) :=
     {p : ℝ × ℝ | ContMDiffAt (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) I (8 : ℕ∞) F p} with hU_def
   have hU_open : IsOpen U := by
@@ -320,11 +294,8 @@ theorem exists_variation_realising_field_via_exp
       (contMDiffAt_iff_contMDiffAt_nhds (by
         exact_mod_cast (by decide : ((8 : ℕ) : ℕ∞) ≠ (⊤ : ℕ∞)))).1 hp
     exact this
-  -- The carrier in the `t`-variable.
   set K : Set ℝ := Set.Icc (-1 : ℝ) (L + 1) with hK_def
   have hK_compact : IsCompact K := isCompact_Icc
-  -- (4) `{0} ×ˢ K ⊆ U`: for each `t₀`, the small-field smoothness gives `ContMDiffAt 8`
-  -- at `(0, t₀)` (the launch parameter `0` is in every smallness ball).
   have hslice : ({(0 : ℝ)} ×ˢ K) ⊆ U := by
     rintro ⟨s, t⟩ ⟨hs, ht⟩
     simp only [Set.mem_singleton_iff] at hs
@@ -333,13 +304,11 @@ theorem exists_variation_realising_field_via_exp
       expMapIntrinsic_variation_contMDiffAt_of_smallField (I := I) g hEnorm γ V₀ hγ
         hVcbundle hV₀proj 8 (by norm_num) t
     exact hδ 0 (Metric.mem_ball_self hδ_pos)
-  -- (5) Tube lemma: a uniform open `u ∋ 0` with `u ×ˢ K ⊆ U`.
   obtain ⟨u, v, hu_open, _hv_open, h0u, hKv, huv⟩ :=
     generalized_tube_lemma (isCompact_singleton (x := (0 : ℝ))) hK_compact hU_open hslice
   have h0u' : (0 : ℝ) ∈ u := h0u rfl
   obtain ⟨δ', hδ'_pos, hδ'_ball⟩ := Metric.isOpen_iff.mp hu_open 0 h0u'
   have hKsub : K ⊆ v := hKv
-  -- (6) The bounded reparametrisation `η := reparam δ'`.
   set η : ℝ → ℝ := reparam δ' with hη_def
   have hη0 : η 0 = 0 := reparam_zero δ'
   have hη_cd : ContDiff ℝ (∞ : WithTop ℕ∞) η := contDiff_reparam δ'
@@ -348,31 +317,23 @@ theorem exists_variation_realising_field_via_exp
     refine hδ'_ball ?_
     rw [Metric.mem_ball, Real.dist_eq, sub_zero]
     exact abs_reparam_lt δ' hδ'_pos s
-  -- `Vc 0 = 0` and `Vc L = 0` from `V 0 = V L = 0`.
   have hVc0 : Vc 0 = 0 := by simp only [hVc_def, hV0, smul_zero]
   have hVcL : Vc L = 0 := by simp only [hVc_def, hVL, smul_zero]
-  -- (7) The variation `f s t := exp_{γ t}(η s • Vc t)`.
-  -- The reparametrisation lift `(s, t) ↦ (η s, t)` is jointly `C^8`.
   have hΦη : ContMDiff (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (8 : ℕ∞)
       (fun p : ℝ × ℝ => (η p.1, p.2)) := by
     have hηM : ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (8 : ℕ∞) η := by
       rw [contMDiff_iff_contDiff]; exact hη_cd.of_le (by decide)
     exact (hηM.comp contMDiff_fst).prodMk contMDiff_snd
   refine ⟨fun s t => F (η s, t), ?_, ?_, ?_, ?_, ?_⟩
-  · -- `IsSmoothVariation`: jointly `ContMDiff 8`.
-    change ContMDiff (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) I (8 : ℕ) (fun p : ℝ × ℝ => F (η p.1, p.2))
+  · change ContMDiff (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) I (8 : ℕ) (fun p : ℝ × ℝ => F (η p.1, p.2))
     intro p
     by_cases hpK : p.2 ∈ K
-    · -- Carrier case: `(η p.1, p.2) ∈ u ×ˢ K ⊆ U`, so `F` is `ContMDiffAt 8` there.
-      have hmem : (η p.1, p.2) ∈ U := huv ⟨hη_bound p.1, hKsub hpK⟩
+    · have hmem : (η p.1, p.2) ∈ U := huv ⟨hη_bound p.1, hKsub hpK⟩
       have hFat : ContMDiffAt (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) I (8 : ℕ∞) F (η p.1, p.2) := hmem
       have hcomp := hFat.comp p (hΦη p)
       exact hcomp
-    · -- Off-carrier case: near `p`, `t ∉ supp χ`, so `χ t = 0`, `Vc t = 0`, `F = γ`.
-      -- `p.2` lies in the open complement of `K = [-1, L+1]`, where `χ = 0`.
-      have hopen : IsOpen ((Set.Icc (-1 : ℝ) (L + 1))ᶜ) := isClosed_Icc.isOpen_compl
+    · have hopen : IsOpen ((Set.Icc (-1 : ℝ) (L + 1))ᶜ) := isClosed_Icc.isOpen_compl
       have hp2 : p.2 ∈ (Set.Icc (-1 : ℝ) (L + 1))ᶜ := hpK
-      -- On the open complement, `γ t ∈` chart, `Vc t = 0`, so `F (η s, t) = γ t`.
       have hsub : (Set.Icc (-1 : ℝ) (L + 1))ᶜ ⊆ (Set.Ioo (-1 : ℝ) (L + 1))ᶜ :=
         Set.compl_subset_compl.mpr Set.Ioo_subset_Icc_self
       have heq : (fun q : ℝ × ℝ => F (η q.1, q.2)) =ᶠ[𝓝 p] (fun q : ℝ × ℝ => γ q.2) := by
@@ -390,19 +351,15 @@ theorem exists_variation_realising_field_via_exp
         exact expMapIntrinsic_zero (I := I) g hEnorm (γ q.2)
       refine ContMDiffAt.congr_of_eventuallyEq ?_ heq
       exact (hγ.of_le (by decide)).contMDiffAt.comp p contMDiffAt_snd
-  · -- `f 0 t = γ t`.
-    intro t
+  · intro t
     change expMapIntrinsic (I := I) g hEnorm (γ t)
       ((η 0 • (V₀ t).snd : E) : TangentSpace I (γ t)) = γ t
     have harg : (η 0 • (V₀ t).snd : E) = (0 : E) := by rw [hη0]; exact zero_smul _ _
     rw [harg]
     exact expMapIntrinsic_zero (I := I) g hEnorm (γ t)
-  · -- velocity on `[0, L]`.
-    intro t ht
-    -- On `[0, L]`, `χ t = 1`, so `Vc t = V t`.
+  · intro t ht
     have hVct : Vc t = V t := by
       simp only [hVc_def, hχ_one ht, Pi.one_apply, one_smul]
-    -- The outer exponential map `expFun v := exp_{γ t}(v)` and its derivative at `0`.
     set expFun : E → M :=
       fun v : E => (expMapIntrinsic (I := I) g hEnorm (γ t) (show TangentSpace I (γ t) from v) : M)
       with hexpFun_def
@@ -412,7 +369,6 @@ theorem exists_variation_realising_field_via_exp
         (ContinuousLinearMap.id ℝ E) := by
       have hh := hexp_mdiff.hasMFDerivAt
       rwa [mfderiv_expMapIntrinsic_at_zero (I := I) g hEnorm (γ t)] at hh
-    -- The inner curve `s ↦ η s • Vc t : ℝ → E`, Fréchet derivative `Vc t` at `0`.
     have hinner_deriv : HasDerivAt (fun s : ℝ => η s • Vc t) (Vc t) 0 := by
       have hη' : HasDerivAt η 1 0 := hasDerivAt_reparam_zero δ' hδ'_pos
       have hsc := hη'.smul_const (Vc t)
@@ -423,10 +379,8 @@ theorem exists_variation_realising_field_via_exp
     have hinner_mfd : HasMFDerivAt 𝓘(ℝ, ℝ) 𝓘(ℝ, E) (fun s : ℝ => η s • Vc t) 0
         ((1 : ℝ →L[ℝ] ℝ).smulRight (Vc t)) :=
       hinner_fd.hasMFDerivAt
-    -- `inner 0 = 0`.
     have hinner0 : (fun s : ℝ => η s • Vc t) 0 = (0 : E) := by
       simp only [hη0, zero_smul]
-    -- Chain rule.
     have hcomp : HasMFDerivAt 𝓘(ℝ, ℝ) I
         (fun s : ℝ => expFun (η s • Vc t)) 0
         ((ContinuousLinearMap.id ℝ E).comp
@@ -434,7 +388,6 @@ theorem exists_variation_realising_field_via_exp
       have hcomp0 : HasMFDerivAt 𝓘(ℝ, E) I expFun ((fun s : ℝ => η s • Vc t) 0)
           (ContinuousLinearMap.id ℝ E) := by rw [hinner0]; exact hexp_mfd
       exact hcomp0.comp 0 hinner_mfd
-    -- Read off the manifold derivative.
     have hmfderiv := hcomp.mfderiv
     change mfderiv 𝓘(ℝ, ℝ) I (fun s : ℝ => F (η s, t)) 0 (1 : ℝ) = V t
     have hfeq : (fun s : ℝ => F (η s, t)) = (fun s : ℝ => expFun (η s • Vc t)) := by
@@ -445,24 +398,20 @@ theorem exists_variation_realising_field_via_exp
     rw [ContinuousLinearMap.comp_apply, ContinuousLinearMap.id_apply,
       ContinuousLinearMap.smulRight_apply, ContinuousLinearMap.one_apply, one_smul]
     exact hVct
-  · -- `f s 0 = γ 0` (since `Vc 0 = χ 0 • V 0 = 1 • 0 = 0`).
-    intro s
+  · intro s
     change expMapIntrinsic (I := I) g hEnorm (γ 0)
       ((η s • (V₀ (0 : ℝ)).snd : E) : TangentSpace I (γ 0)) = γ 0
     have harg : (η s • (V₀ (0 : ℝ)).snd : E) = (0 : E) := by
       rw [hV₀snd, hVc0]; exact smul_zero _
     rw [harg]
     exact expMapIntrinsic_zero (I := I) g hEnorm (γ 0)
-  · -- `f s L = γ L` (since `Vc L = χ L • V L = 1 • 0 = 0`).
-    intro s
+  · intro s
     change expMapIntrinsic (I := I) g hEnorm (γ L)
       ((η s • (V₀ L).snd : E) : TangentSpace I (γ L)) = γ L
     have harg : (η s • (V₀ L).snd : E) = (0 : E) := by
       rw [hV₀snd, hVcL]; exact smul_zero _
     rw [harg]
     exact expMapIntrinsic_zero (I := I) g hEnorm (γ L)
-
-/-! ## Minimiser implies index form is non-negative -/
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
@@ -504,19 +453,12 @@ theorem indexForm_nonneg_of_minimising_geodesic
     (hV0 : V 0 = 0) (hVL : V L = 0) :
     0 ≤ indexForm (I := I) g γ 0 L V V := by
   classical
-  -- (1) The exponential variation realising `V` on `[0, L]`, with fixed endpoints.
   obtain ⟨f, hf_smooth, hf0, hf_vel, hf_fix0, hf_fixL⟩ :=
     exists_variation_realising_field_via_exp (I := I) g hEnorm γ V L hγ_smooth hVbundle hV0 hVL
-  -- The arc-length functional of the variation.
   set L_arc : ℝ → ℝ := fun s : ℝ => arcLength (I := I) g (fun t : ℝ => f s t) 0 L with hL_arc
-  -- (2) The full longitudinal velocity field of `f`, a section along `γ`.  On `[0, L]`
-  -- it agrees with `V` (the variation realises `V` there), and as a field it is exactly
-  -- the velocity, so the `second_variation_of_arcLength_eq_indexForm` hypothesis `hVeq` is `rfl`.
   set Vfield : ℝ → E :=
     fun t : ℝ => (mfderiv (𝓘(ℝ, ℝ)) I (fun s : ℝ => f s t) 0 (1 : ℝ) : E) with hVfield
   have hVfield_Icc : ∀ t ∈ Set.Icc (0 : ℝ) L, Vfield t = V t := fun t ht => hf_vel t ht
-  -- (3) Each slice `f s ·` is `C¹` on `[0, L]` and shares the endpoints of `γ`, so the
-  -- minimising property of `γ` makes `L_arc` globally minimal at `s = 0`.
   have hslice_C1 : ∀ s : ℝ, ContMDiffOn 𝓘(ℝ, ℝ) I 1 (fun t : ℝ => f s t) (Set.Icc 0 L) := by
     intro s
     have hincl : ContMDiff 𝓘(ℝ, ℝ) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (8 : ℕ)
@@ -526,7 +468,6 @@ theorem indexForm_nonneg_of_minimising_geodesic
     exact (hcomp.of_le (by exact_mod_cast (by norm_num : (1 : ℕ) ≤ 8))).contMDiffOn
   have hmin_arc : ∀ s : ℝ, L_arc 0 ≤ L_arc s := by
     intro s
-    -- `L_arc 0 = arcLength γ` (central curve), and `arcLength γ ≤ L_arc s` by `hmin`.
     have hcentral : L_arc 0 = arcLength (I := I) g γ 0 L := by
       have hfun : (fun t : ℝ => f 0 t) = γ := by funext t; exact hf0 t
       change arcLength (I := I) g (fun t : ℝ => f 0 t) 0 L = arcLength (I := I) g γ 0 L

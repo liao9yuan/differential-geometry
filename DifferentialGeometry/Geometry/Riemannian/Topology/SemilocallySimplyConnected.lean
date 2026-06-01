@@ -62,21 +62,15 @@ theorem contractible_loops_nullhomotopic_in_subset
     (γ : _root_.Path x x)
     (hγU : Set.range γ.toContinuousMap ⊆ U) :
     (⟦γ⟧ : _root_.Path.Homotopic.Quotient x x) = ⟦_root_.Path.refl x⟧ := by
-  -- `U` is simply connected as a subspace, since contractible spaces are simply
-  -- connected (`SimplyConnectedSpace.ofContractible`).
   have hSC : IsSimplyConnected U := (inferInstance : SimplyConnectedSpace U)
-  -- Convert the range hypothesis into a pointwise membership.
   have hmem : ∀ t, γ t ∈ U := by
     intro t
     have ht : γ t ∈ Set.range γ.toContinuousMap := by
       refine ⟨t, ?_⟩
       simp [Path.coe_toContinuousMap]
     exact hγU ht
-  -- Apply the characterization of simply connected sets to get a homotopy to
-  -- the constant loop.
   obtain ⟨F, _⟩ :=
     (isSimplyConnected_iff_exists_homotopy_refl_forall_mem.mp hSC).2 x γ hmem
-  -- Descend the homotopy to the quotient.
   exact Quotient.sound ⟨F⟩
 
 section ChartContractible
@@ -98,33 +92,23 @@ model space `E`, of a small open metric ball around `e x` contained in
 contractible. -/
 theorem manifold_exists_contractible_open_nhd (x : M) :
     ∃ U : Set M, IsOpen U ∧ x ∈ U ∧ ContractibleSpace U := by
-  -- Compose the chart at `x` with the model homeomorphism `I.toHomeomorph`
-  -- (available because `I` is boundaryless) to get an open partial
-  -- homeomorphism `e : OpenPartialHomeomorph M E`.
   set e : OpenPartialHomeomorph M E :=
     (chartAt H x).transHomeomorph I.toHomeomorph with he_def
   have he_source : e.source = (chartAt H x).source := rfl
-  -- The image of `x` under `e` is some point `c` in `e.target`.
   set c : E := e x with hc_def
-  -- The target of `e` is open in `E` and contains `c`.
   have hxsrc : x ∈ e.source := by
     rw [he_source]; exact mem_chart_source H x
   have hc_target : c ∈ e.target := e.map_source hxsrc
   have h_target_open : IsOpen e.target := e.open_target
-  -- Pick a radius `r > 0` such that `Metric.ball c r ⊆ e.target`.
   obtain ⟨r, hr_pos, hr_sub⟩ :=
     Metric.isOpen_iff.mp h_target_open c hc_target
-  -- Define `U` as the preimage of the ball under `e`, intersected with the source.
   set B : Set E := Metric.ball c r with hB_def
   set U : Set M := e.source ∩ e ⁻¹' B with hU_def
-  -- `U` is open.
   have hU_open : IsOpen U := e.isOpen_inter_preimage Metric.isOpen_ball
-  -- `x ∈ U`: `x ∈ e.source` and `e x = c ∈ B`.
   have hxU : x ∈ U := by
     refine ⟨hxsrc, ?_⟩
     change e x ∈ B
     simp [hB_def, ← hc_def, Metric.mem_ball, dist_self, hr_pos]
-  -- The image of `U` under `e` equals `B`.
   have heImage : e '' U = B := by
     ext b
     refine ⟨?_, ?_⟩
@@ -136,12 +120,9 @@ theorem manifold_exists_contractible_open_nhd (x : M) :
       change e (e.symm b) ∈ B
       rw [e.right_inv hbT]
       exact hb
-  -- Therefore `U` is homeomorphic to the ball `B` (via the restriction of `e`).
   have hU_sub : U ⊆ e.source := Set.inter_subset_left
   let φ : U ≃ₜ B := e.homeomorphOfImageSubsetSource hU_sub heImage
-  -- The ball `B` is contractible.
   have hB_contr : ContractibleSpace B := Metric.contractibleSpace_ball hr_pos
-  -- Transfer contractibility along the homeomorphism.
   have hU_contr : ContractibleSpace U := φ.contractibleSpace
   exact ⟨U, hU_open, hxU, hU_contr⟩
 
