@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapChartCoordFormulaT0Linear
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapChartCoeffsUniformBound
-import DifferentialGeometry.Riemannian.Connection.RawConnLapRiemannianFiberNormSqLeChartData
+import DifferentialGeometry.Riemannian.Curvature.RawConnLapRiemannianFiberNormSqLeChartData
 
 /-!
 # Uniform-in-`T₀` bound on the squared chart-`α` `(Idx, Jdx)` raw scalar

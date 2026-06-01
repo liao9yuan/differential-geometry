@@ -1,6 +1,6 @@
-import DifferentialGeometry.Integration.DivergenceTheorem.LocalFormula
+import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.LocalFormula
 import DifferentialGeometry.Riemannian.Operator.Gradient
-import DifferentialGeometry.Integration.DivergenceTheorem.POUReduction
+import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.POUReduction
 
 /-!
 # The Laplace–Beltrami operator on a Riemannian manifold

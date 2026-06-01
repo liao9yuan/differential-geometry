@@ -1,5 +1,5 @@
-import DifferentialGeometry.Riemannian.Connection.Realized.Realization.Tensor0SBridge
-import DifferentialGeometry.Riemannian.Connection.Realized.Realization.HomNabla
+import DifferentialGeometry.Riemannian.Realized.Realization.Tensor0SBridge
+import DifferentialGeometry.Riemannian.Realized.Realization.HomNabla
 
 /-!
 # Bundled covariant derivative on the (0,s) tensor bundle

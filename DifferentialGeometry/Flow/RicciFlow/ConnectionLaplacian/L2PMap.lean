@@ -1,9 +1,9 @@
 import DifferentialGeometry.Flow.RicciFlow.ConnectionLaplacian.PointwiseMixed
 import DifferentialGeometry.Riemannian.Connection.RawTensorConnLapIterL2WtwokTwoBound
-import DifferentialGeometry.Integration.L2.Hilbert.Defs
-import DifferentialGeometry.Integration.L2.Hilbert.Inherited
-import DifferentialGeometry.Integration.L2.Hilbert.DenseSubset
-import DifferentialGeometry.Integration.L2.Hilbert.SimpLemmas
+import DifferentialGeometry.Analysis.Integration.L2.Hilbert.Defs
+import DifferentialGeometry.Analysis.Integration.L2.Hilbert.Inherited
+import DifferentialGeometry.Analysis.Integration.L2.Hilbert.DenseSubset
+import DifferentialGeometry.Analysis.Integration.L2.Hilbert.SimpLemmas
 import Mathlib.Topology.Algebra.Module.LinearPMap
 import Mathlib.LinearAlgebra.LinearPMap
 import Mathlib.LinearAlgebra.Basis.VectorSpace

@@ -10,7 +10,7 @@ import DifferentialGeometry.Riemannian.Geodesic.CrossVFReduction
 import DifferentialGeometry.Riemannian.Exponential.RescaleSmallnessUniform
 import DifferentialGeometry.Riemannian.Exponential.RescaledLift
 import DifferentialGeometry.Riemannian.Exponential.UniformExistence
-import DifferentialGeometry.Integration.Measure.ChartDensity
+import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import DifferentialGeometry.Riemannian.Comparison.Variation.SecondVariation
 import Mathlib.Geometry.Manifold.Riemannian.PathELength
 

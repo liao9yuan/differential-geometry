@@ -13,7 +13,7 @@ import DifferentialGeometry.Riemannian.Connection.ChartTensorRSCovariantDerivati
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.SlotCorrectionChartKernel
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.TensorRSChartFiberFromModelOpNormUnconditional
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.TensorRSChartFiberToModelOpNormUnconditional
-import DifferentialGeometry.Integration.Measure.ChartDensity
+import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import Mathlib.MeasureTheory.Integral.IntegrableOn
 
 /-!

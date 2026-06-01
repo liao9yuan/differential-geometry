@@ -1,6 +1,6 @@
 import DifferentialGeometry.Riemannian.Boundary.InducedMetric
-import DifferentialGeometry.Integration.Measure.Invariance
-import DifferentialGeometry.Integration.Measure.Properties
+import DifferentialGeometry.Analysis.Integration.Measure.Invariance
+import DifferentialGeometry.Analysis.Integration.Measure.Properties
 
 /-!
 # Surface measure on the boundary of a Riemannian manifold-with-boundary

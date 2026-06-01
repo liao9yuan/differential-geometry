@@ -3,8 +3,8 @@ import DifferentialGeometry.Analysis.Elliptic.Operator.ChartMeasureEquiv
 import DifferentialGeometry.Analysis.Elliptic.MetricExtension
 import DifferentialGeometry.Riemannian.Operator.Gradient
 import DifferentialGeometry.Riemannian.Operator.Laplacian
-import DifferentialGeometry.Integration.DivergenceTheorem.Green
-import DifferentialGeometry.Integration.Measure.ChartDensity
+import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.Green
+import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import Mathlib.Analysis.Calculus.FDeriv.Equiv
 import Mathlib.Analysis.Calculus.FDeriv.Comp
 import Mathlib.MeasureTheory.Integral.Bochner.Set

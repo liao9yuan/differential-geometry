@@ -3,7 +3,7 @@ import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiply
 import DifferentialGeometry.Analysis.Sobolev.Approximation.SmoothDensity
 import DifferentialGeometry.Analysis.Sobolev.Tools.StrictStrongSupport
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridge
-import DifferentialGeometry.Integration.Measure.Glue
+import DifferentialGeometry.Analysis.Integration.Measure.Glue
 import Mathlib.Analysis.Calculus.ContDiff.Basic
 
 /-!

@@ -3,7 +3,7 @@ import DifferentialGeometry.Riemannian.Geodesic.MaximalInterval
 import DifferentialGeometry.Riemannian.Exponential.SmoothnessClose
 import DifferentialGeometry.Riemannian.Exponential.ChartPushVFEq
 import DifferentialGeometry.Riemannian.Connection.Chart.NablaComponents
-import DifferentialGeometry.Integration.Measure.ChartDensity
+import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import Mathlib.Geometry.Manifold.IntegralCurve.Transform
 
 set_option linter.unusedSectionVars false

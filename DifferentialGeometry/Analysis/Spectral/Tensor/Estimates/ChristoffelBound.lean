@@ -1,6 +1,6 @@
 import DifferentialGeometry.Riemannian.Connection.LeviCivitaChartLocal
 import DifferentialGeometry.Riemannian.Connection.LeviCivitaChartMetric
-import DifferentialGeometry.Integration.Measure.Glue
+import DifferentialGeometry.Analysis.Integration.Measure.Glue
 import Mathlib.Analysis.Calculus.ContDiff.Basic
 import Mathlib.Topology.Order.Compact
 

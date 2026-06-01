@@ -11,7 +11,7 @@ import DifferentialGeometry.Flow.RicciFlow.ODE.TimeDependentFlow.ChartOverlapUni
 import DifferentialGeometry.Flow.RicciFlow.ODE.TimeDependentFlow.BareFlowFromJointC1
 import DifferentialGeometry.Flow.RicciFlow.ODE.TimeDependentFlow.SmoothInSpace.VariationalLiftFlatIdentity
 import DifferentialGeometry.Flow.RicciFlow.ODE.TimeDependentFlow.SmoothDependence.GlobalClosedManifold
-import DifferentialGeometry.Integration.Measure.ChartDensity
+import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 
 namespace DifferentialGeometry.PDE.RicciFlow
 

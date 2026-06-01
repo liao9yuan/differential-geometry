@@ -2,7 +2,7 @@ import DifferentialGeometry.Analysis.Sobolev.Chart.TransitionPipeline
 import DifferentialGeometry.Analysis.Sobolev.Chart.CompletenessAux
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedCompBound
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridge
-import DifferentialGeometry.Integration.Measure.Glue
+import DifferentialGeometry.Analysis.Integration.Measure.Glue
 
 /-!
 # Cross-chart order-`k` iterated-derivative transfer

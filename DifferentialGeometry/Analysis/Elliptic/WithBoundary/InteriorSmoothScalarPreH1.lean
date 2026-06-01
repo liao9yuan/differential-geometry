@@ -1,9 +1,9 @@
 import DifferentialGeometry.Riemannian.Operator.Laplacian
-import DifferentialGeometry.Integration.DivergenceTheorem.WithBoundary.Gradient
-import DifferentialGeometry.Integration.DivergenceTheorem.WithBoundary.Green
-import DifferentialGeometry.Integration.DivergenceTheorem.WithBoundary.Laplacian
+import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.Gradient
+import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.Green
+import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.Laplacian
 import DifferentialGeometry.Riemannian.Boundary.EuclideanHalfSpaceInstance
-import DifferentialGeometry.Integration.Measure.Properties
+import DifferentialGeometry.Analysis.Integration.Measure.Properties
 import DifferentialGeometry.Riemannian.Metric.TensorInner.TangentRiemannian
 import Mathlib.Analysis.InnerProductSpace.Defs
 import Mathlib.MeasureTheory.Integral.Bochner.Basic

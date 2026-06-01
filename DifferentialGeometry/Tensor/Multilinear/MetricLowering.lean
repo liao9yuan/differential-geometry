@@ -2,7 +2,7 @@ import DifferentialGeometry.Tensor.Multilinear.BundleSmoothEval
 import DifferentialGeometry.Riemannian.Metric.TensorInner.Tensor0SRiemannian
 import DifferentialGeometry.Riemannian.Metric.TensorInner.TensorRSRiemannian
 import DifferentialGeometry.Riemannian.Metric.PointwiseInner.DualMetric
-import DifferentialGeometry.Integration.L2.SmoothSections.Defs
+import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Defs
 import Mathlib.Geometry.Manifold.VectorBundle.Hom
 import Mathlib.Geometry.Manifold.VectorBundle.Riemannian
 import Mathlib.Geometry.Manifold.VectorBundle.SmoothSection

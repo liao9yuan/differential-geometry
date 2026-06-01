@@ -2,7 +2,7 @@ import DifferentialGeometry.Analysis.Elliptic.MetricExtension
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.ChartPrimitives
 import DifferentialGeometry.Riemannian.Connection.CovApplyFrameToCoordExpansion
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridge
-import DifferentialGeometry.Integration.DivergenceTheorem.TangentAction
+import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.TangentAction
 
 /-!
 # Chart-pulled chart-α coordinate matrix: smoothness on the Euclidean chart target

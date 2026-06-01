@@ -1,5 +1,5 @@
-import DifferentialGeometry.Integration.Measure.ChartDensity
-import DifferentialGeometry.Riemannian.Connection.CurvatureBundling
+import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
+import DifferentialGeometry.Riemannian.Curvature.CurvatureBundling
 import DifferentialGeometry.Riemannian.Connection.LeviCivita
 import DifferentialGeometry.Riemannian.Connection.ChartBridge.Ricci
 import DifferentialGeometry.Bundle.Frame

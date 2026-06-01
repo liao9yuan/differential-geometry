@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Tensor.PouWeightedHsNorm
-import DifferentialGeometry.Integration.L2.SmoothSections.PreHilbert
+import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.PreHilbert
 import Mathlib.Analysis.InnerProductSpace.Defs
 import Mathlib.Topology.UniformSpace.Completion
 import Mathlib.Topology.Algebra.GroupCompletion

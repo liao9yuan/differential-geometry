@@ -1,7 +1,7 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.LowerAllUpperIndices
 import DifferentialGeometry.Tensor.RSTensor.Defs
 import DifferentialGeometry.Riemannian.Metric.TensorInner.Tensor0SRiemannian
-import DifferentialGeometry.Integration.Measure.ChartDensity
+import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import DifferentialGeometry.Riemannian.Metric.PointwiseInner.Defs
 import DifferentialGeometry.Riemannian.Metric.PointwiseInner.Algebra
 

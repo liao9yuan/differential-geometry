@@ -1,5 +1,5 @@
 import DifferentialGeometry.Riemannian.Operator.Laplacian
-import DifferentialGeometry.Integration.DivergenceTheorem.ChartInvariance
+import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.ChartInvariance
 
 /-!
 # The chart Voss-Weyl formula for the Laplace-Beltrami operator

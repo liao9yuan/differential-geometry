@@ -1,6 +1,6 @@
 import DifferentialGeometry.Riemannian.Operator.Hessian
 import DifferentialGeometry.Riemannian.Geodesic.ChartTransition
-import DifferentialGeometry.Integration.Measure.Invariance
+import DifferentialGeometry.Analysis.Integration.Measure.Invariance
 
 set_option linter.unusedSectionVars false
 set_option linter.style.show false

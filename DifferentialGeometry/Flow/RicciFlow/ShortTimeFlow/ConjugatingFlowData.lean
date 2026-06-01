@@ -3,7 +3,7 @@ import DifferentialGeometry.Flow.RicciFlow.ShortTimeAssembly.BasepointMotion
 import DifferentialGeometry.Flow.RicciFlow.ShortTimeAssembly.EvalFormChainRule
 import DifferentialGeometry.Flow.RicciFlow.ShortTimeAssembly.RicciFlowPdeAtZero
 import DifferentialGeometry.Flow.RicciFlow.Pullback.Metric
-import DifferentialGeometry.Integration.Measure.ChartDensity
+import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 
 namespace DifferentialGeometry.PDE.RicciFlow
 

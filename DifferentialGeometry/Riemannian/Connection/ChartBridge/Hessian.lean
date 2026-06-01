@@ -1,4 +1,4 @@
-import DifferentialGeometry.Riemannian.Connection.RicciIdentity
+import DifferentialGeometry.Riemannian.Curvature.RicciIdentity
 import DifferentialGeometry.Riemannian.Connection.ChartBridge.Gradient
 
 /-!

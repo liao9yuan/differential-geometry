@@ -4,7 +4,7 @@ import DifferentialGeometry.Analysis.Sobolev.Chart.Transition
 import DifferentialGeometry.Analysis.Sobolev.Chart.DensityInfra
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Density
 import DifferentialGeometry.Analysis.Sobolev.Chart.Defs
-import DifferentialGeometry.Integration.Measure.Family
+import DifferentialGeometry.Analysis.Integration.Measure.Family
 
 /-!
 # Helper lemmas for the smooth-density argument on `W^{1,p}_chart(M)`

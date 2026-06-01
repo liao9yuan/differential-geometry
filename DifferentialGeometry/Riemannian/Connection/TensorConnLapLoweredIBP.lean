@@ -1,5 +1,5 @@
 import DifferentialGeometry.Riemannian.Connection.CovariantIntegrationByParts
-import DifferentialGeometry.Integration.L2.Tensor0SInnerSectionSmooth
+import DifferentialGeometry.Analysis.Integration.L2.Tensor0SInnerSectionSmooth
 
 /-!
 # Directional lowered integration-by-parts for `(r, s)`-tensor fields

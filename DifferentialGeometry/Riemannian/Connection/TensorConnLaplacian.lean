@@ -1,7 +1,7 @@
 import DifferentialGeometry.Riemannian.Connection.TensorRSNabla
 import DifferentialGeometry.Riemannian.Connection.ConnectionLaplacian
-import DifferentialGeometry.Riemannian.Connection.Bochner
-import DifferentialGeometry.Integration.L2.SmoothSections.Defs
+import DifferentialGeometry.Riemannian.Curvature.Bochner
+import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Defs
 
 /-!
 # The connection Laplacian on `(r, s)`-tensor sections

@@ -1,6 +1,6 @@
-import DifferentialGeometry.Riemannian.Connection.Curvature
-import DifferentialGeometry.Riemannian.Connection.RicciIdentitySmoothFrame
-import DifferentialGeometry.Riemannian.Connection.RiemannianFiberNormSq
+import DifferentialGeometry.Riemannian.Curvature.Curvature
+import DifferentialGeometry.Riemannian.Curvature.RicciIdentitySmoothFrame
+import DifferentialGeometry.Riemannian.Curvature.RiemannianFiberNormSq
 import DifferentialGeometry.Riemannian.Connection.ChristoffelCorrectionBasepoint
 import Mathlib.Geometry.Manifold.BumpFunction
 import Mathlib.Analysis.Calculus.FDeriv.Congr

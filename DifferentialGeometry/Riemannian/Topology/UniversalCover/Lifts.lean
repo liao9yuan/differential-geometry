@@ -1,9 +1,9 @@
 import DifferentialGeometry.Riemannian.Topology.UniversalCover.Riemannian
 import DifferentialGeometry.Riemannian.Topology.UniversalCover.ChartPullback
 import DifferentialGeometry.Riemannian.Comparison.BonnetMyers.RicciBound
-import DifferentialGeometry.Riemannian.Connection.Ricci
+import DifferentialGeometry.Riemannian.Curvature.RicciConnection
 import DifferentialGeometry.Riemannian.Connection.LeviCivita
-import DifferentialGeometry.Riemannian.Connection.CurvatureBundling
+import DifferentialGeometry.Riemannian.Curvature.CurvatureBundling
 import DifferentialGeometry.Riemannian.Connection.ChartBridge.Ricci
 import Mathlib.Topology.Covering
 import Mathlib.Topology.Homotopy.Lifting

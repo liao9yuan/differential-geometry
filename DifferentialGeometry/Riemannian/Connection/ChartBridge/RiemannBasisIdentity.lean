@@ -1,6 +1,6 @@
 import DifferentialGeometry.Riemannian.Connection.ChartBridge.Ricci
 import DifferentialGeometry.Riemannian.Connection.ChartBridge.Hessian
-import DifferentialGeometry.Riemannian.Connection.CurvatureBundling
+import DifferentialGeometry.Riemannian.Curvature.CurvatureBundling
 import DifferentialGeometry.Riemannian.Connection.ChartLieBracket
 import DifferentialGeometry.Riemannian.Connection.CovApplyCovRSChartBasisExtension
 

@@ -1,7 +1,7 @@
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevHalfSpace
 import DifferentialGeometry.Analysis.Sobolev.Chart.Defs
-import DifferentialGeometry.Integration.Measure.Properties
-import DifferentialGeometry.Integration.L2.CompactSupport
+import DifferentialGeometry.Analysis.Integration.Measure.Properties
+import DifferentialGeometry.Analysis.Integration.L2.CompactSupport
 import DifferentialGeometry.Riemannian.Boundary.EuclideanHalfSpaceInstance
 
 /-!

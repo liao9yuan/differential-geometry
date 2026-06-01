@@ -1,5 +1,5 @@
-import DifferentialGeometry.Riemannian.Connection.Ricci
-import DifferentialGeometry.Integration.Measure.ChartDensity
+import DifferentialGeometry.Riemannian.Curvature.RicciConnection
+import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 
 /-!
 # The "Ric ≥ κ · g" predicate

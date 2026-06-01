@@ -1,7 +1,7 @@
 import DifferentialGeometry.Analysis.Sobolev.Manifold.EmbeddingSubcritical
 import DifferentialGeometry.Analysis.Sobolev.WithBoundary.Chart
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevHalfSpace
-import DifferentialGeometry.Integration.Measure.Family
+import DifferentialGeometry.Analysis.Integration.Measure.Family
 
 /-!
 # Sub-critical Sobolev embedding `W^{1,p}_chart(M) ↪ L^{p*}(M, μ_g)`,

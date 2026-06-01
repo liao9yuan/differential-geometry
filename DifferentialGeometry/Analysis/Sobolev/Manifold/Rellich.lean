@@ -1,10 +1,10 @@
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Rellich
 import DifferentialGeometry.Analysis.Sobolev.Chart.Defs
 import DifferentialGeometry.Analysis.Sobolev.Chart.Atlas
-import DifferentialGeometry.Integration.Measure.Glue
-import DifferentialGeometry.Integration.Measure.Family
-import DifferentialGeometry.Integration.Measure.Properties
-import DifferentialGeometry.Integration.Measure.Invariance
+import DifferentialGeometry.Analysis.Integration.Measure.Glue
+import DifferentialGeometry.Analysis.Integration.Measure.Family
+import DifferentialGeometry.Analysis.Integration.Measure.Properties
+import DifferentialGeometry.Analysis.Integration.Measure.Invariance
 import DifferentialGeometry.External.DeGiorgi.SobolevSpace
 import DifferentialGeometry.External.DeGiorgi.LpFunctionToolkit
 import DifferentialGeometry.External.DeGiorgi.SobolevSpace.Approximation

@@ -1,6 +1,6 @@
 import DifferentialGeometry.Riemannian.Connection.TensorConnLaplacian
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartFrameNormGlobalSmooth
-import DifferentialGeometry.Integration.L2.SmoothSections.Defs
+import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Defs
 
 /-!
 # Chart-α frame trace identity for the raw tensor connection Laplacian

@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolev
-import DifferentialGeometry.Integration.Measure.Properties
-import DifferentialGeometry.Integration.L2.CompactSupport
+import DifferentialGeometry.Analysis.Integration.Measure.Properties
+import DifferentialGeometry.Analysis.Integration.L2.CompactSupport
 import Mathlib.Analysis.InnerProductSpace.EuclideanDist
 
 /-!

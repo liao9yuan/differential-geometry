@@ -1,6 +1,6 @@
-import DifferentialGeometry.Riemannian.Connection.Realized.Realization.TensorNabla
-import DifferentialGeometry.Riemannian.Connection.Realized.Realization.SmoothSections
-import DifferentialGeometry.Riemannian.Connection.Realized.Realization.Connection
+import DifferentialGeometry.Riemannian.Realized.Realization.TensorNabla
+import DifferentialGeometry.Riemannian.Realized.Realization.SmoothSections
+import DifferentialGeometry.Riemannian.Realized.Realization.Connection
 import Mathlib.Geometry.Manifold.VectorBundle.Tensoriality
 
 /-!

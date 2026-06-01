@@ -4,7 +4,7 @@ import DifferentialGeometry.Riemannian.Geodesic.Uniqueness
 import DifferentialGeometry.Riemannian.Geodesic.ProjDerivative
 import DifferentialGeometry.Riemannian.Geodesic.ChartTransition
 import DifferentialGeometry.Riemannian.Connection.AlongCurve
-import DifferentialGeometry.Integration.Measure.ChartDensity
+import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import Mathlib.Geometry.Manifold.IntegralCurve.Basic
 import Mathlib.Analysis.Calculus.FDeriv.CompCLM
 import Mathlib.Analysis.Calculus.Deriv.Mul

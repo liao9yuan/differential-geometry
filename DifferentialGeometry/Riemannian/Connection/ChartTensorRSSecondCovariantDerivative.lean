@@ -1,5 +1,5 @@
 import DifferentialGeometry.Riemannian.Connection.ChartTensorRSCovariantDerivativeAgreement
-import DifferentialGeometry.Riemannian.Connection.Curvature
+import DifferentialGeometry.Riemannian.Curvature.Curvature
 
 /-!
 # Chart-coordinate expression for the second covariant derivative on the

@@ -1,4 +1,4 @@
-import DifferentialGeometry.Riemannian.Connection.Ricci
+import DifferentialGeometry.Riemannian.Curvature.RicciConnection
 import DifferentialGeometry.Riemannian.Connection.ChartBridge.Riemann
 import DifferentialGeometry.Riemannian.Curvature.Ricci
 

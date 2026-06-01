@@ -4,10 +4,10 @@ import DifferentialGeometry.Riemannian.Connection.AlongCurve
 import DifferentialGeometry.Riemannian.Connection.CovariantDerivativeAlong
 import DifferentialGeometry.Riemannian.Connection.MFDerivAlongCurve
 import DifferentialGeometry.Riemannian.Geodesic.Equation
-import DifferentialGeometry.Riemannian.Connection.Curvature
+import DifferentialGeometry.Riemannian.Curvature.Curvature
 import DifferentialGeometry.Riemannian.Connection.LeviCivita
-import DifferentialGeometry.Riemannian.Connection.RicciIdentity
-import DifferentialGeometry.Riemannian.Connection.Ricci
+import DifferentialGeometry.Riemannian.Curvature.RicciIdentity
+import DifferentialGeometry.Riemannian.Curvature.RicciConnection
 import DifferentialGeometry.Riemannian.Metric.TensorInner.TangentRiemannian
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 import Mathlib.Analysis.SpecialFunctions.Pow.Real

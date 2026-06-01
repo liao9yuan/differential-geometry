@@ -8,7 +8,7 @@ import DifferentialGeometry.Analysis.Sobolev.Chart.TransitionPipeline
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolev
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiply
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridge
-import DifferentialGeometry.Integration.Measure.Glue
+import DifferentialGeometry.Analysis.Integration.Measure.Glue
 
 /-!
 # Per-pair cross-chart support helpers and existence form

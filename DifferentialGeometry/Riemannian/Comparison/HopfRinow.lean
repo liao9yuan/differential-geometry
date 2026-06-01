@@ -10,7 +10,7 @@ import DifferentialGeometry.Riemannian.Exponential.Definition
 import DifferentialGeometry.Riemannian.Exponential.SmoothnessUnconditional
 import DifferentialGeometry.Riemannian.Connection.AlongCurve
 import DifferentialGeometry.Riemannian.Connection.MFDerivAlongCurve
-import DifferentialGeometry.Integration.Measure.ChartDensity
+import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import DifferentialGeometry.Riemannian.Connection.LeviCivita
 import Mathlib.Analysis.Calculus.MeanValue
 import Mathlib.Geometry.Manifold.Riemannian.Basic

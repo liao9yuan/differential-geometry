@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.H1Compl.Intrinsic
-import DifferentialGeometry.Integration.L2.Pairing.Defs
+import DifferentialGeometry.Analysis.Integration.L2.Pairing.Defs
 import DifferentialGeometry.Analysis.Elliptic.MetricBounds
 
 /-!

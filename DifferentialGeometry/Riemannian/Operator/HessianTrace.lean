@@ -1,6 +1,6 @@
 import DifferentialGeometry.Riemannian.Operator.Hessian
 import DifferentialGeometry.Riemannian.Operator.VossWeyl
-import DifferentialGeometry.Integration.Measure.Family
+import DifferentialGeometry.Analysis.Integration.Measure.Family
 
 /-!
 # Trace of the chart Hessian against the inverse Gram matrix equals the Laplacian

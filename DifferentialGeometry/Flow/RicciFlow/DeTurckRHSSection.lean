@@ -1,6 +1,6 @@
 import DifferentialGeometry.Flow.RicciFlow.DeTurckRHS
 import DifferentialGeometry.Flow.RicciFlow.LieDerivativePairing
-import DifferentialGeometry.Integration.L2.SmoothSections.Defs
+import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Defs
 import DifferentialGeometry.Tensor.Mixed.Field
 import DifferentialGeometry.Tensor.RSTensor.Field
 

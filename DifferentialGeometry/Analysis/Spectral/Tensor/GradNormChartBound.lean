@@ -1,5 +1,5 @@
 import DifferentialGeometry.Riemannian.Operator.Gradient
-import DifferentialGeometry.Integration.Measure.Glue
+import DifferentialGeometry.Analysis.Integration.Measure.Glue
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ComponentSobolevBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ComponentSobolevPointwise
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.GoodSetMeasure

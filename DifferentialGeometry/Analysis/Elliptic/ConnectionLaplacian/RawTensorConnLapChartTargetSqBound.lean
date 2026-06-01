@@ -1,7 +1,7 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawTensorConnLapNormSqChartPulledReprBound
-import DifferentialGeometry.Integration.Measure.TensorChartPulled
+import DifferentialGeometry.Analysis.Integration.Measure.TensorChartPulled
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.GoodSetMeasure
-import DifferentialGeometry.Integration.L2.SmoothSections.Defs
+import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Defs
 
 /-!
 # Chart-target form of the pointwise squared op-norm bound for

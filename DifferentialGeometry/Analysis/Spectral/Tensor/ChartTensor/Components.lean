@@ -1,9 +1,9 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.Rellich.Tensor
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridge
 import DifferentialGeometry.Analysis.Sobolev.Manifold.RellichManifold
-import DifferentialGeometry.Integration.L2.SmoothSections.Defs
-import DifferentialGeometry.Integration.L2.SmoothSections.Integrability
-import DifferentialGeometry.Integration.Measure.ChartDensity
+import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Defs
+import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Integrability
+import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import DifferentialGeometry.Tensor.RSTensor.Defs
 import Mathlib.Analysis.InnerProductSpace.EuclideanDist
 import Mathlib.Analysis.Normed.Module.FiniteDimension

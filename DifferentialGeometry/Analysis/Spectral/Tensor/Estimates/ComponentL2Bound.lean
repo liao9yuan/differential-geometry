@@ -1,9 +1,9 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ComponentSobolevBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components
-import DifferentialGeometry.Integration.L2.SmoothSections.PreHilbert
-import DifferentialGeometry.Integration.L2.SmoothSections.Integrability
+import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.PreHilbert
+import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Integrability
 import DifferentialGeometry.Riemannian.Metric.PointwiseInner.Algebra
-import DifferentialGeometry.Integration.L2.Pairing.Defs
+import DifferentialGeometry.Analysis.Integration.L2.Pairing.Defs
 import Mathlib.MeasureTheory.Function.LpSpace.Basic
 import Mathlib.MeasureTheory.Function.LpSeminorm.CompareExp
 import Mathlib.MeasureTheory.Integral.Bochner.Basic

@@ -1,5 +1,5 @@
 import DifferentialGeometry.Riemannian.Metric.Basic
-import DifferentialGeometry.Riemannian.Connection.Ricci
+import DifferentialGeometry.Riemannian.Curvature.RicciConnection
 import DifferentialGeometry.Flow.DeTurck.VectorField
 import DifferentialGeometry.Flow.DeTurck.LieDerivativeMetric
 

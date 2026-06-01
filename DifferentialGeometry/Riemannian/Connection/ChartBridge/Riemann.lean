@@ -1,5 +1,5 @@
-import DifferentialGeometry.Riemannian.Connection.Curvature
-import DifferentialGeometry.Riemannian.Connection.CurvatureBundling
+import DifferentialGeometry.Riemannian.Curvature.Curvature
+import DifferentialGeometry.Riemannian.Curvature.CurvatureBundling
 import DifferentialGeometry.Riemannian.Connection.LeviCivita
 import DifferentialGeometry.Riemannian.Curvature.Riemann
 

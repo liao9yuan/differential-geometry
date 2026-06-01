@@ -6,7 +6,7 @@ import DifferentialGeometry.Flow.RicciFlow.Pullback.CartanFormula
 import DifferentialGeometry.Flow.RicciFlow.Pullback.TimeDerivativeChainRule
 import DifferentialGeometry.Flow.DeTurck.LieDerivativeMetric
 import DifferentialGeometry.Flow.DeTurck.VectorField
-import DifferentialGeometry.Riemannian.Connection.Ricci
+import DifferentialGeometry.Riemannian.Curvature.RicciConnection
 import Mathlib.Analysis.Calculus.Deriv.Basic
 import Mathlib.Analysis.Calculus.Deriv.Add
 import Mathlib.Analysis.Calculus.Deriv.Mul

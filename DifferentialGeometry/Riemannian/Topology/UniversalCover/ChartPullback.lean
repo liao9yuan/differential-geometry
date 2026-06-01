@@ -1,7 +1,7 @@
 import DifferentialGeometry.Riemannian.Topology.UniversalCover.Manifold
 import DifferentialGeometry.Riemannian.Topology.UniversalCover.LiftedMetricSmoothness
 import DifferentialGeometry.Riemannian.Topology.UniversalCover.Riemannian
-import DifferentialGeometry.Integration.Measure.ChartDensity
+import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import DifferentialGeometry.Riemannian.Operator.Hessian
 import DifferentialGeometry.Riemannian.Curvature.Riemann
 import DifferentialGeometry.Riemannian.Curvature.Ricci

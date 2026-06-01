@@ -5,7 +5,7 @@ import DifferentialGeometry.Riemannian.Exponential.PreconnectedPropagation
 import DifferentialGeometry.Riemannian.Geodesic.Equation
 import DifferentialGeometry.Riemannian.Geodesic.MaximalInterval
 import DifferentialGeometry.Riemannian.Geodesic.SmoothFlow
-import DifferentialGeometry.Integration.Measure.ChartDensity
+import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import DifferentialGeometry.Analysis.ODE.FlowC1Continuous
 import Mathlib.Topology.MetricSpace.Pseudo.Lemmas
 import Mathlib.Topology.Compactness.Compact

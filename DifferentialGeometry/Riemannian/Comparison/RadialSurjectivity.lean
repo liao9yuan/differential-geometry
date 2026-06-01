@@ -4,7 +4,7 @@ import DifferentialGeometry.Riemannian.Exponential.Definition
 import DifferentialGeometry.Riemannian.Exponential.LocalDiffeomorphism
 import DifferentialGeometry.Riemannian.Comparison.NormalCoordinates
 import DifferentialGeometry.Riemannian.Comparison.RiemannianDistContinuity
-import DifferentialGeometry.Integration.Measure.ChartDensity
+import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import Mathlib.Geometry.Manifold.Riemannian.Basic
 import Mathlib.Geometry.Manifold.Riemannian.PathELength
 import Mathlib.Analysis.Convex.Star

@@ -1,6 +1,6 @@
 import DifferentialGeometry.Riemannian.Connection.TensorConnLapGreenIdentity
 import DifferentialGeometry.Riemannian.Connection.TensorConnLapLoweredIBP
-import DifferentialGeometry.Riemannian.Connection.TensorRicciCommutator
+import DifferentialGeometry.Riemannian.Curvature.TensorRicciCommutator
 import DifferentialGeometry.Riemannian.Connection.RawTensorConnLapChartFrameTrace
 
 /-!

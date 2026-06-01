@@ -3,7 +3,7 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.TensorCovGradL
 import DifferentialGeometry.Riemannian.Connection.RawTensorConnLapChartFrameTrace
 import DifferentialGeometry.Riemannian.Connection.RawTensorConnLapIterL2WtwokTwoBound
 import DifferentialGeometry.Riemannian.Connection.TensorRSMetricCompatible
-import DifferentialGeometry.Integration.DivergenceTheorem.POUReduction
+import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.POUReduction
 import DifferentialGeometry.Analysis.Sobolev.Manifold.Rellich
 
 /-!

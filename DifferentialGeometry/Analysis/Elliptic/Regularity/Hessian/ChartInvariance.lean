@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Hessian.TensorChartSmooth
-import DifferentialGeometry.Riemannian.Connection.BochnerConcrete
+import DifferentialGeometry.Riemannian.Curvature.BochnerConcrete
 
 /-!
 # Chart-invariance of the chart-α tensor Hessian–Frobenius pairing

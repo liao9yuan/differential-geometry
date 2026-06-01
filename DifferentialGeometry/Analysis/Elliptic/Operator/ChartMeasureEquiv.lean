@@ -1,8 +1,8 @@
 import DifferentialGeometry.Analysis.Elliptic.MetricExtension
-import DifferentialGeometry.Integration.DivergenceTheorem.Closed
-import DifferentialGeometry.Integration.Measure.Family
-import DifferentialGeometry.Integration.Measure.ChartDensity
-import DifferentialGeometry.Integration.Measure.Invariance
+import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.Closed
+import DifferentialGeometry.Analysis.Integration.Measure.Family
+import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
+import DifferentialGeometry.Analysis.Integration.Measure.Invariance
 import Mathlib.MeasureTheory.Integral.Bochner.ContinuousLinearMap
 import Mathlib.MeasureTheory.Integral.Bochner.Set
 import Mathlib.MeasureTheory.Measure.Map

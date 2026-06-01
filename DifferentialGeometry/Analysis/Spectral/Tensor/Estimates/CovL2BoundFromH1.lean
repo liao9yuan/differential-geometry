@@ -1,7 +1,7 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.TrivProj.CovNormBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.PreHilbert
 import DifferentialGeometry.Analysis.Spectral.Tensor.H1Compl
-import DifferentialGeometry.Integration.L2.SmoothSections.PreHilbert
+import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.PreHilbert
 import Mathlib.MeasureTheory.Function.LpSeminorm.Basic
 
 /-!

@@ -1,4 +1,4 @@
-import DifferentialGeometry.Riemannian.Connection.TensorThirdOrderWeitzenbock
+import DifferentialGeometry.Riemannian.Curvature.TensorThirdOrderWeitzenbock
 import DifferentialGeometry.Riemannian.Connection.TensorConnLapSecondGradientL2Bound
 
 /-!

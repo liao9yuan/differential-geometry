@@ -1,5 +1,5 @@
 import DifferentialGeometry.Riemannian.Metric.Basic
-import DifferentialGeometry.Riemannian.Connection.Ricci
+import DifferentialGeometry.Riemannian.Curvature.RicciConnection
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.Existence
 import DifferentialGeometry.Flow.DeTurck.Symbol
 import DifferentialGeometry.Flow.RicciFlow.PrincipalSymbol

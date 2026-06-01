@@ -1,10 +1,10 @@
-import DifferentialGeometry.Integration.DivergenceTheorem.Closed
-import DifferentialGeometry.Integration.DivergenceTheorem.Green
+import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.Closed
+import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.Green
 import DifferentialGeometry.Riemannian.Operator.Gradient
 import DifferentialGeometry.Riemannian.Operator.Laplacian
 import DifferentialGeometry.Riemannian.Operator.NormGradSq
-import DifferentialGeometry.Integration.Measure.Properties
-import DifferentialGeometry.Riemannian.Connection.BochnerConcrete
+import DifferentialGeometry.Analysis.Integration.Measure.Properties
+import DifferentialGeometry.Riemannian.Curvature.BochnerConcrete
 import DifferentialGeometry.Riemannian.Connection.ChartBridge.Hessian
 import DifferentialGeometry.Riemannian.Metric.TensorInner.TangentRiemannian
 import Mathlib.MeasureTheory.Integral.Bochner.Basic

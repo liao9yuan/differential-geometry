@@ -1,4 +1,4 @@
-import DifferentialGeometry.Riemannian.Connection.Realized.Realization.Tensor0SBridge
+import DifferentialGeometry.Riemannian.Realized.Realization.Tensor0SBridge
 import DifferentialGeometry.Tensor.Multilinear.BundleSmoothEval
 
 /-!

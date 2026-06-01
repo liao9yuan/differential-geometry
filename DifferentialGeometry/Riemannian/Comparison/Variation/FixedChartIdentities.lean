@@ -2,12 +2,12 @@ import DifferentialGeometry.Riemannian.Comparison.Variation.ParallelTransport
 import DifferentialGeometry.Riemannian.Connection.AlongCurve
 import DifferentialGeometry.Riemannian.Curvature.Riemann
 import DifferentialGeometry.Riemannian.Connection.LeviCivita
-import DifferentialGeometry.Riemannian.Connection.Curvature
-import DifferentialGeometry.Riemannian.Connection.RicciIdentity
+import DifferentialGeometry.Riemannian.Curvature.Curvature
+import DifferentialGeometry.Riemannian.Curvature.RicciIdentity
 import DifferentialGeometry.Riemannian.Connection.ChartBridge.Riemann
 import DifferentialGeometry.Riemannian.Connection.ChartBridge.Ricci
 import DifferentialGeometry.Riemannian.Connection.ChartBridge.RiemannBasisBracket
-import DifferentialGeometry.Integration.Measure.ChartDensity
+import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import Mathlib.Geometry.Manifold.ContMDiff.Defs
 import Mathlib.Analysis.Calculus.FDeriv.Symmetric
 

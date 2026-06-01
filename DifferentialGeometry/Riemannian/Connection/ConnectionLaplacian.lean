@@ -1,4 +1,4 @@
-import DifferentialGeometry.Riemannian.Connection.RicciIdentitySmoothFrame
+import DifferentialGeometry.Riemannian.Curvature.RicciIdentitySmoothFrame
 import DifferentialGeometry.Riemannian.Operator.HessianTrace
 
 /-!

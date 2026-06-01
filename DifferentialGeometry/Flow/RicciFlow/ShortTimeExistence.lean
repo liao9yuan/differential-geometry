@@ -1,5 +1,5 @@
 import DifferentialGeometry.Riemannian.Metric.Basic
-import DifferentialGeometry.Riemannian.Connection.Ricci
+import DifferentialGeometry.Riemannian.Curvature.RicciConnection
 import DifferentialGeometry.Flow.ParabolicShortTime
 import DifferentialGeometry.Flow.DeTurck.VectorField
 import DifferentialGeometry.Flow.DeTurck.LieDerivativeMetric
@@ -19,7 +19,7 @@ import DifferentialGeometry.Flow.RicciFlow.ShortTimeAssembly.ConjugatingDiffeoFa
 import DifferentialGeometry.Flow.RicciFlow.ShortTimeAssembly.FlatAssemblyInterior
 import DifferentialGeometry.Flow.RicciFlow.ShortTimeAssembly.RicciFlowPdeAtZero
 import DifferentialGeometry.Flow.RicciFlow.ShortTimeFlow.ConjugatingFlowData
-import DifferentialGeometry.Integration.Measure.ChartDensity
+import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
