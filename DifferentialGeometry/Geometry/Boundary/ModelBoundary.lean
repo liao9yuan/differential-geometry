@@ -338,6 +338,22 @@ parameterisation `I ∘ inclH`. -/
 theorem frontier_range_eq_range_I_inclH :
     frontier (Set.range I) = Set.range (I ∘ hI.inclH) := hI.range_I_inclH.symm
 
+/-- A point `h : H` lies in the image of the boundary inclusion `inclH` if
+and only if its image under `I` lies in the model-level boundary
+`frontier (Set.range I)`. -/
+theorem mem_range_inclH_iff (h : H) :
+    (∃ z : hI.boundaryH, hI.inclH z = h) ↔ I h ∈ frontier (Set.range I) := by
+  refine ⟨?_, ?_⟩
+  · rintro ⟨z, rfl⟩
+    rw [hI.range_I_inclH.symm]
+    exact ⟨z, rfl⟩
+  · intro hH
+    rw [← hI.range_I_inclH] at hH
+    obtain ⟨z, hz⟩ := hH
+    refine ⟨z, ?_⟩
+    have hz' : I (hI.inclH z) = I h := hz
+    exact I.injective hz'
+
 end Range
 
 section Compat
