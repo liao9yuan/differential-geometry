@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.HeatSemigroupIntrinsic
-import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.AbstractSemigroup
+import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.Semigroup.BoundedC0Semigroup
 
 /-!
 # Intrinsic tensor heat semigroup as a `BoundedC0Semigroup`

@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.AbstractSemigroup
+import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.Semigroup.BoundedC0Semigroup
 import Mathlib.Analysis.InnerProductSpace.l2Space
 import Mathlib.Analysis.SpecialFunctions.Exp
 

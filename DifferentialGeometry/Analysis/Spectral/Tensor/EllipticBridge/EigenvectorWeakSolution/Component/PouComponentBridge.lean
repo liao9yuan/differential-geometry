@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.WeakSolution.WeakSolutionHeadline
-import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.TensorReprFromFrame
+import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.Representation.TensorReprFromFrame
 
 /-!
 # The partition-of-unity-weighted per-component scalar weak-solution headline

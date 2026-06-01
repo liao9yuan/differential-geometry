@@ -53,6 +53,32 @@ NOTE on a PRE-EXISTING tangle (out of scope): Geometry/Curvature still holds Boc
   Geometry→Analysis edges, compile green). A future "consolidate the Bochner L²-estimate apparatus" pass could
   move them; deferred (riskier, needs the same fixpoint treatment).
 
+## DONE — three-tier skeleton, aggregators, decl-names, pile sub-foldering (deferred items 1/2/3)
+- THREE-TIER within concept folders (commit 36339da5): 17 read-only Area planners (lean-researcher) returned
+  move-lists; applied centrally (green-by-construction). The flagged ODE pile FlowC1/FlowC1Bridge/FlowC1Frechet
+  → Flow/Defs.lean + Flow/C1Regularity/{FrechetDerivative,JointFrechetDerivative,ContDiffOnOne,VariationalSolutionOperator}
+  + Flow/HigherRegularity/*. ~95 effort→content renames + Defs designations.
+- AGGREGATOR HIERARCHY (deferred 2, commit 36339da5): _genaggregators.py builds a sibling `Dir.lean` headline
+  (imports-first, docstring-after) for every directory; root DifferentialGeometry.lean repointed from 1281 flat
+  imports → 4 pillar aggregators + 14 preserved External imports. Coverage-complete (collision dirs' subtrees
+  imported by parent; reachability asserted 0 orphans). IMPORTANT Lean rule learned: `import` must be the FIRST
+  token in a file — a `/-! -/` docstring before imports silently voids them (→ "unknown option linter.style.emptyLine").
+- DECL-NAME cleanup (deferred 3a, commit b5c5bf75 + this batch): _declnames.py stripped 40 leaked node-id prefixes
+  (bm_c_/hN_/stub_, incl. private) from declaration names via word-boundary global replace; 0 collisions.
+- NAMESPACES (deferred 3b): DECIDED to KEEP decoupled (user choice). DifferentialGeometry.{Integral,PDE,Riemannian}.*
+  are legitimate math namespaces (CLAUDE.md §6 decouples namespace from path, Mathlib-standard); no clear better
+  target, renaming = 6000+ ref churn for negative value. NOT a defect — left as-is.
+- BOCHNER (deferred 1): investigated via fixpoint → CORRECTLY STAYS in Geometry/Curvature. The CovGradRoughLap/
+  Order2Defect/FiberNormParseval clusters (25 files, only 7 movable) are the curvature-commutator infrastructure of
+  the geometric Bochner-Weitzenböck identity (PointwiseTensorBochner); moving fragments a geometric theorem.
+- PILE SUB-FOLDERING (this batch): 16 read-only planners sub-foldered every remaining ≥15-real-leaf flat pile
+  (Iterated, DiffChart, SmoothInSpace, TimeDependentFlow, RSTensor, Pullback, EigenvectorWeakSolution{,/RHS},
+  QuasiLinear, ChartTensorNabla, Estimates, ChartTensor, TensorRegularity, DivergenceTheorem/WithBoundary,
+  Sobolev/WithBoundary) into 3-5 import-graph-confirmed math sub-themes each (Defs.lean kept at root where clear).
+  275 moves; aggregators regenerated (241, 0 orphans). Per user: batched ALL changes, ONE final build.
+Scratch movers (gitignored, worktree root): _applymoves.py, _genaggregators.py, _declnames.py, _consolidate.py,
+  _grouplaplacian.py, _groupsobolev.py, _concepts*.py, _migrate.py.
+
 ## Commit trail (md2, all green)
 f720f9fa docs → d45a68aa W1 → ec22c521 → 9bca9957 → b837d6d0 → aa460779 → bd6eb3ff → e1be3452 (Spectral)
 → 35eec9a9 (Boundary) → 4fbd4f97 (ChartGram split, D1) → f96c4f98 (D1 PointwiseInner+RSTensor down)

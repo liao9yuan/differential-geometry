@@ -1,19 +1,7 @@
-import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ChosenWeakPartialFderivBridge
-import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ChristoffelBound
-import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ChristoffelCorrectionL2Bound
-import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ChristoffelL2BoundFromH1
-import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ComponentL2Bound
-import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ComponentL2BoundUniform
-import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ComponentSobolevBound
-import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ComponentSobolevBoundDerivBridge
-import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ComponentSobolevBoundFromH1
-import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ComponentSobolevBoundPerSection
-import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ComponentSobolevPointwise
-import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ComponentWkpNormBoundFromH1
-import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.CovL2BoundFromH1
-import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.PartialL2BoundFromH1
-import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.PartialL2Transfer
+import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ChartComponent
+import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ChristoffelCorrection
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.TensorSectionL2BoundByComponents
+import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.WeakPartial
 
 /-!
 # DifferentialGeometry.Analysis.Spectral.Tensor.Estimates

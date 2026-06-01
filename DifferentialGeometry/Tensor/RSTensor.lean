@@ -1,22 +1,8 @@
-import DifferentialGeometry.Tensor.RSTensor.BundleSectionContinuity
-import DifferentialGeometry.Tensor.RSTensor.ChartJacobianClmSmoothness
-import DifferentialGeometry.Tensor.RSTensor.ChartJacobianMatrixEntrySmoothness
-import DifferentialGeometry.Tensor.RSTensor.Components
-import DifferentialGeometry.Tensor.RSTensor.Contract
-import DifferentialGeometry.Tensor.RSTensor.CoordinateBasis
-import DifferentialGeometry.Tensor.RSTensor.CotangentRiemannian
+import DifferentialGeometry.Tensor.RSTensor.BundleTrivialization
+import DifferentialGeometry.Tensor.RSTensor.Coordinates
 import DifferentialGeometry.Tensor.RSTensor.Defs
-import DifferentialGeometry.Tensor.RSTensor.Field
-import DifferentialGeometry.Tensor.RSTensor.GradientBundleEquiv
-import DifferentialGeometry.Tensor.RSTensor.LieDerivative
-import DifferentialGeometry.Tensor.RSTensor.Metric
-import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors
-import DifferentialGeometry.Tensor.RSTensor.Tensor0SBundleLocalityIdentities
-import DifferentialGeometry.Tensor.RSTensor.Tensor0SInnerSectionContinuity
-import DifferentialGeometry.Tensor.RSTensor.Tensor0SMetric
-import DifferentialGeometry.Tensor.RSTensor.TensorRSBundleLocalityIdentities
-import DifferentialGeometry.Tensor.RSTensor.TensorRSMetric
-import DifferentialGeometry.Tensor.RSTensor.TensorRSSpaceNormBridge
+import DifferentialGeometry.Tensor.RSTensor.Derivation
+import DifferentialGeometry.Tensor.RSTensor.FiberMetric
 
 /-!
 # DifferentialGeometry.Tensor.RSTensor

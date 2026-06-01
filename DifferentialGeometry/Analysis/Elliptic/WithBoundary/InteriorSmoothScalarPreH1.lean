@@ -1,7 +1,7 @@
 import DifferentialGeometry.Geometry.Operator.Laplacian
-import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.Gradient
-import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.Green
-import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.Laplacian
+import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.GradientLaplacian.Gradient
+import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.GradientLaplacian.Green
+import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.GradientLaplacian.Laplacian
 import DifferentialGeometry.Geometry.Boundary.EuclideanHalfSpaceInstance
 import DifferentialGeometry.Analysis.Integration.Measure.Properties
 import DifferentialGeometry.Geometry.Metric.TensorInner.TangentRiemannian

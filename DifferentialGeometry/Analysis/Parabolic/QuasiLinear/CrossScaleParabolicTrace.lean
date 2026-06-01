@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.MaxRegSpace
+import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.SolutionSpace
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.AbsolutelyContinuousFun
 
 /-!

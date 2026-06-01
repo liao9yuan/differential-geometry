@@ -1,7 +1,7 @@
 import DifferentialGeometry.Analysis.Sobolev.IntrinsicFlow.HilbertSpace
 import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.PouSobolevIso.SpectralPouH2Identify
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.Flow.L2PMap
-import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.MaxRegSpace
+import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.SolutionSpace
 import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.Operator
 import DifferentialGeometry.Analysis.Parabolic.TimeSobolev.BochnerL2
 import DifferentialGeometry.Analysis.Parabolic.TimeSobolev.TimeH1

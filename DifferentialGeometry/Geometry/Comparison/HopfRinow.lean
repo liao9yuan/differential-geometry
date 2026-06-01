@@ -106,7 +106,7 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 /-- Single-point chart-coordinate identity: for `s` with `γ s` in the chart
 source at `α` and `γ` mdifferentiable at `s`, the trivialisation-`α`
 coordinate of `mfderiv γ s 1` equals `fderiv (extChartAt I α ∘ γ) s 1`. -/
-private theorem bm_c_chartCoord_mfderiv_eq_fderiv_at
+private theorem chartCoord_mfderiv_eq_fderiv_at
     {γ : ℝ → M} {α : M} {s : ℝ}
     (hγ : MDifferentiableAt 𝓘(ℝ, ℝ) I γ s)
     (hs : γ s ∈ (chartAt H α).source) :
@@ -135,14 +135,14 @@ private theorem bm_c_chartCoord_mfderiv_eq_fderiv_at
 
 /-- Single-point raw-form identity: the raw `mfderiv γ s 1 : E` equals the
 inverse trivialisation `symmL` of `fderiv (extChartAt I α ∘ γ) s 1`. -/
-private theorem bm_c_raw_mfderiv_eq_symmL_fderiv_at
+private theorem raw_mfderiv_eq_symmL_fderiv_at
     {γ : ℝ → M} {α : M} {s : ℝ}
     (hγ : MDifferentiableAt 𝓘(ℝ, ℝ) I γ s)
     (hs : γ s ∈ (chartAt H α).source) :
     ((mfderiv 𝓘(ℝ, ℝ) I γ s : ℝ →L[ℝ] _) (1 : ℝ) : E) =
       ((trivializationAt E (TangentSpace I) α).symmL ℝ (γ s))
         ((fderiv ℝ ((extChartAt I α) ∘ γ) s : ℝ →L[ℝ] E) (1 : ℝ)) := by
-  have hCC := bm_c_chartCoord_mfderiv_eq_fderiv_at (I := I) (γ := γ) (α := α)
+  have hCC := chartCoord_mfderiv_eq_fderiv_at (I := I) (γ := γ) (α := α)
     (s := s) hγ hs
   have hbaseSet : γ s ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
     rw [TangentBundle.trivializationAt_baseSet]; exact hs
@@ -237,7 +237,7 @@ theorem gc_constant_speed
           ((chartAt H α).open_source.mem_nhds hut_src)
       filter_upwards [hev', hsrc_nhds] with s hus hsrc
       have hγ_s : MDifferentiableAt 𝓘(ℝ, ℝ) I γ s := hγ_mdiff s
-      have hraw := bm_c_raw_mfderiv_eq_symmL_fderiv_at (I := I) (γ := γ)
+      have hraw := raw_mfderiv_eq_symmL_fderiv_at (I := I) (γ := γ)
         (α := α) (s := s) hγ_s hsrc
       have hfderiv_eq :
           (fderiv ℝ ((extChartAt I α) ∘ γ) s : ℝ →L[ℝ] E) (1 : ℝ) = V s := rfl
@@ -350,7 +350,7 @@ theorem isGeodesicOn_speedSq_hasDerivAt_zero
     have hs_nhds : s ∈ nhds t := hs.mem_nhds ht
     filter_upwards [hev, hsrc_nhds, hs_nhds] with r hur hsrc hrs
     have hγ_r : MDifferentiableAt 𝓘(ℝ, ℝ) I γ r := hγ_mdiffAt r hrs
-    have hraw := bm_c_raw_mfderiv_eq_symmL_fderiv_at (I := I) (γ := γ)
+    have hraw := raw_mfderiv_eq_symmL_fderiv_at (I := I) (γ := γ)
       (α := α) (s := r) hγ_r hsrc
     have hfderiv_eq :
         (fderiv ℝ ((extChartAt I α) ∘ γ) r : ℝ →L[ℝ] E) (1 : ℝ) = V r := rfl
@@ -1388,7 +1388,7 @@ theorem chartVelocity_bound_near_limit
     rw [hV_def, deriv]; rfl
   have hγ_s : MDifferentiableAt 𝓘(ℝ, ℝ) I γ s :=
     (hγ_mdiff s hs_Ioo).mdifferentiableAt (isOpen_Ioo.mem_nhds hs_Ioo)
-  have hraw := bm_c_raw_mfderiv_eq_symmL_fderiv_at (I := I) (γ := γ) (α := y)
+  have hraw := raw_mfderiv_eq_symmL_fderiv_at (I := I) (γ := γ) (α := y)
     (s := s) hγ_s hγ_src
   rw [hVeq] at hraw
   have hu_target : chartCurve (I := I) y γ s ∈ (extChartAt I y).target :=
@@ -1766,7 +1766,7 @@ theorem hasEndpointContinuation_of_complete
   have hη_chartVel0 : deriv (chartCurve (I := I) y η) 0 = wγ := by
     have hη0_src : η 0 ∈ (chartAt H y).source := by rw [hη0]; exact hy_src
     have hη_mdiff0 : MDifferentiableAt 𝓘(ℝ, ℝ) I η 0 := hη_mdiffOn 0 hδ_mem0
-    have hCC := bm_c_chartCoord_mfderiv_eq_fderiv_at (I := I) (γ := η) (α := y)
+    have hCC := chartCoord_mfderiv_eq_fderiv_at (I := I) (γ := η) (α := y)
       (s := 0) hη_mdiff0 hη0_src
     have hbase : (η 0) ∈ (trivializationAt E (TangentSpace I) y).baseSet := by
       rw [TangentBundle.trivializationAt_baseSet]; exact hη0_src

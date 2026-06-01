@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartReprDerivativeBounds.RawTensorConnLapNormSqChartPulledReprBound
 import DifferentialGeometry.Analysis.Integration.Measure.TensorChartPulled
-import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.GoodSetMeasure
+import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.ChartGeometry.GoodSetMeasure
 import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Defs
 
 /-!

@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Smooth.EigenvectorSmoothChartComponentTransport
-import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.PouCutoffComponentBridge
+import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.PouComponentBound.PouCutoffComponentBridge
 
 /-!
 # The chart component of the smooth eigenvector representative

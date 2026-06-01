@@ -1,6 +1,6 @@
-import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.BaseFChartMemWkp22
-import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.ChosenFChartDerivMemW1p
-import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.TwiceDifferentiatedIdentity
+import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.BaseFChart.MemWkpTwoTwo
+import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.ResidualRegularity.ChosenFChartDerivMemW1p
+import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.TwiceDifferentiated.VariationalIdentity
 import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartPushed.MemWkpFourSmooth
 import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.PowH2kBridge
 import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.PowH4Bridge

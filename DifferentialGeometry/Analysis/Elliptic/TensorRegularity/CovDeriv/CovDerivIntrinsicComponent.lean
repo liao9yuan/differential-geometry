@@ -1,6 +1,6 @@
-import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.ChartTensorRSCurryFactor
-import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.ChartPrimitives
-import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.ChristoffelDecomp
+import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.TensorRS.ChartTensorRSCurryFactor
+import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.Defs
+import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components.ChristoffelDecomp
 
 /-!
 # The intrinsic chart piece of the tensor covariant derivative on a raw component

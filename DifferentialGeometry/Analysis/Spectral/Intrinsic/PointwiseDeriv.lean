@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbedding
-import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.MaxRegSpace
+import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.SolutionSpace
 import DifferentialGeometry.Analysis.Parabolic.TimeSobolev.TimeH1
 import Mathlib.Analysis.Calculus.Deriv.Mul
 import Mathlib.Analysis.Calculus.Deriv.Basic

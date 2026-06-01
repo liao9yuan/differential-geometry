@@ -1,6 +1,6 @@
-import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.BilinearH1ComplResidualClosure
+import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.ResidualRegularity.BilinearH1ComplResidualChain
 import DifferentialGeometry.Analysis.Elliptic.Regularity.FChartResidual.LpDecomposition
-import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.BilinearH1ComplFromDomainPow
+import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.ResidualRegularity.BilinearH1ComplFromDomainPow
 import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.ChartData
 import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.CLM.Leibniz
 import DifferentialGeometry.Analysis.Sobolev.Manifold.RellichManifold

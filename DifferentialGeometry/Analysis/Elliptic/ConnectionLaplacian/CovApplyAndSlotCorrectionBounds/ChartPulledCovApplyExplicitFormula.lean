@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.ChartTensorRSCovariantDerivativeAgreement
+import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.TensorRS.ChartTensorRSCovariantDerivativeAgreement
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.Curvature
 import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Defs
 

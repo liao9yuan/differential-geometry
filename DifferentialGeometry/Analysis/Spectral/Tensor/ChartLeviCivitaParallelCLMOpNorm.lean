@@ -1,7 +1,7 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.UniformChartBounds.SlotUniformBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.UniformChartBounds.ChartJUniformBoundLocallyConstant
 import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartLocal
-import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.ChartTensor0SCovariantDerivative
+import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0S.ChartTensor0SCovariantDerivative
 
 /-!
 # Uniform operator-norm bound for `chartLeviCivitaParallelCLM` along a general vector field

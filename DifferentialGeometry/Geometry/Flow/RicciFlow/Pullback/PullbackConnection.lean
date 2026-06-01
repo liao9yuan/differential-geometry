@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Metric
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Defs
 import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivita
 
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback

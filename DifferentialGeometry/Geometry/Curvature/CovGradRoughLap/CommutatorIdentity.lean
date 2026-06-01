@@ -1,5 +1,5 @@
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.AbstractRoughLaplacian
-import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0SRSCovariantDerivativeAgreement
+import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Agreement.Tensor0SRSCovariantDerivativeAgreement
 
 /-!
 # Closing the `(0, 2) → (0, 3)` rough-Laplacian / covariant-gradient commutator

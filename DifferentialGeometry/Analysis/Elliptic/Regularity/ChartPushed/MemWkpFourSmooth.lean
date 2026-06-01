@@ -1,5 +1,5 @@
-import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.DerivedDataConstructor
-import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.TwiceDerivedH2Interior
+import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.Differentiated.DerivedDataConstructor
+import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.TwiceDifferentiated.DerivedH2Interior
 import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartPushed.MemWkpThreeSmooth
 import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartPushed.MemWkpThree
 import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.PowH2kBridge

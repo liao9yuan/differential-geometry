@@ -1,6 +1,6 @@
-import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Glue
-import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.BanachIC
-import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.ChartGlue
+import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.ChartLocalExistence.Glue
+import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.VariationalODE.BanachIC
+import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.VariationalODE.ChartGlue
 import Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary
 
 namespace DifferentialGeometry.PDE.RicciFlow.ODE

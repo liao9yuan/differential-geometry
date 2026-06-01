@@ -1,8 +1,8 @@
 import DifferentialGeometry.Analysis.Elliptic.WithBoundary.Neumann.FullH1Compl
 import DifferentialGeometry.Analysis.Elliptic.WithBoundary.InteriorH1Compl
 import DifferentialGeometry.Analysis.Elliptic.WithBoundary.InteriorSmoothScalarPreH1
-import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.GreenWithBoundary
-import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.Green
+import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.BoundaryContribution.GreenWithBoundary
+import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.GradientLaplacian.Green
 
 /-!
 # Smooth bridge for the variational Laplacian

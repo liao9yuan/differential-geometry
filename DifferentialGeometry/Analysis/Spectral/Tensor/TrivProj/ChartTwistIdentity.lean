@@ -1,6 +1,6 @@
-import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components
-import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.InnerBridge
-import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.InnerLowerBound
+import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components.Components
+import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Inner.InnerBridge
+import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.InnerBounds.InnerLowerBound
 import DifferentialGeometry.Tensor.RSTensor.Defs
 import DifferentialGeometry.Geometry.Metric.TensorInner.Tensor0SRiemannian
 import DifferentialGeometry.Tensor.Multilinear.Bundle

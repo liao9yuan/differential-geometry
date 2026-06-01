@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.NormEstimates.NormComparison
-import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.InnerCovDiagonalBound
-import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.InnerPointwiseUpperBound
+import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.InnerBounds.InnerCovDiagonalBound
+import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.InnerBounds.InnerPointwiseUpperBound
 
 /-!
 # Sum-over-directions bound on the chart-twist-inverted covariant derivative

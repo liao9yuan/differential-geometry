@@ -1,20 +1,8 @@
-import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.AbstractSemigroup
-import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.BallRetraction
-import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.Contraction
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.CrossScaleParabolicTrace
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.CrossScaleParabolicTraceEnergy
-import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.DuhamelMap
-import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.EnergyEstimates
-import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.Existence
-import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.MaxRegFixedPoint
-import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.MaxRegLocalLipschitz
-import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.MaxRegLocalLipschitzExistence
-import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.MaxRegLocalLipschitzStay
-import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.MaxRegSmallTime
-import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.MaxRegSpace
-import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.Scalar
-import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.ScalarInstance
-import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorInstance
+import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.ScalarHeat
+import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.Semigroup
+import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity
 
 /-!
 # DifferentialGeometry.Analysis.Parabolic.QuasiLinear

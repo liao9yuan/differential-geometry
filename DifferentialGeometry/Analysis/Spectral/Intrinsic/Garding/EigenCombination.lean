@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.FaithfulH1Embedding
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.CompactSAResolventIntrinsic
-import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.TensorAllOrdersRegularity
+import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.InteriorRegularity.TensorAllOrdersRegularity
 
 /-!
 # Finite eigen-combinations as smooth weak solutions and their spectral identities

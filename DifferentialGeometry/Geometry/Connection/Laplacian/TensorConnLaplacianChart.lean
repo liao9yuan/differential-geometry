@@ -1,5 +1,5 @@
 import DifferentialGeometry.Geometry.Connection.Laplacian.TensorConnLaplacian
-import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.ChartTensorRSSecondCovariantDerivative
+import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.TensorRS.ChartTensorRSSecondCovariantDerivative
 
 /-!
 # Chart-frame expansion of the raw tensor connection Laplacian

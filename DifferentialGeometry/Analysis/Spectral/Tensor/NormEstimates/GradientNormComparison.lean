@@ -1,7 +1,7 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.NormEstimates.NormComparison
-import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Inner
-import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.InnerBridge
-import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.InnerLowerBound
+import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Inner.Inner
+import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Inner.InnerBridge
+import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.InnerBounds.InnerLowerBound
 import DifferentialGeometry.Tensor.RSTensor.Defs
 import DifferentialGeometry.Geometry.Metric.PointwiseInner.Defs
 import DifferentialGeometry.Geometry.Metric.PointwiseInner.DualMetric

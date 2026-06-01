@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.SmoothMulH1Compl
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.Defs
-import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.H2RegularityStep
+import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.Bootstrap.H2RegularitySuccessor
 
 /-!
 # Manifold-side `Lp`-class identity for `gradInnerCLM g φ u_h`

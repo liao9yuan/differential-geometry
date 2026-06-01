@@ -10,7 +10,7 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciIdentitySm
 import DifferentialGeometry.Geometry.Connection.ChartBridge.Hessian
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.Proper
 import DifferentialGeometry.Geometry.Operator.MetricSharpSmooth
-import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.GoodSetMeasure
+import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.ChartGeometry.GoodSetMeasure
 
 /-!
 # The intrinsic `(0, 2)` connection-Laplacian Green identity via the Dirichlet current

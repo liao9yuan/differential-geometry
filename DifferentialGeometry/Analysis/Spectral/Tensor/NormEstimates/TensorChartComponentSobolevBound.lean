@@ -1,5 +1,5 @@
-import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ComponentL2BoundUniform
-import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ComponentWkpNormBoundFromH1
+import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ChartComponent.ComponentL2BoundUniform
+import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ChartComponent.ComponentWkpNormBoundFromH1
 import DifferentialGeometry.Analysis.Spectral.Tensor.Variational.H1Compl
 import DifferentialGeometry.Analysis.Spectral.Tensor.NormEstimates.TensorComponentGradientEpNormPerAlpha
 import Mathlib.Topology.Compactness.LocallyFinite

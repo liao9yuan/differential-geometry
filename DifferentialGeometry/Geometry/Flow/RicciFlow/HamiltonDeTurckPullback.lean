@@ -1,12 +1,12 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.DeTurckRHS
 import DifferentialGeometry.Geometry.Flow.RicciFlow.DeTurckShortTime
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Metric
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.RicciNaturality
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.EvaluationForm
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Defs
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Naturality.RicciTensor
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Cartan.EvaluationForm
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.TimeDerivativeChainRule
-import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.VariationalFlow
-import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.PushforwardSmooth
-import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.ManifoldIntegralFlow
+import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.VariationalEquation.VariationalFlow
+import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Regularity.PushforwardSmooth
+import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.DiffeomorphismFamily.ManifoldIntegralFlow
 import Mathlib.Analysis.Calculus.Deriv.Basic
 
 /-! # Hamilton–DeTurck pullback: the pulled-back DeTurck flow is a Ricci flow

@@ -2,7 +2,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.DeTurckRHS
 import DifferentialGeometry.Geometry.Flow.RicciFlow.LieDerivativePairing
 import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Defs
 import DifferentialGeometry.Tensor.Mixed.Field
-import DifferentialGeometry.Tensor.RSTensor.Field
+import DifferentialGeometry.Tensor.RSTensor.Coordinates.Field
 
 /-!
 # The Ricci–DeTurck right-hand side as a smooth, compactly-supported tensor section

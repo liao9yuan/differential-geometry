@@ -1,6 +1,6 @@
-import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.InnerPointwiseUpperBound
-import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components
-import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ComponentL2Bound
+import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.InnerBounds.InnerPointwiseUpperBound
+import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components.Components
+import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ChartComponent.ComponentL2Bound
 import DifferentialGeometry.Analysis.Sobolev.Manifold.Rellich
 import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Integrability
 import DifferentialGeometry.Analysis.Integration.L2.Pairing.Defs

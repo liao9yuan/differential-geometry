@@ -1,5 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HamiltonDeTurckPullback
-import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.VariationalFlowFlatPairing
+import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.VariationalEquation.FlatPairing
 
 /-! # Hamilton–DeTurck pullback via the FLAT variational route
 

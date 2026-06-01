@@ -1,0 +1,9 @@
+import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.InteriorRegularity.NirenbergH2
+import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.InteriorRegularity.PrincipalForm
+import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.InteriorRegularity.TensorAllOrdersRegularity
+
+/-!
+# DifferentialGeometry.Analysis.Elliptic.TensorRegularity.InteriorRegularity
+
+Aggregated headline for `DifferentialGeometry.Analysis.Elliptic.TensorRegularity.InteriorRegularity`.
+-/

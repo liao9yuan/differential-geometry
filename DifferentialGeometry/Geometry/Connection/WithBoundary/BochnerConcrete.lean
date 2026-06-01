@@ -1,5 +1,5 @@
 import DifferentialGeometry.Geometry.Curvature.Bochner.BochnerConcrete
-import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.Laplacian
+import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.GradientLaplacian.Laplacian
 import DifferentialGeometry.Geometry.Boundary.ModelBoundary
 import DifferentialGeometry.Geometry.Curvature.Riemann.Riemann
 

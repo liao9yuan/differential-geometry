@@ -155,7 +155,7 @@ each `n`, the smooth-case result `loc_smooth_solution` applied to
 `(u_n, f_n)` yields a weak `k`-partial derivative `g_n` of `∂_i u_n` on
 `Ω''`, with `L²(Ω'')` norm bounded in terms of integrated `L²` data
 of `u_n` on a smooth-case-chosen intermediate `Ω'`. -/
-private lemma h2_loc_per_n_smooth_bound
+private lemma loc_per_n_smooth_bound
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {u f : E → ℝ}
     {Ω'' : Set E} (hΩ'' : IsOpen Ω'')
@@ -217,7 +217,7 @@ theorem loc_nonsmooth_per_n_bound
   intro i k n
   obtain ⟨g, hg_l2, hg_partial, Ω', hΩ'_open, _hΩ''_in_Ω', _hΩ'_in_Ω,
       hΩ'_compact, C, hC_nn, hC_bound⟩ :=
-    h2_loc_per_n_smooth_bound (d := d) B hΩ'' hΩ''_compact_closure hΩ''_in_Ω
+    loc_per_n_smooth_bound (d := d) B hΩ'' hΩ''_compact_closure hΩ''_in_Ω
       h_room S i k n
   obtain ⟨D, hD_nn, hD_bound⟩ :=
     S.data_integrated_bound (Ω' := Ω') hΩ'_open hΩ'_compact

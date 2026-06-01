@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.ChristoffelDecomp
+import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components.ChristoffelDecomp
 import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartLocal
 
 /-!

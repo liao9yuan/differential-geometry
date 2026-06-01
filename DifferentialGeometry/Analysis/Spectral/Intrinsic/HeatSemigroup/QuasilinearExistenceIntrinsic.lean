@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.HeatSemigroupBoundedC0Intrinsic
-import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.Existence
+import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.Semigroup.MildSolutionExistence
 
 /-!
 # Quasi-linear tensor heat equation on `L²` (chart-selection-free)

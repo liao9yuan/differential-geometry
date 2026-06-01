@@ -1,26 +1,8 @@
-import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.BaseFChartMemWkp22
-import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.BaseFChartRegularity
-import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.BaseFChartRegularityB
-import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.BootstrapChartHm
-import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.BootstrapChartHmAnyK
-import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.BootstrapChartHmDomainPow
-import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.BootstrapChartHmMonotone
-import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.BootstrapChartHmPolymorphic
-import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.ChosenThirdMixedPartial
+import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.BaseFChart
+import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.Bootstrap
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.Defs
-import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.DifferentiatedData
-import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.FChartEffRegularity
-import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.FChartEffStepRegularity
-import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.H2Regularity
-import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.H2RegularityStep
-import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.InductiveStepSource
-import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.JumpChartHm
-import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.LeibnizCoefficients
-import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.LeibnizCompensatedFh
-import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.MixedPartials
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.NirenbergInterior
-import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.NirenbergInteriorRelaxedHyp
-import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.VariationalIdentityInductiveStep
+import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.VariationalIdentity
 
 /-!
 # DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated

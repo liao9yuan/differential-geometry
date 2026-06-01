@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.FChartResidual.MemW1pResidualFull
 import DifferentialGeometry.Analysis.Elliptic.Regularity.SmoothApproxSeq.H1ComplTendsto
-import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.BilinearH1ComplResidual
+import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.ResidualRegularity.BilinearH1ComplResidual
 
 /-!
 # Identification of the chart-target `W^{1,2}`-limit with the chart-pulled residual

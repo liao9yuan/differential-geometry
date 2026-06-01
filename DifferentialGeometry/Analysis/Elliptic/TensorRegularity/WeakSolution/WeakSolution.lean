@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.ChartWeakIdentity
+import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.DirichletForm.ChartWeakIdentity
 
 /-!
 # Per-component scalar weak solutions of the tensor connection Laplacian

@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.UniformChartBounds.ChartJUniformBoundLocallyConstant
-import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.InnerBridge
-import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.InnerLowerBound
+import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Inner.InnerBridge
+import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.InnerBounds.InnerLowerBound
 import Mathlib.Analysis.Normed.Module.Multilinear.Basic
 
 /-!

@@ -1,6 +1,6 @@
-import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.ChartWeakIdentity
-import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.SourcePairing
-import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.ChartIntegrationByParts
+import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.DirichletForm.ChartWeakIdentity
+import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.DirichletForm.SourcePairing
+import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.DirichletForm.ChartIntegrationByParts
 
 /-!
 # The per-component scalar weak-solution headline from the global weak equation

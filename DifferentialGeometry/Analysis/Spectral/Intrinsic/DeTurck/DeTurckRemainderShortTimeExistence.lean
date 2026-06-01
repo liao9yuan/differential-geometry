@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.MaxRegLocalLipschitzExistence
+import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.LocallyLipschitzExistence
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.CompactSAResolventIntrinsic
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckNonlinearitySpectral
 

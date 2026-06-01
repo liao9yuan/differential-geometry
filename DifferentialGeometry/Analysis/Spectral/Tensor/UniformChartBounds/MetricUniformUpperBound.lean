@@ -1,6 +1,6 @@
-import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.InnerBridge
-import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.LowerAllUpperIndices
-import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.JinvContinuity
+import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Inner.InnerBridge
+import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Inner.LowerAllUpperIndices
+import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.ChartGeometry.JinvContinuity
 import DifferentialGeometry.Analysis.Elliptic.MetricBounds
 import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import DifferentialGeometry.Analysis.Integration.Measure.Invariance

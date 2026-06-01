@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.PowH4Bridge
-import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.H2Regularity
+import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.Bootstrap.H2Regularity
 
 /-!
 # Bridge: chart-side `MemWkp (2k) 2` to manifold-level `MemWkpChart g (2k) 2`

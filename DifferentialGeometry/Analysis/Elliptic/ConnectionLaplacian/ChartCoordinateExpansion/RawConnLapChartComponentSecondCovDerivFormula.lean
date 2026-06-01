@@ -1,9 +1,9 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartCoordinateExpansion.RawConnLapChartComponentFrameTrace
 import DifferentialGeometry.Geometry.Connection.ChartFrameNormGlobalSmoothCoordBasisExpansion
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapL2SobolevBounds.RawTensorConnLapIterL2WtwokTwoBound
-import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.ChartProjectionSecondCovDerivViaSkExt
+import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.SecondCovDerivExpansion.ChartProjectionSecondCovDerivViaSkExt
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.CovDerivComponentEuclidSkExtExpansion
-import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.ChartPrimitives
+import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.Defs
 
 /-!
 # Chart-α `(Idx, Jdx)` raw component of the tensor connection Laplacian as a

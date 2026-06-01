@@ -1,7 +1,7 @@
-import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.ManifoldIntegralFlow
-import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.BareFlowFromJointC1
-import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.ManifoldFlowFamily
-import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.BanachIC
+import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.DiffeomorphismFamily.ManifoldIntegralFlow
+import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Regularity.BareFlowFromJointC1
+import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.DiffeomorphismFamily.ManifoldFlowFamily
+import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.VariationalODE.BanachIC
 import DifferentialGeometry.Analysis.ODE.Flow.Defs
 import Mathlib.Geometry.Manifold.ContMDiff.Atlas
 import Mathlib.Geometry.Manifold.ContMDiffMFDeriv

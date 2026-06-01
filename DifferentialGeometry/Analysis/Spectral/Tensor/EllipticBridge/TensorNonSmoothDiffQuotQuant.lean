@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.TensorChartBilinearData
+import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.VariationalIdentity.TensorChartBilinearData
 import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartHk.H2NonSmoothQuant
 
 /-!

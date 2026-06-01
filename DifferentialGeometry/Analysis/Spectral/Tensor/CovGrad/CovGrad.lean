@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.Variational.PreHilbert
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovariantLeibniz
-import DifferentialGeometry.Tensor.RSTensor.GradientBundleEquiv
+import DifferentialGeometry.Tensor.RSTensor.Derivation.GradientBundleEquiv
 
 /-!
 # The section-level covariant gradient of a smooth compactly-supported tensor section

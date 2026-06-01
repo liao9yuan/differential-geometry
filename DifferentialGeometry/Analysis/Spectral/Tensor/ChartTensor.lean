@@ -1,19 +1,7 @@
-import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.ChristoffelDecomp
-import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.ComponentScalarFderivLeibniz
+import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.ChartGeometry
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components
-import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.GoodSetMeasure
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Inner
-import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.InnerBridge
-import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.InnerCovDiagonalBound
-import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.InnerJointCont
-import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.InnerLowerBound
-import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.InnerPointwiseUpperBound
-import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.InnerUpperBound
-import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.IntrinsicL2Bridge
-import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.JinvContinuity
-import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.LowerAllUpperIndices
-import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.POUFDerivBound
-import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.TensorRSContRiemannianBundle
+import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.InnerBounds
 
 /-!
 # DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor

@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Tensor.PouWeightedHsNorm
-import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ComponentL2BoundUniform
-import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.IntrinsicL2Bridge
+import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ChartComponent.ComponentL2BoundUniform
+import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.ChartGeometry.IntrinsicL2Bridge
 import DifferentialGeometry.Analysis.Spectral.Tensor.Variational.H1Compl
 
 /-!

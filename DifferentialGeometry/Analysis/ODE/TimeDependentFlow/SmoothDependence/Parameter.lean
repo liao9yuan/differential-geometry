@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.ODE.Flow.Defs
-import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.BanachIC
+import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.VariationalODE.BanachIC
 
 noncomputable section
 open Set Function Filter Metric
