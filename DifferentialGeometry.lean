@@ -47,15 +47,6 @@ import DifferentialGeometry.Synthetic.Geometry.Connection
 import DifferentialGeometry.Synthetic.Geometry.ConnectionExtended
 
 -- Synthetic Operators
-import DifferentialGeometry.Synthetic.Operator.Bochner
-import DifferentialGeometry.Synthetic.Operator.CovariantDerivative
-import DifferentialGeometry.Synthetic.Operator.Divergence
-import DifferentialGeometry.Synthetic.Operator.Gradient
-import DifferentialGeometry.Synthetic.Operator.Hessian
-import DifferentialGeometry.Synthetic.Operator.Laplacian
-import DifferentialGeometry.Synthetic.Operator.LieDerivative
-import DifferentialGeometry.Synthetic.Operator.SecondCovariantDerivative
-import DifferentialGeometry.Synthetic.Operator.SpatialConstant
 import DifferentialGeometry.Synthetic.Operator.Variation
 
 -- Axiom Interface
@@ -66,15 +57,7 @@ import DifferentialGeometry.Synthetic.Realization.Basic
 import DifferentialGeometry.Synthetic.Realization.Embedding
 import DifferentialGeometry.Synthetic.Realization.SmoothSections
 import DifferentialGeometry.Synthetic.Realization.Connection
-import DifferentialGeometry.Synthetic.Realization.Trace
-import DifferentialGeometry.Synthetic.Realization.Metric
-import DifferentialGeometry.Synthetic.Realization.LeviCivita
-import DifferentialGeometry.Synthetic.Realization.KoszulGerm
-import DifferentialGeometry.Synthetic.Realization.SmoothExtension
-import DifferentialGeometry.Synthetic.Realization.SmoothExtensionMDiff
-import DifferentialGeometry.Synthetic.Realization.KoszulCov
 import DifferentialGeometry.Synthetic.Realization.TensorNabla
-import DifferentialGeometry.Synthetic.Realization.NablaComm
 import DifferentialGeometry.Synthetic.Realization.HomNabla
 import DifferentialGeometry.Synthetic.Realization.Tensor0SBridge
 import DifferentialGeometry.Integral.Connection.Tensor0SNabla
@@ -99,38 +82,12 @@ import DifferentialGeometry.Integral.Connection.ChartTensorRSCovariantDerivative
 import DifferentialGeometry.Integral.Connection.ChartTensorRSSecondCovariantDerivative
 import DifferentialGeometry.Integral.Connection.CovApplyCovRSChartBasisExtension
 import DifferentialGeometry.Integral.Connection.ChartPulledCovApplyExplicitFormula
-import DifferentialGeometry.Synthetic.Realization.TensorContract
-import DifferentialGeometry.Synthetic.Realization.NablaContractSynthetic
-import DifferentialGeometry.Synthetic.Realization.TimeDeriv
-import DifferentialGeometry.Synthetic.Realization.SpatialTemporalCommOn
-import DifferentialGeometry.Synthetic.Realization.TimeNabla
-import DifferentialGeometry.Synthetic.Realization.TimeTrace
-import DifferentialGeometry.Synthetic.Realization.TimeJointSmoothness
-import DifferentialGeometry.Synthetic.Realization.RicciFlow
-import DifferentialGeometry.Synthetic.Realization.SmoothRicciFlow
-import DifferentialGeometry.Synthetic.Realization.RicciFlowOn
-import DifferentialGeometry.Synthetic.Realization.SmoothRicciFlowOn
 import DifferentialGeometry.Integral.Connection.LocalFrame
-import DifferentialGeometry.Synthetic.Realization.Coordinates.Christoffel
 
 -- Non-Ricci flows (plug-in demonstrations of flow-agnostic abstraction)
-import DifferentialGeometry.Synthetic.Flow.Heat.Basic
-import DifferentialGeometry.Synthetic.Flow.GradientFlow.Basic
-import DifferentialGeometry.Synthetic.Flow.ReactionDiffusion.Basic
-import DifferentialGeometry.Synthetic.Flow.HamiltonJacobi.Basic
-import DifferentialGeometry.Synthetic.Flow.Yamabe.Basic
 
 -- Ricci Flow
 import DifferentialGeometry.Synthetic.Flow.RicciFlow.Basic
-import DifferentialGeometry.Synthetic.Flow.RicciFlow.Calculus
-import DifferentialGeometry.Synthetic.Flow.RicciFlow.Evolution.Connection
-import DifferentialGeometry.Synthetic.Flow.RicciFlow.Evolution.Gradient
-import DifferentialGeometry.Synthetic.Flow.RicciFlow.Evolution.Laplacian
-import DifferentialGeometry.Synthetic.Flow.RicciFlow.Evolution.ScalarCurvature
-import DifferentialGeometry.Synthetic.Flow.RicciFlow.Evolution.Ricci
-import DifferentialGeometry.Synthetic.Flow.RicciFlow.Evolution.RiemannVariation
-import DifferentialGeometry.Synthetic.Flow.RicciFlow.Evolution.RiemannLaplacian
-import DifferentialGeometry.Synthetic.Flow.RicciFlow.Evolution.RiemannEvolution
 
 import DifferentialGeometry.VectorBundle.Dual
 import DifferentialGeometry.VectorBundle.Equiv
@@ -208,7 +165,6 @@ import DifferentialGeometry.Integral.Measure.PouThickening
 import DifferentialGeometry.Integral.Measure.PouDominatedCutoff
 import DifferentialGeometry.Integral.Measure.TensorChartPulled
 import DifferentialGeometry.Integral.Measure.ChartTargetManifoldL2Bridge
-import DifferentialGeometry.Integral.SyntheticBridge.SmoothFamily
 import DifferentialGeometry.Integral.L2.Basic
 import DifferentialGeometry.Integral.L2.CompactSupport
 import DifferentialGeometry.Integral.L2.PointwiseInner.DualMetric
