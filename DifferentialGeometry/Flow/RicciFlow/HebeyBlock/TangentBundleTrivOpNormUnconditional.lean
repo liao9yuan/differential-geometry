@@ -1,5 +1,5 @@
-import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian
-import DifferentialGeometry.Tensor.RSTensor.TangentContinuousRiemannianMetric
+import DifferentialGeometry.Riemannian.Metric.TensorInner.Tensor0SRiemannian
+import DifferentialGeometry.Riemannian.Metric.TensorInner.TangentContinuousRiemannianMetric
 import Mathlib.Topology.VectorBundle.Riemannian
 import Mathlib.Geometry.Manifold.Riemannian.Basic
 

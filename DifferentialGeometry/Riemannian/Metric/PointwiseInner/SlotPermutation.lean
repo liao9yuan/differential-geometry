@@ -1,5 +1,5 @@
-import DifferentialGeometry.Integration.L2.PointwiseInner.Defs
-import DifferentialGeometry.Integration.L2.PointwiseInner.Algebra
+import DifferentialGeometry.Riemannian.Metric.PointwiseInner.Defs
+import DifferentialGeometry.Riemannian.Metric.PointwiseInner.Algebra
 import Mathlib.LinearAlgebra.Multilinear.Basis
 import Mathlib.Algebra.BigOperators.Fin
 import Mathlib.Logic.Equiv.Fin.Basic

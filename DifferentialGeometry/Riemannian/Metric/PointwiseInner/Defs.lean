@@ -1,4 +1,4 @@
-import DifferentialGeometry.Integration.L2.PointwiseInner.DualMetric
+import DifferentialGeometry.Riemannian.Metric.PointwiseInner.DualMetric
 import DifferentialGeometry.Tensor.RSTensor.Defs
 import Mathlib.Data.Real.Sqrt
 

@@ -3,8 +3,8 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Inner
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.InnerBridge
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.InnerLowerBound
 import DifferentialGeometry.Tensor.RSTensor.Defs
-import DifferentialGeometry.Integration.L2.PointwiseInner.Defs
-import DifferentialGeometry.Integration.L2.PointwiseInner.DualMetric
+import DifferentialGeometry.Riemannian.Metric.PointwiseInner.Defs
+import DifferentialGeometry.Riemannian.Metric.PointwiseInner.DualMetric
 
 /-!
 # Uniform pointwise norm comparison for `(r, s + 1)`-tensors

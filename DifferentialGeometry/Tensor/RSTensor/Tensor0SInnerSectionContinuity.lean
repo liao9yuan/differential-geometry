@@ -1,6 +1,6 @@
 import DifferentialGeometry.Tensor.RSTensor.Defs
-import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian
-import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannianBundle
+import DifferentialGeometry.Riemannian.Metric.TensorInner.Tensor0SRiemannian
+import DifferentialGeometry.Riemannian.Metric.TensorInner.Tensor0SRiemannianBundle
 import DifferentialGeometry.Tensor.Multilinear.Fiber
 import Mathlib.Analysis.Normed.Module.FiniteDimension
 import Mathlib.Geometry.Manifold.VectorBundle.Riemannian

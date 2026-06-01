@@ -1,5 +1,5 @@
-import DifferentialGeometry.Integration.L2.PointwiseInner.DualMetric
-import DifferentialGeometry.Integration.L2.PointwiseInner.Defs
+import DifferentialGeometry.Riemannian.Metric.PointwiseInner.DualMetric
+import DifferentialGeometry.Riemannian.Metric.PointwiseInner.Defs
 import DifferentialGeometry.Tensor.RSTensor.Defs
 import Mathlib.Geometry.Manifold.VectorBundle.Riemannian
 import Mathlib.LinearAlgebra.Matrix.PosDef

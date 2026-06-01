@@ -1,5 +1,5 @@
 import DifferentialGeometry.Tensor.RSTensor.Defs
-import DifferentialGeometry.Integration.Measure.ChartDensity
+import DifferentialGeometry.Riemannian.Metric.ChartGram
 import Mathlib.Geometry.Manifold.VectorBundle.Riemannian
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Geometry.Manifold.VectorBundle.SmoothSection

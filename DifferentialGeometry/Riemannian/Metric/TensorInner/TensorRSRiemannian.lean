@@ -1,9 +1,9 @@
 import DifferentialGeometry.Tensor.RSTensor.Defs
-import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian
-import DifferentialGeometry.Integration.L2.PointwiseInner.Defs
-import DifferentialGeometry.Integration.L2.PointwiseInner.DualMetric
-import DifferentialGeometry.Integration.L2.PointwiseInner.Algebra
-import DifferentialGeometry.Integration.Measure.ChartDensity
+import DifferentialGeometry.Riemannian.Metric.TensorInner.Tensor0SRiemannian
+import DifferentialGeometry.Riemannian.Metric.PointwiseInner.Defs
+import DifferentialGeometry.Riemannian.Metric.PointwiseInner.DualMetric
+import DifferentialGeometry.Riemannian.Metric.PointwiseInner.Algebra
+import DifferentialGeometry.Riemannian.Metric.ChartGram
 import Mathlib.Geometry.Manifold.VectorBundle.Riemannian
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Geometry.Manifold.VectorBundle.SmoothSection

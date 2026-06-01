@@ -1,7 +1,7 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Inner
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.InnerBridge
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.LowerAllUpperIndices
-import DifferentialGeometry.Tensor.RSTensor.TensorRSRiemannianBundle
+import DifferentialGeometry.Riemannian.Metric.TensorInner.TensorRSRiemannianBundle
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SInnerSectionContinuity
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SBundleLocalityIdentities
 import Mathlib.Geometry.Manifold.VectorBundle.Riemannian

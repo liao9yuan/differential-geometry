@@ -4,7 +4,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.JinvContinuity
 import DifferentialGeometry.Analysis.Elliptic.MetricBounds
 import DifferentialGeometry.Integration.Measure.ChartDensity
 import DifferentialGeometry.Integration.Measure.Invariance
-import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian
+import DifferentialGeometry.Riemannian.Metric.TensorInner.Tensor0SRiemannian
 import Mathlib.Analysis.SpecialFunctions.Pow.NNReal
 import Mathlib.Topology.Order.Compact
 import Mathlib.Topology.Separation.Basic

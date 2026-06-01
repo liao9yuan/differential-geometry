@@ -1,4 +1,4 @@
-import DifferentialGeometry.Integration.Measure.ChartDensity
+import DifferentialGeometry.Riemannian.Metric.ChartGram
 import Mathlib.Geometry.Manifold.VectorBundle.Riemannian
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Topology.VectorBundle.Riemannian

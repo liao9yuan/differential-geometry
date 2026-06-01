@@ -1,7 +1,7 @@
 import DifferentialGeometry.Tensor.RSTensor.Defs
-import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian
+import DifferentialGeometry.Riemannian.Metric.TensorInner.Tensor0SRiemannian
 import DifferentialGeometry.Integration.Measure.ChartDensity
-import DifferentialGeometry.Integration.L2.PointwiseInner.DualMetric
+import DifferentialGeometry.Riemannian.Metric.PointwiseInner.DualMetric
 import Mathlib.Analysis.Normed.Module.Multilinear.Basic
 import Mathlib.Analysis.Normed.Operator.NormedSpace
 import Mathlib.Topology.Algebra.Module.LinearMapPiProd

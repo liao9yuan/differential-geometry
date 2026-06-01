@@ -1,6 +1,6 @@
 import DifferentialGeometry.Riemannian.Operator.Hessian
 import DifferentialGeometry.Riemannian.Curvature.Riemann
-import DifferentialGeometry.Tensor.RSTensor.TangentRiemannian
+import DifferentialGeometry.Riemannian.Metric.TensorInner.TangentRiemannian
 import Mathlib.Geometry.Manifold.VectorBundle.Riemannian
 
 /-!

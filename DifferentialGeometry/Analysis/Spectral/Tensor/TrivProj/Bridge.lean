@@ -2,7 +2,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.InnerBridge
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.InnerLowerBound
 import DifferentialGeometry.Tensor.RSTensor.Defs
-import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian
+import DifferentialGeometry.Riemannian.Metric.TensorInner.Tensor0SRiemannian
 import DifferentialGeometry.Tensor.Multilinear.Bundle
 import Mathlib.Topology.VectorBundle.Hom
 import Mathlib.Topology.VectorBundle.Basic

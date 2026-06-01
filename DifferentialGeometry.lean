@@ -127,13 +127,13 @@ import DifferentialGeometry.Tensor.RSTensor.Defs
 import DifferentialGeometry.Tensor.RSTensor.Field
 import DifferentialGeometry.Tensor.RSTensor.LieDerivative
 import DifferentialGeometry.Tensor.RSTensor.Metric
-import DifferentialGeometry.Tensor.RSTensor.TangentContinuousRiemannianMetric
-import DifferentialGeometry.Tensor.RSTensor.TangentRiemannian
-import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian
-import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannianBundle
+import DifferentialGeometry.Riemannian.Metric.TensorInner.TangentContinuousRiemannianMetric
+import DifferentialGeometry.Riemannian.Metric.TensorInner.TangentRiemannian
+import DifferentialGeometry.Riemannian.Metric.TensorInner.Tensor0SRiemannian
+import DifferentialGeometry.Riemannian.Metric.TensorInner.Tensor0SRiemannianBundle
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SInnerSectionContinuity
-import DifferentialGeometry.Tensor.RSTensor.TensorRSRiemannian
-import DifferentialGeometry.Tensor.RSTensor.TensorRSRiemannianBundle
+import DifferentialGeometry.Riemannian.Metric.TensorInner.TensorRSRiemannian
+import DifferentialGeometry.Riemannian.Metric.TensorInner.TensorRSRiemannianBundle
 import DifferentialGeometry.Tensor.RSTensor.TensorRSSpaceNormBridge
 
 import DifferentialGeometry.Integration.Measure.ChartDensity
@@ -148,10 +148,10 @@ import DifferentialGeometry.Integration.Measure.TensorChartPulled
 import DifferentialGeometry.Integration.Measure.ChartTargetManifoldL2Bridge
 import DifferentialGeometry.Integration.L2.Basic
 import DifferentialGeometry.Integration.L2.CompactSupport
-import DifferentialGeometry.Integration.L2.PointwiseInner.DualMetric
-import DifferentialGeometry.Integration.L2.PointwiseInner.Defs
-import DifferentialGeometry.Integration.L2.PointwiseInner.Algebra
-import DifferentialGeometry.Integration.L2.PointwiseInner.SlotPermutation
+import DifferentialGeometry.Riemannian.Metric.PointwiseInner.DualMetric
+import DifferentialGeometry.Riemannian.Metric.PointwiseInner.Defs
+import DifferentialGeometry.Riemannian.Metric.PointwiseInner.Algebra
+import DifferentialGeometry.Riemannian.Metric.PointwiseInner.SlotPermutation
 import DifferentialGeometry.Integration.L2.Pairing.Defs
 import DifferentialGeometry.Integration.L2.Pairing.Algebra
 import DifferentialGeometry.Integration.L2.Pairing.CauchySchwarz
@@ -161,7 +161,7 @@ import DifferentialGeometry.Integration.L2.SmoothSections.Integrability
 import DifferentialGeometry.Tensor.Multilinear.BundleSmoothEval
 import DifferentialGeometry.Tensor.Multilinear.MetricLowering
 import DifferentialGeometry.Tensor.RSTensor.GradientBundleEquiv
-import DifferentialGeometry.Tensor.RSTensor.Tensor0SInnerSectionSmooth
+import DifferentialGeometry.Integration.L2.Tensor0SInnerSectionSmooth
 
 import DifferentialGeometry.Integration.Measure.BorelManifold.Defs
 import DifferentialGeometry.Integration.Measure.BorelManifold.Derived

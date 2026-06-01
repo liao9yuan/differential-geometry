@@ -8,7 +8,7 @@ import DifferentialGeometry.Integration.DivergenceTheorem.WithBoundary.PartialDe
 import DifferentialGeometry.Integration.DivergenceTheorem.POUReduction
 import DifferentialGeometry.Integration.DivergenceTheorem.TangentAction
 import DifferentialGeometry.Integration.Measure.Properties
-import DifferentialGeometry.Tensor.RSTensor.TangentRiemannian
+import DifferentialGeometry.Riemannian.Metric.TensorInner.TangentRiemannian
 import Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary
 import Mathlib.Geometry.Manifold.PartitionOfUnity
 import Mathlib.Geometry.Manifold.Metrizable

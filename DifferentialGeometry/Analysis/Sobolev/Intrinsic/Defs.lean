@@ -9,7 +9,7 @@ import DifferentialGeometry.Integration.L2.CompactSupport
 import DifferentialGeometry.Integration.Measure.Properties
 import DifferentialGeometry.Integration.Measure.Glue
 import DifferentialGeometry.Integration.Measure.Invariance
-import DifferentialGeometry.Tensor.RSTensor.TangentRiemannian
+import DifferentialGeometry.Riemannian.Metric.TensorInner.TangentRiemannian
 import Mathlib.MeasureTheory.Function.LpSeminorm.Basic
 import Mathlib.MeasureTheory.Function.LpSeminorm.CompareExp
 import Mathlib.MeasureTheory.Function.LpSeminorm.SMul

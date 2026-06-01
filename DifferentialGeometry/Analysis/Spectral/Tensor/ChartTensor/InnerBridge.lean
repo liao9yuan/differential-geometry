@@ -1,7 +1,7 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Inner
-import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian
-import DifferentialGeometry.Integration.L2.PointwiseInner.Defs
-import DifferentialGeometry.Integration.L2.PointwiseInner.DualMetric
+import DifferentialGeometry.Riemannian.Metric.TensorInner.Tensor0SRiemannian
+import DifferentialGeometry.Riemannian.Metric.PointwiseInner.Defs
+import DifferentialGeometry.Riemannian.Metric.PointwiseInner.DualMetric
 
 /-!
 # Bridge identity for the chart-frame `(r, s)`-inner product

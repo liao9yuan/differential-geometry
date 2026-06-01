@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad
-import DifferentialGeometry.Integration.L2.PointwiseInner.SlotPermutation
+import DifferentialGeometry.Riemannian.Metric.PointwiseInner.SlotPermutation
 import Mathlib.Data.Fin.Tuple.Basic
 import Mathlib.Algebra.BigOperators.Fin
 import Mathlib.Logic.Equiv.Fin.Basic

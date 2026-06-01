@@ -5,7 +5,7 @@ import DifferentialGeometry.Integration.DivergenceTheorem.WithBoundary.Laplacian
 import DifferentialGeometry.Integration.DivergenceTheorem.WithBoundary.GradientContinuity
 import DifferentialGeometry.Riemannian.Boundary.EuclideanHalfSpaceInstance
 import DifferentialGeometry.Integration.Measure.Properties
-import DifferentialGeometry.Tensor.RSTensor.TangentRiemannian
+import DifferentialGeometry.Riemannian.Metric.TensorInner.TangentRiemannian
 import Mathlib.Analysis.InnerProductSpace.Defs
 import Mathlib.MeasureTheory.Integral.Bochner.Basic
 

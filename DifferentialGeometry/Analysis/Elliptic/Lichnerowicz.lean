@@ -6,7 +6,7 @@ import DifferentialGeometry.Riemannian.Operator.NormGradSq
 import DifferentialGeometry.Integration.Measure.Properties
 import DifferentialGeometry.Riemannian.Connection.BochnerConcrete
 import DifferentialGeometry.Riemannian.Connection.ChartBridge.Hessian
-import DifferentialGeometry.Tensor.RSTensor.TangentRiemannian
+import DifferentialGeometry.Riemannian.Metric.TensorInner.TangentRiemannian
 import Mathlib.MeasureTheory.Integral.Bochner.Basic
 import Mathlib.MeasureTheory.Integral.Bochner.Set
 import Mathlib.Tactic.Linarith

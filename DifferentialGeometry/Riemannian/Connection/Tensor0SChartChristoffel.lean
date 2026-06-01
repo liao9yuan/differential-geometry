@@ -1,6 +1,6 @@
 import DifferentialGeometry.Riemannian.Connection.Tensor0SNabla
 import DifferentialGeometry.Riemannian.Connection.LeviCivitaChartLocal
-import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian
+import DifferentialGeometry.Riemannian.Metric.TensorInner.Tensor0SRiemannian
 
 /-!
 # Chart-coordinate decomposition for the `(0, s)`-tensor covariant derivative

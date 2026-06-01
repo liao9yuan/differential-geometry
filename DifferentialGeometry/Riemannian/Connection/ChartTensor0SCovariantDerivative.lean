@@ -1,6 +1,6 @@
 import DifferentialGeometry.Riemannian.Connection.LeviCivitaChartLocal
 import DifferentialGeometry.Riemannian.Connection.Tensor0SChartChristoffel
-import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian
+import DifferentialGeometry.Riemannian.Metric.TensorInner.Tensor0SRiemannian
 
 /-!
 # Chart-frame covariant derivative on `(0, s)`-tensor bundles

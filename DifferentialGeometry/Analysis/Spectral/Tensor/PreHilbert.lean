@@ -1,13 +1,13 @@
 import DifferentialGeometry.Integration.L2.SmoothSections.PreHilbert
 import DifferentialGeometry.Integration.L2.SmoothSections.Integrability
-import DifferentialGeometry.Integration.L2.PointwiseInner.Algebra
+import DifferentialGeometry.Riemannian.Metric.PointwiseInner.Algebra
 import DifferentialGeometry.Riemannian.Connection.TensorRSNabla
 import DifferentialGeometry.Riemannian.Connection.Curvature
 import DifferentialGeometry.Riemannian.Connection.LeviCivita
 import DifferentialGeometry.Integration.Measure.Properties
 import DifferentialGeometry.Tensor.Multilinear.MetricLowering
 import DifferentialGeometry.Tensor.Multilinear.BundleSmoothEval
-import DifferentialGeometry.Tensor.RSTensor.TensorRSRiemannian
+import DifferentialGeometry.Riemannian.Metric.TensorInner.TensorRSRiemannian
 import DifferentialGeometry.Riemannian.Operator.Gradient
 import Mathlib.Analysis.InnerProductSpace.Defs
 import Mathlib.MeasureTheory.Integral.Bochner.Basic

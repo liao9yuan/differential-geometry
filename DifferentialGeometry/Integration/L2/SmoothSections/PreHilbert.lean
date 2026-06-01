@@ -1,7 +1,7 @@
 import DifferentialGeometry.Integration.L2.SmoothSections.Defs
 import DifferentialGeometry.Integration.L2.SmoothSections.Integrability
 import DifferentialGeometry.Integration.L2.Pairing.CauchySchwarz
-import DifferentialGeometry.Integration.L2.PointwiseInner.Algebra
+import DifferentialGeometry.Riemannian.Metric.PointwiseInner.Algebra
 import Mathlib.Analysis.InnerProductSpace.Defs
 import Mathlib.MeasureTheory.Function.LpSpace.Indicator
 import Mathlib.MeasureTheory.Function.L1Space.Integrable

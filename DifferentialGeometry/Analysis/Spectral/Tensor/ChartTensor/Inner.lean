@@ -1,9 +1,9 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.LowerAllUpperIndices
 import DifferentialGeometry.Tensor.RSTensor.Defs
-import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian
+import DifferentialGeometry.Riemannian.Metric.TensorInner.Tensor0SRiemannian
 import DifferentialGeometry.Integration.Measure.ChartDensity
-import DifferentialGeometry.Integration.L2.PointwiseInner.Defs
-import DifferentialGeometry.Integration.L2.PointwiseInner.Algebra
+import DifferentialGeometry.Riemannian.Metric.PointwiseInner.Defs
+import DifferentialGeometry.Riemannian.Metric.PointwiseInner.Algebra
 
 /-!
 # Chart-frame scalar inner product on mixed `(r, s)`-model tensors

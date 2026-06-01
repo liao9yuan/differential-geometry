@@ -8,7 +8,7 @@ import DifferentialGeometry.Riemannian.Connection.Curvature
 import DifferentialGeometry.Riemannian.Connection.LeviCivita
 import DifferentialGeometry.Riemannian.Connection.RicciIdentity
 import DifferentialGeometry.Riemannian.Connection.Ricci
-import DifferentialGeometry.Tensor.RSTensor.TangentRiemannian
+import DifferentialGeometry.Riemannian.Metric.TensorInner.TangentRiemannian
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 import Mathlib.Analysis.SpecialFunctions.Pow.Real
 import Mathlib.Analysis.Calculus.ParametricIntervalIntegral
