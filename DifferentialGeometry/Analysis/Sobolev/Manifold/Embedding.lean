@@ -13,7 +13,7 @@ import Mathlib.Topology.Bornology.BoundedOperation
 For a closed (compact, boundaryless) smooth manifold `M` modelled on an
 inner-product `E`, this file provides a chart-by-chart Sobolev-style continuous
 embedding from the chart-based Sobolev space `W^{1,p}_chart(M)` (defined in
-`Chart.lean`) into the chart-pushed `L^q` "norm".
+`Chart/Defs.lean`) into the chart-pushed `L^q` "norm".
 
 The Hölder/finite-measure case (`q ≤ p`) is treated rigorously: on a compact
 manifold, every chart-pushed function vanishes (within the chart target) outside

@@ -1,6 +1,11 @@
 import Mathlib.Geometry.Manifold.ContMDiff.Atlas
 import Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary
 
+/-! # Chart-cover stitching of smoothness into a manifold `ContMDiff` map
+
+Promotes per-chart smoothness of a chart-coordinate flow to `ContMDiff` of the
+manifold self-map by a finite chart-cover stitch. -/
+
 namespace DifferentialGeometry.PDE.RicciFlow.ODE
 
 open Bundle IsManifold

@@ -4,7 +4,7 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.Covaria
 # Moving-base-point transport: producing the raw variational identity
 
 This file closes the last documented step of the manifold lift of the Euclidean
-variational ODE.  `SmoothInSpace/VariationalLift.lean` proved the two ingredients:
+variational ODE.  `CovariantIdentity/VariationalLift.lean` proved the two ingredients:
 
 * **Part 1** (`hasDerivAt_mfderiv_flow_of_chart`): the chart-coordinate operator-valued
   Euclidean variational ODE `HasDerivAt Dchart Dchart' t` transfers, through a *fixed*
@@ -19,7 +19,7 @@ variational ODE.  `SmoothInSpace/VariationalLift.lean` proved the two ingredient
   chart-coordinate `fderiv` plus the Christoffel correction — the chart formula
   `∂_j X^i = (∇X)^i_j - Γ^i_{jk} X^k`.
 
-The remaining glue documented at the end of `VariationalLift.lean` is the
+The remaining glue documented at the end of `CovariantIdentity/VariationalLift.lean` is the
 *moving-target trivialization transport*: the value `mfderiv I I (Φ_fam s) x v : E`
 lives in `TangentSpace I (Φ_fam s x)`, whose trivialization base point moves with `s`,
 while Part 2 is anchored at the fixed `α = Φ_fam t x`.

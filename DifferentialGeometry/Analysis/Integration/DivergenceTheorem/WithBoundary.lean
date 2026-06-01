@@ -10,11 +10,11 @@ is **not** assumed).
 
 ## Architecture
 
-The boundaryless API in `DifferentialGeometry/Integral/DivergenceTheorem/`
+The boundaryless API in `DifferentialGeometry/Analysis/Integration/DivergenceTheorem/`
 (`LocalFormula.lean`, `ChartInvariance.lean`, `Closed.lean`, `Proper.lean`,
-`IntegrationByParts.lean`, `Gradient.lean`, `Laplacian.lean`, `Green.lean`,
-`Family.lean`) is preserved unchanged. The with-boundary variant is built as a
-parallel, independent API under the present `WithBoundary/` sub-tree.
+`IntegrationByParts.lean`, `Green.lean`, `Family.lean`) is preserved unchanged.
+The with-boundary variant is built as a parallel, independent API under the
+present `WithBoundary/` sub-tree.
 
 The two APIs agree on common ground (boundaryless manifolds, or sections /
 functions whose support lies in the manifold interior). They diverge for inputs
@@ -32,49 +32,51 @@ earlier ones.
 For an ambient manifold whose model `I` may have a boundary, but for inputs
 whose support lies in `I.interior M`:
 
-* `WithBoundary/PartialDerivWithin.lean` — Fréchet partial derivatives on the
-  chart target, defined via `fderivWithin` (well-posed on a half-space target
-  thanks to `uniqueDiffOn_extChartAt_target`).
-* `WithBoundary/LocalFormula.lean` — chart-local Voss–Weyl divergence via
-  within-derivatives; chart-invariance in the interior.
-* `WithBoundary/Global.lean` — global divergence on the manifold, with
-  Voss–Weyl identity on chart sources.
-* `WithBoundary/POUReduction.lean` — Leibniz and POU sum identities.
-* `WithBoundary/InteriorCompactSupport.lean` — divergence theorem and
+* `WithBoundary/Divergence/PartialDerivWithin.lean` — Fréchet partial
+  derivatives on the chart target, defined via `fderivWithin` (well-posed on a
+  half-space target thanks to `uniqueDiffOn_extChartAt_target`).
+* `WithBoundary/Divergence/LocalFormula.lean` — chart-local Voss–Weyl
+  divergence via within-derivatives; chart-invariance in the interior.
+* `WithBoundary/Divergence/Global.lean` — global divergence on the manifold,
+  with Voss–Weyl identity on chart sources.
+* `WithBoundary/Divergence/POUReduction.lean` — Leibniz and POU sum identities.
+* `WithBoundary/Divergence/InteriorCompactSupport.lean` — divergence theorem and
   proper-support variant for sections supported strictly in `I.interior M`.
-* `WithBoundary/InteriorIBP.lean` — integration by parts and Green's identities
-  for inputs supported in `I.interior M`.
+* `WithBoundary/Divergence/IntegrationByParts.lean` — integration by parts and
+  Green's identities for inputs supported in `I.interior M`.
 
 ### Boundary as a manifold
 
-Equips `boundary I M` with a smooth `(n-1)`-dimensional manifold structure when
-the model `I` admits a smooth boundary, defines the induced Riemannian metric,
-and constructs the surface measure.
+The boundary-manifold infrastructure — equipping `boundary I M` with a smooth
+`(n-1)`-dimensional manifold structure when the model `I` admits a smooth
+boundary, defining the induced Riemannian metric, and constructing the surface
+measure — is first-class geometry and lives under `Geometry/Boundary/`.
 
-* `WithBoundary/ModelBoundary.lean` — the abstract `HasSmoothBoundary I`
+* `Geometry/Boundary/ModelBoundary.lean` — the abstract `HasSmoothBoundary I`
   typeclass.
-* `WithBoundary/BoundaryManifold.lean` — `boundary I M` as a `ChartedSpace`
+* `Geometry/Boundary/BoundaryManifold.lean` — `boundary I M` as a `ChartedSpace`
   and `IsManifold`.
-* `WithBoundary/InducedMetric.lean` — pull-back of the ambient Riemannian metric
-  to the boundary submanifold.
-* `WithBoundary/SurfaceMeasure.lean` — Riemannian volume of the induced metric
-  on the boundary.
-* `WithBoundary/EuclideanHalfSpaceInstance.lean` — `EuclideanHalfSpace n` as a
-  `HasSmoothBoundary` instance.
+* `Geometry/Boundary/InducedMetric.lean` — pull-back of the ambient Riemannian
+  metric to the boundary submanifold.
+* `Geometry/Boundary/SurfaceMeasure.lean` — Riemannian volume of the induced
+  metric on the boundary.
+* `Geometry/Boundary/EuclideanHalfSpaceInstance.lean` — `EuclideanHalfSpace n`
+  as a `HasSmoothBoundary` instance.
+* `Geometry/Boundary/OutwardNormal.lean` — outward unit normal vector field on
+  the boundary, defined intrinsically via Riesz duality applied to a chart-local
+  half-space-direction.
 
 ### Stokes' theorem and Green's identities
 
-* `WithBoundary/OutwardNormal.lean` — outward unit normal vector field on the
-  boundary, defined intrinsically via Riesz duality applied to a chart-local
-  half-space-direction.
-* `WithBoundary/Stokes.lean` — divergence theorem with boundary integral.
-* `WithBoundary/GreenWithBoundary.lean` — Green's first and second identities
-  with boundary terms.
+* `WithBoundary/BoundaryContribution/Stokes.lean` — divergence theorem with
+  boundary integral.
+* `WithBoundary/BoundaryContribution/GreenWithBoundary.lean` — Green's first and
+  second identities with boundary terms.
 
 ### Time-dependent versions
 
-* `WithBoundary/Family.lean` — pointwise-in-time wrappers and time-derivative
-  identities for time-parameterised metric families.
+* `WithBoundary/Divergence/Family.lean` — pointwise-in-time wrappers and
+  time-derivative identities for time-parameterised metric families.
 
 ## Out of scope
 

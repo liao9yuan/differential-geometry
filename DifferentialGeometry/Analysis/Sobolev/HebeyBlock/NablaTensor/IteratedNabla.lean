@@ -3,6 +3,8 @@ import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.ChartParallelTransportOp
 import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.FiberNorm.GramTwist
 import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.ChartParallelTransportOpNorm.UniformChartBounds
 
+/-! # Equivalence of the iterated-covariant `∇^k` and iterated-partial `∂^k` tensor Sobolev norms at order `k` -/
+
 namespace DifferentialGeometry.PDE.RicciFlow.HebeyBlock
 
 open Bundle DifferentialGeometry DifferentialGeometry.Integral.Measure

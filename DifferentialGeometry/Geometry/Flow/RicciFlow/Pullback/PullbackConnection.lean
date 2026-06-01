@@ -1,6 +1,13 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Defs
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 
+/-!
+# The pullback connection along a diffeomorphism
+
+Constructs the connection obtained by pulling a connection back through a diffeomorphism and
+shows it is again torsion-free and metric-compatible with the pullback metric.
+-/
+
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback
 
 open Bundle

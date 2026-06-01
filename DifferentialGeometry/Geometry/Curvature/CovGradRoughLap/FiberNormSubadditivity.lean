@@ -22,17 +22,17 @@ are consumed. Specifically, once the pointwise curried identity
 covGradRoughLapCurv g T₀ (x) (unit) curried along w
   = Tensor3rdCurv g 0 2 (smoothExtensionTangent x w) T₀ x (unit) − residual(x, w)
 ```
-is established (`CovGradRoughLapCommutatorClose3.lean`), the `n`-sub-additivity here reduces the
+is established (`CurvatureDefect.lean`), the `n`-sub-additivity here reduces the
 curvature defect's fibre norm to the sum of the `Tensor3rdCurv` summands' fibre norms (each a
 curvature contraction, controlled by `RiemannianFiberNormSqRiemannOpHigherRankParseval.lean`)
 plus the moving-frame residual's fibre norm, yielding the pointwise `hpt` hypothesis of
-`secondCovGrad_l2NormSq_le_rawConnLap_of_pointwise_curv_bound` (`CovGradRoughLapCurvL2Bound.lean`).
+`secondCovGrad_l2NormSq_le_rawConnLap_of_pointwise_curv_bound` (`L2Bound.lean`).
 
 The single ingredient gating that curried identity is the slot-`0` frame-trace matching
 `Δ_∇(∇T₀)(x)(unit) curried along w = ∑ᵢ ∇_{Bᵢ}∇_{Bᵢ}(∇_W T₀)(x)(unit)` (with
 `B_i := smoothOrthoFrame g x i`, `W := smoothExtensionTangent x w`); it is the genuine
 third-order tensor Weitzenböck Christoffel cancellation documented as open in
-`CovGradRoughLapCommutatorClose{2,3}.lean`, and is **not** discharged here. This file supplies
+`FreeDirectionReduction.lean` / `CurvatureDefect.lean`, and is **not** discharged here. This file supplies
 the frame-sum fibre-norm packaging so that closing that matching immediately delivers `hpt`.
 
 ## Main results

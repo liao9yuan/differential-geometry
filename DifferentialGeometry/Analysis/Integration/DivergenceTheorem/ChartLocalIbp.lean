@@ -25,7 +25,7 @@ $$
 This is the chart-local integration-by-parts formula. Together with the
 intrinsic nature of `tangentSectionAction` and the chart-invariance of
 `chartLocalMeasure` on overlaps (proved in
-`DifferentialGeometry/Integral/Measure/Invariance.lean`), it yields the
+`DifferentialGeometry/Analysis/Integration/Measure/Invariance.lean`), it yields the
 chart-invariance of the chart-local Voss–Weyl divergence.
 
 The proof proceeds by pulling both integrals back to the chart target via the

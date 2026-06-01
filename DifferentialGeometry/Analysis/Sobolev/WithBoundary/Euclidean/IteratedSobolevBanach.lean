@@ -4,7 +4,8 @@ import DifferentialGeometry.Analysis.Sobolev.Euclidean.SupportAndDomain.Iterated
 /-!
 # Sequential completeness of the iterated Euclidean half-space Sobolev space `W^{k,p}_0`
 
-This is the with-boundary mirror of `EuclideanIteratedSobolevBanach.lean`.
+This is the with-boundary mirror of
+`Euclidean/Completeness/IteratedSobolevBanach.lean`.
 
 For a half-space-friendly carrier `Ω ⊆ EuclideanSpace ℝ (Fin d)`, the Dirichlet
 half-space iterated Sobolev predicate `MemWkpHalfSpace k p u Ω` is *defined* as

@@ -47,7 +47,7 @@ theorem deTurckRicciRHS_symm
 /-- The Ricci–DeTurck section `deTurckRHSSection g_bg g`, re-tagged from the
 type-level metric tag `g` to the background tag `g_bg`.  The metric tag is a pure
 type-level parameter (it does not appear in the carrier data, see `SmoothCcTensor`
-in `Integral/L2/SmoothSections/Defs.lean`), so the underlying smooth section is
+in `Analysis/Integration/L2/SmoothSections/Defs.lean`), so the underlying smooth section is
 unchanged. -/
 noncomputable def deTurckRHSSectionBg (g_bg g : SmoothRiemannianMetric I M) :
     DifferentialGeometry.Integral.L2.SmoothCcTensor g_bg 0 2 where

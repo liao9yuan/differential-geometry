@@ -3,6 +3,11 @@ import Mathlib.Analysis.ODE.Gronwall
 import Mathlib.Geometry.Manifold.MFDeriv.Basic
 import Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary
 
+/-! # Gluing chart-local flows into a global flow on a closed manifold
+
+From per-base-point chart-local Picard data, assembles a single global candidate
+flow `Φ : ℝ → M → M` on a uniform horizon by gluing the chart-coordinate flows. -/
+
 namespace DifferentialGeometry.PDE.RicciFlow.ODE
 
 open Bundle

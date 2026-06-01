@@ -59,7 +59,7 @@ diagonal in a fixed finite basis. The proof reduces to two left-linear
 sums by symmetry-free distributivity over the basis decomposition.
 
 Mirrors the analogous expansion in
-`Tensor/RSTensor/TensorRSRiemannianBundle.lean` for the (chart-independent)
+`Geometry/Metric/TensorInner/TensorRSRiemannianBundle.lean` for the (chart-independent)
 metric inner product. -/
 private lemma chartTensorInnerPointwise_rs_model_basis_expand
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α b : M)

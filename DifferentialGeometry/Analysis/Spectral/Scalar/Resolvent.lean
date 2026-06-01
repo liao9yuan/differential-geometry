@@ -13,18 +13,16 @@ variational Laplacian, defined as the composition
 `resolventL2 g := H1ComplToLp g ∘L resolvent g`.
 
 We prove:
+* `resolventL2_symm`: `resolventL2 g` is symmetric on `Lp ℝ 2 μ_g`.
 * `resolventL2_isSelfAdjoint`: `resolventL2 g` is a self-adjoint
   continuous linear operator on `Lp ℝ 2 μ_g`.
-* `resolventL2_isCompactOperator`: `resolventL2 g` is a compact operator
-  on `Lp ℝ 2 μ_g`.
 
 The self-adjointness reduces to symmetry of the H¹ inner product on
 `H1Compl g` (already established in `Variational.lean`).
 
-The compactness comes from a chart-Sobolev bridge for smooth functions
-(uniform-in-`u` in the smooth case) combined with the closed-manifold
-Rellich-Kondrachov compact embedding `rellich_kondrachov_chart_seq`
-(established in `RellichOnM.lean`).
+Compactness of `resolventL2 g` (via the chart-Sobolev / Rellich-Kondrachov
+route) is established separately in `Scalar/Compactness.lean` as
+`resolventL2_isCompactOperator`.
 
 ## Sign convention
 

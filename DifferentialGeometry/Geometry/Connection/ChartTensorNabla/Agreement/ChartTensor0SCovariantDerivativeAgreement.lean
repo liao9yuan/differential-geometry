@@ -98,7 +98,7 @@ private lemma tensor0Iso_symm_apply_empty (x : M) (a : ℝ) :
 
 /-- Scalar form of `extDerivFun`: applied to a scalar function and a tangent
 vector, it is exactly the manifold-Fréchet derivative. Mirrors the helper
-`extDerivFun_eq_mfderiv` used in `Realized/Realization/Embedding.lean`. -/
+`extDerivFun_eq_mfderiv` used in `Realization/Embedding.lean`. -/
 private lemma extDerivFun_apply_scalar (f : M → ℝ) (x : M) (v : TangentSpace I x) :
     extDerivFun (I := I) f x v = mfderiv I 𝓘(ℝ, ℝ) f x v := by
   simp only [extDerivFun, ContinuousLinearMap.comp_apply, ContinuousLinearEquiv.coe_coe]

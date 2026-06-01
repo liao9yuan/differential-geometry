@@ -9,7 +9,8 @@ the slot-`0` free-direction reduction
 For a closed smooth Riemannian manifold `(M, g)` modelled on a real inner-product
 space `E`, and a smooth compactly-supported `(0, 2)`-tensor field `T₀`, this file
 takes the abstract `(0, 3)` reduction of the order-`2` Gårding commutator from
-`CovGradRoughLapCommutator{,Abstract,Assembly,DoubleUnfold}.lean` and reduces the
+`GradientField.lean`, `AbstractRoughLaplacian.lean`, `CommutatorIdentity.lean` and
+`AbstractRoughLaplacianNaturality.lean`, and reduces the
 remaining curvature reconciliation to a single explicit equation read along a
 **free gradient direction** `w`, using the right-hand-side frame-trace third-order
 Weitzenböck swap `frame_trace_thirdCovDeriv_swap` of `TensorThirdOrderWeitzenbock.lean`.
@@ -102,7 +103,7 @@ remaining work.
 ## Sign / convention
 
 Geometer convention `Δ_∇ = ∑ᵢ ∇²_{Bᵢ, Bᵢ}` (the frame trace), matching
-`CovGradRoughLapCommutatorAbstract.lean` and `TensorThirdOrderWeitzenbock.lean`. The
+`AbstractRoughLaplacian.lean` and `TensorThirdOrderWeitzenbock.lean`. The
 covariant gradient `covGrad g 0 s` curries the new tangent-direction slot as the
 leftmost covariant slot.
 -/

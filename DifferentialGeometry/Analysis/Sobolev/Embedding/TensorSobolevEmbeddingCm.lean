@@ -8,6 +8,8 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.TensorSectionL2Bo
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingManifoldC0
 import Mathlib.Geometry.Manifold.ContMDiff.Basic
 
+/-! # Sobolev embedding `H^{2k} ↪ C^m` for `(r, s)`-tensor sections on a closed Riemannian manifold -/
+
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle Tensor0SBundle
@@ -61,7 +63,7 @@ The conclusion encodes the `m = 0` (C⁰-norm) component of the full
 `C^m`-norm bound. The general `C^m`-norm version, controlling all
 iterated covariant derivatives `‖∇^j T x‖` for `0 ≤ j ≤ m`, is delivered
 separately by `iteratedCovGrad_toSobolev_embedding_Cm_unconditional`
-(file `SobolevEmbeddingCmRankReduction.lean`), in the same Riemannian
+(file `Embedding/SobolevEmbeddingCmOrderDropping.lean`), in the same Riemannian
 bundle norm.
 
 ## Proof
@@ -70,7 +72,7 @@ The full manifold-side assembly (finite atlas-aligned partition of unity +
 Lebesgue-number `ρ`-localisation + Euclidean local-ball `L²` pointwise
 embedding + op-norm ↦ Hilbert–Schmidt + per-term `≤ tsum`) is carried out,
 chart-locality-free, in `tensorPouSobolevHilbert_embedding_Ck_gNorm`
-(file `PDE/RicciFlow/SobolevEmbeddingAssembly.lean`). This headline is the
+(file `Embedding/SobolevEmbeddingManifoldC0.lean`). This headline is the
 specialisation that installs the Riemannian bundle instance and delegates.
 -/
 theorem tensorPouSobolevHilbert_embedding_Ck

@@ -7,10 +7,10 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.ChristoffelCorrection
 
 The committed connector chain reduces the *covariant* per-slot variational identity
 `RawVariationalIdentity g X Φ_fam t x v`
-(`TimeDependentFlow/VariationalFlow.lean`) to the value equation `hsplit`, which equates the
+(`VariationalEquation/VariationalFlow.lean`) to the value equation `hsplit`, which equates the
 operator-ODE derivative value `(T'.comp (chartCloseFderiv … t) + (chartCloseTriv … t).comp P') v`
 with the trivialised-flat-plus-metric-Christoffel decomposition.  As the module docstring of
-`SmoothInSpace/VariationalLiftManifoldFlowOrbitODE.lean` records (the residual identity (★)),
+`ChartOperator/ManifoldFlowOrbitODE.lean` records (the residual identity (★)),
 `hsplit` is **false in a general chart**: the genuine derivative of the orbit pushforward curve
 `s ↦ mfderiv (Φ_fam s) x v`, read in Mathlib's *moving* target chart, is the **flat / Lie-type**
 value `T' (dΦv) + P' v` — *not* the covariant value `-∇_{dΦv} X`.  The two differ by the metric
@@ -20,7 +20,7 @@ two slots, where metric-compatibility makes the metric-transport term appear).
 This file exposes the genuinely-dischargeable object: the **flat** per-slot identity
 `RawVariationalIdentityFlat`, asserting that the orbit pushforward curve has, at `t`, the
 *flat* operator-ODE derivative value — the value that `chartCloseDop_hasDerivAt_clm_comp`
-(`SmoothInSpace/VariationalLiftManifoldFlowOrbitODE.lean`) actually produces.  Unlike the
+(`ChartOperator/ManifoldFlowOrbitODE.lean`) actually produces.  Unlike the
 covariant `RawVariationalIdentity`, this identity is closed **directly** from the product-rule
 operator ODE for `chartCloseDop` (no `hsplit`, no false `D²φ = Γ`), once the two factor
 `HasDerivAt` data are supplied:
@@ -47,7 +47,7 @@ inputs (the "F1" inputs), exactly as in the orbit-ODE assembly
 The residual that connects the flat value to the covariant value is **not** a per-slot
 equation but the metric-Christoffel contraction at the basepoint; it is handled at the
 *pairing* level (the symmetric `g.inner` two-slot pairing) in
-`VariationalFlowFlatPairing.lean`, where metric-compatibility identifies it with the
+`VariationalEquation/FlatPairing.lean`, where metric-compatibility identifies it with the
 metric-transport term.  No `sorry`, no `axiom`, no `HasLocallyConstantChartAt`-style
 hypothesis, no joint-`C^∞`-on-`ℝ × M` predicate, and **no** false `D²φ = Γ` identification
 appears.  No hypothesis-packaging: the inputs are factor `HasDerivAt`s and a continuity datum,

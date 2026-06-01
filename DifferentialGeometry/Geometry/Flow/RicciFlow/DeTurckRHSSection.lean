@@ -9,7 +9,7 @@ import DifferentialGeometry.Tensor.RSTensor.Coordinates.Field
 
 The Ricci–DeTurck right-hand side
 `deTurckRicciRHS g_bg g x : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ`
-(from `PDE/RicciFlow/DeTurckRHS.lean`) is, at each base point `x`, a continuous
+(from `Geometry/Flow/RicciFlow/DeTurckRHS.lean`) is, at each base point `x`, a continuous
 bilinear form on the tangent space — i.e. a covariant `(0,2)`-tensor.  This file
 turns the family `x ↦ deTurckRicciRHS g_bg g x` into a genuine smooth section of
 the project's mixed-tensor bundle and packages it as a `SmoothCcTensor`.
@@ -20,7 +20,7 @@ A continuous bilinear form on `TangentSpace I x` is a covariant `(0,2)`-tensor.
 In the project's bundle convention (`Tensor/RSTensor/Defs.lean`) the fibre
 `TensorRSSpace r s I x = Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x` has `r`
 contravariant slots (fed dual covectors via `dualCovariantCMM`, see
-`Analysis/.../ChartTensor/Components.lean`) and `s` covariant slots.  A covariant
+`Analysis/Spectral/Tensor/ChartTensor/Components/Defs.lean`) and `s` covariant slots.  A covariant
 bilinear form therefore lives in the fibre with `r = 0` covariant-only slots and
 `s = 2`, namely `TensorRSSpace 0 2 I x`, whose underlying object is exactly a
 `(0,2)` continuous multilinear map `Tensor0SSpace 2 I x` extended by a scalar to

@@ -1,6 +1,11 @@
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.ChartLocalExistence.PointwiseLocal
 import Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary
 
+/-! # Chart-local Picard data and uniform existence
+
+The `ChartLocalPicardData` structure packaging per-base-point chart-coordinate
+Picard–Lindelöf flow data, and the uniform-existence consequences it supports. -/
+
 namespace DifferentialGeometry.PDE.RicciFlow.ODE
 
 open Bundle

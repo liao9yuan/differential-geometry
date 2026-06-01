@@ -8,7 +8,24 @@ open DifferentialGeometry.Analysis.ODE.Flow
 
 namespace DifferentialGeometry.PDE.RicciFlow.ODE
 
-/-! ## Pending grandchild (Stage C round-1 output; round-2 expansion target) -/
+/-!
+# Euclidean `C^k` smooth dependence of the local flow
+
+For a time-dependent vector field `f : ℝ → E → E` on a finite-dimensional Banach
+space `E`, this file assembles the `C^k` smooth-dependence of the local Picard
+flow on a flow box `closedBall x₀ r ×ˢ Icc (t₀ - ε) (t₀ + ε)` around `(x₀, t₀)`.
+
+## Main results
+
+* `linearizationNorm_continuousOn_box` — continuity of `(x, t) ↦ ‖fderiv ℝ (f t) (Φ q)‖`
+  along the flow on the box.
+* `exists_uniform_norm_fderiv_le_on_flow_box` — a uniform bound on the linearization
+  norm over the box.
+* `isVariationalFlowProjection_mono_box` — monotonicity of the variational-flow
+  projection predicate under box shrinking.
+* `exists_isLocalFlow_contDiffOn_Ck` — existence of a local flow that is jointly
+  `ContDiffOn ℝ k` when `f` is jointly `C^k`.
+-/
 
 theorem linearizationNorm_continuousOn_box
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] {f : ℝ → E → E}

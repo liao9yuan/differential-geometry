@@ -10,7 +10,7 @@ For a closed Riemannian manifold `(M, g)` of dimension `n ≥ 2` satisfying
 `Ric ≥ (n - 1) K g` with `K > 0`, every strictly positive eigenvalue of the
 variational Laplacian satisfies `λ ≥ n K`. The user-facing theorem accepts a
 generic basis index `i = ⟨μ, k⟩` for the spectral eigenbasis assembled in
-`Analysis/Laplacian/Spectral/EigenBasis.lean`, with no smoothness hypothesis
+`Analysis/Spectral/Scalar/EigenBasis.lean`, with no smoothness hypothesis
 on the eigenfunctions.
 
 The proof composes two ingredients:

@@ -33,7 +33,7 @@ summand of the chart formula, and pushing the result back to the manifold via
 the chart-local representation of `tangentSectionAction`.
 
 The structural adjustments compared to the boundaryless `chart_local_ibp`
-proof in `DifferentialGeometry/Integral/DivergenceTheorem/Ibp.lean` are:
+proof in `DifferentialGeometry/Analysis/Integration/DivergenceTheorem/IntegrationByParts.lean` are:
 
 * The Fréchet partial derivatives `partialDeriv` are replaced everywhere on the
   chart-target side by `partialDerivWithin (extChartAt I α).target`. On the

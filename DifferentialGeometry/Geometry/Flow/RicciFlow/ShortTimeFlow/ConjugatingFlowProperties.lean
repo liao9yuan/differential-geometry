@@ -6,6 +6,14 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeAssembly.RicciConti
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Defs
 import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 
+/-!
+# Regularity data for the conjugating flow of the DeTurck–Ricci short-time construction
+
+Collects the per-time analytic data produced by the conjugating diffeomorphism flow — flat
+variational data, orbit-pushforward continuity, time-zero continuity, and joint chart-Gram
+continuity — that feed the assembly of the Ricci-flow solution from the DeTurck solution.
+-/
+
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle

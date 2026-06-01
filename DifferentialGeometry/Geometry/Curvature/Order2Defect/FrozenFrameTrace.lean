@@ -1,7 +1,7 @@
 import DifferentialGeometry.Geometry.Curvature.Order2Defect.PartialMetricTrace
 
 /-!
-# The partial metric-trace covariant-derivative commutation (final, `g`-weighted route)
+# The frame-frozen diagonal trace and its agreement with the metric trace
 
 For a closed smooth Riemannian manifold `(M, g)` modelled on a real inner-product space `E`,
 this file develops the **partial metric-trace covariant-derivative commutation** — the last

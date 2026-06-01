@@ -16,13 +16,14 @@ F_E : E → ℝ := tensorChartComponentRaw g r s T₀ α Idx Jdx ∘ (extChartAt
 
 is `C^∞` on the open Euclidean chart target `(extChartAt I α).target` (see
 `chartPushedRaw_tensorChartComponentRaw_contDiffOn` of
-`Analysis/Laplacian/TensorRegularity/CovDerivChartFormLowerOrder.lean`). On the
+`Analysis/Elliptic/TensorRegularity/CovDeriv/ChartFormLowerOrder.lean`). On the
 chart target, the `j`-th iterated Fréchet derivative `iteratedFDeriv ℝ j F_E` is
 continuous. Composing with the chart map `extChartAt I α : M → E` and taking
 norms gives a function on `M` whose Borel-measurability is the subject of this
 file. Because the Mathlib partial-equiv `extChartAt I α` has unspecified
 behaviour outside the chart source, we use the Borel-measurable global extension
-`extChartAtExt α : M → E` from `Analysis/Sobolev/Chart/MeasurablePullback.lean`,
+`extChartAtExt α : M → E` from
+`Analysis/Sobolev/Chart/ChartTransition/MeasurablePullback.lean`,
 which agrees with `extChartAt I α` on the chart source (where the partition of
 unity weights live in downstream applications).
 

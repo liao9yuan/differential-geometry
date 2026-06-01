@@ -54,11 +54,11 @@ cross terms on the RHS into a single chart-explicit `f_chart_eff` and
 checking its local `L²` regularity. This absorption is a substantial
 chart-explicit construction (it parallels the chart-side residual
 `MemW1p` discharge for the H² case, which is also currently exposed as
-a hypothesis in `DiffChartBilinearH1ComplUnconditional.lean`).
+a hypothesis in `Regularity/DiffChart/Differentiated/BilinearH1Compl.lean`).
 
 Accordingly, this module **exposes** the derived `ChartBilinearH1ComplData`
 for `u_chart_deriv` as a hypothesis, mirroring the pattern in
-`DiffChartBilinearH1ComplUnconditional.lean`. The headline
+`Regularity/DiffChart/Differentiated/BilinearH1Compl.lean`. The headline
 `chart_loc_of_diff_data_and_uniform_bound` then applies the existing
 per-chart `H²` regularity to the supplied derived data, producing the
 chart-local `H³` regularity of `u_chart_deriv`.

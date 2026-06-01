@@ -15,12 +15,13 @@ import DifferentialGeometry.Tensor.Product.Defs
 import DifferentialGeometry.Tensor.Alternating.Basis
 import DifferentialGeometry.Tensor.Auxiliary.Shuffle.Derivative
 
-/-
-d(Sum_J ω_J dx^J) := Sum dω_J ∧ dx^J
--/
+/-!
+# Wedge products of continuous alternating maps
 
-/-
-# Wedge Products
+This file defines the wedge product `wedge_product` of continuous alternating maps
+(and the covector wedge `covectorWedge`), relates it to alternatization, and proves
+its core algebraic laws: bilinearity, associativity, antisymmetry, a norm bound, and
+the vanishing of the wedge of an odd-degree form with itself.
 -/
 
 noncomputable section

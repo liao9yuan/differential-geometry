@@ -22,11 +22,11 @@ of volume: the joint and slicewise continuity of the metric trace
 integral, and the clean headline first-variation theorem on a compact manifold.
 
 The definitional layer (measure family, regularity interfaces, chart-density
-families, the metric trace) lives in `MeasureFamilyDefs`; the determinant Jacobi
+families, the metric trace) lives in `FamilyDefs`; the determinant Jacobi
 formula in `JacobiFormula`; and the chart-invariance and partition-of-unity
-decomposition of the volume measure in `MeasureFamilyDecomposition`. All three
+decomposition of the volume measure in `FamilyDecomposition`. All three
 are re-exported transitively through this file's import of
-`MeasureFamilyDecomposition`.
+`FamilyDecomposition`.
 
 ## Main results
 

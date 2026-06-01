@@ -6,7 +6,7 @@ import DifferentialGeometry.Analysis.Sobolev.Euclidean.SupportAndDomain.Iterated
 half-space-friendly domains
 
 This module is the half-space-friendly companion of
-`Analysis/Sobolev/EuclideanDensity.lean`. It establishes that any function
+`Analysis/Sobolev/Euclidean/Density.lean`. It establishes that any function
 in the Dirichlet (zero-trace) iterated Sobolev space
 `MemWkpHalfSpace k p u Ω` whose compact support sits *strictly inside* the
 open interior part `interiorHalfSpace Ω` is approximated, in
@@ -15,7 +15,7 @@ support also sits strictly inside the open interior part.
 
 ## Strategy
 
-Recall from `EuclideanIteratedSobolevHalfSpace.lean`:
+Recall from `Euclidean/SupportAndDomain/IteratedSobolevHalfSpace.lean`:
 
 * `MemWkpHalfSpace k p u Ω = MemWkp k p u (interiorHalfSpace Ω)`,
 * `wkpNormHalfSpace k p u Ω = wkpNorm k p u (interiorHalfSpace Ω)`,

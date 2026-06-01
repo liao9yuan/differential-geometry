@@ -10,20 +10,20 @@ Gårding commutator defect is the `(0, 3)`-tensor field
 ```
 covGradRoughLapCurv g T₀ = Δ_∇(∇T₀) − ∇(Δ_∇ T₀)
 ```
-(`CovGradRoughLapCommutatorClose3.lean`); its pointwise intrinsic fibre-norm bound `hpt`,
+(`CovGradRoughLap/CurvatureDefect.lean`); its pointwise intrinsic fibre-norm bound `hpt`,
 ```
 rfns(covGradRoughLapCurv g T₀)(x) ≤ C₀² · (rfns(T₀) + rfns(∇T₀) + rfns(∇²T₀))(x),
 ```
 is the sole remaining ingredient for the unconditional order-`2` covariant Gårding estimate
-`secondCovGrad_l2NormSq_le_rawConnLap_of_pointwise_curv_bound` (`CovGradRoughLapCurvL2Bound.lean`),
-assembled by the endpoint bridge `hpt_to_unconditional_bound` (`Order2DefectMetricTraceFrame.lean`).
+`secondCovGrad_l2NormSq_le_rawConnLap_of_pointwise_curv_bound` (`CovGradRoughLap/L2Bound.lean`),
+assembled by the endpoint bridge `hpt_to_unconditional_bound` (`MetricTraceFrame.lean`).
 
 This file develops two genuine, non-degenerate ingredients of the metric-trace route:
 
 ## 1. The frame-summed off-diagonal curvature fibre bound
 
 The per-frame-pair off-diagonal Ricci identity `secondCovDeriv_gradTensor_antisymm_eq_riemannOp`
-(`Order2DefectOffDiagPerDir.lean`) writes the antisymmetric pair-swap of the second covariant
+(`OffDiagonalCurvatureCore.lean`) writes the antisymmetric pair-swap of the second covariant
 derivative of the gradient tensor `S := ∇T₀` as the genuine **off-diagonal** Riemann curvature
 `R_x(Bᵢ, eₐ)(∇T₀)` — never the degenerate diagonal `R_x(Bᵢ, Bᵢ) = 0`. The per-pair fibre bound
 `riemannOp_gradTensor_offDiag_frame_fiberNormSq_le` controls each contraction by `Cx · rfns(∇T₀)`.
@@ -61,7 +61,7 @@ smoothOrthoFrame g x i`, which is `g_y`-orthonormal at every `y` in the neighbou
 ## The precise remaining subgoal (documented, not assumed)
 
 The two ingredients above discharge the **moving-frame** obstruction (obstruction 2 of
-`CovGradRoughLapCommutatorClose2.lean`) of the metric-trace route. The single genuinely-distinct
+`CovGradRoughLap/FreeDirectionReduction.lean`) of the metric-trace route. The single genuinely-distinct
 remaining content is the **slot-`0` Christoffel matching** (obstruction 1): the identification, per
 outer frame direction `eₐ`, of the slot-`0` curry along `eₐ` of the rank-`(0, 3)` Hessian trace
 `∑ᵢ ∇²_{Bᵢ, Bᵢ}(∇T₀)` with the rank-`(0, 2)` Hessian trace of the directional derivative
@@ -73,7 +73,7 @@ gradient operator on the leftmost slot; that intertwining (the tensor analogue o
 `cotangentCov_metricDuality` on the gradient slot) is genuine new content not present in the
 available infrastructure. Once it is available, `frame_offDiag_curvature_sum_fiberNormSq_le` of this
 file together with the slot-split reduction `riemannianFiberNormSq_three_le_of_slot0_bound`
-(`Order2DefectRouteTensorial.lean`) deliver `hpt`, hence the unconditional estimate.
+(`SlotSplitBound.lean`) deliver `hpt`, hence the unconditional estimate.
 
 ## Sign / convention
 

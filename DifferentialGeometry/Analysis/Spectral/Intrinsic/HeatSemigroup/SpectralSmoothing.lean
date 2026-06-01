@@ -7,7 +7,7 @@ import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCm
 
 For a closed Riemannian manifold `(M, g)` and ranks `(r, s)`, the
 intrinsic tensor heat semigroup `tensorHeatSemigroup g r s t`
-(built in `HeatSemigroupIntrinsic.lean` from the chart-locality-free
+(built in `HeatSemigroup/Intrinsic.lean` from the chart-locality-free
 resolvent eigenbasis) acts diagonally on that eigenbasis, multiplying the
 `i`-th Fourier coefficient by `exp(-λᵢ t)` with `λᵢ ≥ 0` the
 connection-Laplacian eigenvalue.

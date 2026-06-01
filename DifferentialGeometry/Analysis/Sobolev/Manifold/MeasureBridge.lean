@@ -23,7 +23,8 @@ chart `α`, this file provides quantitative comparisons between
 The chart-pushed function comes in two flavours: a *raw* version
 `chartPushedRaw I α u`, which composes `u` with the inverse chart and
 `toEuclidean.symm`, and the partition-of-unity-weighted version `chartPushed`
-already defined in `Sobolev/Chart.lean`. The raw version is the natural target
+already defined in `Sobolev/Chart/Defs.lean`. The raw version is the natural
+target
 for the chart-target Euclidean integral, since it carries no partition-of-unity
 weight.
 

@@ -84,8 +84,8 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 /-- The pointwise application of the discrete product rule:
 `D_h^k(f · g)(x) = (translate k h f)(x) · (D_h^k g)(x) + (D_h^k f)(x) · g(x)`.
-This is `diffQuot_coeff_apply` from
-`Analysis/Sobolev/Nirenberg/Euclidean.lean`. -/
+This is the discrete product rule for `diffQuot` from
+`Analysis/Sobolev/Tools/DifferenceQuotient.lean`. -/
 lemma diffQuot_mul_apply
     (k : Fin (Module.finrank ℝ E)) (h : ℝ) (f g : EuclN → ℝ) (x : EuclN) :
     DifferentialGeometry.Analysis.Sobolev.diffQuot

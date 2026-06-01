@@ -11,9 +11,9 @@ commutator defect is the `(0, 3)`-tensor field
 ```
 covGradRoughLapCurv g T₀ = Δ_∇(∇T₀) − ∇(Δ_∇ T₀)
 ```
-(`CovGradRoughLapCommutatorClose3.lean`); its pointwise intrinsic fibre-norm bound is the sole
+(`CovGradRoughLap/CurvatureDefect.lean`); its pointwise intrinsic fibre-norm bound is the sole
 remaining ingredient for the unconditional order-`2` covariant Gårding estimate, assembled by the
-endpoint bridge `hpt_to_unconditional_bound` (`Order2DefectMetricTraceFrame.lean`).
+endpoint bridge `hpt_to_unconditional_bound` (`MetricTraceFrame.lean`).
 
 The rough Laplacian `Δ_∇ T = rawTensorConnLap g r s T` traces the second covariant derivative
 against the *moving* `g_y`-orthonormal frame `Cʸᵢ := smoothOrthoFrame g y i`. Differentiating the
@@ -22,8 +22,8 @@ frame, whose derivative is genuinely unbounded on multi-chart manifolds. The esc
 gradient-slot Leibniz intertwining of this file — is to read `Δ_∇ T` near `x` as the *fixed-frame*
 diagonal trace `frozenFrameTrace g r s T x ·` against the `x`-centred frame `Bᵢ := smoothOrthoFrame
 g x i`, which is `g_y`-orthonormal at *every* `y` in the orthonormality neighbourhood
-(`smoothOrthoFrame_orthonormal`). The two sections agree near `x` (`Order2DefectFrameCurvatureCore.
-lean`), so the outer covariant gradient of `Δ_∇ T` equals the outer covariant gradient of the
+(`smoothOrthoFrame_orthonormal`). The two sections agree near `x` (`FrameCurvatureCore.lean`),
+so the outer covariant gradient of `Δ_∇ T` equals the outer covariant gradient of the
 fixed-frame trace; and the fixed-frame trace is a *finite sum* of smooth sections over a *fixed*
 frame, so the gradient passes through the sum with no moving-frame derivative.
 

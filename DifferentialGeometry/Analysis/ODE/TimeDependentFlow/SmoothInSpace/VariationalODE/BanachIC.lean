@@ -5,6 +5,12 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.ChartLocalExistence.C
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.ChartLocalExistence.UniformExistence
 import DifferentialGeometry.Analysis.ODE.Flow.HigherRegularity.ContDiffOnTop
 
+/-! # Jointly `C^∞` local flow from a jointly `C^∞` field (Banach initial condition)
+
+For a jointly `C^∞` time-dependent vector field on a finite-dimensional Banach
+space, the local Picard flow is jointly `C^∞`; specialised to the chart-coordinate
+Picard data of the time-dependent flow. -/
+
 namespace DifferentialGeometry.PDE.RicciFlow.ODE
 
 open Bundle

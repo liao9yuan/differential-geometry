@@ -9,7 +9,7 @@ import Mathlib.Analysis.Normed.Operator.Extend
 
 For a closed smooth Riemannian manifold `(M, g)` modelled on a real
 inner-product space `E`, this file packages the section-level covariant
-gradient `covGrad g r s` (built in `CovGrad.lean`) as a *bounded linear map*
+gradient `covGrad g r s` (built in `CovGrad/Defs.lean`) as a *bounded linear map*
 out of the `H¹` pre-Hilbert space of smooth compactly-supported
 `(r, s)`-tensor sections, into the metric `L²` Hilbert space of
 one-rank-higher `(r, s + 1)`-tensor sections, and extends it continuously to

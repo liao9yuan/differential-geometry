@@ -5,7 +5,7 @@ import DifferentialGeometry.Analysis.ODE.Flow.C1Regularity.ContDiffOnOne
 
 For a time-dependent vector field `f : ℝ → E → E` on a Banach space `E` and a local
 Picard–Lindelöf flow `Φ : E × ℝ → E` packaged by `IsLocalFlow`, the previous file
-`FlowC1Continuous.lean` established the joint `C^1` regularity of `Φ` on a strictly
+`Flow/C1Regularity/ContDiffOnOne.lean` established the joint `C^1` regularity of `Φ` on a strictly
 interior open neighbourhood of `(x₀, t₀)`, under the assumption that `f` is jointly
 `C^1`.
 
@@ -16,7 +16,7 @@ jointly `C^k`, then `Φ` is jointly `C^k`.  The mathematical content has two sta
 
 The headline theorem `contDiffOn_flow_of_isLocalFlow_of_contDiff` takes a `ContDiffOn ℝ k`
 hypothesis on `f` for any `k ∈ ℕ∞` with `1 ≤ k`, and delivers `ContDiffOn ℝ 1 Φ U` on the
-same strictly-interior neighbourhood as `FlowC1Continuous`.  Internally it reduces to
+same strictly-interior neighbourhood as `ContDiffOnOne`.  Internally it reduces to
 `contDiffOn_flow_of_isLocalFlow` via `ContDiffOn.of_le`.
 
 ## Stage 2: induction `k → k + 1` (deferred).
@@ -50,7 +50,7 @@ where
 
 ## Files
 
-This file imports `FlowC1Continuous.lean` and provides the headline `C^1` theorem in the
+This file imports `Flow/C1Regularity/ContDiffOnOne.lean` and provides the headline `C^1` theorem in the
 unified `C^k` signature, together with the preparatory smoothness lemma for the time
 piece `(x, t) ↦ f t (Φ ⟨x, t⟩)` which will plug into the eventual induction.
 

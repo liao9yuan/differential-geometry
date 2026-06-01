@@ -9,7 +9,7 @@ For a closed Riemannian manifold `(M, g)`, this file defines the heat semigroup
 `e^{t Δ_g}` (with the geometer Laplacian convention `Δ_g = div_g ∘ grad_g`,
 so that `Δ_g` is non-positive on a closed manifold) acting on `Lp ℝ 2 μ_g`,
 via spectral calculus on the eigenbasis assembled in
-`Analysis/Laplacian/Spectral/EigenBasis.lean`.
+`Analysis/Spectral/Scalar/EigenBasis.lean`.
 
 Concretely, with the L² eigenbasis `b := resolventHilbertEigenbasisSigma g`
 and Laplacian eigenvalues `λ_i := laplacianEigenvalueOf i.1.val ≥ 0`, the

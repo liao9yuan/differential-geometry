@@ -25,7 +25,7 @@ support from their underlying scalar functions.
 ## Strategy
 
 The proofs mirror the boundaryless variants in
-`DifferentialGeometry/Integral/DivergenceTheorem/Green.lean`. The key
+`DifferentialGeometry/Analysis/Integration/DivergenceTheorem/Green.lean`. The key
 differences are:
 
 * the gradient is packaged as a smooth tangent section via

@@ -1,6 +1,11 @@
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.ChartLocalExistence.UniformExistence
 import Mathlib.Analysis.ODE.Gronwall
 
+/-! # Uniqueness of the chart-cover flow on chart overlaps
+
+Grönwall uniqueness for the chart-coordinate flow and its consequence that the
+chart-cover flows agree on the overlaps of their chart neighborhoods. -/
+
 namespace DifferentialGeometry.PDE.RicciFlow.ODE
 
 open Bundle

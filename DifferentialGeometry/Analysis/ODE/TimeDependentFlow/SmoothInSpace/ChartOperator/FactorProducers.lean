@@ -8,9 +8,9 @@ import Mathlib.Analysis.Calculus.FDeriv.Mul
 # Producers for the two linearized-flow factor derivatives `hT` and `hP`
 
 The orbit-ODE assembly `chartCloseDop_hasDerivAt_clm_comp`
-(`SmoothInSpace/VariationalLiftManifoldFlowOrbitODE.lean`) and the flat per-slot identity
+(`ChartOperator/ManifoldFlowOrbitODE.lean`) and the flat per-slot identity
 `rawVariationalIdentityFlat_of_orbitODE_factors`
-(`SmoothInSpace/VariationalLiftFlatIdentity.lean`) both consume, for a diffeomorphism family
+(`CovariantIdentity/FlatIdentity.lean`) both consume, for a diffeomorphism family
 `Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M)`, the two factor `HasDerivAt` data
 
 * `hP : HasDerivAt (chartCloseFderiv Φ_fam α x) P' t` — the orbit-derivative of the
@@ -35,7 +35,7 @@ Euclidean flow `Φ_eucl(·, s)` post-composed with the *fixed* source chart `ext
 a *fixed* continuous-linear post-composition `· ∘L trivToE α x` of the Euclidean
 chart-flow spatial Fréchet derivative `s ↦ fderiv ℝ (fun z => Φ_eucl z s) (extChartAt I α x)`.
 The Euclidean operator-valued variational ODE `IsLocalFlow.hasDerivAt_partial_spatial_fderiv`
-(`SmoothInSpace/VariationalODE.lean`) supplies the `HasDerivAt` of that Euclidean factor; the
+(`VariationalODE/EuclideanVariationalODE.lean`) supplies the `HasDerivAt` of that Euclidean factor; the
 fixed post-composition then transfers it (`HasFDerivAt.comp_hasDerivAt` with the fixed CLM
 `compL · |>.flip (trivToE α x)`) to `chartCloseFderiv`.
 

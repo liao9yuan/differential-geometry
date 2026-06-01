@@ -28,8 +28,8 @@ proved by evaluating both sides at the unit `(0, 0)`-tensor.
 ## Sign / convention
 
 Geometer convention `Δ_∇ = ∑ᵢ ∇²_{Bᵢ, Bᵢ}` (the frame trace), matching
-`TensorThirdOrderWeitzenbock.lean`, `CovGradRoughLapCommutator.lean`, and
-`CovGradRoughLapCommutatorAbstract.lean`. The covariant gradient `covGrad g 0 s`
+`TensorThirdOrderWeitzenbock.lean`, `GradientField.lean`, and
+`AbstractRoughLaplacian.lean`. The covariant gradient `covGrad g 0 s`
 curries the new tangent-direction slot as the leftmost covariant slot.
 -/
 

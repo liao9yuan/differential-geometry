@@ -5,7 +5,7 @@ import DifferentialGeometry.Analysis.Integration.L2.Pairing.Defs
 
 Let `M` be a smooth finite-dimensional manifold modelled on a real normed
 space `E` equipped with a smooth Riemannian metric `g`. Building on
-`tensorL2Inner`, `MemL2`, and `tensorL2Norm` from `GlobalPairing.Defs`,
+`tensorL2Inner`, `MemL2`, and `tensorL2Norm` from `Pairing.Defs`,
 this file proves:
 
 * `tensorL2Inner_symm` — symmetry, unconditional;

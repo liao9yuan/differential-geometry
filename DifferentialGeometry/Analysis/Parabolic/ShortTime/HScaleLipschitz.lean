@@ -10,6 +10,12 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Regularity.BareFlowFr
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.CovariantIdentity.FlatIdentity
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.GlobalClosedManifold
 
+/-! # `H`-scale Lipschitz bound for the DeTurck nonlinearity
+
+`deturckN_hscale_lipschitz`: the continuous DeTurck nonlinearity `N_cont` is locally
+Lipschitz across Sobolev scales, packaged in the binder shape consumed by the
+short-time-existence Duhamel fixed point. -/
+
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle

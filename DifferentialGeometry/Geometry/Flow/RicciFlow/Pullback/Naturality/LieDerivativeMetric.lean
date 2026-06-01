@@ -8,6 +8,14 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Naturality.Covarian
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.ChainRule
 import DifferentialGeometry.Geometry.Flow.LieDerivativeMetric
 
+/-!
+# Naturality of the metric Lie derivative under a diffeomorphism
+
+Proves that the Lie derivative of a metric along a vector field is natural under a diffeomorphism,
+pointwise and in assembled form, via the Cartan formula and the connection/bracket naturality
+lemmas.
+-/
+
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback
 
 open Bundle

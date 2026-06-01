@@ -7,6 +7,14 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnection
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.Defs
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.CurvatureBundling
 
+/-!
+# Naturality of the Ricci tensor under a diffeomorphism
+
+Proves `ricci_tensor_pullback_natural_under_diffeomorphism`: the Ricci tensor of a pullback metric
+is the pullback of the Ricci tensor, assembled from the conjugation behaviour of the Levi-Civita
+connection, Riemann tensor, and Ricci trace.
+-/
+
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback
 
 open Bundle

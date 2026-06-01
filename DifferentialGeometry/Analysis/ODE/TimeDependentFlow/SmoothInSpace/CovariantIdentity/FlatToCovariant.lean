@@ -9,14 +9,14 @@ consumed through the BanachIC raw-fibre chart vector field) produces the **flat*
 Fréchet derivative of the section, read in the raw-fibre representation
 `R(z) := (X (φ.symm z) : E)` (`chartRawRepr`).  The per-flow producer
 `rawVariationalIdentity_of_chartFderiv_witness`
-(`SmoothInSpace/VariationalLiftChartDictionary.lean`), however, demands a value equation
+(`ChartOperator/ChartDictionary.lean`), however, demands a value equation
 `hQinner` whose right-hand side is built from `chartLeviCivitaInnerCLM`, the **covariant**
 inner CLM at the orbit point `α := Φ_fam t x` — the trivialised flat `fderiv` summand
 *plus* the metric Christoffel correction `christoffelCorrection g α α`.
 
 The two are *not* equal: the linearized flow produces the flat derivative `−∂X`, whereas
 `chartLeviCivitaInnerCLM` is the covariant `−∇X`.  By the committed convention bridge
-`chartTrivRepr_fderiv_eq` (`SmoothInSpace/VariationalLiftConventionBridge.lean`) the two flat
+`chartTrivRepr_fderiv_eq` (`ChartOperator/ConventionBridge.lean`) the two flat
 derivatives differ by the **moving-trivialization correction** `(D C · h)(R z₀)` — the
 chart-transition first jet `D²φ`, a *smooth-structure* object, metric-independent.  And the
 metric Christoffel correction enters only through a `g`-referencing step that the pure

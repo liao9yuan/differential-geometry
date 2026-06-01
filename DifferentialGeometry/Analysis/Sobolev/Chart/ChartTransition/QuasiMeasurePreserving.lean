@@ -6,7 +6,8 @@ import DifferentialGeometry.Analysis.Sobolev.Chart.ChartTransition.ChartPullback
 The Euclidean chart-transition map `chartTransitionEuclid γ α` is a `C^∞`
 diffeomorphism between the two chart-overlap regions
 `chartOverlapEuclid γ α` and `chartOverlapEuclid α γ` (see
-`TransitionPipeline.lean`). Because it is smooth on the overlap, it carries
+`Chart/ChartTransition/ChartPullbackSmooth.lean`). Because it is smooth on the
+overlap, it carries
 Lebesgue-null subsets of the overlap to Lebesgue-null sets. This file packages
 that fact as a `QuasiMeasurePreserving` statement and derives the practically
 useful corollary: almost-everywhere equalities transport across charts.

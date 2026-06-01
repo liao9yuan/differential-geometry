@@ -18,7 +18,7 @@ import Mathlib.MeasureTheory.Function.ConvergenceInMeasure
 For a closed (compact, boundaryless) smooth Riemannian manifold `(M, g)` modelled
 on a finite-dimensional real inner-product space `E` of dimension `n ≥ 1`, and
 for `1 ≤ p < n`, this file provides the sub-critical Sobolev embedding from the
-chart-based Sobolev space `W^{1,p}_chart(M)` (defined in `Chart.lean`) into
+chart-based Sobolev space `W^{1,p}_chart(M)` (defined in `Chart/Defs.lean`) into
 `L^{p*}(M, μ_g)`, where `p* = n*p/(n-p)` is the Sobolev conjugate exponent.
 
 ## Main results

@@ -15,6 +15,13 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.ChartLocalExistence.G
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Bijective
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.DiffeomorphismFamily.ChartBridge
 
+/-!
+# Interior local flow and chart-cover orbits
+
+Builds the local interior flow of the DeTurck vector field, identifies the chart-cover orbit as a
+bare integral curve, and glues the local pieces into a uniqueness statement for the interior flow.
+-/
+
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle

@@ -14,9 +14,9 @@ for divergence-form equations. This module establishes the structural
 properties of `v_h`: compact support, an `L²` bound on a precompact set,
 and the discrete product / chain-rule expansion of its weak partials.
 
-The companion file `Nirenberg/TestFunction.lean` covers the dual-direction
-test function `D_{-h}^k(η² · D_h^k u)` for *smooth* `u`. The present file
-assumes only weak partials of `u`.
+The companion file `Nirenberg/TestFunction/StandardNirenbergTest.lean` covers the
+dual-direction test function `D_{-h}^k(η² · D_h^k u)` for *smooth* `u`. The
+present file assumes only weak partials of `u`.
 -/
 
 noncomputable section

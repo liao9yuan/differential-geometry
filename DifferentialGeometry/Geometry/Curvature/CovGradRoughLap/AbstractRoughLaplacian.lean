@@ -6,7 +6,7 @@ import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.GradientField
 For a closed smooth Riemannian manifold `(M, g)` modelled on a real inner-product
 space `E`, and a smooth compactly-supported `(0, 2)`-tensor field `T₀`, this file
 continues the reduction of the order-`2` Gårding commutator begun in
-`CovGradRoughLapCommutator.lean`.
+`GradientField.lean`.
 
 That file reduces the left-hand side of the target commutator
 ```
@@ -73,7 +73,7 @@ structural input; it is not assumed here.
 ## Sign / convention
 
 Geometer convention `Δ_∇ = -∇*∇` (the frame trace `∑ᵢ ∇²_{Bᵢ, Bᵢ}`), matching
-`CovGradRoughLapCommutator.lean`, `TensorThirdOrderWeitzenbock.lean`, and
+`GradientField.lean`, `TensorThirdOrderWeitzenbock.lean`, and
 `TensorConnLaplacian.lean`. The covariant gradient `covGrad g 0 s` curries the new
 tangent-direction slot as the leftmost covariant slot.
 -/

@@ -52,7 +52,8 @@ This section builds that keystone (`chartDeTurckVFComp_joint_contMDiffOn`) from 
 node's own joint chart-Gram hypothesis, by assembling the joint Cramer inverse, the
 joint chart-Christoffel symbol, and joint spatial partial derivatives. Each step is
 the joint-`(s, y)` analogue of the on-disk single-metric facts in
-`Geometry/HessianTrace.lean` and `PDE/DeTurck/DeTurckLinearization/ChartVectorField.lean`. -/
+`Geometry/Operator/HessianTrace.lean` and
+`Analysis/Parabolic/DeTurckLinearization/ChartVectorField.lean`. -/
 
 namespace DeTurckVFSmoothnessKeystone
 

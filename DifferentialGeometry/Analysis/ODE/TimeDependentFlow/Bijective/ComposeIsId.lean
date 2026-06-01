@@ -2,6 +2,11 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Bijective.ReversedFlo
 import Mathlib.Analysis.ODE.Gronwall
 import Mathlib.Geometry.Manifold.MFDeriv.Basic
 
+/-! # The reversed flow composes to the identity
+
+Grönwall uniqueness identifies the composition of the forward flow with the
+reversed flow of `-X` with the identity map, giving the inverse of the flow. -/
+
 namespace DifferentialGeometry.PDE.RicciFlow.ODE
 
 open Bundle

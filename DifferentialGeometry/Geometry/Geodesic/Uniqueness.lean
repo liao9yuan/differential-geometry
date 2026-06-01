@@ -18,7 +18,7 @@ agree on a neighbourhood of `t₀`. This is a direct lift of Mathlib's
 specialised to the chart-fixed geodesic vector field
 `geodesicVectorFieldChart g α`, whose `C^∞`-smoothness on
 `(chartAt H α).source` is recorded in
-`DifferentialGeometry/Geometry/Riemannian/Geodesic/Equation.lean`.
+`DifferentialGeometry/Geometry/Geodesic/Equation.lean`.
 
 We then transfer the result to base curves on `M` via projection, and
 package the conclusion at the `IsGeodesicAt`-predicate level. The key

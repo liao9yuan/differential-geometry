@@ -6,7 +6,7 @@ import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.LocalFormula
 This file collects coordinate change-of-basis identities for the chart-basis
 component functions `chartCoeff` of a smooth tangent section `X`. These are the
 contravariant counterpart of the basis pullback identities developed in
-`DifferentialGeometry/Integral/Measure/Invariance.lean` for the basis vectors
+`DifferentialGeometry/Analysis/Integration/Measure/Invariance.lean` for the basis vectors
 themselves (`chartBasisVecFiber_pullback`).
 
 ## Main result

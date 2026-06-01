@@ -14,7 +14,8 @@ import Mathlib.Topology.UniformSpace.UniformEmbedding
 
 This file collects scaffolding lemmas tying together the existing chart-target
 Euclidean Sobolev infrastructure (per-chart Banach completeness on Euclidean
-chart targets, in `EuclideanIteratedSobolevBanach.lean`) and the manifold-side
+chart targets, in `Euclidean/Completeness/IteratedSobolevBanach.lean`) and the
+manifold-side
 pullback construction (`pullbackToManifold` in `MeasurablePullback.lean`),
 needed to assemble a manifold limit for a Cauchy sequence in the chart-based
 Sobolev space `WkpChart`.

@@ -6,7 +6,7 @@ import Mathlib.Analysis.Normed.Group.Uniform
 /-!
 # Seminormed and normed structures on the chart-based Sobolev space `W^{k,p}_chart(M)` with boundary
 
-Building on `WithBoundary/Chart.lean`, we equip the subtype
+Building on `WithBoundary/Chart/Defs.lean`, we equip the subtype
 `WkpChart g k p hp := ↥(wkpChartSubmodule g k p hp)` with a seminormed real
 vector-space structure, using the chart-based half-space-Sobolev norm
 `wkpNormChart g k p u` (taken in real form via `ENNReal.toReal`).
@@ -14,7 +14,7 @@ vector-space structure, using the chart-based half-space-Sobolev norm
 For compact `M` the norm is finite for any element of `WkpChart`, and the
 three core seminorm axioms (nonnegativity, homogeneity, triangle) are direct
 consequences of the `wkpNormChart` triangle and scalar-multiplication
-identities established in `WithBoundary/Chart.lean`.
+identities established in `WithBoundary/Chart/Defs.lean`.
 
 The standard quotient `SeparationQuotient (WkpChart …)` then carries a
 `NormedAddCommGroup` structure (Mathlib's `SeparationQuotient` machinery),

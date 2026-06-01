@@ -146,7 +146,7 @@ def formLaplacianScalar [I.Boundaryless] [T2Space M]
 negative of its Laplace–Beltrami operator: `Δ_H f y = -Δ_g f y`. With the
 project's geometer sign convention `Δ_g = div_g ∘ grad_g`, both sides unfold to
 `-div_g (grad_g f) y`, so the identity holds by definition (`formLaplacianScalar`
-is defined here as `-div_g ∘ grad_g`, and `Δ_g` in `Geometry/Laplacian.lean` as
+is defined here as `-div_g ∘ grad_g`, and `Δ_g` in `Geometry/Operator/Laplacian.lean` as
 `div_g ∘ grad_g`). -/
 theorem formLaplacianScalar_eq_neg_Δ_g [I.Boundaryless] [T2Space M]
     (g : SmoothRiemannianMetric I M) {f : M → ℝ}

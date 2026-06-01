@@ -3,7 +3,7 @@ import DifferentialGeometry.Geometry.Connection.ChartBridge.RiemannBasisIdentity
 /-!
 # Off-centre chart-`α` discharge of the chart-Christoffel Riemann/Ricci identity
 
-`Integral.Connection.ChartBridge.RiemannBasisIdentity` proves, unconditionally, the
+`Geometry.Connection.ChartBridge.RiemannBasisIdentity` proves, unconditionally, the
 *centred* basis-coordinate identification of the abstract Riemann operator of the
 Levi-Civita connection with the chart-Christoffel Riemann tensor:
 `riemannOp (LeviCivita g) x e_j e_k e_i = ∑ l R^l{}_{ijk}(g, x)(ϕ_x x) • e_l`, where the

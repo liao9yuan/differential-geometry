@@ -18,6 +18,22 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.Covaria
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.GlobalClosedManifold
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeAssembly.RicciFlowPdeAtZero
 
+/-!
+# Time-continuity of the Ricci tensor along a metric family
+
+This assembly file shows that the Ricci tensor depends continuously on time when read along a
+time-family of metrics `g_DT`, provided the family's chart-coordinate Gram entries (and their
+derivatives up to second order) are time-continuous.  The Ricci tensor is built from these
+chart data through the Christoffel symbols, so continuity propagates through the chart formula.
+
+## Main results
+
+* `gfam_inner_continuous_on` — time-continuity of the metric pairings along the family.
+* `ricci_gfam_continuous_on` — time-continuity of the Ricci tensor in chart coordinates.
+* `ricci_continuous_in_metric_time` — the assembled statement: `s ↦ ricciTensor (g_DT s) x v w`
+  is continuous on `[0, T]`.
+-/
+
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle

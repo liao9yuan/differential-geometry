@@ -10,13 +10,14 @@ import Mathlib.Analysis.InnerProductSpace.Basic
 # `L²`-convention chart-based Sobolev space `W^{k,2}_chart(M)` and its
 Hilbert structure on a smooth manifold-with-boundary
 
-This is the with-boundary parallel of `Analysis/Sobolev/ChartL2.lean`.
+This is the with-boundary parallel of
+`Analysis/Sobolev/Chart/AtlasNorm/L2.lean`.
 Given a smooth manifold `M` modelled on the canonical Euclidean
 half-space `EuclideanHalfSpace n` (via
 `modelWithCornersEuclideanHalfSpace n`), we mirror the boundaryless
 chart-based `L²`-Sobolev norm and inner product, replacing the
 underlying boundaryless `L²` quantities by the half-space-friendly
-Dirichlet variants from `WithBoundary/EuclideanIteratedL2.lean`.
+Dirichlet variants from `WithBoundary/Euclidean/IteratedL2.lean`.
 
 The `L²`-convention chart-based norm is
 

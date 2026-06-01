@@ -10,6 +10,13 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Regularity.BareFlowFr
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.CovariantIdentity.FlatIdentity
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.GlobalClosedManifold
 
+/-!
+# Interior Ricci-flow PDE via the flat variational route
+
+Assembles, on the interior of the flow domain, the Ricci-flow PDE for the conjugated metric family
+from the flat per-slot variational data of the conjugating diffeomorphism flow.
+-/
+
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle

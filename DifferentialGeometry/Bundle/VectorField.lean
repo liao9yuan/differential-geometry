@@ -13,7 +13,7 @@ import Mathlib.Geometry.Manifold.BumpFunction
 import Mathlib.LinearAlgebra.Multilinear.Basic
 
 /-!
-# Bridge Definitions
+# Smooth Vector Fields and Scalar Fields
 
 ## Main Definitions
 

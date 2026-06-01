@@ -2,6 +2,11 @@ import Mathlib.Analysis.InnerProductSpace.Basic
 import DifferentialGeometry.Analysis.Parabolic.TimeSobolev.TimeH1
 import DifferentialGeometry.Analysis.Parabolic.TimeSobolev.BochnerL2
 
+/-! # Lions-Magenes intermediate-trace theorem (project form)
+
+The Lions-Magenes intermediate trace theorem for a continuous Hilbert-space
+inclusion `X ↪ Y`, in the project's time-Sobolev formulation. -/
+
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open DifferentialGeometry.Analysis.Parabolic.TimeSobolev

@@ -41,7 +41,7 @@ The combinator `laplacianDomainPow_memWkpChart_two_k` packages the available
 cases under the unified statement `MemWkpChart g (2k) 2 ...` and exposes the
 recursive structure so that downstream consumers (in particular, the heat
 semigroup `h_iterated_regularity` discharge in
-`Analysis/HeatEquation/Smoothing.lean`) can invoke it.
+`Analysis/Heat/Smoothing/`) can invoke it.
 
 ## Main theorems
 

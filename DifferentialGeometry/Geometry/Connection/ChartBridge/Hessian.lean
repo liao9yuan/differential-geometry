@@ -5,7 +5,7 @@ import DifferentialGeometry.Geometry.Connection.ChartBridge.Gradient
 # Bridge between the chart Hessian carrier and the Levi-Civita Hessian
 
 The chart Hessian carrier `hessFun g f : pointwiseBilin I` (defined in
-`Integral.Geometry.Hessian`) is the bilinear form on the tangent bundle whose
+`Geometry.Operator.Hessian`) is the bilinear form on the tangent bundle whose
 matrix in the chart basis is the chart Hessian tensor
 $$
   (\operatorname{Hess} f)_{ij}(x) = \partial_i \partial_j (f \circ \varphi_x^{-1})(\varphi_x x)
@@ -14,7 +14,7 @@ $$
 $$
 
 The abstract Hessian `abstractHessian g f x v w` (defined in
-`Integral.Connection.TensorExtension`) is the (0,2)-tensor at `x` obtained by applying the
+`Geometry.Connection.TensorNabla.TensorExtension`) is the (0,2)-tensor at `x` obtained by applying the
 cotangent extension of the Levi-Civita connection to the differential `df = extDerivFun f`:
 $$
   \operatorname{Hess}_{LC} f(x)(v, w) :=

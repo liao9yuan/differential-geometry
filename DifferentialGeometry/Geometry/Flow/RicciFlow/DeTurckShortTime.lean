@@ -6,6 +6,20 @@ import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.RHSSmoothQuasilinear
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.ConnectionLaplacianMaximalRegularity
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.PointwiseDeriv
 
+/-!
+# Short-time existence for the Ricci–DeTurck flow
+
+On a closed manifold, the DeTurck-modified Ricci right-hand side is strictly parabolic, so the
+abstract quasilinear parabolic short-time existence theorem applies.  This file records the
+resulting headline.
+
+## Main results
+
+* `deTurckRicci_shortTime_existence_of_closed` — for any initial metric `g₀` and background
+  metric `g_bg` on a closed manifold there exist `T > 0` and a family `g_DT` solving the
+  Ricci–DeTurck flow on `[0, T)` with `g_DT 0 = g₀`.
+-/
+
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle

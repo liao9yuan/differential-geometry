@@ -10,6 +10,12 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Regularity.BareFlowFr
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.CovariantIdentity.FlatIdentity
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.GlobalClosedManifold
 
+/-! # Per-mode forcing for the DeTurck short-time solution
+
+Interior continuity of the DeTurck nonlinear forcing (`forcing_continuous_interior`)
+and the per-mode derivative of its eigenmode sum (`permode_sum_hasderivat`), the
+mode-wise inputs to the time-regularity of the mild solution. -/
+
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle

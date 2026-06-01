@@ -4,14 +4,14 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.ChartOp
 # The product-rule operator ODE for the canonical chart operator of the orbit flow
 
 The orbit-reduction lemma `rawVariationalIdentity_iff_hasDerivAt_chartCloseDop`
-(`SmoothInSpace/VariationalLiftManifoldFlowOrbitReduction.lean`) identifies the variational
+(`ChartOperator/ManifoldFlowOrbitReduction.lean`) identifies the variational
 identity `RawVariationalIdentity g X Φ_fam t x v` with the single operator-applied `HasDerivAt`
 
   `HasDerivAt (fun s => chartCloseDop Φ_fam (Φ_fam t x) x s v)
       (-(LeviCivita g) X (Φ_fam t x) (mfderiv (Φ_fam t) x v)) t`,
 
 and the per-flow connector `rawVariationalIdentity_of_manifoldFlowFamily_chartClose`
-(`SmoothInSpace/VariationalLiftManifoldFlowClose.lean`) consumes the *operator*-valued ODE
+(`CovariantIdentity/ConcreteFlow.lean`) consumes the *operator*-valued ODE
 `hDchart : HasDerivAt (chartCloseDop Φ_fam (Φ_fam t x) x) Dchart' t`.
 
 `chartCloseDop` is, by definition, the continuous-linear **composition**
@@ -80,9 +80,8 @@ smooth-structure** objects, *metric-independent*.  The right-hand summand
 `christoffelCorrection g α α (X̃_α α) w` is the **metric** chart-Christoffel symbol built from
 `g`.
 
-The chart-transition transformation law `chartChristoffelContraction_chart_transform`
-(`Geometry/Riemannian/Geodesic/ChartChristoffelTransform.lean`) records that the metric symbol
-and the chart-transition second jet `D²φ` differ in a general chart (they coincide only in
+The chart-transition transformation law of the Christoffel contraction records that the
+metric symbol and the chart-transition second jet `D²φ` differ in a general chart (they coincide only in
 normal/geodesic coordinates at `α`).  Consequently (★) is **false in a general chart**: the
 metric Christoffel cannot be produced from the orbit-derivative of the moving trivialisation
 plus the flat spatial jet alone.  This is the documented metric-covariant reconciliation gap:
@@ -152,7 +151,8 @@ lemma chartCloseDop_eq_comp
 At `s = t`, the orbit point is `Φ_fam t x = α`, which sits at the centre of its own chart, so
 the moving inverse trivialisation `trivFromE α α` is the identity continuous-linear map.
 
-This is the inverse companion of `trivToE_basepoint` (`ChristoffelCorrectionBasepoint.lean`):
+This is the inverse companion of `trivToE_basepoint`
+(`Geometry/Connection/LeviCivita/ChristoffelCorrectionBasepoint.lean`):
 `trivFromE α α` is the inverse of `trivToE α α = 𝟙`, hence itself `𝟙`.  Proved directly from the
 round-trip `trivToE_trivFromE` on the chart base set, which forces `trivFromE α α w = w`. -/
 lemma chartCloseTriv_basepoint

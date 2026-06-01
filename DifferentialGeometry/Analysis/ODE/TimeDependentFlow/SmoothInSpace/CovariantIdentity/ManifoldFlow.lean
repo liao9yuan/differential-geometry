@@ -18,7 +18,7 @@ For a time-indexed diffeomorphism family `Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M
        (-(LeviCivita g) X (Φ_fam t x) (mfderiv I I (Φ_fam t) x v)) t`
 
 is produced by the generic per-flow producer `rawVariationalIdentity_of_isLocalFlow`
-(`SmoothInSpace/VariationalLiftLocalFlow.lean`) from:
+(`CovariantIdentity/LocalFlow.lean`) from:
 
 * `hDchart` — the operator-valued Euclidean chart-flow variational ODE
   `HasDerivAt Dchart Dchart' t` on the model space `E`
@@ -61,9 +61,8 @@ genuine per-flow data:
   trivialization derivative along the orbit, contracted against the metric).
 
 The naive identification "moving-trivialization correction = metric Christoffel" is *false*
-in a general chart (they coincide only in normal/geodesic coordinates at `α`; see
-`Geometry/Riemannian/Geodesic/ChartChristoffelTransform.lean`, where the chart-change
-second-derivative jet `D²φ` is shown to differ from the metric symbol `Γ`). The metric
+in a general chart (they coincide only in normal/geodesic coordinates at `α`; the chart-change
+second-derivative jet `D²φ` differs from the metric symbol `Γ`). The metric
 Christoffel residual is therefore exposed as a genuine *additive* input in `hsplit`, never
 asserted to vanish and never identified with the smooth-structure `D²φ` term.
 

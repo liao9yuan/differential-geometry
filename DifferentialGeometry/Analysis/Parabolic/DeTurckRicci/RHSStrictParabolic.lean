@@ -6,6 +6,13 @@ import DifferentialGeometry.Analysis.Parabolic.StrictParabolicity
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciSecondOrderPart
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.DeTurckCorrectionSymbol
 
+/-! # Strict parabolicity of the DeTurck-Ricci right-hand side
+
+The concrete DeTurck-Ricci operator `g ↦ -2 Ric(g) + 𝓛_{X(g, g_bg)} g` is strictly
+parabolic at every metric: its principal symbol equals the DeTurck symbol, which
+yields `IsStrictlyParabolicMetricRHS` for the abstract short-time-existence
+interface. -/
+
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle

@@ -10,9 +10,9 @@ closed manifold `M` and a compact `K ⊆ chart-γ source ∩ chart-α source`, t
 is a `SmoothDiffeoBoundedAtOrder kmax` structure realising the chart-transition
 on a neighbourhood of the chart-γ Euclidean image of `K`.
 
-The argument assembles three ingredients delivered by
-`TransitionPipeline.lean` and a smooth-cutoff layer from
-`EuclideanDensity.lean`:
+The argument assembles three ingredients delivered by the
+`Chart/ChartTransition/` pipeline and a smooth-cutoff layer from
+`Euclidean/Density.lean`:
 
 * a δ-neighbourhood of `K_E_γ := (toEuclidean ∘ extChartAt I γ) '' K` contained
   in the chart-overlap (open) set;

@@ -35,7 +35,7 @@ and `σ_{ik}(ξ)(t) = ricciSymbolComp g x ξ t i k` is the component formula.
 ## Conventions
 
 A covector at `x` is recorded as a model vector `ξ : E`, with chart components
-`ξ_a = (chartModelBasis E).repr ξ a` (the same convention as `Symbol.lean` and
+`ξ_a = (chartModelBasis E).repr ξ a` (the same convention as `PrincipalSymbol.lean` and
 `RicciSymbolFormula.lean`).  The fibre `TangentSpace I x` is definitionally the model
 space `E`, so the model-basis vectors `chartModelBasis E i` are admissible arguments of a
 fibre bilinear form, and `(chartModelBasis E).repr` provides chart components of fibre

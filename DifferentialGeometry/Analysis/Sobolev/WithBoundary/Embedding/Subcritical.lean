@@ -79,7 +79,7 @@ chart-side L^{p*}-norms expressed against the volume measure on the chart
 target. The boundaryless module provides this bridge under the standard
 Mathlib identification `toEuclidean : E ≃L EuclideanSpace ℝ (Fin (finrank E))`,
 but that identification does not in general preserve the half-space structure
-(see the scope note in `WithBoundary/Chart.lean`). Building the with-boundary
+(see the scope note in `WithBoundary/Chart/Defs.lean`). Building the with-boundary
 measure-bridge directly on `EuclideanSpace ℝ (Fin n)` (the model space of the
 canonical half-space) is delivered in the broader with-boundary measure-bridge
 infrastructure module; the present file ships the Euclidean-side per-chart

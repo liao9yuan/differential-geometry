@@ -1,6 +1,13 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Conjugation.LeviCivita
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.PushforwardVF
 
+/-!
+# Naturality of the covariant derivative of a pushforward vector field
+
+Shows that covariant differentiation of pushforward vector fields with respect to the pullback
+connection is natural under a diffeomorphism.
+-/
+
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback
 
 open Bundle

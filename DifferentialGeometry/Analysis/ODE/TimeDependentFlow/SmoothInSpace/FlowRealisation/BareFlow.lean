@@ -6,7 +6,7 @@ import DifferentialGeometry.Analysis.ODE.Flow.Defs
 # Discharging the chart-realised factor inputs from the BARE geometric flow
 
 The factor-producer discharge `rawVariationalIdentityFlat_of_chart_realisation`
-(`SmoothInSpace/VariationalLiftFactorDischarge.lean`) consumes, in the target chart
+(`FlowRealisation/Factor.lean`) consumes, in the target chart
 `α := Φ_fam t x`, four genuine per-flow data:
 
 * `heucl` / `heucl_diff` — the Euclidean operator-valued variational ODE and per-time spatial
@@ -20,7 +20,7 @@ The chart-coordinate input `Φ_eucl` must simultaneously (i) realise the genuine
 `Φ_fam` in the chart `α` near `(t, x)`, and (ii) carry the Euclidean variational ODE.  The
 chart-cover construction reads `Φ_fam` in a *representative* chart `αRep` that differs from the
 target chart `α` at a positive orbit time, and the moving-chart reconciliation
-(`SmoothInSpace/VariationalLiftMovingChartReconciliation.lean`) re-expresses the representative
+(`FlowRealisation/MovingChartReconciliation.lean`) re-expresses the representative
 realisation into the target chart only under a chart-transition compatibility hypothesis
 `hcompat`, which is **false** for a field with non-affine chart transitions (the geometric
 DeTurck field).

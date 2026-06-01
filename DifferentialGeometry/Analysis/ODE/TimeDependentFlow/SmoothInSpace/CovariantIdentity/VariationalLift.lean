@@ -7,7 +7,7 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 
 The Euclidean variational / linearized-flow ODE
 `IsLocalFlow.hasDerivAt_partial_spatial_fderiv`
-(`SmoothInSpace/VariationalODE.lean`) is the *flat* linearized-flow equation for a
+(`VariationalODE/EuclideanVariationalODE.lean`) is the *flat* linearized-flow equation for a
 chart-coordinate flow `Φ : E × ℝ → E` of a jointly-`C^∞` chart vector field
 `f : ℝ → E → E`:
 
@@ -17,13 +17,13 @@ an operator-valued `HasDerivAt` for the spatial Fréchet derivative
 `s ↦ fderiv ℝ (fun y => Φ (y, s)) x`.
 
 This file carries that identity to the manifold level, toward the predicate
-`RawVariationalIdentity` (`TimeDependentFlow/VariationalFlow.lean`)
+`RawVariationalIdentity` (`VariationalEquation/VariationalFlow.lean`)
 
   `HasDerivAt (fun s => (mfderiv I I (Φ_fam s) x v : E))
       (-(LeviCivita g) X (Φ_fam t x) (mfderiv I I (Φ_fam t) x v)) t`.
 
 The lift has three ingredients, named after the roadmap that closes
-`VariationalODE.lean`:
+`VariationalODE/EuclideanVariationalODE.lean`:
 
 1. **`mfderiv`/chart-`fderiv` dictionary** (`mfderiv_flow_eq_chartFderiv_apply`,
    `hasDerivAt_mfderiv_flow_of_chart`).  Through a *fixed* source chart at `x` and a

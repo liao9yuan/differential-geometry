@@ -19,7 +19,7 @@ Given a smooth manifold `M` with a smooth boundary stratum
 ambient tangent bundle, this file builds the chart-Gram-matrix infrastructure
 for the *induced* Riemannian metric on `BoundaryManifold I M`. The construction
 mirrors `chartGramMatrix` from the ambient (boundaryless) case in
-`Integral/Measure/ChartDensity.lean`, but with the boundary tangent bundle and
+`Geometry/Metric/ChartGram.lean`, but with the boundary tangent bundle and
 the boundary inner product `inducedMetricInner g` replacing the ambient ones.
 
 ## Overview

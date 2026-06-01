@@ -10,7 +10,8 @@ For a smooth Riemannian metric `g` on a smooth manifold `M` and a smooth scalar
 `f : M → ℝ`, this file defines the pointwise squared gradient norm
 `normGradSqFun g f x = g(∇f, ∇f)(x)` and proves its continuity and smoothness.
 The unconditional Bochner-Weitzenböck identity using these quantities is in
-`Integral/Connection/Bochner.lean` and `Integral/Connection/BochnerConcrete.lean`.
+`Geometry/Curvature/Bochner/BochnerConcrete.lean` and
+`Geometry/Connection/WithBoundary/BochnerConcrete.lean`.
 -/
 
 noncomputable section

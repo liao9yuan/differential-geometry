@@ -5,7 +5,7 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.Covaria
 /-!
 # The PAIRED-residual route for the moving-pushforward inner product
 
-`variational_flow_flat_pairing_hasDerivAt` (`VariationalFlowFlatPairing.lean`) produces the
+`variational_flow_flat_pairing_hasDerivAt` (`VariationalEquation/FlatPairing.lean`) produces the
 flat-route derivative of the frozen-metric moving-pushforward inner product
 
   `s ↦ g.inner (Φ_fam t x) (mfderiv (Φ_fam s) x v) (mfderiv (Φ_fam s) x w)`

@@ -2,6 +2,11 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace
 import Mathlib.Geometry.Manifold.MFDeriv.Basic
 import Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary
 
+/-! # `mfderiv` packaging of the time-dependent diffeomorphism flow
+
+The pointwise `HasMFDerivAt` of the time-dependent flow `Φ_fam s`, packaged in the
+abstract form expected by the downstream variational-equation machinery. -/
+
 namespace DifferentialGeometry.PDE.RicciFlow.ODE
 
 open Bundle

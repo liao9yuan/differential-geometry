@@ -4,6 +4,13 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.PullbackConnection
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.Defs
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.CurvatureBundling
 
+/-!
+# Conjugation of the Riemann curvature by a diffeomorphism
+
+Shows that the Riemann curvature operator of a pullback metric is the conjugate of the original
+Riemann curvature under the diffeomorphism's pushforward.
+-/
+
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback
 
 open Bundle

@@ -6,6 +6,13 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.Defs
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.CurvatureBundling
 import Mathlib.LinearAlgebra.Trace
 
+/-!
+# Conjugation of the Ricci tensor via the trace of the Riemann curvature
+
+Takes the trace of the conjugated Riemann curvature to express the Ricci tensor of a pullback
+metric as the pullback of the Ricci tensor.
+-/
+
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback
 
 open Bundle

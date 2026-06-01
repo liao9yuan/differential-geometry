@@ -13,7 +13,7 @@ factorises as
 a composition of the H¹ → L² compactness with the bounded resolvent.
 
 The predicate-free (compactness-of-`M`-based) statements live in
-`PDE/RicciFlow/IntrinsicSpectral/CompactSAResolventIntrinsic.lean`
+`Analysis/Spectral/Intrinsic/CompactSAResolventIntrinsic.lean`
 (`tensorResolventL2_isCompactOperator`).
 -/
 

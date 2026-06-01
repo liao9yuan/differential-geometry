@@ -27,10 +27,10 @@ which combines:
   chart-pulled `u`, `f`, the explicit weak first partials, and the variational
   identity);
 * `chartBilinear_substitution_identity_holds` from
-  `SubstitutionDischargeAssembly.lean` (the unconditional substitution identity
-  for the chart-bilinear data);
-* `chart_loc_of_uniform_bound` from `ChartH2NonSmooth.lean` (the per-chart
-  weak-second-partial output of the localised Nirenberg argument).
+  `Sobolev/Nirenberg/SubstitutionIdentity/ChartBilinearVariationalIdentity.lean`
+  (the unconditional substitution identity for the chart-bilinear data);
+* `chart_loc_of_uniform_bound` from `Regularity/ChartHk/H2NonSmooth.lean`
+  (the per-chart weak-second-partial output of the localised Nirenberg argument).
 
 ## Structural form
 

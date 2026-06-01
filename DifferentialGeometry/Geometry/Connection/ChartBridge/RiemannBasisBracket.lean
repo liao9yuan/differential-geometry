@@ -10,7 +10,7 @@ import Mathlib.Geometry.Manifold.MFDeriv.Atlas
 # Vanishing of the chart-basis Lie bracket at the base point
 
 The chart-basis tangent-bundle sections `chartBasisVecFiber x₀ i` (defined in
-`Integral.Measure.ChartDensity`) are obtained by transporting a fixed model-space basis
+`Geometry.Metric.ChartGram`) are obtained by transporting a fixed model-space basis
 vector through the inverse of the tangent-bundle trivialization centred at `x₀`. On the
 base set of that trivialization (which is the chart source `(chartAt H x₀).source`), the
 chart pullback of such a section is *constant* — it equals the fixed model-space basis

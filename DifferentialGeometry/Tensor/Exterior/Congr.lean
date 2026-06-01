@@ -7,6 +7,8 @@ Coauthors: Jack McCarthy
 import DifferentialGeometry.Tensor.Exterior.Defs
 import DifferentialGeometry.Tensor.Alternating.Flip
 
+/-! # Reindexing differential forms along an equivalence of index sets (`domDomCongr`) -/
+
 open ContinuousAlternatingMap
 
 noncomputable section Congr

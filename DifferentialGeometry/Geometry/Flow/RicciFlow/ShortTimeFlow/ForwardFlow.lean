@@ -10,6 +10,13 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Regularity.BareFlowFr
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.CovariantIdentity.FlatIdentity
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.GlobalClosedManifold
 
+/-!
+# Forward (one-sided) flow of the DeTurck vector field
+
+Produces the forward integral flow of the time-dependent DeTurck vector field on `[0, T)` from a
+joint-`C¹` field hypothesis, together with the time-zero continuity extension used downstream.
+-/
+
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle

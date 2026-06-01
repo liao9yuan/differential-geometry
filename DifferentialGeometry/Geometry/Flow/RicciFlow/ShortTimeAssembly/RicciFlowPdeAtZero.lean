@@ -17,6 +17,13 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Regularity.BareFlowFr
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.CovariantIdentity.FlatIdentity
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.GlobalClosedManifold
 
+/-!
+# The Ricci-flow PDE at the initial time
+
+Establishes that the conjugated metric family satisfies the Ricci-flow equation at `t = 0`,
+converting the one-sided interior derivative into the ordinary time derivative of the family.
+-/
+
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle

@@ -21,7 +21,7 @@ import DifferentialGeometry.Analysis.Sobolev.Euclidean.Density
 For a closed (compact, boundaryless) smooth Riemannian manifold `(M, g)`
 modelled on a finite-dimensional real inner-product space `E`, the tensor
 super-critical reconstruction bridge `TensorSuperCriticalReconstruct g r s`
-(`SpectralSmoothGate.lean`) asks that an `L²` tensor `w`, all of whose canonical
+(`SpectralSmoothRepresentative.lean`) asks that an `L²` tensor `w`, all of whose canonical
 Euclidean chart-Sobolev components lie in `W^{2k,2}` for every order `k`, be the
 `L²` class of a genuine `C^∞` (`SmoothCcTensor`) section.
 

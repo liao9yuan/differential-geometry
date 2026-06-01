@@ -50,8 +50,8 @@ where `(DW)^k_{\mathrm{principal}}[h] = chartLinearizedDeTurckVFPrincipal g g' �
 The principal-symbol / remainder split itself — extracting the pure `∂²h`
 expression and the genuinely-first-order remainder from
 `chartDeTurckCorrSecondOrderPart` — is carried out in
-`DeTurckCorrectionSecondOrderSplit.lean`, which builds on the Leibniz expansion
-recorded here.
+`DeTurckCorrectionPrincipalSymbolRemainder.lean`, which builds on the Leibniz
+expansion recorded here.
 -/
 
 noncomputable section

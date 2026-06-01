@@ -27,11 +27,11 @@ exposes the mixed `(r, s)` pointwise inner product
 `innerModelCLMRS g r s b` on the model fibre `TensorRSModel r s ℝ E`.
 
 The mixed `(r, s)` pointwise inner product is defined in
-`Integral/L2/PointwiseInner/Defs.lean` by lowering the `r` upper indices
+`Geometry/Metric/PointwiseInner/Defs.lean` by lowering the `r` upper indices
 via `lowerAllUpperIndices` and reducing to the covariant `(0, r + s)`
 inner product `tensorInnerPointwise_0s` at arity `r + s`. The algebraic
 properties (bilinearity, symmetry, non-negativity, positive
-definiteness) are established in `Integral/L2/PointwiseInner/Algebra.lean`.
+definiteness) are established in `Geometry/Metric/PointwiseInner/Algebra.lean`.
 
 The construction here packages the inner product as a continuous bilinear
 `→L[ℝ] · →L[ℝ] ·` pairing, the natural object for further use in
@@ -661,7 +661,7 @@ end Tensor0SBundle
 
 The `IsContinuousRiemannianBundle` typeclass instance for the `(r, s)`-tensor
 bundle is installed at a higher layer in the project, in
-`Analysis/Parabolic/TensorSpectral/ChartTensor/TensorRSContRiemannianBundle.lean`,
+`Analysis/Spectral/Tensor/ChartTensor/Inner/TensorRSContRiemannianBundle.lean`,
 where the chart-frame `(r, s)`-inner product machinery
 (`chartTensorInnerPointwise_rs_model`, with its smoothness theorem and bridge
 identity) is available. -/

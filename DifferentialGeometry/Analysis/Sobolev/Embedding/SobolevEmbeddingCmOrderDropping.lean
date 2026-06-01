@@ -7,7 +7,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 # Per-degree covariant order reduction and the unconditional collapsed `C^m`/`C²` embedding
 
 The collapse engine `iteratedCovGrad_toSobolev_embedding_Cm_collapsed` of
-`SobolevEmbeddingCmReduction` turned the `C^m` iterated-covariant-derivative
+`SobolevEmbeddingCmOrderReduction` turned the `C^m` iterated-covariant-derivative
 embedding into a single multiple of the spectral norm `‖T.toHs (2k)‖`, *given* a
 per-degree rank-reduction hypothesis at the common top order `2k`:
 `‖∇^j T‖_{H^{2k}} ≤ Cred · ‖T‖_{H^{2k}}`.

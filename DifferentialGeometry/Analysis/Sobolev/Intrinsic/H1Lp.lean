@@ -10,7 +10,7 @@ import Mathlib.Analysis.Normed.Operator.BoundedLinearMaps
 
 This file defines an `Lp`-witnessed variant of the intrinsic `H¹` predicate on a
 closed (compact, boundaryless) smooth Riemannian manifold `(M, g)`. The key
-deviation from the function-based predicate of `IntrinsicLp.lean` is that the
+deviation from the function-based predicate of `Intrinsic/Lp.lean` is that the
 weak Riemannian gradient witness here is required to live in the
 *Banach-space quotient* `MeasureTheory.Lp E 2 μ_g`, rather than being an
 arbitrary measurable map `M → E`.
@@ -60,7 +60,7 @@ classes" of measurable functions. Since the IBP identity is bilinear in
 `(u, G)` and is invariant under a.e.-modification, well-definedness of the
 predicate on classes (rather than representatives) follows automatically,
 provided one phrases the integrand correctly via `Lp.coeFn`. We do this here
-by reducing to the `HasWeakRiemannianGradLp` predicate of `IntrinsicLp.lean`
+by reducing to the `HasWeakRiemannianGradLp` predicate of `Intrinsic/Lp.lean`
 applied to the canonical representatives.
 
 The metric `g`-norm `√(g(G,G))` is included as a separate `MemLp 2`
@@ -145,7 +145,7 @@ private lemma g_norm_neg
   simp
 
 /-- Triangle inequality for the metric `g`-norm. Reproves the result of
-`IntrinsicLp.lean` (where it is `private`) for use in this file. -/
+`Intrinsic/Lp.lean` (where it is `private`) for use in this file. -/
 private lemma g_norm_triangle
     (g : SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x) :
     Real.sqrt (g.inner x (v + w) (v + w)) ≤

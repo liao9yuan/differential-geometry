@@ -7,10 +7,11 @@ import DifferentialGeometry.Geometry.Boundary.EuclideanHalfSpaceInstance
 /-!
 # Chart-based Sobolev space `W^{k,p}_chart(M)` on a smooth manifold-with-boundary
 
-This is the with-boundary parallel of `Analysis/Sobolev/Chart.lean`. We mirror
-the boundaryless predicate `MemWkpChart` and norm `wkpNormChart`, replacing the
-underlying open-set Sobolev predicate by the half-space-friendly Dirichlet
-variant from `EuclideanIteratedSobolevHalfSpace.lean`.
+This is the with-boundary parallel of `Analysis/Sobolev/Chart/Defs.lean`. We
+mirror the boundaryless predicate `MemWkpChart` and norm `wkpNormChart`,
+replacing the underlying open-set Sobolev predicate by the half-space-friendly
+Dirichlet variant from
+`Euclidean/SupportAndDomain/IteratedSobolevHalfSpace.lean`.
 
 Specifically, given a smooth manifold `M` modelled on the canonical Euclidean
 half-space `EuclideanHalfSpace n` (via `modelWithCornersEuclideanHalfSpace n`),

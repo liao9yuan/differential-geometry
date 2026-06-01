@@ -30,7 +30,7 @@ mean-value inequality on the convex ball
 
 `chartCoordPicardRegular_of_spatialC1` is the producer. Composed with the
 already-proved `chartLocalPicardData_of_regular`
-(`ChartLocalPicardProducer.lean`), it yields the per-base-point
+(`Regularity/ChartLocalPicardRegular.lean`), it yields the per-base-point
 `ChartLocalPicardData X α` — and likewise for `-X`, whose chart pushforward has
 spatial derivative `-Df^α` with the same joint continuity — directly from the
 spatial-`C¹` regularity of `X`, with no bundled ODE-solution data anywhere.

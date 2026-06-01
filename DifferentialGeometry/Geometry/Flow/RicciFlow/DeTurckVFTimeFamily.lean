@@ -4,6 +4,20 @@ import DifferentialGeometry.Geometry.Flow.VectorFieldSmooth
 import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.DeTurckVectorFieldContinuousInMetric
 import DifferentialGeometry.Geometry.Flow.DeTurckVFChartCoord
 
+/-!
+# Spatial-smooth / time-continuous regularity of the DeTurck vector field along a metric family
+
+For a background metric `g_bg` and a time-family `g_DT : ℝ → SmoothRiemannianMetric I M`
+whose pointwise pairings (and their chart-coordinate first partials) are time-continuous
+on `[0, T)`, this file records that the DeTurck vector field `deTurckVF (g_DT t) g_bg` is a
+smooth tangent section at each fixed time and continuous in `t` at each fixed point.
+
+## Main results
+
+* `deturck_vf_time_family_smoothness` — the spatial-smoothness / time-continuity statement
+  for the DeTurck vector field of the time-family `g_DT`.
+-/
+
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle Set
@@ -43,7 +57,7 @@ restated.
 * `h_metric_cont` records `C^0` time-continuity of the inner-product pairings
   `(g_DT t).inner x v w`.  This is the conclusion of
   `maxreg_solution_in_c1_via_sobolev_embedding`
-  (`PDE/RicciFlow/DeTurckSolutionC1.lean`) and is produced for free by that
+  (`Geometry/Flow/RicciFlow/DeTurckSolutionC1.lean`) and is produced for free by that
   lemma when `g_DT` is the maxReg DeTurck-Ricci solution.
 
 * `h_metric_partial_cont` records `C^1` time-continuity of the chart-coordinate

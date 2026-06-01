@@ -8,7 +8,7 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapL2So
 
 The chart-locality-free maximal-regularity strong-existence engine
 `deTurckRemainder_strong_shortTime_exists`
-(`DeTurckRemainderStrongExists.lean`) consumes a *locally Lipschitz* first-order
+(`DeTurck/RemainderShortTimeExistence.lean`) consumes a *locally Lipschitz* first-order
 nonlinearity
 
   `N : tensorHs g_bg 0 2 (a + 1) → tensorHs g_bg 0 2 a`

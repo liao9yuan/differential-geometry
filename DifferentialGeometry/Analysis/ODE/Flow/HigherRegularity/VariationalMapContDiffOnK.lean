@@ -3,7 +3,7 @@ import DifferentialGeometry.Analysis.ODE.Flow.HigherRegularity.ContDiffOnK
 /-!
 # Parametric `C^k` smoothness of the variational linear map
 
-The previous file `FlowCk.lean` reduced the `C^k` flow problem to the joint `C^j`
+The previous file `ContDiffOnK.lean` reduced the `C^k` flow problem to the joint `C^j`
 smoothness of the *spatial piece* `Lsp(x, t) ∈ E →L[ℝ] E` of the joint Fréchet derivative
 `D Φ`.  Pointwise, `Lsp(x, t) δ = y_δ(x, t)` where `y_δ` is the variational solution
 along the orbit `Φ ⟨x, ·⟩` with initial variation `δ`.
@@ -40,7 +40,7 @@ This recursive observation gives the abstract induction:
 * **Step** : if the augmented system has a flow that is jointly `C^k`, the projection
   `(x, t) ↦ Y(x, t) ∘ id = variationalLinearMapAt(x, t)` is jointly `C^k`, which
   discharges the spatial-piece hypothesis of `contDiffOn_flow_succ_of_spatial_smooth`
-  (the inductive step from `FlowCk.lean`) and upgrades `Φ` from `C^k` to `C^{k+1}`.
+  (the inductive step from `ContDiffOnK.lean`) and upgrades `Φ` from `C^k` to `C^{k+1}`.
 
 This file provides the *structural* pieces of this argument:
 
@@ -53,7 +53,7 @@ This file provides the *structural* pieces of this argument:
   augmented flow with initial spatial-component `id`, then `Y` is jointly `C^k`.
 * `contDiffOn_flow_of_isLocalFlow_of_contDiff_via_aug` — the cleanest packaging of the
   unconditional `C^k` flow theorem, parametrised by a *single* `C^k` candidate for the
-  augmented flow.  This factors out the entire `Lsp_seq` sequence from `FlowCk.lean` into
+  augmented flow.  This factors out the entire `Lsp_seq` sequence from `ContDiffOnK.lean` into
   a single, mathematically-transparent hypothesis.
 
 The connecting hypothesis between "the augmented system has a `C^k` joint flow" and
@@ -623,7 +623,7 @@ variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax 
 
 When `uncurry f` is jointly `C^2` on `Set.univ`, the augmented vector field `augVF f`
 is jointly `C^1` on `Set.univ : Set (ℝ × (E × (E →L[ℝ] E)))`.  V.2.b.1's
-`exists_isLocalFlow_of_contDiffOn_univ` (`FlowC1.lean`) then produces a local flow of
+`exists_isLocalFlow_of_contDiffOn_univ` (`Flow/Defs.lean`) then produces a local flow of
 the augmented system around any base point. -/
 theorem exists_isLocalFlow_augVF_of_C2
     (hf_C2 : ContDiffOn ℝ 2 (uncurry f) (Set.univ : Set (ℝ × E)))

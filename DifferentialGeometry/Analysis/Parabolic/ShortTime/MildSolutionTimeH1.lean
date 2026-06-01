@@ -11,6 +11,12 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Regularity.BareFlowFr
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.CovariantIdentity.FlatIdentity
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.GlobalClosedManifold
 
+/-! # Time-`H¹` regularity of the DeTurck mild solution
+
+`deturck_mildsolution_timeh1`: the maximal-regularity Duhamel mild solution of the
+DeTurck-Ricci linearized flow lies in the time-`H¹` space, from the matching
+coordinate/realize identities of its construction data. -/
+
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle

@@ -14,7 +14,7 @@ riemannianFiberNormSq g 0 3 x (covGradRoughLapCurv g T₀).toSection x
   ≤ C₀² · (rfns(T₀) + rfns(∇T₀) + rfns(∇²T₀))(x).
 ```
 (`secondCovGrad_l2NormSq_le_rawConnLap_of_pointwise_curv_bound`,
-`CovGradRoughLapCurvL2Bound.lean`).
+`CovGradRoughLap/L2Bound.lean`).
 
 This file works **directly** with the `(0, 3)`-tensor `covGradRoughLapCurv g T₀` and its
 fibre components, with **no** vector-field currying and **no** reliance on the (uncontrolled)
@@ -49,7 +49,7 @@ The slot-split reduces `hpt` to the per-frame-direction `(0, 2)` curried bound
 ```
 By the headline unconditional curried identity
 `covGradRoughLapCurv_curry_eq_discrepancy_add_curv_sub_residual`
-(`CovGradRoughLapCurvBoundCorrect.lean`), the curried `(0, 2)` value along a direction `w`
+(`CovGradRoughLap/TraceDiscrepancyDecomposition.lean`), the curried `(0, 2)` value along a direction `w`
 decomposes as
 ```
 discrepancy(w) + Tensor3rdCurv(W, T₀)(unit) − residual(w),

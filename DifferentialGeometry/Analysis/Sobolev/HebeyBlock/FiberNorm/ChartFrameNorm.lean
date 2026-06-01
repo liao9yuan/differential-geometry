@@ -1,6 +1,8 @@
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.HilbertSpace
 import DifferentialGeometry.Analysis.Sobolev.Tensor.PouWeightedHsNorm
 
+/-! # Per-chart frame-component `H^k` seminorm bounded by the global Hilbert-Schmidt chart-Sobolev tensor norm -/
+
 namespace DifferentialGeometry
 namespace PDE
 namespace RicciFlow

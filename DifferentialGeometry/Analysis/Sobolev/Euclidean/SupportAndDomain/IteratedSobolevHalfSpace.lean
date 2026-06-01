@@ -8,7 +8,8 @@ import Mathlib.MeasureTheory.Constructions.BorelSpace.Basic
 # Iterated Euclidean Sobolev space `W^{k,p}` on half-space-friendly domains
 
 This module extends the iterated `W^{k,p}` API from
-`Analysis/Sobolev/EuclideanIteratedSobolev.lean` to chart-target-style domains
+`Analysis/Sobolev/Euclidean/IteratedSobolevSpace/IteratedSobolev.lean` to
+chart-target-style domains
 that are *relatively open in the closed half-space* `{y : E | 0 ≤ y 0}`,
 rather than open in the full ambient space `E := EuclideanSpace ℝ (Fin d)`.
 

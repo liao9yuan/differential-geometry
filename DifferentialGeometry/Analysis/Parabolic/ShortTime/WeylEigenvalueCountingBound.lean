@@ -1,4 +1,10 @@
-/-
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.SpectralWeylCounting
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.SpectralDiagonalCounting
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.EigenCombination
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.TensorHsRealize
+
+/-! # Local Weyl law: pointwise diagonal kernel bound and eigenvalue counting
+
 The single isolated open analytic input of the Ricci-flow short-time-existence
 development: the classical local Weyl law for the intrinsic tensor Laplacian on a
 closed manifold, in its pointwise on-diagonal reproducing-kernel form.
@@ -25,11 +31,6 @@ bound `EigenvalueCountingBound`. From this single node we re-derive:
 Consolidating to this one node is the project's deliberate isolation of the single
 open classical analytic gap.
 -/
-import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.SpectralWeylCounting
-import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.SpectralDiagonalCounting
-import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.EigenCombination
-import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.TensorHsRealize
-
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle

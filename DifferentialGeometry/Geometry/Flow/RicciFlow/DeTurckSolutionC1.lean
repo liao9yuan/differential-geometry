@@ -5,6 +5,19 @@ import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegulari
 import DifferentialGeometry.Analysis.Parabolic.TimeSobolev.TimeH1
 import Mathlib.Geometry.Manifold.ContMDiff.Basic
 
+/-!
+# From maximal `H^{a+2}` regularity to `C¹` for the Ricci–DeTurck solution
+
+A maxReg-style solution of the DeTurck-Ricci equation lives in the maximal-regularity solution
+space `L²([0,T]; H^{a+2})`, which embeds into `C¹` once `2(a+2) > finrank ℝ E + 2`.  This file
+passes that Sobolev embedding through to time-continuity of the metric pairings.
+
+## Main results
+
+* `maxreg_solution_in_c1_via_sobolev_embedding` — under the super-criticality hypothesis, the
+  time-parameterised metric pairings `(g_DT t).inner x v w` are continuous on `[0, T)`.
+-/
+
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle

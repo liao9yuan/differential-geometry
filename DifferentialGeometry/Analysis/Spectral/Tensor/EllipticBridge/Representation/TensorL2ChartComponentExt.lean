@@ -11,7 +11,7 @@ sections. A general element of `TensorL2 r s g` carries no concrete tensor
 section.
 
 The canonical Euclidean chart component `tensorL2ChartComponent g r s u α P₀`
-(`CanonicalTensorRepr.lean`) reads off, from an abstract element
+(`TensorReprFromFrame.lean`) reads off, from an abstract element
 `u : TensorL2 r s g`, the partition-of-unity-weighted chart-frame scalar
 component at a chart center `α : M` and a component multi-index `P₀`, as a
 genuine `L²` function class on the Euclidean chart target.

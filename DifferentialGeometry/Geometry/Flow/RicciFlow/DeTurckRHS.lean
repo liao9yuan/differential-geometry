@@ -22,8 +22,8 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 /-! ## Smoothness-index bridge
 
 Both `DifferentialGeometry.SmoothRiemannianMetric I M` (from
-`Metric/Basic.lean`) and `Integral.Measure.SmoothRiemannianMetric I M`
-(from `Integral/Measure/ChartDensity.lean`) are now aliased to
+`Geometry/Metric/Basic.lean`) and `Integral.Measure.SmoothRiemannianMetric I M`
+(from `Analysis/Integration/Measure/ChartDensity.lean`) are now aliased to
 `Bundle.ContMDiffRiemannianMetric I ∞ E (TangentSpace I)`; the bridge
 is a definitional identity. -/
 

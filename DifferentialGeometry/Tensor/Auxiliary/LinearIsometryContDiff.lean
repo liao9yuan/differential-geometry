@@ -7,6 +7,8 @@ import Mathlib.Analysis.Normed.Module.FiniteDimension
 import Mathlib.Analysis.Normed.Module.Alternating.Basic
 import Mathlib.RingTheory.Finiteness.Defs
 
+/-! # A linear isometry into a finite-dimensional space is a `C^n` embedding -/
+
 section LinearIsometry
 
 variable {𝕜 E F G : Type*} [NontriviallyNormedField 𝕜]

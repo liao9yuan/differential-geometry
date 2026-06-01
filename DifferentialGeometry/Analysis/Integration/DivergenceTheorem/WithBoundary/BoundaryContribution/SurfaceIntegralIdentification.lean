@@ -18,8 +18,8 @@ linking the chart-by-chart presentation of the with-boundary divergence theorem
 boundary contribution (`boundaryFaceSum`, defined via the chart-atlas partition
 of unity in `GreenWithBoundary.lean`) with the intrinsic surface integral
 against the smooth outward unit normal (`outwardNormal`, from
-`OutwardNormal.lean`) and the surface measure (`surfaceMeasure`, from
-`SurfaceMeasure.lean`).
+`Geometry/Boundary/OutwardNormal.lean`) and the surface measure (`surfaceMeasure`, from
+`Geometry/Boundary/SurfaceMeasure.lean`).
 
 ## Strategy
 

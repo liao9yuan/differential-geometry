@@ -3,7 +3,7 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.Covaria
 /-!
 # Covariant-value closure of the variational-lift transport
 
-`SmoothInSpace/VariationalLiftTransport.lean` proves two transport combinators that
+`CovariantIdentity/Transport.lean` proves two transport combinators that
 turn the chart-coordinate Euclidean variational data of the manifold flow into the
 predicate `RawVariationalIdentity`:
 

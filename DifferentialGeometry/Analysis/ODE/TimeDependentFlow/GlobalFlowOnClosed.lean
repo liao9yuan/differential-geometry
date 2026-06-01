@@ -11,6 +11,12 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Bijective
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.DiffeomorphismFamily.MFDeriv
 
+/-! # Global time-dependent flow on a closed manifold
+
+The headline assembling, from per-base-point chart-local Picard data, a single
+global flow of the time-dependent vector field on a closed manifold over a
+uniform positive horizon. -/
+
 namespace DifferentialGeometry.PDE.RicciFlow.ODE
 
 open Bundle

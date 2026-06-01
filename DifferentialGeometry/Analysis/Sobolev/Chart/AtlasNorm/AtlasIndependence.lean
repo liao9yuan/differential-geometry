@@ -28,8 +28,9 @@ together with extremal vanishing-and-equality lemmas for the chart-pushed
 precisely in the structural extremes (one of `wkpNormChartGen ρ_i u` equals
 `⊤`, or the two values agree). The interior regime where both values are
 positive and finite is reduced to the chart-transition pipeline of
-`Transition.lean`, `EuclideanCompChainRuleK.lean`, and
-`EuclideanMultiply.lean`, used as imports.
+`Chart/ChartTransition/Transition.lean`,
+`Euclidean/ChainRule/CompChainRuleK.lean`, and
+`Euclidean/Multiplication/Multiply.lean`, used as imports.
 -/
 
 noncomputable section

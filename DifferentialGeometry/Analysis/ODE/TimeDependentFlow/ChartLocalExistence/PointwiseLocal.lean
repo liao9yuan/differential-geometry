@@ -2,6 +2,11 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.ChartLocalExistence.C
 import Mathlib.Geometry.Manifold.MFDeriv.Basic
 import Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary
 
+/-! # Pointwise local existence of the time-dependent flow
+
+The chart-α-local specialisation producing, at a single base point, a local flow
+of the time-dependent vector field from the chart-coordinate Picard data. -/
+
 namespace DifferentialGeometry.PDE.RicciFlow.ODE
 
 open Bundle

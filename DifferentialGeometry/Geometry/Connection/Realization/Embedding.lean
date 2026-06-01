@@ -5,7 +5,7 @@ import Mathlib.Geometry.Manifold.VectorBundle.Hom
 import Mathlib.RingTheory.Derivation.Lie
 
 /-!
-# SmoothRicciFlow: Embedding of vector fields as derivations
+# Embedding of vector fields as derivations
 
 This file defines the pointwise action of a smooth vector field on a smooth function,
 proves the result is smooth, and packages the action as a `Derivation ℝ C^∞⟮I,M;ℝ⟯ C^∞⟮I,M;ℝ⟯`.

@@ -10,7 +10,7 @@ fundamental analytic properties of the L²-side resolvent
 `tensorResolventL2 g r s : TensorL2 r s g →L[ℝ] TensorL2 r s g`:
 
 * **Self-adjointness** — already established in
-  `Analysis/Parabolic/TensorSpectral/Resolvent.lean` as
+  `Analysis/Spectral/Tensor/Spectrum/Resolvent.lean` as
   `tensorResolventL2_isSelfAdjoint`. This is the predicate-free form
   required downstream.
 
@@ -18,7 +18,7 @@ fundamental analytic properties of the L²-side resolvent
   Sobolev tower as `L² → H² ↪ L²`, where the inclusion
   `H² ↪ L²` is compact by Rellich
   (`tensorPouSobolevHilbert_inclusion_isCompactOperator` in
-  `IntrinsicSobolev/Rellich.lean`).
+  `Analysis/Sobolev/TensorHilbert/Rellich.lean`).
 
 The bundled output is needed for the spectral / eigenbasis layer
 downstream (α.4) and for the De Simon maximal-regularity bound (γ.1).

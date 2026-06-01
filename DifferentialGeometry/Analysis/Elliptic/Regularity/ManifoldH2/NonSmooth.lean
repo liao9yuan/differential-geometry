@@ -20,7 +20,7 @@ supply the per-chart `MemWkp 2 2` evidence.
 
 The chart-level non-smooth `H²` evidence is the natural target of
 `chart_loc_of_uniform_bound` (delivered for the chart-bilinear data structure
-`ChartBilinearH1ComplData g α` in `ChartH2NonSmooth.lean`). The bridge from
+`ChartBilinearH1ComplData g α` in `Regularity/ChartHk/H2NonSmooth.lean`). The bridge from
 that chart-level output to the per-chart `MemWkp 2 2` evidence uses two
 analytical packaging steps:
 

@@ -14,7 +14,7 @@ import Mathlib.Topology.Algebra.Support
 This file provides thin, project-idiomatic wrappers over Mathlib's Bochner and Lebesgue
 integrals, specialised to the Riemannian volume measure
 `DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure g` built in the
-`Integral.Measure` files.
+`Analysis/Integration/Measure` files.
 
 The purpose of the wrappers is threefold:
 

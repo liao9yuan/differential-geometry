@@ -10,10 +10,10 @@ import DifferentialGeometry.Bundle.Section
 import DifferentialGeometry.Tensor.RSTensor.Defs
 
 /-!
-# SmoothRicciFlow Scaffolding
+# Scalar-tower scaffolding for the realization layer
 
 Imports, instance verification, and `IsScalarTower` for the concrete instantiation
-`k = ℝ`, `R = C^∞(M, ℝ)`, `V = Γ(TM)`, `Time = ℝ`.
+`k = ℝ`, `R = C^∞(M, ℝ)`, `V = Γ(TM)`.
 -/
 
 noncomputable section

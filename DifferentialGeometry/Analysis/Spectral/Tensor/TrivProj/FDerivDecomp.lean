@@ -6,8 +6,8 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartLocal
 
 Let `S : SmoothCcTensor g r s` be a smooth, compactly-supported `(r, s)`-tensor
 section on a closed Riemannian manifold `(M, g)`, and let `α : M` be a chart
-center. The previous file `TensorChartChristoffelDecomp.lean` (chain-rule
-factorisation through the trivialisation projection) reduces the partial
+center. The previous file `ChartTensor/Components/ChristoffelDecomp.lean`
+(chain-rule factorisation through the trivialisation projection) reduces the partial
 derivative of a scalar chart component to the partial derivative of
 
 ```

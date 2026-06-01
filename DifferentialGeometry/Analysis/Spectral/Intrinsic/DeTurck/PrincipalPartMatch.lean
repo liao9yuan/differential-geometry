@@ -35,7 +35,7 @@ This file establishes the *symbol-level* principal-part match — the
 mathematically decisive Step-0 verification.  It does **not** assemble a global
 operator `N : tensorHs (a+2) → tensorHs a` with a `LipschitzWith` constant: that
 faces two further, separate obstructions documented in
-`DeTurckRHSPointwiseLipschitz.lean` (the jet-versus-value obstruction `O1` and
+`RHSPointwiseLipschitz.lean` (the jet-versus-value obstruction `O1` and
 the model↔Riemannian uniformisation `O2`) and a type-level obstruction (elements
 of `tensorHs` are abstract spectral coordinate families, not Riemannian metrics,
 so `deTurckRicciRHS`, which consumes two `SmoothRiemannianMetric`, does not even

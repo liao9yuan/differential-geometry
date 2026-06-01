@@ -20,7 +20,7 @@ Ricci-specific content.
 ### Partial-derivative algebra
 
 The boundaryless Fréchet partial derivative `partialDeriv i u y = fderiv ℝ u y
-(chartModelBasis E i)` from `Integral/DivergenceTheorem/LocalFormula.lean` lacks the
+(chartModelBasis E i)` from `Analysis/Integration/DivergenceTheorem/LocalFormula.lean` lacks the
 elementary algebra lemmas (its with-boundary cousin `partialDerivWithin` has them).  We
 supply them here:
 

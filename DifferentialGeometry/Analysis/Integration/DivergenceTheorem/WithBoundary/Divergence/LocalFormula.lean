@@ -10,11 +10,11 @@ Riemannian metric on a smooth manifold whose local model `I` may carry a
 non-trivial boundary (i.e. `[I.Boundaryless]` is **not** assumed).
 
 The construction parallels the boundaryless `localDivergence` from
-`Integral/DivergenceTheorem/LocalFormula.lean`, replacing the Fréchet partial
+`DivergenceTheorem/LocalFormula.lean`, replacing the Fréchet partial
 derivative `partialDeriv` (which is undefined on boundary points of the chart
 target) by the within-set partial derivative
 `partialDerivWithin (extChartAt I α).target` from
-`WithBoundary/PartialDerivWithin.lean`. The within-derivative is uniquely
+`WithBoundary/Divergence/PartialDerivWithin.lean`. The within-derivative is uniquely
 determined thanks to `uniqueDiffOn_extChartAt_target`, which holds for every
 manifold with corners.
 

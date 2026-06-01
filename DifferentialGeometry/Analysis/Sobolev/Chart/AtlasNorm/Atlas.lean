@@ -4,7 +4,7 @@ import DifferentialGeometry.Analysis.Sobolev.Chart.BanachCompleteness.Banach
 /-!
 # Atlas-flexible chart-based Sobolev norms on a smooth manifold
 
-The file `Chart.lean` defines `wkpNormChart g k p u` using a fixed canonical
+The file `Chart/Defs.lean` defines `wkpNormChart g k p u` using a fixed canonical
 partition of unity `chartAtlasPOU I M`. This file generalises that definition
 to any smooth partition of unity subordinate to the canonical chart family
 `fun α : M => (chartAt H α).source`, and establishes that

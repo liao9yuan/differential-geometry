@@ -25,8 +25,8 @@ the unit sphere) of the chart-pulled `√det · G⁻¹` over the compact support
 the cutoff function.
 
 The end product is a `SmoothEllipticBilinearForm` (from
-`NirenbergEuclidean.lean`) on `Set.univ`, ready to feed into the Nirenberg
-difference-quotient interior-regularity machinery.
+`Sobolev/Nirenberg/H2Regularity/Defs.lean`) on `Set.univ`, ready to feed into
+the Nirenberg difference-quotient interior-regularity machinery.
 
 ## Setting
 
@@ -34,7 +34,7 @@ Throughout this file we work in the boundaryless setting:
 `[I.Boundaryless]`, `[T2Space M]`, `[SigmaCompactSpace M]`. The model fibre is
 a finite-dimensional real inner-product space `E` with positive dimension.
 The metric `g` is a `SmoothRiemannianMetric I M` from
-`Integral.Measure.ChartDensity`.
+`Geometry/Metric/Basic.lean`.
 
 ## Strategy
 

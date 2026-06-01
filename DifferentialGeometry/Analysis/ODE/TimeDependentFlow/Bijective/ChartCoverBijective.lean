@@ -3,6 +3,11 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.ChartLocalExistence.G
 import Mathlib.Analysis.ODE.Gronwall
 import Mathlib.Geometry.Manifold.MFDeriv.Basic
 
+/-! # Chart-cover bijectivity of the time-dependent flow on a short horizon
+
+Transport of chart-coordinate bijectivity of the local Picard flow to the manifold
+flow, and its chart-cover assembly into short-time bijectivity (and its inverse). -/
+
 namespace DifferentialGeometry.PDE.RicciFlow.ODE
 
 open Bundle

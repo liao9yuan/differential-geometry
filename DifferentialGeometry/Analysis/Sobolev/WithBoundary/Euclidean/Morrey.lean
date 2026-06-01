@@ -4,7 +4,8 @@ import DifferentialGeometry.Analysis.Sobolev.Euclidean.SupportAndDomain.Iterated
 /-!
 # Morrey-type embedding on Euclidean half-space balls
 
-This is the with-boundary parallel of `Analysis/Sobolev/EuclideanMorrey.lean`. We
+This is the with-boundary parallel of
+`Analysis/Sobolev/Euclidean/Embedding/Morrey.lean`. We
 deliver Morrey-type embeddings whose conclusions hold on the closed-half-space
 portion of a Euclidean ball, `Metric.ball x₀ R ∩ closedHalfSpace`.
 

@@ -22,7 +22,7 @@ and isolates — as a single concrete, named, smooth `(0, 3)`-tensor field — t
 ## The two concrete frame-trace readings
 
 The right-hand-side reading `covGrad_rawConnLap_unit_eval_curry`
-(`CovGradRoughLapCommutatorClose2.lean`) gives the slot-`0` curry, along a tangent
+(`FreeDirectionReduction.lean`) gives the slot-`0` curry, along a tangent
 direction `w`, of the unit-`(0, 0)`-evaluation of `∇(Δ_∇ T₀)`:
 ```
 tensor0S_curry 2 x (∇(Δ_∇T₀) x (unit)) w = (∇_w Δ_∇T₀)(x)(unit),
@@ -32,7 +32,7 @@ Laplacian (its frame `Cᶻ_i := smoothOrthoFrame g z i` is `g_z`-orthonormal at 
 `z`).
 
 The frame-trace swap `frame_trace_third_eq_swap_unit`
-(`CovGradRoughLapCommutatorClose2.lean`) isolates the explicit third-order curvature
+(`FreeDirectionReduction.lean`) isolates the explicit third-order curvature
 field `Tensor3rdCurv` from a **fixed-at-`x`** frame trace: with `W := smoothExtensionTangent x w`
 and `B_i := smoothOrthoFrame g x i`,
 ```
@@ -58,7 +58,7 @@ frame-derivative correction.
 * `covGradRoughLap_commutator_eq` — the **commutator equation** `hcomm`:
   `Δ_∇(∇T₀) = ∇(Δ_∇ T₀) + covGradRoughLapCurv g T₀`, by `sub_add_cancel`. This is the
   exact `hcomm` consumed by `secondCovGrad_l2NormSq_le_rawConnLap_gen`
-  (`TensorConnLapSecondOrderGardingGen.lean`).
+  (`TensorConnLapSecondOrderGardingSobolevCurv.lean`).
 
 * `rhs_curry_eq_swap_add_curv_add_residual` — the **right-hand-side curried-unit
   decomposition** of `∇(Δ_∇ T₀)`:
@@ -92,7 +92,7 @@ genuinely-distinct pointwise fibre-norm bounds, both within the `‖∇²T₀‖
    derivative of `T₀` is controlled by `‖∇²T₀‖` (uniform on the compact `M`).
 
 In addition, the **slot-`0` Christoffel-vs-field-direction matching** (the
-`CovGradRoughLapCommutatorClose2.lean` obstruction 1) is needed to identify the
+`FreeDirectionReduction.lean` obstruction 1) is needed to identify the
 commutator left-hand side `Δ_∇(∇T₀)(x)(unit)` (curried along `w`) with
 `(∑ᵢ ∇_{Bᵢ}∇_{Bᵢ}(∇_W T₀))(x)(unit) + (Christoffel families)`; only after that
 identification does `covGradRoughLapCurv` equal `Tensor3rdCurv + residual` as a curried
@@ -103,7 +103,7 @@ the remaining work.
 ## Sign / convention
 
 Geometer convention `Δ_∇ = ∑ᵢ ∇²_{Bᵢ, Bᵢ}` (the frame trace), matching
-`CovGradRoughLapCommutatorClose2.lean` and `TensorThirdOrderWeitzenbock.lean`. The
+`FreeDirectionReduction.lean` and `TensorThirdOrderWeitzenbock.lean`. The
 covariant gradient `covGrad g 0 s` curries the new tangent-direction slot as the
 leftmost covariant slot.
 -/
@@ -163,7 +163,7 @@ noncomputable def covGradRoughLapCurv
 Δ_∇(∇T₀) = ∇(Δ_∇ T₀) + covGradRoughLapCurv g T₀,
 ```
 by `sub_add_cancel`. This is the exact `hcomm` hypothesis consumed by
-`secondCovGrad_l2NormSq_le_rawConnLap_gen` (`TensorConnLapSecondOrderGardingGen.lean`). -/
+`secondCovGrad_l2NormSq_le_rawConnLap_gen` (`TensorConnLapSecondOrderGardingSobolevCurv.lean`). -/
 theorem covGradRoughLap_commutator_eq
     (g : SmoothRiemannianMetric I M) (T₀ : SmoothCcTensor g 0 2) :
     rawTensorConnLapSmooth (I := I) g 0 3 (covGrad (I := I) (M := M) g 0 2 T₀) =

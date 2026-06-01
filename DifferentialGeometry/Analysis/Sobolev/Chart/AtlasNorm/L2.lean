@@ -19,7 +19,8 @@ and the corresponding `L²`-Sobolev inner product
 
   `⟨u, v⟩_{W^{k,2}_chart(M)} = ∑_α ⟨chartPushed α u, chartPushed α v⟩_{W^{k,2}(chartTargetEuclid α)}`,
 
-where the per-chart norms and inner products are those defined in `EuclideanIteratedL2.lean`.
+where the per-chart norms and inner products are those defined in
+`Euclidean/IteratedSobolevSpace/IteratedL2.lean`.
 
 The resulting subtype `WkpChartL2 g k` carries:
 * a `SeminormedAddCommGroup` structure (homogeneity, triangle, with seminorm zero on

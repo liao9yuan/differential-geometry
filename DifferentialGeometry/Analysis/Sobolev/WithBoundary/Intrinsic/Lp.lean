@@ -26,7 +26,7 @@ import Mathlib.MeasureTheory.Integral.Bochner.Set
 For a closed (compact) smooth Riemannian manifold `(M, g)` whose model `I` may
 carry a smooth boundary, and an exponent `1 ≤ p ≤ ∞` (with `p ≠ ∞`), this file
 extends the boundaryless intrinsic Sobolev space
-`Analysis/Sobolev/IntrinsicLp.lean` to the with-boundary setting.
+`Analysis/Sobolev/Intrinsic/Lp.lean` to the with-boundary setting.
 
 Compared with the boundaryless case, the integration-by-parts identity carries
 a boundary correction term in general:

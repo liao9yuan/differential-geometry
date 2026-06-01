@@ -7,7 +7,7 @@ import DifferentialGeometry.Geometry.Curvature.Riemann.Defs
 # Bridge between the chart Riemann tensor and the abstract Riemann operator
 
 The chart-coordinate Riemann tensor `chartRiemannTensor g α i j k l y` (defined in
-`Integral.Geometry.Curvature.Riemann`) packages the (1, 3)-tensor
+`Geometry.Curvature.Riemann.Defs`) packages the (1, 3)-tensor
 $$
   R^l{}_{ijk}(g, \alpha)(y) =
     \partial_j \Gamma^l{}_{ik}(g, \alpha)(y) -
@@ -16,7 +16,7 @@ $$
                  \Gamma^l{}_{km}(g, \alpha)(y)\,\Gamma^m{}_{ij}(g, \alpha)(y)\bigr).
 $$
 The abstract Riemann operator `riemannOp (LeviCivita g) x` (defined in
-`Integral.Connection.CurvatureBundling`) is the bundled continuous trilinear map
+`Geometry.Curvature.CurvatureOperator.CurvatureBundling`) is the bundled continuous trilinear map
 `T_x M →L T_x M →L T_x M →L T_x M` that on smooth global sections evaluates to
 $$
   R^{LC}(X, Y) Z(x) = \nabla_X(\nabla_Y Z)(x) - \nabla_Y(\nabla_X Z)(x) - \nabla_{[X, Y]} Z(x).
@@ -28,7 +28,7 @@ whose chart-basis components are exactly the entries of `chartRiemannTensor g x 
 at `(extChartAt I x x)`. The bridge CLM is independent of the (deep) chart-Christoffel
 expansion; it is built directly from the chart-Riemann tensor entries via the standard
 basis-coordinate sum, mirroring the `ricciFun` construction in
-`Integral.Geometry.Curvature.Riemann`.
+`Geometry.Curvature.Riemann.Defs`.
 
 ## Main definitions
 

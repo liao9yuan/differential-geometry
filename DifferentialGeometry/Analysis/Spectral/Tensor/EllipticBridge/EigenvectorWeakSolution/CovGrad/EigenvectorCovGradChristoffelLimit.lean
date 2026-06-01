@@ -32,7 +32,7 @@ Christoffel correction at `Tₙ`, restricted to the chart target, is a finite
 * `tensorChartComponent g r s wₙ.toCcTensor α p` (the bare chart component).
 
 The `L²`-limit of that atom is `componentLpLimit` (companion file
-`EigenvectorChartChartComponentL2.lean`), which is `μ` times the canonical chart
+`EigenvectorChartComponentL2.lean`), which is `μ` times the canonical chart
 component `tensorL2ChartComponent g r s φ α p` of the eigenvector
 `φ := tensorResolventEigenbasisVec h_atlas i`. The `μ⁻¹`-rescaling of the
 `n`-th term — matching the rescaling convention of every companion eigenvector

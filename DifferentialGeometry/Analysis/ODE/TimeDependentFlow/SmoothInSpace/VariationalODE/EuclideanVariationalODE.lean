@@ -6,7 +6,7 @@ import Mathlib.Analysis.Calculus.FDeriv.Symmetric
 
 For a time-dependent vector field `f : ℝ → E → E` on a finite-dimensional Banach
 space `E`, jointly `C^∞` in `(t, x)`, `exists_isLocalFlow_contDiffOn_top`
-(`SmoothInSpace/BanachIC.lean`) produces a local Picard–Lindelöf flow `Φ : E × ℝ → E`
+(`VariationalODE/BanachIC.lean`) produces a local Picard–Lindelöf flow `Φ : E × ℝ → E`
 together with a strictly interior open neighbourhood
 `ball x₀ ρ ×ˢ Ioo (t₀ - T) (t₀ + T)` on which `Φ` is jointly `C^∞`.
 
@@ -48,7 +48,7 @@ The only joint-`C^∞` hypothesis is `ContDiff ℝ ∞ (uncurry f)` on the **mod
 ## Status of the manifold lift
 
 The manifold-level identity `RawVariationalIdentity` (in
-`TimeDependentFlow/VariationalFlow.lean`) is *not* derived here; the precise chart-lift
+`VariationalEquation/VariationalFlow.lean`) is *not* derived here; the precise chart-lift
 and connection-reconciliation that would close that gap are documented at the end of
 this file.
 -/

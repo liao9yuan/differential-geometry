@@ -11,8 +11,8 @@ This file defines smooth sections of the mixed multilinear bundle
 (hom bundle between two continuous multilinear bundles) over an arbitrary `C^n`
 vector bundle `E`, and proves basic results about them.
 
-These results generalize the `TensorRSField` API from `RSTensor/Field.lean`, which is
-the special case `E = TangentSpace I`.
+These results generalize the `TensorRSField` API from `RSTensor/Coordinates/Field.lean`,
+which is the special case `E = TangentSpace I`.
 
 ## Main Definitions
 

@@ -52,7 +52,7 @@ isolate that defect, building directly on the pointwise tensor Ricci identity (`
 
 The Riemann commutator uses the section-level formula
 `R(X, Y) Z (x) = ∇_X ∇_Y Z (x) - ∇_Y ∇_X Z (x) - ∇_{[X,Y]} Z (x)` (`riemannSec`), matching
-`Curvature.lean`. The rough Laplacian `Δ_∇` is the geometer trace `∑ᵢ ∇²_{Bᵢ, Bᵢ}`.
+`CurvatureOperator/Defs.lean`. The rough Laplacian `Δ_∇` is the geometer trace `∑ᵢ ∇²_{Bᵢ, Bᵢ}`.
 -/
 
 noncomputable section

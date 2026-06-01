@@ -3,6 +3,8 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartLocal
 import DifferentialGeometry.Analysis.Spectral.Tensor.TrivProj.FDerivDecomp
 import DifferentialGeometry.Analysis.Sobolev.Tensor.ChartComponents
 
+/-! # Uniform `C^k` bound on chart Christoffel symbols from a `C^{k+1}` metric, on a precompact chart subset -/
+
 namespace DifferentialGeometry.PDE.RicciFlow.HebeyBlock
 
 open Bundle
@@ -76,7 +78,7 @@ and the `H¹` reduction in `iterated_nabla_vs_iterated_partial_equivalence_H1`)
 only need bounds on the chart image of the partition-of-unity support,
 which is compact and sits inside `chartTargetEuclid α` (see
 `chartChristoffel_bdd_on_pou_tsupport` in
-`Analysis/Parabolic/TensorSpectral/Estimates/ChristoffelBound.lean`).
+`Analysis/Spectral/Tensor/Estimates/ChristoffelCorrection/ChristoffelBound.lean`).
 This is the Christoffel-side counterpart of `fibrewise_gram_twist_estimate`,
 and the per-chart constant `C` absorbs into a single absolute constant
 across the chart atlas via `uniform_chart_bounds_from_compactness`.

@@ -41,7 +41,7 @@ section-level Riemann formula `riemannSec cov X Y Z` realises the standard `R(X,
 operator: `R(X, Y) Z = ∇_X (∇_Y Z) - ∇_Y (∇_X Z) - ∇_{[X, Y]} Z`. The Ricci contraction
 adopts the geometer's convention `Ric(v, w) = tr_Z R(Z, v) w`, matching the
 chart-coordinate Ricci tensor `chartRicciTensor g α i k = ∑ j R^j_{ijk}` defined in
-`Integral/DivergenceTheorem/RicciCurvature.lean`.
+`Geometry/Curvature/Riemann/Defs.lean`.
 
 ## Symmetry and smoothness
 

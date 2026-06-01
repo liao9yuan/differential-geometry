@@ -1,5 +1,24 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.TensorConnLapGreenDivergenceIdentityAnySection
 
+/-!
+# Metric-lowering intertwiner and the connection-Laplacian Green identity at general covariant rank
+
+This file generalises the rank-`(0, s)` metric-lowering intertwiner from the
+fixed numeral cases `(0, 2)`, `(0, 3)` to arbitrary covariant rank `s`, by
+carrying explicit natural-number type-transports along `Nat.zero_add s` at every
+site where the original proofs relied on the definitional reduction `0 + s ≡ s`.
+Feeding this intertwiner into the per-section divergence identity yields the
+unconditional rank-`(0, s)` connection-Laplacian Green identity.
+
+## Main results
+
+* `loweredCovDerivAt_eq_lower_tensorCovDerivAt_gen` — the rank-`0` metric-lowering
+  intertwiner at general covariant rank `s`.
+* `tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawConnLap_gen` — the unconditional
+  rank-`(0, s)` connection-Laplacian Green identity for compactly-supported
+  smooth tensors.
+-/
+
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false

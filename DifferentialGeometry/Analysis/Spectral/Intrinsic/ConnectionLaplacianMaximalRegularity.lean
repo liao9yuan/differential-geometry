@@ -6,6 +6,18 @@ import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.Operator
 import DifferentialGeometry.Analysis.Parabolic.TimeSobolev.BochnerL2
 import DifferentialGeometry.Analysis.Parabolic.TimeSobolev.TimeH1
 
+/-!
+# `L²`-maximal regularity for the connection Laplacian
+
+For a closed Riemannian manifold and `0 < T ≤ 1`, the inhomogeneous tensor heat
+equation `∂_t u = Δ_∇ u + f`, `u(0) = 0`, driven by a forcing
+`f ∈ L²([0,T]; TensorL2 r s g)`, has a strong solution in `H¹([0,T]; TensorL2 r s g)`
+with the De Simon maximal-regularity bound `‖u‖_{H¹} ≤ 2 · ‖f‖_{L²}`. The result is
+packaged as a bounded linear solution operator together with its companion `H²`
+field and the time-pointwise rough Laplacian, recovering the strong form of the
+equation at the `L²([0,T]; L²)` level.
+-/
+
 namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
 open Bundle

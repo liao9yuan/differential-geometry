@@ -4,6 +4,17 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciSecondOrd
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.DeTurckCorrectionSymbol
 import DifferentialGeometry.Analysis.Parabolic.StrictParabolicity
 
+/-!
+# Principal symbol of the linearized Ricci–DeTurck right-hand side
+
+The linearization of `deTurckRicciRHS g_bg` at a base metric `g₀`, viewed as a
+second-order operator on `(0,2)`-tensor perturbations, has principal symbol the
+geometer-sign isotropic Ricci–DeTurck symbol `isotropicSymbol _ (deTurckSymbolCoeff g₀)`
+(scalar coefficient `c(x, ξ) = -|ξ|²_{g₀}`). This is the same witness shape used by
+the strict-parabolicity statement of the operator at the same metric, recorded here
+for the spectral principal-part match.
+-/
+
 namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
 open Bundle

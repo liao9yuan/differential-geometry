@@ -6,6 +6,20 @@ import Mathlib.Geometry.Manifold.VectorBundle.Riemannian
 import Mathlib.Geometry.Manifold.ContMDiffMFDeriv
 import Mathlib.Analysis.InnerProductSpace.Basic
 
+/-!
+# Pullback of a Riemannian metric along a diffeomorphism
+
+This is the low-rank anchor of the `Pullback` concept: it defines the fiberwise pullback of the
+inner product along a diffeomorphism `Φ` and assembles it into a pulled-back Riemannian metric,
+together with the immediately-needed smoothness/bilinearity API.
+
+## Main definitions
+
+* `Diffeomorph.pullbackInner` — the fiberwise pullback `Φ^* g` of an inner product along `Φ`,
+  as a continuous bilinear form on each tangent space.
+* `Diffeomorph.pullbackMetric` — the resulting pulled-back smooth Riemannian metric.
+-/
+
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback
 
 open Bundle

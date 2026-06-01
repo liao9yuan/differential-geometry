@@ -6,14 +6,14 @@ import DifferentialGeometry.Geometry.Curvature.Riemann.Ricci
 # Bridge between the chart Ricci carrier and the abstract Ricci tensor
 
 The chart Ricci carrier `ricciFun g : pointwiseBilin I` (defined in
-`Integral.Geometry.Curvature.Riemann`) is the bilinear form on the tangent bundle
+`Geometry.Curvature.Riemann.Defs`) is the bilinear form on the tangent bundle
 whose matrix in the canonical model basis is the chart-coordinate Ricci tensor
 $$
   \operatorname{Rc}_{ik}(x, \varphi_x x) = \sum_j R^j{}_{ijk}(g, x)(\varphi_x x).
 $$
 
 The abstract Ricci tensor `ricciTensor g x : T_x M →L T_x M →L ℝ` (defined in
-`Integral.Connection.Ricci`) is the trace of the curvature endomorphism
+`Geometry.Curvature.CurvatureOperator.RicciConnection`) is the trace of the curvature endomorphism
 $$
   \operatorname{Ric}^{\nabla}(v, w)
     := \operatorname{tr}_{\mathbb{R}}\bigl(Z \mapsto R^{\nabla}(Z, v) w\bigr).

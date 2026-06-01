@@ -7,8 +7,8 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.NonlinearitySpec
 
 The chart-locality-free maximal-regularity engine
 `quasilinear_strong_existence_locallyLipschitz_smallTime_stayDischarged_ofCompact`
-(`Analysis/Parabolic/QuasiLinear/MaxRegLocalLipschitzStayDischarge.lean`) takes a
-**locally Lipschitz** lower-order nonlinearity
+(`Analysis/Parabolic/QuasiLinear/TensorMaximalRegularity/LocallyLipschitzExistence.lean`)
+takes a **locally Lipschitz** lower-order nonlinearity
 
   `N : tensorHs g_bg 0 2 (a + 1) → tensorHs g_bg 0 2 a`
 
@@ -131,7 +131,8 @@ chart-selection / parallelizability witness).  The construction is exactly
 `quasilinear_strong_existence_locallyLipschitz_smallTime_stayDischarged_ofCompact`
 specialised to `(r, s) = (0, 2)`, `g = g_bg`, with the intrinsic compactness
 witness.  `N` and its local-Lipschitz bound are honest analytic inputs — the
-output of the realization program of `DeTurckNonlinearitySpectral.lean` — and the
+output of the realization program of
+`MetricRealization/DeTurckGeometricNonlinearity.lean` — and the
 conclusion is the existence of a strong PDE solution, structurally distinct from
 the Lipschitz hypothesis. -/
 theorem deTurckRemainder_strong_shortTime_exists

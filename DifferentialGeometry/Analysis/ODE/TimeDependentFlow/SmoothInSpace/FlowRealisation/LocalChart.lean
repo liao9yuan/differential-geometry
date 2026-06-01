@@ -8,7 +8,7 @@ import DifferentialGeometry.Analysis.ODE.Flow.Defs
 # Moving-chart-local discharge of the chart-realised factor inputs at an interior time
 
 The factor-producer discharge `rawVariationalIdentityFlat_of_chart_realisation`
-(`SmoothInSpace/VariationalLiftFactorDischarge.lean`) consumes, in the *target* chart
+(`FlowRealisation/Factor.lean`) consumes, in the *target* chart
 `α := Φ_fam t x` (the orbit point at the interior time `t`), five data that are all **local
 near `t`**:
 

@@ -38,7 +38,7 @@ The remaining content — that the intrinsic order-`2k` chart-Sobolev norm
 `L²` data of `u` — is the **interior elliptic-regularity / Gårding estimate**. The
 chart-locality-free, all-orders form of this estimate is a genuine open analytic
 sub-program (see the project's order-`2` discussion in
-`Analysis/Parabolic/TensorSpectral/SobolevScale/Order2Equivalence.lean`): the only
+`Analysis/Spectral/Tensor/SobolevScale/Order2Equivalence.lean`): the only
 on-disk quantitative `W^{2k,2}`-energy machinery carries the
 `HasLocallyConstantChartAt` chart-selection hypothesis, which is *false* on normal
 manifolds (e.g. `S²`), and the chart-locality-free all-orders elliptic engine

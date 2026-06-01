@@ -12,6 +12,8 @@ import Mathlib.Analysis.Calculus.FDeriv.Symmetric
 import Mathlib.Geometry.Manifold.VectorBundle.SmoothSection
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 
+/-! # Exterior derivative of rough (not-necessarily-smooth) alternating-form-valued maps -/
+
 noncomputable section
 
 open Filter ContinuousAlternatingMap Set

@@ -6,10 +6,12 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.VariationalEquation.F
 The committed `hamilton_deturck_pullback_solves_ricci_flow` (`HamiltonDeTurckPullback.lean`) consumes the
 **covariant** raw variational identities `RawVariationalIdentity` (each asserting the slot
 pushforward curve has derivative `-∇_{dΦ·} X`).  As the orbit-ODE analysis records
-(`SmoothInSpace/VariationalLiftManifoldFlowOrbitODE.lean`, residual (★)), that covariant
+(`Analysis/ODE/TimeDependentFlow/SmoothInSpace/ChartOperator/ManifoldFlowOrbitODE.lean`,
+residual (★)), that covariant
 per-slot identity is **not dischargeable** from the flow ODE: the genuine derivative of the
 orbit pushforward curve, read in Mathlib's *moving* target chart, is the **flat / Lie-type**
-value (`RawVariationalIdentityFlat`, `SmoothInSpace/VariationalLiftFlatIdentity.lean`), which
+value (`RawVariationalIdentityFlat`,
+`Analysis/ODE/TimeDependentFlow/SmoothInSpace/CovariantIdentity/FlatIdentity.lean`), which
 differs from the covariant value by the metric Christoffel contraction at the basepoint.
 
 This file re-architects the pullback theorem onto the **flat** route, in which every per-slot

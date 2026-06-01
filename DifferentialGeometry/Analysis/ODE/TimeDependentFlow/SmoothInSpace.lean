@@ -3,6 +3,15 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.Variati
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.VariationalODE.ChartGlue
 import Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary
 
+/-!
+# Spatial smoothness of the time-dependent flow on a closed manifold
+
+Folder headline: from the chart-local smooth-flow data assembled in the
+`SmoothInSpace/` subtree (Euclidean Picard regularity, chart-glue), the global
+time-dependent flow `Φ t : M → M` is, at every fixed interior time, a smooth
+self-map of the closed manifold `M`.
+-/
+
 namespace DifferentialGeometry.PDE.RicciFlow.ODE
 
 open Bundle

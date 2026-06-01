@@ -10,7 +10,7 @@ inner-product space `E` with `n := finrank ℝ E ≥ 1`, given an initial datum
 `u_0 ∈ Lp ℝ 2 μ_g` and a positive time `t > 0`, this file re-expresses the
 smoothing property of the heat semigroup in terms of the chart-side
 `H^{2k}` bridge hypothesis `ChartSideH2kBridge` from
-`Laplacian/Regularity/LaplacianDomainPowH2kBridge.lean`.
+`Analysis/Elliptic/Regularity/LaplacianDomain/PowH2kBridge.lean`.
 
 The iterated-regularity hypothesis exposed by
 `heatSemigroup_smooth_representative` is the manifold-level chart-Sobolev

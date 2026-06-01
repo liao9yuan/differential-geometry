@@ -41,7 +41,7 @@ The countable sum is locally finite: in a neighborhood of any point only finitel
 many terms are nonzero.
 
 The construction parallels the boundaryless variant in
-`DifferentialGeometry/Integral/DivergenceTheorem/POUReduction.lean`. The
+`DifferentialGeometry/Analysis/Integration/DivergenceTheorem/POUReduction.lean`. The
 fiberwise smul `smoothSmul`, the chart-coefficient pull-out lemmas
 `chartCoeff_smoothSmul` / `chartCoeffOnE_smoothSmul`, and the intrinsic
 tangent-action helpers `tangentSectionAction_finset_sum`,

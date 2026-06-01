@@ -7,7 +7,7 @@ import Mathlib.Geometry.Manifold.BumpFunction
 # Smooth orthonormal local frame from the chart frame
 
 This file builds a smooth Gram-Schmidt orthonormalisation of the chart-basis
-frame `chartBasisVec g α` from `Integral.Measure.ChartDensity` against the
+frame `chartBasisVec g α` from `Geometry/Metric/ChartGram.lean` against the
 Riemannian inner product `g.inner`. The output is a smooth tangent-bundle
 section family `smoothOrthoFrame g α : Fin n → Π b : M, TangentSpace I b`
 whose fibres at `α` are `g`-orthonormal.

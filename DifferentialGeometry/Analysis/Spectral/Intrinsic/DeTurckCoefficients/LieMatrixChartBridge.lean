@@ -11,10 +11,10 @@ metric Lie-derivative component `(𝓛_W g)_{ij}`:
 
 * the **abstract Cartan-formula chart matrix** `chartLieDerivMetricMatrix g W α i j x`,
   built from the bundled section's chart components `chartCoeff α W k`
-  (`PDE/DeTurck/LieDerivativeMetric.lean`);
+  (`Geometry/Flow/LieDerivativeMetric.lean`);
 * the **textbook Christoffel carrier** `chartLieDeTurckComp g g_bg α i j (ϕ_α x)`,
   built from the explicit DeTurck-VF component function `chartDeTurckVFComp g g_bg α k`
-  (`PDE/RicciFlow/IntrinsicSpectral/DeTurckCoefficients/LieSummandLipschitz.lean`).
+  (`DeTurckCoefficients/LieSummandLipschitz.lean`).
 
 Both compute the classical coordinate expression
 `(𝓛_W g)_{ij} = W^k ∂_k g_{ij} + g_{kj} ∂_i W^k + g_{ik} ∂_j W^k`, so they must

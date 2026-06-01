@@ -37,7 +37,7 @@ its slot-`0` currying reading, the mirror of `contMDiff_curried_unitGradField` a
 ## Sign / convention
 
 Geometer convention `Δ_∇ = ∑ᵢ ∇²_{Bᵢ, Bᵢ}` (the frame trace), matching
-`CovGradRoughLapCommutatorAbstract.lean` and `CovGradRoughLapCommutatorAssembly.lean`.
+`AbstractRoughLaplacian.lean` and `CommutatorIdentity.lean`.
 The covariant gradient `covGrad g 0 s` curries the new tangent-direction slot as the
 leftmost covariant slot.
 -/

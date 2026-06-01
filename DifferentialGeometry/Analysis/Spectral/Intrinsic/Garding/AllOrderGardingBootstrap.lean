@@ -35,7 +35,7 @@ per-order ingredients (none of which is the all-order conclusion):
   `‖∇²S‖²_{L²} ≤ Cg · (‖Δ_∇ S‖²_{L²} + ‖S‖²_{L²})`. This is exactly the
   intrinsic order-`2` Gårding estimate
   (`secondCovGrad_l2NormSq_le_rawConnLap_of_pointwise_curv_bound`,
-  `CovGradRoughLapCurvL2Bound.lean`), threaded at every valence; its own input —
+  `Geometry/Curvature/CovGradRoughLap/L2Bound.lean`), threaded at every valence; its own input —
   the pointwise curvature-defect bound and the constant `Cg = 2 + 3 C₀ + 2 C₀²`
   — is the base, *not* the conclusion of this file.
 
@@ -57,7 +57,8 @@ per-order ingredients (none of which is the all-order conclusion):
 The single-step `(0, 2)` instance of `Hcomm` is `covGradRoughLap_commutator_eq`
 together with the pointwise curvature-defect bound supplied to `Hgard`; the
 all-order / higher-valence form is the open curvature-derivative sub-program
-flagged in the module docstrings of `CovGradRoughLapCurvL2Bound.lean`. We
+flagged in the module docstrings of
+`Geometry/Curvature/CovGradRoughLap/L2Bound.lean`. We
 therefore expose it as an explicit hypothesis rather than assume the bootstrap.
 
 ## The bootstrap recursion

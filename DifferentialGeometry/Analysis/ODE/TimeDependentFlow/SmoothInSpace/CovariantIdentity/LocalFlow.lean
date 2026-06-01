@@ -6,7 +6,7 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.Variati
 
 The committed flat-data producer
 `rawVariationalIdentity_of_flatChartFderiv_witness`
-(`SmoothInSpace/VariationalLiftFlatToCovariant.lean`) builds `RawVariationalIdentity`
+(`CovariantIdentity/FlatToCovariant.lean`) builds `RawVariationalIdentity`
 from the flat chart Euclidean variational data (`hDchart`, `hcontAt`, `hwitness`,
 `hRdiff`, `hCdiff`) together with the *flat-plus-correction* value equation `hcov`
 
@@ -18,7 +18,7 @@ from the flat chart Euclidean variational data (`hDchart`, `hcontAt`, `hwitness`
 with `α := Φ_fam t x` and `w := mfderiv I I (Φ_fam t) x v`.
 
 The Euclidean variational ODE `IsLocalFlow.hasDerivAt_partial_spatial_fderiv`
-(`SmoothInSpace/VariationalODE.lean`) produces, for a genuine `IsLocalFlow` `Φ` of a
+(`VariationalODE/EuclideanVariationalODE.lean`) produces, for a genuine `IsLocalFlow` `Φ` of a
 chart-coordinate vector field `f` on the model space `E`, the operator-valued flat ODE
 
   `HasDerivAt (fun u => fderiv ℝ (fun z => Φ (z, u)) z₀)

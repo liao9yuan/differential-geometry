@@ -8,7 +8,8 @@ set_option linter.unusedSectionVars false
 /-!
 # Uniform-in-parameter chart-coordinate ODE uniqueness on `Ioo (-T) T`
 
-The eventually-equal form `chartPhaseVF_orbit_uniqueness` (from `Bridge.lean`)
+The eventually-equal form `chartPhaseVF_orbit_uniqueness` (from
+`ChartFlow/ChartFlowGeodesicLink.lean`)
 gives ODE uniqueness on a neighbourhood of `0` whose size depends on the
 input curves. For a uniform-in-parameter statement — agreement on a
 **fixed** open interval `Ioo (-T) T` — we need an explicit Lipschitz

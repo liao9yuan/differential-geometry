@@ -13,7 +13,7 @@ import Mathlib.Geometry.Manifold.VectorBundle.Basic
 
 This file installs the inner-product-space structure on the wrapper
 `SmoothCcTensor g r s` from `SmoothSections.Defs` using the global
-metric-induced `L²` pairing `tensorL2Inner` from `GlobalPairing.Defs`.
+metric-induced `L²` pairing `tensorL2Inner` from `Pairing.Defs`.
 
 ## Main constructions
 
@@ -32,7 +32,7 @@ Riemannian volume measure), so the seminorm is not a norm.
 
 The four `PreInnerProductSpace.Core` axioms reduce to algebraic
 properties of `tensorL2Inner` already established in
-`GlobalPairing.Algebra` and `GlobalPairing.CauchySchwarz`:
+`Pairing.Algebra` and `Pairing.CauchySchwarz`:
 
 * `conj_inner_symm` reduces to `tensorL2Inner_symm` (real conjugation is
   trivial);

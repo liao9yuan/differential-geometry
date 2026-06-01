@@ -6,7 +6,7 @@ import Mathlib.Algebra.Order.Chebyshev
 # `L²`-convention iterated Euclidean Sobolev norm and inner product
 
 The iterated Sobolev norm `wkpNorm k 2 u Ω` defined in
-`EuclideanIteratedSobolev.lean` is the *linear* sum
+`Euclidean/IteratedSobolevSpace/IteratedSobolev.lean` is the *linear* sum
 `∑_{|β| ≤ k} ‖∂^β u‖_{L²(Ω)}`. While this is convenient for general `p`,
 it is not directly compatible with an inner-product structure when
 `p = 2`. The standard `L²`-Sobolev convention uses the Euclidean

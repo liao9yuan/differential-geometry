@@ -16,7 +16,7 @@ covGradRoughLapCurv g T₀ = Δ_∇(∇T₀) − ∇(Δ_∇ T₀)   (a `(0, 3)`-
 ```
 Its pointwise fibre-norm bound is the only remaining ingredient for the unconditional order-`2`
 covariant Gårding estimate `secondCovGrad_l2NormSq_le_rawConnLap_of_pointwise_curv_bound`
-(`CovGradRoughLapCurvL2Bound.lean`).
+(`CovGradRoughLap/L2Bound.lean`).
 
 ## The metric-trace route (frame-free)
 
@@ -270,7 +270,7 @@ for every `x`, with `C₀ ≥ 0`, then the order-`2` covariant Gårding estimate
 ‖∇²T₀‖²_{L²} ≤ (2 + 3 C₀ + 2 C₀²) · (‖Δ_∇ T₀‖²_{L²} + ‖T₀‖²_{L²})
 ```
 holds. This is `secondCovGrad_l2NormSq_le_rawConnLap_of_pointwise_curv_bound`
-(`CovGradRoughLapCurvL2Bound.lean`) restated under the route-endpoint name; it is the final
+(`CovGradRoughLap/L2Bound.lean`) restated under the route-endpoint name; it is the final
 assembly once the metric-trace route supplies `hpt` (i.e. once STEP 2 is available). -/
 theorem hpt_to_unconditional_bound
     (g : SmoothRiemannianMetric I M) (T₀ : SmoothCcTensor g 0 2) (C₀ : ℝ) (hC₀ : 0 ≤ C₀)

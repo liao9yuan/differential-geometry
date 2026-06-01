@@ -5,7 +5,7 @@ import DifferentialGeometry.Analysis.Integration.L2.Pairing.Algebra
 
 Let `M` be a smooth finite-dimensional manifold modelled on a real normed
 space `E` equipped with a smooth Riemannian metric `g`. Building on the
-algebraic and `MemL2`-closure machinery from `GlobalPairing.Algebra`,
+algebraic and `MemL2`-closure machinery from `Pairing.Algebra`,
 this file proves the global `L²` Cauchy–Schwarz inequality and its
 absolute-value form, together with the triangle inequality for the
 global `L²` norm.

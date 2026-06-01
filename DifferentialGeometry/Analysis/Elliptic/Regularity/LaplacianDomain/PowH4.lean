@@ -19,9 +19,10 @@ the Nirenberg uniform difference-quotient bound twice, and reassembles the
 chart-by-chart `W^{4,2}` membership. Because the discharge of the
 residual chart-side `MemW1p`-of-residual data hypotheses for the
 differentiated identities is documented in the existing codebase as a
-follow-up piece (see `DiffChartBilinearH1ComplUnconditional.lean` and
-`DiffChartBilinearH1ComplFinal.lean`), this module exposes the H⁴ regularity
-result in the same hypothesis-bearing witness style as the existing H² API.
+follow-up piece (see `Regularity/DiffChart/Differentiated/BilinearH1Compl.lean`
+and `Regularity/DiffChart/TwiceDifferentiated/BilinearH1Compl.lean`), this
+module exposes the H⁴ regularity result in the same hypothesis-bearing witness
+style as the existing H² API.
 
 The single residual hypothesis exposed by this module is a per-chart
 `MemWkp 4 2` witness `ChartH4NonSmoothPOUWitness g u α` for the

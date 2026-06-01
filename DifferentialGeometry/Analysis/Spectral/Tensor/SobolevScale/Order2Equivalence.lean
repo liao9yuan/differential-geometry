@@ -17,7 +17,7 @@ Sobolev towers of mixed `(r, s)`-tensor fields:
 * the **intrinsic** tower `TensorPouSobolevHilbert g r s k` (Hausdorff
   completion of smooth compactly-supported sections in the Hilbert-Schmidt
   partition-of-unity-weighted chart-Sobolev norm `tensorPouSobolevHsNorm g k`),
-  built in `IntrinsicSobolev/HilbertSpace.lean`.
+  built in `Analysis/Sobolev/TensorHilbert/HilbertSpace.lean`.
 
 This file collects the order-`2` comparison material that is available
 **without any chart-locality predicate** (no `HasLocallyConstantChartAt`, no

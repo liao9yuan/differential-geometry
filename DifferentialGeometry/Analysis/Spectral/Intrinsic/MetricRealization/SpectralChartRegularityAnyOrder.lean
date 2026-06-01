@@ -13,7 +13,7 @@ For a closed (compact, boundaryless) smooth Riemannian manifold `(M, g)` modelle
 on a finite-dimensional real inner-product space `E`, this file assembles the
 *general-element* (infinite spectral support) extension of the per-eigenvector
 chart-Sobolev regularity bounds into the all-orders predicate
-`SpectralChartRegularity g r s` of `SpectralSmoothGate.lean`.
+`SpectralChartRegularity g r s` of `SpectralSmoothRepresentative.lean`.
 
 ## Strategy
 

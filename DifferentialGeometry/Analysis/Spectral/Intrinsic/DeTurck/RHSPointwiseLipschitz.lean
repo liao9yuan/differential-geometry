@@ -20,7 +20,7 @@ norm `‖·‖_{g₀,x}` coming from `Tensor0SBundle.tensorRS_riemannianBundle g
 The DeTurck right-hand side `deTurckRicciRHS g_bg g x : TangentSpace I x →L[ℝ]
 TangentSpace I x →L[ℝ] ℝ` is a continuous bilinear form, i.e. a covariant
 `(0,2)`-tensor, living in the fibre `TensorRSSpace 0 2 I x` (see
-`PDE/RicciFlow/DeTurckRHSSection.lean`).  Its Riemannian fibre norm is taken in
+`Geometry/Flow/RicciFlow/DeTurckRHSSection.lean`).  Its Riemannian fibre norm is taken in
 the `(0,2)`-tensor bundle Riemannian metric induced by the tangent metric
 `g₀.toContinuousRiemannianMetric`.
 

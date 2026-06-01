@@ -5,7 +5,7 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Regularity.Pushforwar
 # The `mfderiv`-in-chart dictionary feeding the raw variational identity
 
 The combinator `rawVariationalIdentity_of_chartFlow_innerCLM`
-(`SmoothInSpace/VariationalLiftCovariant.lean`) produces `RawVariationalIdentity`
+(`CovariantIdentity/Covariant.lean`) produces `RawVariationalIdentity`
 from three per-flow inputs:
 
 * `hDchart` — an operator-valued Euclidean variational ODE on the model space `E`;

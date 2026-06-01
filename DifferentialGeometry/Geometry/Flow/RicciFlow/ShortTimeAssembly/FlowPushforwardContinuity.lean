@@ -13,6 +13,14 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeFlow.ForwardFlow
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeFlow.CutoffExtension
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeAssembly.FlatVariationalIdentity
 
+/-!
+# Time-continuity of the flow pushforward
+
+Shows that the pushforward `mfderiv` of the conjugating diffeomorphism flow is continuous in time,
+identifies the relevant flow families, and records the joint-smooth moving-`mfderiv` continuity
+fact used when assembling the Ricci-flow solution.
+-/
+
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle

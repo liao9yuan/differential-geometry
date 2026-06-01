@@ -11,7 +11,7 @@ For a smooth Riemannian metric `g` on a smooth manifold `M` whose model
 (`[HasSmoothBoundary E H I]`), this file packages the pointwise
 Bochner-Weitzenböck identity at **interior points** of `M`. The companion
 boundaryless file
-`Integral/Connection/BochnerConcrete.lean` proves the identity unconditionally
+`Geometry/Curvature/Bochner/BochnerConcrete.lean` proves the identity unconditionally
 at every point under `[I.Boundaryless]`.
 
 The pointwise Bochner identity is a statement at INTERIOR points of `M` (where
@@ -47,7 +47,7 @@ On the with-boundary track:
 hypothesis-bearing form: the per-interior-point identity is supplied as
 `h_pointwise`, and the named theorem extracts it at any interior point. This
 mirrors the role played by `bochner_pointwise_concrete_metric_unconditional` in
-`Integral/DivergenceTheorem/Bochner.lean` for the boundaryless track.
+`Geometry/Curvature/Bochner/BochnerConcrete.lean` for the boundaryless track.
 
 ## Discharge of the hypothesis
 
@@ -57,7 +57,7 @@ The hypothesis `h_pointwise` can be discharged in two ways:
    `[I.Boundaryless]` (so that the model coincides with a boundaryless model
    and the entire boundaryless Bochner machinery applies), then
    `bochner_pointwise_concrete_metric_unconditional` from
-   `Integral/Connection/BochnerConcrete.lean` discharges `h_pointwise` for
+   `Geometry/Curvature/Bochner/BochnerConcrete.lean` discharges `h_pointwise` for
    every `x : M` together with the agreement
    `Δ_g_with_boundary g hf hf_int x = Δ_g g hf x` at every interior point.
 2. **Direct chart-Christoffel verification.** A client may discharge the

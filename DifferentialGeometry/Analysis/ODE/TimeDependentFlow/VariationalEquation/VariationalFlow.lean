@@ -14,7 +14,8 @@ the **moving-pushforward inner product**
   `s ↦ g.inner (Φ_fam t x) (mfderiv (Φ_fam s) x v) (mfderiv (Φ_fam s) x w)`.
 
 The derivative-level Cartan-cancellation primitive
-`cartan_cancellation_derivative_witness` (in `Pullback/CartanCancellation.lean`)
+`cartan_cancellation_derivative_witness` (in
+`Geometry/Flow/RicciFlow/Pullback/Cartan/Cancellation.lean`)
 *takes* the per-slot `HasDerivAt` witnesses (`h_A`, `h_B`), the per-slot value
 identifications (`h_A_value`, `h_B_value`), the assembled total `HasDerivAt`
 (`h_total`) and the additive identity (`h_sum`) as hypotheses, and packages the

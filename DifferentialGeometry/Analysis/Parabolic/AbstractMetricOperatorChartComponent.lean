@@ -7,9 +7,16 @@ import Mathlib.Geometry.Manifold.ContMDiff.Basic
 /-!
 # Chart-component witnesses for an abstract metric operator
 
-Type-level scaffolding for the chart-component smoothness and chart-component
+Two witness theorems for the chart-component smoothness and chart-component
 symmetry of an abstract operator `F` on smooth Riemannian metrics, in the shape
-consumed by the Phase 7/8 quasi-linear short-time existence pipeline.
+consumed by the quasi-linear short-time existence pipeline:
+
+* `F_canonical_chart_component_smooth` — the scalar chart components of `F g`
+  against the chart-pushforward model frame are `C^∞` on the chart source,
+  projected from the smooth quasi-linear dependence hypothesis on `F`.
+* `F_chart_component_symmetric` — those chart components are symmetric in the
+  pair of model-basis indices when `F`'s output is symmetric in its two
+  tangent-vector arguments.
 -/
 
 noncomputable section

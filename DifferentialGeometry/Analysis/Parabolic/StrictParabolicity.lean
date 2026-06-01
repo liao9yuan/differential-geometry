@@ -82,7 +82,7 @@ phrased with the `+` sign, the genuine output of the closed forms.
 ## Conventions
 
 A covector at `x` is recorded as a model vector `ξ : E`, with chart components
-`ξ_a = (chartModelBasis E).repr ξ a` (the same convention as `Symbol.lean`,
+`ξ_a = (chartModelBasis E).repr ξ a` (the same convention as `PrincipalSymbol.lean`,
 `RicciSymbol.lean`, and `DeTurckCorrectionSymbol.lean`).  The fibre `TangentSpace I x` is
 definitionally the model space `E`, so the model-basis vectors `chartModelBasis E i` are
 admissible arguments of a fibre bilinear form.  "Symmetric input tensor" means a fibre
@@ -256,7 +256,7 @@ theorem deTurckSymbol_isStrictlyParabolic_of_symm (g g' : SmoothRiemannianMetric
 tensors, up to sign.**
 
 The scalar Laplace–Beltrami symbol `laplacianSymbol g`, in the `∂_a∂_b ↦ −ξ_aξ_b`
-convention of `Symbol.lean`, scales by `−|ξ|²_g` (`laplacianSymbol_apply_apply`).  The
+convention of `PrincipalSymbol.lean`, scales by `−|ξ|²_g` (`laplacianSymbol_apply_apply`).  The
 Ricci–DeTurck symbol, in the `∂_a∂_b ↦ +ξ_aξ_b` convention of the linearized closed
 forms, scales — on a symmetric input — by `+|ξ|²_g`.  Hence on symmetric tensors the
 Ricci–DeTurck symbol is the negative of the (constant-fibre) scalar-Laplacian

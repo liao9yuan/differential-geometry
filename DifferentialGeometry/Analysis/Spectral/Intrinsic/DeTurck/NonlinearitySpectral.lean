@@ -9,15 +9,15 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.PrincipalPartMat
 
 The quasilinear strong-existence engine
 `quasilinear_strong_existence`
-(`Analysis/Parabolic/QuasiLinear/MaxRegFixedPoint.lean`) consumes a
-nonlinearity
+(`Analysis/Parabolic/QuasiLinear/TensorMaximalRegularity/ForcingFixedPoint.lean`)
+consumes a nonlinearity
 
   `N : tensorHs g r s (a + 2) → tensorHs g r s a`
 
 with `LipschitzWith L N` and `2 L < 1`, and produces a strong solution of
 `∂_t u = Δ_∇ u + N(u)`.  The spectral operator `Δ_∇` whose eigenvalues
 `λᵢ ≥ 0` scale the `tensorHs` tower is, by the principal-part match recorded
-in `DeTurckPrincipalPartMatch.lean`, exactly the second-order part of the
+in `PrincipalPartMatch.lean`, exactly the second-order part of the
 Ricci–DeTurck right-hand side `deTurckRicciRHS g_bg ·`.  The remainder
 
   `N(u) := deTurckRicciRHS g_bg (g_bg + h) − Δ_∇ h`,   `h = realize u`,
@@ -31,7 +31,7 @@ the construction depends on.
 
 ## The type-level obstruction (the gate)
 
-`tensorHs g r s σ` is, by `SobolevScale/Defs.lean`, a structure carrying an
+`tensorHs g r s σ` is, by `Analysis/Spectral/Tensor/SobolevScale/Defs.lean`, a structure carrying an
 abstract spectral coordinate family
 `coeff : TensorEigenIdx g r s → ℝ` together with a weighted-`ℓ²` summability
 witness — *not* a pointwise tensor field, and certainly not a
@@ -52,12 +52,12 @@ The realization splits into two maps of very different difficulty:
 
 * **`TensorL2 → SmoothRiemannianMetric`** — *the gate, NOT available*:
   `TensorL2 r s g = UniformSpace.Completion (SmoothCcTensor g r s)`
-  (`Integral/L2/Hilbert/Defs.lean`), an abstract metric completion.  A
+  (`Analysis/Integration/L2/Hilbert/Defs.lean`), an abstract metric completion.  A
   generic element is an equivalence class of Cauchy sequences with no
   pointwise values.  Promoting it to a `SmoothRiemannianMetric` requires
   (i) a continuous-representative Sobolev embedding `H^{a+2} ↪ C²`
   (the key tensor lemma `tensorPouSobolevHilbert_embedding_Ck` in
-  `SobolevEmbedding.lean` is itself still unproved), valid only when
+  `Analysis/Sobolev/Embedding/TensorSobolevEmbeddingCm.lean`), valid only when
   `2(a+2) > dim M + 4`, and (ii) a positive-definiteness argument making
   `g_bg + h` an honest metric for `h` small in `C⁰`.  The only existing
   `tensorHs → SmoothCcTensor` realization, `tensorHsSmoothRepr`
@@ -77,7 +77,7 @@ The realization splits into two maps of very different difficulty:
   `firstOrderRemainder_lands_in_Ha`.
 * `deTurckNonlinearitySpectral_principalPart_cancels` — re-export of the
   symbol-level cancellation `deTurckRicciRHS_minus_roughLaplacian_…` from
-  `DeTurckPrincipalPartMatch.lean`, the mathematical justification that the
+  `PrincipalPartMatch.lean`, the mathematical justification that the
   remainder is first order.
 
 ## Sign convention

@@ -19,7 +19,7 @@ used in the time-calculus of the tensor heat power family:
   with `K = tensorHeatPowerCoeffBoundCalc (k+2) (t/2)`.
 
 These mirror the scalar template in
-`Analysis/HeatEquation/SpectralBounds.lean`.
+`Analysis/Heat/Semigroup/SpectralBounds.lean`.
 -/
 
 noncomputable section

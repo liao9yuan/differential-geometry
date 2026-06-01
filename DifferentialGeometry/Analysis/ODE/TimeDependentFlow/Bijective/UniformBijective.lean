@@ -1,5 +1,10 @@
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Bijective.ChartCoverBijective
 
+/-! # Two-sided bijectivity of the chart-cover flow on a uniform horizon
+
+Extraction of a single uniform time horizon from the open-cover-local bijectivity
+data on a compact manifold, giving two-sided bijectivity of the chart-cover flow. -/
+
 namespace DifferentialGeometry.PDE.RicciFlow.ODE
 
 open Bundle

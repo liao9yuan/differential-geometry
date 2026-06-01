@@ -3,6 +3,15 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Bijective.ReversedFlo
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Bijective.ComposeIsId
 import Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary
 
+/-!
+# Bijectivity of the time-dependent flow on a closed manifold
+
+Folder headline assembling, from the `Bijective/` siblings, the chart-cover
+"forward flow of `X` together with the reverse flow of `-X`" on a common positive
+time horizon, the building block for flow bijectivity and smooth invertibility
+of the time-dependent flow on a closed (compact, boundaryless) manifold.
+-/
+
 namespace DifferentialGeometry.PDE.RicciFlow.ODE
 
 open Bundle

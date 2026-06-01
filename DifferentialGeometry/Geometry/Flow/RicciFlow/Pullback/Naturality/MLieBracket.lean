@@ -1,6 +1,13 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.PushforwardVF
 import Mathlib.Geometry.Manifold.VectorField.LieBracket
 
+/-!
+# Naturality of the Lie bracket under pushforward
+
+Shows that the manifold Lie bracket of vector fields is natural under a diffeomorphism: the
+pushforward of a bracket is the bracket of the pushforwards.
+-/
+
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback
 
 open Bundle

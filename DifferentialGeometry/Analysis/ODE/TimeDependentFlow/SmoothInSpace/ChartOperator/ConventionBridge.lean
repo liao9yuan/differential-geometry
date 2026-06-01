@@ -4,7 +4,7 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.ChartOp
 # The trivialization-convention bridge for the chart-coordinate variational data
 
 The combinator `rawVariationalIdentity_of_chartFderiv_witness`
-(`SmoothInSpace/VariationalLiftChartDictionary.lean`) produces `RawVariationalIdentity`
+(`ChartOperator/ChartDictionary.lean`) produces `RawVariationalIdentity`
 from chart-coordinate Euclidean variational data once a single value equation `hQinner`
 is supplied:
 
@@ -28,14 +28,14 @@ representation of the vector field — to that trivialised flat summand.
 ## The two chart representations of the generating vector field
 
 The Euclidean variational ODE `IsLocalFlow.hasDerivAt_partial_spatial_fderiv`
-(`SmoothInSpace/VariationalODE.lean`) is run on the chart flow of the **raw-fibre**
+(`VariationalODE/EuclideanVariationalODE.lean`) is run on the chart flow of the **raw-fibre**
 representation
 
   `R(z) := (X (φ.symm z) : E)`        (`chartRawRepr`),
 
 i.e. the value `X (φ.symm z) : TangentSpace I (φ.symm z) = E`, read with **no**
 trivialization applied (this is exactly the `f_chart` consumed by
-`ChartLocalPicardData.contDiffOn_top` in `BanachIC.lean`).  The chart Levi-Civita
+`ChartLocalPicardData.contDiffOn_top` in `VariationalODE/BanachIC.lean`).  The chart Levi-Civita
 inner CLM, by contrast, is built from the **trivialised** representation
 
   `T(z) := X̃_α (φ.symm z) = trivToE α (φ.symm z) (X (φ.symm z))`   (`chartTrivRepr`).
@@ -78,9 +78,8 @@ The decomposition makes the obstruction to `hQinner` explicit and verifiable:
   (the symbol `Γ^i_{jk}` built from `g`, `chartChristoffel`);
 * the two flat derivatives differ by the **moving-trivialization correction**
   `(fderiv ℝ C z₀ ·) (R z₀)`, which is the *chart-transition* first-jet derivative — the
-  classical second-derivative-of-the-chart-change term `D²φ`, see
-  `chartChristoffelContraction_chart_transform` in
-  `Geometry/Riemannian/Geodesic/ChartChristoffelTransform.lean`.
+  classical second-derivative-of-the-chart-change term `D²φ` (the chart-transition
+  transformation law of the Christoffel contraction).
 
 Consequently the moving-trivialization correction is a **smooth-structure** object,
 metric-independent, and is *not equal* to the metric `christoffelCorrection` in a general

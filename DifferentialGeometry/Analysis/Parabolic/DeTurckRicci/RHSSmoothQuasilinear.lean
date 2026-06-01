@@ -47,7 +47,8 @@ linearly combined. -/
 is the constant model-basis vector `chartModelBasis E i`.  Smooth in `x` on the
 chart-`α` source by `contMDiffOn_symm_coordChangeL` applied to the tangent
 bundle's `ContMDiffVectorBundle` instance (see
-`Tensor/RSTensor/ChartJacobianSmoothness.lean` for the wrapped-form pattern). -/
+`Tensor/RSTensor/BundleTrivialization/ChartJacobianClmSmoothness.lean` for the
+wrapped-form pattern). -/
 noncomputable def chartFrameVec (α : M) (i : Fin (Module.finrank ℝ E))
     (x : M) : TangentSpace I x :=
   (trivializationAt E (TangentSpace I) α).symmL ℝ x (chartModelBasis E i)
@@ -376,7 +377,8 @@ theorem linearity_in_second_derivatives
 shape required by the quasi-linear parabolic existence engine.
 
 The predicate `IsSmoothQuasilinearMetricRHS F` unfolds (per
-`PDE/ParabolicShortTime.lean`) into two conjuncts:
+`Analysis/Parabolic/DeTurckRicci/QuasilinearMetricShortTimeExistence.lean`) into two
+conjuncts:
 
 * **(C1) chart smoothness**: for every metric `g`, chart base point `α`, and pair of
   basis indices `(i, j)`, the scalar function

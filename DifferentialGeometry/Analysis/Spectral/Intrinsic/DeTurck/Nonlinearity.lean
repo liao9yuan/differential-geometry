@@ -6,6 +6,18 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.DeTurckRHSSection
 import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Integrability
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartFiberTrivialisationOpNorm.SmoothBilinearSectionBddAbove
 
+/-!
+# The Ricci–DeTurck RHS difference as an intrinsic `g₀`-tensor section
+
+The Ricci–DeTurck right-hand side `deTurckRicciRHS g_bg g` is a covariant `(0,2)`-tensor
+at each base point, re-tagged by a base metric `g₀` whose Levi-Civita fibre structure
+supplies the intrinsic `(0,2)`-tensor fibre norm. This file studies the difference of two
+such RHS sections measured in the `g₀`-induced Riemannian fibre norm
+`tensorPointwiseNorm g₀ 0 2`, which (unlike the chart-trivialization-image model operator
+norm) is bounded on the compact manifold — the chart-independent object that controls the
+DeTurck nonlinearity.
+-/
+
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -33,7 +45,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 The Ricci–DeTurck right-hand side `deTurckRicciRHS g_bg g x` is a covariant
 `(0,2)`-tensor at each base point, packaged as a smooth, compactly-supported
 section `deTurckRHSSection g_bg g : SmoothCcTensor g 0 2`
-(see `PDE/RicciFlow/DeTurckRHSSection.lean`).  The *metric* tag on
+(see `Geometry/Flow/RicciFlow/DeTurckRHSSection.lean`).  The *metric* tag on
 `SmoothCcTensor` is phantom — the underlying section type does not depend on
 it — so each such section may be re-tagged by the base metric `g₀`, whose
 Levi-Civita / Riemannian fibre structure supplies the intrinsic

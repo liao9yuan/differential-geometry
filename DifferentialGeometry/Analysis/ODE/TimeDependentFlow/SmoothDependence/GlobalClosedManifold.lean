@@ -5,7 +5,7 @@ import Mathlib.Topology.Compactness.Compact
 import Mathlib.Data.Finset.Lattice.Fold
 
 /-!
-## H3 — global jointly-smooth flow on a closed manifold
+# Global jointly-smooth flow on a closed manifold
 
 This file upgrades the *local* manifold ODE smooth-dependence theorem
 `local_flow_jointSmooth_and_integralCurve` (one open neighbourhood per point)
@@ -113,7 +113,7 @@ theorem autonomizedFieldJointC1_of_contMDiff
   exact ((autonomizedFlowVF_section_contMDiff X hX).of_le h1le).contMDiffAt
 
 /--
-**H3 globalised: a jointly-smooth flow on a closed manifold.**
+**A jointly-smooth flow on a closed manifold.**
 
 On a closed (compact, boundaryless) manifold `M`, the local manifold ODE
 smooth-dependence theorem upgrades to a single global flow `Φ : M → ℝ → M` on a

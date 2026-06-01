@@ -6,7 +6,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.Representati
 
 For a smooth Riemannian metric `g` on a closed (compact, boundaryless) smooth
 manifold `M`, fixed ranks `(r, s)`, and a chart center `α : M`, the chart-frame
-component API of `ChartTensor/Components.lean` *reads off* — from a smooth
+component API of `ChartTensor/Components/Defs.lean` *reads off* — from a smooth
 compactly-supported `(r, s)`-tensor section `S : SmoothCcTensor g r s` — the
 scalar component functions of `S` in the chart-`α` frame, indexed by the
 component multi-index type `TensorCompIdx r s`. The raw chart-frame component

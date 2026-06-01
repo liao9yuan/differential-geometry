@@ -16,7 +16,7 @@ spectrum).
 The Ricci–DeTurck flow is a quasilinear parabolic equation
 `∂_t u = Δ_∇ u + N(u)` whose nonlinearity `N` is **first-order**: it loses
 exactly one spatial derivative (`N : H^{b+1} → Hᵇ`, zero principal symbol —
-see `DeTurckPrincipalPartMatch.lean`).  Feeding such a solution into the
+see `DeTurck/PrincipalPartMatch.lean`).  Feeding such a solution into the
 two-derivative-gain smoothing produces a genuine **net gain of one spatial
 order per step**:
 

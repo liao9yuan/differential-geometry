@@ -12,7 +12,7 @@ covGradRoughLapCurv g T₀ = Δ_∇(∇T₀) − ∇(Δ_∇ T₀)
 ```
 
 is the only remaining ingredient for the unconditional order-`2` covariant Gårding estimate.
-The committed foundation (`Order2DefectMetricTraceFrame.lean`, `Order2DefectOffDiagPerDir.lean`)
+The committed foundation (`MetricTraceFrame.lean`, `OffDiagonalCurvatureCore.lean`)
 reduces it — modulo **STEP 2** — to a sum of off-diagonal Riemann-curvature contractions of
 `∇T₀`, whose intrinsic fibre norm sits in the admissible `rfns(∇T₀)` budget.
 

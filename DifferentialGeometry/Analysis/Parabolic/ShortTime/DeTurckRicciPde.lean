@@ -13,6 +13,12 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.Covaria
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.GlobalClosedManifold
 import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 
+/-! # DeTurck-Ricci-flow parabolic short-time existence and the metric PDE
+
+The short-time-existence endpoint `deturck_ricci_flow_parabolic_short_time_existence`
+for the DeTurck-Ricci flow on a closed manifold, together with the interior and
+initial-time forms of the realized metric PDE `∂_t g = -2 Ric(g) + 𝓛_X g`. -/
+
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle

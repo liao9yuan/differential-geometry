@@ -17,7 +17,7 @@ $$
 $$
 
 This is the genuinely-new, tensor-valued analogue of the scalar Bochner identity proved in
-`Bochner.lean` / `BochnerConcrete.lean` (which only covers the gradient `∇f` of a scalar).
+`WeitzenbockIdentity.lean` / `BochnerConcrete.lean` (which only covers the gradient `∇f` of a scalar).
 It is the pointwise input to the order-2 Gårding estimate
 $$
   \int |\nabla^2 T|^2 \;\le\; C\,\bigl(\|\Delta_\nabla T\|_{L^2}^2
@@ -58,7 +58,7 @@ symmetrises. The commutator identity below isolates that curvature term.
 
 The Riemann commutator uses the section-level formula
 `R(X, Y) Z = ∇_X ∇_Y Z - ∇_Y ∇_X Z - ∇_{[X,Y]} Z` (`riemannSec`), matching the curvature
-convention used throughout `Curvature.lean` / `Ricci.lean`. The connection Laplacian
+convention used throughout `Defs.lean` / `Ricci.lean`. The connection Laplacian
 `Δ_∇ = tr_g (W ↦ ∇_W ∇ ·)` uses the geometer convention (`rawTensorConnLap`).
 -/
 

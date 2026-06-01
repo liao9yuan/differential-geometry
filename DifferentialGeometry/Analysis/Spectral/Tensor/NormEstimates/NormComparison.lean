@@ -56,7 +56,7 @@ continuous bundle sections (total-space-valued) and never extract an
   the project's `tangentSpace_normedAddCommGroup`/`tangentSpace_normedSpace`
   and Mathlib's `RiemannianBundle (TangentSpace I)`-derived instances
   resolved by a local `attribute [-instance]` scope, mirroring the
-  `Continuous`-variant in `Tensor/RSTensor/TangentRiemannian.lean`.
+  `Continuous`-variant in `Geometry/Metric/TensorInner/TangentRiemannian.lean`.
 
 ## Remaining technical gap
 

@@ -8,7 +8,7 @@ import DifferentialGeometry.Geometry.Metric.PointwiseInner.DualMetric
 
 This file establishes the pointwise algebraic identity that connects the
 chart-frame `(r, s)`-inner product (`chartTensorInnerPointwise_rs_model`,
-defined in `ChartTensorInner.lean`) with the bundle-fibre `(0, n)`-inner
+defined in `Inner/Defs.lean`) with the bundle-fibre `(0, n)`-inner
 product (`tensorInnerPointwise_0s`, defined on the model fibre in
 `PointwiseInner/Defs.lean`), at a fixed base point `b` in the chart base
 set.

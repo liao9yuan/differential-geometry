@@ -1,6 +1,12 @@
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.ChartLocalExistence.ChartLocalPicard
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.ChartLocalExistence.UniformExistence
 
+/-! # The chart-coordinate Picard regularity predicate
+
+The clean regularity predicate `ChartCoordPicardRegular X` (continuity plus a
+per-chart uniform-in-time spatial Lipschitz bound) of the field, mentioning no
+solution flow, and the chart-local Picard data it produces. -/
+
 namespace DifferentialGeometry.PDE.RicciFlow.ODE
 
 open Bundle

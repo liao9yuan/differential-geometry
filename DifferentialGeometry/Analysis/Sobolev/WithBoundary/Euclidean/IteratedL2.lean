@@ -6,7 +6,8 @@ import DifferentialGeometry.Analysis.Sobolev.Euclidean.SupportAndDomain.Iterated
 half-space-friendly domains
 
 This module is the half-space-friendly parallel of
-`Analysis/Sobolev/EuclideanIteratedL2.lean`. Given a half-space-friendly
+`Analysis/Sobolev/Euclidean/IteratedSobolevSpace/IteratedL2.lean`. Given a
+half-space-friendly
 carrier `Ω ⊆ E` (an open subset of `E` intersected with the closed
 half-space `{y | 0 ≤ y 0}`), we define the *Dirichlet (zero-trace)*
 `L²`-convention norm and inner product

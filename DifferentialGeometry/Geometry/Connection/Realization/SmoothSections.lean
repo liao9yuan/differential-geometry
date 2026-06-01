@@ -6,7 +6,7 @@ import Mathlib.Geometry.Manifold.VectorBundle.Hom
 import Mathlib.Geometry.Manifold.ContMDiffMFDeriv
 
 /-!
-# SmoothRicciFlow: Smooth sections of the dual tangent bundle
+# Smooth sections of the dual tangent bundle
 
 This file provides smoothness lemmas about sections of the dual tangent bundle
 `Bundle.dual ℝ (TangentSpace I)`, needed for realizing the dual covariant derivative

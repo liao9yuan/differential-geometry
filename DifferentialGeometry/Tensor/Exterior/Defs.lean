@@ -11,6 +11,8 @@ import Mathlib.Analysis.Calculus.FDeriv.Symmetric
 import Mathlib.Geometry.Manifold.VectorBundle.SmoothSection
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 
+/-! # Differential forms: the `DifferentialForm` structure and its module instances -/
+
 noncomputable section
 
 open Filter ContinuousAlternatingMap Set

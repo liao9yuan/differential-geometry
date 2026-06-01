@@ -11,8 +11,9 @@ This module collects auxiliary `L²` bounds for the forward difference quotient
 a compact set `K` containing `cthickening |h| (closure Ω'')`.
 
 The bounds are intended as building blocks for the difference-quotient
-approach to interior `H²` regularity: see `Nirenberg/CrossBounds.lean` for the
-smooth-case algebra and `Regularity/ChartH2NonSmooth.lean` for the consumer
+approach to interior `H²` regularity: see
+`Sobolev/Nirenberg/MasterInequality/CrossBounds.lean` for the
+smooth-case algebra and `Regularity/ChartHk/H2NonSmooth.lean` for the consumer
 (`chart_loc_of_uniform_bound`) that turns a uniform-in-`h` bound into a
 weak second partial derivative.
 

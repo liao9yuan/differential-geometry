@@ -21,7 +21,7 @@ b ↦ TotalSpace.mk' E b (metricSharp g b (cv b))
 is a smooth tangent-bundle section.
 
 The construction mirrors the gradient smoothness chain in
-`Geometry/Gradient.lean`. The gradient is the special case `cv = df`, in which
+`Geometry/Operator/Gradient.lean`. The gradient is the special case `cv = df`, in which
 case `cv b (chartBasisVecFiber α j b) = ∂_j f̃ (φ b)` are the chart-pullback
 partial derivatives. Here `cv` is arbitrary, with its chart-basis components
 `cv_j(b) := cv b (chartBasisVecFiber α j b)` supplied as the smoothness witness.

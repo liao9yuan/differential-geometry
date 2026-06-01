@@ -13,6 +13,12 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Regularity.BareFlowFr
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.CovariantIdentity.FlatIdentity
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.GlobalClosedManifold
 
+/-! # `C²`-in-time continuity of the realized DeTurck solution
+
+`deturck_solution_c2_continuous_icc0`: the metric family `g_DT` realized from the
+mild solution is `C²` (jointly continuous through second order) on `[0, T]`, from
+the Sobolev-scale and realize hypotheses on the solution. -/
+
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle

@@ -9,7 +9,7 @@ Let `S : SmoothCcTensor g r s` be a smooth, compactly-supported `(r, s)`-tensor
 section over a closed Riemannian manifold `(M, g)`, and let `α : M` be a chart
 center. For each pair of multi-indices `Idx : Fin r → Fin n` and
 `Jdx : Fin s → Fin n` (with `n := Module.finrank ℝ E`), the file
-`Analysis/Parabolic/TensorSpectral/ChartTensor/Components.lean` defines the
+`ChartTensor/Components/Defs.lean` defines the
 chart-`α`-trivialised scalar component
 
 ```

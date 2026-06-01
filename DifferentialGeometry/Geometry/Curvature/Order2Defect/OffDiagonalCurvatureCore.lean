@@ -9,7 +9,7 @@ commutator defect is the `(0, 3)`-tensor field
 ```
 covGradRoughLapCurv g T₀ = Δ_∇(∇T₀) − ∇(Δ_∇ T₀)
 ```
-(`CovGradRoughLapCommutatorClose3.lean`), where `Δ_∇ = rawTensorConnLapSmooth` is the rough
+(`CovGradRoughLap/CurvatureDefect.lean`), where `Δ_∇ = rawTensorConnLapSmooth` is the rough
 (connection) Laplacian and `∇ = covGrad` is the covariant gradient. Its pointwise intrinsic
 fibre-norm bound
 ```
@@ -17,8 +17,8 @@ rfns(covGradRoughLapCurv g T₀)(x) ≤ C₀² · (rfns(T₀) + rfns(∇T₀) + 
 ```
 is the only remaining ingredient for the unconditional order-`2` covariant Gårding estimate
 `secondCovGrad_l2NormSq_le_rawConnLap_of_pointwise_curv_bound`
-(`CovGradRoughLapCurvL2Bound.lean`), assembled from this pointwise bound by the endpoint
-bridge `hpt_to_unconditional_bound` (`Order2DefectMetricTraceFrame.lean`).
+(`CovGradRoughLap/L2Bound.lean`), assembled from this pointwise bound by the endpoint
+bridge `hpt_to_unconditional_bound` (`MetricTraceFrame.lean`).
 
 ## The genuine off-diagonal curvature
 

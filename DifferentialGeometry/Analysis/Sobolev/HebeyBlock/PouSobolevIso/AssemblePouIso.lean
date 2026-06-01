@@ -7,6 +7,8 @@ import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.ChartParallelTransportOp
 import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.PouSobolevIso.PouNormChartComp
 import DifferentialGeometry.Analysis.Spectral.Tensor.Variational.H1Compl
 
+/-! # Assembling the `H^1`-level two-sided comparison between the operator-norm and Hilbert-Schmidt chart-Sobolev tensor norms -/
+
 namespace DifferentialGeometry.PDE.RicciFlow.HebeyBlock
 
 open Bundle

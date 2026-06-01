@@ -17,7 +17,7 @@ import Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary
 This file establishes standard properties of the chart-local measure
 `chartLocalMeasure g x₀` and of the glued global Riemannian measure
 `riemannianMeasure g ρ` (and its canonical form `riemannianVolumeMeasure g`)
-constructed in `ChartDensity.lean`, `Glue.lean` and `Invariance.lean`.
+constructed in `ChartDensity.lean`, `RiemannianMeasure.lean` and `Invariance.lean`.
 
 ## Main results
 

@@ -10,7 +10,7 @@ set_option linter.unusedSectionVars false
 # The intrinsic exponential map of a complete Riemannian manifold
 
 The chart-fixed exponential map `expMap g p v = maximalGeodesic g p v 1`
-(`Exponential/Definition.lean`) follows the geodesic spray written in the single
+(`Exponential/Defs.lean`) follows the geodesic spray written in the single
 chart at `p`.  That object is junk once the geodesic leaves `(chartAt H p).source`,
 so on a multi-chart manifold `expMap g p v` reverts to `p` for large `v`.
 

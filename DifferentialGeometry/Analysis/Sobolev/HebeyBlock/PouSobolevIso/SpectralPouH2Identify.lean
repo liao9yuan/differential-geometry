@@ -10,6 +10,8 @@ import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.ChartParallelTransportOp
 import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.PouSobolevIso.PouNormChartComp
 import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.PouSobolevIso.AssemblePouIso
 
+/-! # Identifying the `H^1` chart-Sobolev tensor norm with the intrinsic covariant-derivative `H^1` norm -/
+
 namespace DifferentialGeometry.PDE.RicciFlow.HebeyBlock
 
 open Bundle

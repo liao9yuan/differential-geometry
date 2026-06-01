@@ -13,7 +13,7 @@ For a smooth Riemannian metric `g` on a smooth manifold `M` and a curve
 $$u''(t) + \Gamma^k{}_{ij}(g, \alpha)(u(t))\, u'^i(t)\, u'^j(t) = 0,
   \qquad u(t) := \varphi_\alpha (\gamma(t)),$$
 where `Γ` is the chart-coordinate Christoffel symbol provided by
-`chartChristoffel g α` (see `DifferentialGeometry/Geometry/Hessian.lean`).
+`chartChristoffel g α` (see `DifferentialGeometry/Geometry/Operator/Hessian.lean`).
 
 This file packages:
 

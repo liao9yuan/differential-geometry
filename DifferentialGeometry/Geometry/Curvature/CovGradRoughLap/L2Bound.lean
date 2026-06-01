@@ -8,7 +8,7 @@ import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.Tensor3rdCurvFi
 
 For a closed smooth Riemannian manifold `(M, g)` modelled on a real inner-product space
 `E`, the generalized order-`2` covariant Gårding estimate
-`secondCovGrad_l2NormSq_le_rawConnLap_gen` (`TensorConnLapSecondOrderGardingGen.lean`)
+`secondCovGrad_l2NormSq_le_rawConnLap_gen` (`TensorConnLapSecondOrderGardingSobolevCurv.lean`)
 consumes a **curvature defect `L²` bound** `hcurv` of the shape
 ```
 ‖Curv‖_{L²} ≤ C₀ · (‖T₀‖_{L²} + ‖∇T₀‖_{L²} + ‖∇²T₀‖_{L²}),
@@ -19,7 +19,7 @@ where `Curv : SmoothCcTensor g 0 3` is the canonical commutator defect
 
 This file supplies the **analytic packaging** that turns a *pointwise* fibre-norm bound on
 the defect — the form in which the genuine third-order Weitzenböck curvature reconciliation
-(`Tensor3rdCurv` + the moving-frame residual, `CovGradRoughLapCommutatorClose3.lean`)
+(`Tensor3rdCurv` + the moving-frame residual, `CurvatureDefect.lean`)
 delivers its control — into the `L²` inequality of the exact shape consumed by
 `secondCovGrad_l2NormSq_le_rawConnLap_gen`. The bridge corollary
 `tensorL2Norm_sq_eq_integral_riemannianFiberNormSq`
@@ -60,14 +60,14 @@ riemannianFiberNormSq g 0 3 x (covGradRoughLapCurv g T₀).toSection x
 the hypothesis of `tensorL2Norm_le_of_pointwise_fiberNormSq_bound` /
 `secondCovGrad_l2NormSq_le_rawConnLap_of_pointwise_curv_bound`. That bound is **not** packaged
 here: it is the genuine third-order tensor Weitzenböck content. Its closure requires the
-slot-`0` Christoffel matching (obstruction 1 of `CovGradRoughLapCommutatorClose2.lean`) — the
+slot-`0` Christoffel matching (obstruction 1 of `FreeDirectionReduction.lean`) — the
 torsion-free identification of `Δ_∇(∇T₀)(x)(unit)` (curried) with the fixed-frame trace
 `∑ᵢ ∇_{Bᵢ}∇_{Bᵢ}(∇_W T₀)(x)(unit)` — followed by the two genuinely-distinct fibre-norm bounds:
 the `Tensor3rdCurv` curvature-contraction bound (controlled fibrewise by `rfns(T₀)`,
 `rfns(∇T₀)`, `rfns(∇²T₀)` via `Tensor3rdCurvFiberNormBound.lean` and the Parseval curvature
 lemmas) and the moving-frame residual bound (`covGradRoughLapMovingFrameResidual`, controlled
 by `rfns(∇²T₀)`). Both obstructions are documented as open in
-`CovGradRoughLapCommutatorClose{2,3}.lean`; this file isolates the analytic packaging so that
+`FreeDirectionReduction.lean` / `CurvatureDefect.lean`; this file isolates the analytic packaging so that
 closing them immediately yields the unconditional estimate.
 
 ## Sign / convention

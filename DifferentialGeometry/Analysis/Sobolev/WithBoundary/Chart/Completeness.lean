@@ -6,11 +6,12 @@ import Mathlib.Topology.UniformSpace.UniformEmbedding
 /-!
 # Structural building blocks for Banach completeness of `W^{k,p}_chart(M)` (with boundary)
 
-This is the with-boundary parallel of `Analysis/Sobolev/ChartBanachComplete.lean`.
+This is the with-boundary parallel of
+`Analysis/Sobolev/Chart/BanachCompleteness/Completeness.lean`.
 
 For a smooth manifold-with-boundary `M` modelled on `EuclideanHalfSpace n`, the
 chart-based half-space Sobolev space `WkpChart g k p hp` (built in
-`WithBoundary/ChartBanach.lean`) is seminormed. We establish the chart-by-chart
+`WithBoundary/Chart/Banach.lean`) is seminormed. We establish the chart-by-chart
 structural lemmas needed to study sequential completeness of the corresponding
 `WkpChartQuot`:
 

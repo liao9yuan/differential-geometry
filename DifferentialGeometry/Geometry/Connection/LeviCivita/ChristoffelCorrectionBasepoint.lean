@@ -12,7 +12,7 @@ section's `α`-trivialised value `Y : E` (second slot) and the tangent-vector ar
      = ∑ᵢⱼₖ (b.repr (trivToE α x v))ᵢ · (b.repr Y)ⱼ · Γᵏᵢⱼ(g, α)(φ x) • eₖ`,
 
 where `Γᵏᵢⱼ(g, α)` is the *metric* chart-Christoffel symbol `chartChristoffel`, built from `g`
-(`Geometry/Hessian.lean`).
+(`Geometry/Operator/Hessian.lean`).
 
 This file isolates the value of this correction at the **basepoint** `x = α`, where the
 moving trivialisation degenerates to the identity (`trivToE α α = id` on the chart base set).

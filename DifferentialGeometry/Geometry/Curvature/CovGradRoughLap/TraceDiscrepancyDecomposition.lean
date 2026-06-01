@@ -9,7 +9,7 @@ commutator defect is
 ```
 covGradRoughLapCurv g T₀ = Δ_∇(∇T₀) − ∇(Δ_∇ T₀)   (a `(0, 3)`-tensor field),
 ```
-(`CovGradRoughLapCommutatorClose3.lean`). The headline of this file is the **unconditional**
+(`CurvatureDefect.lean`). The headline of this file is the **unconditional**
 curried decomposition of that defect along a tangent direction `w`, read at the unit
 `(0, 0)`-tensor:
 ```
@@ -22,7 +22,7 @@ tensor0S_curry 2 x (covGradRoughLapCurv g T₀ x (unit)) w
 ## Why the slot-`0` matching route is unavailable
 
 The slot-`0` frame-trace matching predicate `slot0FrameTraceMatching`
-(`CovGradRoughLapCurvRicciRoute.lean`) asserts that the curried unit-evaluation of
+(`Slot0FrameTraceMatching.lean`) asserts that the curried unit-evaluation of
 `Δ_∇(∇T₀)` equals the **bare** fixed-frame iterated trace `∑ᵢ ∇_{Bᵢ}∇_{Bᵢ}(∇_W T₀)(x)(unit)`.
 That equality is false: the rough Laplacian `Δ_∇ = rawTensorConnLap` carries, by definition,
 the Christoffel correction `−∑ᵢ ∇_{(∇_{Bᵢ}Bᵢ)}(·)` (and the bare iterated trace also
@@ -45,13 +45,13 @@ carried as a named term rather than asserted to vanish.
   the discrepancy plus the explicit curvature field `Tensor3rdCurv` minus the moving-frame
   residual. The proof is pure algebra from the proved frame-trace swap
   `frame_trace_thirdW_eq_covGrad_rawConnLap_sub_residual_add_curv`
-  (`CovGradRoughLapCommutatorClose3.lean`) and the definition of `covGradRoughLapCurv`; no
+  (`CurvatureDefect.lean`) and the definition of `covGradRoughLapCurv`; no
   curvature cancellation is re-derived (the curvature is delivered entirely by the swap).
 
 ## The precise remaining gap to the unconditional Gårding estimate (documented, not assumed)
 
 The hypothesis `hpt` of `secondCovGrad_l2NormSq_le_rawConnLap_of_pointwise_curv_bound`
-(`CovGradRoughLapCurvL2Bound.lean`) is the **(0, 3)** pointwise fibre-norm bound
+(`L2Bound.lean`) is the **(0, 3)** pointwise fibre-norm bound
 ```
 riemannianFiberNormSq g 0 3 x (covGradRoughLapCurv g T₀).toSection x
   ≤ C₀² · (rfns(T₀) + rfns(∇T₀) + rfns(∇²T₀))(x).
@@ -71,7 +71,7 @@ With that bridge in hand, the three curried summands must each be controlled wit
    (`RiemannianFiberNormSqRiemannOpHigherRankParseval.lean`,
    `Tensor3rdCurvFiberNormBound.lean`).
 3. `covGradRoughLapMovingFrameResidual g T₀ x w` — the moving-vs-fixed frame correction,
-   bounded by `rfns(∇²T₀)` (`CovGradRoughLapCommutatorClose3.lean`).
+   bounded by `rfns(∇²T₀)` (`CurvatureDefect.lean`).
 
 ## Convention
 

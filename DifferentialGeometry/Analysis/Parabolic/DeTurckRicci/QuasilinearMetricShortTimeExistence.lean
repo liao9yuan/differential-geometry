@@ -6,11 +6,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.PrincipalSymbol
 import Mathlib.Geometry.Manifold.MFDeriv.Basic
 
 /-!
-# Phase 7 — Parabolic existence: the engineering interface to Phase 8 (SKELETON)
-
-This file is a *skeleton* for the Phase 7 deliverables. Statements are concrete
-and self-contained, but the deeper sub-theorems are stubbed with `sorry` so
-the chain can be assembled and downstream Phase 8 work can begin in parallel.
+# Quasi-linear short-time existence for a parabolic operator on smooth metrics
 
 The endpoint is a quasi-linear short-time existence theorem for an
 abstract second-order parabolic operator on smooth Riemannian metrics:
@@ -21,16 +17,15 @@ smooth dependence on `(g, ∇g, ∇²g)`, there is a positive existence time
 `g_fam : ℝ → SmoothRiemannianMetric I M` with `g_fam 0 = g₀` and
 `∂_t g_fam(t) = F(g_fam(t))` for every `t ∈ [0, T)`.
 
-Phase 8 (handled in a separate dispatch) consumes this endpoint by
-instantiating `F` with the DeTurck-Ricci right-hand side
-`g ↦ -2 Ric(g) + 𝓛_{X(g, g_bg)} g`, which is strictly parabolic by the
-existing `deTurckSymbol_isStrictlyParabolic_of_symm`.
+The DeTurck-Ricci right-hand side `g ↦ -2 Ric(g) + 𝓛_{X(g, g_bg)} g` is the
+intended instantiation of `F`; it is strictly parabolic by the existing
+`deTurckSymbol_isStrictlyParabolic_of_symm`.
 
 ## Layout
 
-* `IsParabolicMetricRHS` — abstract data describing a parabolic operator
-  on metrics together with its strict-parabolicity witness at the initial
-  metric, suitable for plugging into `quasilinear_parabolic_metric_short_time_existence`.
+* `IsStrictlyParabolicMetricRHS` — abstract strict-parabolicity data for an
+  operator `F` at a metric `g` (the existence of a principal symbol),
+  suitable for plugging into `quasilinear_parabolic_metric_short_time_existence`.
 * `IsQuasilinearMetricParabolicSolution F g₀ T g_fam` — the equation
   `∂_t g_fam(t) = F(g_fam(t))` evaluated pointwise against tangent
   vectors, with the initial condition `g_fam 0 = g₀` and the existence
@@ -40,17 +35,16 @@ existing `deTurckSymbol_isStrictlyParabolic_of_symm`.
   expressed via the Duhamel formula. Used internally as the linearisation
   of the quasi-linear case.
 
-## Main theorems (skeleton, proofs are `sorry`)
+## Main theorems
 
 * `linear_tensor_parabolic_shortTime_exists` — existence of a mild
-  solution to the linear inhomogeneous tensor heat equation. The
-  existing project lemma `tensor_linear_parabolic_existence`
-  (`Analysis/Parabolic/TensorLinearParabolic.lean`) provides this under
-  a chart-locality predicate; the predicate-free version is the target
-  of Route Y. The skeleton states it predicate-free.
-* `quasilinear_parabolic_metric_short_time_existence` — the Phase 7 endpoint:
-  short-time existence for `∂_t g = F(g)`, by Banach fixed point on
-  Duhamel iterates seeded by the linearised semigroup.
+  solution to the linear inhomogeneous tensor heat equation, stated
+  predicate-free and built directly from the Duhamel map of the abstract
+  bounded `C₀`-semigroup.
+* `quasilinear_parabolic_metric_short_time_existence` — short-time
+  existence for `∂_t g = F(g)`, by Banach fixed point on Duhamel iterates
+  seeded by the linearised semigroup. The proof of this endpoint is still
+  `sorry`-stubbed.
 -/
 
 namespace DifferentialGeometry
@@ -73,7 +67,7 @@ bilinear form `(g_fam s).inner x v w` at every base point `x` and tangent pair
 `(v, w)` matches `F(g_fam(t)) x v w`.
 
 The right-hand side `F` produces, for each metric `g`, a pointwise bilinear form
-`F g : ∀ x, T_x M →L T_x M →L ℝ`. Phase 8 will instantiate `F` with the
+`F g : ∀ x, T_x M →L T_x M →L ℝ`. The DeTurck-Ricci instantiation takes `F` to be the
 DeTurck-Ricci right-hand side
 `F(g) x v w = -2 ricciTensor g x v w + lieDerivMetric g (deTurckVF g g_bg) x v w`. -/
 def IsQuasilinearMetricParabolicSolution
@@ -88,11 +82,11 @@ def IsQuasilinearMetricParabolicSolution
 
 /-- An abstract strict-parabolicity hypothesis on an operator `F` at a metric `g`.
 
-For the skeleton this is an opaque `Prop` placeholder; downstream callers
-(notably Phase 8) supply concrete content by combining the existing
-`deTurckSymbol_isStrictlyParabolic_of_symm` (`PDE/DeTurck/StrictParabolicity.lean`) with
-the linearisation infrastructure in `PDE/DeTurck/DeTurckLinearization/`. The
-shape `Prop` is what `quasilinear_parabolic_metric_short_time_existence` consumes. -/
+Downstream callers supply concrete content by combining the existing
+`deTurckSymbol_isStrictlyParabolic_of_symm`
+(`Analysis/Parabolic/StrictParabolicity.lean`) with the linearisation
+infrastructure in `Analysis/Parabolic/DeTurckLinearization/`. The shape `Prop`
+is what `quasilinear_parabolic_metric_short_time_existence` consumes. -/
 def IsStrictlyParabolicMetricRHS
     (F : SmoothRiemannianMetric I M →
          (∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ))
@@ -101,10 +95,9 @@ def IsStrictlyParabolicMetricRHS
     DifferentialGeometry.PDE.RicciFlow.HasPrincipalSymbol F g σ
 
 /-- A second-order parabolic operator `F` on metrics has *smooth quasi-linear
-dependence on* the data `(g, ∇g, ∇²g)`. As an abstract Prop placeholder for the
-skeleton; downstream the concrete content is "F factors through chart-coordinate
+dependence on* the data `(g, ∇g, ∇²g)`: `F` factors through chart-coordinate
 data as a smooth function of metric components and their first two derivatives,
-strictly parabolic in the highest-order part".
+and is strictly parabolic in the highest-order part.
 
 The chart-smoothness conjunct is stated against the **chart-`α`-pushforward
 frame vectors** `(trivializationAt E (TangentSpace I) α).symmL ℝ x (chartModelBasis E i)`,
@@ -162,7 +155,8 @@ value `u₀`, where `L` is the (operator generating the) semigroup `S`.
 
 The Duhamel formula is `u(t) = S(t) u₀ + ∫₀ᵗ S(t - τ) (F τ) dτ`. Here we leave
 the semigroup `S` and forcing `F` as abstract data so the predicate composes
-with the existing `Analysis/Parabolic/QuasiLinear/Existence.lean` infrastructure. -/
+with the existing `Analysis/Parabolic/QuasiLinear/Semigroup/` Duhamel
+infrastructure. -/
 def IsLinearTensorParabolicMildSolution
     {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
     (S : Analysis.Parabolic.QuasiLinear.BoundedC0Semigroup X) (u₀ : X)

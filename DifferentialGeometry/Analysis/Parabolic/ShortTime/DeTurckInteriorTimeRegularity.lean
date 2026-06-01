@@ -11,6 +11,12 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Regularity.BareFlowFr
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.CovariantIdentity.FlatIdentity
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.GlobalClosedManifold
 
+/-! # Interior time regularity of the DeTurck maximal-regularity solution
+
+`deturck_interior_time_regularity`: the maximal-regularity Duhamel solution of the
+DeTurck linearized flow is differentiable in time on the open interval, with the
+interior heat-equation `∂_t u = Δ u + N(u)` holding almost everywhere. -/
+
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle

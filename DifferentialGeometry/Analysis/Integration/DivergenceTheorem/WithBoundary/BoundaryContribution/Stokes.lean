@@ -106,7 +106,7 @@ codimension-one affine subspace) but is not stated as a generic fact of
 theorem in chart-by-chart form is not proved here. The sole structural
 statement at the global level is
 `integral_divergence_with_boundary_eq_zero_of_compact_of_interior_support`
-(`InteriorCompactSupport.lean`), which establishes the boundary-vanishing
+(`WithBoundary/Divergence/InteriorCompactSupport.lean`), which establishes the boundary-vanishing
 case.
 -/
 
@@ -432,7 +432,7 @@ private lemma chartLocalMeasure_boundary_zero_of_total
 
 /-- A continuous compactly-supported function on a chart-source is integrable
 against the chart-local measure. (Reproduction of an analogous private lemma
-in `InteriorCompactSupport.lean`, exposed here so the global Stokes proof can
+in `WithBoundary/Divergence/InteriorCompactSupport.lean`, exposed here so the global Stokes proof can
 use it.) -/
 private lemma integrable_chartLocalMeasure_of_cs_chartSource
     [T2Space M] [CompactSpace M]

@@ -13,16 +13,25 @@ set_option linter.unusedSectionVars false
 /-!
 # Affine reparametrisation of geodesics
 
-Skeleton stubs for the tangent-bundle chain rule plus affine
-reparametrisation of geodesics. The four declarations below state:
+The tangent-bundle chain rule plus affine reparametrisation of geodesics.
+The main declarations below include:
 
 * `chartChristoffelContraction_smul_left_right` — bilinear scaling of the
-  chart-Christoffel contraction in both vector slots simultaneously.
-* `geodesicVectorFieldChartFiber_scaling_along_lift` — degree-two fibre
-  homogeneity of `geodesicVectorFieldChart g α`.
+  chart-Christoffel contraction in both vector slots simultaneously:
+  `Γ(a v, a w) = a² · Γ(v, w)`.
+* `chartFiberCoord_fiberScale` — effect of fibre rescaling on the chart
+  fibre coordinate of a tangent vector.
+* `hasMFDerivWithinAt_of_chartPhase_at_zero_section`,
+  `hasMFDerivWithinAt_of_chartDeriv_self` — chart-phase / chart-derivative
+  `MFDerivWithinAt` lemmas along the zero section.
+* `tangentCoordChange_zero_section_geodesicVF`,
+  `chartPhaseVF_extChartAt_zero_section` — chart-coordinate expressions of
+  the geodesic vector field on the zero section.
 * `scaledTangentLift_transport` — rescaling an integral curve of
   `geodesicVectorFieldChart g α` by an affine reparametrisation and a
   fibre rescaling yields another integral curve of the same field.
+* `pathELength_comp_affineHomeo` — invariance of the path length under an
+  affine reparametrisation.
 -/
 
 noncomputable section

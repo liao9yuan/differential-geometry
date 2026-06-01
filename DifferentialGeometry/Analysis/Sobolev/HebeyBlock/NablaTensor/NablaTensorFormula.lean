@@ -4,6 +4,8 @@ import DifferentialGeometry.Analysis.Sobolev.Tensor.PouWeightedHsNorm
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.Inclusion
 import DifferentialGeometry.Tensor.Multilinear.HsBoundOp
 
+/-! # Chart-coordinate decomposition `∇T = ∂T + Γ * T` of the covariant derivative on `(r, s)`-tensor sections -/
+
 namespace DifferentialGeometry.PDE.RicciFlow.HebeyBlock
 
 open Bundle DifferentialGeometry

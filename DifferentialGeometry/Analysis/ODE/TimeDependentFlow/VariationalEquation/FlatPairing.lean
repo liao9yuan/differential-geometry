@@ -4,18 +4,18 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.Covaria
 /-!
 # The flat-route Cartan pairing for the moving-pushforward inner product
 
-`variational_flow_feeds_cartan_witness` (`TimeDependentFlow/VariationalFlow.lean`) consumes the
+`variational_flow_feeds_cartan_witness` (`VariationalEquation/VariationalFlow.lean`) consumes the
 **covariant** per-slot identities `RawVariationalIdentity` (each asserting the slot pushforward
 curve has derivative `-∇_{dΦ·} X`) and produces the `-lieDerivMetric` derivative of the
 frozen-metric moving-pushforward inner product
 
   `s ↦ g.inner (Φ_fam t x) (mfderiv (Φ_fam s) x v) (mfderiv (Φ_fam s) x w)`.
 
-As the orbit-ODE analysis records (`SmoothInSpace/VariationalLiftManifoldFlowOrbitODE.lean`,
+As the orbit-ODE analysis records (`ChartOperator/ManifoldFlowOrbitODE.lean`,
 the residual (★)), the covariant per-slot identity is **not dischargeable** from the flow ODE:
 the genuine derivative of the orbit pushforward curve, read in Mathlib's moving target chart,
 is the **flat / Lie-type** value `T' (dΦv) + P' v` (`RawVariationalIdentityFlat`,
-`SmoothInSpace/VariationalLiftFlatIdentity.lean`), which differs from the covariant value by the
+`CovariantIdentity/FlatIdentity.lean`), which differs from the covariant value by the
 metric Christoffel contraction at the basepoint.  Precisely, with `α := Φ_fam t x` and
 `dΦv := mfderiv (Φ_fam t) x v`, the two per-slot values are related by
 

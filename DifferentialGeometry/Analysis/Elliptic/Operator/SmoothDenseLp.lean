@@ -20,7 +20,7 @@ functions are `Lp`-dense.
 
 The density of `smoothToLp` lifts to density of the H¹ extension
 `H1ComplToLp g : H1Compl g →L[ℝ] Lp ℝ 2 μ_g`, which is the form used by the
-variational Laplacian construction (see `Operator.lean`).
+variational Laplacian construction (see `VariationalLaplacian.lean`).
 
 ## Main results
 

@@ -15,8 +15,9 @@ import Mathlib.MeasureTheory.Function.LpSpace.Basic
 
 For a closed (compact, boundaryless) smooth Riemannian manifold `(M, g)` and an
 exponent `1 ≤ p ≤ ∞` (`p ≠ ∞`), this file establishes that the chart-based
-predicate `MemWkpChart g 1 p u` (defined in `Sobolev/Chart.lean`) and the
-intrinsic predicate `MemW1pIntrinsic g p u` (defined in `Sobolev/Intrinsic.lean`)
+predicate `MemWkpChart g 1 p u` (defined in `Sobolev/Chart/Defs.lean`) and the
+intrinsic predicate `MemW1pIntrinsic g p u` (defined in
+`Sobolev/Intrinsic/Defs.lean`)
 both hold for every smooth scalar function `u : M → ℝ`. As a consequence, the
 two predicates are equivalent on smooth inputs.
 
@@ -312,7 +313,7 @@ private lemma contDiff_chartPushedExt
       (I := I) (M := M) α (f := f) hf_supp hf_compact hy_off
 
 /-- The (private) chart-target image is open in `EuclN E` (re-exported from
-`Sobolev/Chart.lean`). -/
+`Sobolev/Chart/Defs.lean`). -/
 private lemma chartTargetEuclid_isOpen' [I.Boundaryless] (α : M) :
     IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
   chartTargetEuclid_isOpen (I := I) (M := M) α

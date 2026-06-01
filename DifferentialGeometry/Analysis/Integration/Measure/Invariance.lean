@@ -14,7 +14,7 @@ import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
 # Chart invariance of chart-local and global Riemannian measures
 
 This file develops the chart-invariance story of the Riemannian volume measure
-built in `ChartDensity.lean` and `Glue.lean`. The development is independent of
+built in `ChartDensity.lean` and `RiemannianMeasure.lean`. The development is independent of
 boundary assumptions on the model: every public statement holds for manifolds
 modelled on `ModelWithCorners ℝ E H` regardless of whether the model has
 boundary or corners.

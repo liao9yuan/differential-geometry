@@ -3,7 +3,7 @@ import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic
 import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion
 
 /-!
-# SmoothRicciFlow: Connection from CovariantDerivative
+# Concrete connection from a CovariantDerivative
 
 Given a Mathlib `CovariantDerivative I E (TangentSpace I)` on the tangent bundle of `M`,
 this file constructs the concrete connection `conn : V → V → V` and proves its four

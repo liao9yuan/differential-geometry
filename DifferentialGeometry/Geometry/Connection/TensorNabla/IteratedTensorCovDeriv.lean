@@ -31,7 +31,7 @@ Composing `tensor03Cov cov ∘ tensor02Cov cov` gives `tensor02CovIterate cov`, 
 
 We also supply the const-`1` fibre isometry bridges identifying the curried-CLM (0,3)- and
 (0,4)-tensor fibres with the model `ContinuousMultilinearMap`-fibres, analogous to
-`bilinFormToModelₗᵢ` (which did (0,2)) in `PDE/RicciFlow/DeTurckRHSSection.lean`.
+`bilinFormToModelₗᵢ` (which did (0,2)) in `Geometry/Flow/RicciFlow/DeTurckRHSSection.lean`.
 
 ## Main definitions
 

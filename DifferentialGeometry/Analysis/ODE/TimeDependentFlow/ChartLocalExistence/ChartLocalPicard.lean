@@ -4,6 +4,11 @@ import Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary
 import Mathlib.Geometry.Manifold.MFDeriv.Basic
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 
+/-! # Chart-coordinate Picard–Lindelöf existence for the time-dependent field
+
+Picard–Lindelöf existence, in a fixed chart, of a chart-coordinate flow of the
+time-dependent vector field, both with and without an explicit Lipschitz bound. -/
+
 namespace DifferentialGeometry.PDE.RicciFlow.ODE
 
 open Bundle

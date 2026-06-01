@@ -16,8 +16,9 @@ for every smooth `u : M → ℝ`. The constant `C ≥ 0` depends only on `g`, `p
 and the canonical chart-atlas partition of unity, and is otherwise uniform in
 `u`.
 
-The forward direction (uniform-in-`u`) is delivered in `EquivalenceFull.lean`
-via `w1pNormIntrinsicLp_le_const_mul_wkpNormChart_smooth_uniform_full`.
+The forward direction (uniform-in-`u`) is delivered in
+`Intrinsic/EquivalenceForward.lean` via
+`w1pNormIntrinsicLp_le_const_mul_wkpNormChart_smooth_uniform_full`.
 
 ## Mathematical strategy
 

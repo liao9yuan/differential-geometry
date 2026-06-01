@@ -17,7 +17,7 @@ divergence operator on manifolds whose local model `I : ModelWithCorners ℝ E H
 may have a non-trivial boundary (the chart target need not be open in `E`).
 
 The Fréchet partial derivative `partialDeriv` from
-`Integral/DivergenceTheorem/LocalFormula.lean` is defined as
+`DivergenceTheorem/LocalFormula.lean` is defined as
 `fderiv ℝ u y (chartModelBasis E i)`. On a chart target that is not open in
 `E`, `fderiv` is the wrong notion at boundary points: a function may be smooth
 in the within-the-target sense without admitting a Fréchet derivative on a full

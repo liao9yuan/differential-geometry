@@ -6,7 +6,7 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.ChartLocalExistence.C
 
 The factor-producer discharge
 `rawVariationalIdentityFlat_of_chart_realisation`
-(`SmoothInSpace/VariationalLiftFactorDischarge.lean`) consumes its chart-conjugation input
+(`FlowRealisation/Factor.lean`) consumes its chart-conjugation input
 `hagree` and its moving-trivialisation orbit jet `hg` **in the target chart** `α := Φ_fam t x`
 (the chart at the orbit point at time `t`):
 
@@ -373,7 +373,7 @@ Composes two slot-`v`/`w` applications of
 `RawVariationalIdentityFlat` from the moving-chart-reconciled `hreal`/`hc_eucl` plus the
 target-chart `IsLocalFlow` variational data) with the discharge's paired-residual headline
 `variational_flow_flat_paired_residual_of_chart_realisation`
-(`SmoothInSpace/VariationalLiftFactorDischarge.lean`).
+(`FlowRealisation/Factor.lean`).
 
 The output is the headline frozen-metric moving-pushforward inner-product variation derivative
 

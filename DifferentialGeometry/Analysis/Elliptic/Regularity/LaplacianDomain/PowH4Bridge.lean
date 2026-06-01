@@ -31,11 +31,11 @@ The bridge consists of two ingredients:
    `u_chart` to the chart-pushed POU function via the chart-side support
    bridge already used at the `H²` level. This bridge is the chart-side
    `MemW1p`-style support discharge developed in
-   `LaplacianDomainPerChartWitness.lean` for the `H²` case.
+   `Regularity/LaplacianDomain/PerChart.lean` for the `H²` case.
 
 The full bridge is a substantial chart-explicit construction. This
 module exposes the bridge as a hypothesis, mirroring the pattern of
-`DiffChartBilinearH1ComplUnconditional.lean` (where the residual
+`Regularity/DiffChart/Differentiated/BilinearH1Compl.lean` (where the residual
 `MemW1p` is exposed as a hypothesis at the `H²` level).
 
 ## Main results
@@ -115,7 +115,8 @@ chart-side bridge from chart-local `H⁴` regularity of a manifold function
 
 This hypothesis is the analogue, at H⁴ level, of the chart-side support
 bridge that is currently exposed at the H² level in
-`DiffChartBilinearH1ComplUnconditional.lean`. The downstream consumer
+`Regularity/DiffChart/Differentiated/BilinearH1Compl.lean`. The downstream
+consumer
 discharges this hypothesis once the chart-side residual MemW1p machinery
 is extended to fourth weak partials. -/
 def ChartSideH4Bridge (_g : SmoothRiemannianMetric I M) (u : M → ℝ) : Prop :=

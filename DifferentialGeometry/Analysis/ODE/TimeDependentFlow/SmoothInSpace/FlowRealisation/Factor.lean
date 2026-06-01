@@ -6,13 +6,13 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.VariationalEquation.F
 /-!
 # Discharging the factor-producer inputs from a concrete chart-coordinate flow
 
-The factor producers of `SmoothInSpace/VariationalLiftFactorProducers.lean`,
+The factor producers of `ChartOperator/FactorProducers.lean`,
 
 * `chartCloseFderiv_hasDerivAt_of_eucl` (producing `hP`), and
 * `chartCloseTriv_hasDerivAt_of_movingTriv` (producing `hT`),
 
 and the paired-residual `variational_flow_flat_paired_residual_hasDerivAt`
-(`TimeDependentFlow/VariationalFlowFlatPairedResidual.lean`), all take their genuine
+(`VariationalEquation/FlatPairedResidual.lean`), all take their genuine
 analytic inputs (`heucl`, `hagree`, `hg`, the bridge side conditions `hRdiff`/`hCdiff`) as
 **explicit hypotheses**.  This file supplies those inputs from a *concrete* chart-coordinate
 flow `Φ_eucl : E → ℝ → E` on the model space `E`, closing the gap between "the producer takes
@@ -25,7 +25,7 @@ The discharge is organised by input:
 For the chart-coordinate flow written as `Φ_eucl z s := Φ (z, s)` of a `IsLocalFlow` Picard
 datum (the chart realisation of `manifoldFlowFamily`), the genuinely sorry-free Euclidean
 linearized-flow ODE `IsLocalFlow.hasDerivAt_partial_spatial_fderiv`
-(`SmoothInSpace/VariationalODE.lean`) supplies, at every strictly-interior chart coordinate,
+(`VariationalODE/EuclideanVariationalODE.lean`) supplies, at every strictly-interior chart coordinate,
 the operator-valued `HasDerivAt`
 
   `HasDerivAt (fun s => fderiv ℝ (fun z => Φ_eucl z s) z₀) D'_eucl t`,

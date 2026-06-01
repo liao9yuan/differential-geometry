@@ -13,9 +13,9 @@ commutator defect is
 ```
 covGradRoughLapCurv g T₀ = Δ_∇(∇T₀) − ∇(Δ_∇ T₀)   (a `(0, 3)`-tensor field),
 ```
-(`CovGradRoughLapCommutatorClose3.lean`). Its pointwise fibre-norm bound — the hypothesis
+(`CurvatureDefect.lean`). Its pointwise fibre-norm bound — the hypothesis
 `hpt` of `secondCovGrad_l2NormSq_le_rawConnLap_of_pointwise_curv_bound`
-(`CovGradRoughLapCurvL2Bound.lean`) — is the only remaining ingredient for the unconditional
+(`L2Bound.lean`) — is the only remaining ingredient for the unconditional
 order-`2` covariant Gårding estimate.
 
 ## The curvature route
@@ -36,10 +36,10 @@ tensor0S_curry 2 x (∇(Δ_∇ T₀) x (unit)) w
   = (∑ᵢ ∇_{Bᵢ}∇_{Bᵢ}(∇_W T₀))(x)(unit) + residual − Tensor3rdCurv g 0 2 W T₀ x (unit),
 ```
 which is `frame_trace_thirdW_eq_covGrad_rawConnLap_sub_residual_add_curv`
-(`CovGradRoughLapCommutatorClose3.lean`) re-read through `covGrad_rawConnLap_unit_eval_curry`.
+(`CurvatureDefect.lean`) re-read through `covGrad_rawConnLap_unit_eval_curry`.
 The **left-hand side** `Δ_∇(∇T₀)` reading is `rawTensorConnLap_covGrad_unit_eval_eq_abstract_roughLap`
-followed by `curry_unitGradAbstractRoughLap_along`
-(`CovGradRoughLapCommutatorClose2.lean`).
+(`AbstractRoughLaplacian.lean`) followed by `curry_unitGradAbstractRoughLap_along`
+(`FreeDirectionReduction.lean`).
 
 ## What this file establishes
 
@@ -47,7 +47,7 @@ followed by `curry_unitGradAbstractRoughLap_along`
   unit-`(0, 0)`-evaluation of `Δ_∇(∇T₀)`, curried along the gradient direction `w`, equals the
   fixed-frame iterated-covariant trace `(∑ᵢ ∇_{Bᵢ}∇_{Bᵢ}(∇_W T₀))(x)(unit)`. This is precisely
   the torsion-free **slot-`0` Christoffel matching** documented as the single remaining
-  obstruction in `CovGradRoughLapCommutatorClose{2,3}.lean`; it is curvature-free (no
+  obstruction in `FreeDirectionReduction.lean` / `CurvatureDefect.lean`; it is curvature-free (no
   `riemannSec` occurs — the curvature lives entirely in `Tensor3rdCurv`, supplied by the
   already-proved swap).
 
@@ -73,7 +73,7 @@ The slot-`0` matching `slot0FrameTraceMatching` is the single remaining equation
 torsion-free Christoffel-bookkeeping identity between two third-order frame traces of `T₀`
 (the abstract `(0, 3)` rough-Laplacian double-unfold versus the RS-level double covariant
 derivative of `∇_W T₀`). It is documented as open obstruction 1 of
-`CovGradRoughLapCommutatorClose2.lean`. This file proves, unconditionally, that the entire
+`FreeDirectionReduction.lean`. This file proves, unconditionally, that the entire
 curried curvature-defect identity follows from it.
 -/
 

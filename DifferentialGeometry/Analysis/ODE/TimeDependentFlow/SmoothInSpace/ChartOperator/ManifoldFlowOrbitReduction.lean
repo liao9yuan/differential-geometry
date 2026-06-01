@@ -4,7 +4,7 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.Covaria
 # The canonical chart operator of the orbit flow IS the pushforward
 
 The canonical chart-coordinate operator `chartCloseDop Φ_fam α x s`
-(`SmoothInSpace/VariationalLiftManifoldFlowClose.lean`) is the moving inverse target
+(`CovariantIdentity/ConcreteFlow.lean`) is the moving inverse target
 trivialisation `trivFromE α (Φ_fam s x)` post-composed with the chart-coordinate spatial
 Fréchet derivative `mfderiv I 𝓘(ℝ,E) (extChartAt I α ∘ Φ_fam s) x`, both read through the
 *fixed* chart at `α := Φ_fam t x`.
@@ -16,7 +16,7 @@ the orbit point `Φ_fam s x` lies in the fixed chart source of `α`,
   `chartCloseDop Φ_fam α x s v = mfderiv I I (Φ_fam s) x v`           (in `TangentSpace I (Φ_fam s x) = E`).
 
 The proof is the *raw-value chart dictionary* `mfderiv_flow_eq_chartFderiv_apply`
-(`SmoothInSpace/VariationalLiftChartDictionary.lean`) read **backwards**: that lemma states
+(`ChartOperator/ChartDictionary.lean`) read **backwards**: that lemma states
 
   `mfderiv I I F x v = trivFromE α (F x) (mfderiv I 𝓘(ℝ,E) (extChartAt I α ∘ F) x v)`,
 
@@ -28,7 +28,7 @@ exactly the diffeomorphism pushforward read in the fibre `TangentSpace I (Φ_fam
 ## Why this is the genuine bridge to the variational identity
 
 `RawVariationalIdentity g X Φ_fam t x v`
-(`TimeDependentFlow/VariationalFlow.lean`) is by definition the statement that the orbit
+(`VariationalEquation/VariationalFlow.lean`) is by definition the statement that the orbit
 pushforward curve
 
   `s ↦ (mfderiv I I (Φ_fam s) x v : E)`

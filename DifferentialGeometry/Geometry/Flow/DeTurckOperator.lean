@@ -18,10 +18,10 @@ This file assembles that right-hand side as a `(0,2)`-tensor field and records i
 properties.  The two summands are built in the preceding files:
 
 * `−2 Rc(g)` uses `ricciFun g`, the Ricci tensor of `g` as a pointwise bilinear form
-  (`Geometry/Curvature/Riemann.lean`);
+  (`Geometry/Curvature/Riemann/Defs.lean`);
 * `𝓛_W g` uses `lieDerivMetric g W` with `W := deTurckVF g g'`, the Lie derivative of `g`
-  along the DeTurck vector field (`PDE/DeTurck/LieDerivativeMetric.lean`,
-  `PDE/DeTurck/VectorField.lean`).
+  along the DeTurck vector field (`Geometry/Flow/LieDerivativeMetric.lean`,
+  `Geometry/Flow/VectorField.lean`).
 
 The operator is assembled pointwise: at each `x : M` it is the bilinear-form sum
 `(-2) • Rc(g)(x) + 𝓛_W g(x)` on `TangentSpace I x`.

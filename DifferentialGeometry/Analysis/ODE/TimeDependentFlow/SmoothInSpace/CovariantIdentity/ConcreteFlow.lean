@@ -4,7 +4,7 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.Covaria
 # Concrete-flow closing of the per-flow raw variational identity
 
 The per-flow connector `rawVariationalIdentity_of_manifoldFlowFamily`
-(`SmoothInSpace/VariationalLiftManifoldFlow.lean`) produces `RawVariationalIdentity` from
+(`CovariantIdentity/ManifoldFlow.lean`) produces `RawVariationalIdentity` from
 the chart-coordinate Euclidean data of a flow once the following are supplied:
 
 * `hcont` — joint continuity of the orbit `s ↦ Φ_fam s x`;
@@ -46,8 +46,8 @@ three inputs, all on the model space `E`:
   **never** set to zero.
 
 The naive identification "moving-trivialisation correction = metric Christoffel" is *false*
-in a general chart (`Γ_α = J Γ_β − D²φ`; see
-`Geometry/Riemannian/Geodesic/ChartChristoffelTransform.lean`).  The metric Christoffel
+in a general chart (`Γ_α = J Γ_β − D²φ`, the chart-change transformation law of the
+Christoffel symbol).  The metric Christoffel
 residual is therefore exposed as a genuine additive input in `hsplit`, never asserted to
 vanish and never identified with `D²φ`.
 

@@ -12,6 +12,13 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.Glob
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.FlowRealisation.LocalChart
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.VariationalEquation.FlatPairedResidual
 
+/-!
+# Flat per-slot variational identities for the conjugating flow
+
+Discharges the flat (Lie-type) raw variational identities and the per-slot Christoffel-correction
+equations for the conjugating diffeomorphism flow, which feed the flat-route pullback assembly.
+-/
+
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle

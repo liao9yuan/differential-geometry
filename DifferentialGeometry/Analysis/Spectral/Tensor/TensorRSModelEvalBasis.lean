@@ -22,7 +22,7 @@ equivalence
 sending a `(r, s)`-tensor model element `T` to its scalar components
 against the fixed model-fibre basis `chartModelBasis E`. It mirrors the
 existing scalar-side construction `evalAtBasisCLELocal` for
-`Tensor0SModel n ℝ E` (see `PreHilbert.lean`) and packages an
+`Tensor0SModel n ℝ E` (see `Variational/Continuity.lean`) and packages an
 equivalent smoothness characterisation: a map into `TensorRSModel r s ℝ E`
 is smooth iff every scalar component is smooth.
 
@@ -66,7 +66,7 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 sending `Φ` to the function `φ ↦ Φ (chartModelBasis E ∘ φ)`.
 
 This is the same map as `evalAtBasisLinearLocal` of
-`PreHilbert.lean` and the `MetricLowering` sister; re-stated here so the
+`Variational/Continuity.lean` and the `MetricLowering` sister; re-stated here so the
 present file is self-contained. -/
 noncomputable def eval0SLinear (n : ℕ) :
     Tensor0SModel n ℝ E →ₗ[ℝ]

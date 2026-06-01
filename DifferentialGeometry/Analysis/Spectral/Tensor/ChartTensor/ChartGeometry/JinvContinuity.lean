@@ -11,7 +11,7 @@ For a smooth manifold `M` modelled on `(E, H)` with model `I`, and a base point
 `α : M`, this file packages pointwise wrapped operator-norm continuities of
 the chart-inverse-Jacobian CLM family at every centre, as delivered by the
 existing `chartJinv_pre_clm_contMDiffAt` and `chartJ_pre_clm_contMDiffAt`
-lemmas in `Tensor/RSTensor/ChartJacobianSmooth.lean`.
+lemmas in `Tensor/RSTensor/BundleTrivialization/ChartJacobianClmSmoothness.lean`.
 
 The wrapped CLM at centre `b₀` is
 

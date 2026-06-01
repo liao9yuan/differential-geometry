@@ -22,7 +22,7 @@ whose inner product mirrors the boundaryless case:
   ⟨f, h⟩ := ∫ f · h dμ_g + ∫ g(grad f, grad h) dμ_g
 
 Unlike the interior-supported variant in
-`Analysis/Laplacian/WithBoundary/InteriorSmoothScalarPreH1.lean`, no
+`Analysis/Elliptic/WithBoundary/InteriorSmoothScalarPreH1.lean`, no
 support hypothesis is imposed. The intrinsic gradient `gradFun g f x` is
 not packaged here as a globally smooth tangent-bundle section (this is
 not generally available without an interior-support hypothesis on `f`),

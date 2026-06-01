@@ -2,6 +2,13 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Defs
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.PullbackConnection
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 
+/-!
+# Conjugation of the Levi-Civita connection by a diffeomorphism
+
+Identifies the pullback Levi-Civita connection of a pullback metric with the conjugate of the
+original Levi-Civita connection, by uniqueness of the metric-compatible torsion-free connection.
+-/
+
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback
 
 open Bundle

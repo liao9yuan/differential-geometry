@@ -9,10 +9,24 @@ import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Analysis.Calculus.BumpFunction.FiniteDimension
 
 /-!
-## H3 — manifold-global joint smooth dependence (headline + pending children)
+# Manifold-level joint smooth dependence of the local flow
 
-This file carries the manifold-level smooth-dependence theorems of the smooth-dependence
-program: the H3 headline together with its pending proof-target children.
+This file carries the manifold-level smooth-dependence theorems: from a jointly
+`ContDiffOn` chart-pushed field it builds, near each point, a local flow that is
+jointly `ContMDiffOn` in space and time and realises the prescribed (bare-velocity)
+vector field, via the chart-coordinate Picard machinery and the chart-to-manifold
+realisation bridge.
+
+## Main results
+
+* `manifoldFlow_contMDiffOn_of_jointContDiffOn` — joint smoothness of the manifold
+  flow from joint chart-coordinate smoothness.
+* `chart_pushforward_field_jointContDiff` / `chart_pushforward_field_cutoff_globalContDiff`
+  — joint smoothness of the chart-pushed field (and its cutoff extension).
+* `local_flow_jointSmooth_and_integralCurve` — existence of a local jointly-smooth
+  flow realising the bare velocity, with the integral-curve property.
+* `local_flow_chartIsLocalFlow_and_realisation` — the chart-local Picard flow and its
+  manifold realisation.
 -/
 
 noncomputable section

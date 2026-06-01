@@ -71,7 +71,7 @@ discharge is conditional on a "vanishing-on-zero-set" predicate.
 
 The smooth case is the only case used by smooth scalar approximators
 `v_n → u_h`; the image-membership / iterated-closure / residual-regularity
-chain in `DiffChartBilinearH1ComplFinal` supplies the smooth approximators
+chain in `DiffChart/Differentiated/BilinearH1Compl.lean` supplies the smooth approximators
 for which the residual MemW1p holds unconditionally. The general
 (non-smooth) case requires a careful density argument or alternative
 upstream rephrasing; we expose the smooth-case bridge for use as the

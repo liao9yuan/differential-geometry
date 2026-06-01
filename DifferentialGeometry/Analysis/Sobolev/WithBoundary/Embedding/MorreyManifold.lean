@@ -80,7 +80,7 @@ inputs) requires a smooth-density argument in `MemWkpChart` (analogous to
 the boundaryless `contMDiff_dense_in_WkpChart`). In the with-boundary
 setting this requires the boundary-trace / mollification-near-boundary
 infrastructure that is currently developed only chart-locally
-(`WithBoundary/EuclideanDensity.lean`); a manifold-level density bridge
+(`WithBoundary/Euclidean/Density.lean`); a manifold-level density bridge
 is a downstream concern and out of scope for the present file. The
 smooth-input version delivered here, together with the per-chart Hölder
 modulus, is the engine used by every downstream parabolic / elliptic

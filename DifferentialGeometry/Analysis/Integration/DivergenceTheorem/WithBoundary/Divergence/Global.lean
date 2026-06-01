@@ -14,7 +14,7 @@ global with-boundary divergence operator
 The construction parallels the boundaryless `divergence_g` from
 `DivergenceTheorem/LocalFormula.lean`, using the chart-local with-boundary
 formula `localDivergenceWithin g (chartAt H x) X` from
-`WithBoundary/LocalFormula.lean`. The chart is taken at `x` itself, so the
+`WithBoundary/Divergence/LocalFormula.lean`. The chart is taken at `x` itself, so the
 chart-local formula is well-defined at `x` for every `x : M`.
 
 ## Main definition

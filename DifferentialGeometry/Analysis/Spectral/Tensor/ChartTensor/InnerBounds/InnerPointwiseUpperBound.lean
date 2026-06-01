@@ -7,10 +7,10 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.TrivProj.ChartTwistIdentity
 # Bundle-fibre upper bound for the `(r, s)` pointwise inner product
 
 This file bridges the chart-frame quadratic upper bound established in
-`ChartTensorInnerUpperBound.lean` to the bundle-fibre `(r, s)` pointwise
+`InnerBounds/InnerUpperBound.lean` to the bundle-fibre `(r, s)` pointwise
 inner product `tensorInnerPointwise`. The bridge identity
 `chartTensorInnerPointwise_rs_model_eq_tensorInnerPointwise` from
-`ChartTensorInnerBridge.lean` identifies the chart-frame diagonal value
+`Inner/InnerBridge.lean` identifies the chart-frame diagonal value
 at a model tensor `T` with the bundle-fibre diagonal value at the
 chart-`(α, b)`-twisted tensor `chartRSTwist α b r s T`.
 
