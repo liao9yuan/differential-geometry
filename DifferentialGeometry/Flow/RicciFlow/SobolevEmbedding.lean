@@ -2,9 +2,9 @@ import DifferentialGeometry.Flow.RicciFlow.IntrinsicSobolev.HilbertSpace
 import DifferentialGeometry.Flow.RicciFlow.HebeyBlock.SpectralPouH2Identify
 import DifferentialGeometry.Analysis.Sobolev.Manifold.IteratedSobolevEmbedding
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MorreyManifoldHigherOrder
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.Estimates.ComponentSobolevBound
+import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ComponentSobolevBound
 import DifferentialGeometry.Flow.RicciFlow.HebeyBlock.FiberNormRiemannianBridge
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.Estimates.TensorSectionL2BoundByComponents
+import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.TensorSectionL2BoundByComponents
 import DifferentialGeometry.Flow.RicciFlow.SobolevEmbeddingAssembly
 import Mathlib.Geometry.Manifold.ContMDiff.Basic
 

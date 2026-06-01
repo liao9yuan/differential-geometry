@@ -1,6 +1,6 @@
 import DifferentialGeometry.Flow.RicciFlow.IntrinsicSpectral.MetricRealization.RealizedJet2CovGradBound
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.TensorRSChartFiberToModelOpNormUnconditional
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.Estimates.ComponentL2BoundUniform
+import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ComponentL2BoundUniform
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDerivComponentSecondFormula
 
 /-!

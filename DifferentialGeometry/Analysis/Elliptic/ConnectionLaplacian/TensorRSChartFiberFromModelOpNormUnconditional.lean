@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensor.TensorRSContRiemannianBundle
+import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.TensorRSContRiemannianBundle
 import DifferentialGeometry.Tensor.RSTensor.TensorRSBundleLocalityIdentities
 import Mathlib.Geometry.Manifold.VectorBundle.Hom
 import Mathlib.Topology.VectorBundle.Hom

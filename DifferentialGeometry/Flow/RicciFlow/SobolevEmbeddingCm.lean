@@ -1,5 +1,5 @@
 import DifferentialGeometry.Flow.RicciFlow.SobolevEmbeddingAssembly
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.CovGrad
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad
 
 /-!
 # The `C^m` tensor Sobolev embedding controlling iterated covariant derivatives

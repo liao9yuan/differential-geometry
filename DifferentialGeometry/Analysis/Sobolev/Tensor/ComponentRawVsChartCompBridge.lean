@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Tensor.Defs
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensor.POUFDerivBound
+import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.POUFDerivBound
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.MultiplyQuantK
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Density
 

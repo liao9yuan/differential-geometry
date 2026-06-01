@@ -1,7 +1,7 @@
 import DifferentialGeometry.Flow.RicciFlow.HebeyBlock.FiberNormRiemannianBridge
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.TensorRSChartFiberFromModelOpNormUnconditional
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.Estimates.TensorSectionL2BoundByComponents
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensor.Components
+import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.TensorSectionL2BoundByComponents
+import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components
 
 /-!
 # Off-centre pointwise tensor-fibre-norm reconstruction on a compact set

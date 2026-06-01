@@ -1,9 +1,9 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawTensorConnLapL2WtwokTwoBound
 import DifferentialGeometry.Riemannian.Connection.RawTensorConnLapIterL2WtwokTwoBound
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.TensorSectionL2WtwokTwoZeroBound
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.TrivProj.Bridge
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.TensorChartTwistUniformBound
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.Estimates.ComponentL2BoundUniform
+import DifferentialGeometry.Analysis.Spectral.Tensor.TrivProj.Bridge
+import DifferentialGeometry.Analysis.Spectral.Tensor.TensorChartTwistUniformBound
+import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ComponentL2BoundUniform
 import DifferentialGeometry.Analysis.Sobolev.Tensor.ChartLocality
 
 /-!

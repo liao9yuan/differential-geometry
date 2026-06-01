@@ -1,6 +1,6 @@
 import DifferentialGeometry.Riemannian.Connection.RiemannianFiberNormSq
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.FiberNormSqSummandChartAlphaBound
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.GramInvUniformEigenvalueLowerBound
+import DifferentialGeometry.Analysis.Spectral.Tensor.GramInvUniformEigenvalueLowerBound
 
 /-!
 # Bounding `riemannianFiberNormSq` by chart-`α`-frame summands on POU tsupport

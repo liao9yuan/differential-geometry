@@ -1,8 +1,8 @@
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDerivComponentFormula
 import DifferentialGeometry.Riemannian.Connection.ChartTensorRSCovariantDerivativeAgreement
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.TrivProj.Bridge
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensor.InnerBridge
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.PreHilbert
+import DifferentialGeometry.Analysis.Spectral.Tensor.TrivProj.Bridge
+import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.InnerBridge
+import DifferentialGeometry.Analysis.Spectral.Tensor.PreHilbert
 
 /-!
 # Chart-coordinate principal part of the tensor `H^1` Dirichlet integrand

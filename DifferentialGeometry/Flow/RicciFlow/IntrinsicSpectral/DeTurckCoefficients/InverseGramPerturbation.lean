@@ -1,5 +1,5 @@
 import DifferentialGeometry.Riemannian.Operator.Gradient
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.GramInvUniformEigenvalueLowerBound
+import DifferentialGeometry.Analysis.Spectral.Tensor.GramInvUniformEigenvalueLowerBound
 import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
 import Mathlib.Algebra.Order.BigOperators.Group.Finset
 import Mathlib.Topology.Order.Compact

@@ -11,7 +11,7 @@ import DifferentialGeometry.Riemannian.Connection.TensorRSChartReprNormBound
 import DifferentialGeometry.Riemannian.Connection.IntrinsicPieceFderivBound
 import DifferentialGeometry.Riemannian.Connection.LeviCivitaChartLocal
 import DifferentialGeometry.Riemannian.Connection.TensorConnLaplacian
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensor.Components
+import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDerivIntrinsicComponent
 import DifferentialGeometry.Integration.L2.SmoothSections.Defs
 

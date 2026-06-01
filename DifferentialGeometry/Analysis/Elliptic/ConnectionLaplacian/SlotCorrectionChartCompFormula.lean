@@ -1,6 +1,6 @@
 import DifferentialGeometry.Riemannian.Connection.ChartTensorRSCovariantDerivative
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.TrivProj.Bridge
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensor.Components
+import DifferentialGeometry.Analysis.Spectral.Tensor.TrivProj.Bridge
+import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components
 
 /-!
 # Chart-component formula for the upper/lower Christoffel slot corrections

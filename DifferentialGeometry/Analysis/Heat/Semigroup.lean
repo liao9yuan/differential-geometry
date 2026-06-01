@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Elliptic.Spectral.EigenBasis
+import DifferentialGeometry.Analysis.Spectral.Scalar.EigenBasis
 import Mathlib.Analysis.SpecialFunctions.Exp
 import Mathlib.Analysis.Normed.Group.Tannery
 

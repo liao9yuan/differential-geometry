@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.CovGradMetricBridge
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGradMetricBridge
 
 /-!
 # The covariant-gradient `L²` inner product as the integrated Dirichlet pairing

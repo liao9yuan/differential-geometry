@@ -10,7 +10,8 @@ Resume: read this + `git log --oneline`, continue from the last green commit.
 - ☑ Batch B: Integral/Connection→Riemannian/Connection (D2); Analysis/Laplacian→Analysis/Elliptic; Realized→Riemannian/Connection/Realized — 9bca9957
 - ☑ Batch C+D: Metric→Riemannian/Metric; delete Interface — b837d6d0
 - ☑ Batch E: lift 40 connection-Laplacian analysis files → Analysis/Elliptic/ConnectionLaplacian — aa460779
-- ☑ Batch F: Riemannian sub-routing → Comparison/, Hodge/, and loose files into Curvature/Metric/Connection/Exponential — (this commit)
+- ☑ Batch F: Riemannian sub-routing → Comparison/, Hodge/, and loose files into Curvature/Metric/Connection/Exponential — bd6eb3ff
+- ☑ Batch G: extract Analysis/Spectral (Parabolic/TensorSpectral→Spectral/Tensor, Elliptic/Spectral→Spectral/Scalar) — (this commit)
 
 ## ACHIEVED TOP-LEVEL ARCHITECTURE (matches target)
 ```
@@ -19,7 +20,7 @@ DifferentialGeometry/
   Tensor/        Multilinear Product Mixed Alternating Auxiliary RSTensor Exterior(was DifferentialForm)
   Riemannian/    Metric Connection Curvature Operator Geodesic Exponential Comparison(BonnetMyers,Variation,…) Hodge Topology
   Integration/   Measure L2 DivergenceTheorem   (was Integral/)
-  Analysis/      Sobolev Elliptic(was Laplacian; +ConnectionLaplacian) Parabolic Heat ODE SpectralBounds
+  Analysis/      Sobolev Elliptic(was Laplacian; +ConnectionLaplacian) Spectral(Tensor,Scalar) Parabolic Heat ODE
   Flow/          DeTurck RicciFlow   (was PDE/)
   External/      VENDORED, untouched
 ```

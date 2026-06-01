@@ -1,6 +1,6 @@
 import DifferentialGeometry.Riemannian.Connection.ChartTensorRSCovariantDerivative
 import DifferentialGeometry.Riemannian.Connection.TensorRSChartFiberOpNorm
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartJUniformBoundLocallyConstant
+import DifferentialGeometry.Analysis.Spectral.Tensor.ChartJUniformBoundLocallyConstant
 
 /-!
 # Uniform op-norm bound on the intrinsic chart Fréchet-derivative CLM

@@ -3,9 +3,9 @@ import DifferentialGeometry.Riemannian.Connection.ChartTensorRSCovariantDerivati
 import DifferentialGeometry.Riemannian.Connection.LeviCivita
 import DifferentialGeometry.Riemannian.Connection.TensorRSChartReprNormBound
 import DifferentialGeometry.Riemannian.Connection.TensorRSChartFiberForwardOpNorm
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartLeviCivitaParallelCLMOpNorm
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensor.GoodSetMeasure
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensor.Components
+import DifferentialGeometry.Analysis.Spectral.Tensor.ChartLeviCivitaParallelCLMOpNorm
+import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.GoodSetMeasure
+import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components
 
 /-!
 # Pointwise bound on the chart-trivialised first covariant derivative by the

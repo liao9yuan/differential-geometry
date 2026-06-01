@@ -1,7 +1,7 @@
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.SobolevScale.Defs
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.SobolevScale.Inclusion
+import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.Defs
+import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.Inclusion
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.TensorConnLapGreenDivergenceIdentityGeneral
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.EigenvectorSmoothToL2
+import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.EigenvectorSmoothToL2
 
 /-!
 # Weighted Sobolev-scale summability of spectral coordinates

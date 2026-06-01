@@ -13,7 +13,7 @@ import DifferentialGeometry.Riemannian.Connection.RicciIdentitySmoothFrame
 import DifferentialGeometry.Riemannian.Connection.ChartBridge.Hessian
 import DifferentialGeometry.Integration.DivergenceTheorem.Proper
 import DifferentialGeometry.Riemannian.Operator.MetricSharpSmooth
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensor.GoodSetMeasure
+import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.GoodSetMeasure
 
 /-!
 # The intrinsic `(0, s)` connection-Laplacian Green identity via the Dirichlet current

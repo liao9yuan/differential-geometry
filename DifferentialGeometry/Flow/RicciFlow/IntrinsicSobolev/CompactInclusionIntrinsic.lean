@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.CompactInclusion
+import DifferentialGeometry.Analysis.Spectral.Tensor.CompactInclusion
 import DifferentialGeometry.Flow.RicciFlow.HebeyBlock.TensorChartComponentSobolevIntrinsic
 
 /-!

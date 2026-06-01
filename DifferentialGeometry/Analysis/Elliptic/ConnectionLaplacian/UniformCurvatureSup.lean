@@ -1,6 +1,6 @@
 import DifferentialGeometry.Riemannian.Connection.Tensor3rdCurvFiberNormBound
 import DifferentialGeometry.Riemannian.Connection.TensorThirdOrderWeitzenbock
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.CovGrad
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad
 
 /-!
 # Uniform curvature and differentiated-curvature fibre-norm bounds on a closed manifold

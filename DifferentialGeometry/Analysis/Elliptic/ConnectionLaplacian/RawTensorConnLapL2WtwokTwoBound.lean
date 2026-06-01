@@ -5,8 +5,8 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawTensorConnL
 import DifferentialGeometry.Analysis.Sobolev.Tensor.Defs
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.FderivToWkpNormBridge
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedFderivToWkpNormBridge
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensor.GoodSetMeasure
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.TensorChartTransition
+import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.GoodSetMeasure
+import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.TensorChartTransition
 import DifferentialGeometry.Riemannian.Connection.SlotCorrectionChartFderivBound
 
 /-!

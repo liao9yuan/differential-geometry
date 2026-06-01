@@ -2,7 +2,7 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapPoin
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.CompDataIJChartOnMMeasurable
 import DifferentialGeometry.Analysis.Sobolev.Tensor.PouWeightedNorm
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridge
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensor.GoodSetMeasure
+import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.GoodSetMeasure
 import DifferentialGeometry.Analysis.Sobolev.Manifold.Rellich
 
 /-!

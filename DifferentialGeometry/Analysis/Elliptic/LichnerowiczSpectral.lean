@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.Lichnerowicz
-import DifferentialGeometry.Analysis.Elliptic.Spectral.EigenBasis
+import DifferentialGeometry.Analysis.Spectral.Scalar.EigenBasis
 import DifferentialGeometry.Analysis.Heat.Semigroup
 import DifferentialGeometry.Analysis.Heat.SmoothingUnconditional
 

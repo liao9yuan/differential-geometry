@@ -1,8 +1,8 @@
 import DifferentialGeometry.Riemannian.Connection.RicciIdentitySmoothFrame
 import DifferentialGeometry.Riemannian.Connection.LeviCivitaChartSmooth
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensor.GoodSetMeasure
+import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.GoodSetMeasure
 import DifferentialGeometry.Integration.Measure.Glue
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensor.InnerLowerBound
+import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.InnerLowerBound
 
 /-!
 # Globally smooth chart-frame Gram-Schmidt section uniformizing the bumped

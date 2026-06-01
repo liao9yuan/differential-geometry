@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.PerChartWitness
-import DifferentialGeometry.Analysis.Elliptic.Spectral.Resolvent
+import DifferentialGeometry.Analysis.Spectral.Scalar.Resolvent
 
 /-!
 # Iterated Laplacian domain

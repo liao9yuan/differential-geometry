@@ -1,6 +1,6 @@
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.SobolevScale.Defs
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.SobolevScale.Inclusion
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.CompactResolvent
+import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.Defs
+import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.Inclusion
+import DifferentialGeometry.Analysis.Spectral.Tensor.CompactResolvent
 import DifferentialGeometry.Flow.RicciFlow.DeTurckRHS
 import DifferentialGeometry.Flow.RicciFlow.IntrinsicSpectral.DeTurckPrincipalPartMatch
 

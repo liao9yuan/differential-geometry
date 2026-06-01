@@ -1,6 +1,6 @@
 import DifferentialGeometry.Riemannian.Connection.RiemannianFiberNormSq
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartGramMatrixQuadFormUpperBound
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensor.Components
+import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components
 import DifferentialGeometry.Tensor.Multilinear.Fiber
 
 /-!

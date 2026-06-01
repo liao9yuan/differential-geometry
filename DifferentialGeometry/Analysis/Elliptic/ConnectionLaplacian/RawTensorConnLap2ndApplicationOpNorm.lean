@@ -1,8 +1,8 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartTensorRSCovariantDerivativeOpNorm
 import DifferentialGeometry.Riemannian.Connection.ChartTensorRSCovariantDerivativeAgreement
 import DifferentialGeometry.Riemannian.Connection.LeviCivita
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartLeviCivitaParallelCLMOpNorm
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensor.GoodSetMeasure
+import DifferentialGeometry.Analysis.Spectral.Tensor.ChartLeviCivitaParallelCLMOpNorm
+import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.GoodSetMeasure
 
 /-!
 # Pointwise op-norm bound for the second-application term in the

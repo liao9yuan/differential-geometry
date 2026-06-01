@@ -11,7 +11,7 @@ import DifferentialGeometry.Riemannian.Connection.IntrinsicPieceFderivBound
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartFrameNormGlobalSmooth
 import DifferentialGeometry.Riemannian.Connection.RawTensorConnLapPointwiseBound
 import DifferentialGeometry.Riemannian.Connection.TensorRSChartReprNormBound
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensor.Components
+import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components
 
 /-!
 # Pointwise order-2 squared norm bound on the chart-pulled representation of

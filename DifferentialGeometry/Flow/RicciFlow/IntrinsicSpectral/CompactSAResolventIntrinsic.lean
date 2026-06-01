@@ -1,6 +1,6 @@
 import DifferentialGeometry.Flow.RicciFlow.IntrinsicSobolev.CompactInclusionIntrinsic
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.Rellich.Tensor
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.Resolvent
+import DifferentialGeometry.Analysis.Spectral.Tensor.Rellich.Tensor
+import DifferentialGeometry.Analysis.Spectral.Tensor.Resolvent
 
 /-!
 # Compactness and self-adjointness of the L²-side tensor resolvent (chart-locality-free)

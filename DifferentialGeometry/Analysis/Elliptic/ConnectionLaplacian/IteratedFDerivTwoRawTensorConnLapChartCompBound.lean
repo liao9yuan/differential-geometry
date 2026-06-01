@@ -1,7 +1,7 @@
 import DifferentialGeometry.Riemannian.Connection.RawTensorConnLapIterL2WtwokTwoBound
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawTensorConnLapNormSqChartPulledReprBound
 import DifferentialGeometry.Riemannian.Connection.IteratedFDerivTensorReprChartCompBound
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.TrivProj.FDerivDecompReal
+import DifferentialGeometry.Analysis.Spectral.Tensor.TrivProj.FDerivDecompReal
 
 /-!
 # Order-2 pointwise bound on chart-component partials of the raw tensor

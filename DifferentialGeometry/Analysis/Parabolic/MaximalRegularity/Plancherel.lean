@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.PerMode
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.SobolevScale.Defs
+import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.Defs
 import DifferentialGeometry.Analysis.Parabolic.TimeSobolev.BochnerL2
 import Mathlib.MeasureTheory.Integral.Lebesgue.Add
 import Mathlib.MeasureTheory.Integral.DominatedConvergence

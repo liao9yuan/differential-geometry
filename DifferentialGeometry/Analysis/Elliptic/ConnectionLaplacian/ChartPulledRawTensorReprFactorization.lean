@@ -2,7 +2,7 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawTensorConnL
 import DifferentialGeometry.Riemannian.Connection.RawTensorConnLapIterL2WtwokTwoBound
 import DifferentialGeometry.Riemannian.Connection.TensorRSChartFiberForwardOpNorm
 import DifferentialGeometry.Riemannian.Connection.TensorRSChartReprNormBound
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensor.Components
+import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components
 import Mathlib.Analysis.SpecialFunctions.Sqrt
 
 /-!

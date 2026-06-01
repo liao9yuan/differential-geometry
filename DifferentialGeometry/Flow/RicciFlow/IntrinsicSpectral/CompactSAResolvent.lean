@@ -1,6 +1,6 @@
 import DifferentialGeometry.Flow.RicciFlow.IntrinsicSobolev.L2BanachIso
 import DifferentialGeometry.Flow.RicciFlow.IntrinsicSobolev.Rellich
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.Resolvent
+import DifferentialGeometry.Analysis.Spectral.Tensor.Resolvent
 
 /-!
 # Compactness and self-adjointness of the L²-side tensor resolvent

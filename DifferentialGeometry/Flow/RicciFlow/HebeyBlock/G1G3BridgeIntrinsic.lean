@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.PreHilbert
+import DifferentialGeometry.Analysis.Spectral.Tensor.PreHilbert
 import DifferentialGeometry.Riemannian.Connection.ChartTensorRSCovariantDerivative
 import DifferentialGeometry.Integration.Measure.ChartDensity
 import DifferentialGeometry.Integration.Measure.Glue

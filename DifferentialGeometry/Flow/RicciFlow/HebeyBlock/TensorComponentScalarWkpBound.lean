@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.Estimates.ComponentSobolevBound
+import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ComponentSobolevBound
 import DifferentialGeometry.Analysis.Sobolev.Tensor.PouWeightedHsNorm
 import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothMulQuant
 import DifferentialGeometry.Analysis.Sobolev.Chart.CrossChartBoundStrictMemWkpHigherOrder

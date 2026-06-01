@@ -1,7 +1,7 @@
 import DifferentialGeometry.Flow.RicciFlow.SobolevEmbeddingCmReduction
 import DifferentialGeometry.Flow.RicciFlow.HebeyBlock.NablaTensorFormula
 import DifferentialGeometry.Flow.RicciFlow.HebeyBlock.ChristoffelCkBound
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.EigenvectorCovGradChartIdentity
+import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.EigenvectorCovGradChartIdentity
 
 /-!
 # Per-degree covariant order reduction and the unconditional collapsed `C^m`/`C²` embedding

@@ -1,6 +1,6 @@
 import DifferentialGeometry.Flow.RicciFlow.IntrinsicSobolev.HilbertSpace
 import DifferentialGeometry.Analysis.Sobolev.Approximation.SmoothDensity
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensor.Components
+import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components
 import Mathlib.Analysis.Normed.Operator.Extend
 import Mathlib.Analysis.Normed.Operator.ContinuousLinearMap
 

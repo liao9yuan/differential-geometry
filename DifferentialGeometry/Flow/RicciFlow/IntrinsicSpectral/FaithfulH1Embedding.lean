@@ -1,5 +1,5 @@
 import DifferentialGeometry.Flow.RicciFlow.IntrinsicSpectral.SobolevScaleSummable
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.Spectrum
+import DifferentialGeometry.Analysis.Spectral.Tensor.Spectrum
 
 /-!
 # Closability of the covariant gradient: the faithful `H¹ ↪ L²` embedding

@@ -1,5 +1,5 @@
 import DifferentialGeometry.Flow.RicciFlow.IntrinsicSpectral.MetricRealization.SpectralWeylCounting
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.EigenvectorSmoothToL2
+import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.EigenvectorSmoothToL2
 import DifferentialGeometry.Integration.Measure.Invariance
 
 /-!

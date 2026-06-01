@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.OperatorEquation
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.SobolevScale.Inclusion
+import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.Inclusion
 
 /-!
 # The maximal-regularity solution space and the affine Duhamel map

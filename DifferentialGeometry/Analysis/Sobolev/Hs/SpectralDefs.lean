@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Elliptic.Spectral.EigenIdx
+import DifferentialGeometry.Analysis.Spectral.Scalar.EigenIdx
 import Mathlib.Analysis.InnerProductSpace.l2Space
 import Mathlib.Analysis.SpecialFunctions.Pow.Real
 

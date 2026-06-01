@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.TensorRSIntrinsicChartCLMOpNorm
 import DifferentialGeometry.Riemannian.Connection.SlotChristoffelCorrectionOpNorm
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartLeviCivitaParallelCLMOpNorm
+import DifferentialGeometry.Analysis.Spectral.Tensor.ChartLeviCivitaParallelCLMOpNorm
 
 /-!
 # Pointwise op-norm bound for `chartTensorRSCovariantDerivative`

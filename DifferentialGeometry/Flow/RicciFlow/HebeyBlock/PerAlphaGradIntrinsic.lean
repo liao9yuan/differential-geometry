@@ -1,5 +1,5 @@
 import DifferentialGeometry.Flow.RicciFlow.HebeyBlock.A3IntrinsicHeadline
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.TensorChartComponentSobolevBound
+import DifferentialGeometry.Analysis.Spectral.Tensor.TensorChartComponentSobolevBound
 
 /-!
 # Intrinsic per-`α` gradient constants and the `α`-uniform gradient `L²` headline

@@ -1,6 +1,6 @@
 import DifferentialGeometry.Flow.RicciFlow.HebeyBlock.TangentBundleTrivOpNormUnconditional
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.Estimates.ChristoffelBound
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensor.InnerLowerBound
+import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ChristoffelBound
+import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.InnerLowerBound
 import DifferentialGeometry.Riemannian.Connection.LeviCivitaChartLocal
 import DifferentialGeometry.Riemannian.Connection.ChartTensor0SCovariantDerivative
 

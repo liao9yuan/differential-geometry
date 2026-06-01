@@ -1,9 +1,9 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.SlotCorrectionChartCompFormula
 import DifferentialGeometry.Riemannian.Connection.LeviCivitaChartSmooth
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartLeviCivitaParallelCLMOpNorm
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.SlotUniformBound
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.SlotChartSourceContMDiff
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensor.GoodSetMeasure
+import DifferentialGeometry.Analysis.Spectral.Tensor.ChartLeviCivitaParallelCLMOpNorm
+import DifferentialGeometry.Analysis.Spectral.Tensor.SlotUniformBound
+import DifferentialGeometry.Analysis.Spectral.Tensor.SlotChartSourceContMDiff
+import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.GoodSetMeasure
 
 /-!
 # Kernel factorisation, chart-pulled smoothness, and uniform bounds for the
