@@ -1,6 +1,6 @@
 import DifferentialGeometry.Flow.RicciFlow.IntrinsicSpectral.DeTurckCoefficients.LieSummandLipschitz
-import DifferentialGeometry.Flow.DeTurck.DeTurckVFChartCoord
-import DifferentialGeometry.Flow.DeTurck.LieDerivativeMetric
+import DifferentialGeometry.Geometry.Flow.DeTurckVFChartCoord
+import DifferentialGeometry.Geometry.Flow.LieDerivativeMetric
 
 /-!
 # The Cartan-formula Lie matrix equals the textbook Christoffel Lie–DeTurck carrier

@@ -1,8 +1,8 @@
-import DifferentialGeometry.Riemannian.Operator.Gradient
+import DifferentialGeometry.Geometry.Operator.Gradient
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.Green
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.Closed
 import DifferentialGeometry.Analysis.Integration.Measure.Properties
-import DifferentialGeometry.Riemannian.Metric.TensorInner.TangentRiemannian
+import DifferentialGeometry.Geometry.Metric.TensorInner.TangentRiemannian
 import Mathlib.Analysis.InnerProductSpace.Defs
 import Mathlib.MeasureTheory.Integral.Bochner.Basic
 

@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.WithBoundary.Chart
-import DifferentialGeometry.Riemannian.Boundary.SurfaceMeasure
+import DifferentialGeometry.Geometry.Boundary.SurfaceMeasure
 import Mathlib.MeasureTheory.Function.LpSeminorm.Basic
 import Mathlib.MeasureTheory.Function.LpSpace.Basic
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus

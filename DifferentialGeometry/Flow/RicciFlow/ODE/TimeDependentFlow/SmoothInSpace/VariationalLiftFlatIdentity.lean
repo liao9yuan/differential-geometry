@@ -1,6 +1,6 @@
 import DifferentialGeometry.Flow.RicciFlow.ODE.TimeDependentFlow.SmoothInSpace.VariationalLiftManifoldFlowOrbitODE
 import DifferentialGeometry.Flow.RicciFlow.ODE.TimeDependentFlow.SmoothInSpace.VariationalLiftFlatToCovariant
-import DifferentialGeometry.Riemannian.Connection.ChristoffelCorrectionBasepoint
+import DifferentialGeometry.Geometry.Connection.ChristoffelCorrectionBasepoint
 
 /-!
 # The FLAT per-slot linearized-flow identity (dischargeable directly from the operator ODE)

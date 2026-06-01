@@ -1,8 +1,8 @@
 import DifferentialGeometry.Flow.RicciFlow.DeTurckShortTime
-import DifferentialGeometry.Flow.DeTurck.VectorField
-import DifferentialGeometry.Flow.DeTurck.VectorFieldSmooth
-import DifferentialGeometry.Flow.DeTurck.ChristoffelContInMetric
-import DifferentialGeometry.Flow.DeTurck.DeTurckVFChartCoord
+import DifferentialGeometry.Geometry.Flow.VectorField
+import DifferentialGeometry.Geometry.Flow.VectorFieldSmooth
+import DifferentialGeometry.Analysis.Parabolic.ChristoffelContInMetric
+import DifferentialGeometry.Geometry.Flow.DeTurckVFChartCoord
 
 namespace DifferentialGeometry.PDE.RicciFlow
 

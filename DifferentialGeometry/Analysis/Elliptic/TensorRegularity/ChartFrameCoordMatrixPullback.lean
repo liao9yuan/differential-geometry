@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.MetricExtension
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.ChartPrimitives
-import DifferentialGeometry.Riemannian.Connection.CovApplyFrameToCoordExpansion
+import DifferentialGeometry.Geometry.Connection.CovApplyFrameToCoordExpansion
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridge
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.TangentAction
 

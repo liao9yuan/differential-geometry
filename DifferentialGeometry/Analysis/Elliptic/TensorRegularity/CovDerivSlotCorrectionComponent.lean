@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDerivIntrinsicComponent
 import DifferentialGeometry.Analysis.Spectral.Tensor.TrivProj.Bridge
-import DifferentialGeometry.Riemannian.Connection.ChartTensorRSCovariantDerivative
+import DifferentialGeometry.Geometry.Connection.ChartTensorRSCovariantDerivative
 
 /-!
 # The Christoffel slot-correction pieces of the chart tensor covariant derivative

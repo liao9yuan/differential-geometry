@@ -3,7 +3,7 @@ import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.Global
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.POUReduction
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.InteriorCompactSupport
-import DifferentialGeometry.Riemannian.Boundary.ModelBoundary
+import DifferentialGeometry.Geometry.Boundary.ModelBoundary
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.LocalFormula
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.Closed
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.Proper

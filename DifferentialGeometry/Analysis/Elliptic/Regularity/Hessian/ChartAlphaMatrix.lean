@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Hessian.ChartInvariance
-import DifferentialGeometry.Riemannian.Connection.ChartBridge.Hessian
+import DifferentialGeometry.Geometry.Connection.ChartBridge.Hessian
 
 /-!
 # Unconditional discharge of the chart-α matrix identity and swap auxiliary

@@ -1,4 +1,4 @@
-import DifferentialGeometry.Riemannian.Connection.CovApplyCovRSChartBasisExtension
+import DifferentialGeometry.Geometry.Connection.CovApplyCovRSChartBasisExtension
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDerivComponentSecondFormula
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDerivChartForm
 

@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.Operator.DirichletForm
 import DifferentialGeometry.Analysis.Elliptic.MetricBounds
-import DifferentialGeometry.Riemannian.Operator.Gradient
+import DifferentialGeometry.Geometry.Operator.Gradient
 import DifferentialGeometry.Analysis.Elliptic.Operator.Variational
 
 /-!

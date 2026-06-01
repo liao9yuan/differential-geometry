@@ -1,5 +1,5 @@
 import DifferentialGeometry.Flow.RicciFlow.IntrinsicSpectral.DeTurckCoefficients.ChristoffelPerturbation
-import DifferentialGeometry.Flow.DeTurck.DeTurckLinearization.ChartVectorField
+import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.ChartVectorField
 
 /-!
 # Lipschitz dependence of the DeTurck Lie (gauge) summand on the metric 2-jet

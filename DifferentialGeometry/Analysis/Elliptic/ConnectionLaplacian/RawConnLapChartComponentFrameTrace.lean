@@ -1,4 +1,4 @@
-import DifferentialGeometry.Riemannian.Connection.RawTensorConnLapChartFrameTrace
+import DifferentialGeometry.Geometry.Connection.RawTensorConnLapChartFrameTrace
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components
 
 /-!

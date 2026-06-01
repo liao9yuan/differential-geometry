@@ -1,4 +1,4 @@
-import DifferentialGeometry.Riemannian.Connection.LeibnizRemainderSecondDerivCancellation
+import DifferentialGeometry.Geometry.Connection.LeibnizRemainderSecondDerivCancellation
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.SkExtChartComponentEqCovDerivEuclid
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDerivComponentFormula
 

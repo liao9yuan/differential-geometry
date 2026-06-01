@@ -1,10 +1,10 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.SlotUniformBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.TensorRSModelEvalBasis
 import DifferentialGeometry.Analysis.Spectral.Tensor.TrivProj.Bridge
-import DifferentialGeometry.Riemannian.Connection.ChartLeviCivitaParallelExtend
-import DifferentialGeometry.Riemannian.Connection.ChartTensor0SCovariantDerivative
-import DifferentialGeometry.Riemannian.Connection.ChartTensorRSCovariantDerivative
-import DifferentialGeometry.Riemannian.Connection.LeviCivitaChartSmooth
+import DifferentialGeometry.Geometry.Connection.ChartLeviCivitaParallelExtend
+import DifferentialGeometry.Geometry.Connection.ChartTensor0SCovariantDerivative
+import DifferentialGeometry.Geometry.Connection.ChartTensorRSCovariantDerivative
+import DifferentialGeometry.Geometry.Connection.LeviCivitaChartSmooth
 
 /-!
 # Chart-source smoothness of the trivialised slot-correction sections

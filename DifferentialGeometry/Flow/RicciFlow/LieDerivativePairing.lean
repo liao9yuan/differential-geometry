@@ -1,5 +1,5 @@
 import DifferentialGeometry.Flow.RicciFlow.SmoothQuasilinear
-import DifferentialGeometry.Flow.DeTurck.LieDerivativeChartFrameIdentity
+import DifferentialGeometry.Geometry.Flow.LieDerivativeChartFrameIdentity
 
 /-!
 # Smoothness of the metric Lie-derivative pairing on smooth tangent sections

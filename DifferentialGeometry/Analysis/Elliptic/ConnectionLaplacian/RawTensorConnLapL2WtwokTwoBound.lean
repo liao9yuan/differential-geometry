@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartPulledCovDerivChartCompBound
-import DifferentialGeometry.Riemannian.Connection.IteratedFDerivTensorReprChartCompBound
+import DifferentialGeometry.Geometry.Connection.IteratedFDerivTensorReprChartCompBound
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawTensorConnLapChartTargetSqBound
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawTensorConnLapChartL2PouBridge
 import DifferentialGeometry.Analysis.Sobolev.Tensor.Defs
@@ -7,7 +7,7 @@ import DifferentialGeometry.Analysis.Sobolev.Euclidean.FderivToWkpNormBridge
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedFderivToWkpNormBridge
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.GoodSetMeasure
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.TensorChartTransition
-import DifferentialGeometry.Riemannian.Connection.SlotCorrectionChartFderivBound
+import DifferentialGeometry.Geometry.Connection.SlotCorrectionChartFderivBound
 
 /-!
 # Order-zero bound: chart-target POU-weighted L² of the chart-pulled

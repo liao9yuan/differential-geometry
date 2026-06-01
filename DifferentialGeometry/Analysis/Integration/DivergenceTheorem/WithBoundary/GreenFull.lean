@@ -1,12 +1,12 @@
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.GreenWithBoundary
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.GradientGlobalSection
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.SurfaceIntegralIdentification
-import DifferentialGeometry.Riemannian.Boundary.OutwardNormal
-import DifferentialGeometry.Riemannian.Boundary.SurfaceMeasure
-import DifferentialGeometry.Riemannian.Boundary.EuclideanHalfSpaceInstance
+import DifferentialGeometry.Geometry.Boundary.OutwardNormal
+import DifferentialGeometry.Geometry.Boundary.SurfaceMeasure
+import DifferentialGeometry.Geometry.Boundary.EuclideanHalfSpaceInstance
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.POUReduction
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.Stokes
-import DifferentialGeometry.Riemannian.Operator.NormGradSq
+import DifferentialGeometry.Geometry.Operator.NormGradSq
 import DifferentialGeometry.Analysis.Integration.Measure.Family
 import Mathlib.MeasureTheory.Integral.Bochner.Basic
 

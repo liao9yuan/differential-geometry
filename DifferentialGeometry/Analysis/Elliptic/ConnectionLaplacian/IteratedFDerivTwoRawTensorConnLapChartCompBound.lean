@@ -1,6 +1,6 @@
-import DifferentialGeometry.Riemannian.Connection.RawTensorConnLapIterL2WtwokTwoBound
+import DifferentialGeometry.Geometry.Connection.RawTensorConnLapIterL2WtwokTwoBound
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawTensorConnLapNormSqChartPulledReprBound
-import DifferentialGeometry.Riemannian.Connection.IteratedFDerivTensorReprChartCompBound
+import DifferentialGeometry.Geometry.Connection.IteratedFDerivTensorReprChartCompBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.TrivProj.FDerivDecompReal
 
 /-!

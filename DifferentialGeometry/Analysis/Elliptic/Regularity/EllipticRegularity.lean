@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.H2Regularity
 import DifferentialGeometry.Analysis.Sobolev.Chart.Defs
-import DifferentialGeometry.Riemannian.Operator.Laplacian
+import DifferentialGeometry.Geometry.Operator.Laplacian
 
 /-!
 # Chart-local elliptic bilinear forms for the variational Laplacian on a

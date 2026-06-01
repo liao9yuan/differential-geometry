@@ -6,7 +6,7 @@ import DifferentialGeometry.Flow.RicciFlow.Pullback.CartanFormula
 import DifferentialGeometry.Flow.RicciFlow.Pullback.CovDerivPullbackNaturality
 import DifferentialGeometry.Flow.RicciFlow.Pullback.CovDerivPullbackPointwise
 import DifferentialGeometry.Flow.RicciFlow.Pullback.ChainRule
-import DifferentialGeometry.Flow.DeTurck.LieDerivativeMetric
+import DifferentialGeometry.Geometry.Flow.LieDerivativeMetric
 
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback
 

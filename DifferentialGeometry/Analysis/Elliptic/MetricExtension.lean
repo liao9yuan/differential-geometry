@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.Euclidean
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.Family
-import DifferentialGeometry.Riemannian.Operator.Hessian
+import DifferentialGeometry.Geometry.Operator.Hessian
 import Mathlib.Analysis.InnerProductSpace.EuclideanDist
 import Mathlib.Topology.Order.Compact
 

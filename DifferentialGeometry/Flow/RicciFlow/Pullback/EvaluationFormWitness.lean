@@ -4,9 +4,9 @@ import DifferentialGeometry.Flow.RicciFlow.Pullback.RicciNaturality
 import DifferentialGeometry.Flow.RicciFlow.Pullback.LieNaturality
 import DifferentialGeometry.Flow.RicciFlow.Pullback.CartanFormula
 import DifferentialGeometry.Flow.RicciFlow.Pullback.TimeDerivativeChainRule
-import DifferentialGeometry.Flow.DeTurck.LieDerivativeMetric
-import DifferentialGeometry.Flow.DeTurck.VectorField
-import DifferentialGeometry.Riemannian.Curvature.RicciConnection
+import DifferentialGeometry.Geometry.Flow.LieDerivativeMetric
+import DifferentialGeometry.Geometry.Flow.VectorField
+import DifferentialGeometry.Geometry.Curvature.RicciConnection
 import Mathlib.Analysis.Calculus.Deriv.Basic
 import Mathlib.Analysis.Calculus.Deriv.Add
 import Mathlib.Analysis.Calculus.Deriv.Mul

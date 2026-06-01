@@ -1,8 +1,8 @@
 import DifferentialGeometry.Flow.RicciFlow.DeTurckRHS
 import DifferentialGeometry.Flow.RicciFlow.PrincipalSymbol
-import DifferentialGeometry.Flow.DeTurck.RicciLinearization.RicciPrincipalPart
-import DifferentialGeometry.Flow.DeTurck.DeTurckLinearization.DeTurckCorrectionSymbol
-import DifferentialGeometry.Flow.DeTurck.StrictParabolicity
+import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciSecondOrderPart
+import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.DeTurckCorrectionSymbol
+import DifferentialGeometry.Analysis.Parabolic.StrictParabolicity
 
 namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 

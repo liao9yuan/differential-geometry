@@ -9,7 +9,7 @@ import DifferentialGeometry.Flow.RicciFlow.ODE.TimeDependentFlow.ChartOverlapUni
 import DifferentialGeometry.Flow.RicciFlow.ODE.TimeDependentFlow.BareFlowFromJointC1
 import DifferentialGeometry.Flow.RicciFlow.ODE.TimeDependentFlow.SmoothInSpace.VariationalLiftFlatIdentity
 import DifferentialGeometry.Flow.RicciFlow.ODE.TimeDependentFlow.SmoothDependence.GlobalClosedManifold
-import DifferentialGeometry.Flow.DeTurck.DeTurckVFChartCoord
+import DifferentialGeometry.Geometry.Flow.DeTurckVFChartCoord
 
 namespace DifferentialGeometry.PDE.RicciFlow
 

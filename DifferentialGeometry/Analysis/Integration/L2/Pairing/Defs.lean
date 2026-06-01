@@ -1,8 +1,8 @@
 import DifferentialGeometry.Analysis.Integration.Measure.Properties
 import DifferentialGeometry.Analysis.Integration.L2.Basic
-import DifferentialGeometry.Riemannian.Metric.PointwiseInner.Defs
-import DifferentialGeometry.Riemannian.Metric.PointwiseInner.DualMetric
-import DifferentialGeometry.Riemannian.Metric.PointwiseInner.Algebra
+import DifferentialGeometry.Geometry.Metric.PointwiseInner.Defs
+import DifferentialGeometry.Geometry.Metric.PointwiseInner.DualMetric
+import DifferentialGeometry.Geometry.Metric.PointwiseInner.Algebra
 import DifferentialGeometry.Tensor.RSTensor.Defs
 import Mathlib.MeasureTheory.Integral.Bochner.Basic
 import Mathlib.MeasureTheory.Function.L1Space.Integrable

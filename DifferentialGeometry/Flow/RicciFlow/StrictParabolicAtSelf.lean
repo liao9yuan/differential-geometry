@@ -1,10 +1,10 @@
 import DifferentialGeometry.Flow.RicciFlow.DeTurckRHS
 import DifferentialGeometry.Flow.RicciFlow.PrincipalSymbol
 import DifferentialGeometry.Flow.ParabolicShortTime
-import DifferentialGeometry.Flow.DeTurck.Symbol
-import DifferentialGeometry.Flow.DeTurck.StrictParabolicity
-import DifferentialGeometry.Flow.DeTurck.RicciLinearization.RicciPrincipalPart
-import DifferentialGeometry.Flow.DeTurck.DeTurckLinearization.DeTurckCorrectionSymbol
+import DifferentialGeometry.Analysis.Parabolic.PrincipalSymbol
+import DifferentialGeometry.Analysis.Parabolic.StrictParabolicity
+import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciSecondOrderPart
+import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.DeTurckCorrectionSymbol
 
 namespace DifferentialGeometry.PDE.RicciFlow
 

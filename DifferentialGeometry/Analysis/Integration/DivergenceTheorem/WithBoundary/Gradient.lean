@@ -1,4 +1,4 @@
-import DifferentialGeometry.Riemannian.Operator.Gradient
+import DifferentialGeometry.Geometry.Operator.Gradient
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.PartialDerivWithin
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.LocalFormula
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.POUReduction

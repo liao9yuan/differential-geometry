@@ -11,7 +11,7 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartPushed.WeakPartial
 import DifferentialGeometry.Analysis.Elliptic.Operator.Operator
 import DifferentialGeometry.Analysis.Elliptic.Operator.SmoothBridge
 import DifferentialGeometry.Analysis.Elliptic.Operator.Variational
-import DifferentialGeometry.Riemannian.Operator.NormGradSq
+import DifferentialGeometry.Geometry.Operator.NormGradSq
 
 /-!
 # Unconditional general-case variational identity for the variational Laplacian

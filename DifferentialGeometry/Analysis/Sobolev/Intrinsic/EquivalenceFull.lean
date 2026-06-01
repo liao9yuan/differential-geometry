@@ -6,7 +6,7 @@ import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridgeUniform
 import DifferentialGeometry.Analysis.Sobolev.Manifold.EmbeddingSubcritical
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MorreyManifold
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.IntegrationByParts
-import DifferentialGeometry.Riemannian.Operator.Laplacian
+import DifferentialGeometry.Geometry.Operator.Laplacian
 import DifferentialGeometry.Analysis.Integration.Measure.Family
 import Mathlib.MeasureTheory.Function.LpSpace.Complete
 import Mathlib.MeasureTheory.Function.LpSeminorm.TriangleInequality

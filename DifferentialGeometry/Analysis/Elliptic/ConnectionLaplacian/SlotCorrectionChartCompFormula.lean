@@ -1,4 +1,4 @@
-import DifferentialGeometry.Riemannian.Connection.ChartTensorRSCovariantDerivative
+import DifferentialGeometry.Geometry.Connection.ChartTensorRSCovariantDerivative
 import DifferentialGeometry.Analysis.Spectral.Tensor.TrivProj.Bridge
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components
 

@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapChartCoeffsUniformBound
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.ChartPrimitives
-import DifferentialGeometry.Riemannian.Curvature.Riemann
+import DifferentialGeometry.Geometry.Curvature.Riemann
 
 /-!
 # Uniform-over-compact-`M` bound on the chart-`α` Riemann curvature data

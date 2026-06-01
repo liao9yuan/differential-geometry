@@ -2,14 +2,14 @@ import DifferentialGeometry.Flow.RicciFlow.DeTurckRHS
 import DifferentialGeometry.Flow.ParabolicShortTime
 import DifferentialGeometry.Flow.RicciFlow.StrictParabolicAtSelf
 import DifferentialGeometry.Flow.RicciFlow.Pullback.CartanFormula
-import DifferentialGeometry.Riemannian.Curvature.RicciConnection
-import DifferentialGeometry.Riemannian.Connection.LeviCivita
-import DifferentialGeometry.Riemannian.Connection.CotangentExtension
-import DifferentialGeometry.Flow.DeTurck.VectorFieldSmooth
-import DifferentialGeometry.Flow.DeTurck.LieDerivativeMetric
+import DifferentialGeometry.Geometry.Curvature.RicciConnection
+import DifferentialGeometry.Geometry.Connection.LeviCivita
+import DifferentialGeometry.Geometry.Connection.CotangentExtension
+import DifferentialGeometry.Geometry.Flow.VectorFieldSmooth
+import DifferentialGeometry.Geometry.Flow.LieDerivativeMetric
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.LocalFormula
-import DifferentialGeometry.Riemannian.Curvature.Ricci
-import DifferentialGeometry.Riemannian.Curvature.Riemann
+import DifferentialGeometry.Geometry.Curvature.Ricci
+import DifferentialGeometry.Geometry.Curvature.Riemann
 import Mathlib.Geometry.Manifold.ContMDiff.Basic
 
 namespace DifferentialGeometry.PDE.RicciFlow

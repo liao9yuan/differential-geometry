@@ -1,10 +1,10 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.JinvContinuity
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.InnerLowerBound
 import DifferentialGeometry.Tensor.RSTensor.Defs
-import DifferentialGeometry.Riemannian.Metric.TensorInner.Tensor0SRiemannian
-import DifferentialGeometry.Riemannian.Metric.TensorInner.TangentRiemannian
-import DifferentialGeometry.Riemannian.Metric.PointwiseInner.Defs
-import DifferentialGeometry.Riemannian.Metric.PointwiseInner.DualMetric
+import DifferentialGeometry.Geometry.Metric.TensorInner.Tensor0SRiemannian
+import DifferentialGeometry.Geometry.Metric.TensorInner.TangentRiemannian
+import DifferentialGeometry.Geometry.Metric.PointwiseInner.Defs
+import DifferentialGeometry.Geometry.Metric.PointwiseInner.DualMetric
 import Mathlib.Analysis.Normed.Module.Basic
 import Mathlib.Analysis.Normed.Operator.NormedSpace
 import Mathlib.Topology.Algebra.Module.Multilinear.Topology

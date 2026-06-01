@@ -1,5 +1,5 @@
 import DifferentialGeometry.Flow.RicciFlow.IntrinsicSpectral.DeTurckCoefficients.ChristoffelPerturbation
-import DifferentialGeometry.Riemannian.Curvature.Ricci
+import DifferentialGeometry.Geometry.Curvature.Ricci
 
 /-!
 # Affine-in-`∂²(g₁−g₂)` decomposition of the chart Ricci-tensor difference

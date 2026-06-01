@@ -1,6 +1,6 @@
 import DifferentialGeometry.Flow.RicciFlow.IntrinsicSpectral.DeTurckCoefficients.InverseGramPerturbation
-import DifferentialGeometry.Flow.DeTurck.RicciLinearization.InvGramPerturbation
-import DifferentialGeometry.Riemannian.Curvature.Ricci
+import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.InvGramPerturbation
+import DifferentialGeometry.Geometry.Curvature.Ricci
 
 /-!
 # Lipschitz dependence of the chart Christoffel symbols and their derivatives on the metric jet

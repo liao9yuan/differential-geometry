@@ -1,5 +1,5 @@
-import DifferentialGeometry.Riemannian.Metric.Basic
-import DifferentialGeometry.Flow.DeTurck.Symbol
+import DifferentialGeometry.Geometry.Metric.Basic
+import DifferentialGeometry.Analysis.Parabolic.PrincipalSymbol
 
 /-!
 # Principal-symbol predicate for tensor-valued operators on Riemannian metrics

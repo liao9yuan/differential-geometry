@@ -2,7 +2,7 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.CLM
 import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartBilinear.Smooth
 import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.ChartData
 import DifferentialGeometry.Analysis.Elliptic.MetricExtension
-import DifferentialGeometry.Riemannian.Operator.Gradient
+import DifferentialGeometry.Geometry.Operator.Gradient
 import Mathlib.MeasureTheory.Function.LpSpace.Basic
 
 /-!

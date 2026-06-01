@@ -1,4 +1,4 @@
-import DifferentialGeometry.Riemannian.Metric.TensorInner.TensorRSRiemannian
+import DifferentialGeometry.Geometry.Metric.TensorInner.TensorRSRiemannian
 import DifferentialGeometry.Tensor.Multilinear.MetricLowering
 import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Defs
 import Mathlib.Geometry.Manifold.VectorBundle.Hom

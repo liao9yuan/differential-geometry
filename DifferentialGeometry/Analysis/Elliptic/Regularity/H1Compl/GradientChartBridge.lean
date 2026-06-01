@@ -1,7 +1,7 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartBilinear.H1ComplFromDom
 import DifferentialGeometry.Analysis.Elliptic.Regularity.H1Compl.ToLpChartBridge
 import DifferentialGeometry.Analysis.Sobolev.Chart.Defs
-import DifferentialGeometry.Riemannian.Operator.Gradient
+import DifferentialGeometry.Geometry.Operator.Gradient
 import Mathlib.MeasureTheory.Function.LpSpace.Basic
 import Mathlib.MeasureTheory.Function.LpSpace.Complete
 

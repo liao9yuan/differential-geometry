@@ -1,4 +1,4 @@
-import DifferentialGeometry.Riemannian.Curvature.RiemannianFiberNormSq
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.FiberNormSqSummandChartAlphaBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.GramInvUniformEigenvalueLowerBound
 

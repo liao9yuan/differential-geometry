@@ -2,7 +2,7 @@ import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevHalfSpace
 import DifferentialGeometry.Analysis.Sobolev.Chart.Defs
 import DifferentialGeometry.Analysis.Integration.Measure.Properties
 import DifferentialGeometry.Analysis.Integration.L2.CompactSupport
-import DifferentialGeometry.Riemannian.Boundary.EuclideanHalfSpaceInstance
+import DifferentialGeometry.Geometry.Boundary.EuclideanHalfSpaceInstance
 
 /-!
 # Chart-based Sobolev space `W^{k,p}_chart(M)` on a smooth manifold-with-boundary

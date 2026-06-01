@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.EigenvectorChartCrossLimits
-import DifferentialGeometry.Riemannian.Operator.Gradient
+import DifferentialGeometry.Geometry.Operator.Gradient
 
 /-!
 # The cross-right covariant-Leibniz term as an `n → ∞` `L²`-limit, recast at rank `(r, s)`

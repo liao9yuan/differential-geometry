@@ -1,7 +1,7 @@
-import DifferentialGeometry.Riemannian.Metric.Basic
-import DifferentialGeometry.Riemannian.Curvature.RicciConnection
+import DifferentialGeometry.Geometry.Metric.Basic
+import DifferentialGeometry.Geometry.Curvature.RicciConnection
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.Existence
-import DifferentialGeometry.Flow.DeTurck.Symbol
+import DifferentialGeometry.Analysis.Parabolic.PrincipalSymbol
 import DifferentialGeometry.Flow.RicciFlow.PrincipalSymbol
 import Mathlib.Geometry.Manifold.MFDeriv.Basic
 

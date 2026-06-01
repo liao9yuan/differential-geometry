@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.ChartFrameCoordMatrixPullback
-import DifferentialGeometry.Riemannian.Connection.LeviCivita
-import DifferentialGeometry.Riemannian.Connection.CovApplyFrameToCoordExpansion
+import DifferentialGeometry.Geometry.Connection.LeviCivita
+import DifferentialGeometry.Geometry.Connection.CovApplyFrameToCoordExpansion
 
 /-!
 # Chart-α `m`-coordinate of `(LC g) B^α_i (B^α_i)`: smoothness on the Euclidean chart target

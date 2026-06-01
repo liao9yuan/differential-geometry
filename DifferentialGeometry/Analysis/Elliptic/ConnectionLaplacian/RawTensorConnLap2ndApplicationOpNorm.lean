@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartTensorRSCovariantDerivativeOpNorm
-import DifferentialGeometry.Riemannian.Connection.ChartTensorRSCovariantDerivativeAgreement
-import DifferentialGeometry.Riemannian.Connection.LeviCivita
+import DifferentialGeometry.Geometry.Connection.ChartTensorRSCovariantDerivativeAgreement
+import DifferentialGeometry.Geometry.Connection.LeviCivita
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartLeviCivitaParallelCLMOpNorm
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.GoodSetMeasure
 

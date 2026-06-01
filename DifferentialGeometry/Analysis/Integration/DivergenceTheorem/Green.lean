@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.LocalFormula
-import DifferentialGeometry.Riemannian.Operator.Gradient
-import DifferentialGeometry.Riemannian.Operator.Laplacian
+import DifferentialGeometry.Geometry.Operator.Gradient
+import DifferentialGeometry.Geometry.Operator.Laplacian
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.IntegrationByParts
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.Closed
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.Proper

@@ -1,5 +1,5 @@
-import DifferentialGeometry.Riemannian.Curvature.Tensor3rdCurvFiberNormBound
-import DifferentialGeometry.Riemannian.Curvature.TensorThirdOrderWeitzenbock
+import DifferentialGeometry.Geometry.Curvature.Tensor3rdCurvFiberNormBound
+import DifferentialGeometry.Geometry.Curvature.TensorThirdOrderWeitzenbock
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad
 
 /-!

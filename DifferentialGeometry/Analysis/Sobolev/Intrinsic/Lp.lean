@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Intrinsic.Defs
-import DifferentialGeometry.Riemannian.Operator.Gradient
+import DifferentialGeometry.Geometry.Operator.Gradient
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.IntegrationByParts
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.LocalFormula
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.POUReduction
@@ -8,7 +8,7 @@ import DifferentialGeometry.Analysis.Integration.L2.CompactSupport
 import DifferentialGeometry.Analysis.Integration.Measure.Properties
 import DifferentialGeometry.Analysis.Integration.Measure.Glue
 import DifferentialGeometry.Analysis.Integration.Measure.Invariance
-import DifferentialGeometry.Riemannian.Metric.TensorInner.TangentRiemannian
+import DifferentialGeometry.Geometry.Metric.TensorInner.TangentRiemannian
 import Mathlib.MeasureTheory.Function.LpSeminorm.Basic
 import Mathlib.MeasureTheory.Function.LpSeminorm.TriangleInequality
 import Mathlib.MeasureTheory.Function.LpSeminorm.SMul

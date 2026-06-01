@@ -1,4 +1,4 @@
-import DifferentialGeometry.Riemannian.Metric.TensorInner.Tensor0SRiemannian
+import DifferentialGeometry.Geometry.Metric.TensorInner.Tensor0SRiemannian
 import DifferentialGeometry.Analysis.Integration.Measure.Invariance
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Geometry.Manifold.VectorBundle.Basic

@@ -1,6 +1,6 @@
-import DifferentialGeometry.Riemannian.Boundary.InducedMetric
-import DifferentialGeometry.Riemannian.Boundary.SurfaceMeasure
-import DifferentialGeometry.Riemannian.Operator.Laplacian
+import DifferentialGeometry.Geometry.Boundary.InducedMetric
+import DifferentialGeometry.Geometry.Boundary.SurfaceMeasure
+import DifferentialGeometry.Geometry.Operator.Laplacian
 
 /-!
 # The boundary Laplacian on a Riemannian manifold-with-boundary

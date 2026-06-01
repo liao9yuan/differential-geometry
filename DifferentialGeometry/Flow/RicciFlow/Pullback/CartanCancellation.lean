@@ -1,8 +1,8 @@
 import DifferentialGeometry.Flow.RicciFlow.Pullback.CartanFormula
-import DifferentialGeometry.Flow.DeTurck.LieDerivativeMetric
-import DifferentialGeometry.Flow.DeTurck.VectorField
+import DifferentialGeometry.Geometry.Flow.LieDerivativeMetric
+import DifferentialGeometry.Geometry.Flow.VectorField
 import DifferentialGeometry.Flow.RicciFlow.Pullback.PushforwardVF
-import DifferentialGeometry.Riemannian.Connection.LeviCivita
+import DifferentialGeometry.Geometry.Connection.LeviCivita
 import Mathlib.Analysis.Calculus.Deriv.Basic
 import Mathlib.Analysis.Calculus.Deriv.Add
 

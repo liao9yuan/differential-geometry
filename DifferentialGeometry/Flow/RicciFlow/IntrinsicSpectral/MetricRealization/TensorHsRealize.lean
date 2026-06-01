@@ -1,7 +1,7 @@
 import DifferentialGeometry.Flow.RicciFlow.IntrinsicSpectral.MetricRealization.PosDefPerturbation
 import DifferentialGeometry.Flow.RicciFlow.DeTurckRHSSection
 import DifferentialGeometry.Tensor.Multilinear.BundleSmoothEval
-import DifferentialGeometry.Riemannian.Connection.CotangentExtension
+import DifferentialGeometry.Geometry.Connection.CotangentExtension
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.EigenvectorTensorHsToWtwokTwo
 import DifferentialGeometry.Flow.RicciFlow.IntrinsicSpectral.DeTurckNonlinearitySpectral
 

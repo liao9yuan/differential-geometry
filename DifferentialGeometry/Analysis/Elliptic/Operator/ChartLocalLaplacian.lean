@@ -1,7 +1,7 @@
 import DifferentialGeometry.Analysis.Elliptic.MetricExtension
 import DifferentialGeometry.Analysis.Elliptic.Operator.ChartMeasureEquiv
-import DifferentialGeometry.Riemannian.Operator.Gradient
-import DifferentialGeometry.Riemannian.Operator.Laplacian
+import DifferentialGeometry.Geometry.Operator.Gradient
+import DifferentialGeometry.Geometry.Operator.Laplacian
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.Green
 import Mathlib.Analysis.Calculus.ContDiff.Basic
 import Mathlib.Analysis.Calculus.FDeriv.Basic

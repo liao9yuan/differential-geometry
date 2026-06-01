@@ -1,4 +1,4 @@
-import DifferentialGeometry.Riemannian.Metric.TensorInner.TangentRiemannian
+import DifferentialGeometry.Geometry.Metric.TensorInner.TangentRiemannian
 import Mathlib.LinearAlgebra.Dual.Basis
 
 set_option autoImplicit false

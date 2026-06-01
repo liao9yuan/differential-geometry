@@ -3,8 +3,8 @@ import DifferentialGeometry.Flow.RicciFlow.Pullback.Metric
 import DifferentialGeometry.Flow.RicciFlow.Pullback.MLieBracketNaturality
 import DifferentialGeometry.Flow.RicciFlow.Pullback.PullbackConnection
 import DifferentialGeometry.Flow.RicciFlow.Pullback.CovDerivPullbackNaturality
-import DifferentialGeometry.Riemannian.Connection.LeviCivita
-import DifferentialGeometry.Riemannian.Connection.Koszul
+import DifferentialGeometry.Geometry.Connection.LeviCivita
+import DifferentialGeometry.Geometry.Connection.Koszul
 
 /-!
 # Pointwise connection-pullback chain rule for the Levi-Civita derivative

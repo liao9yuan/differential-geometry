@@ -3,8 +3,8 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartPushed.WeakPartial
 import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.BilinearH1ComplFromDomainPow
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Hessian.TensorChartSmooth
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolev
-import DifferentialGeometry.Riemannian.Operator.Hessian
-import DifferentialGeometry.Riemannian.Connection.ChartMetric
+import DifferentialGeometry.Geometry.Operator.Hessian
+import DifferentialGeometry.Geometry.Connection.ChartMetric
 
 /-!
 # Chart-α weak Hessian primitives for `u_h ∈ laplacianDomain g`

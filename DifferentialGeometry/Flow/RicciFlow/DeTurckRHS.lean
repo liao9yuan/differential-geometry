@@ -1,7 +1,7 @@
-import DifferentialGeometry.Riemannian.Metric.Basic
-import DifferentialGeometry.Riemannian.Curvature.RicciConnection
-import DifferentialGeometry.Flow.DeTurck.VectorField
-import DifferentialGeometry.Flow.DeTurck.LieDerivativeMetric
+import DifferentialGeometry.Geometry.Metric.Basic
+import DifferentialGeometry.Geometry.Curvature.RicciConnection
+import DifferentialGeometry.Geometry.Flow.VectorField
+import DifferentialGeometry.Geometry.Flow.LieDerivativeMetric
 
 namespace DifferentialGeometry
 namespace PDE

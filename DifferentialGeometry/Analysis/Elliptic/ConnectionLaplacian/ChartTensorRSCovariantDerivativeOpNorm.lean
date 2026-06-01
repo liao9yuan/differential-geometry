@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.TensorRSIntrinsicChartCLMOpNorm
-import DifferentialGeometry.Riemannian.Connection.SlotChristoffelCorrectionOpNorm
+import DifferentialGeometry.Geometry.Connection.SlotChristoffelCorrectionOpNorm
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartLeviCivitaParallelCLMOpNorm
 
 /-!

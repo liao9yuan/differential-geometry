@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.H1Compl.GradientLipschitz
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridgeUniform
-import DifferentialGeometry.Riemannian.Operator.NormGradSq
+import DifferentialGeometry.Geometry.Operator.NormGradSq
 import Mathlib.MeasureTheory.Integral.Bochner.Basic
 import Mathlib.MeasureTheory.Function.LpSpace.Basic
 import Mathlib.Analysis.Calculus.ContDiff.Basic

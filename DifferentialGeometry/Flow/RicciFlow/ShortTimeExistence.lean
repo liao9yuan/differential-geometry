@@ -1,9 +1,9 @@
-import DifferentialGeometry.Riemannian.Metric.Basic
-import DifferentialGeometry.Riemannian.Curvature.RicciConnection
+import DifferentialGeometry.Geometry.Metric.Basic
+import DifferentialGeometry.Geometry.Curvature.RicciConnection
 import DifferentialGeometry.Flow.ParabolicShortTime
-import DifferentialGeometry.Flow.DeTurck.VectorField
-import DifferentialGeometry.Flow.DeTurck.LieDerivativeMetric
-import DifferentialGeometry.Flow.DeTurck.StrictParabolicity
+import DifferentialGeometry.Geometry.Flow.VectorField
+import DifferentialGeometry.Geometry.Flow.LieDerivativeMetric
+import DifferentialGeometry.Analysis.Parabolic.StrictParabolicity
 import DifferentialGeometry.Flow.RicciFlow.DeTurckRHS
 import DifferentialGeometry.Flow.RicciFlow.DeTurckShortTime
 import DifferentialGeometry.Flow.RicciFlow.DeTurckVFTimeFamily
