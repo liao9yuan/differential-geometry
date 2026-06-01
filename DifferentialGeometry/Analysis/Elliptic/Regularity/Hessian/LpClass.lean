@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.PerChartWitness
+import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.PerChart
 import DifferentialGeometry.Analysis.Elliptic.MetricExtension
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolev
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Density

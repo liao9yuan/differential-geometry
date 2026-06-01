@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.TensorComponentGradientL2Atoms
-import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.TensorRSChartFiberFromModelOpNormUnconditional
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.TensorRSChartFiberFromModelOpNorm
 
 /-!
 # Fibre-form covariant-derivative atom `L²` bound

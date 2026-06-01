@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.TangentBundleTrivOpNormUnconditional
+import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.TangentBundleTrivOpNorm
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ChristoffelBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.InnerLowerBound
 import DifferentialGeometry.Geometry.Connection.LeviCivitaChartLocal

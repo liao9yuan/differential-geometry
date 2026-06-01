@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.BilinearH1ComplFromDomainPow
 import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.SmoothMulH1Compl
-import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.PerChartWitness
+import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.PerChart
 
 /-!
 # Manifold-side Lp decomposition of `fHLeibnizResidualLp`

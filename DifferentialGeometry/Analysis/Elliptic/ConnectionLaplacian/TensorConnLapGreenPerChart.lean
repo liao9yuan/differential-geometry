@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.TensorConnLapGreenAssembly
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.TensorConnLapGreen
 import DifferentialGeometry.Geometry.Connection.TensorConnLapGreenIdentity
 import DifferentialGeometry.Geometry.Connection.RawTensorConnLapChartFrameTrace
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.GoodSetMeasure

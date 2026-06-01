@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartBilinear.UniformDiffQuotBound
 import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartBilinear.UniformDiffQuotGTotalBound
-import DifferentialGeometry.Analysis.Sobolev.Nirenberg.SubstitutionDischargeAssembly
+import DifferentialGeometry.Analysis.Sobolev.Nirenberg.SubstitutionDischarge
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.SubstitutionNonSmooth
 
 /-!

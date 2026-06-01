@@ -1,5 +1,5 @@
-import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.TensorRSChartFiberToModelOpNormUnconditional
-import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.TensorRSChartFiberFromModelOpNormUnconditional
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.TensorRSChartFiberToModelOpNorm
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.TensorRSChartFiberFromModelOpNorm
 import DifferentialGeometry.Tensor.RSTensor.TensorRSBundleLocalityIdentities
 
 /-!

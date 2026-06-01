@@ -2,7 +2,7 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.LeibnizCompens
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.LaplacianDomain
 import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.VariationalLimitGeneral
 import DifferentialGeometry.Analysis.Elliptic.Regularity.SmoothScalar.PreH1
-import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.PerChartWitness
+import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.PerChart
 
 /-!
 # Smooth-multiplication structure on the variational Laplacian's domain

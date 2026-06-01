@@ -1,51 +1,49 @@
 # PROGRESS.md — restructuring execution tracker
 
 Branch: md2. Binding constraint: `lake build` green at every committed checkpoint (HELD throughout).
-Resume: read this + `git log --oneline`, continue from the last green commit.
+Verify builds by grepping the log for "Build completed successfully" (shell is zsh; exit-code echoes unreliable).
+Resume: read this + `git log --oneline`, continue from the last green commit. Scratch movers: `_migrate.py`,
+`_applyplan.py`, `_stage1.py`, `_stage2.py`, `_rename.py` at the worktree root (gitignored).
 
-## DONE (each a green-build commit)
-- ☑ Conventions + plan committed (CLAUDE.md, STRUCTURE.md, NAMING.md, MIGRATION_PLAN.md) — f720f9fa
-- ☑ W1 renames: VectorBundle→Bundle, HeatEquation→Heat, DifferentialForm→Tensor/Exterior, PDE→Flow — d45a68aa
-- ☑ Batch A: Integral→Integration; Geometry/Riemannian+Curvature+operators→Riemannian; Coordinates→Riemannian/Connection/Chart — ec22c521
-- ☑ Batch B: Integral/Connection→Riemannian/Connection (D2); Analysis/Laplacian→Analysis/Elliptic; Realized→Riemannian/Connection/Realized — 9bca9957
-- ☑ Batch C+D: Metric→Riemannian/Metric; delete Interface — b837d6d0
-- ☑ Batch E: lift 40 connection-Laplacian analysis files → Analysis/Elliptic/ConnectionLaplacian — aa460779
-- ☑ Batch F: Riemannian sub-routing → Comparison/, Hodge/, and loose files into Curvature/Metric/Connection/Exponential — bd6eb3ff
-- ☑ Batch G: extract Analysis/Spectral (Parabolic/TensorSpectral→Spectral/Tensor, Elliptic/Spectral→Spectral/Scalar) — (this commit)
-
-## ACHIEVED TOP-LEVEL ARCHITECTURE (matches target)
+## ACHIEVED — final architecture (by REASONING NATURE), all green
 ```
 DifferentialGeometry/
-  Bundle/        (was VectorBundle/)
-  Tensor/        Multilinear Product Mixed Alternating Auxiliary RSTensor Exterior(was DifferentialForm)
-  Riemannian/    Metric Connection Curvature Operator Geodesic Exponential Comparison(BonnetMyers,Variation,…) Hodge Topology
-  Integration/   Measure L2 DivergenceTheorem   (was Integral/)
-  Analysis/      Sobolev Elliptic(was Laplacian; +ConnectionLaplacian) Spectral(Tensor,Scalar) Parabolic Heat ODE
-  Flow/          DeTurck RicciFlow   (was PDE/)
-  External/      VENDORED, untouched
+  Bundle/     Tensor/        -- algebraic FOUNDATIONS (multilinear algebra over bundles)
+  Geometry/                  -- GEOMETRIC reasoning
+      Metric/ Connection/{…,Realization(ex-bridges)} Curvature/ Operator/ Geodesic/ Exponential/
+      Comparison/{BonnetMyers,…} Boundary/ Hodge/ Topology/ Flow/{DeTurck-geometric, RicciFlow flow-specific}
+  Analysis/                  -- DRY ANALYTIC / PDE reasoning
+      Integration/{Measure,L2,DivergenceTheorem} Sobolev/{…,HebeyBlock,Embedding,IntrinsicFlow}
+      Elliptic/{…,ConnectionLaplacian} Spectral/{…,Intrinsic,Tensor} Parabolic/{…,RicciLinearization,
+      DeTurckLinearization,ShortTime} ODE/{…,TimeDependentFlow} Heat/
+  External/                  -- VENDORED (De Giorgi-Nash-Moser), untouched
 ```
-Old dirs fully gone: Integral, Geometry, Coordinates, Realized(top), Interface, PDE, VectorBundle, DifferentialForm, Metric(top), Synthetic(already absent). Files 1341→1336 (−5 = Interface).
+1319 files. Old top-levels gone: Integral, Geometry(old), Coordinates, Realized, Interface, PDE, VectorBundle,
+DifferentialForm, Metric(top), Synthetic, Riemannian, Flow, SpectralBounds.
 
-## METHOD NOTE
-All structural moves were file/dir renames + consistent import-path rewrites (helper `_migrate.py`),
-which preserve the import DAG ⇒ green by construction. Namespaces were intentionally NOT renamed
-(decoupled from paths, Mathlib-style); `open`/qualified refs still resolve. Author-attributed files
-moved whole (`git mv`). No content was split.
+## Commit trail (md2, all green)
+f720f9fa docs → d45a68aa W1 → ec22c521 → 9bca9957 → b837d6d0 → aa460779 → bd6eb3ff → e1be3452 (Spectral)
+→ 35eec9a9 (Boundary) → 4fbd4f97 (ChartGram split, D1) → f96c4f98 (D1 PointwiseInner+RSTensor down)
+→ 27292c99 (curvature consol + Integration fold + Realized reloc + SpectralBounds) → 87210380 (Geometry
+rename + Realized DELETED + DeTurck distribute + curvature-estimates→Analysis) → eddd638b (Flow dissolve:
+RicciFlow general→Analysis, flow-specific→Geometry/Flow/RicciFlow).
 
-## DEFERRED — review-appropriate (content-risky or dedup-entangled); NOT done tonight to keep build green
-1. **Metric 3→1 dedup + ChartDensity content-split (D1 root).** `SmoothRiemannianMetric` still defined in
-   Integration/Measure/ChartDensity + Riemannian/Connection/Realized/MetricFamily + Riemannian/Metric/Basic.
-   Unifying needs namespace work; the metric TYPE should move out of ChartDensity into Riemannian/Metric.
-2. **Curvature/Operator extraction from Riemannian/Connection.** ~51 curvature + 4 operator files still sit in
-   Connection; moving them collides with existing Curvature/{Ricci,Riemann} + Operator/{Gradient,Hessian,Laplacian}
-   — i.e. entangled with the D3 duplicate-merge (two `Ricci.lean`, etc.). Needs the dedup decision first.
-3. **Realized/ internal routing** (Riemannian/Connection/Realized): its curvature realizations → Curvature.
-4. **Exponential 19→~3 content collapse** (merging files = content op).
-5. **R5 declaration-level one-cluster-per-file splitting** of lumped files (the highest-risk content op).
-6. **Namespace alignment** to the new paths (cosmetic; everything builds with old namespaces).
-7. **Analysis/Spectral extraction** from Parabolic/TensorSpectral + Elliptic/Spectral.
-8. **Boundary infra → Riemannian/Boundary** (currently under Integration/DivergenceTheorem/WithBoundary).
+## DONE this round (deferred items)
+- ☑ Metric D1 fix (ChartGram split + PointwiseInner/RSTensor-Riemannian → Geometry/Metric; Tensor Integration-free)
+- ☑ Boundary infra → Geometry/Boundary
+- ☑ D3 curvature consolidation (Connection→Curvature); analytic norm-estimates → Analysis
+- ☑ Realized DELETED (redundant ex-Synthetic; verified no external importers); 7 load-bearing Realization
+     bridges relocated → Geometry/Connection/Realization (plain glue, no longer "Realized")
+- ☑ Geometry rename (Riemannian→Geometry); Integration folded into Analysis
+- ☑ Flow dissolved by reasoning nature (DeTurck + RicciFlow distributed)
+- ◐ file-name optimization: 12 safe effort-suffix strips applied (build pending)
 
-## Log
-- All 7 structural waves landed green. Top-level architecture = target. Deferred items are the
-  content-changing / dedup-entangled refinements, left for a reviewed pass (build stays green now).
+## REMAINING (large per-file content passes; workflow CANNOT help — its subagents read the wrong branch/worktree)
+- File-rename clusters that need MERGE not strip: Exponential effort-cluster (Final/FinalClosure/Unconditional/
+  SmoothnessClose/SmoothnessUnconditional/UnifiedPackaging — all "exp C∞-at-0" facets → collapse to ~3 content files);
+  CovGradRoughLapCommutator{Close2,Close3,DoubleUnfold,Assembly}; Order2Defect* route-named files.
+- R5 declaration-level one-cluster-per-file splitting of lumped files (hundreds; content-risky).
+- Namespace alignment: namespaces are now stale (DifferentialGeometry.{Riemannian,Integral,PDE,Realized}.*) vs
+  the new paths. OPTIONAL per STRUCTURE.md §6 (namespaces decoupled from paths) but cosmetically confusing;
+  a full realign is a large all-references rewrite — defer / do with review.
+- Realized↔intrinsic semantic dedup was avoided (Realized deleted instead, cleaner).

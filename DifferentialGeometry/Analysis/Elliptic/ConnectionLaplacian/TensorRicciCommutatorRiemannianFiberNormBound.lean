@@ -1,5 +1,5 @@
 import DifferentialGeometry.Geometry.Curvature.TensorRicciCommutator
-import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSqLeCanonical
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSqLe
 import Mathlib.Topology.Order.Compact
 
 /-!
