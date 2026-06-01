@@ -33,24 +33,14 @@ import DifferentialGeometry.Realized.Bochner
 import DifferentialGeometry.Realized.Bianchi
 
 -- Synthetic Algebra
-import DifferentialGeometry.Synthetic.Algebra.VectorFieldAlgebra
-import DifferentialGeometry.Synthetic.Algebra.TensorAlgebra
-import DifferentialGeometry.Synthetic.Algebra.Metric
 
 -- Synthetic Analysis
-import DifferentialGeometry.Synthetic.Analysis.NablaOnTensors
-import DifferentialGeometry.Synthetic.Analysis.TimeOnTensors
-import DifferentialGeometry.Synthetic.Analysis.NablaTimeInteraction
 
 -- Synthetic Geometry
-import DifferentialGeometry.Synthetic.Geometry.Connection
-import DifferentialGeometry.Synthetic.Geometry.ConnectionExtended
 
 -- Synthetic Operators
-import DifferentialGeometry.Synthetic.Operator.Variation
 
 -- Axiom Interface
-import DifferentialGeometry.Synthetic.Assembly
 
 -- Realization: Concrete Ricci flow solution analysis
 import DifferentialGeometry.Synthetic.Realization.Basic
@@ -87,7 +77,6 @@ import DifferentialGeometry.Integral.Connection.LocalFrame
 -- Non-Ricci flows (plug-in demonstrations of flow-agnostic abstraction)
 
 -- Ricci Flow
-import DifferentialGeometry.Synthetic.Flow.RicciFlow.Basic
 
 import DifferentialGeometry.VectorBundle.Dual
 import DifferentialGeometry.VectorBundle.Equiv

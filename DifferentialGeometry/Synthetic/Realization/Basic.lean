@@ -1,4 +1,3 @@
-import DifferentialGeometry.Synthetic.Assembly
 import Mathlib.Geometry.Manifold.DerivationBundle
 import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic
 import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion
@@ -95,16 +94,6 @@ noncomputable instance invertible2SmoothFunctions :
         ContMDiffMap.coe_smul, Pi.smul_apply, smul_eq_mul, ContMDiffMap.coe_one,
         Pi.one_apply, mul_one]
     rw [this, two_smooth_eval, ContMDiffMap.coe_one, Pi.one_apply]; norm_num
-
--- ============================================================
--- char_ne_2 for C^∞(M, ℝ)
--- ============================================================
-
-/-- `Invertible (2 : C^∞(M, ℝ))` gives `2a = 0 → a = 0` via the generic lemma
-`char_ne_2_of_invertible_two`. -/
-theorem char_ne_2_smooth_functions :
-    ∀ (a : C^∞⟮I, M; ℝ⟯), (2 : C^∞⟮I, M; ℝ⟯) * a = 0 → a = 0 :=
-  char_ne_2_of_invertible_two
 
 end SmoothRicciFlowContext
 
