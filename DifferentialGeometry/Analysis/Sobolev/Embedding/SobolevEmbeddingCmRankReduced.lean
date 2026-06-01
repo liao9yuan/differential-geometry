@@ -1,7 +1,7 @@
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCmOrderCollapse
 import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.NablaTensorFormula
 import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.ChristoffelCkBound
-import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.EigenvectorCovGradChartIdentity
+import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.CovGrad.EigenvectorCovGradChartIdentity
 
 /-!
 # Per-degree covariant order reduction and the unconditional collapsed `C^m`/`C²` embedding
